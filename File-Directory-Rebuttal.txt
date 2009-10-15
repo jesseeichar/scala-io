@@ -1,0 +1,39 @@
+An excellent point about File/Directory.  This is the most controversial part of the API.  For now lets assume we are going to keep the File/Directory abstraction and see if we can answer satisfy our questions using this abstraction.  If not we will probably go with a NIO style API with Path only.  
+
+For purposes of this discussion let us define a File as a filesystem object that can contain bytes and can optionally be read and/or written to.  A Directory can contain other filesystem objects.  Additionally, File, Directory and Path are simply views on a concrete filesystem object.  As a consequence a filesystem object is not a File per-say, rather it can be viewed as a File.  
+
+Paul has kindly added an isValid method on Path which can be used to indicate whether a particular view isValid.  
+
+Now with regards to your example suppose you do:
+
+val path = Path("foo")  -> this gives a path view
+val file = path.toFile  -> this gives a file view (a file is a subclass of Path)
+val dir = path.toDirectory -> this gives a file view.
+
+so before touch is called path, file and dir are valid because the file does not exist and therefore all views are valid.  (That is current implementation.  I can also see a case for path isValid but not file or dir.)
+
+Along come touch foo.  Now path and file are valid but not dir. 
+
+rm foo
+mkdir foo
+
+No surprise that path and dir are valid but not dir.
+
+Now to Kevin Wrights point about having to consider Symlinks and Devices.  
+
+I have two feelings on this.
+
+1.  Both of these can be represented as either a File or Directory.  A symlink could be either a file or directory and treated as such.  With the current implementation that is how a symlink would be treated.  Path has an isSymlink method and when we go Java 7 we can have a createSymlink method as well.
+    As for Devices.  Again I think it can be viewed as a Directory.  Even the NIO API (as far as I know) does not permit mounting and unmounting of devices.  Although I could be wrong.
+    In the NIO API all Path objects have FileAttributes.  These are designed to be extensible and platform specific.  I had planned on adding FileAttributes to future versions of Path.  This version cannot have it because we need the full NIO API to be able to support them.  Any metadata or information beyond the basic Path API would be accessible through the FileAttributes API.  While not the nicest API it does cover the rest of the 1% use-cases and 
+2.  We could add other alternate views (a symlink object and device object).  My problem with this is that we have to create a completely new framework for being able to define new views for a given filesystem.  So my feeling is to reusethe NIO FileAttributes framework for these sorts of corner cases.
+
+Advantages of having File and Directory
+- The extra classes allow one to be more expressive when defining APIs.  For example by saying a return type is a File you are specifying additional metadata that the returned object will have data associated with it.
+- 
+
+Cons
+- Cases where a Path be both a File and a Directory is slightly more difficult to understand because you have to think of them as views not representations of the underlying filesystem object.  (Similar consideration for files that are deleted and have directories created for them.)
+- File/Directory are commonly expected to be representative objects instead of views.  (This is easily fixed by a name change, FileView for example).
+
+Jesse

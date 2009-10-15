@@ -35,7 +35,8 @@ object File
 import File._
 import Path._
 
-/** An abstraction for files.  For character data, a Codec
+/** 
+ *  An abstraction for files.  For character data, a Codec
  *  can be supplied at either creation time or when a method
  *  involving character data is called (with the latter taking
  *  precdence if supplied.) If neither is available, the value
@@ -43,6 +44,8 @@ import Path._
  *
  *  @author  Paul Phillips
  *  @since   2.8
+ *  @see Path
+ *  @see Directory
  */
 class File(jfile: JFile)(implicit val creationCodec: Codec = null)
 extends Path(jfile)

@@ -50,7 +50,8 @@ object Path
 }
 import Path._
 
-/** An abstraction for filesystem paths.  The differences between
+/** 
+ *  An abstraction for filesystem paths.  The differences between
  *  Path, File, and Directory are primarily to communicate intent.
  *  Since the filesystem can change at any time, there is no way to
  *  reliably associate Files only with files and so on.  Any Path
@@ -58,11 +59,10 @@ import Path._
  *  the additional entity specific methods) by calling toFile or
  *  toDirectory, which has no effect on the filesystem.
  *
- *  Also available are createFile and createDirectory, which attempt
- *  to create the path in question.
- *
+ * <p>
  * The Path constructor is private so we can enforce some
  * semantics regarding how a Path might relate to the world.
+ * </p>
  *  @author  Paul Phillips
  *  @since   2.8
  */
@@ -378,19 +378,6 @@ class Path private[io] (val jfile: JFile)
   def compareTo(other:Path):Int = 0 // TODO
  
   // creations
-  /**
-   * Create the directory referenced by this path.  
-   * <p>
-   * If failIfExists then FileAlreadyExistsException is thrown if the directory already exists
-   * </p>
-   * @throws FileAlreadyExistsException
-   */
-  def createDirectory(force: Boolean = true, failIfExists: Boolean = false): Directory = {
-    val res = if (force) jfile.mkdirs() else jfile.mkdir()
-    if (!res && failIfExists && exists) FileAlreadyExistsExcepion("Directory '%s' already exists." format name)
-    else if (isDirectory) toDirectory
-    else new Directory(jfile)
-  }
   def createFile(failIfExists: Boolean = false): File = {
     val res = jfile.createNewFile()
     if (!res && failIfExists && exists) FileAlreadyExistsExcepion("File '%s' already exists." format name)

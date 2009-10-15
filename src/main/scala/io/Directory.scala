@@ -19,12 +19,13 @@ object Directory
   def makeTemp(prefix: String = Path.randomPrefix, suffix: String = null, dir: JFile = null): Directory = {
     val path = File.makeTemp(prefix, suffix, dir)
     path.delete()
-    path.createDirectory()
+    path.toDirectory().create()
   }
 }
 import Path._
 
-/** An abstraction for directories.
+/** 
+ *  An abstraction for directories.
  *
  *  @author  Paul Phillips
  *  @since   2.8
@@ -69,4 +70,17 @@ class Directory(jfile: JFile) extends Path(jfile)
   }
   
   override def toString() = "Directory(%s)".format(path)
+  /**
+   * Create the directory referenced by this path.  
+   * <p>
+   * If failIfExists then FileAlreadyExistsException is thrown if the directory already exists
+   * </p>
+   * @throws FileAlreadyExistsException
+   */
+  def create(force: Boolean = true, failIfExists: Boolean = false): Directory = {
+    val res = if (force) jfile.mkdirs() else jfile.mkdir()
+    if (!res && failIfExists && exists) FileAlreadyExistsExcepion("Directory '%s' already exists." format name)
+    else if (isDirectory) toDirectory
+    else new Directory(jfile)
+  }
 }
