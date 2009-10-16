@@ -1,7 +1,7 @@
 // Test if path is file or directory or does not exist
 Path("home/jesse") match {
-  case File(file) => // extractor resolves if it is a file
-  case Directory(dir) => // same extractor does the work
+  case file if(file.isFile) => // extractor resolves if it is a file
+  case dir if(dir.isDirectory) => // same extractor does the work
   case p if(!p.exists) => // doesn't yet exist
   case _ => // oog
 }
@@ -10,3 +10,4 @@ Path("home/jesse") match {
 Path("/tmp/file").createFile() // default params so () is required
 // create a directory
 Path("/tmp/dir").createDirectory() // default params so () is required
+
