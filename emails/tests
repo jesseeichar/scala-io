@@ -5,7 +5,8 @@ Following the emails about Path-File-Directory with great interest.  But it seem
 The point of this file is to make sure that we have a useable API for common tasks.  
 
 So take a look at:
-
+http://github.com/jesseeichar/ScalaIO/blob/master/src/test/scala/io/samples
+http://github.com/jesseeichar/ScalaIO/blob/master/src/test/scala/io/samples_path_only
 
 I will be adding more and more examples.  
 
