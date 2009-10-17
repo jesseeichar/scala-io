@@ -1,1 +1,4 @@
 Should separator be string or character
+Which style is prefered:  
+  copyTo( target:Path, options:Options* )
+  copyTo( target:Path, option1:Boolean=true, option2:Boolean=false) 

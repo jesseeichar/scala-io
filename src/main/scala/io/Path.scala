@@ -16,6 +16,7 @@ import collection.{ Sequence, Traversable }
 import collection.immutable.{ StringVector => SV }
 import PartialFunction._
 import util.Random.nextASCIIString
+import java.lang.{ProcessBuilder, Process}
 
 /**
  * The object for constructing Path objects and for containing implicits from strings and 
@@ -46,25 +47,47 @@ object Path
   def apply(jfile: JFile): Path = new Path(jfile)
     
   private[io] def randomPrefix = nextASCIIString(6)
-  private[io] def fail(msg: String) = throw FileOperationException(msg)
+  private[io] def fail(msg: String) = throw new IOException(msg)
 }
 import Path._
 
 /** 
- *  An abstraction for filesystem paths.  The differences between
- *  Path, File, and Directory are primarily to communicate intent.
- *  Since the filesystem can change at any time, there is no way to
- *  reliably associate Files only with files and so on.  Any Path
- *  can be converted to a File or Directory (and thus gain access to
- *  the additional entity specific methods) by calling toFile or
- *  toDirectory, which has no effect on the filesystem.
+ *  An abstraction for filesystem paths.  A path does not represent an
+ *  underlying filesystem object rather it is a path to a potential filesystem
+ *  object.  The path provides methods for inspecting if there exists
+ *  referenced filesystem object and metadata about the object.  In 
+ *  addition to path there are {@link File} and {@link Directory} "views". 
+ *  <p>
+ *  The differences between {@link Path}, {@link File}, and {@link Directory} are primarily to 
+ *  communicate intent. Since the filesystem can change at any time, there 
+ *  is no way to reliably associate Files only with files and so on.
+ *  </p>
+ *  <p>
+ *  Any Path can be converted to a {@link File} or {@link Directory} (and thus gain access 
+ *  to the additional entity specific methods) by calling {@link #toFile()} or
+ *  {@link #toDirectory()}, which has no effect on the filesystem.
+ *  </p>
+ *  <p>
+ *  It is important to remember that {@link File} is a view of a filesystem object
+ *  it does not guarantee that the underlying object is a file and will not change
+ *  For example, a File object can created and after an external process can change the 
+ *  filesystem so the filesystem object is actually a Directory.
+ *  </p>
+ *  <p>
+ *  Further it must be recognized that in some file systems a file could also be a directory.
+ *  In which case both toFile and toDirectory will be valid.
+ *  </p>
+ *  <p>
+ *  The Path constructor is private so we can enforce some
+ *  semantics regarding how a Path might relate to the world.
+ *  </p>
  *
- * <p>
- * The Path constructor is private so we can enforce some
- * semantics regarding how a Path might relate to the world.
- * </p>
  *  @author  Paul Phillips
- *  @since   2.8
+ *  @author  Jesse Eichar
+ *  @since   0.1
+ * 
+ *  @see File
+ *  @see Directory
  */
 class Path private[io] (val jfile: JFile)
 {
@@ -376,22 +399,101 @@ class Path private[io] (val jfile: JFile)
    * TODO
    */
   def compareTo(other:Path):Int = 0 // TODO
- 
+
   // creations
-  def createFile(failIfExists: Boolean = false): File = {
+  /**
+   * Create the file referenced by this path.  
+   * <p>
+   * If failIfExists then IOException is thrown if the file already exists. 
+   * In the next Java 7 only version it will throw FileAlreadyExistsException
+   * </p>
+   * @throws IOException if file already exists.  In the next Java 7 
+   *         only version it will throw FileAlreadyExistsException
+   */
+  def createFile(failIfExists: Boolean = false /*, attributes:List[FileAttributes[_]]=Nil TODO*/): File = {
     val res = jfile.createNewFile()
-    if (!res && failIfExists && exists) FileAlreadyExistsExcepion("File '%s' already exists." format name)
+    if (!res && failIfExists && exists) fail("File '%s' already exists." format name)
     else if (isFile) toFile
     else new File(jfile)
   }
-  
+  /**
+   * Create the directory referenced by this path.  
+   * <p>
+   * If failIfExists then FileAlreadyExistsException is thrown if the directory already exists
+   * In the next Java 7 only version it will throw FileAlreadyExistsException
+   * </p>
+   * @throws IOException if directory already exists.  In the next Java 7 only version it will 
+   *         throw FileAlreadyExistsException
+   *
+   */
+  def createDirectory(force: Boolean = true, failIfExists: Boolean = false /*, attributes:List[FileAttributes[_]]=Nil TODO*/): Directory = {
+    val res = if (force) jfile.mkdirs() else jfile.mkdir()
+    if (!res && failIfExists && exists) FileAlreadyExistsExcepion("Directory '%s' already exists." format name)
+    else if (isDirectory) toDirectory
+    else new Directory(jfile)
+  }
+
+ 
   // deletions
-  def delete() = jfile.delete()
-  def deleteIfExists() = if (jfile.exists()) delete() else false
+  /**
+   *  Delete the filesystem object if possible.  
+   *  <p>
+   *  If the file exists and is a non-empty Directory or 
+   *  there is some other reason the operation cannot be performed an 
+   *  IOException will be thrown.
+   *  </p>
+   *  <p>
+   *  If the file does not exist it will return false
+   *  </p>
+   */
+  def delete() = if (jfile.exists()) delete() else false
 
   // todo
-  // def copyTo(target: Path, options ...): Boolean
-  // def moveTo(target: Path, options ...): Boolean
+  /**
+   *  Copy the underlying object if it exists to the target location.  
+   *  If the underlying object is a directory it is not copied recursively.
+   *
+   *  @param target 
+   *      the target path to copy the filesystem object to.
+   *  @param copyAttributes 
+   *      if true then copy the File attributes of the object
+   *      as well as the data.  True by default
+   *  @param replaceExisting 
+   *      if true then replace any existing target object
+   *      unless it is a non-empty directory in which case
+   *      an IOException is thrown.
+   *      False by default
+   * 
+   *  @return 
+   *      true if data was copied false if this path does not reference an object
+   *  @throws IOException 
+   *      if the copy could not be satisfied because the target could
+   *      not be written to or if this path cannot be copied
+   */
+  def copyTo(target: Path, copyAttributes:Boolean=true, 
+             replaceExisting=false, atomicMove:Boolean=false): Boolean = false
+  /**
+   *  Move the underlying object if it exists to the target location.  
+   *
+   *  @param target          
+   *      the target path to move the filesystem object to.
+   *  @param replaceExisting 
+   *      if true then replace any existing target object
+   *      unless it is a non-empty directory in which case
+   *      an IOException is thrown.
+   *      False by default
+   *  @param atomicMove      
+   *      This is ignored at the moment but in the future version
+   *      it will guarantee atomicity of the move
+   *      True by default
+   *
+   *  @return true
+   *      if data was moved false if this path does not reference an object
+   *  @throws IOException 
+   *      if the move could not be satisfied because the target could
+   *      not be written to or if this path cannot be moved
+   */
+  def moveTo(target: Path, options:CopyOption*): Boolean = false
   
   override def toString() = "Path(%s)".format(path)
   override def equals(other: Any) = other match {
@@ -400,5 +502,13 @@ class Path private[io] (val jfile: JFile)
   }  
   override def hashCode() = path.hashCode()
 
-  def execute(args:String*):Int = -1 // TODO
+  /**
+   * Execute the file in a separate process if the path
+   * is executable.
+   *
+   * @param arguments to send to the process
+   * @return Process
+   */
+  def execute(args:Seq[String])(configuration:ProcessBuilder=>Unit):Process = null // TODO
+  
 }
