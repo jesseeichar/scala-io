@@ -5,4 +5,4 @@ Path("src").toDirectory
                .foreach ( f => {
                           val data = f.toFile.slurp()
                            f.toFile.writeAll(List(data), codec=Codec.UTF8)
-                        })
+                        })	

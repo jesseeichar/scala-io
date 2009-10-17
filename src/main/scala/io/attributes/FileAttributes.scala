@@ -1,0 +1,1 @@
+case class FileAttribute[T] (name:String, value:T)

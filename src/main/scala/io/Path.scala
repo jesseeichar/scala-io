@@ -10,117 +10,164 @@ package scalax.io
 
 import java.io.{ 
   FileInputStream, FileOutputStream, BufferedReader, BufferedWriter, InputStreamReader, OutputStreamWriter, 
-  BufferedInputStream, BufferedOutputStream, File => JFile }
+  BufferedInputStream, BufferedOutputStream, IOException, File => JFile}
 import java.net.{ URI, URL }
 import collection.{ Sequence, Traversable }
-import collection.immutable.{ StringVector => SV }
+import collection.immutable.StringVector
 import PartialFunction._
 import util.Random.nextASCIIString
 import java.lang.{ProcessBuilder, Process}
 
 /**
  * The object for constructing Path objects and for containing implicits from strings and 
- * Java.io.Files to Scala files
+ * {@link java.io.File}s to Scala paths. 
+ * <p> All Paths constructed by this factory are created for the default filesystem</p>
  */
 object Path
 {
-  // not certain these won't be problematic, but looks good so far
+  /** 
+   * Method to implicitly convert a string to a Path
+   * object on the default file system
+   */
   implicit def string2path(s: String): Path = apply(s)
+  /** 
+   * Method to implicitly convert a {@link java.io.File} to a Path
+   * object on the default file system
+   */
   implicit def jfile2path(jfile: JFile): Path = apply(jfile)
     
-  // java 7 style, we don't use it yet
-  // object AccessMode extends Enumeration("AccessMode") {
-  //   val EXECUTE, READ, WRITE = Value
-  // }
-  // def checkAccess(modes: AccessMode*): Boolean = {
-  //   modes foreach {
-  //     case EXECUTE  => throw new Exception("Unsupported") // can't check in java 5
-  //     case READ     => if (!jfile.canRead()) return false
-  //     case WRITE    => if (!jfile.canWrite()) return false
-  //   }
-  //   true
-  // }
-  
+  /**
+   * Enumeration of the Access modes possible for accessing files
+   */
+  object AccessModes extends Enumeration("AccessMode") {
+    type AccessMode = Value
+    val EXECUTE, READ, WRITE = Value
+  }
+
+  /**
+   * Lists the roots of the default filesystem
+   */  
   def roots: List[Path] = JFile.listRoots().toList map Path.apply
 
+  /**
+   * Create a Path on the default files system from a string
+   *
+   * @param path 
+   *          the string to use for creating the Path
+   */
   def apply(path: String): Path = apply(new JFile(path))
+  /**
+   * Create a Path on the default files system from a {@link java.io.File}
+   *
+   * @param path 
+   *          the file to use for creating the Path
+   */
   def apply(jfile: JFile): Path = new Path(jfile)
+
+  /**
+   * Creates an empty file in the provided directory with the provided prefix and suffixes.
+   * The file will not replace an existing file and it is guaranteed to be unique and
+   * not previously used by another process at time of creation.
+   * 
+   * @param prefix 
+   *          the starting characters of the file name.
+   *          Default is a randomly generated prefix
+   * @param suffix
+   *          the last characters of the file name
+   *          Default is null (no suffix)
+   * @param dir
+   *          the directory to create the file in.  If null or
+   *          not declared the file will be created in the system
+   *          temporary folder
+   *          Default is null (system/user temp folder)
+   * @param deleteOnExit
+   *          If true then the file will be deleted when the JVM is shutdown
+   *          Default is true
+   * @param attributes
+   *          The attributes to create on the file.
+   *          Default is Nil(default system file attributes)
+   */
+  def makeTempFile(prefix: String = Path.randomPrefix, 
+                   suffix: String = null, 
+                   dir: Path = null,
+                   deleteOnExit : Boolean = true
+                   /*attributes:List[FileAttributes] TODO */ ) : Path = {
+    val file = apply(JFile.createTempFile(prefix, suffix, dir.jfile))
+    if(deleteOnExit) file.jfile.deleteOnExit
+    file
+  }
     
+
+  /**
+   * Creates an empty directory in the provided directory with the provided prefix and suffixes.
+   * The directory will not replace an existing file/directory and it is guaranteed to be unique and
+   * not previously used by another process at time of creation.
+   * 
+   * @param prefix 
+   *          the starting characters of the directory name.
+   *          Default is a randomly generated prefix
+   * @param suffix
+   *          the last characters of the directory name
+   *          Default is null (no suffix)
+   * @param dir
+   *          the directory to create the directory in.  If null or
+   *          not declared the directory will be created in the system
+   *          temporary folder
+   *          Default is null (system/user temp folder)
+   * @param deleteOnExit
+   *          If true then the directory and all contained folders will be deleted
+   *          when the JVM is shutdown. 
+   *          Default is true
+   * @param attributes
+   *          The attributes to create on the file.
+   *          Default is Nil(default system file attributes)
+   */
+  def makeTempDirectory(prefix: String = Path.randomPrefix,
+                        suffix: String = null, 
+                        dir: Path = null,
+                        deleteOnExit : Boolean = true
+                        /*attributes:List[FileAttributes] TODO */) : Path = {
+    val path = Path.makeTempFile(prefix, suffix, dir.jfile, false)
+    path.delete()
+    path.createDirectory()
+    if(deleteOnExit) {
+      Runtime.getRuntime.addShutdownHook(new Thread{ def run:Unit = path.deleteRecursively })
+    }
+    path
+  }
+
+  type Closeable = { def close(): Unit }
+  private[io] def closeQuietly(target: Closeable) {
+    try target.close() catch { case e: IOException => }
+  }  
+
   private[io] def randomPrefix = nextASCIIString(6)
   private[io] def fail(msg: String) = throw new IOException(msg)
 }
 import Path._
+import Path.AccessModes._
 
 /** 
- *  An abstraction for filesystem paths.  A path does not represent an
- *  underlying filesystem object rather it is a path to a potential filesystem
- *  object.  The path provides methods for inspecting if there exists
- *  referenced filesystem object and metadata about the object.  In 
- *  addition to path there are {@link File} and {@link Directory} "views". 
- *  <p>
- *  The differences between {@link Path}, {@link File}, and {@link Directory} are primarily to 
- *  communicate intent. Since the filesystem can change at any time, there 
- *  is no way to reliably associate Files only with files and so on.
- *  </p>
- *  <p>
- *  Any Path can be converted to a {@link File} or {@link Directory} (and thus gain access 
- *  to the additional entity specific methods) by calling {@link #toFile()} or
- *  {@link #toDirectory()}, which has no effect on the filesystem.
- *  </p>
- *  <p>
- *  It is important to remember that {@link File} is a view of a filesystem object
- *  it does not guarantee that the underlying object is a file and will not change
- *  For example, a File object can created and after an external process can change the 
- *  filesystem so the filesystem object is actually a Directory.
- *  </p>
- *  <p>
- *  Further it must be recognized that in some file systems a file could also be a directory.
- *  In which case both toFile and toDirectory will be valid.
- *  </p>
- *  <p>
- *  The Path constructor is private so we can enforce some
- *  semantics regarding how a Path might relate to the world.
- *  </p>
+ *  A file reference that locates a file using a system independent path.
+ *  The file is not required to exist.
  *
  *  @author  Paul Phillips
  *  @author  Jesse Eichar
  *  @since   0.1
  * 
- *  @see File
- *  @see Directory
  */
-class Path private[io] (val jfile: JFile)
+class Path private[io] (val jfile: JFile) extends Ordered[Path]
 {
-  /** The path segment separator character */
-  val separator = JFile.separatorChar
-
-  /** Validation: this verifies that the type of this object and the
-   * contents of the filesystem are in agreement.  All objects are
-   * valid except File objects whose path points to a directory and
-   * Directory objects whose path points to a file.
-   */
-  def isValid: Boolean = true
+  /** The path segment separator string */
+  val separator = JFile.separator
 
   // conversions
-  /**
-   * Convert the Path to a file object if the path is a File
-   * or if it does not exist
-   *
-   * @see toDirectory
-   */
-  def toFile: Option[File] = if(isFile ¦¦ !exists) Some(new File(jfile)) else None
-  /**
-   * Convert the Path to a file object if the path is a File
-   * or if it does not exist
-   *
-   * @see toFile
-   */
-  def toDirectory: Option[Directory] = if(isFile ¦¦ !exists) Some(new Directory(jfile)) else None
   /**
    * Modifies the Path so that it is absolute from a root of the file system.
    * However it is not necessarily canonical.  For example /home/user/../another 
    * is a valid absolute path.
-   * @see toCanonical
+   *
+   * @see normalize
    */
   def toAbsolute: Path = if (isAbsolute) this else Path(jfile.getAbsolutePath())
   /**
@@ -145,14 +192,18 @@ class Path private[io] (val jfile: JFile)
    * path / "child/grandchild"
    * path / ".." / "sibling"
    * path / "../sibling"
-   *
-   * @return A new path with the specified path appended
+   * </code></pre>
+   * <p>
    * @Note This is a duplicate when the implicit string2Path is imported
    *       But using the implicit makes the API less discoverable so I have 
    *       added this method.
-   * @see #/(String)
+   * </p>
+   * @return A new path with the specified path appended
+   *
+   * @see Path#/(String)
    */  
   def /(child: String): Path = new Path(new JFile(jfile, child)) // TODO check if directory is absolute
+
   /** 
    * If child is relative, creates a new Path based on the current path with the
    * child appended. If child is absolute the child is returned
@@ -169,22 +220,6 @@ class Path private[io] (val jfile: JFile)
    * @see #/(String)
    */
   def /(child: Path): Path = /(child.path)
-  /**
-   * If child is relative, creates a new Directory based on the current path with the
-   * child appended. If child is absolute the child is returned
-   *
-   * @return A new Directory with the specified path appended
-   * @see #/(String)
-   */
-  def /(child: Directory): Directory = /(child: Path).toDirectory
-  /**
-   * If child is relative, creates a new File based on the current path with the
-   * child appended. If child is absolute the child is returned
-   *
-   * @return A new Directory with the specified path appended
-   * @see #/(String)
-   */
-  def /(child: File): File = /(child: Path).toFile
 
   // identity
   /**
@@ -214,20 +249,23 @@ class Path private[io] (val jfile: JFile)
   /**
    * Make the current path relative to the other path.  If the two paths
    * are on different drives then the other path is returned
-   *
-   * @return relative path from the current path to the other path
+   * <p>
    * @NOTE do we want to relativize:  /home/jesse and /home/jones to /home/jesse/../jones?
-           or do we call that out of scope and simply return other?
+   *       or do we call that out of scope and simply return other?
+   * </p>
+   * @return relative path from the current path to the other path
    */
   def relativize(other: Path): Path = null // TODO
   
   // derived from identity
   /**
    * The root of the file system of the path if it can be determined.
-   *
-   * @return the root of the file system
+   * <p>
    * @NOTE do we want to convert to absolute to try to determine root or always return None
    *       if the path is relative?  (I think convert to absolute)
+   * </p>
+   *
+   * @return the root of the file system
    */
   def root: Option[Path] = roots find (this startsWith _) // TODO convert to absolute?
   /**
@@ -259,31 +297,28 @@ class Path private[io] (val jfile: JFile)
    * @return the extension of the path
    */
   def extension: Option[String] =   
-    condOpt(SV.lastIndexWhere(name, _ == '.')) {
-      case idx if idx != -1 => SV.drop(name, idx + 1)
+    condOpt(StringVector.lastIndexWhere(name, _ == '.')) {
+      case idx if idx != -1 => StringVector.drop(name, idx + 1)
     }
   // Alternative approach:
-  // (Option fromReturnValue SV.lastIndexWhere(name, _ == '.') map (x => SV.drop(name, x + 1))
+  // (Option fromReturnValue StringVector.lastIndexWhere(name, _ == '.') map (x => StringVector.drop(name, x + 1))
 
   // Boolean tests
   /**
-   * True if the backing element exists and is readable
-   * @return True if the backing element exists and is readable
-   * @see java.io.File#canRead
+   * Check if the referenced file both exists and be accessed with the requested modes
+   * 
+   * @param modes the modes to check for on the file.  If empty then only existance 
+   *        is checked
+   * @return true if all modes are available on the file
    */
-  def canRead = jfile.canRead()
-  /**
-   * True if the backing element exists and is writable
-   * @return True if the backing element exists and is writable
-   * @see java.io.File#canWrite
-   */
-  def canWrite = jfile.canWrite()
-  /**
-   * True if the backing element exists and is Executable
-   * @return True if the backing element exists and is Executable
-   * @see java.io.File#canExecute
-   */
-  def canExecute = jfile.canExecute()
+  def checkAccess(modes: AccessMode*): Boolean = {
+    modes foreach {
+      case EXECUTE  => if (!jfile.canExecute()) return false
+      case READ     => if (!jfile.canRead())    return false
+      case WRITE    => if (!jfile.canWrite())   return false
+    }
+    true
+  }
   /**
    * True if the path exists in the file system
    *
@@ -396,9 +431,9 @@ class Path private[io] (val jfile: JFile)
    */
   def isFresher(other: Path):Boolean = lastModified > other.lastModified
   /**
-   * TODO
+   * Compares this path to the other lexigraphically.  
    */
-  def compareTo(other:Path):Int = 0 // TODO
+  def compareTo(other:Path):Int = toString.compareTo(other.toString)
 
   // creations
   /**
@@ -410,11 +445,10 @@ class Path private[io] (val jfile: JFile)
    * @throws IOException if file already exists.  In the next Java 7 
    *         only version it will throw FileAlreadyExistsException
    */
-  def createFile(failIfExists: Boolean = false /*, attributes:List[FileAttributes[_]]=Nil TODO*/): File = {
+  def createFile(failIfExists: Boolean = false /*, attributes:List[FileAttributes[_]]=Nil TODO*/): Path = {
     val res = jfile.createNewFile()
     if (!res && failIfExists && exists) fail("File '%s' already exists." format name)
-    else if (isFile) toFile
-    else new File(jfile)
+    else this
   }
   /**
    * Create the directory referenced by this path.  
@@ -423,20 +457,18 @@ class Path private[io] (val jfile: JFile)
    * In the next Java 7 only version it will throw FileAlreadyExistsException
    * </p>
    * @throws IOException if directory already exists.  In the next Java 7 only version it will 
-   *         throw FileAlreadyExistsException
+   *         throw IOException
    *
    */
-  def createDirectory(force: Boolean = true, failIfExists: Boolean = false /*, attributes:List[FileAttributes[_]]=Nil TODO*/): Directory = {
+  def createDirectory(force: Boolean = true, failIfExists: Boolean = false /*, attributes:List[FileAttributes[_]]=Nil TODO*/): Path = {
     val res = if (force) jfile.mkdirs() else jfile.mkdir()
-    if (!res && failIfExists && exists) FileAlreadyExistsExcepion("Directory '%s' already exists." format name)
-    else if (isDirectory) toDirectory
-    else new Directory(jfile)
+    if (!res && failIfExists && exists) fail("Directory '%s' already exists." format name)
+    else this
   }
-
  
   // deletions
   /**
-   *  Delete the filesystem object if possible.  
+   *  Delete the filesystem object if the file exists.
    *  <p>
    *  If the file exists and is a non-empty Directory or 
    *  there is some other reason the operation cannot be performed an 
@@ -445,8 +477,47 @@ class Path private[io] (val jfile: JFile)
    *  <p>
    *  If the file does not exist it will return false
    *  </p>
+   *  @throws IOException if the file cannot be written
    */
-  def delete() = if (jfile.exists()) delete() else false
+  def deleteIfExists() = {
+    if (jfile.exists()) {
+      if( canWrite ) jfile.delete()
+      else fail("File is not writeable so the file cannot be deleted")
+    } else {
+      false
+    }
+  }
+  
+  def delete
+
+  /** 
+   *  Deletes the directory recursively.
+   * <p> 
+   *  This method does not detect circular directory graphs and
+   *  does not promise to perform the delete in an atomic operation
+   * </p>
+   *  <p>Use with caution!</p>
+   *  @param continueOnFailure 
+   *           If false then method will abort when encountering a
+   *           file that cannot be deleted.  Otherwise it will continue
+   *           to delete all the files that can be deleted. 
+   *  
+   *  @return 
+   *           Tuple with (The number of files deleted, The number of files remaining)
+   *  @throws IOException when continueOnFailure is false and a file is not deleted
+   */
+  def deleteRecursively(continueOnFailure:Boolean=false): (Int,Int) = deleteRecursively(jfile)
+  private def deleteRecursively(f: JFile): (Int,Int) = {
+    val (deleted,remaining) = if (f.isDirectory) f.listFiles match { 
+      case null => 0
+      case xs   => (xs foldLeft (0,0)) {case (count,path) => path deleteRecursively continueOnFailure }
+    }
+    (f.delete(),continueOnFailure) match {
+      case (true, _) => (deleted + 1, remaining)
+      case (false, true) => (deleted, remaining + 1)
+      case (false, false) => fail( "Unable to delete "+f);
+  }
+  
 
   // todo
   /**
@@ -465,13 +536,49 @@ class Path private[io] (val jfile: JFile)
    *      False by default
    * 
    *  @return 
-   *      true if data was copied false if this path does not reference an object
+   *      the path to the new copy
    *  @throws IOException 
    *      if the copy could not be satisfied because the target could
    *      not be written to or if this path cannot be copied
    */
   def copyTo(target: Path, copyAttributes:Boolean=true, 
-             replaceExisting=false, atomicMove:Boolean=false): Boolean = false
+             replaceExisting:Boolean=false): Path = null //TODO
+
+  private def copyFile(dest: Path, copyAttributes: Boolean=true, 
+             replaceExisting: Boolean=false): Path = {
+    val FIFTY_MB = 1024 * 1024 * 50
+    if (!isFile) fail("Source %s is not a valid file." format name)
+    if (this.normalize == dest.normalize) fail("Source and destination are the same.")
+    if (!dest.parent.map(_.exists).getOrElse(false)) fail("Parent directory of destination file does not exist.")
+    if (dest.exists && !replaceExisting) fail("Destination file already exists, force creation or choose another file.")
+    if (dest.exists && dest.checkAccess(WRITE)) fail("Destination exists but is not writable.")
+    if (dest.isDirectory) fail("Destination exists but is a directory.")
+
+// TODO ARM this
+    lazy val in_s = new FileInputStream(jfile)
+    lazy val out_s = new FileOutputStream(dest.jfile)
+    lazy val in = in_s.getChannel()
+    lazy val out = out_s.getChannel()
+
+    try {
+      val size = in.size()
+      var pos, count = 0L
+      while (pos < size) {
+        count = (size - pos) min FIFTY_MB
+        pos += out.transferFrom(in, pos, count)
+      }
+    }
+    finally List[Closeable](out, out_s, in, in_s) foreach closeQuietly
+    
+    if (this.length != dest.length)
+      fail("Failed to completely copy %s to %s".format(name, dest.name))
+    
+    if (copyAttributes)
+      dest.lastModified = this.lastModified
+    
+    dest
+  }
+
   /**
    *  Move the underlying object if it exists to the target location.  
    *
@@ -488,12 +595,13 @@ class Path private[io] (val jfile: JFile)
    *      True by default
    *
    *  @return true
-   *      if data was moved false if this path does not reference an object
+   *      the path to the moved object
    *  @throws IOException 
    *      if the move could not be satisfied because the target could
    *      not be written to or if this path cannot be moved
    */
-  def moveTo(target: Path, options:CopyOption*): Boolean = false
+  def moveTo(target: Path, replaceExisting:Boolean=false, 
+             atomicMove:Boolean=false): Path = null
   
   override def toString() = "Path(%s)".format(path)
   override def equals(other: Any) = other match {
@@ -510,5 +618,7 @@ class Path private[io] (val jfile: JFile)
    * @return Process
    */
   def execute(args:Seq[String])(configuration:ProcessBuilder=>Unit):Process = null // TODO
-  
+
+  //Directory accessors
+
 }

@@ -15,12 +15,6 @@ object Directory
 {  
   def apply(path: Path):Directory    = path.toDirectory
   
-  // Like File.makeTemp but creates a directory instead
-  def makeTemp(prefix: String = Path.randomPrefix, suffix: String = null, dir: JFile = null): Directory = {
-    val path = File.makeTemp(prefix, suffix, dir)
-    path.delete()
-    path.toDirectory().create()
-  }
 }
 import Path._
 
