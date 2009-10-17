@@ -108,14 +108,14 @@ class Path private[io] (val jfile: JFile)
    *
    * @see toDirectory
    */
-  def toFile: Option[File] = if(isFile ¦¦ !exists) Some(new File(jfile)) else None
+  def toFile: Option[File] = if(isFile Â¦Â¦ !exists) Some(new File(jfile)) else None
   /**
    * Convert the Path to a file object if the path is a File
    * or if it does not exist
    *
    * @see toFile
    */
-  def toDirectory: Option[Directory] = if(isFile ¦¦ !exists) Some(new Directory(jfile)) else None
+  def toDirectory: Option[Directory] = if(isFile Â¦Â¦ !exists) Some(new Directory(jfile)) else None
   /**
    * Modifies the Path so that it is absolute from a root of the file system.
    * However it is not necessarily canonical.  For example /home/user/../another 
