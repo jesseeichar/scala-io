@@ -1,0 +1,8 @@
+Hi,
+
+I have been reading the last batch of emails about the File-Directory-Path split with interest.  First of all I believe that there is a misunderstanding about the role of File and Directory.  File is in no way a FileHandle or FileDescriptor.  It is probably better described as FilePath.  IE a Path that is assumed by the programmer to reference an existing file or not yet exist (and be used to create the File).
+
+But that is mostly moot because I have been writing some code samples that uses the API and I have decided that the split offers only a very slight advantage over just having Path (assuming a nice ARM architecture).  So I am now leaning towards not having Path-File-Directory and instead having a Path and very clean semantics for opening files and directories and operating on them.  In the first draft I want to minimize the number convenience methods and keep the API as simple as possible.  I will add the Stream and Channel accessors as we think they are necessary.  
+
+
+Jesse 

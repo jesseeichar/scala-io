@@ -10,3 +10,24 @@ Path("home/jesse") match {
 Path("/tmp/file").createFile() // default params so () is required
 // create a directory
 Path("/tmp/dir").createDirectory() // default params so () is required
+
+// Append a string to a file
+// TODO update with ARM API is known; I am making up some ARM style syntax.  
+Path("/tmp/file").toFile() match {
+  case Some(file) if(file.canWrite) => file.withWriter(append=true){ writer => writer.write(Data) )
+  case None => fail("Path is a directory not a file")
+}
+
+// write data to a file replacing if it exists
+// TODO update with ARM API is known; I am making up some ARM style syntax.  
+Path("/tmp/file").toFile() match {
+  case Some(file) if(file.canWrite) => file.withOutputStream(){ out => out.write(Data) )
+  case None => fail("Path is a directory not a file")
+}
+
+// Read complete file
+// TODO update with ARM API is known; I am making up some ARM style syntax.  
+Path("/tmp/file").toFile() match {
+  case Some(file) if(file.canRead) => file.slurp
+  case None => fail("Path is a directory not a file")
+}
