@@ -131,7 +131,7 @@ object Path
     path.delete()
     path.createDirectory()
     if(deleteOnExit) {
-      Runtime.getRuntime.addShutdownHook(new Thread{ def run:Unit = path.deleteRecursively })
+      Runtime.getRuntime.addShutdownHook(new Thread{ def run:Unit = path.deleteRecursively(true) })
     }
     path
   }
@@ -319,6 +319,9 @@ class Path private[io] (val jfile: JFile) extends Ordered[Path]
     }
     true
   }
+  def canWrite : Boolean = jfile.canWrite
+  def canRead : Boolean = jfile.canRead
+  def canExecute : Boolean = jfile.canExecute
   /**
    * True if the path exists in the file system
    *
@@ -481,14 +484,14 @@ class Path private[io] (val jfile: JFile) extends Ordered[Path]
    */
   def deleteIfExists() = {
     if (jfile.exists()) {
-      if( canWrite ) jfile.delete()
-      else fail("File is not writeable so the file cannot be deleted")
+	delete()
     } else {
       false
     }
   }
   
-  def delete
+  def delete() = if( canWrite ) jfile.delete 
+                 else fail("File is not writeable so the file cannot be deleted")
 
   /** 
    *  Deletes the directory recursively.
@@ -501,21 +504,26 @@ class Path private[io] (val jfile: JFile) extends Ordered[Path]
    *           If false then method will abort when encountering a
    *           file that cannot be deleted.  Otherwise it will continue
    *           to delete all the files that can be deleted. 
+   *           Note:  this method is not transactional, all files visited before
+   *           failure are deleted.  
    *  
    *  @return 
    *           Tuple with (The number of files deleted, The number of files remaining)
-   *  @throws IOException when continueOnFailure is false and a file is not deleted
+   *  @throws IOException 
+   *           when continueOnFailure is false and a file cannot be deleted
    */
-  def deleteRecursively(continueOnFailure:Boolean=false): (Int,Int) = deleteRecursively(jfile)
-  private def deleteRecursively(f: JFile): (Int,Int) = {
-    val (deleted,remaining) = if (f.isDirectory) f.listFiles match { 
-      case null => 0
-      case xs   => (xs foldLeft (0,0)) {case (count,path) => path deleteRecursively continueOnFailure }
+  def deleteRecursively(continueOnFailure:Boolean=false): (Int,Int) = deleteRecursively(jfile,continueOnFailure)
+  private def deleteRecursively(f: JFile, continueOnFailure:Boolean): (Int,Int) = {
+    def combine(one:(Int,Int),two:(Int,Int)) = (one._1 + two._1, one._2 + two._2)
+    val (deleted:Int,remaining:Int) = if (f.isDirectory) f.listFiles match { 
+      case null => (0,0)
+      case xs   => (xs foldLeft (0,0)){case (count,path) => combine (count, path deleteRecursively continueOnFailure) }
     }
     (f.delete(),continueOnFailure) match {
       case (true, _) => (deleted + 1, remaining)
       case (false, true) => (deleted, remaining + 1)
       case (false, false) => fail( "Unable to delete "+f);
+    }
   }
   
 
