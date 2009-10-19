@@ -34,7 +34,7 @@ object Path
    * Method to implicitly convert a {@link java.io.File} to a Path
    * object on the default file system
    */
-  implicit def jfile2path(jfile: JFile): Path = apply(jfile)
+  implicit def jfile2path(jfile: JFile): Path = apply(jfile.getPath)
     
   /**
    * Enumeration of the Access modes possible for accessing files
@@ -47,22 +47,23 @@ object Path
   /**
    * Lists the roots of the default filesystem
    */  
-  def roots: List[Path] = JFile.listRoots().toList map Path.apply
+  def roots: List[Path] = FileSystem.defaultFileSystem.roots
 
   /**
-   * Create a Path on the default files system from a string
+   * Create a Path from a string
    *
    * @param path 
    *          the string to use for creating the Path
+   * TODO filesystem param
    */
-  def apply(path: String): Path = apply(new JFile(path))
+  def apply(path: String)(implicit fileSystem: FileSystem = FileSystem.defaultFileSystem): Path = fileSystem(path)
   /**
    * Create a Path on the default files system from a {@link java.io.File}
    *
-   * @param path 
+   * @param path
    *          the file to use for creating the Path
    */
-  def apply(jfile: JFile): Path = new Path(jfile)
+  def apply(jfile: JFile) = new Path(jfile, FileSystem.defaultFileSystem)
 
   /**
    * Creates an empty file in the provided directory with the provided prefix and suffixes.
@@ -156,7 +157,7 @@ import Path.AccessModes._
  *  @since   0.1
  * 
  */
-class Path private[io] (val jfile: JFile) extends Ordered[Path]
+class Path private[io] (val jfile: JFile, val fileSystem: FileSystem) extends Ordered[Path]
 {
   /** The path segment separator string */
   val separator = JFile.separator
@@ -169,7 +170,7 @@ class Path private[io] (val jfile: JFile) extends Ordered[Path]
    *
    * @see normalize
    */
-  def toAbsolute: Path = if (isAbsolute) this else Path(jfile.getAbsolutePath())
+  def toAbsolute: Path = if (isAbsolute) this else Path(jfile.getAbsolutePath())(fileSystem)
   /**
    * Creates a URI from the path.
    * @see java.io.File#toURI
@@ -202,7 +203,7 @@ class Path private[io] (val jfile: JFile) extends Ordered[Path]
    *
    * @see Path#/(String)
    */  
-  def /(child: String): Path = new Path(new JFile(jfile, child)) // TODO check if directory is absolute
+  def /(child: String): Path = new Path(new JFile(jfile, child), fileSystem) // TODO check if directory is absolute
 
   /** 
    * If child is relative, creates a new Path based on the current path with the
@@ -241,7 +242,7 @@ class Path private[io] (val jfile: JFile) extends Ordered[Path]
    * @see #toAbsolute
    * @see java.io.File#toCanonical   
    */
-  def normalize: Path = Path(jfile.getCanonicalPath())
+  def normalize: Path = Path(jfile.getCanonicalPath())(fileSystem)
   /**
    * TODO Need to refer to NIO documentation to understand this
    */
@@ -256,7 +257,7 @@ class Path private[io] (val jfile: JFile) extends Ordered[Path]
    * @return relative path from the current path to the other path
    */
   def relativize(other: Path): Path = null // TODO
-  
+
   // derived from identity
   /**
    * The root of the file system of the path if it can be determined.

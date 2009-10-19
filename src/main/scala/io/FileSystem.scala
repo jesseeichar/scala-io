@@ -6,6 +6,23 @@
 **                          |/                                          **
 \*                                                                      */
 
-package scalax.io.attributes
+package scalax.io
 
-case class FileAttribute[T] (name:String, value:T)
+import java.io.{File=>JFile}
+
+object FileSystem {
+  val defaultFileSystem: FileSystem = new DefaultFileSystem()
+}
+
+abstract class FileSystem {
+  /**
+   * Create a path object for the filesystem
+   */
+  def apply(path: String): Path
+  def roots: List[Path];
+}
+
+private[io] class DefaultFileSystem extends FileSystem {
+  def apply(path: String): Path = new Path (new JFile (path), this)
+  def roots = JFile.listRoots().toList map {f=> Path (f.getPath)}
+}
