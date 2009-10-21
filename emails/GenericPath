@@ -1,0 +1,16 @@
+I can't wait to be back in normal internet land where I can respond to emails any time I wish :).  But at least I have time to think about my responses this way!
+
+I fully support the idea of making the common use-cases easy.  But I also acknowledge that the people working on the NIO file API have vastly more experience than I and have taken into account corner cases that I have not way to account for.  
+
+So the idea I have been brewing has been touched on several times on this thread and that is:  
+
+- I am doing a low-level NIO inspired Path API that can accomodate virtually any use-cases, especially when I implement the Java 7 version (I am doing a Java 6 version first). 
+- For the common case I am going to try to implement a Path implementation that will work with the common file-systems: Windows and Unix flavours (and maybe jar and zip).  If it works out well I will make it the Path created when using the Path object (as opposed to using a Filesystem object for Path object creation).
+
+No promises to that higher level path class but I think it would be great to be able to ignore issues like which path seperator needs to be used and other minor path-like issues.  
+
+I want to finish the low-level API first though and then I can see if we can make the higher level object work out for us.
+
+I think you can see parallels between this and GIT.  Get a solid base then build up the abstractions that make it easier to use for common-cases.  That way you have a nice/easy way to handle the common cases (some may debate this is the case with GIT) but all the power necessary to do the crazy stuff someone always wants to do.
+
+Jesse
