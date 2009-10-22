@@ -38,8 +38,56 @@ abstract class FileSystem {
   /**
    * Returns the list of roots for this filesystem
    */
-  def roots: List[Path];
-
+  def roots: List[Path]
+  /**
+   * Creates a function that returns true if parameter matches the
+   * pattern used to create the function.
+   * <p>
+   * If the syntax is glob then the following patterns are accepted:
+   * <ul>
+   * <li>The * character matches zero or more characters of a name component without 
+   *     crossing directory boundaries.</li>
+   * <li><The ** characters matches zero or more characters crossing directory boundaries.</li>
+   * <li>The ? character matches exactly one character of a name component.</li>
+   * <li>The backslash character (\) is used to escape characters that would otherwise be 
+   *     interpreted as special characters. The expression \\ matches a single backslash 
+   *     and "\{" matches a left brace for example.</li>
+   * </ul>
+   * Currently unsupported slated to be supported shortly are:
+   * <ul>
+   * <li>The [ ] characters are a bracket expression that match a single character of a 
+   *     name component out of a set of characters. For example, [abc] matches "a", "b", or "c". 
+   *     The hyphen (-) may be used to specify a range so [a-z] specifies a range that matches 
+   *     from "a" to "z" (inclusive). These forms can be mixed so [abce-g] matches "a", "b", "c", 
+   *     "e", "f" or "g". If the character after the [ is a ! then it is used for negation so 
+   *     [!a-c] matches any character except "a", "b", or "c".</li>
+   * <li>Within a bracket expression the *, ? and \ characters match themselves. The (-) character 
+   *     matches itself if it is the first character within the brackets, or the first character
+   *     after the ! if negating.</li>
+   * <li>The { } characters are a group of subpatterns, where the group matches if any subpattern 
+   *     in the group matches. The "," character is used to separate the subpatterns. Groups 
+   *     cannot be nested.</li>
+   * <li>All other characters match themselves in an implementation dependent manner. This 
+   *     includes characters representing any name-separators.</li>
+   * </ul>
+   * The matching of root components is highly implementation-dependent and is not specified.
+   * <p> 
+   * If the syntax is regex then the pattern component is a pattern as defined by the 
+   * {@link java.util.regex.Pattern} class
+   * </p>
+   * <p>In both cases the matching is case sensitive</p>
+   *
+   * @param pattern 
+   *          the pattern of the match
+   * @param syntax 
+   *          the identifier of the syntax that will be used to interpret the pattern
+   *
+   * @return 
+   *          a function that matches paths agains the matching specification in syntax and Pattern
+   *
+   * @see Path#contents 
+   */
+  def matcher(pattern:String, syntax:String = "glob"): (Path) => Boolean
   /**
    * Creates an empty file in the provided directory with the provided prefix and suffixes, 
    * if the filesystem supports it.  If not then a UnsupportedOperationException is thrown.

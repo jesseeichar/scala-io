@@ -586,5 +586,52 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
   def execute(args:Seq[String])(configuration:ProcessBuilder=>Unit):Process
 
   //Directory accessors
-  
+  /**
+   * Iterates over the contents of the directory passing each element to the
+   * function.  
+   * <p>
+   * This method is non-locking so the contents of the directory may change 
+   * during the execution of this method.  Files and Directories may be deleted
+   * at any time including during the period that the function is executing with 
+   * a Path to a file.
+   * </p><p>
+   * For stronger guarantees use the contents method If the filesystem supports it
+   * then the contents method will return a {@link ManagedResource} with a {@link SecuredDirectoryStream}
+   * </p>
+   * <p>
+   * The partial function does not need to be complete, all Path's that do not have matches in the function
+   * will be ignored.  For example: <code>contents {case File(p)=>println(p+" is a file")}</code> would match
+   * all Files.  To assist in matching Paths see the {@link Extractors}
+   * 
+   * @param initial the value that is passed to the first call of function
+   * @param function the function that is used to process each entry in the directory
+   * 
+   * @return The result from the last call to PartialFunction or None if there were not matches
+   * @see Extractors
+   */
+  def contents[R]( initial:R, function: PartialFunction[(R, Path),R] ): Option[R]
+
+  // TODO with ARM
+  /**
+   * Returns an iterator over the contents of the directory.  
+   * <p> 
+   * If the glob pattern is declared then it will be used to define the files that
+   * are returned by the DirectoryStream.  The syntax of the glob is specified in the
+   * {@link FileSystem#matcher} comments.
+   * </p> 
+   * <p>
+   * In Java 7 version some filesystems will support {@link SecureDirectoryStream}s.
+   * If the filesystem supports {@link SecureDirectoryStreams} and lock = true
+   * the {@link DirectoryStream} can be cast to a {@link SecureDirectoryStream}
+   * </p>
+   * 
+   * @param pattern 
+   *          the pattern used to select Paths returned by the DirectoryStream
+   *          Default is *
+   * @param syntax
+   *          The syntax use to interpret the pattern
+   *          Default is "glob"
+   *
+   */
+  // def contents(pattern: String = "*", syntax: String = "glob", lock: Boolean = false) : ManagedResource[DirectoryStream[Path]]
 }

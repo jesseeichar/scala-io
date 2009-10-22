@@ -8,4 +8,13 @@
 
 package scalax.io
 
-//abstract class DirectoryStream 
+/**
+ * An iterator for iterating over the contents of a directory
+ * <p>
+ * On some FileSystems directories must be opened and closed, therefore
+ * DirectoryStream must also be closed after use.
+ * </p>
+ */
+trait DirectoryStream[T] extends Iterator[T] with Closeable
+
+trait SecureDirectoryStream[T] extends DirectoryStream[T]
