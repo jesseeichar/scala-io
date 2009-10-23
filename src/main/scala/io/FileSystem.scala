@@ -87,7 +87,7 @@ abstract class FileSystem {
    *
    * @see Path#contents 
    */
-  def matcher(pattern:String, syntax:String = "glob"): (Path) => Boolean
+  def matcher(pattern:String, syntax:String = "glob"): PathMatcher
   /**
    * Creates an empty file in the provided directory with the provided prefix and suffixes, 
    * if the filesystem supports it.  If not then a UnsupportedOperationException is thrown.

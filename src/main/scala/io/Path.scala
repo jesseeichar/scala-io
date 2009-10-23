@@ -62,7 +62,26 @@ object Path
    */
   def apply(path: String)(implicit fileSystem: FileSystem = defaultFileSystem): Path = fileSystem(path)
 
-  // TODO apply (uri)  // URI determins which filesystem and the path
+  /**
+   * Create a Path from a URI.
+   * <p>
+   * both the filesystem and the path can be determined from
+   * from the uri.  For example:
+   * <ul>
+   * <li><code>file://c:\dir</code> will create an absolute Path 
+   *     from the default filesystem with the Path = c:\dir</li>
+   * <li><code>jar://classes.jar!dir</code> creates a Path to the
+   *     dir directory in the jar filesystem classes.jar</li>
+   * </ul>
+   * @param uri
+   *          The uri specifying the filesystem and path
+   * @return 
+   *          A path object
+   * @throws IOException 
+   *          if the filesystem cannot be loaded or if the 
+   *          path cannot be created with that filesystem
+   */
+  def apply (uri: URI): Path = null // TODO
 
   /**
    * Create a Path on the default files system from a {@link java.io.File}
@@ -136,6 +155,76 @@ object Path
     defaultFileSystem.makeTempDirectory(prefix,suffix,dir,deleteOnExit)
   }
 
+  /**
+   * Allows matching on the full path of a Path
+   * <p> 
+   *  The match must be exact and in the same case as
+   *  the path but the / and \ are interchangeable
+   * </p>
+   * <pre><code>
+   * Path("c:/dir/file")
+   * Path("c:\\dir\\file")
+   * </code></pre>
+   * both of the above examples will match the same path
+   * <p>
+   * For more on matching Paths see {@link Path.Matching}
+   */
+  def unapply(pathExpr:Path): Option[String] = None //TODO 
+
+  /**
+   * Object containing several objects that make matching
+   * certain types of Paths much easier. 
+   * <p>
+   * Example:
+   * <pre><code>
+   * val Apple = path.matcher (pattern="[aA]pple", syntax="glob")
+   * val ReadWrite = new AccessMatcher (READ, WRITE)
+   * path match {
+   *   case File(f) => println("A file was found")
+   *   case Directory(d) => println("A directory was found")
+   *   case NonExistant(e) => println("Path does not Exist")
+   *   case Apple(apple) => println("A path named apple was found")
+   *   case ReadWrite(apply) => println("Path is readable and writeable")
+   *   case Path("c:/dir/file") => println("Found a path that is c:/dir/file or
+                                            c:\\dir\\file")
+   * }
+   * </code></pre>
+   * Note: The Apple portion of the example is not part of Matching but
+   *       a critical part of matching Paths and thus is included in
+   *       this example
+   */
+  object Matching {
+    /** matches a path if it is a file (and exists)*/
+    object File {
+      def unapply(path:Path):Option[Path] = None // TODO
+    }
+    /** matches a path if it is a Directory (and exists)*/
+    object Directory {
+      def unapply(path:Path):Option[Path] = None // TODO
+    }
+    /** matches a path if it is Exists */
+    object Exists {
+      def unapply(path:Path):Option[Path] = None // TODO
+    }
+    /** matches a path if it does not Exist */
+    object NonExistant {
+      def unapply(path:Path):Option[Path] = None // TODO
+    }
+    /** 
+     * Matches a path if the access modes are applicable 
+     * for the file.
+     * <p>
+     * If the file does not exist this matcher will not match
+     * </p>
+     * 
+     * @param accessModes 
+     *          the access modes that must be applicable
+     *          on the path object.
+     */
+    class AccessMatcher (accessModes: AccessModes.AccessMode*) {
+	def unapply(path: Path): Option[Path] = None // TODO
+    }
+  }
   type Closeable = { def close(): Unit }
   private[io] def closeQuietly(target: Closeable) {
     try target.close() catch { case e: IOException => }
@@ -585,6 +674,12 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    */
   def execute(args:Seq[String])(configuration:ProcessBuilder=>Unit):Process
 
+  /**
+   * Create a matcher from this path's filesystem
+   * @see FileSystem#matcher(String,String)
+   */
+  def matcher(pattern:String, syntax:String = "glob") = FileSystem.matcher(pattern, syntax)
+
   //Directory accessors
   /**
    * Iterates over the contents of the directory passing each element to the
@@ -601,13 +696,16 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    * <p>
    * The partial function does not need to be complete, all Path's that do not have matches in the function
    * will be ignored.  For example: <code>contents {case File(p)=>println(p+" is a file")}</code> would match
-   * all Files.  To assist in matching Paths see the {@link Extractors}
+   * all Files.  To assist in matching Paths see the {@link Extractors} and
+   * {@link FileSystem.matcher}
    * 
    * @param initial the value that is passed to the first call of function
    * @param function the function that is used to process each entry in the directory
    * 
    * @return The result from the last call to PartialFunction or None if there were not matches
-   * @see Extractors
+   * @see Path.Matching
+   * @see FileSystem.matcher
+   *
    */
   def contents[R]( initial:R, function: PartialFunction[(R, Path),R] ): Option[R]
 
@@ -631,7 +729,13 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    * @param syntax
    *          The syntax use to interpret the pattern
    *          Default is "glob"
-   *
+   * @param lock
+   *          If true then the DirectoryStream will be a SecureDirectoryStream
+   *          as long as the filesystem supports this.  This
+   *          is only supported in Java 7+ dependent implementations
+   * @return
+   *          A managed resource managing a DirectoryStream.
    */
   // def contents(pattern: String = "*", syntax: String = "glob", lock: Boolean = false) : ManagedResource[DirectoryStream[Path]]
+
 }
