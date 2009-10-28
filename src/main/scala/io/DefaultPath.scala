@@ -46,6 +46,9 @@ class DefaultPath private[io] (val jfile: JFile, fileSystem: FileSystem) extends
     }
     true
   }
+  def canWrite  = jfile.canWrite
+  def canRead = jfile.canRead
+  def canExecute = jfile.canExecute
   def exists = jfile.exists()
   override def notExists = try !jfile.exists() catch { case ex: SecurityException => false }
   def isFile = jfile.isFile()
