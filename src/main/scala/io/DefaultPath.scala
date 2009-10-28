@@ -133,5 +133,15 @@ class DefaultPath private[io] (val jfile: JFile, fileSystem: FileSystem) extends
   override def hashCode() = path.hashCode()
 
   //Directory accessors
+  def contents[R] (initial:R, function: PartialFunction[(R, Path),R]): Option[R] = {
+    val (foundMatch, result) = jfile.listFiles
+         .map (f=> fileSystem(f.getPath))
+         .foldLeft ((false, initial)) {
+           case ((_, result), nextPath) if(function.isDefinedAt(result,nextPath)) => (true, function(result, nextPath))
+           case ((foundMatch, result), _ ) => (foundMatch, result)
+         }
+    if(foundMatch) Some(result)
+    else None
+  }
 
 }

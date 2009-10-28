@@ -712,7 +712,7 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    * @see FileSystem.matcher
    *
    */
-  def contents[R]( initial:R, function: PartialFunction[(R, Path),R] ): Option[R]
+  def contents[R] (initial:R, function: PartialFunction[(R, Path),R]): Option[R]
 
   // TODO with ARM
   /**
