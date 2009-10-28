@@ -1,0 +1,15 @@
+This project is a Mass(mvn-scala-skin) project but for those who have maven only the pom.xml is also checked in but changes to the pom.xml will be overwritten so the changes must be made to the .mass file.
+
+Mass build instructions:
+
+1. Download Mass from http://github.com/jesseeichar/maven-scala-skin/downloads
+2. Install maven
+3. unzip mass into a directory
+4. cd to scalaio directory
+5. type: mass install
+
+Maven build instructions
+
+1. install maven
+2. cd to scalaio directory
+3. type: mvn install

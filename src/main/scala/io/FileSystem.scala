@@ -182,7 +182,7 @@ private[io] class DefaultFileSystem extends FileSystem {
     path.delete()
     path.createDirectory()
     if(deleteOnExit) {
-      Runtime.getRuntime.addShutdownHook(new Thread{ def run:Unit = path.deleteRecursively(true) })
+      Runtime.getRuntime.addShutdownHook(new Thread{override def run:Unit = path.deleteRecursively(true) })
     }
     path
   }

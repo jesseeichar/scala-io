@@ -12,8 +12,7 @@ import java.io.{
   FileInputStream, FileOutputStream, BufferedReader, BufferedWriter, InputStreamReader, OutputStreamWriter, 
   BufferedInputStream, BufferedOutputStream, IOException, File => JFile}
 import java.net.{ URI, URL }
-import collection.{ Sequence, Traversable }
-import collection.immutable.StringVector
+import collection.{ Traversable }
 import PartialFunction._
 import util.Random.nextASCIIString
 import java.lang.{ProcessBuilder, Process}
@@ -233,7 +232,7 @@ object Path
   private[io] def randomPrefix = nextASCIIString(6)
   private[io] def fail(msg: String) = throw new IOException(msg)
 }
-import Path._
+
 import Path.AccessModes._
 
 /** 
@@ -380,7 +379,7 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    *
    * @return the root of the file system
    */
-  def root: Option[Path] = roots find (this startsWith _) // TODO convert to absolute?
+  def root: Option[Path] = fileSystem.roots find (this startsWith _) // TODO convert to absolute?
   /**
    * The segments in the path including the current element of the path.  If the
    * the path is relative only the segments defined are returned... NOT the absolute 
@@ -410,11 +409,10 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    * @return the extension of the path
    */
   def extension: Option[String] =   
-    condOpt(StringVector.lastIndexWhere(name, _ == '.')) {
-      case idx if idx != -1 => StringVector.drop(name, idx + 1)
+    name.lastIndexWhere (_ == '.') match {
+      case idx if idx != -1 => Some(name.drop(idx + 1))
+      case _ =>None
     }
-  // Alternative approach:
-  // (Option fromReturnValue StringVector.lastIndexWhere(name, _ == '.') map (x => StringVector.drop(name, x + 1))
 
   // Boolean tests
   /**
@@ -542,7 +540,7 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
   /**
    * Compares this path to the other lexigraphically.  
    */
-  def compareTo(other:Path):Int = toString.compareTo(other.toString)
+  def compare(other:Path):Int = toString.compare(other.toString)
 
   // creations
   /**
@@ -580,14 +578,21 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    *  </p>
    *  @throws IOException if the file cannot be written
    */
-  def deleteIfExists(): Boolean
+  def deleteIfExists() = {
+    if (exists) {
+	delete()
+        true
+    } else {
+      false
+    }
+  }
   
   /**
    * Deletes the file or throws an IOException on failure
    *
    * @throws IOException if the file could not be deleted
    */
-  def delete(): Boolean
+  def delete(): Unit
 
   /** 
    *  Deletes the directory recursively.
@@ -678,7 +683,7 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    * Create a matcher from this path's filesystem
    * @see FileSystem#matcher(String,String)
    */
-  def matcher(pattern:String, syntax:String = "glob") = FileSystem.matcher(pattern, syntax)
+  def matcher(pattern:String, syntax:String = "glob") = fileSystem.matcher(pattern, syntax)
 
   //Directory accessors
   /**

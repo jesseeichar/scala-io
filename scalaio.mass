@@ -1,0 +1,7 @@
+import mass._
+
+class ScalaIo extends ScalaProject("scala-incubator", "0.1-SNAPSHOT", "2.8.0") {
+  name="Scala IO"
+  description="The Scala IO incubator project"
+  inceptionYear="2009"
+}

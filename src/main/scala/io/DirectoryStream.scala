@@ -8,6 +8,8 @@
 
 package scalax.io
 
+import java.io.Closeable
+
 /**
  * An iterator for iterating over the contents of a directory
  * <p>

@@ -26,6 +26,7 @@ package scalax.io
  *
  * @see FileSystem#matcher(String,String)
  * @see Path#matcher(String,String)
-abstract class PathMatcher extends (Path) => Boolean {
+ */
+abstract class PathMatcher extends Function[Path,Boolean] {
   def unapply(path: Path): Option[Path]
 }
