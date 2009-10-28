@@ -186,4 +186,6 @@ private[io] class DefaultFileSystem extends FileSystem {
     }
     path
   }
+  def matcher(pattern:String, syntax:String = "glob"): PathMatcher = null // TODO
+
 }
