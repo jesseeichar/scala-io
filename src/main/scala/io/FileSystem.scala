@@ -118,7 +118,7 @@ abstract class FileSystem {
    */
   def makeTempFile(prefix: String = Path.randomPrefix, 
                    suffix: String = null, 
-                   dir: Path = null,
+                   dir: String = null,
                    deleteOnExit : Boolean = true
                    /*attributes:List[FileAttributes] TODO */ ) : Path 
   /**
@@ -151,7 +151,7 @@ abstract class FileSystem {
    */
   def makeTempDirectory(prefix: String = Path.randomPrefix,
                         suffix: String = null, 
-                        dir: Path = null,
+                        dir: String = null,
                         deleteOnExit : Boolean = true
                         /*attributes:List[FileAttributes] TODO */) : Path
 
@@ -164,21 +164,19 @@ private[io] class DefaultFileSystem extends FileSystem {
   def roots = JFile.listRoots().toList map {f=> apply (f.getPath)}
   def makeTempFile(prefix: String = Path.randomPrefix, 
                    suffix: String = null, 
-                   dir: Path = null,
+                   dir: String = null,
                    deleteOnExit : Boolean = true
                    /*attributes:List[FileAttributes] TODO */ ) : Path = {
-    assert(dir.fileSystem == this, "Specified directory must be be in the same filesystem as the filesystem creating the temporary file")
-    val path = apply(JFile.createTempFile(prefix, suffix, dir.asInstanceOf[DefaultPath].jfile).getPath)
+    val path = apply(JFile.createTempFile(prefix, suffix, new JFile(dir)).getPath)
     if(deleteOnExit) path.jfile.deleteOnExit
     path
   }
 
   def makeTempDirectory(prefix: String = Path.randomPrefix,
                         suffix: String = null, 
-                        dir: Path = null,
+                        dir: String = null,
                         deleteOnExit : Boolean = true
                         /*attributes:List[FileAttributes] TODO */) : Path = {
-    assert(dir.fileSystem == this, "Specified directory must be be in the same filesystem as the filesystem creating the temporary directory")
     val path = Path.makeTempFile(prefix, suffix, dir, false)
     path.delete()
     path.createDirectory()
