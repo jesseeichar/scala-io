@@ -81,13 +81,14 @@ abstract class FileSystem {
    *          the pattern of the match
    * @param syntax 
    *          the identifier of the syntax that will be used to interpret the pattern
+   *          Default is glob
    *
    * @return 
    *          a function that matches paths agains the matching specification in syntax and Pattern
    *
    * @see Path#contents 
    */
-  def matcher(pattern:String, syntax:String = "glob"): PathMatcher
+  def matcher(pattern:String, syntax:String = PathMatcher.StandardSyntax.GLOB): PathMatcher
   /**
    * Creates an empty file in the provided directory with the provided prefix and suffixes, 
    * if the filesystem supports it.  If not then a UnsupportedOperationException is thrown.
@@ -186,6 +187,6 @@ private[io] class DefaultFileSystem extends FileSystem {
     }
     path
   }
-  def matcher(pattern:String, syntax:String = "glob"): PathMatcher = null // TODO
+  def matcher(pattern:String, syntax:String = PathMatcher.StandardSyntax.GLOB): PathMatcher = null // TODO
 
 }

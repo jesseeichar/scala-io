@@ -683,7 +683,7 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    * Create a matcher from this path's filesystem
    * @see FileSystem#matcher(String,String)
    */
-  def matcher(pattern:String, syntax:String = "glob") = fileSystem.matcher(pattern, syntax)
+  def matcher(pattern:String, syntax:String = PathMatcher.StandardSyntax.GLOB) = fileSystem.matcher(pattern, syntax)
 
   //Directory accessors
   /**

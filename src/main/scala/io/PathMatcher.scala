@@ -30,3 +30,20 @@ package scalax.io
 abstract class PathMatcher extends Function[Path,Boolean] {
   def unapply(path: Path): Option[Path]
 }
+
+object PathMatcher {
+  /**
+   * Contains the constants for the different
+   * PathMatcher syntaxes that are supported by all
+   * filesystems
+   *
+   * @see FileSystem#matcher(String,String) 
+   * @see Path#matcher(String,String)
+   */
+  object StandardSyntax {
+    /** Glob matcher sytax */
+    final val GLOB = "glob"
+    /** Regex matcher sytax */
+    final val REGEX = "regex"
+  }
+}
