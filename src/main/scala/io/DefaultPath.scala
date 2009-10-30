@@ -8,6 +8,7 @@
 
 package scalax.io
 
+import scala.resource.ManagedResource
 import java.io.{ 
   FileInputStream, FileOutputStream, BufferedReader, BufferedWriter, InputStreamReader, OutputStreamWriter, 
   BufferedInputStream, BufferedOutputStream, IOException, File => JFile}
@@ -15,7 +16,7 @@ import java.net.{ URI, URL }
 import collection.{Traversable }
 import PartialFunction._
 import util.Random.nextASCIIString
-import java.lang.{ProcessBuilder, Process}
+import java.lang.{ProcessBuilder}
 
 import Path._
 import Path.AccessModes._
@@ -58,13 +59,35 @@ class DefaultPath private[io] (val jfile: JFile, fileSystem: FileSystem) extends
   def lastModified = jfile.lastModified()
   def lastModified_=(time: Long) = {jfile setLastModified time; time}
   def length = jfile.length()
-  def createFile(failIfExists: Boolean = false /*, attributes:List[FileAttributes[_]]=Nil TODO*/): Path = {
+  private def createContainingDir(createParents: Boolean) = {
+    def testWrite(parent:Option[Path]) = {
+      parent match {
+        case Some(p) if(!p.canWrite) => fail("Cannot write parent directory")
+        case Some(p) => ()
+        case None => fail("Parent directory cannot be created")
+      }
+    }
+
+    (createParents, parent) match {
+      case (_, Some(_)) => testWrite(parent)
+      case (true, None) => {
+        jfile.getParentFile.mkdirs()
+        testWrite(parent)
+      }
+      case (false, None) => fail("Parent directory does not exist")
+    }
+  }
+  def createFile(createParents: Boolean = true, failIfExists: Boolean = true /*, attributes:List[FileAttributes[_]]=Nil TODO*/): Path = {
+    createContainingDir (createParents)
     val res = jfile.createNewFile()
     if (!res && failIfExists && exists) fail("File '%s' already exists." format name)
     else this
   }
-  def createDirectory(force: Boolean = true, failIfExists: Boolean = false /*, attributes:List[FileAttributes[_]]=Nil TODO*/): Path = {
-    val res = if (force) jfile.mkdirs() else jfile.mkdir()
+  def createDirectory(createParents: Boolean = true, failIfExists: Boolean = true /*, attributes:List[FileAttributes[_]]=Nil TODO*/): Path = {
+    createContainingDir (createParents)
+
+    val res = jfile.mkdir()
+
     if (!res && failIfExists && exists) fail("Directory '%s' already exists." format name)
     else this
   }
@@ -126,7 +149,7 @@ class DefaultPath private[io] (val jfile: JFile, fileSystem: FileSystem) extends
   }
   def moveTo(target: Path, replaceExisting:Boolean=false, 
              atomicMove:Boolean=false): Path = null
-  def execute(args:Seq[String])(configuration:ProcessBuilder=>Unit):Process = null // TODO
+  def execute(args:String*)(implicit configuration:ProcessBuilder=>Unit = p =>()):Option[Process] = null // TODO
   
   override def toString() = "Path(%s)".format(path)
   override def equals(other: Any) = other match {
@@ -136,7 +159,10 @@ class DefaultPath private[io] (val jfile: JFile, fileSystem: FileSystem) extends
   override def hashCode() = path.hashCode()
 
   //Directory accessors
-  def contents[R] (initial:R, function: PartialFunction[(R, Path),R]): Option[R] = {
+  def directoryStream (function: PartialFunction[Path,Unit]): Unit = { null
+    foldDirectoryStream (()){case (_,path) => function(path)}
+  }
+  def foldDirectoryStream[R] (initial:R)(function: PartialFunction[(R, Path),R]): Option[R] = {
     val (foundMatch, result) = jfile.listFiles
          .map (f=> fileSystem(f.getPath))
          .foldLeft ((false, initial)) {
@@ -145,6 +171,10 @@ class DefaultPath private[io] (val jfile: JFile, fileSystem: FileSystem) extends
          }
     if(foundMatch) Some(result)
     else None
+  }
+
+  def directoryStream(matcher:Option[PathMatcher] = None, lock: Boolean = false) : ManagedResource[DirectoryStream[Path]] = {
+    null
   }
 
 }

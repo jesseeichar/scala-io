@@ -8,14 +8,13 @@
 
 package scalax.io
 
-import java.io.{
-  FileInputStream, FileOutputStream, BufferedReader, BufferedWriter, InputStreamReader, OutputStreamWriter,
-  BufferedInputStream, BufferedOutputStream, IOException, File => JFile}
+import scala.resource.ManagedResource
+import java.io.{IOException, File => JFile}
 import java.net.{ URI, URL }
 import collection.{ Traversable }
 import PartialFunction._
 import util.Random.nextASCIIString
-import java.lang.{ProcessBuilder, Process}
+import java.lang.{ProcessBuilder}
 import FileSystem.defaultFileSystem
 /**
  * The object for constructing Path objects and for containing implicits from strings and
@@ -285,6 +284,12 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    * If child is relative, creates a new Path based on the current path with the
    * child appended. If child is absolute the child is returned
    *
+   * <ul>
+   * <li>if other is null return this</li>
+   * <li>if other is absolute return other</li>
+   * <li>if other is not absolute the return this append other</li>
+   * </ul>
+   *
    * <p>Examples include:
    * <pre><code>
    * path / "child" / "grandchild"
@@ -306,6 +311,12 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
   /**
    * If child is relative, creates a new Path based on the current path with the
    * child appended. If child is absolute the child is returned
+   *
+   * <ul>
+   * <li>if other is null return this</li>
+   * <li>if other is absolute return other</li>
+   * <li>if other is not absolute the return this append other</li>
+   * </ul>
    *
    * <p>Examples include:
    * <pre><code>
@@ -344,11 +355,8 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
   /**
    * Resolve this path with other.  In the simplest case
    * that means appending other to this.
-   * <ul>
-   * <li>if other is null return this</li>
-   * <li>if other is absolute return other</li>
-   * <li>if other is not absolute the return this append other</li>
-   * </ul>
+   * <p> Does the same thing as the / method </p>
+   *
    * @param other
    *          another path to append to this path
    * @return
@@ -551,25 +559,69 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
   // creations
   /**
    * Create the file referenced by this path.
+   *
    * <p>
    * If failIfExists then IOException is thrown if the file already exists.
    * In the next Java 7 only version it will throw FileAlreadyExistsException
    * </p>
-   * @throws IOException if file already exists.  In the next Java 7
-   *         only version it will throw FileAlreadyExistsException
+   * <p>
+   * An exception is always thrown if the file is a directory and that directory
+   * contains children
+   * </p>
+   * <p>
+   * An Wxception will also be thrown if the parent directory does not have write
+   * permission
+   * </p>
+   * @param createParents
+   *          If true then the containing directories will be created if they do not exist
+   *          Default is true
+   * @param failIfExists
+   *          If true and an object exists then an exception will be thrown
+   *          If false then the object will be deleted if possible
+   *          If not possible to delete the object or it is a non-empty directory
+   *            an exception will be thrown
+   *          Default is true
+   *
+   * @throws IOException
+   *           If file or directory already exists.
+   *           In the next Java 7 only version it will throw FileAlreadyExistsException
+   *           If the process does not have write permission to the parent directory
+   *           If parent directory does not exist
    */
-  def createFile(failIfExists: Boolean = false /*, attributes:List[FileAttributes[_]]=Nil TODO*/): Path
+  def createFile(createParents:Boolean = true, failIfExists: Boolean = true /*, attributes:List[FileAttributes[_]]=Nil TODO*/): Path
+
   /**
    * Create the directory referenced by this path.
    * <p>
-   * If failIfExists then FileAlreadyExistsException is thrown if the directory already exists
+   * If failIfExists then IOException is thrown if the file already exists.
    * In the next Java 7 only version it will throw FileAlreadyExistsException
    * </p>
-   * @throws IOException if directory already exists.  In the next Java 7 only version it will
-   *         throw IOException
+   * <p>
+   * An exception is always thrown if the file is a directory and that directory
+   * contains children
+   * </p>
+   * <p>
+   * An exception will also be thrown if the parent directory does not have write
+   * permission
+   * </p>
+   * @param failIfExists
+   *          If true and an object exists then an exception will be thrown
+   *          If false then the object will be deleted if possible
+   *          If not possible to delete the object or it is a non-empty directory
+   *            an exception will be thrown
+   *          Default is true
+   * @param createParents
+   *          If true then the containing directories will be created if they do not exist
+   *          Default is true
+   *
+   * @throws IOException
+   *           if file or directory already exists.
+   *           In the next Java 7 only version it will throw FileAlreadyExistsException
+   *           If the process does not have write permission to the parent directory
+   *           If parent directory does not exist
    *
    */
-  def createDirectory(force: Boolean = true, failIfExists: Boolean = false /*, attributes:List[FileAttributes[_]]=Nil TODO*/): Path
+  def createDirectory(createParents: Boolean = true, failIfExists: Boolean = true /*, attributes:List[FileAttributes[_]]=Nil TODO*/): Path
 
   // deletions
   /**
@@ -582,7 +634,10 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    *  <p>
    *  If the file does not exist it will return false
    *  </p>
-   *  @throws IOException if the file cannot be written
+   *  @throws IOException
+   *            if the file cannot be written or if there is some other reason
+   *            the file cannot be deleted. For example if the file is a non-empty
+   *            directory
    */
   def deleteIfExists() = {
     if (exists) {
@@ -627,44 +682,48 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    *  If the underlying object is a directory it is not copied recursively.
    *
    *  @param target
-   *      the target path to copy the filesystem object to.
+   *           the target path to copy the filesystem object to.
    *  @param copyAttributes
-   *      if true then copy the File attributes of the object
-   *      as well as the data.  True by default
+   *           if true then copy the File attributes of the object
+   *           as well as the data.  True by default
    *  @param replaceExisting
-   *      if true then replace any existing target object
-   *      unless it is a non-empty directory in which case
-   *      an IOException is thrown.
-   *      False by default
+   *           if true then replace any existing target object
+   *           unless it is a non-empty directory in which case
+   *           an IOException is thrown.
+   *           False by default
    *
    *  @return
-   *      the path to the new copy
+   *           the path to the new copy
    *  @throws IOException
-   *      if the copy could not be satisfied because the target could
-   *      not be written to or if this path cannot be copied
+   *           if the copy could not be satisfied because the target could
+   *           not be written to or if this path cannot be copied
    */
   def copyTo(target: Path, copyAttributes:Boolean=true,
              replaceExisting:Boolean=false): Path
   /**
    *  Move the underlying object if it exists to the target location.
+   *  <p>
+   *  If copying of the file is required this will happen, as long as
+   *  atomicMove = false.  If atomicMove = true and the move requires copy then
+   *  deletion an exception will be thrown.  This is filesystem dependent
+   *  </p>
    *
    *  @param target
-   *      the target path to move the filesystem object to.
+   *           the target path to move the filesystem object to.
    *  @param replaceExisting
-   *      if true then replace any existing target object
-   *      unless it is a non-empty directory in which case
-   *      an IOException is thrown.
-   *      False by default
+   *           if true then replace any existing target object
+   *           unless it is a non-empty directory in which case
+   *           an IOException is thrown.
+   *           False by default
    *  @param atomicMove
-   *      This is ignored at the moment but in the future version
-   *      it will guarantee atomicity of the move
-   *      True by default
+   *           it will guarantee atomicity of the move
+   *           False by default
    *
    *  @return true
-   *      the path to the moved object
+   *           the path to the moved object
    *  @throws IOException
-   *      if the move could not be satisfied because the target could
-   *      not be written to or if this path cannot be moved
+   *           if the move could not be satisfied because the target could
+   *           not be written to or if this path cannot be moved
    */
   def moveTo(target: Path, replaceExisting:Boolean=false,
              atomicMove:Boolean=false): Path
@@ -680,10 +739,16 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    * Execute the file in a separate process if the path
    * is executable.
    *
-   * @param arguments to send to the process
+   * @param arguments
+   *          Arguments to send to the process
+   * @param configuration
+   *          An optional configuration function for configuring
+   *          the ProcessBuilder.  The default process builder will
+   *          be passed to the function.
+   *
    * @return Process
    */
-  def execute(args:Seq[String])(configuration:ProcessBuilder=>Unit):Process
+  def execute(args:String*)(implicit configuration:ProcessBuilder=>Unit = p=>()):Option[Process]
 
   /**
    * Create a matcher from this path's filesystem
@@ -708,17 +773,46 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    * The partial function does not need to be complete, all Path's that do not have matches in the function
    * will be ignored.  For example: <code>contents {case File(p)=>println(p+" is a file")}</code> would match
    * all Files.  To assist in matching Paths see the {@link Extractors} and
-   * {@link FileSystem.matcher}
+   * {@link FileSystem.matcher(String,String)}
+   * </p>
+   * <p>
+   * Note: If a PathMatcher is used in PartialFunction this method may be less efficient than
+   * {@link Path#directoryStream(Option[PathMatcher], Boolean)} because there is no way that this
+   * method can detect the PathMatcher and therefore all content objects must be read from disk and
+   * processed by the PartialFunction in order to determine if a match is found.
+   * <p>
+   * Compared to {@link Path#directoryStream(Option[PathMatcher], Boolean)} which can pass the
+   * matcher to the underlying FileSystem and have the filesystem perform the filtering (if the
+   * filesystem supports the functionality natively
+   * </p>
+   * </p>
+   * @param function the function that is used to process each entry in the directory
+   *
+   * @return nothing
+   *
+   * @see Path.Matching
+   * @see FileSystem#matcher(String,String)
+   */
+  def directoryStream (function: PartialFunction[Path,Unit]): Unit
+
+  /**
+   * Iterates over the contents of the directory passing each element to the
+   * function and returns the result of the computation.
+   * <p>
+   * See {@link Path#directoryStream(Function)} for details and restrictions on how the
+   * directories are processed.
+   * </p>
    *
    * @param initial the value that is passed to the first call of function
    * @param function the function that is used to process each entry in the directory
    *
-   * @return The result from the last call to PartialFunction or None if there were not matches
-   * @see Path.Matching
-   * @see FileSystem.matcher
+   * @return The result from the last call to PartialFunction or None if there were no matches
    *
+   * @see Path#directoryStream(Function)
+   * @see Path.Matching
+   * @see FileSystem#matcher(String,String)
    */
-  def contents[R] (initial:R, function: PartialFunction[(R, Path),R]): Option[R]
+  def foldDirectoryStream[R] (initial:R)(function: PartialFunction[(R, Path),R]): Option[R]
 
   // TODO with ARM
   /**
@@ -726,7 +820,7 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    * <p>
    * If the glob pattern is declared then it will be used to define the files that
    * are returned by the DirectoryStream.  The syntax of the glob is specified in the
-   * {@link FileSystem#matcher} comments.
+   * {@link FileSystem#matcher(String,String)} comments.
    * </p>
    * <p>
    * In Java 7 version some filesystems will support {@link SecureDirectoryStream}s.
@@ -746,7 +840,11 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    *          is only supported in Java 7+ dependent implementations
    * @return
    *          A managed resource managing a DirectoryStream.
+   *
+   * @see Path#directoryStream(Function)
+   * @see Path.Matching
+   * @see FileSystem#matcher(String,String)
    */
-  // def contents(pattern: String = "*", syntax: String = "glob", lock: Boolean = false) : ManagedResource[DirectoryStream[Path]]
+//  def directoryStream(matcher:Option[PathMatcher] = None, lock: Boolean = false) : ManagedResource[DirectoryStream[Path]]
 
 }

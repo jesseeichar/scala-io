@@ -19,13 +19,14 @@
  *       sample code.  It is not required to work (with the exception of the forcing *
  *       the implicits to work in the first two examples                             *
  *************************************************************************************/
+import java.lang.{ Process => JProcess }
 
 object Samples {
   { // implicitly convert strings to paths
     import scalax.io.Path
     import Path.string2path
 
-    val filePath:Path = "/tmp/file"
+    val filePath: Path = "/tmp/file"
   }
 
   { // implicitly convert files to paths
@@ -33,37 +34,37 @@ object Samples {
     import scalax.io.Path
     import Path.string2path
 
-    val filePath:Path = new File("/tmp/file")
+    val filePath: Path = new File ("/tmp/file")
   }
 
   { // list roots of defaultFileSystem
     import scalax.io.{Path, FileSystem}
-    val roots1:List[Path] = Path.roots
+    val roots1: List[Path] = Path.roots
     // This method delegates to the defaultFileSystem as follows
-    val roots2:List[Path] = FileSystem.defaultFileSystem.roots
+    val roots2: List[Path] = FileSystem.defaultFileSystem.roots
   }
 
   { // Create a Path in the default filesystem explicitly
     import scalax.io.{Path, FileSystem}
     // first use default param to indicate defaultFileSystem
-    val path1:Path = Path("/tmp/file1")
+    val path1: Path = Path ("/tmp/file1")
 
     // include windows examples for completeness
-    val path2:Path = Path("file://c:/tmp/file2")
-    val path3:Path = Path("file://c:\\tmp\\file3")
+    val path2: Path = Path ("file://c:/tmp/file2")
+    val path3: Path = Path ("file://c:\\tmp\\file3")
 
     //now explicitly state the filesystem
-    val path4:Path = Path("/tmp/file4")(FileSystem.defaultFileSystem)
+    val path4: Path = Path ("/tmp/file4")(FileSystem.defaultFileSystem)
 
     // or declare an implicit val so it can be reused (this is bot really 
     // required since the default paramter is the default filesystem but 
     // it illustrates how another filesystem can be used
     implicit val fs = FileSystem.defaultFileSystem
     // fs will now be used to create the path
-    val path5:Path = Path("/tmp/file5")
+    val path5: Path = Path ("/tmp/file5")
 
     // a filesystem can also be used to create Paths
-    val path6:Path = fs("/tmp/file6")
+    val path6: Path = fs ("/tmp/file6")
   }
 
   { // Create Path from URI
@@ -71,14 +72,14 @@ object Samples {
     import java.net.URI
     // the URI type indicates which filesystem to use
     // file:// indicates the default filesystem
-    val path1:Path = Path(new URI("file:///tmp/file1"))
+    val path1: Path = Path (new URI ("file:///tmp/file1"))
 
     // include windows examples for completeness
-    val path2:Path = Path(new URI("file://c:/tmp/file2"))
-    val path3:Path = Path(new URI("file://c:\\tmp\\file3"))
+    val path2: Path = Path (new URI ("file://c:/tmp/file2"))
+    val path3: Path = Path (new URI ("file://c:\\tmp\\file3"))
 
     // For opening a zip filesystem
-    val zipPath:Path = Path(new URI("zip:///tmp/zipfile.zip!/file"))
+    val zipPath: Path = Path (new URI ("zip:///tmp/zipfile.zip!/file"))
   }
 
   // TODO demonstrate the GenericPath usage
@@ -88,10 +89,10 @@ object Samples {
     import scalax.io.Path
     // java.io.File are always on the default filesystem
     // so filesystem is not declared
-    val path1:Path = Path(new File("/tmp/file1"))
+    val path1: Path = Path (new File ("/tmp/file1"))
     // include windows examples for completeness
-    val path2:Path = Path(new File("file://c:/tmp/file2"))
-    val path3:Path = Path(new File("file://c:\\tmp\\file3"))
+    val path2: Path = Path (new File ("file://c:/tmp/file2"))
+    val path3: Path = Path (new File ("file://c:\\tmp\\file3"))
   }
 
   { // create temporary files
@@ -100,14 +101,14 @@ object Samples {
     // by default the filesystem is the defaultFileSystem (surprise :-) )
     // using the default parameters will create a randomly named file in
     // the system temp directory which will be deleted when the JVM exists
-    val tmpFile1:Path = Path.makeTempFile()
+    val tmpFile1: Path = Path.makeTempFile ()
 
     // fully declare the temporary file parameters
     // all parameters have defaults so there are many option
     // Note that not all filesystems support creating temporary
     // files.  
     // The default filesystem does
-    val tmpFile2:Path = Path.makeTempFile(prefix="tmpFile",
+    val tmpFile2: Path = Path.makeTempFile (prefix="tmpFile",
                                           suffix="tmp",
                                           dir="/tmp",
                                           deleteOnExit=false)(FileSystem.defaultFileSystem)
@@ -116,10 +117,10 @@ object Samples {
     // to declare the FileSystem that is used by make temp file
     implicit val fs = FileSystem.defaultFileSystem
     // fs will now be used by makeTempFile
-    val tmpFile3:Path = Path.makeTempFile()
+    val tmpFile3: Path = Path.makeTempFile ()
 
     // a file system can also be used to create temporary files/directories
-    fs.makeTempFile()
+    fs.makeTempFile ()
   }
 
   { // create temporary directories
@@ -129,14 +130,14 @@ object Samples {
     // by default the filesystem is the defaultFileSystem (surprise :-) )
     // using the default parameters will create a randomly named directory in
     // the system temp directory which will be deleted when the JVM exists
-    val tmpFile1:Path = Path.makeTempDirectory()
+    val tmpFile1: Path = Path.makeTempDirectory ()
 
     // fully declare the temporary directory parameters
     // all parameters have defaults so there are many option
     // Note that not all filesystems support creating temporary
     // files/directories.  
     // The default filesystem does
-    val tmpFile2:Path = Path.makeTempDirectory(prefix="tmpFile",
+    val tmpFile2: Path = Path.makeTempDirectory (prefix="tmpFile",
                                           suffix="tmp",
                                           dir="/tmp",
                                           deleteOnExit=false)(FileSystem.defaultFileSystem)
@@ -145,21 +146,21 @@ object Samples {
     // to declare the FileSystem that is used by make temp directory
     implicit val fs = FileSystem.defaultFileSystem
     // fs will now be used by makeTempDirectory
-    val tmpFile3:Path = Path.makeTempDirectory()
+    val tmpFile3: Path = Path.makeTempDirectory ()
 
     // a file system can also be used to create temporary files/directories
-    fs.makeTempFile()
+    fs.makeTempFile ()
   }
 
   { // Match a Path against the full path as a string
     import scalax.io.Path
-    Path("/tmp/file") match {
-      case Path("/tmp/file") => println("it's a match")
-      case _ => println("no match")
+    Path ("/tmp/file") match {
+      case Path ("/tmp/file") => println ("it's a match")
+      case _ => println ("no match")
     }
-    Path("/tmp/file") match {
-      case Path(stringPath) => println("path as a string is:"+stringPath)
-      case _ => println("no match")
+    Path ("/tmp/file") match {
+      case Path (stringPath) => println ("path as a string is:"+stringPath)
+      case _ => println ("no match")
     }
   }
 
@@ -168,24 +169,24 @@ object Samples {
     import Path.Matching._
 
     // This example tests if the path is a file, directory, exists or does not exist
-    Path("/tmp/file") match {
-      case File(file) => println("it's a file!"+file)
-      case Directory(dir) => println("it's a directory!"+dir)
-      case Exists(path) => println("It exists... but what is it?"+path)
-      case NonExistant(path) => println("It does not exist!"+path)
-      case _ => println("I give up")
+    Path ("/tmp/file") match {
+      case File (file) => println ("it's a file!"+file)
+      case Directory (dir) => println ("it's a directory!"+dir)
+      case Exists (path) => println ("It exists... but what is it?"+path)
+      case NonExistant (path) => println ("It does not exist!"+path)
+      case _ => println ("I give up")
     }
 
     // Now match based on the permissions of the path
     // Set up matchers we want to use
     import Path.AccessModes._
-    val RWE = new AccessMatcher(READ, WRITE, EXECUTE)
-    val RW = new AccessMatcher(READ, WRITE)
-    val R = new AccessMatcher(READ)
-    Path("/tmp/file") match {
-      case RWE(path) => println("path is rwe"+path)
-      case RW(path) => println("path is rw"+path)
-      case R(path) => println("path is r"+path)
+    val RWE = new AccessMatcher (READ, WRITE, EXECUTE)
+    val RW = new AccessMatcher (READ, WRITE)
+    val R = new AccessMatcher (READ)
+    Path ("/tmp/file") match {
+      case RWE (path) => println ("path is rwe"+path)
+      case RW (path) => println ("path is rw"+path)
+      case R (path) => println ("path is r"+path)
     }
   }
 
@@ -198,34 +199,235 @@ object Samples {
     // FileSystem.matcher
 
     // default type of matcher created is a glob matcher
-    val InTmpDir:PathMatcher = Path("/tmp/file").matcher("/tmp/**")
+    val InTmpDir: PathMatcher = Path ("/tmp/file").matcher ("/tmp/**")
 
     // If you can also create through the FileSystem
-    val InBinDir:PathMatcher = FileSystem.defaultFileSystem.matcher("/bin/*")
+    val InBinDir: PathMatcher = FileSystem.defaultFileSystem.matcher ("/bin/*")
     import FileSystem.defaultFileSystem
 
     // you can explicitly declare the GLOB matcher
     import PathMatcher.StandardSyntax.GLOB
-    val StartsWithH:PathMatcher = defaultFileSystem.matcher("**/H*", GLOB)
+    val StartsWithH: PathMatcher = defaultFileSystem.matcher ("**/H*", GLOB)
     
     // a Regex matcher is also available
     import PathMatcher.StandardSyntax.REGEX
-    val ContainsVowel:PathMatcher = defaultFileSystem.matcher(".*[aeiou].*", REGEX)
+    val ContainsVowel: PathMatcher = defaultFileSystem.matcher (".*[aeiou].*", REGEX)
 
     // If a filesystem supports a filesystem specific sytax you can declare that
-    val CustomSyntaxMatcher:PathMatcher = defaultFileSystem.matcher("/tmp/@123", "customSyntax")
+    val CustomSyntaxMatcher: PathMatcher = defaultFileSystem.matcher ("/tmp/@123", "customSyntax")
 
     // now demonstrate use
     // See FileSystem.matcher for details on creating a matcher
-    Path("/tmp/file") match {
-      case InTmpDir(path) => println("Path name is in tmp dir")
-      case InBinDir(path) => println("File is in the bin dir")
-      case StartsWithH(path) => println("Path name starts with an H")
-      case ContainsVowel(path) => println("File contains a vowel")
-      case CustomSyntaxMatcher(path) => println("CustomMatcher matched")
+    Path ("/tmp/file") match {
+      case InTmpDir (path) => println ("Path name is in tmp dir")
+      case InBinDir (path) => println ("File is in the bin dir")
+      case StartsWithH (path) => println ("Path name starts with an H")
+      case ContainsVowel (path) => println ("File contains a vowel")
+      case CustomSyntaxMatcher (path) => println ("CustomMatcher matched")
     }
   }
 
-  
+  { // common simple Path operations
+    // Nothing too fancy here. Coolest is the resolving child
+    // files and directories
+    import scalax.io.Path
+    import java.net.{URI, URL}
+
+    val path: Path = Path ("file")
+    
+    // if path is a directory then you can use the /
+    // methods to make a new path based on that directory
+    val child1: Path = path / "childFile"
+    val child2: Path = path / "dir1/f2"
+    val child3: Path = path / "dir1" / "f3"
+    val child4: Path = path / Path ("f4")
+    val child5: Path = path / Path ("dir2") / Path ("f5") 
+
+    // the resolve methods is essentially an alias for / for those
+    // who are uncomfortable with operator type methods.  Also to 
+    // maintain a familiar feel with NIO Path
+    val child6: Path = path.resolve ("child")
+    val child7: Path = path.resolve (Path ("child/grandchild"))
+
+    val name: String = path.name
+    val pathString: String = path.path
+
+    // make a Path relative to another path
+    // This should result in path "child"
+    val relative: Path = path.relativize (Path ("file/child"))
+
+    // There are two ways to query about the access mode of the underlying
+    // path object.  One is similar to the java.io.File.  The other is based
+    // a single query to test several attributes at once.
+    
+    // first the java.io.File way
+    val executable: Boolean = path.canExecute
+    val readable: Boolean = path.canRead
+    val writable: Boolean = path.canWrite
+
+    // next check if file is read and write
+    import Path.AccessModes._
+    val readWrite: Boolean = path.checkAccess (READ, WRITE)
+
+    // the following are fairly boring queries 
+    val root: Option[Path] = path.root
+    val pathSegments: List[String] = path.segments
+    val parent: Option[Path] = path.parent
+    val parents: List[Path] = path.parents
+    
+    val absolute: Boolean = path.isAbsolute
+    val absolutePath: Path = path.toAbsolute
+    val uri: URI = path.toURI
+    val url: URL = path.toURL
+    
+    val exists: Boolean = path.exists
+    val notExists: Boolean = path.notExists
+
+    val hidden: Boolean = path.isHidden
+    val isSymLink: Boolean = path.isSymlink
+
+    // query last modified information
+    val lastModified: Long = path.lastModified
+    path.lastModified = System.currentTimeMillis
+    
+    val length = path.length
+
+    // A way to test if path is a file/directory without using the matchers
+    val isFile: Boolean = path.isFile
+    val isDirectory: Boolean = path.isDirectory
+
+    // several simple path comparison queries
+    val endsWith: Boolean = path.endsWith (Path ("file"))
+    val startsWith: Boolean = path.startsWith (Path ("file"))
+    val isSame: Boolean = path.isSame (Path ("file"))
+    val isFresher: Boolean = path.isFresher (Path ("/tmp/file"))
+    
+    //several lexigraphic comparisons
+    val lessThan: Boolean = path < Path("other")
+    val lessThanEqual: Boolean = path <= Path("other")
+    val greaterThan: Boolean = path > Path("other")
+    val greaterThanEqual: Boolean = path >= Path("other")
+    val compare: Int = path.compare (Path ("other"))
+    val compareTo: Int = path.compareTo (Path ("other"))
+  }
+
+  { // create files and directories
+    import scalax.io.Path
+    
+    val path: Path = Path ("/tmp/file")
+
+    // create file but fail if the file already exists.
+    // an exception may be thrown
+    path.createFile()
+    
+    // force create a file will fail if it is a directory which
+    // contain children
+    path.createFile(failIfExists=false)
+
+    // TODO createFile with attributes
+
+    // create a directory at the path location
+    path.createDirectory()
+    path.createDirectory(failIfExists=false)
+  }
+
+  { // delete files and directories
+    import scalax.io.Path
+
+    val path: Path = Path ("/tmp/file")
+
+    // Will throw IOException if file could not be deleted
+    // even if it cannot be deleted because it does not exist
+    path.delete()
+
+    // Will not throw exception if file does not exist but will
+    // if it is a non-empty directory or not writeable
+    path.deleteIfExists()
+
+    // Delete path and all children.  This is currently not a safe method so
+    // it should be used with caution.  Future versions will be better
+    // by default it will throw an exception if one of the files cannot be deleted
+    path.deleteRecursively()
+    
+    // Delete path and all children. If a file cannot be deleted then continue on and delete
+    // all that can be deleted
+    path.deleteRecursively(true)
+    // or
+    path.deleteRecursively(continueOnFailure=true)
+  }
+
+  { // copy and move/rename files
+    import scalax.io.Path
+
+    val path: Path = Path ("/tmp/file")
+    val dest: Path = Path ("/tmp/file2")
+   
+    // make a copy of the file
+    // by default this will fail if dest already exists
+    // also attribute information like datestamp will be
+    // set on the destination file
+    // If path is a directory the copy will not be recursive
+    path.copyTo (dest)
+
+    // Copy explicitly declaring options
+    path.copyTo (target=dest,
+                 copyAttributes=false,
+                 replaceExisting=true)
+
+    // Move/Rename the path
+    // by default throw exception if destination exists
+    // and if a copy is required by underlying filesystem then do that
+    path.moveTo (target=dest)
+
+    // Here we will overwrite existing files (but not non-empty directories)
+    // and will fail if a copy is required (similar to java.io.File.renameTo)
+    // if a failure occures an exception is thrown
+    path.moveTo (target=dest,
+                 replaceExisting=true,
+                 atomicMove=true)
+  }
+
+  { // execute a file if it is executeable
+    import scalax.io.Path  
+    import scalax.io.Process
+
+    val path: Path = Path ("/tmp/file")
+
+    // attempt to execute the file.  If it is possible then the process will be 
+    // returned
+    val process:Option[Process] = path.execute("arg1", "arg2")
+
+    
+  }
+
+  { // search the contents of a directory and perform operations on the objects encountered
+    
+    // This set of examples use the contents method with the partial function parameter
+    // there is another way of inspecting directory contents I another example
+    
+    import scalax.io.{Path, PathMatcher}
+    import scalax.io.Path.Matching._
+
+    val path:Path = Path("/tmp/")
+
+    // print the name of each object in the directory
+    path.directoryStream {case path => println (path.name)}
+    
+    // Now print names of each directory
+    path.directoryStream {case File(file) => println (file.name)}
+    
+    // remove spaces from names of paths
+    // renaming with this method can be dangerous because the stream may be calculated lazily on some filesystems and the renamed file could also be processed resulting in a infinite loop
+    val ContainsSpace:PathMatcher = path.matcher ("* *")
+    path.directoryStream {case ContainsSpace (path) => path.moveTo (Path (path.name.filter (_ != ' ')))}
+    
+    // count the number of directories
+    val fileCount: Option[Int] = path.foldDirectoryStream (0){case (count, File (_)) => count+1}
+  }
+
+  { // using the Managed Resource
+//    path.directoryStream
+  }
+
 }
 

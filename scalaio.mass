@@ -8,4 +8,10 @@ class ScalaIo extends ScalaProject("scala-incubator", "0.1-SNAPSHOT", "2.8.0") {
   new ScalaCompilerConfig {
     args = args.map( "-deprecation" :: _ )
   }
+
+  new Dependencies {
+    dep (group="scala-incubator", 
+         id="scala-arm",
+         version="0.1-SNAPSHOT")
+  }
 }
