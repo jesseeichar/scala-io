@@ -159,7 +159,7 @@ class DefaultPath private[io] (val jfile: JFile, fileSystem: FileSystem) extends
   override def hashCode() = path.hashCode()
 
   //Directory accessors
-  def directoryStream (function: PartialFunction[Path,Unit]): Unit = { null
+/*  def directoryStream (function: PartialFunction[Path,Unit]): Unit = { null
     foldDirectoryStream (()){case (_,path) => function(path)}
   }
   def foldDirectoryStream[R] (initial:R)(function: PartialFunction[(R, Path),R]): Option[R] = {
@@ -172,9 +172,14 @@ class DefaultPath private[io] (val jfile: JFile, fileSystem: FileSystem) extends
     if(foundMatch) Some(result)
     else None
   }
-
-  def directoryStream(matcher:Option[PathMatcher] = None, lock: Boolean = false) : ManagedResource[DirectoryStream[Path]] = {
-    null
+*/
+  def tree(filter:(Path,Path)=>Option[PathMatcher] = (origin,relativePath) => None, 
+           depth:Int = -1, 
+           lock: Boolean = false) : DirectoryStream[Path] = {
+    null // TODO
   }
+
+  def directoryStream(filter:Option[PathMatcher] = None, 
+                      lock: Boolean = false) : DirectoryStream[Path] =tree((o,p) => filter, 1, lock)
 
 }

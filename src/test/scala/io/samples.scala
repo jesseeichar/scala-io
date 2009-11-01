@@ -404,30 +404,79 @@ object Samples {
     
     // This set of examples use the contents method with the partial function parameter
     // there is another way of inspecting directory contents I another example
-    
-    import scalax.io.{Path, PathMatcher}
+
+    import scalax.io.{Path, PathMatcher, DirectoryStream, SecureDirectoryStream}
     import scalax.io.Path.Matching._
 
     val path:Path = Path("/tmp/")
 
     // print the name of each object in the directory
-    path.directoryStream {case path => println (path.name)}
+    path.directoryStream ().filterEach {case path => println (path.name)}
     
     // Now print names of each directory
-    path.directoryStream {case File(file) => println (file.name)}
+    path.directoryStream ().filterEach {case File(file) => println (file.name)}
     
     // remove spaces from names of paths
     // renaming with this method can be dangerous because the stream may be calculated lazily on some filesystems and the renamed file could also be processed resulting in a infinite loop
     val ContainsSpace:PathMatcher = path.matcher ("* *")
-    path.directoryStream {case ContainsSpace (path) => path.moveTo (Path (path.name.filter (_ != ' ')))}
+    path.directoryStream ().filterEach {case ContainsSpace (path) => path.moveTo (Path (path.name.filter (_ != ' ')))}
     
     // count the number of directories
-    val fileCount: Option[Int] = path.foldDirectoryStream (0){case (count, File (_)) => count+1}
-  }
+    val fileCount: Option[Int] = path.directoryStream ().filterFold (0){case (count, File (_)) => count+1}
 
-  { // using the Managed Resource
-//    path.directoryStream
-  }
+    // A directory stream can also be constructed with a filter
+    // this is sometime preferable because using a PathMatcher as a filter may offer operating system
+    // native support for filtering
+    // obviously useful when processing directories with many file (millions perhaps)
+    // the filter is a function returning a PathMatcher because it is possible to define a 
+    // directoryStream that traverses many levels of the filesystem tree and the filter
+    // function allows a new Matcher to be defined at each level of the tree
+    val matcher: PathMatcher = path.matcher("S*")
+    path.directoryStream (Some(matcher)).foreach (println _)
 
+    // Also you can attempt to perform atomic operations on a DirectoryStream
+    // Since not all filesystems support atomic operations (Non in the pre java 7 implementation)
+    // a check must be made to see if a secure directory stream was obtained
+    path.directoryStream (lock=true) match  {
+      case stream:SecureDirectoryStream[Path]  => stream.foreach (_.delete)
+      case _:DirectoryStream[Path] => throw new AssertionError ("This filesystem does not support SecureDirectoryStream!")
+    }
+
+  }
+  
+  { // Walk the directory tree
+
+    import scalax.io.{Path, PathMatcher, DirectoryStream, SecureDirectoryStream}
+
+    val path:Path = Path("/tmp/")
+
+    // by default only the files contained in the current path are returned but if depth
+    // is set (<0 will traverse entire tree) then the stream will visit subdirectories in
+    // pre-order traversal
+    
+    // search for a .gitignore file down to a depth of 4
+    val gitIgnoreRestrictedTree: Option[Path] = path.tree (depth=4).find (_.name == ".gitignore")
+    
+    // search for a .gitignore in the entire subtree
+    val gitIgnoreFullTree: Option[Path] = path.tree ().find (_.name == ".gitignore")
+
+    // search for the .git directory and println all files from that directory and below up to 
+    // a depth of 10 and does it on a locked directory
+
+    // this method creates the filters that are used to filter each query for a directories contents
+    // origin is the originating path (in this example it is path)
+    // relativePath is the path relative from origin to the path that will be contained in the DirectoryStream
+    // In this example if the depth == 1 (shown by the length of the relativePath) then only the .git directory is accepted
+    // All other directories that are traversed will not be filtered
+    def filters (origin:Path, relativePath:Path) = { 
+      if (relativePath.segments.length > 1) None 
+      else Some(relativePath.matcher(".git"))
+    } 
+
+    path.tree (filters,  10, true ) match {
+      case stream:SecureDirectoryStream[Path]  => stream.foreach (println _)
+      case _:DirectoryStream[Path] => throw new AssertionError ("This filesystem does not support SecureDirectoryStream!")
+    }
+  }
 }
 

@@ -758,82 +758,11 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
 
   //Directory accessors
   /**
-   * Iterates over the contents of the directory passing each element to the
-   * function.
-   * <p>
-   * This method is non-locking so the contents of the directory may change
-   * during the execution of this method.  Files and Directories may be deleted
-   * at any time including during the period that the function is executing with
-   * a Path to a file.
-   * </p><p>
-   * For stronger guarantees use the contents method If the filesystem supports it
-   * then the contents method will return a {@link ManagedResource} with a {@link SecuredDirectoryStream}
-   * </p>
-   * <p>
-   * The partial function does not need to be complete, all Path's that do not have matches in the function
-   * will be ignored.  For example: <code>contents {case File(p)=>println(p+" is a file")}</code> would match
-   * all Files.  To assist in matching Paths see the {@link Extractors} and
-   * {@link FileSystem.matcher(String,String)}
-   * </p>
-   * <p>
-   * Note: If a PathMatcher is used in PartialFunction this method may be less efficient than
-   * {@link Path#directoryStream(Option[PathMatcher], Boolean)} because there is no way that this
-   * method can detect the PathMatcher and therefore all content objects must be read from disk and
-   * processed by the PartialFunction in order to determine if a match is found.
-   * <p>
-   * Compared to {@link Path#directoryStream(Option[PathMatcher], Boolean)} which can pass the
-   * matcher to the underlying FileSystem and have the filesystem perform the filtering (if the
-   * filesystem supports the functionality natively
-   * </p>
-   * </p>
-   * @param function the function that is used to process each entry in the directory
-   *
-   * @return nothing
-   *
-   * @see Path.Matching
-   * @see FileSystem#matcher(String,String)
-   */
-  def directoryStream (function: PartialFunction[Path,Unit]): Unit
-
-  /**
-   * Iterates over the contents of the directory passing each element to the
-   * function and returns the result of the computation.
-   * <p>
-   * See {@link Path#directoryStream(Function)} for details and restrictions on how the
-   * directories are processed.
-   * </p>
-   *
-   * @param initial the value that is passed to the first call of function
-   * @param function the function that is used to process each entry in the directory
-   *
-   * @return The result from the last call to PartialFunction or None if there were no matches
-   *
-   * @see Path#directoryStream(Function)
-   * @see Path.Matching
-   * @see FileSystem#matcher(String,String)
-   */
-  def foldDirectoryStream[R] (initial:R)(function: PartialFunction[(R, Path),R]): Option[R]
-
-  // TODO with ARM
-  /**
-   * Returns an iterator over the contents of the directory.
-   * <p>
-   * If the glob pattern is declared then it will be used to define the files that
-   * are returned by the DirectoryStream.  The syntax of the glob is specified in the
-   * {@link FileSystem#matcher(String,String)} comments.
-   * </p>
-   * <p>
-   * In Java 7 version some filesystems will support {@link SecureDirectoryStream}s.
-   * If the filesystem supports {@link SecureDirectoryStreams} and lock = true
-   * the {@link DirectoryStream} can be cast to a {@link SecureDirectoryStream}
-   * </p>
-   *
-   * @param pattern
-   *          the pattern used to select Paths returned by the DirectoryStream
-   *          Default is *
-   * @param syntax
-   *          The syntax use to interpret the pattern
-   *          Default is "glob"
+   * An iterable over the contents of the directory.  This is simply walkTree with depth=1.
+   * 
+   * @param filter
+   *          A filter that restricts what paths are available in the DirectoryStream
+   *          Default is None
    * @param lock
    *          If true then the DirectoryStream will be a SecureDirectoryStream
    *          as long as the filesystem supports this.  This
@@ -841,10 +770,83 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    * @return
    *          A managed resource managing a DirectoryStream.
    *
-   * @see Path#directoryStream(Function)
+   * @see Path#walkTree
    * @see Path.Matching
    * @see FileSystem#matcher(String,String)
    */
-//  def directoryStream(matcher:Option[PathMatcher] = None, lock: Boolean = false) : ManagedResource[DirectoryStream[Path]]
+  def directoryStream(filter:Option[PathMatcher] = None, lock: Boolean = false) : DirectoryStream[Path]
 
+  /**
+   * An iterable that traverses all the elements in the directory tree down to the specified depth
+   * <p>
+   * The filter parameter restricts what paths are available through the DirectoryStream.  This is
+   * different from using a filter, filterFold or filterEach method because PathMatchers can be used by
+   * the underlying filesystem natively and can potentially provide dramatically improved performance for
+   * very large directories.
+   * </p>
+   * <p>
+   * The filter parameter is a function because the DirectoryStream can return files from many directories.
+   * The function provides the mechanism for declaring which PathMatcher to use at each level.  The two
+   * parameters are original path and the path to be visited relative to the original path.  By default the
+   * function always returns None.
+   * </p>
+   * <p>
+   * If the depth parameter is non-negative then that restricts the depth that will be traversed.  The value 0 will not return any
+   * elements, depth = 1 is essentially the {@link path#directoryStream(Option,Boolean)} method and values < 0 will return all elements
+   * at any depth.
+   * </p>
+   * <p>
+   * The traversal order is pre-order.
+   * </p>
+   * <p>
+   * The lock parameter attempts to lock the directory against concurrent access.  Some but not all filesystems support
+   * this.  This parameter is to assist in binary compatibility between this version and the next Java 7 version because
+   * this parameter is ignored in the current implementation.
+   * </p>
+   * <p>
+   * If the filesystem does support directory locking and lock = true then
+   * the {@link DirectoryStream} will be a {@link SecureDirectoryStream}.  If the {@link DirectoryStream} is an instance of
+   * {@link SecureDirectoryStream} then any operations done through the SecureDirectoryStream will be secure against concurrent updates.
+   * </p>
+   * <p>
+   * However, calling this method does not lock the directory.  Only performing operations on the SecureDirectoryStream will lock the directory.
+   * <p>
+   * </p>
+   * For Example:
+   * </p>
+   * <pre><code>
+   * val tree = path.walkTree()
+   * // directory is not yet locked
+   * tree.foreach {
+   *   // now the directory is locked
+   *   println _
+   * }
+   * // directory has been unlocked
+   * </code>
+   * <p>
+   * No exceptions will be thrown by this method if it is called and the Path is a File or does not exist.  Instead the {@link DirectoryStream}
+   * will throw a NotADirectoryException when a method is called and the underlying object is not a Directory.  
+   * </p>
+   * @param filter
+   *          A filter that restricts what paths are available in the DirectoryStream
+   *          Default is None
+   * @param depth
+   *          How deep down the tree to traverse
+   *          1 is just visit the object in the directory
+   *          >0 is visit all directories in entire tree
+   *          Default is 1
+   * @param lock
+   *          If true then the DirectoryStream will be a SecureDirectoryStream
+   *          as long as the filesystem supports this.  This
+   *          is only supported in Java 7+ dependent implementations
+   * @return
+   *          A managed resource managing a DirectoryStream.
+   *
+   * @see Path#directoryStream(Option,Boolean)
+   * @see Path.Matching
+   * @see FileSystem#matcher(String,String)
+   */
+  def tree(filter:(Path,Path)=>Option[PathMatcher] = (origin,relativePath) => None, 
+           depth:Int = -1, 
+           lock: Boolean = false) : DirectoryStream[Path]
 }

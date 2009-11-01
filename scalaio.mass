@@ -6,7 +6,7 @@ class ScalaIo extends ScalaProject("scala-incubator", "0.1-SNAPSHOT", "2.8.0") {
   inceptionYear="2009"
 
   new ScalaCompilerConfig {
-    args = args.map( "-deprecation" :: _ )
+    args = args.map("-unchecked" :: "-deprecation" :: _ )
   }
 
   new Dependencies {

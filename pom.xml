@@ -49,6 +49,12 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
                             <goal>compile</goal>
                             <goal>testCompile</goal>
                         </goals>
+                        <configuration>
+                          <args>
+                            <param>-deprecation</param>
+                            <param>-unchecked</param>
+                          </args>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
