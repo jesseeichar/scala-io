@@ -56,8 +56,8 @@ object Samples {
     //now explicitly state the filesystem
     val path4: Path = Path ("/tmp/file4")(FileSystem.defaultFileSystem)
 
-    // or declare an implicit val so it can be reused (this is bot really 
-    // required since the default paramter is the default filesystem but 
+    // or declare an implicit val so it can be reused (this is bot really
+    // required since the default paramter is the default filesystem but
     // it illustrates how another filesystem can be used
     implicit val fs = FileSystem.defaultFileSystem
     // fs will now be used to create the path
@@ -106,7 +106,7 @@ object Samples {
     // fully declare the temporary file parameters
     // all parameters have defaults so there are many option
     // Note that not all filesystems support creating temporary
-    // files.  
+    // files.
     // The default filesystem does
     val tmpFile2: Path = Path.makeTempFile (prefix="tmpFile",
                                           suffix="tmp",
@@ -135,7 +135,7 @@ object Samples {
     // fully declare the temporary directory parameters
     // all parameters have defaults so there are many option
     // Note that not all filesystems support creating temporary
-    // files/directories.  
+    // files/directories.
     // The default filesystem does
     val tmpFile2: Path = Path.makeTempDirectory (prefix="tmpFile",
                                           suffix="tmp",
@@ -208,7 +208,7 @@ object Samples {
     // you can explicitly declare the GLOB matcher
     import PathMatcher.StandardSyntax.GLOB
     val StartsWithH: PathMatcher = defaultFileSystem.matcher ("**/H*", GLOB)
-    
+
     // a Regex matcher is also available
     import PathMatcher.StandardSyntax.REGEX
     val ContainsVowel: PathMatcher = defaultFileSystem.matcher (".*[aeiou].*", REGEX)
@@ -234,17 +234,17 @@ object Samples {
     import java.net.{URI, URL}
 
     val path: Path = Path ("file")
-    
+
     // if path is a directory then you can use the /
     // methods to make a new path based on that directory
     val child1: Path = path / "childFile"
     val child2: Path = path / "dir1/f2"
     val child3: Path = path / "dir1" / "f3"
     val child4: Path = path / Path ("f4")
-    val child5: Path = path / Path ("dir2") / Path ("f5") 
+    val child5: Path = path / Path ("dir2") / Path ("f5")
 
     // the resolve methods is essentially an alias for / for those
-    // who are uncomfortable with operator type methods.  Also to 
+    // who are uncomfortable with operator type methods.  Also to
     // maintain a familiar feel with NIO Path
     val child6: Path = path.resolve ("child")
     val child7: Path = path.resolve (Path ("child/grandchild"))
@@ -259,7 +259,7 @@ object Samples {
     // There are two ways to query about the access mode of the underlying
     // path object.  One is similar to the java.io.File.  The other is based
     // a single query to test several attributes at once.
-    
+
     // first the java.io.File way
     val executable: Boolean = path.canExecute
     val readable: Boolean = path.canRead
@@ -269,17 +269,17 @@ object Samples {
     import Path.AccessModes._
     val readWrite: Boolean = path.checkAccess (READ, WRITE)
 
-    // the following are fairly boring queries 
+    // the following are fairly boring queries
     val root: Option[Path] = path.root
     val pathSegments: List[String] = path.segments
     val parent: Option[Path] = path.parent
     val parents: List[Path] = path.parents
-    
+
     val absolute: Boolean = path.isAbsolute
     val absolutePath: Path = path.toAbsolute
     val uri: URI = path.toURI
     val url: URL = path.toURL
-    
+
     val exists: Boolean = path.exists
     val notExists: Boolean = path.notExists
 
@@ -289,7 +289,7 @@ object Samples {
     // query last modified information
     val lastModified: Long = path.lastModified
     path.lastModified = System.currentTimeMillis
-    
+
     val length = path.length
 
     // A way to test if path is a file/directory without using the matchers
@@ -301,7 +301,7 @@ object Samples {
     val startsWith: Boolean = path.startsWith (Path ("file"))
     val isSame: Boolean = path.isSame (Path ("file"))
     val isFresher: Boolean = path.isFresher (Path ("/tmp/file"))
-    
+
     //several lexigraphic comparisons
     val lessThan: Boolean = path < Path("other")
     val lessThanEqual: Boolean = path <= Path("other")
@@ -313,13 +313,13 @@ object Samples {
 
   { // create files and directories
     import scalax.io.Path
-    
+
     val path: Path = Path ("/tmp/file")
 
     // create file but fail if the file already exists.
     // an exception may be thrown
     path.createFile()
-    
+
     // force create a file will fail if it is a directory which
     // contain children
     path.createFile(failIfExists=false)
@@ -348,7 +348,7 @@ object Samples {
     // it should be used with caution.  Future versions will be better
     // by default it will throw an exception if one of the files cannot be deleted
     path.deleteRecursively()
-    
+
     // Delete path and all children. If a file cannot be deleted then continue on and delete
     // all that can be deleted
     path.deleteRecursively(true)
@@ -361,7 +361,7 @@ object Samples {
 
     val path: Path = Path ("/tmp/file")
     val dest: Path = Path ("/tmp/file2")
-   
+
     // make a copy of the file
     // by default this will fail if dest already exists
     // also attribute information like datestamp will be
@@ -388,20 +388,20 @@ object Samples {
   }
 
   { // execute a file if it is executeable
-    import scalax.io.Path  
+    import scalax.io.Path
     import scalax.io.Process
 
     val path: Path = Path ("/tmp/file")
 
-    // attempt to execute the file.  If it is possible then the process will be 
+    // attempt to execute the file.  If it is possible then the process will be
     // returned
     val process:Option[Process] = path.execute("arg1", "arg2")
 
-    
+
   }
 
   { // search the contents of a directory and perform operations on the objects encountered
-    
+
     // This set of examples use the contents method with the partial function parameter
     // there is another way of inspecting directory contents I another example
 
@@ -412,15 +412,15 @@ object Samples {
 
     // print the name of each object in the directory
     path.directoryStream ().filterEach {case path => println (path.name)}
-    
+
     // Now print names of each directory
     path.directoryStream ().filterEach {case File(file) => println (file.name)}
-    
+
     // remove spaces from names of paths
     // renaming with this method can be dangerous because the stream may be calculated lazily on some filesystems and the renamed file could also be processed resulting in a infinite loop
     val ContainsSpace:PathMatcher = path.matcher ("* *")
     path.directoryStream ().filterEach {case ContainsSpace (path) => path.moveTo (Path (path.name.filter (_ != ' ')))}
-    
+
     // count the number of directories
     val fileCount: Option[Int] = path.directoryStream ().filterFold (0){case (count, File (_)) => count+1}
 
@@ -428,7 +428,7 @@ object Samples {
     // this is sometime preferable because using a PathMatcher as a filter may offer operating system
     // native support for filtering
     // obviously useful when processing directories with many file (millions perhaps)
-    // the filter is a function returning a PathMatcher because it is possible to define a 
+    // the filter is a function returning a PathMatcher because it is possible to define a
     // directoryStream that traverses many levels of the filesystem tree and the filter
     // function allows a new Matcher to be defined at each level of the tree
     val matcher: PathMatcher = path.matcher("S*")
@@ -443,7 +443,7 @@ object Samples {
     }
 
   }
-  
+
   { // Walk the directory tree
 
     import scalax.io.{Path, PathMatcher, DirectoryStream, SecureDirectoryStream}
@@ -453,14 +453,14 @@ object Samples {
     // by default only the files contained in the current path are returned but if depth
     // is set (<0 will traverse entire tree) then the stream will visit subdirectories in
     // pre-order traversal
-    
+
     // search for a .gitignore file down to a depth of 4
     val gitIgnoreRestrictedTree: Option[Path] = path.tree (depth=4).find (_.name == ".gitignore")
-    
+
     // search for a .gitignore in the entire subtree
     val gitIgnoreFullTree: Option[Path] = path.tree ().find (_.name == ".gitignore")
 
-    // search for the .git directory and println all files from that directory and below up to 
+    // search for the .git directory and println all files from that directory and below up to
     // a depth of 10 and does it on a locked directory
 
     // this method creates the filters that are used to filter each query for a directories contents
@@ -468,15 +468,34 @@ object Samples {
     // relativePath is the path relative from origin to the path that will be contained in the DirectoryStream
     // In this example if the depth == 1 (shown by the length of the relativePath) then only the .git directory is accepted
     // All other directories that are traversed will not be filtered
-    def filters (origin:Path, relativePath:Path) = { 
-      if (relativePath.segments.length > 1) None 
+    def filters (origin:Path, relativePath:Path) = {
+      if (relativePath.segments.length > 1) None
       else Some(relativePath.matcher(".git"))
-    } 
+    }
 
     path.tree (filters,  10, true ) match {
       case stream:SecureDirectoryStream[Path]  => stream.foreach (println _)
       case _:DirectoryStream[Path] => throw new AssertionError ("This filesystem does not support SecureDirectoryStream!")
     }
   }
+
+  { // since the underlying filesystem could change to safely use the DirectoryStream API it is recommended to handle the
+    // NotADirectoryException
+    import scalax.io.{Path, NotADirectoryException, DirectoryStream}
+    import scala.util.control.Exception._
+
+    catching (classOf[NotADirectoryException]) opt {
+      Path ("/tmp/dir").directoryStream() map ( _.name)
+    } match {
+      case None => println ("Not a direcory")
+      case Some(names) => println ("files names = "+names)
+    }
+  }
+
+  { // SecureDirectoryStream examples
+    // TODO examples
+  }
+
+  
 }
 

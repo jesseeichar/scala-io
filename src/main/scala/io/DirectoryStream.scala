@@ -11,13 +11,18 @@ package scalax.io
 import java.io.Closeable
 
 /**
- * An iterator for iterating over the contents of a directory
- *
- * TODO ControlException docs
- * TODO ConcurrencyException docs
- * 
+ * An iterable that permits iterating over a directory tree starting at a root Path.  
+ * <p>
+ * When a method is called the root Path is checked to determine if it is a Directory.  If not
+ * a NotADirectoryException is thrown.
+ * </p>
+ * <p>
+ * If an IOException is encountered while iterating a ConcurrentModificationException is thrown with
+ * case IOException
+ * </p>
+ * @see NotADirectoryException
  */
-trait DirectoryStream[T] extends Iterable[T] {
+abstract class DirectoryStream[T] extends Iterable[T] {
   /**
    * Iterates over the contents of the directory passing each element to the
    * function.
@@ -59,8 +64,14 @@ trait DirectoryStream[T] extends Iterable[T] {
 }
 
 /**
- * TODO scaladocs
+ * A DirectoryStream that defines operations on files that are located relative to an open directory.
+ * A SecureDirectoryStream is intended for use by sophisticated or security sensitive applications
+ * requiring to traverse file trees or otherwise operate on directories in a race-free manner.
+ * Race conditions can arise when a sequence of file operations cannot be carried out in isolation.
+ * Each of the file operations defined by this interface specify a relative path. All access to the file
+ * is relative to the open directory irrespective of if the directory is moved or replaced by an attacker
+ * while the directory is open. A SecureDirectoryStream may also be used as a virtual working directory.
  */
-trait SecureDirectoryStream[T] extends DirectoryStream[T] {
+abstract class SecureDirectoryStream[T] extends DirectoryStream[T] {
   // TODO methods
 }

@@ -182,4 +182,6 @@ class DefaultPath private[io] (val jfile: JFile, fileSystem: FileSystem) extends
   def directoryStream(filter:Option[PathMatcher] = None, 
                       lock: Boolean = false) : DirectoryStream[Path] =tree((o,p) => filter, 1, lock)
 
+  def file(implicit codec:Codec = Codec.UTF8):File = new DefaultFile(jfile,codec)
+
 }

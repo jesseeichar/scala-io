@@ -515,9 +515,9 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    */
   def lastModified_=(time: Long): Long
   /**
-   * The length of the file in bytes or 0 if file does not exist or is not a file
+   * The length of the file/directory in bytes or 0 if file does not exist
    *
-   * @return The length of the file in bytes or 0 if file does not exist or is not a file
+   * @return The length of the file/directory in bytes or 0 if file does not exist
    * @see java.io.File#length()
    */
   def length: Long
@@ -849,4 +849,6 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
   def tree(filter:(Path,Path)=>Option[PathMatcher] = (origin,relativePath) => None, 
            depth:Int = -1, 
            lock: Boolean = false) : DirectoryStream[Path]
+
+  def file(implicit codec:Codec = Codec.UTF8):File
 }
