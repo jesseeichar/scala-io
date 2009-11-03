@@ -14,13 +14,13 @@ import java.io.Closeable
  * An iterable that permits iterating over a directory tree starting at a root Path.  
  * <p>
  * When a method is called the root Path is checked to determine if it is a Directory.  If not
- * a NotADirectoryException is thrown.
+ * a NotDirectoryException is thrown.
  * </p>
  * <p>
  * If an IOException is encountered while iterating a ConcurrentModificationException is thrown with
  * case IOException
  * </p>
- * @see NotADirectoryException
+ * @see NotDirectoryException
  */
 abstract class DirectoryStream[T] extends Iterable[T] {
   /**

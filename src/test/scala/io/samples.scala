@@ -480,11 +480,11 @@ object Samples {
   }
 
   { // since the underlying filesystem could change to safely use the DirectoryStream API it is recommended to handle the
-    // NotADirectoryException
-    import scalax.io.{Path, NotADirectoryException, DirectoryStream}
+    // NotDirectoryException
+    import scalax.io.{Path, NotDirectoryException, DirectoryStream}
     import scala.util.control.Exception._
 
-    catching (classOf[NotADirectoryException]) opt {
+    catching (classOf[NotDirectoryException]) opt {
       Path ("/tmp/dir").directoryStream() map ( _.name)
     } match {
       case None => println ("Not a direcory")

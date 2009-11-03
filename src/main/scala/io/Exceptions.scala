@@ -9,6 +9,28 @@
 package scalax.io
 
 import scala.util.control.ControlException
+import java.io.IOException
+
+/**
+ * This is a control exception that indicates the underlying filesystem object cannot be treated as a File.
+ * <p>
+ * IE a symbolic link maybe treated as a file in some cases but a Directory cannot.  So
+ * if a file operation is attempted on a Directory a NotFileException will be thrown
+ * <p>
+ * To safely use {@link File} one should use the following code:
+ * <pre>
+ * <code>
+ * import scala.util.control.Exception._
+ * catching(classOf[NotFileException]) opt {
+ *   file.lines foreach (println _)
+ * } match {
+ *   case None => println ("Oh no the path is not a file")
+ *   case Some(names) => println ("oh everything went as planned and we got all the lines: "+lines)
+ * }
+ * </code>
+ * </pre>
+ */
+case class NotFileException() extends IOException with ControlException
 
 /**
  * This is a control exception that indicates the underlying filesystem object either does not exist or is not a Directory
@@ -17,7 +39,7 @@ import scala.util.control.ControlException
  * <pre>
  * <code>
  * import scala.util.control.Exception._
- * catching(classOf[NotADirectoryException]) opt {
+ * catching(classOf[NotDirectoryException]) opt {
  *   ds map (_.name)
  * } match {
  *   case None => println ("Oh no the path is not a directory!")
@@ -26,4 +48,4 @@ import scala.util.control.ControlException
  * </code>
  * </pre>
  */
-case class NotADirectoryException() extends ControlException
+case class NotDirectoryException() extends IOException with ControlException

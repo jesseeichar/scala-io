@@ -20,6 +20,9 @@ import FileSystem.defaultFileSystem
  * The object for constructing Path objects and for containing implicits from strings and
  * {@link java.io.File}s to Scala paths.
  * <p> All Paths constructed by this factory are created for the default filesystem</p>
+ * 
+ *  @author Jesse Eichar
+ *  @since  0.1
  */
 object Path
 {
@@ -825,7 +828,7 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    * </code>
    * <p>
    * No exceptions will be thrown by this method if it is called and the Path is a File or does not exist.  Instead the {@link DirectoryStream}
-   * will throw a NotADirectoryException when a method is called and the underlying object is not a Directory.  
+   * will throw a NotDirectoryException when a method is called and the underlying object is not a Directory.  
    * </p>
    * @param filter
    *          A filter that restricts what paths are available in the DirectoryStream
@@ -850,5 +853,5 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
            depth:Int = -1, 
            lock: Boolean = false) : DirectoryStream[Path]
 
-  def file(implicit codec:Codec = Codec.UTF8):File
+  def file(implicit codec: Codec = Codec.UTF8):File
 }

@@ -11,6 +11,7 @@
 
 package scalax.io
 
+import scala.resource.ManagedResource
 import java.io.{ FileInputStream, InputStream, PrintStream, File => JFile }
 import java.net.{ URI, URL }
 
@@ -123,6 +124,7 @@ object Source {
       withReset (resetFn) .
       withClose (close)
   }
+
 }
 
 // Coming Soon?
