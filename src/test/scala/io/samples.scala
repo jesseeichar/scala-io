@@ -496,6 +496,180 @@ object Samples {
     // TODO examples
   }
 
-  
-}
+  // the following several examples illustrate how to read and write files
+  // One thing you will see in most examples is the assumption that the underlying file either is a file or does not exist. If the underlying file object is not a file at then a NotFileException  is thrown when a file method is invoked.
+  // there is one example that demonstrates the recommended way to write safe file code
 
+  { // implement custom copy method
+    import scalax.io.Path
+    import scalax.io.StandardOpenOptions._
+    // not necessarily the most efficient way to copy but demonstrates use of reading/writing bytes
+    Path("to").file.writeBytes(
+      Path("from").file.bytes()
+    )
+
+    // we could also append to file
+    Path("to").file.writeBytes(
+      Path("from").file.bytes(),
+      openOptions = WRITE_APPEND
+    )
+  }
+
+  { // read comma seperated file
+    import scalax.io.Path
+
+    val records: Iterable[Array[String]] = Path ("csv").file.lines().map (_ split 'x')
+  }
+
+  { // add all bytes in file together
+    import scalax.io.{File, Path}
+    val file:File = Path("file").file
+    val sum: Int = file.bytesAsInts().reduceLeft (_ + _)
+  }
+
+  { // quickly an unsafely load file into memory
+
+    // first load as strings and remove vowels
+    import scalax.io.{File, Path}
+    val file:File = Path("file").file
+    val consonants = file.slurpString().filter (c => !("aeiou" contains c))
+
+    // ok now as bytes
+    val (small, large) = file.slurpBytes() partition (_ < 128)
+  }
+
+  { // iterate over all character in file
+    import scalax.io.{File, Path}
+    val file: File =  Path("file").file
+    val doubled: Iterable[String] = for ( c <- file.chars() ) yield "" + c + c
+  }
+
+  { // read and print out all lines in a file
+    import scalax.io.{File, Path}
+    val file: File =  Path("file").file
+
+    // by default the line terminator is stripped and is
+    // the default terminator for the platform
+    file.lines() foreach println _
+
+    // now do not strip terminator
+    file.lines (includeTerminator = true) foreach print _
+
+    // now declare explicitly the terminator
+    // terminator is restricted to 1 or 2 characters
+    file.lines (terminator = "\n") foreach println _
+  }
+
+  { // explicitly declare the codecs to use
+    import scalax.io.{File, Path, Codec}
+    // create the file so that all operations on the file
+    // will default to UTF8
+    val file: File =  Path("file").file (Codec.UTF8)
+
+    // the withCodec method is useful for switching
+    // to another codec
+    //
+    // NOTE: This does not change the underlying file
+    //       is only affects how strings are encoded
+    //       when written and how they are decoded
+    //       when read.
+    val file2: File = file.withCodec (Codec.ISO8859)
+
+    // All methods for reading and writing characters/strings
+    // have a codec parameter that used to explicitly declare the
+    // codec to use
+    file.chars (codec = Codec.ISO8859)
+
+    // If there is not a constant for the desired codec
+    // one can easily be created
+    file.lines (codec = Codec("UTF-16"))
+  }
+
+  { // recommended way to read and write a file
+    import scalax.io.{
+      File, Path, NotFileException,
+      NoSuchFileException}
+    import scala.util.control.Exception._
+    val file: File =  Path("file").file
+    val result:Option[String] = catching (classOf[NotFileException],
+                                          classOf[NoSuchFileException]) opt { file.slurpString()}
+
+    result match {
+      case None => println("oops not a file maybe a directory?")
+      case Some(data) => println (data)
+    }
+  }
+
+  { // several examples of writing data
+    import scalax.io.{
+      File, Path, Codec, StandardOpenOptions}
+    import StandardOpenOptions._
+
+    val file: File =  Path ("file").file
+
+    // write bytes
+    // By default the file write will replace
+    // an existing file with the new data
+    file.writeBytes (Array (1,2,3) map ( _.toByte))
+
+    // another option for writeBytes is openOptions which allows the caller
+    // to specify in detail how the write should take place
+    // the openOptions parameter takes a collections of OpenOptions objects
+    // which are filesystem specific in general but the standard options
+    // are defined in the StandardOpenOptions object
+    // in addition to the definition common collections are also defined
+    // WRITE_APPEND for example is a List(CREATE, APPEND, WRITE)
+    file.writeBytes (List (1,2,3) map (_.toByte),
+                     openOptions = WRITE_APPEND)
+
+    // write a string to the file
+    file.writeString("Hello my dear file")
+
+    // with all options (these are the default options explicitely declared)
+    file.writeString("Hello my dear file",
+                     codec = Codec.UTF8,
+                     openOptions = WRITE_TRUNCATE)
+
+    // Convert several strings to the file
+    // same options apply as for writeString
+    file.writeStrings( "It costs" :: "one" :: "dollar" :: Nil)
+
+    // write a collection of strings as lines in the file
+    file.writeLines("It costs" :: "one" :: "dollar" :: Nil)
+
+    // Now all options
+    file.writeLines("It costs" :: "one" :: "dollar" :: Nil,
+                    separator="||\n||",
+                    codec = Codec.UTF8,
+                    openOptions = List(CREATE_NEW, WRITE, SYNC))
+  }
+
+  { // perform an actions within a file lock
+    import scalax.io.{File, Path}                         
+    val file: File =  Path ("file").file
+
+    // By default the entire file is locked with exclusive access
+    val result: Option[String] = file.withLock() {
+      file.slurpString()
+    }
+
+    // if the filesystem does not support locking then None will be returned
+    result match {
+      case None => file.slurpString() // oh well this is the best I can do
+      case Some(data) => data
+    }
+
+    def fail: Nothing = throw new AssertionError("Uh oh")
+
+    // or perhaps we only lock part of the file
+    val result2: Iterable[Byte] = file.withLock(10, 20) {
+      file.bytes() slice (10,20)
+    } getOrElse {fail}
+
+
+
+  }
+  // TODO interop with java API
+
+
+}

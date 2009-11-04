@@ -13,6 +13,9 @@ import java.io.{
   BufferedInputStream, BufferedOutputStream, IOException, File => JFile}
 import java.net.{ URI, URL }
 import collection.{Traversable}
+import StandardOpenOptions._
+// TODO document NotFileException
+// TODO Document NoSuchFileException
 
 abstract class File(override val creationCodec:Codec = Codec.default) extends Chars {
   def outputStream: OutputStreamResource
@@ -21,27 +24,27 @@ abstract class File(override val creationCodec:Codec = Codec.default) extends Ch
 
   def withCodec(codec:Codec): File
 
-  def writeString(string: String,
-                  append: Boolean = false,
-                  codec: Codec = creationCodec): Unit = {
+  def writeBytes(bytes: Traversable[Byte],
+                 openOptions: Iterable[OpenOptions] = WRITE_TRUNCATE): Unit = {
     // TODO
     ()
   }
-  def writeBytes(bytes: Traversable[Byte],
-                 append: Boolean = false): Unit = {
+  def writeString(string: String,
+                  codec: Codec = creationCodec, 
+                  openOptions: Iterable[OpenOptions] = WRITE_TRUNCATE): Unit = {
     // TODO
     ()
   }
   def writeStrings(strings: Traversable[String],
-                   append: Boolean = false,
-                   codec: Codec = creationCodec): Unit = {
+                   codec: Codec = creationCodec,
+                   openOptions: Iterable[OpenOptions] = WRITE_TRUNCATE): Unit = {
     // TODO
     ()
   }
   def writeLines(strings: Traversable[String],
-                 terminiator: String = compat.Platform.EOL,
-                 append: Boolean = false,
-                 codec: Codec = creationCodec): Unit = {
+                 separator: String = compat.Platform.EOL,
+                 codec: Codec = creationCodec, 
+                 openOptions: Iterable[OpenOptions] = WRITE_TRUNCATE): Unit = {
     // TODO
     ()
   }

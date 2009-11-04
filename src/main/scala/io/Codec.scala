@@ -82,7 +82,7 @@ object Codec {
     val _decoder = decoder
     new Codec(decoder.charset()) { override def decoder = _decoder }
   }
-  
+
   def toUTF8(bytes: Array[Byte]): Array[Char] = {
     val bbuffer = java.nio.ByteBuffer wrap bytes
     val cbuffer = UTF8 decode bbuffer

@@ -47,7 +47,7 @@ trait Bytes {
    * {@link #bytesAsInts}
    * </p>
    */
-  def bytes: Iterable[Byte] = bytesAsInts map (_.toByte)
+  def bytes(): Iterable[Byte] = bytesAsInts() map (_.toByte)
   /**
    * Obtains a Iterable for conveniently processing the file as Ints.
    * <p>
@@ -58,7 +58,7 @@ trait Bytes {
    * This is a View so remember to treat it as a view and not as a Stream or
    * a strict collection
    */
-  def bytesAsInts: Iterable[Int] = {
+  def bytesAsInts(): Iterable[Int] = {
     val resource = inputStream.buffered
     resource.toTraversable( in => {
       Iterator continually in.read() takeWhile (_ != -1)
@@ -69,10 +69,10 @@ trait Bytes {
    * This method aspires to be the fastest way to read
    * a stream of known length into memory.
    */
-  def sluprByteArray(): Array[Byte] = {
+  def slurpBytes(): Array[Byte] = {
     // if we don't know the length, fall back on relative inefficiency
     if (length == -1L)
-      return (new ArrayBuffer[Byte]() ++= bytes).toArray
+      return (new ArrayBuffer[Byte]() ++= bytes()).toArray
 
     val arr = new Array[Byte](length.toInt)
     val len = arr.length
@@ -121,7 +121,10 @@ trait Chars extends Bytes {
     else if (allowDefault) Codec.default
     else failNoCodec()
 
-  def chars(codec: Codec = getCodec()): Iterable[Char] = bytesAsInts map (c => (codec wrap c).toChar)
+  def chars(codec: Codec = getCodec()): Iterable[Char] = bytesAsInts() map (c => (codec wrap c).toChar)
+  /**
+   * terminator is 1-2 characters
+   */
   def lines(terminator: String = compat.Platform.EOL,
             includeTerminator: Boolean = false,
             codec: Codec = getCodec()): Iterable[String] =
