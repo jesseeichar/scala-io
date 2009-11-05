@@ -22,55 +22,6 @@ import java.nio.channels.{
 }
 
 /**
- * Factory class/object for creating Resource objects
- *
- * @param T
- *          The type of object that the ManagedResource will wrap
- * @param R
- *          The type of ManagedResource that will be returned
- */
-protected[io] trait IoResourceFactory[I,R <: ManagedResource[I]] {
-  /**
-   * Create an InputStreamResource from a function that creates an inputStream
-   * <p>
-   * It is important to remember that if the resource is to be reusable the function should
-   * return a new instance each time
-   * </p>
-   * Discouraged code:
-   * <pre><code>
-   * val stream = new FileInputStream("filename")
-   * InputStreamResource(stream)
-   * </code></pre>
-   * This is discouraged because the resulting InputStreamResource can only be used once
-   * before the stream is finished.
-   * <p>
-   * The recommended Example:
-   * <pre><code>
-   * InputStreamResource(new FileInputStream("filename")
-   * </code></pre>
-   * Using this code snippet the resource can be reused several times because the resource
-   * has the ability to open a new stream.
-   */
-  def apply(opener: => I): R 
-}
-
-/**
- * Factory class/object for creating both a non-buffered and buffered instances of Resource objects
- * @param T
- *          The type of object that the ManagedResource will wrap
- * @param R
- *          The type of ManagedResource that will be returned
- */
-protected[io] trait BufferedIoResourceFactory[T,R <: ManagedResource[T]] {
-  /**
-   * Creates a buffered resource from the opener.
-   *
-   * @see IoResourceFactory#apply
-   */
-  def buffered(opener: => T): R
-} 
-
-/**
  * A Resource that can be used to do IO.  It wraps objects from the java.io package
  *
  * @param R
@@ -114,31 +65,37 @@ protected[io] trait IoResource[R <: Closeable] extends AbstractUntranslatedManag
 protected[io] trait BufferableResource[O <: Closeable,B,BufferedRepr <: ManagedResource[O]] 
 extends IoResource[O] {
   /**
-   * The factory for creating the BufferedVersion
-   */
-  protected val companion: BufferedIoResourceFactory[O,BufferedRepr]
-  /**
    * Create a {@link BufferedInputStreamResource} that will use the same opener
    * for creating {@link InputStream}s
    */
-  lazy val buffered: BufferedRepr = companion.buffered(open())
+  def buffered: BufferedRepr
 }
 
+object IoResource {
+  // InputStream factory methods
+  def inputStream(opener: => InputStream): InputStreamResource = new InputStreamResource(opener)
+  def bufferedInputStream(opener: => BufferedInputStream): BufferedInputStreamResource = new BufferedInputStreamResource(opener)
 
+  // OutputStream factory methods
+  def outputStream(opener: => OutputStream): OutputStreamResource = new OutputStreamResource(opener)
+  def bufferedOutputStream(opener: => BufferedOutputStream): BufferedOutputStreamResource = new BufferedOutputStreamResource(opener)
+
+  // Reader factory methods
+  def reader(opener: => Reader): ReaderResource = new ReaderResource(opener)
+  def bufferedReader(opener: => BufferedReader): BufferedReaderResource = new BufferedReaderResource(opener)
+
+  // Writer factory methods
+  def writer(opener: => Writer): WriterResource = new WriterResource(opener)
+  def bufferedWriter(opener: => BufferedWriter): BufferedWriterResource = new BufferedWriterResource(opener)
+
+  // Channel factory methods
+  def readableChannel(opener: => ReadableByteChannel): ReadableByteChannelResource = new ReadableByteChannelResource(opener)
+  def writableChannel(opener: => WritableByteChannel): WritableByteChannelResource = new WritableByteChannelResource(opener)
+  def byteChannel(opener: => ByteChannel): ByteChannelResource = new ByteChannelResource(opener)
+  def fileChannel(opener: => FileChannel): FileChannelResource = new FileChannelResource(opener)
+
+}
 /***************************** InputStreamResource ************************************/
-
-/**
- * Contains factory methods for creating InputStreamResources
- */
-object InputStreamResource 
-extends BufferedIoResourceFactory[InputStream, BufferedInputStreamResource] 
-with IoResourceFactory[InputStream, InputStreamResource]{
-  def apply(opener: => InputStream): InputStreamResource = new InputStreamResource(opener)
-  def buffered(opener: => InputStream): BufferedInputStreamResource = {
-    new BufferedInputStreamResource(new BufferedInputStream(opener))
-  }
-}
-
 /**
  * A ManagedResource for accessing and using InputStreams.
  *
@@ -147,12 +104,12 @@ with IoResourceFactory[InputStream, InputStreamResource]{
 class InputStreamResource(opener: => InputStream) 
 extends BufferableResource[InputStream, BufferedInputStream, BufferedInputStreamResource] {
   def open() = opener
-  val companion = InputStreamResource
+  val buffered = IoResource.bufferedInputStream(new BufferedInputStream(opener))
   def reader(implicit codec: Codec = Codec.default) = {
-    ReaderResource(new InputStreamReader(opener, codec.charSet))
+    IoResource.reader(new InputStreamReader(opener, codec.charSet))
   }
   lazy val channel: ReadableByteChannelResource = {
-    ReadableByteChannelResource(Channels.newChannel(open()))
+    IoResource.readableChannel(Channels.newChannel(open()))
   }
 }
 
@@ -165,22 +122,12 @@ class BufferedInputStreamResource(opener: => BufferedInputStream)
 extends IoResource[BufferedInputStream] {
   def open() = opener
   def reader(implicit codec:Codec = Codec.default) = {
-    ReaderResource.buffered(new InputStreamReader(opener, codec.charSet))
+    IoResource.reader(new InputStreamReader(opener, codec.charSet))
   }
 }
 
 
 /***************************** OutputStreamResource ************************************/
-
-/**
- * Contains factory methods for creating OutputStreamResources
- */
-object OutputStreamResource 
-extends BufferedIoResourceFactory[OutputStream, BufferedOutputStreamResource] 
-with IoResourceFactory[OutputStream, OutputStreamResource]{
-  def apply(opener: => OutputStream): OutputStreamResource = new OutputStreamResource(opener)
-  def buffered(opener: => OutputStream): BufferedOutputStreamResource = new BufferedOutputStreamResource(new BufferedOutputStream(opener))
-}
 
 /**
  * A ManagedResource for accessing and using OutputStreams.
@@ -190,11 +137,11 @@ with IoResourceFactory[OutputStream, OutputStreamResource]{
 class OutputStreamResource(opener: => OutputStream) 
 extends BufferableResource[OutputStream, BufferedOutputStream, BufferedOutputStreamResource] {
   def open() = opener
-  val companion = OutputStreamResource
+  val buffered = IoResource.bufferedOutputStream(new BufferedOutputStream(opener))
   def writer(implicit codec:Codec = 
-    Codec.default) = WriterResource(new OutputStreamWriter(opener, codec.charSet))
+    Codec.default) = IoResource.writer(new OutputStreamWriter(opener, codec.charSet))
   lazy val channel: WritableByteChannelResource = 
-    WritableByteChannelResource(Channels.newChannel(open()))
+    IoResource.writableChannel(Channels.newChannel(open()))
 }
 
 /**
@@ -211,15 +158,6 @@ extends IoResource[BufferedOutputStream] {
 /***************************** ReaderResource ************************************/
 
 /**
- * Contains factory methods for creating ReaderResources
- */
-object ReaderResource extends BufferedIoResourceFactory[Reader, BufferedReaderResource] 
-                      with IoResourceFactory[Reader, ReaderResource]{
-  def apply(opener: => Reader): ReaderResource = new ReaderResource(opener)
-  def buffered(opener: => Reader): BufferedReaderResource = new BufferedReaderResource(new BufferedReader(opener))
-}
-
-/**
  * A ManagedResource for accessing and using Readers.
  *
  * @see ManagedResource 
@@ -227,7 +165,7 @@ object ReaderResource extends BufferedIoResourceFactory[Reader, BufferedReaderRe
 class ReaderResource(opener: => Reader) 
 extends BufferableResource[Reader, BufferedReader, BufferedReaderResource] {
   def open() = opener
-  val companion = ReaderResource
+  val buffered = IoResource.bufferedReader(new BufferedReader(opener))
 }
 
 /**
@@ -241,17 +179,6 @@ class BufferedReaderResource(opener: => BufferedReader) extends IoResource[Buffe
 
 
 /***************************** WriterResource ************************************/
-
-/**
- * Contains factory methods for creating WriterResources
- */
-object WriterResource extends BufferedIoResourceFactory[Writer, BufferedWriterResource] 
-                      with IoResourceFactory[Writer, WriterResource]{
-  def apply(opener: => Writer): WriterResource = new WriterResource(opener)
-  def buffered(opener: => Writer): BufferedWriterResource = 
-    new BufferedWriterResource(new BufferedWriter(opener))
-}
-
 /**
  * A ManagedResource for accessing and using Writers.
  *
@@ -259,7 +186,7 @@ object WriterResource extends BufferedIoResourceFactory[Writer, BufferedWriterRe
  */
 class WriterResource(opener: => Writer) extends BufferableResource[Writer, BufferedWriter, BufferedWriterResource] {
   def open() = opener
-  val companion = WriterResource
+  val buffered = IoResource.bufferedWriter(new BufferedWriter(opener))
 }
 
 /**
@@ -273,14 +200,6 @@ class BufferedWriterResource(opener: => BufferedWriter) extends IoResource[Buffe
 
 
 /***************************** ByteChannelResource ************************************/
-
-/**
- * Contains factory methods for creating ByteChannelResources
- */
-object ByteChannelResource extends IoResourceFactory[ByteChannel, ByteChannelResource]{
-  def apply(opener: => ByteChannel): ByteChannelResource = new ByteChannelResource(opener)
-}
-
 /**
  * A ManagedResource for accessing and using ByteChannels.
  *
@@ -288,17 +207,12 @@ object ByteChannelResource extends IoResourceFactory[ByteChannel, ByteChannelRes
  */
 class ByteChannelResource(opener: => ByteChannel) extends IoResource[ByteChannel] {  
   def open() = opener
+  lazy val inputStream = IoResource.inputStream(Channels.newInputStream(opener))
+  lazy val outputStream = IoResource.outputStream(Channels.newOutputStream(opener))
 }
 
 
 /***************************** ReadableByteChannelResource ************************************/
-
-/**
- * Contains factory methods for creating ReadableByteChannelResources
- */
-object ReadableByteChannelResource extends IoResourceFactory[ReadableByteChannel, ReadableByteChannelResource]{
-  def apply(opener: => ReadableByteChannel): ReadableByteChannelResource = new ReadableByteChannelResource(opener)
-}
 
 /**
  * A ManagedResource for accessing and using ByteChannels.
@@ -307,17 +221,11 @@ object ReadableByteChannelResource extends IoResourceFactory[ReadableByteChannel
  */
 class ReadableByteChannelResource(opener: => ReadableByteChannel) extends IoResource[ReadableByteChannel] {  
   def open() = opener
+  lazy val inputStream = IoResource.inputStream(Channels.newInputStream(opener))
 }
 
 
 /***************************** WritableByteChannelResource ************************************/
-
-/**
- * Contains factory methods for creating WritableByteChannelResources
- */
-object WritableByteChannelResource extends IoResourceFactory[WritableByteChannel, WritableByteChannelResource]{
-  def apply(opener: => WritableByteChannel): WritableByteChannelResource = new WritableByteChannelResource(opener)
-}
 
 /**
  * A ManagedResource for accessing and using ByteChannels.
@@ -326,18 +234,11 @@ object WritableByteChannelResource extends IoResourceFactory[WritableByteChannel
  */
 class WritableByteChannelResource(opener: => WritableByteChannel) extends IoResource[WritableByteChannel] {  
   def open() = opener
+  lazy val outputStream = IoResource.outputStream(Channels.newOutputStream(opener))
 }
 
 
 /***************************** FileChannelResource ************************************/
-
-/**
- * Contains factory methods for creating FileChannelResources
- */
-object FileChannelResource extends IoResourceFactory[FileChannel, FileChannelResource]{
-  def apply(opener: => FileChannel): FileChannelResource = new FileChannelResource(opener)
-}
-
 /**
  * A ManagedResource for accessing and using ByteChannels.
  *
@@ -346,4 +247,3 @@ object FileChannelResource extends IoResourceFactory[FileChannel, FileChannelRes
 class FileChannelResource(opener: => FileChannel) extends IoResource[FileChannel] {  
   def open() = opener
 }
-

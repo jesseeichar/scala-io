@@ -645,7 +645,7 @@ object Samples {
   }
 
   { // perform an actions within a file lock
-    import scalax.io.{File, Path}                         
+    import scalax.io.{File, Path}
     val file: File =  Path ("file").file
 
     // By default the entire file is locked with exclusive access
@@ -669,7 +669,131 @@ object Samples {
 
 
   }
-  // TODO interop with java API
 
+// TODO resource examples without file
+// TODO Mention in writeBytes and patch that using an array is the most performant
+ // TODO Bytes and Chars objects with both inputStreams and channels apply methods
+ // TODO rename Bytes to ReadBytes
+ // TODO remove little factory objects for IoResource and have 1 IoResource factory object
+
+
+  { // demonstrate several ways to interoperate existing java APIs
+    import scalax.io.{File, Path}
+    import java.io._
+    val file: File =  Path ("file").file
+
+    // some APIs require a stream or channel. Using one of the io resources you can safely call the method and be guaranteed that the stream will be correctly closed and exceptions handled
+    // see the documentation in scala.resource.ManagedResource for details on all the options available
+    def javaApiEntryPoint(stream: InputStream) = {
+      // do something interesting
+      stream.read()
+    }
+
+    // here is the code for calling that method
+    file.inputStream.acquireFor (javaApiEntryPoint)
+
+    // other APIs use inversion of to obtain the io object.
+    // here is how to get a raw java OutputStream from a file
+    // and just for good measure it will be a BufferedOutputStream
+    // streams and writer both have buffered versions, similar to their java counterparts
+    val out: BufferedOutputStream = file.outputStream().buffered.open
+  }
+
+  { // several examples of obtaining IoResources
+    import scalax.io._
+    import StandardOpenOptions._
+    import java.nio.channels._
+    val file: File =  Path ("file").file
+
+    // get various input streams, readers an channels
+    val in: InputStreamResource = file.inputStream
+    val bufferedIn: BufferedInputStreamResource = in.buffered
+    val readableChannel: ReadableByteChannelResource = in.channel
+    val reader: ReaderResource = in.reader
+    val bufferedReader: BufferedReaderResource = reader.buffered
+
+    // get various output streams and channels
+    // get default OutputStream
+    // default will create fileif it does not exist and overwrite if it does
+    var out: OutputStreamResource = file.outputStream()
+    // create a appending stream
+    var out2: OutputStreamResource = file.outputStream (WRITE_APPEND:_*)
+    val bufferedOut: BufferedOutputStreamResource = out.buffered
+    val writableChannel: WritableByteChannelResource = out.channel
+    val writer: WriterResource = out.writer
+    val bufferedWriter: BufferedWriterResource = writer.buffered
+    // TODO copy examples from input section
+
+    // examples getting ByteChannels
+    // default is a read/write/create channel
+    val channel: ByteChannelResource = file.channel()
+    val channel2: ByteChannelResource = file.channel(READ,WRITE,APPEND)
+
+    // Not all filesystems can support FileChannels so the fileChannel method returns an option
+    file.fileChannel() foreach { fc => println("got a file channel") }
+  }
+
+  { // examples of patching a file
+    import scalax.io.{File, Path, Codec}
+    val file: File =  Path ("file").file
+
+    // write "people" at byte 6
+    // if the file is < 6 bytes an underflow exception is thrown
+    // if the patch extends past the end of the file then the file is extended
+    file.patchString(6, "people")
+    file.patchString(6, "people", Codec.UTF8)
+
+    // patch the file with a traversable of bytes
+    file.patch(6, "people".getBytes)
+  }
+
+  { // when several operation need to be performed on a file it is often more performant to perform them within an function passed to the open method
+    // this is because the underlying filesystem has options for optimizing the use of the file channels
+    // for example a file could be mapped into memory for the duration of the function and all operations could be performed using the same channel object
+    import scalax.io.{File, Path, Codec}
+    val file: File =  Path ("file").file
+
+    file.open{
+      val s = file.slurp
+      file.write(s.replaceAll("l", "L"))
+    }
+  }
+
+  { // Examples of non-file IO
+    import scalax.io._
+    import scala.resource.ManagedResource
+    import java.net.URL
+    import java.io.{
+      ObjectInputStream, InputStreamReader, ByteArrayOutputStream,
+      PrintStream, OutputStreamWriter
+    }
+    
+
+
+    // Note that in these example streams are closed automatically
+    // Also note that normally a constructed stream is not passed to factory method because most factory methods are by-name parameters (=> R)
+    // this means that the objects here can be reused without worrying about the stream being previously emptied
+    val url = new URL("www.scala-lang.org")
+    // A ReadChars (a trait of File) object can be created from a stream or channel
+    Chars.fromInputStream(url.openStream()).lines() foreach println _
+    Chars.fromReader(new InputStreamReader(url.openStream())).lines() foreach println _
+    // ReadBytes can also be constructed
+    val bytes: Iterable[Byte] = Bytes.fromInputStream(url.openStream()).bytes()
+    Path("scala.html").file writeBytes bytes
+
+    // WriteChars and WriteBytes can be used to simplify writing to OutputStreams
+    Chars.fromOutputStream(new ByteArrayOutputStream()).writeString("howdy")
+    Chars.fromWriter(new OutputStreamWriter(new ByteArrayOutputStream())).writeString("howdy")
+    Chars.fromOutputStream(new PrintStream(new ByteArrayOutputStream())).writeString("howdy")
+
+    // Channels and streams can also be wrapped in IoResource objects
+    val resource = IoResource.inputStream (url.openStream ())
+    resource.buffered acquireFor {in => println (in.read())}
+    // IoResources have convenience methods for converting between common types of resources
+    resource.reader.buffered  acquireFor {in => println (in.readLine())}
+
+    // a more general way of converting between resources is to use the ManagedResource API
+//    val objectIn: ManagedResource[ObjectInputStream] = resource map (s => new ObjectInputStream (s))
+  }
 
 }

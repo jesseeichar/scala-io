@@ -12,43 +12,42 @@ import java.io.{
   FileInputStream, FileOutputStream, BufferedReader, BufferedWriter, InputStreamReader, OutputStreamWriter,
   BufferedInputStream, BufferedOutputStream, IOException, File => JFile}
 import java.net.{ URI, URL }
-import collection.{Traversable}
+
+import scala.collection.{Traversable}
+
 import StandardOpenOptions._
 // TODO document NotFileException
 // TODO Document NoSuchFileException
 
-abstract class File(override val creationCodec:Codec = Codec.default) extends Chars {
-  def outputStream: OutputStreamResource
-  def channel: ByteChannelResource
-  def fileChannel: Option[FileChannelResource]
+abstract class File(override val creationCodec:Codec = Codec.default) extends ReadChars with ReadBytes with WriteChars with WriteBytes {
+  def inputStream: InputStreamResource
+  def outputStream(openOptions:OpenOptions*): OutputStreamResource
+  def channel(openOptions:OpenOptions*): ByteChannelResource
+  def fileChannel(openOptions:OpenOptions*): Option[FileChannelResource]
+
+  protected def obtainReadableByteChannel = channel()
+  protected def obtainWritableByteChannel = channel()
+
 
   def withCodec(codec:Codec): File
 
-  def writeBytes(bytes: Traversable[Byte],
-                 openOptions: Iterable[OpenOptions] = WRITE_TRUNCATE): Unit = {
-    // TODO
-    ()
-  }
-  def writeString(string: String,
-                  codec: Codec = creationCodec, 
-                  openOptions: Iterable[OpenOptions] = WRITE_TRUNCATE): Unit = {
-    // TODO
-    ()
-  }
-  def writeStrings(strings: Traversable[String],
-                   codec: Codec = creationCodec,
-                   openOptions: Iterable[OpenOptions] = WRITE_TRUNCATE): Unit = {
-    // TODO
-    ()
-  }
-  def writeLines(strings: Traversable[String],
-                 separator: String = compat.Platform.EOL,
-                 codec: Codec = creationCodec, 
-                 openOptions: Iterable[OpenOptions] = WRITE_TRUNCATE): Unit = {
-    // TODO
-    ()
-  }
+  def patchString(position: Long, 
+                  string: String,
+                  codec: Codec = getCodec(),
+                  openOptions: Iterable[OpenOptions] = List(WRITE)): Unit = {
+                    // TODO implement
+                    ()
+                  }
+  def patch(position: Long,
+            bytes: Traversable[Byte],
+            openOptions: Iterable[OpenOptions] = List(WRITE)): Unit = {
+                    // TODO implement
+                    ()
 
+            }
+            
+  def open[R](openOptions: Iterable[OpenOptions] = List(WRITE))(action: => R): Unit
+                    
   /**
    * Performs an operation on the file with a FileLock
    * <p>
