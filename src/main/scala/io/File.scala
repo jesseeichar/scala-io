@@ -8,14 +8,10 @@
 
 package scalax.io
 
-import java.io.{
-  FileInputStream, FileOutputStream, BufferedReader, BufferedWriter, InputStreamReader, OutputStreamWriter,
-  BufferedInputStream, BufferedOutputStream, IOException, File => JFile}
-import java.net.{ URI, URL }
-
-import scala.collection.{Traversable}
-
+import scala.collection.Traversable
 import StandardOpenOptions._
+import IoResource._
+
 // TODO document NotFileException
 // TODO Document NoSuchFileException
 
@@ -46,7 +42,7 @@ abstract class File(override val creationCodec:Codec = Codec.default) extends Re
 
             }
             
-  def open[R](openOptions: Iterable[OpenOptions] = List(WRITE))(action: => R): Unit
+  def open[R](openOptions: Iterable[OpenOptions] = List(WRITE))(action: => R): R
                     
   /**
    * Performs an operation on the file with a FileLock
@@ -73,6 +69,6 @@ abstract class File(override val creationCodec:Codec = Codec.default) extends Re
    * @return the result
    *          the result from the block or None if the filesystem does not support locking
    */
-  def withLock[R](start: Long = 0, size: Long = -1, shared: Boolean = false)(block: => R): Some[R]
+  def withLock[R](start: Long = 0, size: Long = -1, shared: Boolean = false)(block: => R): Option[R]
 }
 

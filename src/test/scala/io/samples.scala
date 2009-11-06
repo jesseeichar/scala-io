@@ -703,14 +703,21 @@ object Samples {
     import scalax.io._
     import StandardOpenOptions._
     import java.nio.channels._
+    import IoResource._
+    import java.io.{
+      InputStream, BufferedInputStream,
+      OutputStream, BufferedOutputStream,
+      Reader, BufferedReader,
+      Writer, BufferedWriter
+    }
     val file: File =  Path ("file").file
 
     // get various input streams, readers an channels
     val in: InputStreamResource = file.inputStream
-    val bufferedIn: BufferedInputStreamResource = in.buffered
-    val readableChannel: ReadableByteChannelResource = in.channel
-    val reader: ReaderResource = in.reader
-    val bufferedReader: BufferedReaderResource = reader.buffered
+    val bufferedIn: IoResource[BufferedInputStream] = in.buffered
+    val readableChannel: IoResource[ReadableByteChannel] = in.readableByteChannel
+    val reader: IoResource[Reader] with Bufferable[BufferedReader] = in.reader
+    val bufferedReader: IoResource[BufferedReader] = reader.buffered
 
     // get various output streams and channels
     // get default OutputStream
@@ -718,10 +725,10 @@ object Samples {
     var out: OutputStreamResource = file.outputStream()
     // create a appending stream
     var out2: OutputStreamResource = file.outputStream (WRITE_APPEND:_*)
-    val bufferedOut: BufferedOutputStreamResource = out.buffered
-    val writableChannel: WritableByteChannelResource = out.channel
-    val writer: WriterResource = out.writer
-    val bufferedWriter: BufferedWriterResource = writer.buffered
+    val bufferedOut: IoResource[BufferedOutputStream] = out.buffered
+    val writableChannel: IoResource[WritableByteChannel] = out.writableByteChannel
+    val writer: IoResource[Writer] with Bufferable[BufferedWriter] = out.writer
+    val bufferedWriter: IoResource[BufferedWriter] = writer.buffered
     // TODO copy examples from input section
 
     // examples getting ByteChannels
@@ -753,9 +760,9 @@ object Samples {
     import scalax.io.{File, Path, Codec}
     val file: File =  Path ("file").file
 
-    file.open{
-      val s = file.slurp
-      file.write(s.replaceAll("l", "L"))
+    file.open(){
+      val s = file.slurpString()
+      file.writeString(s.replaceAll("l", "L"))
     }
   }
 
@@ -787,7 +794,7 @@ object Samples {
     Chars.fromOutputStream(new PrintStream(new ByteArrayOutputStream())).writeString("howdy")
 
     // Channels and streams can also be wrapped in IoResource objects
-    val resource = IoResource.inputStream (url.openStream ())
+    val resource = IoResource.fromInputStream (url.openStream ())
     resource.buffered acquireFor {in => println (in.read())}
     // IoResources have convenience methods for converting between common types of resources
     resource.reader.buffered  acquireFor {in => println (in.readLine())}

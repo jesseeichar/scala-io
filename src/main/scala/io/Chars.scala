@@ -37,15 +37,15 @@ object Chars {
   def fromFileChannel(channel: => FileChannel): ReadChars with WriteChars with ReadBytes with WriteBytes =  new ReadWrite(channel)
 
   private class Read (channel: => ReadableByteChannel) extends ReadChars with ReadBytes{
-    protected lazy val obtainReadableByteChannel = IoResource.readableChannel(channel)
+    protected lazy val obtainReadableByteChannel = IoResource.fromReadableByteChannel (channel)
     def creationCodec: Codec = Codec.default
   }
   private class Write (channel: => WritableByteChannel) extends WriteChars with WriteBytes{
-    protected lazy val obtainWritableByteChannel = IoResource.writableChannel(channel)
+    protected lazy val obtainWritableByteChannel = IoResource.fromWritableByteChannel (channel)
     def creationCodec: Codec = Codec.default
   }
   private class ReadWrite (channel: => ByteChannel) extends ReadChars with WriteChars with ReadBytes with WriteBytes{
-    lazy val resource = IoResource.byteChannel(channel)
+    lazy val resource = IoResource.fromByteChannel (channel)
     protected lazy val obtainWritableByteChannel = resource
     protected lazy val obtainReadableByteChannel = resource
     def creationCodec: Codec = Codec.default
