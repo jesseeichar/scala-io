@@ -853,5 +853,5 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
            depth:Int = -1, 
            lock: Boolean = false) : DirectoryStream[Path]
 
-  def file(implicit codec: Codec = Codec.UTF8):File
+  def file(implicit codec: Codec = Codec.UTF8):FileOperations
 }

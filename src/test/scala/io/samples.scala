@@ -522,16 +522,16 @@ object Samples {
   }
 
   { // add all bytes in file together
-    import scalax.io.{File, Path}
-    val file:File = Path("file").file
+    import scalax.io.{FileOperations, Path}
+    val file:FileOperations = Path("file").file
     val sum: Int = file.bytesAsInts().reduceLeft (_ + _)
   }
 
   { // quickly an unsafely load file into memory
 
     // first load as strings and remove vowels
-    import scalax.io.{File, Path}
-    val file:File = Path("file").file
+    import scalax.io.{FileOperations, Path}
+    val file:FileOperations = Path("file").file
     val consonants = file.slurpString().filter (c => !("aeiou" contains c))
 
     // ok now as bytes
@@ -539,14 +539,14 @@ object Samples {
   }
 
   { // iterate over all character in file
-    import scalax.io.{File, Path}
-    val file: File =  Path("file").file
+    import scalax.io.{FileOperations, Path}
+    val file: FileOperations =  Path("file").file
     val doubled: Iterable[String] = for ( c <- file.chars() ) yield "" + c + c
   }
 
   { // read and print out all lines in a file
-    import scalax.io.{File, Path}
-    val file: File =  Path("file").file
+    import scalax.io.{FileOperations, Path}
+    val file: FileOperations =  Path("file").file
 
     // by default the line terminator is stripped and is
     // the default terminator for the platform
@@ -561,10 +561,10 @@ object Samples {
   }
 
   { // explicitly declare the codecs to use
-    import scalax.io.{File, Path, Codec}
+    import scalax.io.{FileOperations, Path, Codec}
     // create the file so that all operations on the file
     // will default to UTF8
-    val file: File =  Path("file").file (Codec.UTF8)
+    val file: FileOperations =  Path("file").file (Codec.UTF8)
 
     // the withCodec method is useful for switching
     // to another codec
@@ -573,7 +573,7 @@ object Samples {
     //       is only affects how strings are encoded
     //       when written and how they are decoded
     //       when read.
-    val file2: File = file.withCodec (Codec.ISO8859)
+    val file2: FileOperations = file.withCodec (Codec.ISO8859)
 
     // All methods for reading and writing characters/strings
     // have a codec parameter that used to explicitly declare the
@@ -587,10 +587,10 @@ object Samples {
 
   { // recommended way to read and write a file
     import scalax.io.{
-      File, Path, NotFileException,
+      FileOperations, Path, NotFileException,
       NoSuchFileException}
     import scala.util.control.Exception._
-    val file: File =  Path("file").file
+    val file: FileOperations =  Path("file").file
     val result:Option[String] = catching (classOf[NotFileException],
                                           classOf[NoSuchFileException]) opt { file.slurpString()}
 
@@ -602,10 +602,10 @@ object Samples {
 
   { // several examples of writing data
     import scalax.io.{
-      File, Path, Codec, StandardOpenOptions}
+      FileOperations, Path, Codec, StandardOpenOptions}
     import StandardOpenOptions._
 
-    val file: File =  Path ("file").file
+    val file: FileOperations =  Path ("file").file
 
     // write bytes
     // By default the file write will replace
@@ -645,8 +645,8 @@ object Samples {
   }
 
   { // perform an actions within a file lock
-    import scalax.io.{File, Path}
-    val file: File =  Path ("file").file
+    import scalax.io.{FileOperations, Path}
+    val file: FileOperations =  Path ("file").file
 
     // By default the entire file is locked with exclusive access
     val result: Option[String] = file.withLock() {
@@ -678,9 +678,9 @@ object Samples {
 
 
   { // demonstrate several ways to interoperate existing java APIs
-    import scalax.io.{File, Path}
+    import scalax.io.{FileOperations, Path}
     import java.io._
-    val file: File =  Path ("file").file
+    val file: FileOperations =  Path ("file").file
 
     // some APIs require a stream or channel. Using one of the io resources you can safely call the method and be guaranteed that the stream will be correctly closed and exceptions handled
     // see the documentation in scala.resource.ManagedResource for details on all the options available
@@ -710,7 +710,7 @@ object Samples {
       Reader, BufferedReader,
       Writer, BufferedWriter
     }
-    val file: File =  Path ("file").file
+    val file: FileOperations =  Path ("file").file
 
     // get various input streams, readers an channels
     val in: InputStreamResource = file.inputStream
@@ -741,8 +741,8 @@ object Samples {
   }
 
   { // examples of patching a file
-    import scalax.io.{File, Path, Codec}
-    val file: File =  Path ("file").file
+    import scalax.io.{FileOperations, Path, Codec}
+    val file: FileOperations =  Path ("file").file
 
     // write "people" at byte 6
     // if the file is < 6 bytes an underflow exception is thrown
@@ -757,13 +757,13 @@ object Samples {
   { // when several operation need to be performed on a file it is often more performant to perform them within an function passed to the open method
     // this is because the underlying filesystem has options for optimizing the use of the file channels
     // for example a file could be mapped into memory for the duration of the function and all operations could be performed using the same channel object
-    import scalax.io.{File, Path, Codec}
-    val file: File =  Path ("file").file
+    import scalax.io.{FileOperations, Path, Codec}
+    val file: FileOperations =  Path ("file").file
 
-    file.open(){
-      val s = file.slurpString()
+    file.open()( f => {
+      val s = f.slurpString()
       file.writeString(s.replaceAll("l", "L"))
-    }
+    })
   }
 
   { // Examples of non-file IO
@@ -781,7 +781,7 @@ object Samples {
     // Also note that normally a constructed stream is not passed to factory method because most factory methods are by-name parameters (=> R)
     // this means that the objects here can be reused without worrying about the stream being previously emptied
     val url = new URL("www.scala-lang.org")
-    // A ReadChars (a trait of File) object can be created from a stream or channel
+    // A ReadChars (a trait of FileOperations) object can be created from a stream or channel
     Chars.fromInputStream(url.openStream()).lines() foreach println _
     Chars.fromReader(new InputStreamReader(url.openStream())).lines() foreach println _
     // ReadBytes can also be constructed

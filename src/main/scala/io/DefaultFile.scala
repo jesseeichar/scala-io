@@ -21,7 +21,7 @@ import PartialFunction._
 import util.Random.nextASCIIString
 import java.lang.{ProcessBuilder}
 
-class DefaultFile(jfile:JFile, codec:Codec) extends File(codec) {
+class DefaultFile(jfile:JFile, codec:Codec) extends FileOperations(codec) {
 
   private implicit val defaultCodec = codec
 
@@ -30,9 +30,9 @@ class DefaultFile(jfile:JFile, codec:Codec) extends File(codec) {
   def channel( openOptions: OpenOptions*) = IoResource.fromByteChannel(new FileInputStream(jfile).getChannel)
   def fileChannel(openOptions: OpenOptions*) = Some(IoResource.fromFileChannel(new FileInputStream(jfile).getChannel))
   
-  def withCodec(codec:Codec): File = new DefaultFile(jfile, codec)
+  def withCodec(codec:Codec) = new DefaultFile(jfile, codec)
 
-  def open[R](openOptions: Iterable[OpenOptions] = List(WRITE))(action: => R): R = null.asInstanceOf[R] // TODO
+  def open[R](openOptions: Iterable[OpenOptions] = List(WRITE))(action: FileOperations => R): R = null.asInstanceOf[R] // TODO
 
   def withLock[R](start: Long = 0, size: Long = -1, shared: Boolean = false)(block: => R): Option[R] = {
     None
