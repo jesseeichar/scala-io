@@ -11,13 +11,13 @@ package scalax.io
 import scala.collection.Traversable
 import StandardOpenOptions._
 import IoResource._
-
-// TODO document NotFileException
-// TODO Document NoSuchFileException
 /**
- * An object for reading and writing files.  FileOperatipns provides access to Channels and streams as well as providing methods for performing simple tasks on files easily.
+ * An object for reading and writing files.
  * <p>
- * Obtaining a FileOperations from a object does not open a file execution of methods will open a file. Thus it is important to handle NotFileException and FileNotFoundException. Depending on the method one or both exceptions must be handled.
+ * Obtaining a FileOperations from a object does not open a
+ * file execution of methods will open a file. Thus it is important
+ * to handle NotFileException and FileNotFoundException. Depending
+ * on the method one or both exceptions must be handled.
  * </p><p>
  * Examples of exception handling:
  * <pre><code>
@@ -33,24 +33,157 @@ import IoResource._
  * import scala.util.control.Exceptions
  * val catcher = catching(classOf[NotFileException], classOf[FileNotFoundException])
  *
-  * catcher {
-  *   file.lines flatMap _.split(":")
-  * }
-  * </code></pre>
-  * The API into 3 main sections
-  * <ul>
-  * <li>Resources - methods for obtaining ManagedResources of input/output streams and byte/file channel. </li>
-  * <li>Direct Operations - methods for directly obtaining or writing the contents of the file.</li>
-  * <li>Batch Operations - methods for performing several actions on the file in sequence.
-  * <p>open() attempts to perform all actions using the open channel in order to improve the performance of the operations.
-  * </p><p>
-  * lock() performs all the actions using the same channel</li>
-  * </ul>
-  *
-  * @author Jesse Eichar
-  * @since 1.0
-  */
-abstract class FileOperations(override val creationCodec:Codec = Codec.default) extends ReadChars with ReadBytes with WriteChars with WriteBytes {
+ * catcher {
+ *   file.lines flatMap _.split(":")
+ * }
+ * </code></pre>
+ * 
+ * @param sourceCodec
+ *          the codec that the file was created with
+ *          Default is Codec.default
+ *
+ * @author Jesse Eichar
+ * @since 1.0
+ */
+abstract class BasicFileOperations(override val sourceCodec:Codec = Codec.default) extends ReadChars with ReadBytes with WriteChars with WriteBytes {
+  
+  /**
+   * Creates a new BasicFileOperations object with
+   * the new codec
+   */
+  def withCodec(codec:Codec): BasicFileOperations
+
+  /**
+   * Update a portion of the file content with string at
+   * the declared location.
+   * <p>
+   * If the position is beyond the end of the file a BufferUnderflow
+   * Exception will be thrown
+   * </p><p>
+   * If the position is within the file but the
+   * <code>position + codecConvertedString.getBytes.length</code>
+   * is beyond the end of the file the file will be enlarged so
+   * that the entire string can fit in the file
+   * </p><p>
+   * The write begins at the position indicated.  So if position = 0
+   * then the write will begin at the first byte of the file.
+   * </p>
+   * @param position
+   *          The start position of the update starting at 0.
+   *          The position must be within the file
+   * @param string
+   *          The string to write to the file starting at
+   *          position.
+   * @param openOptions
+   *          The options to use for opening the file
+   *          Default is WRITE
+   * @see patch(Long,Traversable[Byte],Iterable[OpenOptions])
+   */
+  def patchString(position: Long, 
+                  string: String,
+                  codec: Codec = getCodec(),
+                  openOptions: Iterable[OpenOptions] = List(WRITE)): Unit = {
+                    // TODO implement
+                    ()
+                  }
+
+  /**
+   * Update a portion of the file content with several bytes at
+   * the declared location.
+   * <p>
+   * <strong>Important:</strong> The use of an Array is highly recommended
+   * because normally arrays can be more efficiently written using
+   * the underlying APIs
+   * </p>
+   * <p>
+   * If the position is beyond the end of the file a BufferUnderflow
+   * Exception will be thrown
+   * </p><p>
+   * If the position is within the file but the
+   * <code>position + bytes.length</code>
+   * is beyond the end of the file the file will be enlarged so
+   * that the entire string can fit in the file
+   * </p><p>
+   * The write begins at the position indicated.  So if position = 0
+   * then the write will begin at the first byte of the file.
+   * </p>
+   * @param position
+   *          The start position of the update starting at 0.
+   *          The position must be within the file
+   * @param bytes
+   *          The bytes to write to the file starting at
+   *          position.
+   * @param openOptions
+   *          The options to use for opening the file
+   *          Default is WRITE
+   */
+  def patch(position: Long,
+            bytes: Traversable[Byte],
+            openOptions: Iterable[OpenOptions] = List(WRITE)): Unit = {
+     require(position >= 0, "The patch starting position must be within the existing file")
+                    // TODO implement
+                    ()
+
+            }
+}
+
+/**
+ * An object for reading and writing files.  FileOperations provides
+ * access to Channels and streams as well as providing methods for
+ * performing simple tasks on files easily.
+ * <p>
+ * Obtaining a FileOperations from a object does not open a
+ * file execution of methods will open a file. Thus it is important
+ * to handle NotFileException and FileNotFoundException. Depending
+ * on the method one or both exceptions must be handled.
+ * </p><p>
+ * Examples of exception handling:
+ * <pre><code>
+ *  try {
+ *   file.lines flatMap _.split(":")
+ *  } catch {
+ *   case FileNotFoundException => fail
+ *   case NotFileException => fail
+ *  }
+ * </code></pre>
+ * or using the Exceptions object
+ * <pre><code>
+ * import scala.util.control.Exceptions
+ * val catcher = catching(classOf[NotFileException], classOf[FileNotFoundException])
+ *
+ * catcher {
+ *   file.lines flatMap _.split(":")
+ * }
+ * </code></pre>
+ * 
+ * The API into 3 main sections
+ * </p>
+ * <ul>
+ * <li>Resources - methods for obtaining ManagedResources of input/output
+ *                 streams and byte/file channel. </li>
+ * <li>Direct Operations - methods for directly obtaining or writing
+ *                         the contents of the file.</li>
+ * <li>Batch Operations - methods for performing several actions
+ *                        on the file in sequence.
+ *                        <p>
+ *                        open() attempts to perform all actions using the
+ *                        open channel in order to improve the performance
+ *                        of the operations.
+ *                        </p><p>
+ *                        lock() performs all the actions using the same channel
+ *                        <p>
+ * </li>
+ * </ul>
+ *
+ * @param codec
+ *          the codec that the file was created with
+ *          Default is Codec.default
+ * 
+ * @author Jesse Eichar
+ * @since 1.0
+ */
+abstract class FileOperations(sourceCodec: Codec = Codec.default) extends BasicFileOperations(sourceCodec) {
+
   /**
    * Obtains an input stream resource for reading from the file
    */
@@ -73,50 +206,43 @@ abstract class FileOperations(override val creationCodec:Codec = Codec.default) 
   *  @param openOptions
   *           the options that define how the file is opened when using the stream
   *           Default is read/write/create/truncate
-  *
   */
   def channel(openOptions:OpenOptions*): ByteChannelResource
   /**
-   * Obtains a FileChannel for read/write access to the file.  Not all filesystems can support FileChannels therefore None will be returned if the filesystem does not support FileChannels.
+   * Obtains a FileChannel for read/write access to the file.  Not all filesystems
+   * can support FileChannels therefore None will be returned if the filesystem
+   * does not support FileChannels.
    *
   * All {@link StandardOpenOptions} can be used
   *
-  *  @param openOptions
-  *           the options that define how the file is opened when using the stream
-  *           Default is read/write/create/truncate
+  * @param openOptions
+  *          the options that define how the file is opened when using the stream
+  *          Default is read/write/create/truncate
   */
   def fileChannel(openOptions:OpenOptions*): Option[FileChannelResource]
 
-  protected def obtainReadableByteChannel = channel()
-  protected def obtainWritableByteChannel = channel()
-
-
   def withCodec(codec:Codec): FileOperations
 
-  def patchString(position: Long, 
-                  string: String,
-                  codec: Codec = getCodec(),
-                  openOptions: Iterable[OpenOptions] = List(WRITE)): Unit = {
-                    // TODO implement
-                    ()
-                  }
-  def patch(position: Long,
-            bytes: Traversable[Byte],
-            openOptions: Iterable[OpenOptions] = List(WRITE)): Unit = {
-                    // TODO implement
-                    ()
-
-            }
-
   /**
-   * Runs several operations as efficiently as possible. If the filesystem permits random access then the same channel will be used to perform all operations.
+   * Runs several operations as efficiently as possible. If the filesystem
+   * permits random access then the same channel will be used to perform all operations.
    * <p>
-   * Note: only the direct file operations (bytes,lines,write,patch etc...) can be used and expected to use the same resource. The resource methods all created new streams.
+   * Note: only the direct file operations (bytes,lines,write,patch etc...)
+   * can be used and expected to use the same resource. The resource methods
+   * all created new streams.
    * </p><p>
-   * Note: not all file systems support this, if not then at worst the performance is the same as if they where performed outside an open block
+   * Note: not all file systems support this, if not then at worst the performance
+   * is the same as if they where performed outside an open block
    * </p>
+   *
+   * @param openOptions
+   *          The options that define how the file is opened for the duration of the
+   *          operation
+   *          Default is WRITE/CREATE
+   * @param action
+   *          The function that will be executed within the block
    */
-  def open[R](openOptions: Iterable[OpenOptions] = List(WRITE))(action: FileOperations => R): R
+  def open[R](openOptions: Iterable[OpenOptions] = List(WRITE, CREATE))(action: BasicFileOperations => R): R
                     
   /**
    * Performs an operation on the file with a FileLock
@@ -144,5 +270,11 @@ abstract class FileOperations(override val creationCodec:Codec = Codec.default) 
    *          the result from the block or None if the filesystem does not support locking
    */
   def withLock[R](start: Long = 0, size: Long = -1, shared: Boolean = false)(block: => R): Option[R]
+
+  // API ends here.
+  protected def obtainReadableByteChannel = channel()
+  protected def obtainWritableByteChannel = channel()
+
+
 }
 

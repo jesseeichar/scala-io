@@ -32,7 +32,7 @@ class DefaultFile(jfile:JFile, codec:Codec) extends FileOperations(codec) {
   
   def withCodec(codec:Codec) = new DefaultFile(jfile, codec)
 
-  def open[R](openOptions: Iterable[OpenOptions] = List(WRITE))(action: FileOperations => R): R = null.asInstanceOf[R] // TODO
+  def open[R](openOptions: Iterable[OpenOptions] = List(WRITE))(action: BasicFileOperations => R): R = null.asInstanceOf[R] // TODO
 
   def withLock[R](start: Long = 0, size: Long = -1, shared: Boolean = false)(block: => R): Option[R] = {
     None

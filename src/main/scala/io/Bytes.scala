@@ -25,24 +25,78 @@ import java.net.{ URI, URL }
 import collection.mutable.ArrayBuffer
 import Path.fail
 
+/**
+ * Factory for creating {@link ReadBytes} and {@link WriteBytes} from
+ * streams and channels.
+ * <p>
+ * Note: It is highly recommended to pass the stream/channel creation code to the factory method
+ * so that the Read/WriteBytes object can be reused.  For example:
+ * <pre><code>
+ * val url = new URL("www.scala-lang.org")
+ * Bytes.fromInputStream(url.openStream)
+ * </code></pre>
+ * is preferable to
+ * <pre><code>
+ * val stream = new URL("www.scala-lang.org")
+ * Bytes.fromInputStream(stream)
+ * </code></pre>
+ * The ReadBytes obtained from latter example can only be
+ * used once before the stream is used.  But the former
+ * can be re-used because the parameter is the function required
+ * to create the input stream
+ */
 object Bytes {
-  def fromInputStream(inputStream: => InputStream): ReadBytes = fromReadableByteChannel(Channels.newChannel(inputStream)) 
-  def fromReadableByteChannel(channel: => ReadableByteChannel): ReadBytes =  new Read(channel)
+  /**
+   * Create a ReadBytes from an {@link InputStream}
+   *
+   * @param creator
+   *          the function used to create an {@link InputStream}
+   */
+  def fromInputStream(creator: => InputStream): ReadBytes = fromReadableByteChannel(Channels.newChannel(creator)) 
+  /**
+   * Create a ReadBytes from an {@link ReadableByteChannel}
+   *
+   * @param creator
+   *          the function used to create an {@link ReadableByteChannel}
+   */
+  def fromReadableByteChannel(creator: => ReadableByteChannel): ReadBytes =  new Read(creator)
+  /**
+   * Create a ReadBytes from an {@link OutputStream}
+   *
+   * @param creator
+   *          the function used to create an {@link OutputStream}
+   */
+  def fromOutputStream(creator: => OutputStream): WriteBytes = fromWritableByteChannel(Channels.newChannel(creator)) 
+  /**
+   * Create a WriteBytes from an {@link WritableByteChannel}
+   *
+   * @param creator
+   *          the function used to create an {@link WritableByteChannel}
+   */
+  def fromWritableByteChannel(creator: => WritableByteChannel): WriteBytes =  new Write(creator)
+  /**
+   * Create a ReadBytes with WriteBytes from an {@link ByteChannel}
+   *
+   * @param creator
+   *          the function used to create an {@link ByteChannel}
+   */
+  def fromByteChannel(creator: => ByteChannel): ReadBytes with WriteBytes =  new ReadWrite(creator)
+  /**
+   * Create a ReadBytes with WriteBytes from an {@link FileChannel}
+   *
+   * @param creator
+   *          the function used to create an {@link FileChannel}
+   */
+  def fromFileChannel(creator: => FileChannel): ReadBytes with WriteBytes =  new ReadWrite(creator)
 
-  def fromOutputStream(outputStream: => OutputStream): WriteBytes = fromWritableByteChannel(Channels.newChannel(outputStream)) 
-  def fromWritableByteChannel(channel: => WritableByteChannel): WriteBytes =  new Write(channel)
-
-  def fromByteChannel(channel: => ByteChannel): ReadBytes with WriteBytes =  new ReadWrite(channel)
-  def fromFileChannel(channel: => FileChannel): ReadBytes with WriteBytes =  new ReadWrite(channel)
-
-  private class Read (channel: => ReadableByteChannel) extends ReadBytes {
-    protected lazy val obtainReadableByteChannel = IoResource.fromReadableByteChannel(channel)
+  private class Read (creator: => ReadableByteChannel) extends ReadBytes {
+    protected lazy val obtainReadableByteChannel = IoResource.fromReadableByteChannel(creator)
   }
-  private class Write (channel: => WritableByteChannel) extends WriteBytes {
-    protected lazy val obtainWritableByteChannel = IoResource.fromWritableByteChannel(channel)
+  private class Write (creator: => WritableByteChannel) extends WriteBytes {
+    protected lazy val obtainWritableByteChannel = IoResource.fromWritableByteChannel(creator)
   }
-  private class ReadWrite (channel: => ByteChannel) extends ReadBytes with WriteBytes {
-    lazy val resource = IoResource.fromByteChannel(channel)
+  private class ReadWrite (creator: => ByteChannel) extends ReadBytes with WriteBytes {
+    lazy val resource = IoResource.fromByteChannel(creator)
     protected lazy val obtainWritableByteChannel = resource
     protected lazy val obtainReadableByteChannel = resource
   }
@@ -140,6 +194,24 @@ trait WriteBytes {
    */
   protected def obtainWritableByteChannel: ManagedResource[WritableByteChannel]
 
+  /**
+   * Write bytes to the file
+   * 
+   * <strong>Important:</strong> The use of an Array is highly recommended
+   * because normally arrays can be more efficiently written using
+   * the underlying APIs
+   * </p><p>
+   * The bytes are either appended to the file or replace the contents of the
+   * file depending on the openOptions. By default the conents of the file
+   * will be replaced.
+   * </p>
+   * 
+   * @param bytes
+   *          The bytes to write to the file
+   * @param openOptions
+   *          The options declaring how the file will be opened
+   *          Default is WRITE/CREATE/TRUNCATE
+   */
   def writeBytes(bytes: Traversable[Byte],
                  openOptions: Iterable[OpenOptions] = WRITE_TRUNCATE): Unit = {
     // TODO

@@ -24,6 +24,26 @@ import java.net.{ URI, URL }
 import collection.mutable.ArrayBuffer
 import Path.fail
 
+/**
+ * Factory for creating {@link ReadChars} and {@link WriteChars} from
+ * streams, readers, writers and channels.
+ * <p>
+ * Note: It is highly recommended to pass the stream/channel creation code to the factory method
+ * so that the Read/WriteChars object can be reused.  For example:
+ * <pre><code>
+ * val url = new URL("www.scala-lang.org")
+ * Chars.fromInputStream(url.openStream)
+ * </code></pre>
+ * is preferable to
+ * <pre><code>
+ * val stream = new URL("www.scala-lang.org")
+ * Chars.fromInputStream(stream)
+ * </code></pre>
+ * The ReadChars obtained from latter example can only be
+ * used once before the stream is used.  But the former
+ * can be re-used because the parameter is the function required
+ * to create the input stream
+ */
 object Chars {
   def fromInputStream(inputStream: => InputStream): ReadChars with ReadBytes = fromReadableByteChannel(Channels.newChannel(inputStream)) 
   def fromReadableByteChannel(channel: => ReadableByteChannel): ReadChars with ReadBytes =  new Read(channel)
@@ -38,23 +58,27 @@ object Chars {
 
   private class Read (channel: => ReadableByteChannel) extends ReadChars with ReadBytes{
     protected lazy val obtainReadableByteChannel = IoResource.fromReadableByteChannel (channel)
-    def creationCodec: Codec = Codec.default
+    def sourceCodec: Codec = Codec.default
   }
   private class Write (channel: => WritableByteChannel) extends WriteChars with WriteBytes{
     protected lazy val obtainWritableByteChannel = IoResource.fromWritableByteChannel (channel)
-    def creationCodec: Codec = Codec.default
+    def sourceCodec: Codec = Codec.default
   }
   private class ReadWrite (channel: => ByteChannel) extends ReadChars with WriteChars with ReadBytes with WriteBytes{
     lazy val resource = IoResource.fromByteChannel (channel)
     protected lazy val obtainWritableByteChannel = resource
     protected lazy val obtainReadableByteChannel = resource
-    def creationCodec: Codec = Codec.default
+    def sourceCodec: Codec = Codec.default
   }
 }
  
 
+/**
+ * For objects which can be viewed as Chars.  The abstract sourceCodec
+ * can safely be defined as null and will subsequently be ignored.
+ */
 trait Chars {
-  def creationCodec: Codec
+  protected def sourceCodec: Codec
   private def failNoCodec() = fail("This method requires a Codec to be chosen explicitly.")
 
   /**
@@ -71,14 +95,10 @@ trait Chars {
    */
   def getCodec(givenCodec: Codec = null, allowDefault: Boolean = true) =
     if (givenCodec != null) givenCodec
-    else if (creationCodec != null) creationCodec
+    else if (sourceCodec != null) sourceCodec
     else if (allowDefault) Codec.default
     else failNoCodec()
 }
-/**
- * For objects which can be viewed as Chars.  The abstract creationCodec
- * can safely be defined as null and will subsequently be ignored.
- */
 trait ReadChars extends Chars {
 
   def bytes(): Iterable[Byte]
