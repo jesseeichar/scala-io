@@ -6,8 +6,9 @@
 **                          |/                                          **
 \*                                                                      */
 
-package scalax.io
+package scalax.io.resource
 
+import scalax.io._
 import scala.resource.{
   ManagedResource, AbstractUntranslatedManagedResource
 }
@@ -27,7 +28,7 @@ import java.nio.channels.{
  * @param R
  *          The type of the resource that will be managed by the ManagedResource
  */
-trait IoResource[R <: Closeable] extends AbstractUntranslatedManagedResource[R] {
+trait IoResource[R <: {def close()}] extends AbstractUntranslatedManagedResource[R] {
   /**
    * Creates a new InputStream (provided the code block used to create the resource is
    * re-usable).  This method should only be used with care in cases when Automatic
@@ -59,7 +60,7 @@ trait IoResource[R <: Closeable] extends AbstractUntranslatedManagedResource[R] 
  * @param B
  *          they type of the Buffered object
  */
-trait Bufferable[B] {
+trait Bufferable[B <: {def close()}] {
   /**
    * Obtain the buffered version of this object.
    * 
@@ -77,27 +78,102 @@ trait Bufferable[B] {
  * @param B
  *          the type of buffered input stream that can also be created
  */
-trait InputStreamable[S <: InputStream, B] {
+trait InputStreamable[S <: InputStream, B <: BufferedInputStream] {
+  /**
+   * Obtain the InputStream IoResource version of this object.
+   * 
+   * @return the InputStream IoResource version of this object.
+   */
   def inputStream: IoResource[S] with Bufferable[B]
 }
 
-trait OutputStreamable[S <: OutputStream, B] {
+/**
+ * An object that can be converted to an output stream. For example
+ * a WriteableByteChannel
+ * 
+ * @param S
+ *          the type of OutputStream that is created
+ * @param B
+ *          the type of buffered output stream that can also be created
+ */
+trait OutputStreamable[S <: OutputStream, B <: BufferedOutputStream] {
+  /**
+   * Obtain the InputStream IoResource version of this object.
+   * 
+   * @return the InputStream IoResource version of this object.
+   */
   def outputStream: IoResource[S] with Bufferable[B]
 }
 
-trait Readable[S <: Reader, B] {
+/**
+ * An object that can be converted to a Reader. For example
+ * an InputStream
+ * 
+ * @param S
+ *          the type of Reader that is created
+ * @param B
+ *          the type of BufferedReader that can also be created
+ */
+trait Readable[S <: Reader, B <: BufferedReader] {
+  /**
+   * Obtain the Reader IoResource version of this object.
+   * 
+   * @return the Reader IoResource version of this object.
+   */
   def reader(implicit codec: Codec = Codec.default): IoResource[S] with Bufferable[B]
 }
 
-trait Writable[S <: Writer, B] {
+/**
+ * An object that can be converted to a Writer. For example
+ * an OutputStream
+ * 
+ * @param S
+ *          the type of Writer that is created
+ * @param B
+ *          the type of BufferedWriter that can also be created
+ */
+trait Writable[S <: Writer, B <: BufferedWriter] {
+  /**
+   * Obtain the Writer IoResource version of this object.
+   * 
+   * @return the Writer IoResource version of this object.
+   */
   def writer(implicit codec: Codec = Codec.default): IoResource[S] with Bufferable[B]
 }
 
+/**
+ * An object that can be converted to a WritableByteChannel. For example
+ * an OutputStream
+ * 
+ * @param S
+ *          the type of WritableByteChannel that is created
+ * @param B
+ *          the type of BufferedWritableByteChannel that can also be created
+ */
 trait WritableByteChannelable[S <: WritableByteChannel] {
+  /**
+   * Obtain the Writer IoResource version of this object.
+   * 
+   * @return the Writer IoResource version of this object.
+   */
   def writableByteChannel: IoResource[S]
 }
 
+/**
+ * An object that can be converted to a ReadableByteChannel. For example
+ * an InputStream
+ * 
+ * @param S
+ *          the type of ReadableByteChannel that is created
+ * @param B
+ *          the type of BufferedReadableByteChannel that can also be created
+ */
 trait ReadableByteChannelable[S <: ReadableByteChannel] {
+  /**
+   * Obtain the Reader IoResource version of this object.
+   * 
+   * @return the Reader IoResource version of this object.
+   */
   def readableByteChannel: IoResource[S]
 }
 

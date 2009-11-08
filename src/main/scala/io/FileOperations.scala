@@ -8,6 +8,7 @@
 
 package scalax.io
 
+import scalax.io.resource._
 import scala.collection.Traversable
 import StandardOpenOptions._
 import IoResource._

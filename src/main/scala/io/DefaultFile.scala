@@ -8,13 +8,14 @@
 
 package scalax.io
 
+import scalax.io.resource._
 import java.io.{ 
   FileInputStream, FileOutputStream, File => JFile
 }
 import java.net.{ URI, URL }
 
 
-import resource.ManagedResource
+import scala.resource.ManagedResource
 import StandardOpenOptions._
 import collection.{Traversable }
 import PartialFunction._

@@ -707,7 +707,10 @@ object Samples {
     import scalax.io._
     import StandardOpenOptions._
     import java.nio.channels._
-    import IoResource._
+    import scalax.io.resource.{
+      IoResource, Bufferable
+    }
+    import scalax.io.resource.IoResource._
     import java.io.{
       InputStream, BufferedInputStream,
       OutputStream, BufferedOutputStream,
@@ -772,6 +775,7 @@ object Samples {
 
   { // Examples of non-file IO
     import scalax.io._
+    import scalax.io.resource.IoResource
     import scala.resource.ManagedResource
     import java.net.URL
     import java.io.{
