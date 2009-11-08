@@ -9,6 +9,8 @@
 package scalax.io
 
 import scala.resource.ManagedResource
+import scalax.io.attributes.FileAttribute
+
 import java.io.{ 
   FileInputStream, FileOutputStream, BufferedReader, BufferedWriter, InputStreamReader, OutputStreamWriter, 
   BufferedInputStream, BufferedOutputStream, IOException, File => JFile}
@@ -77,13 +79,14 @@ class DefaultPath private[io] (val jfile: JFile, fileSystem: FileSystem) extends
       case (false, None) => fail("Parent directory does not exist")
     }
   }
-  def createFile(createParents: Boolean = true, failIfExists: Boolean = true /*, attributes:List[FileAttributes[_]]=Nil TODO*/): Path = {
+  def createFile(createParents: Boolean = true, failIfExists: Boolean = true , attributes:Iterable[FileAttribute[_]]=Nil): Path = {
     createContainingDir (createParents)
     val res = jfile.createNewFile()
     if (!res && failIfExists && exists) fail("File '%s' already exists." format name)
     else this
   }
-  def createDirectory(createParents: Boolean = true, failIfExists: Boolean = true /*, attributes:List[FileAttributes[_]]=Nil TODO*/): Path = {
+  def createDirectory(createParents: Boolean = true, failIfExists: Boolean = true, attributes:Iterable[FileAttribute[_]]=Nil) = {
+
     createContainingDir (createParents)
 
     val res = jfile.mkdir()
@@ -158,17 +161,11 @@ class DefaultPath private[io] (val jfile: JFile, fileSystem: FileSystem) extends
   }  
   override def hashCode() = path.hashCode()
 
-  //Directory accessors
+  def directoryStream(filter:Option[PathMatcher] = None) = null // TODO
 
   def tree(filter:(Path,Path)=>Option[PathMatcher] = (origin,relativePath) => None, 
-           depth:Int = -1, 
-           lock: Boolean = false) : DirectoryStream[Path] = {
-    null // TODO
-  }
+           depth:Int = -1) = null // TODO
 
-  def directoryStream(filter:Option[PathMatcher] = None, 
-                      lock: Boolean = false) : DirectoryStream[Path] =tree((o,p) => filter, 1, lock)
-
-  def file(implicit codec:Codec = Codec.UTF8) = new DefaultFile(jfile,codec)
+  def fileOperations(implicit codec:Codec = Codec.UTF8) = new DefaultFile(jfile,codec)
 
 }

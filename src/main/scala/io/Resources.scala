@@ -52,23 +52,44 @@ trait IoResource[R <: Closeable] extends AbstractUntranslatedManagedResource[R] 
   protected final def unsafeClose(handle : R) = try{ handle.close } catch { case _ => () }
 }
 
-trait Bufferable[B <: Closeable] {
+/**
+ * An Object that has an associates Buffered object. For example InputStream
+ * has BufferedInputStream
+ * 
+ * @param B
+ *          they type of the Buffered object
+ */
+trait Bufferable[B] {
+  /**
+   * Obtain the buffered version of this object.
+   * 
+   * @return the buffered version of this object
+   */
   def buffered: IoResource[B]
 }
 
-trait InputStreamable[S <: InputStream, B <: Closeable] {
+/**
+ * An object that can be converted to an input stream. For example
+ * a ReadableByteChannel
+ * 
+ * @param S
+ *          the type of InputStream that is created
+ * @param B
+ *          the type of buffered input stream that can also be created
+ */
+trait InputStreamable[S <: InputStream, B] {
   def inputStream: IoResource[S] with Bufferable[B]
 }
 
-trait OutputStreamable[S <: OutputStream, B <: Closeable] {
+trait OutputStreamable[S <: OutputStream, B] {
   def outputStream: IoResource[S] with Bufferable[B]
 }
 
-trait Readable[S <: Reader, B <: Closeable] {
+trait Readable[S <: Reader, B] {
   def reader(implicit codec: Codec = Codec.default): IoResource[S] with Bufferable[B]
 }
 
-trait Writable[S <: Writer, B <: Closeable] {
+trait Writable[S <: Writer, B] {
   def writer(implicit codec: Codec = Codec.default): IoResource[S] with Bufferable[B]
 }
 
@@ -80,7 +101,20 @@ trait ReadableByteChannelable[S <: ReadableByteChannel] {
   def readableByteChannel: IoResource[S]
 }
 
+/**
+ * defined several factory methods for creating instances of IoResource.
+ * It also defines several useful IoResource types. For example
+ * ResourceType which is a IoResource[Reader] with Bufferable[BufferedReader].
+ * All the types that can be created with the factory methods can be created.
+ * <p>
+ * Example usage:
+ * <pre><code>
+ * val URL = new URL("http://scala-lang.org")
+ * val resource: IoResource[InputStream] = IoResource.fromInputStream(url.openStream).buffered
+ * </code></pre>
+*/
 object IoResource {
+  
   type InputStreamResource = IoResource[InputStream] with Bufferable[BufferedInputStream]
       with Readable[Reader, BufferedReader] with ReadableByteChannelable[ReadableByteChannel]
   type BufferedInputStreamResource = IoResource[BufferedInputStream]
@@ -105,6 +139,26 @@ object IoResource {
       with OutputStreamable[OutputStream, BufferedOutputStream] with Writable[Writer, BufferedWriter]
 
   // InputStream factory methods
+  /**
+   * create an IoResource instance with several conversion traits from an InputStream.
+   * <p>
+   * The opener param is a by-name argument an is use to open a new stream.
+   * In other words it is important to try and pass in a function for opening
+   * the stream rather than the already openned stream so that the returned
+   * IoResource can be used multiple time
+   * </p>
+   * 
+   * @param opener
+   *          the function for opening a new InoutStream
+   * @param codec
+   *          the codec representing the encoding of the underlying data
+   *          this is only important if the stream may be converted to a
+   *          IoResource[Reader]
+   *          Default is Codec.default
+   *
+   * @return
+   *          an InputStreamResource
+   */
   def fromInputStream(opener: => InputStream)(implicit codec: Codec = Codec.default): InputStreamResource = new InputStreamIoResource(opener,codec)
   def fromBufferedInputStream(opener: => BufferedInputStream)(implicit codec: Codec = Codec.default): BufferedInputStreamResource  = new BufferedInputStreamIoResource(opener,codec)
 

@@ -43,6 +43,15 @@ import Path.fail
  * used once before the stream is used.  But the former
  * can be re-used because the parameter is the function required
  * to create the input stream
+ *
+ * @author Jesse Eichar
+ * @since 1.0
+ * 
+ * @see Bytes
+ * @see ReadBytes
+ * @see WriteBytes
+ * @see ReadChars
+ * @see WriteChars
  */
 object Chars {
   def fromInputStream(inputStream: => InputStream): ReadChars with ReadBytes = fromReadableByteChannel(Channels.newChannel(inputStream)) 
@@ -76,8 +85,20 @@ object Chars {
 /**
  * For objects which can be viewed as Chars.  The abstract sourceCodec
  * can safely be defined as null and will subsequently be ignored.
+ *
+ * @author Jesse Eichar
+ * @since 1.0
+ * 
+ * @see Bytes
+ * @see ReadBytes
+ * @see WriteBytes
+ * @see ReadChars
+ * @see WriteChars
  */
 trait Chars {
+  /**
+   * The codec representing encoding of the underlying data
+   */
   protected def sourceCodec: Codec
   private def failNoCodec() = fail("This method requires a Codec to be chosen explicitly.")
 
@@ -99,12 +120,81 @@ trait Chars {
     else if (allowDefault) Codec.default
     else failNoCodec()
 }
+
+/**
+ * An trait for objects that viewed as a sequence of Chars. For example InputStream,
+ * Reader and ReadableByteChannel could all be a ReadChars object (or be converted
+ * to a ReadChars object).
+ * <p>
+ * Note: All collections returned are non-strict collections and each
+ * invocation of a method will typically open a new stream or channel.
+ * That behaviour can be overrided by the implementation but
+ * it is the default behaviour.
+ * </p>
+ *
+ * @author Jesse Eichar
+ * @since 1.0
+ * 
+ * @see Bytes
+ * @see ReadBytes
+ * @see WriteBytes
+ * @see Chars
+ * @see WriteChars
+ */
 trait ReadChars extends Chars {
 
-  def bytes(): Iterable[Byte]
+  /**
+   * The characters in the object.
+   * <p>
+   * If the codec is not the same as the source codec (the codec of
+   * the underlying data) then the characters will converted to the
+   * desired codec.
+   * </p><p>
+   * In some object the bytes of underlying iterable can be cast to a Seq
+   * and elements can be randomly accessed. Random access must be used
+   * carefully as each access will open a new stream unless that behavior
+   * is modified by the implementation.
+   * </p><p>
+   * For example on some filesystems using random access within a
+   * {@link FileOperations#open} will perform all accesses using
+   * the same Channel improving the performance.
+   * </p>
+   * 
+   * @param codec
+   *          The codec representing the desired encoding of the characters
+   * @return
+   *          an iterable of all the characters
+   */
   def chars(codec: Codec = getCodec()): Iterable[Char] = null // TODO bytesAsInts() map (c => (codec wrap c).toChar)
   /**
-   * terminator is 1-2 characters
+   * Obtain an non-strict iterable for iterating through the lines in the object
+   * <p>
+   * If the codec is not the same as the source codec (the codec of
+   * the underlying data) then the characters will converted to the
+   * desired codec.
+   * </p><p>
+   * In some object the bytes of underlying iterable can be cast to a Seq
+   * and elements can be randomly accessed. Random access must be used
+   * carefully as each access will open a new stream unless that behavior
+   * is modified by the implementation.
+   * </p><p>
+   * For example on some filesystems using random access within a
+   * {@link FileOperations#open} will perform all accesses using
+   * the same Channel improving the performance.
+   * </p>       
+   *
+   * @param codec
+   *          The codec representing the desired encoding of the characters
+   * @param terminator
+   *          The string to use as a line terminator. The string
+   *          length is restricted to 1 or 2 characters
+   *          Default is platform specific EOL
+   * @param includeTerminator
+   *          if true then the line will end with the line terminator
+   *          Default is false
+   *
+   * @return
+   *          a non-strict iterable for iterating through all the lines
    */
   def lines(terminator: String = compat.Platform.EOL,
             includeTerminator: Boolean = false,
@@ -116,7 +206,15 @@ trait ReadChars extends Chars {
                 }
               }
   /**
-   * Convenience function to import entire file into a String.
+   * Loads all the characters into memory. There is no protection against
+   * loading very large files/amounts of data.
+   * <p>
+   * If the codec is not the same as the source codec (the codec of
+   * the underlying data) then the characters will converted to the
+   * desired codec.
+   * </p>
+   * @param codec
+   *          The codec representing the desired encoding of the characters  
    */
   def slurpString(codec: Codec = getCodec()) = chars(codec).mkString
 
@@ -159,24 +257,98 @@ trait ReadChars extends Chars {
   }
 }
 
+/**
+ * A trait for objects that have bytes written to them. For example an
+ * OutputStream and File can both be WriteChars (or be converted to one).
+ * Depending on the implementation and the underlying object the
+ * {@link OpenOptions} may be restricted to a subset of the
+ * {@link StandardOpenOptions}.
+ * <p>
+ * Note: Each invocation of a method will typically open a new stream or
+ * channel.  That behaviour can be overrided by the implementation but
+ * it is the default behaviour.
+ * </p>
+ *
+ * @author Jesse Eichar
+ * @since 1.0
+ * 
+ * @see Bytes
+ * @see ReadBytes
+ * @see WriteBytes
+ * @see Chars
+ * @see ReadChars
+ */
 trait WriteChars extends Chars {
 
+  /**
+   * Writes a string. The open options that can be used are dependent
+   * on the implementation and implementors should clearly document
+   * which option are permitted.
+   * 
+   * @param string
+   *          the data to write
+   * @param codec
+   *          the codec of the string to be written. The string will
+   *          be converted to the encoding of {@link sourceCodec}
+   *          Default is sourceCodec
+   * @param openOptions
+   *          the options to use when preparing to write. The implementation
+   *          must declare which options can be used.
+   *          Default is standard options write/create/truncate
+   */
   def writeString(string: String,
                   codec: Codec = getCodec(),
-                  openOptions: Iterable[OpenOptions] = WRITE_TRUNCATE): Unit = {
+                  openOptions: Iterable[OpenOption] = WRITE_TRUNCATE): Unit = {
     // TODO
     ()
   }
+  
+  /**
+   * Write several strings. The open options that can be used are dependent
+   * on the implementation and implementors should clearly document
+   * which option are permitted.
+   * 
+   * @param strings
+   *          The data to write
+   * @param codec
+   *          The codec of the strings to be written. The strings will
+   *          be converted to the encoding of {@link sourceCodec}
+   *          Default is sourceCodec
+   * @param openOptions
+   *          The options to use when preparing to write. The implementation
+   *          must declare which options can be used.
+   *          Default is standard options write/create/truncate
+   */  
   def writeStrings(strings: Traversable[String],
                    codec: Codec = getCodec(),
-                   openOptions: Iterable[OpenOptions] = WRITE_TRUNCATE): Unit = {
+                   openOptions: Iterable[OpenOption] = WRITE_TRUNCATE): Unit = {
     // TODO
     ()
   }
+
+  /**
+   * Writes several strings to file adding a separator between each string.
+   * The open options that can be used are dependent on the implementation
+   * and implementors should clearly document which option are permitted.
+   * 
+   * @param lines
+   *          The data to write
+   * @param separator
+   *          The separator to insert between the strings
+   *          Default is platform dependent EOF
+   * @param codec
+   *          The codec of the string to be written.
+   *          The string will be converted to the encoding of {@link sourceCodec}
+   *          Default is sourceCodec
+   * @param openOptions
+   *          The options to use when preparing to write.
+   *          The implementation must declare which options can be used.
+   *          Default is standard options write/create/truncate
+   */
   def writeLines(strings: Traversable[String],
                  separator: String = compat.Platform.EOL,
                  codec: Codec = getCodec(),
-                 openOptions: Iterable[OpenOptions] = WRITE_TRUNCATE): Unit = {
+                 openOptions: Iterable[OpenOption] = WRITE_TRUNCATE): Unit = {
     // TODO
     ()
   }

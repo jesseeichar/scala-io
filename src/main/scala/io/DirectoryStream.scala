@@ -9,9 +9,11 @@
 package scalax.io
 
 import java.io.Closeable
-
+import java.nio.channels.ByteChannel
 /**
- * An iterable that permits iterating over a directory tree starting at a root Path.  
+ * An iterable that permits iterating over a directory tree starting at a root Path.  The
+ * DirectoryStream is an example of a non-strict collection. 
+ * 
  * <p>
  * When a method is called the root Path is checked to determine if it is a Directory.  If not
  * a NotDirectoryException is thrown.
@@ -63,15 +65,34 @@ abstract class DirectoryStream[T] extends Iterable[T] {
   def filterFold[R] (initial:R)(function: PartialFunction[(R, Path),R]): Option[R]
 }
 
-/**
- * A DirectoryStream that defines operations on files that are located relative to an open directory.
- * A SecureDirectoryStream is intended for use by sophisticated or security sensitive applications
- * requiring to traverse file trees or otherwise operate on directories in a race-free manner.
- * Race conditions can arise when a sequence of file operations cannot be carried out in isolation.
- * Each of the file operations defined by this interface specify a relative path. All access to the file
- * is relative to the open directory irrespective of if the directory is moved or replaced by an attacker
- * while the directory is open. A SecureDirectoryStream may also be used as a virtual working directory.
- */
-abstract class SecureDirectoryStream[T] extends DirectoryStream[T] {
-  // TODO methods
+/*
+ * Will uncomment this for the jdk7 version
+trait SecuredPath[T] {
+  val path: T
+  /**
+   * Deletes a directory.
+   */
+  def deleteDirectory(path:T): Unit
+  /**
+   * Deletes a file.
+   */
+  def deleteFile(path:T): Unit
+  /**
+   * Move a file from this directory to another directory.
+   *
+   * @TODO verify that this method is possible
+   */
+  def move(srcpath:T, targetdir:SecuredPath[T], targetpath:T): Unit
+          
+  /*
+   * Opens or creates a file in this directory, returning a seekable byte channel to access the file.
+   */
+  def newByteChannel(path:T, options:Set[OpenOption] /*FileAttribute<?>... attrs*/): ByteChannel 
+     
+  /**
+   * Opens the directory identified by the given path, returning a DirectoryStream[SecuredPath] to iterate over the entries in the directory.
+   */
+  def newDirectoryStream(path:T /*LinkOption... options*/): DirectoryStream[T] 
+          
 }
+*/

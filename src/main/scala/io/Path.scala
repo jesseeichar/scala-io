@@ -9,7 +9,9 @@
 package scalax.io
 
 import scala.resource.ManagedResource
+import scalax.io.attributes.FileAttribute
 import java.io.{IOException, File => JFile}
+import java.nio.channels.ByteChannel
 import java.net.{ URI, URL }
 import collection.{ Traversable }
 import PartialFunction._
@@ -112,7 +114,7 @@ object Path
    * @param deleteOnExit
    *          If true then the file will be deleted when the JVM is shutdown
    *          Default is true
-   * @param attributes TODO
+   * @param attributes 
    *          The attributes to create on the file.
    *          Default is Nil(default system file attributes)
    * @param fileSystem
@@ -122,8 +124,8 @@ object Path
   def makeTempFile(prefix: String = Path.randomPrefix,
                    suffix: String = null,
                    dir: String = null,
-                   deleteOnExit : Boolean = true
-                   /*attributes:List[FileAttributes] TODO */ )
+                   deleteOnExit : Boolean = true,
+                   attributes:Iterable[FileAttribute[_]] = Nil )
                   (implicit fileSystem: FileSystem = defaultFileSystem) : Path = {
     fileSystem.makeTempDirectory(prefix,suffix,dir,deleteOnExit)
   }
@@ -156,8 +158,8 @@ object Path
   def makeTempDirectory(prefix: String = Path.randomPrefix,
                         suffix: String = null,
                         dir: String = null,
-                        deleteOnExit : Boolean = true
-                        /*attributes:List[FileAttributes] TODO */)
+                        deleteOnExit : Boolean = true,
+                        attributes:Iterable[FileAttribute[_]] = Nil)
                        (implicit fileSystem: FileSystem = defaultFileSystem) : Path = {
     defaultFileSystem.makeTempDirectory(prefix,suffix,dir,deleteOnExit)
   }
@@ -591,7 +593,7 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    *           If the process does not have write permission to the parent directory
    *           If parent directory does not exist
    */
-  def createFile(createParents:Boolean = true, failIfExists: Boolean = true /*, attributes:List[FileAttributes[_]]=Nil TODO*/): Path
+  def createFile(createParents:Boolean = true, failIfExists: Boolean = true, attributes:Iterable[FileAttribute[_]]=Nil): Path
 
   /**
    * Create the directory referenced by this path.
@@ -624,7 +626,7 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    *           If parent directory does not exist
    *
    */
-  def createDirectory(createParents: Boolean = true, failIfExists: Boolean = true /*, attributes:List[FileAttributes[_]]=Nil TODO*/): Path
+  def createDirectory(createParents: Boolean = true, failIfExists: Boolean = true, attributes:Iterable[FileAttribute[_]]=Nil): Path
 
   // deletions
   /**
@@ -762,14 +764,16 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
   //Directory accessors
   /**
    * An iterable over the contents of the directory.  This is simply walkTree with depth=1.
+   * <p>
+   * The filter parameter restricts what paths are available through the DirectoryStream.  This is
+   * different from using the filter, filterFold or filterEach methods in DirectoryStream because PathMatchers can be used by
+   * the underlying filesystem natively and can potentially provide dramatically improved performance for
+   * very large directories.
+   * </p>
    * 
    * @param filter
    *          A filter that restricts what paths are available in the DirectoryStream
    *          Default is None
-   * @param lock
-   *          If true then the DirectoryStream will be a SecureDirectoryStream
-   *          as long as the filesystem supports this.  This
-   *          is only supported in Java 7+ dependent implementations
    * @return
    *          A managed resource managing a DirectoryStream.
    *
@@ -777,16 +781,10 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    * @see Path.Matching
    * @see FileSystem#matcher(String,String)
    */
-  def directoryStream(filter:Option[PathMatcher] = None, lock: Boolean = false) : DirectoryStream[Path]
+  def directoryStream(filter:Option[PathMatcher] = None) : DirectoryStream[Path]
 
   /**
    * An iterable that traverses all the elements in the directory tree down to the specified depth
-   * <p>
-   * The filter parameter restricts what paths are available through the DirectoryStream.  This is
-   * different from using a filter, filterFold or filterEach method because PathMatchers can be used by
-   * the underlying filesystem natively and can potentially provide dramatically improved performance for
-   * very large directories.
-   * </p>
    * <p>
    * The filter parameter is a function because the DirectoryStream can return files from many directories.
    * The function provides the mechanism for declaring which PathMatcher to use at each level.  The two
@@ -802,17 +800,90 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    * The traversal order is pre-order.
    * </p>
    * <p>
-   * The lock parameter attempts to lock the directory against concurrent access.  Some but not all filesystems support
-   * this.  This parameter is to assist in binary compatibility between this version and the next Java 7 version because
-   * this parameter is ignored in the current implementation.
+   * No exceptions will be thrown by this method if it is called and the Path is a File or does not exist.  Instead the {@link DirectoryStream}
+   * will throw a NotDirectoryException when a method is called and the underlying object is not a Directory.  
+   * </p>
+   * @param filter
+   *          A filter that restricts what paths are available in the DirectoryStream
+   *          The directoryStream methods explains why this is often the efficient method
+   *          for filtering directories
+   *          Default is None
+   * @param depth
+   *          How deep down the tree to traverse
+   *          1 is just visit the object in the directory
+   *          >0 is visit all directories in entire tree
+   *          Default is 1
+   * 
+   * @return
+   *          A managed resource managing a DirectoryStream.
+   *
+   * @see Path#directoryStream(Option,Boolean)
+   * @see Path.Matching
+   * @see FileSystem#matcher(String,String)
+   */
+  def tree(filter:(Path,Path)=>Option[PathMatcher] = (origin,relativePath) => None, 
+           depth:Int = -1 /*LinkOption... options*/): DirectoryStream[Path]
+
+  /**
+   * Obtains an object for performing reads and writes to files
+   *
+   * @param codec
+   *          The codec representing the encoding of the file
+   *          This codec will be the default used for reading and
+   *          writing to the file
+   *          Default is Codec.default
+   */
+  def fileOperations(implicit codec: Codec = Codec.default /*LinkOption... options*/):FileOperations
+
+
+/* ****************** The following require jdk7's nio.file ************************** */
+
+  /*
+   * This method is the tree walking anology of secureDirectoryStream for tree.  See
+   * both secureDirectoryStream and tree for details.
+   * 
+   * @param filter
+   *          A filter that restricts what paths are available in the DirectoryStream
+   *          The directoryStream methods explains why this is often the efficient method
+   *          for filtering directories
+   *          Default is None
+   * @param depth
+   *          How deep down the tree to traverse
+   *          1 is just visit the object in the directory
+   *          >0 is visit all directories in entire tree
+   *          Default is 1
+   * 
+   * @return
+   *          A managed resource managing a DirectoryStream.
+   *
+   * @see Path#secureDirectoryStream(Option)
+   * @see Path#tree(Function2, Int)
+   * @see Path.Matching
+   * @see FileSystem#matcher(String,String)
+   */
+/*
+  def secureTree(filter:(Path,Path)=>Option[PathMatcher] = (origin,relativePath) => None, 
+                 depth:Int = -1,options:LinkOption*): Option[DirectoryStream[SecuredPath[Path]]]
+*/
+
+
+  /**
+   * Attempts to obtain a secured DirectoryStream.  This method and the associated secureTree are intended
+   * to be used for security sensitive operations that need to access and/or traverse directory structures
+   * in a race free manner.
+   * <p>
+   * Not all filesystems can support this,  if not then None will be returned.  Using this method will ensure that
+   * during the duration of an operation on the {@link DirectoryStream} no external processes
+   * are able to modify the directory.
+   * </p><p>
+   * The stream can also be used as a "virtual" working directory
    * </p>
    * <p>
-   * If the filesystem does support directory locking and lock = true then
-   * the {@link DirectoryStream} will be a {@link SecureDirectoryStream}.  If the {@link DirectoryStream} is an instance of
-   * {@link SecureDirectoryStream} then any operations done through the SecureDirectoryStream will be secure against concurrent updates.
+   * No exceptions will be thrown by this method if it is called and the Path is a File or does not exist.  Instead the {@link DirectoryStream}
+   * will throw a NotDirectoryException when a method is called and the underlying object is not a Directory.  
    * </p>
    * <p>
-   * However, calling this method does not lock the directory.  Only performing operations on the SecureDirectoryStream will lock the directory.
+   * <strong>Note:</strong> calling this method does not lock the directory.  Only performing operations on the SecureDirectoryStream will lock the directory.
    * <p>
    * </p>
    * For Example:
@@ -827,31 +898,19 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    * // directory has been unlocked
    * </code>
    * <p>
-   * No exceptions will be thrown by this method if it is called and the Path is a File or does not exist.  Instead the {@link DirectoryStream}
-   * will throw a NotDirectoryException when a method is called and the underlying object is not a Directory.  
-   * </p>
    * @param filter
-   *          A filter that restricts what paths are available in the DirectoryStream
+   *          A filter that restricts what paths are available in the DirectoryStream.
+   *          The directoryStream methods explains why this is often the efficient method
+   *          for filtering directories
    *          Default is None
-   * @param depth
-   *          How deep down the tree to traverse
-   *          1 is just visit the object in the directory
-   *          >0 is visit all directories in entire tree
-   *          Default is 1
-   * @param lock
-   *          If true then the DirectoryStream will be a SecureDirectoryStream
-   *          as long as the filesystem supports this.  This
-   *          is only supported in Java 7+ dependent implementations
    * @return
    *          A managed resource managing a DirectoryStream.
    *
-   * @see Path#directoryStream(Option,Boolean)
-   * @see Path.Matching
-   * @see FileSystem#matcher(String,String)
+   * @see Path#directoryStream(Option)
+   * @see Path#secureTree(Function2,Int)
    */
-  def tree(filter:(Path,Path)=>Option[PathMatcher] = (origin,relativePath) => None, 
-           depth:Int = -1, 
-           lock: Boolean = false) : DirectoryStream[Path]
-
-  def file(implicit codec: Codec = Codec.UTF8):FileOperations
+/*
+  def secureDirectoryStream(filter:Option[PathMatcher] = None
+                            :LinkOption*): Option[DirectoryStream[SecuredPath[Path]]]
+*/
 }

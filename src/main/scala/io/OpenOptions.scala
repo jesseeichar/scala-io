@@ -8,19 +8,19 @@
 
 package scalax.io
 
-trait OpenOptions {}
+trait OpenOption {}
 
 object StandardOpenOptions {
-  final val APPEND = new OpenOptions{}
-  final val CREATE = new OpenOptions{}
-  final val CREATE_NEW = new OpenOptions{}
-  final val DELETE_ON_CLOSE = new OpenOptions{}
-  final val DSYNC = new OpenOptions{}
-  final val READ = new OpenOptions{}
-  final val SPARSE = new OpenOptions{}
-  final val SYNC = new OpenOptions{}
-  final val TRUNCATE_EXISTING = new OpenOptions{}
-  final val WRITE = new OpenOptions{}
+  final val APPEND = new OpenOption{}
+  final val CREATE = new OpenOption{}
+  final val CREATE_NEW = new OpenOption{}
+  final val DELETE_ON_CLOSE = new OpenOption{}
+  final val DSYNC = new OpenOption{}
+  final val READ = new OpenOption{}
+  final val SPARSE = new OpenOption{}
+  final val SYNC = new OpenOption{}
+  final val TRUNCATE_EXISTING = new OpenOption{}
+  final val WRITE = new OpenOption{}
 
   final val WRITE_TRUNCATE = List(CREATE, TRUNCATE_EXISTING, WRITE)
   final val WRITE_APPEND = List(CREATE, APPEND, WRITE)

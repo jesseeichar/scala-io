@@ -77,12 +77,12 @@ abstract class BasicFileOperations(override val sourceCodec:Codec = Codec.defaul
    * @param openOptions
    *          The options to use for opening the file
    *          Default is WRITE
-   * @see patch(Long,Traversable[Byte],Iterable[OpenOptions])
+   * @see patch(Long,Traversable[Byte],Iterable[OpenOption])
    */
   def patchString(position: Long, 
                   string: String,
                   codec: Codec = getCodec(),
-                  openOptions: Iterable[OpenOptions] = List(WRITE)): Unit = {
+                  openOptions: Iterable[OpenOption] = List(WRITE)): Unit = {
                     // TODO implement
                     ()
                   }
@@ -119,7 +119,7 @@ abstract class BasicFileOperations(override val sourceCodec:Codec = Codec.defaul
    */
   def patch(position: Long,
             bytes: Traversable[Byte],
-            openOptions: Iterable[OpenOptions] = List(WRITE)): Unit = {
+            openOptions: Iterable[OpenOption] = List(WRITE)): Unit = {
      require(position >= 0, "The patch starting position must be within the existing file")
                     // TODO implement
                     ()
@@ -191,35 +191,35 @@ abstract class FileOperations(sourceCodec: Codec = Codec.default) extends BasicF
   /**
   * Obtains an OutputStreamResource for writing to the file
   *
-  * All {@link StandardOpenOptions} can be used except READ which will be ingnored if present
+  * All {@link StandardOpenOption} can be used except READ which will be ingnored if present
   *
   *  @param openOptions
   *           the options that define how the file is opened when using the stream
   *           Default is write/create/truncate
   */
-  def outputStream(openOptions:OpenOptions*): OutputStreamResource
+  def outputStream(openOptions:OpenOption*): OutputStreamResource
   /**
    * Obtains a ByteChannel for read/write access to the file.
    *
-  * All {@link StandardOpenOptions} can be used
+  * All {@link StandardOpenOption} can be used
   *
   *  @param openOptions
   *           the options that define how the file is opened when using the stream
   *           Default is read/write/create/truncate
   */
-  def channel(openOptions:OpenOptions*): ByteChannelResource
+  def channel(openOptions:OpenOption*): ByteChannelResource
   /**
    * Obtains a FileChannel for read/write access to the file.  Not all filesystems
    * can support FileChannels therefore None will be returned if the filesystem
    * does not support FileChannels.
    *
-  * All {@link StandardOpenOptions} can be used
+  * All {@link StandardOpenOption} can be used
   *
   * @param openOptions
   *          the options that define how the file is opened when using the stream
   *          Default is read/write/create/truncate
   */
-  def fileChannel(openOptions:OpenOptions*): Option[FileChannelResource]
+  def fileChannel(openOptions:OpenOption*): Option[FileChannelResource]
 
   def withCodec(codec:Codec): FileOperations
 
@@ -242,7 +242,7 @@ abstract class FileOperations(sourceCodec: Codec = Codec.default) extends BasicF
    * @param action
    *          The function that will be executed within the block
    */
-  def open[R](openOptions: Iterable[OpenOptions] = List(WRITE, CREATE))(action: BasicFileOperations => R): R
+  def open[R](openOptions: Iterable[OpenOption] = List(WRITE, CREATE))(action: BasicFileOperations => R): R
                     
   /**
    * Performs an operation on the file with a FileLock

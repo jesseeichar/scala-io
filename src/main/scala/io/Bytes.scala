@@ -44,6 +44,12 @@ import Path.fail
  * used once before the stream is used.  But the former
  * can be re-used because the parameter is the function required
  * to create the input stream
+ *
+ * @author Jesse Eichar
+ * @since 1.0
+ * 
+ * @see ReadBytes
+ * @see WriteBytes
  */
 object Bytes {
   /**
@@ -103,13 +109,25 @@ object Bytes {
 }
  
 /**
- * Traits which can be viewed as a sequence of bytes.  Source types
- * which know their length should override def length: Long for more
- * efficient method implementations.
+ * An trait for objects that viewed as a sequence of bytes. For example InputStream
+ * and ReadableByteChannel could both be a ReadBytes object (or be converted
+ * to a ReadBytes object).  Source types which know their length should override
+ * <code>def length: Long</code> for better efficiency.
  * <p>
- * The default implementation uses the inputStream 
- * basis for reading the data.
+ * Note: All collections returned are non-strict collections and each
+ * invocation of a method will typically open a new stream or channel.
+ * That behaviour can be overrided by the implementation but
+ * it is the default behaviour.
  * </p>
+ *
+ * @author Jesse Eichar
+ * @since 1.0
+ * 
+ * @see WriteBytes
+ * @see Bytes
+ * @see Chars
+ * @see ReadChars
+ * @see WriteChars
  */
 trait ReadBytes {
   /**
@@ -140,8 +158,23 @@ trait ReadBytes {
    * Depending on the underlying resource this may be slower than
    * {@link #bytesAsInts}
    * </p>
+   * <p>
+   * Note: The iterable returned is a non-strict collection
+   * </p><p>
+   * In some object the bytes of underlying iterable can be cast to an Seq
+   * and elements can be randomly accessed. Random access must be used
+   * carefully as each access will open a new stream unless that behavior
+   * is modified by the implementation.
+   * </p><p>
+   * For example on some filesystems using random access within a
+   * {@link FileOperations#open} will perform all accesses using the same
+   * Channel improving the performance
+   * </p>
+   * 
+   * @return an non-strict iterable over all the bytes
    */
   def bytes(): Iterable[Byte] = bytesAsInts() map (_.toByte)
+
   /**
    * Obtains a Iterable for conveniently processing the file as Ints.
    * <p>
@@ -151,6 +184,22 @@ trait ReadBytes {
    * <p>
    * This is a View so remember to treat it as a view and not as a Stream or
    * a strict collection
+   * </p>
+   * <p>
+   * In some object the bytes of underlying iterable can be cast to an Seq
+   * and elements can be randomly accessed. Random access must be used
+   * carefully as each access will open a new stream unless that behavior
+   * is modified by the implementation.
+   * </p><p>
+   * For example on some filesystems using random access within a
+   * {@link FileOperations#open} will perform all accesses using the same
+   * Channel improving the performance
+   * </p>
+   * <p>
+   * Note: The iterable returned is a non-strict collection
+   * </p>
+   * 
+   * @return an non-strict iterable over all the bytes with the bytes being represented as Ints
    */
   def bytesAsInts(): Iterable[Int] = {
     withBufferedInputStream {
@@ -187,6 +236,27 @@ trait ReadBytes {
   }
 }
 
+/**
+ * A trait for objects that have bytes written to them. For example an
+ * OutputStream and File can both be WriteBytes (or be converted to one).
+ * Depending on the implementation and the underlying object the
+ * {@link OpenOptions} may be restricted to a subset of the
+ * {@link StandardOpenOptions}.
+ * <p>
+ * Note: Each invocation of a method will typically open a new stream or
+ * channel.  That behaviour can be overrided by the implementation but
+ * it is the default behaviour.
+ * </p>
+ *
+ * @author Jesse Eichar
+ * @since 1.0
+ * 
+ * @see ReadBytes
+ * @see Bytes
+ * @see Chars
+ * @see ReadChars
+ * @see WriteChars
+ */
 trait WriteBytes {
   /**
    * Obtains a {@ReadableByteResource} for input
@@ -213,7 +283,7 @@ trait WriteBytes {
    *          Default is WRITE/CREATE/TRUNCATE
    */
   def writeBytes(bytes: Traversable[Byte],
-                 openOptions: Iterable[OpenOptions] = WRITE_TRUNCATE): Unit = {
+                 openOptions: Iterable[OpenOption] = WRITE_TRUNCATE): Unit = {
     // TODO
     ()
   }

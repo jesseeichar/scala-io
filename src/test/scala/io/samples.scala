@@ -405,7 +405,7 @@ object Samples {
     // This set of examples use the contents method with the partial function parameter
     // there is another way of inspecting directory contents I another example
 
-    import scalax.io.{Path, PathMatcher, DirectoryStream, SecureDirectoryStream}
+    import scalax.io.{Path, PathMatcher, DirectoryStream}
     import scalax.io.Path.Matching._
 
     val path:Path = Path("/tmp/")
@@ -434,19 +434,21 @@ object Samples {
     val matcher: PathMatcher = path.matcher("S*")
     path.directoryStream (Some(matcher)).foreach (println _)
 
+/*
+ * Disabled until Java 7 version because implementation is impossible until then
     // Also you can attempt to perform atomic operations on a DirectoryStream
     // Since not all filesystems support atomic operations (Non in the pre java 7 implementation)
     // a check must be made to see if a secure directory stream was obtained
-    path.directoryStream (lock=true) match  {
-      case stream:SecureDirectoryStream[Path]  => stream.foreach (_.delete)
-      case _:DirectoryStream[Path] => throw new AssertionError ("This filesystem does not support SecureDirectoryStream!")
+    path.secureDirectoryStream () match  {
+      case Some(stream)  => stream.foreach (_.path.delete)
+      case None => throw new AssertionError ("This filesystem does not support SecureDirectoryStream!")
     }
-
+*/
   }
 
   { // Walk the directory tree
 
-    import scalax.io.{Path, PathMatcher, DirectoryStream, SecureDirectoryStream}
+    import scalax.io.{Path, PathMatcher, DirectoryStream}
 
     val path:Path = Path("/tmp/")
 
@@ -473,10 +475,13 @@ object Samples {
       else Some(relativePath.matcher(".git"))
     }
 
-    path.tree (filters,  10, true ) match {
-      case stream:SecureDirectoryStream[Path]  => stream.foreach (println _)
-      case _:DirectoryStream[Path] => throw new AssertionError ("This filesystem does not support SecureDirectoryStream!")
+/*
+ * Disabled until the Java 7 version because it can't be implemented until then
+    path.secureTree (filters,  10 ) match {
+      case Some(stream)  => stream.foreach (e => println (e.path))
+      case None => throw new AssertionError ("This filesystem does not support SecureDirectoryStream!")
     }
+*/
   }
 
   { // since the underlying filesystem could change to safely use the DirectoryStream API it is recommended to handle the
@@ -492,25 +497,24 @@ object Samples {
     }
   }
 
-  { // SecureDirectoryStream examples
-    // TODO examples
-  }
-
   // the following several examples illustrate how to read and write files
-  // One thing you will see in most examples is the assumption that the underlying file either is a file or does not exist. If the underlying file object is not a file at then a NotFileException  is thrown when a file method is invoked.
-  // there is one example that demonstrates the recommended way to write safe file code
+  // One thing you will see in most examples is the assumption that the 
+  // underlying file either is a file or does not exist. If the underlying 
+  // file object is not a file at then a NotFileException  is thrown when 
+  // a file method is invoked.there is one example that demonstrates the 
+  // recommended way to write safe file code
 
   { // implement custom copy method
     import scalax.io.Path
     import scalax.io.StandardOpenOptions._
     // not necessarily the most efficient way to copy but demonstrates use of reading/writing bytes
-    Path("to").file.writeBytes(
-      Path("from").file.bytes()
+    Path("to").fileOperations.writeBytes(
+      Path("from").fileOperations.bytes()
     )
 
     // we could also append to file
-    Path("to").file.writeBytes(
-      Path("from").file.bytes(),
+    Path("to").fileOperations.writeBytes(
+      Path("from").fileOperations.bytes(),
       openOptions = WRITE_APPEND
     )
   }
@@ -518,12 +522,12 @@ object Samples {
   { // read comma seperated file
     import scalax.io.Path
 
-    val records: Iterable[Array[String]] = Path ("csv").file.lines().map (_ split 'x')
+    val records: Iterable[Array[String]] = Path ("csv").fileOperations.lines().map (_ split 'x')
   }
 
   { // add all bytes in file together
     import scalax.io.{FileOperations, Path}
-    val file:FileOperations = Path("file").file
+    val file:FileOperations = Path("file").fileOperations
     val sum: Int = file.bytesAsInts().reduceLeft (_ + _)
   }
 
@@ -531,7 +535,7 @@ object Samples {
 
     // first load as strings and remove vowels
     import scalax.io.{FileOperations, Path}
-    val file:FileOperations = Path("file").file
+    val file:FileOperations = Path("file").fileOperations
     val consonants = file.slurpString().filter (c => !("aeiou" contains c))
 
     // ok now as bytes
@@ -540,13 +544,13 @@ object Samples {
 
   { // iterate over all character in file
     import scalax.io.{FileOperations, Path}
-    val file: FileOperations =  Path("file").file
+    val file: FileOperations =  Path("file").fileOperations
     val doubled: Iterable[String] = for ( c <- file.chars() ) yield "" + c + c
   }
 
   { // read and print out all lines in a file
     import scalax.io.{FileOperations, Path}
-    val file: FileOperations =  Path("file").file
+    val file: FileOperations =  Path("file").fileOperations
 
     // by default the line terminator is stripped and is
     // the default terminator for the platform
@@ -564,7 +568,7 @@ object Samples {
     import scalax.io.{FileOperations, Path, Codec}
     // create the file so that all operations on the file
     // will default to UTF8
-    val file: FileOperations =  Path("file").file (Codec.UTF8)
+    val file: FileOperations =  Path("file").fileOperations (Codec.UTF8)
 
     // the withCodec method is useful for switching
     // to another codec
@@ -590,7 +594,7 @@ object Samples {
       FileOperations, Path, NotFileException,
       NoSuchFileException}
     import scala.util.control.Exception._
-    val file: FileOperations =  Path("file").file
+    val file: FileOperations =  Path("file").fileOperations
     val result:Option[String] = catching (classOf[NotFileException],
                                           classOf[NoSuchFileException]) opt { file.slurpString()}
 
@@ -605,7 +609,7 @@ object Samples {
       FileOperations, Path, Codec, StandardOpenOptions}
     import StandardOpenOptions._
 
-    val file: FileOperations =  Path ("file").file
+    val file: FileOperations =  Path ("file").fileOperations
 
     // write bytes
     // By default the file write will replace
@@ -646,7 +650,7 @@ object Samples {
 
   { // perform an actions within a file lock
     import scalax.io.{FileOperations, Path}
-    val file: FileOperations =  Path ("file").file
+    val file: FileOperations =  Path ("file").fileOperations
 
     // By default the entire file is locked with exclusive access
     val result: Option[String] = file.withLock() {
@@ -680,7 +684,7 @@ object Samples {
   { // demonstrate several ways to interoperate existing java APIs
     import scalax.io.{FileOperations, Path}
     import java.io._
-    val file: FileOperations =  Path ("file").file
+    val file: FileOperations =  Path ("file").fileOperations
 
     // some APIs require a stream or channel. Using one of the io resources you can safely call the method and be guaranteed that the stream will be correctly closed and exceptions handled
     // see the documentation in scala.resource.ManagedResource for details on all the options available
@@ -710,7 +714,7 @@ object Samples {
       Reader, BufferedReader,
       Writer, BufferedWriter
     }
-    val file: FileOperations =  Path ("file").file
+    val file: FileOperations =  Path ("file").fileOperations
 
     // get various input streams, readers an channels
     val in: InputStreamResource = file.inputStream
@@ -742,7 +746,7 @@ object Samples {
 
   { // examples of patching a file
     import scalax.io.{FileOperations, Path, Codec}
-    val file: FileOperations =  Path ("file").file
+    val file: FileOperations =  Path ("file").fileOperations
 
     // write "people" at byte 6
     // if the file is < 6 bytes an underflow exception is thrown
@@ -758,7 +762,7 @@ object Samples {
     // this is because the underlying filesystem has options for optimizing the use of the file channels
     // for example a file could be mapped into memory for the duration of the function and all operations could be performed using the same channel object
     import scalax.io.{FileOperations, Path, Codec}
-    val file: FileOperations =  Path ("file").file
+    val file: FileOperations =  Path ("file").fileOperations
 
     file.open()( f => {
       val s = f.slurpString()
@@ -786,7 +790,7 @@ object Samples {
     Chars.fromReader(new InputStreamReader(url.openStream())).lines() foreach println _
     // ReadBytes can also be constructed
     val bytes: Iterable[Byte] = Bytes.fromInputStream(url.openStream()).bytes()
-    Path("scala.html").file writeBytes bytes
+    Path("scala.html").fileOperations writeBytes bytes
 
     // WriteChars and WriteBytes can be used to simplify writing to OutputStreams
     Chars.fromOutputStream(new ByteArrayOutputStream()).writeString("howdy")
