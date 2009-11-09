@@ -48,10 +48,6 @@ import IoResource._
  */
 abstract class BasicFileOperations(override val sourceCodec:Codec = Codec.default) extends ReadChars with ReadBytes with WriteChars with WriteBytes {
   
-  /**
-   * Creates a new BasicFileOperations object with
-   * the new codec
-   */
   def withCodec(codec:Codec): BasicFileOperations
 
   /**
@@ -184,6 +180,7 @@ abstract class BasicFileOperations(override val sourceCodec:Codec = Codec.defaul
  * @since 1.0
  */
 abstract class FileOperations(sourceCodec: Codec = Codec.default) extends BasicFileOperations(sourceCodec) {
+  def withCodec(codec:Codec): FileOperations
 
   /**
    * Obtains an input stream resource for reading from the file
@@ -221,8 +218,6 @@ abstract class FileOperations(sourceCodec: Codec = Codec.default) extends BasicF
   *          Default is read/write/create/truncate
   */
   def fileChannel(openOptions:OpenOption*): Option[FileChannelResource]
-
-  def withCodec(codec:Codec): FileOperations
 
   /**
    * Runs several operations as efficiently as possible. If the filesystem

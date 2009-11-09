@@ -804,6 +804,7 @@ object Samples {
     // Channels and streams can also be wrapped in IoResource objects
     val resource = IoResource.fromInputStream (url.openStream ())
     resource.buffered acquireFor {in => println (in.read())}
+
     // IoResources have convenience methods for converting between common types of resources
     resource.reader.buffered  acquireFor {in => println (in.readLine())}
 

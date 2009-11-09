@@ -55,30 +55,81 @@ import Path.fail
  * @see WriteChars
  */
 object Chars {
-  def fromInputStream(inputStream: => InputStream): ReadChars with ReadBytes = fromReadableByteChannel(Channels.newChannel(inputStream)) 
-  def fromReadableByteChannel(channel: => ReadableByteChannel): ReadChars with ReadBytes =  new Read(channel)
-  def fromReader(reader: => Reader): ReadChars = null // TODO implement
+  /**
+   * Create a ReadChars with ReadBytesfrom an {@link InputStream}
+   *
+   * @param creator
+   *          the function used to create an {@link InputStream}
+   */
+  def fromInputStream(creator: => InputStream, codec:Codec = Codec.default): ReadChars with ReadBytes = fromReadableByteChannel(Channels.newChannel(creator), codec) 
+  /**
+   * Create a ReadChars with ReadBytes from an {@link ReadableByteChannel}
+   *
+   * @param creator
+   *          the function used to create an {@link ReadableByteChannel}
+   */
+  def fromReadableByteChannel(creator: => ReadableByteChannel, codec:Codec = Codec.default): ReadChars with ReadBytes =  new Read(creator, codec)
+  /**
+   * Create a ReadChars from an {@link Reader}
+   *
+   * @param creator
+   *          the function used to create an {@link Reader}
+   */
+  def fromReader(creator: => Reader): ReadChars = null // TODO implement
 
-  def fromOutputStream(outputStream: => OutputStream): WriteChars = fromWritableByteChannel(Channels.newChannel(outputStream)) 
-  def fromWritableByteChannel(channel: => WritableByteChannel): WriteChars with WriteBytes =  new Write(channel)
-  def fromWriter(reader: => Writer): WriteChars = null // TODO implement
+  /**
+   * Create a WriteChars with WriteBytes from an {@link OutputStream}
+   *
+   * @param creator
+   *          the function used to create an {@link OutputStream}
+   */
+  def fromOutputStream(creator: => OutputStream, codec:Codec = Codec.default): WriteChars with WriteBytes = fromWritableByteChannel(Channels.newChannel(creator), codec) 
+  /**
+   * Create a WriteChars with WriteBytes from an {@link WritableByteChannel}
+   *
+   * @param creator
+   *          the function used to create an {@link WritableByteChannel}
+   */
+  def fromWritableByteChannel(creator: => WritableByteChannel, codec:Codec = Codec.default): WriteChars with WriteBytes =  new Write(creator, codec)
+  /**
+   * Create a WriteChars from an {@link Writer}
+   *
+   * @param creator
+   *          the function used to create an {@link Writer}
+   */
+  def fromWriter(creator: => Writer): WriteChars = null // TODO implement
 
-  def fromByteChannel(channel: => ByteChannel): ReadChars with WriteChars with ReadBytes with WriteBytes =  new ReadWrite(channel)
-  def fromFileChannel(channel: => FileChannel): ReadChars with WriteChars with ReadBytes with WriteBytes =  new ReadWrite(channel)
+  /**
+   * Create a ReadChars with WriteChars with ReadBytes with WriteBytes from an {@link ByteChannel}
+   *
+   * @param creator
+   *          the function used to create an {@link ByteChannel}
+   */
+  def fromByteChannel(creator: => ByteChannel, codec:Codec = Codec.default): ReadChars with WriteChars with ReadBytes with WriteBytes =  new ReadWrite(creator, codec)
+  /**
+   * Create a ReadChars with WriteChars with ReadBytes with WriteBytes from an {@link FileChannel}
+   *
+   * @param creator
+   *          the function used to create an {@link FileChannel}
+   */
+  def fromFileChannel(creator: => FileChannel, codec:Codec = Codec.default): ReadChars with WriteChars with ReadBytes with WriteBytes =  new ReadWrite(creator, codec)
 
-  private class Read (channel: => ReadableByteChannel) extends ReadChars with ReadBytes{
-    protected lazy val obtainReadableByteChannel = IoResource.fromReadableByteChannel (channel)
-    def sourceCodec: Codec = Codec.default
+  private class Read (creator: => ReadableByteChannel, codec: Codec = Codec.default) extends ReadChars with ReadBytes{
+    protected lazy val obtainReadableByteChannel = IoResource.fromReadableByteChannel (creator)
+    def sourceCodec: Codec = codec
+    def withCodec(codec:Codec) = new Read(creator, codec)
   }
-  private class Write (channel: => WritableByteChannel) extends WriteChars with WriteBytes{
-    protected lazy val obtainWritableByteChannel = IoResource.fromWritableByteChannel (channel)
-    def sourceCodec: Codec = Codec.default
+  private class Write (creator: => WritableByteChannel, codec: Codec = Codec.default) extends WriteChars with WriteBytes{
+    protected lazy val obtainWritableByteChannel = IoResource.fromWritableByteChannel (creator)
+    def sourceCodec: Codec = codec
+    def withCodec(codec:Codec) = new Write(creator, codec)
   }
-  private class ReadWrite (channel: => ByteChannel) extends ReadChars with WriteChars with ReadBytes with WriteBytes{
-    lazy val resource = IoResource.fromByteChannel (channel)
+  private class ReadWrite (creator: => ByteChannel, codec: Codec) extends ReadChars with WriteChars with ReadBytes with WriteBytes{
+    lazy val resource = IoResource.fromByteChannel (creator)
     protected lazy val obtainWritableByteChannel = resource
     protected lazy val obtainReadableByteChannel = resource
-    def sourceCodec: Codec = Codec.default
+    def sourceCodec: Codec = codec
+    def withCodec(codec:Codec) = new ReadWrite(creator, codec)
   }
 }
  
@@ -120,6 +171,13 @@ trait Chars {
     else if (sourceCodec != null) sourceCodec
     else if (allowDefault) Codec.default
     else failNoCodec()
+
+
+  /**
+   * Creates a new BasicFileOperations object with
+   * the new codec
+   */
+  def withCodec(codec:Codec): Chars
 }
 
 /**
@@ -143,6 +201,7 @@ trait Chars {
  * @see WriteChars
  */
 trait ReadChars extends Chars {
+  def withCodec(codec:Codec): ReadChars
 
   /**
    * The characters in the object.
@@ -263,7 +322,8 @@ trait ReadChars extends Chars {
  * OutputStream and File can both be WriteChars (or be converted to one).
  * Depending on the implementation and the underlying object the
  * {@link OpenOption} may be restricted to a subset of the
- * {@link OpenOption}.
+ * {@link OpenOption}
+ * 
  * <p>
  * Note: Each invocation of a method will typically open a new stream or
  * channel.  That behaviour can be overrided by the implementation but
@@ -280,6 +340,7 @@ trait ReadChars extends Chars {
  * @see ReadChars
  */
 trait WriteChars extends Chars {
+  def withCodec(codec:Codec): WriteChars
 
   /**
    * Writes a string. The open options that can be used are dependent
