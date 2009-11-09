@@ -23,6 +23,9 @@ import java.nio.channels.ByteChannel
  * case IOException
  * </p>
  * @see NotDirectoryException
+ * 
+ * @author  Jesse Eichar
+ * @since   1.0
  */
 abstract class DirectoryStream[T] extends Iterable[T] {
   /**

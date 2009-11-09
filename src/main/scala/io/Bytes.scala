@@ -11,7 +11,7 @@ package scalax.io
 import scalax.io.resource._
 import scala.resource.ManagedResource
 import scala.collection.Traversable
-import StandardOpenOptions._
+import OpenOption._
 
 import java.io.{ 
   InputStream, PrintStream, File => JFile,
@@ -242,7 +242,7 @@ trait ReadBytes {
  * OutputStream and File can both be WriteBytes (or be converted to one).
  * Depending on the implementation and the underlying object the
  * {@link OpenOptions} may be restricted to a subset of the
- * {@link StandardOpenOptions}.
+ * {@link OpenOption}.
  * <p>
  * Note: Each invocation of a method will typically open a new stream or
  * channel.  That behaviour can be overrided by the implementation but

@@ -11,8 +11,6 @@ package scalax.io
 import scala.util.control.ControlException
 import java.io.IOException
 
-case class NoSuchFileException() extends IOException with ControlException
-
 /**
  * This is a control exception that indicates the underlying filesystem object cannot be treated as a File.
  * <p>
@@ -31,6 +29,9 @@ case class NoSuchFileException() extends IOException with ControlException
  * }
  * </code>
  * </pre>
+ * 
+ * @author  Jesse Eichar
+ * @since   1.0
  */
 case class NotFileException() extends IOException with ControlException
 
@@ -49,5 +50,8 @@ case class NotFileException() extends IOException with ControlException
  * }
  * </code>
  * </pre>
+ * 
+ * @author  Jesse Eichar
+ * @since   1.0
  */
 case class NotDirectoryException() extends IOException with ControlException

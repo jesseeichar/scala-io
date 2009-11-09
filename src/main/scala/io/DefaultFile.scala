@@ -16,13 +16,18 @@ import java.net.{ URI, URL }
 
 
 import scala.resource.ManagedResource
-import StandardOpenOptions._
+import OpenOption._
 import collection.{Traversable }
 import PartialFunction._
 import util.Random.nextASCIIString
 import java.lang.{ProcessBuilder}
-
-class DefaultFile(jfile:JFile, codec:Codec) extends FileOperations(codec) {
+/**
+ * <b>Not part of API.</b>
+ * 
+ * @author  Jesse Eichar
+ * @since   1.0
+ */
+private[io] class DefaultFile(jfile:JFile, codec:Codec) extends FileOperations(codec) {
 
   private implicit val defaultCodec = codec
 

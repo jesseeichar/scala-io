@@ -10,7 +10,7 @@ package scalax.io
 
 import scalax.io.resource._
 import scala.collection.Traversable
-import StandardOpenOptions._
+import OpenOption._
 import IoResource._
 /**
  * An object for reading and writing files.
@@ -192,7 +192,7 @@ abstract class FileOperations(sourceCodec: Codec = Codec.default) extends BasicF
   /**
   * Obtains an OutputStreamResource for writing to the file
   *
-  * All {@link StandardOpenOption} can be used except READ which will be ingnored if present
+  * All {@link OpenOption} can be used except READ which will be ingnored if present
   *
   *  @param openOptions
   *           the options that define how the file is opened when using the stream
@@ -202,7 +202,7 @@ abstract class FileOperations(sourceCodec: Codec = Codec.default) extends BasicF
   /**
    * Obtains a ByteChannel for read/write access to the file.
    *
-  * All {@link StandardOpenOption} can be used
+  * All {@link OpenOption} can be used
   *
   *  @param openOptions
   *           the options that define how the file is opened when using the stream
@@ -214,7 +214,7 @@ abstract class FileOperations(sourceCodec: Codec = Codec.default) extends BasicF
    * can support FileChannels therefore None will be returned if the filesystem
    * does not support FileChannels.
    *
-  * All {@link StandardOpenOption} can be used
+  * All {@link OpenOption} can be used
   *
   * @param openOptions
   *          the options that define how the file is opened when using the stream

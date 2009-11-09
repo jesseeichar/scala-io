@@ -12,6 +12,11 @@ import java.io.{File=>JFile}
 
 /**
  * Factory object for obtaining filesystem objects
+ *
+ * @todo add factory methods for creating non-default file systems
+ * 
+ * @author  Jesse Eichar
+ * @since   1.0
  */
 object FileSystem {
   /**
@@ -27,6 +32,9 @@ object FileSystem {
  * Provides an interface to a file system and is a factory for other objects
  * for accessing files and directories.  Also is used for obtaining metadata
  * about the filesystem.
+ * 
+ * @author  Jesse Eichar
+ * @since   1.0
  */
 abstract class FileSystem {
   /** The path segment separator string for the filesystem */
@@ -157,6 +165,13 @@ abstract class FileSystem {
 
 }
 
+/**
+ * Not API
+ *
+ * 
+ * @author  Jesse Eichar
+ * @since   1.0
+ */
 private[io] class DefaultFileSystem extends FileSystem {
   def separator: String = JFile.separator
   def apply(path: String): DefaultPath = apply (new JFile (path))

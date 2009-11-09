@@ -681,7 +681,6 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    */
   def deleteRecursively(continueOnFailure:Boolean=false): (Int,Int)
 
-  // todo
   /**
    *  Copy the underlying object if it exists to the target location.
    *  If the underlying object is a directory it is not copied recursively.

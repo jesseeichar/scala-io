@@ -27,6 +27,9 @@ import java.nio.channels.{
  *
  * @param R
  *          The type of the resource that will be managed by the ManagedResource
+ * 
+ * @author  Jesse Eichar
+ * @since   1.0
  */
 trait IoResource[R <: {def close()}] extends AbstractUntranslatedManagedResource[R] {
   /**
@@ -56,14 +59,17 @@ trait IoResource[R <: {def close()}] extends AbstractUntranslatedManagedResource
 /**
  * An Object that has an associates Buffered object. For example InputStream
  * has BufferedInputStream
- * 
+ *
  * @param B
  *          they type of the Buffered object
+ * 
+ * @author  Jesse Eichar
+ * @since   1.0
  */
 trait Bufferable[B <: {def close()}] {
   /**
    * Obtain the buffered version of this object.
-   * 
+   *
    * @return the buffered version of this object
    */
   def buffered: IoResource[B]
@@ -72,16 +78,19 @@ trait Bufferable[B <: {def close()}] {
 /**
  * An object that can be converted to an input stream. For example
  * a ReadableByteChannel
- * 
+ *
  * @param S
  *          the type of InputStream that is created
  * @param B
  *          the type of buffered input stream that can also be created
+ * 
+ * @author  Jesse Eichar
+ * @since   1.0
  */
 trait InputStreamable[S <: InputStream, B <: BufferedInputStream] {
   /**
    * Obtain the InputStream IoResource version of this object.
-   * 
+   *
    * @return the InputStream IoResource version of this object.
    */
   def inputStream: IoResource[S] with Bufferable[B]
@@ -90,16 +99,19 @@ trait InputStreamable[S <: InputStream, B <: BufferedInputStream] {
 /**
  * An object that can be converted to an output stream. For example
  * a WriteableByteChannel
- * 
+ *
  * @param S
  *          the type of OutputStream that is created
  * @param B
  *          the type of buffered output stream that can also be created
+ * 
+ * @author  Jesse Eichar
+ * @since   1.0
  */
 trait OutputStreamable[S <: OutputStream, B <: BufferedOutputStream] {
   /**
    * Obtain the InputStream IoResource version of this object.
-   * 
+   *
    * @return the InputStream IoResource version of this object.
    */
   def outputStream: IoResource[S] with Bufferable[B]
@@ -108,16 +120,19 @@ trait OutputStreamable[S <: OutputStream, B <: BufferedOutputStream] {
 /**
  * An object that can be converted to a Reader. For example
  * an InputStream
- * 
+ *
  * @param S
  *          the type of Reader that is created
  * @param B
  *          the type of BufferedReader that can also be created
+ * 
+ * @author  Jesse Eichar
+ * @since   1.0
  */
 trait Readable[S <: Reader, B <: BufferedReader] {
   /**
    * Obtain the Reader IoResource version of this object.
-   * 
+   *
    * @return the Reader IoResource version of this object.
    */
   def reader(implicit codec: Codec = Codec.default): IoResource[S] with Bufferable[B]
@@ -126,16 +141,19 @@ trait Readable[S <: Reader, B <: BufferedReader] {
 /**
  * An object that can be converted to a Writer. For example
  * an OutputStream
- * 
+ *
  * @param S
  *          the type of Writer that is created
  * @param B
  *          the type of BufferedWriter that can also be created
+ * 
+ * @author  Jesse Eichar
+ * @since   1.0
  */
 trait Writable[S <: Writer, B <: BufferedWriter] {
   /**
    * Obtain the Writer IoResource version of this object.
-   * 
+   *
    * @return the Writer IoResource version of this object.
    */
   def writer(implicit codec: Codec = Codec.default): IoResource[S] with Bufferable[B]
@@ -144,16 +162,19 @@ trait Writable[S <: Writer, B <: BufferedWriter] {
 /**
  * An object that can be converted to a WritableByteChannel. For example
  * an OutputStream
- * 
+ *
  * @param S
  *          the type of WritableByteChannel that is created
  * @param B
  *          the type of BufferedWritableByteChannel that can also be created
+ * 
+ * @author  Jesse Eichar
+ * @since   1.0
  */
 trait WritableByteChannelable[S <: WritableByteChannel] {
   /**
    * Obtain the Writer IoResource version of this object.
-   * 
+   *
    * @return the Writer IoResource version of this object.
    */
   def writableByteChannel: IoResource[S]
@@ -162,23 +183,26 @@ trait WritableByteChannelable[S <: WritableByteChannel] {
 /**
  * An object that can be converted to a ReadableByteChannel. For example
  * an InputStream
- * 
+ *
  * @param S
  *          the type of ReadableByteChannel that is created
  * @param B
  *          the type of BufferedReadableByteChannel that can also be created
+ * 
+ * @author  Jesse Eichar
+ * @since   1.0
  */
 trait ReadableByteChannelable[S <: ReadableByteChannel] {
   /**
    * Obtain the Reader IoResource version of this object.
-   * 
+   *
    * @return the Reader IoResource version of this object.
    */
   def readableByteChannel: IoResource[S]
 }
 
 /**
- * defined several factory methods for creating instances of IoResource.
+ * Defines several factory methods for creating instances of IoResource.
  * It also defines several useful IoResource types. For example
  * ResourceType which is a IoResource[Reader] with Bufferable[BufferedReader].
  * All the types that can be created with the factory methods can be created.
@@ -188,44 +212,59 @@ trait ReadableByteChannelable[S <: ReadableByteChannel] {
  * val URL = new URL("http://scala-lang.org")
  * val resource: IoResource[InputStream] = IoResource.fromInputStream(url.openStream).buffered
  * </code></pre>
-*/
+ * 
+ * @author  Jesse Eichar
+ * @since   1.0
+ */
 object IoResource {
-  
+
+  /** A IoResource with several conversion traits. */
   type InputStreamResource = IoResource[InputStream] with Bufferable[BufferedInputStream]
       with Readable[Reader, BufferedReader] with ReadableByteChannelable[ReadableByteChannel]
+  /** A IoResource with several conversion traits. */
   type BufferedInputStreamResource = IoResource[BufferedInputStream]
       with Readable[Reader, BufferedReader] with ReadableByteChannelable[ReadableByteChannel]
+  /** A IoResource with several conversion traits. */
   type OutputStreamResource = IoResource[OutputStream] with Bufferable[BufferedOutputStream]
       with Writable[Writer, BufferedWriter] with WritableByteChannelable[WritableByteChannel]
+  /** A IoResource with several conversion traits. */
   type BufferedOutputStreamResource = IoResource[BufferedOutputStream]
       with Writable[Writer, BufferedWriter] with WritableByteChannelable[WritableByteChannel]
+  /** A IoResource with several conversion traits. */
   type ReaderResource = IoResource[Reader] with Bufferable[BufferedReader]
+  /** A IoResource with several conversion traits. */
   type BufferedReaderResource = IoResource[BufferedReader]
+  /** A IoResource with several conversion traits. */
   type WriterResource = IoResource[Writer] with Bufferable[BufferedWriter]
+  /** A IoResource with several conversion traits. */
   type BufferedWriterResource = IoResource[BufferedWriter]
+  /** A IoResource with several conversion traits. */
   type ReadableByteChannelResource = IoResource[ReadableByteChannel]
       with InputStreamable[InputStream, BufferedInputStream] with Readable[Reader, BufferedReader]
+  /** A IoResource with several conversion traits. */
   type WritableByteChannelResource = IoResource[WritableByteChannel]
       with OutputStreamable[OutputStream, BufferedOutputStream] with Writable[Writer, BufferedWriter]
+  /** A IoResource with several conversion traits. */
   type ByteChannelResource = IoResource[ByteChannel]
       with InputStreamable[InputStream, BufferedInputStream] with Readable[Reader, BufferedReader]
       with OutputStreamable[OutputStream, BufferedOutputStream] with Writable[Writer, BufferedWriter]
+  /** A IoResource with several conversion traits. */
   type FileChannelResource = IoResource[FileChannel]
       with InputStreamable[InputStream, BufferedInputStream] with Readable[Reader, BufferedReader]
       with OutputStreamable[OutputStream, BufferedOutputStream] with Writable[Writer, BufferedWriter]
 
   // InputStream factory methods
   /**
-   * create an IoResource instance with several conversion traits from an InputStream.
+   * Create an IoResource instance with several conversion traits from an InputStream.
    * <p>
    * The opener param is a by-name argument an is use to open a new stream.
    * In other words it is important to try and pass in a function for opening
    * the stream rather than the already openned stream so that the returned
    * IoResource can be used multiple time
    * </p>
-   * 
+   *
    * @param opener
-   *          the function for opening a new InoutStream
+   *          the function for opening a new InputStream
    * @param codec
    *          the codec representing the encoding of the underlying data
    *          this is only important if the stream may be converted to a
@@ -236,24 +275,226 @@ object IoResource {
    *          an InputStreamResource
    */
   def fromInputStream(opener: => InputStream)(implicit codec: Codec = Codec.default): InputStreamResource = new InputStreamIoResource(opener,codec)
+  /**
+   * Create an IoResource instance from a BufferedInputStream
+   * <p>
+   * The opener param is a by-name argument an is use to open a new stream.
+   * In other words it is important to try and pass in a function for opening
+   * the stream rather than the already openned stream so that the returned
+   * IoResource can be used multiple time
+   * </p>
+   *
+   * @param opener
+   *          the function for opening a new BufferedInputStream
+   * @param codec
+   *          the codec representing the encoding of the underlying data
+   *          this is only important if the stream may be converted to a
+   *          IoResource[Reader]
+   *          Default is Codec.default
+   *
+   * @return
+   *          a BufferedInputStreamResource
+   */
   def fromBufferedInputStream(opener: => BufferedInputStream)(implicit codec: Codec = Codec.default): BufferedInputStreamResource  = new BufferedInputStreamIoResource(opener,codec)
 
   // OutputStream factory methods
+  /**
+   * Create an IoResource instance with several conversion traits from an OutputStream.
+   * <p>
+   * The opener param is a by-name argument an is use to open a new stream.
+   * Out other words it is important to try and pass in a function for opening
+   * the stream rather than the already openned stream so that the returned
+   * IoResource can be used multiple time
+   * </p>
+   *
+   * @param opener
+   *          the function for opening a new OutputStream
+   * @param codec
+   *          the codec representing the encoding of the underlying data
+   *          this is only important if the stream may be converted to a
+   *          IoResource[Writer]
+   *          Default is Codec.default
+   *
+   * @return
+   *          an OutputStreamResource
+   */
   def fromOutputStream(opener: => OutputStream)(implicit codec: Codec = Codec.default): OutputStreamResource = new OutputStreamIoResource(opener,codec)
+  /**
+   * Create an IoResource instance from a BufferedOutputStream
+   * <p>
+   * The opener param is a by-name argument an is use to open a new stream.
+   * Out other words it is important to try and pass in a function for opening
+   * the stream rather than the already openned stream so that the returned
+   * IoResource can be used multiple time
+   * </p>
+   *
+   * @param opener
+   *          the function for opening a new BufferedOutputStream
+   *
+   * @param codec
+   *          the codec representing the encoding of the underlying data
+   *          this is only important if the stream may be converted to a
+   *          IoResource[Writer]
+   *          Default is Codec.default
+   *
+   * @return
+   *          a BufferedOutputStreamResource
+   */
   def fromBufferedOutputStream(opener: => BufferedOutputStream)(implicit codec: Codec = Codec.default): BufferedOutputStreamResource = new BufferedOutputStreamIoResource(opener,codec)
 
   // Reader factory methods
-  def fromReader(opener: => Reader)(implicit codec: Codec = Codec.default): ReaderResource = new ReaderIoResource(opener)
-  def fromBufferedReader(opener: => BufferedReader)(implicit codec: Codec = Codec.default): BufferedReaderResource = new BufferedReaderIoResource(opener)
+  /**
+   * Create an IoResource instance with conversion traits from an Reader.
+   * <p>
+   * The opener param is a by-name argument an is use to open a new stream.
+   * Out other words it is important to try and pass in a function for opening
+   * the stream rather than the already openned stream so that the returned
+   * IoResource can be used multiple time
+   * </p>
+   *
+   * @param opener
+   *          the function for opening a new Reader
+   *          this is only important if the stream may be converted to a
+   *
+   * @return
+   *          an ReaderResource
+   */
+  def fromReader(opener: => Reader): ReaderResource = new ReaderIoResource(opener)
+  /**
+   * Create an IoResource instance with conversion traits from an BufferedReader.
+   * <p>
+   * The opener param is a by-name argument an is use to open a new stream.
+   * Out other words it is important to try and pass in a function for opening
+   * the stream rather than the already openned stream so that the returned
+   * IoResource can be used multiple time
+   * </p>
+   *
+   * @param opener
+   *          the function for opening a new BufferedReader
+   *
+   * @return
+   *          an BufferedReaderResource
+   */
+  def fromBufferedReader(opener: => BufferedReader): BufferedReaderResource = new BufferedReaderIoResource(opener)
 
   // Writer factory methods
-  def fromWriter(opener: => Writer)(implicit codec: Codec = Codec.default): WriterResource = new WriterIoResource(opener)
-  def fromBufferedWriter(opener: => BufferedWriter)(implicit codec: Codec = Codec.default): BufferedWriterResource = new BufferedWriterIoResource(opener)
+  /**
+   * Create an IoResource instance with conversion traits from an Writer.
+   * <p>
+   * The opener param is a by-name argument an is use to open a new stream.
+   * Out other words it is important to try and pass in a function for opening
+   * the stream rather than the already openned stream so that the returned
+   * IoResource can be used multiple time
+   * </p>
+   *
+   * @param opener
+   *          the function for opening a new Writer
+   *
+   * @return
+   *          an WriterResource
+   */
+  def fromWriter(opener: => Writer): WriterResource = new WriterIoResource(opener)
+  /**
+   * Create an IoResource instance with conversion traits from an BufferedReader.
+   * <p>
+   * The opener param is a by-name argument an is use to open a new stream.
+   * Out other words it is important to try and pass in a function for opening
+   * the stream rather than the already openned stream so that the returned
+   * IoResource can be used multiple time
+   * </p>
+   *
+   * @param opener
+   *          the function for opening a new BufferedReader
+   *
+   * @return
+   *          an BufferedReaderResource
+   */
+  def fromBufferedWriter(opener: => BufferedWriter): BufferedWriterResource = new BufferedWriterIoResource(opener)
 
   // Channel factory methods
+  /**
+   * Create an IoResource instance with several conversion traits from an ReadableByteChannel.
+   * <p>
+   * The opener param is a by-name argument an is use to open a new stream.
+   * In other words it is important to try and pass in a function for opening
+   * the stream rather than the already openned stream so that the returned
+   * IoResource can be used multiple time
+   * </p>
+   *
+   * @param opener
+   *          the function for opening a new ReadableByteChannel
+   * @param codec
+   *          the codec representing the encoding of the underlying data
+   *          this is only important if the stream may be converted to a
+   *          IoResource[Reader]
+   *          Default is Codec.default
+   *
+   * @return
+   *          an ReadableByteChannelResource
+   */
   def fromReadableByteChannel(opener: => ReadableByteChannel)(implicit codec: Codec = Codec.default): ReadableByteChannelResource = new ReadableByteChannelIoResource(opener,codec)
+  /**
+   * Create an IoResource instance with several conversion traits from an WritableByteChannel.
+   * <p>
+   * The opener param is a by-name argument an is use to open a new stream.
+   * In other words it is important to try and pass in a function for opening
+   * the stream rather than the already openned stream so that the returned
+   * IoResource can be used multiple time
+   * </p>
+   *
+   * @param opener
+   *          the function for opening a new WritableByteChannel
+   * @param codec
+   *          the codec representing the encoding of the underlying data
+   *          this is only important if the stream may be converted to a
+   *          IoResource[Writer]
+   *          Default is Codec.default
+   *
+   * @return
+   *          an WritableByteChannelResource
+   */
   def fromWritableByteChannel(opener: => WritableByteChannel)(implicit codec: Codec = Codec.default): WritableByteChannelResource = new WritableByteChannelIoResource(opener,codec)
+  /**
+   * Create an IoResource instance with several conversion traits from an ByteChannel.
+   * <p>
+   * The opener param is a by-name argument an is use to open a new stream.
+   * In other words it is important to try and pass in a function for opening
+   * the stream rather than the already openned stream so that the returned
+   * IoResource can be used multiple time
+   * </p>
+   *
+   * @param opener
+   *          the function for opening a new ByteChannel
+   * @param codec
+   *          the codec representing the encoding of the underlying data
+   *          this is only important if the stream may be converted to a
+   *          IoResource[Writer] or IoResource[Reader]
+   *          Default is Codec.default
+   *
+   * @return
+   *          an ByteChannelResource
+   */
   def fromByteChannel(opener: => ByteChannel)(implicit codec: Codec = Codec.default): ByteChannelResource = new ByteChannelIoResource(opener,codec)
+  /**
+   * Create an IoResource instance with several conversion traits from an FileChannel.
+   * <p>
+   * The opener param is a by-name argument an is use to open a new stream.
+   * In other words it is important to try and pass in a function for opening
+   * the stream rather than the already openned stream so that the returned
+   * IoResource can be used multiple time
+   * </p>
+   *
+   * @param opener
+   *          the function for opening a new FileChannel
+   * @param codec
+   *          the codec representing the encoding of the underlying data
+   *          this is only important if the stream may be converted to a
+   *          IoResource[Writer] or IoResource[Reader]
+   *          Default is Codec.default
+   *
+   * @return
+   *          an FileChannelResource
+   */
   def fromFileChannel(opener: => FileChannel)(implicit codec: Codec = Codec.default): FileChannelResource = new FileChannelIoResource(opener,codec)
 }
 
@@ -263,7 +504,7 @@ object IoResource {
  *
  * @see ManagedResource
  */
-protected[io] class InputStreamIoResource(opener: => InputStream, codec: Codec) extends IoResource[InputStream]
+private[io] class InputStreamIoResource(opener: => InputStream, codec: Codec) extends IoResource[InputStream]
       with Bufferable[BufferedInputStream] with Readable[Reader, BufferedReader]
       with ReadableByteChannelable[ReadableByteChannel] {
   def open() = opener
@@ -279,12 +520,12 @@ protected[io] class InputStreamIoResource(opener: => InputStream, codec: Codec) 
  *
  * @see ManagedResource
  */
-protected[io] class BufferedInputStreamIoResource(opener: => BufferedInputStream, codec: Codec) extends IoResource[BufferedInputStream]
+private[io] class BufferedInputStreamIoResource(opener: => BufferedInputStream, codec: Codec) extends IoResource[BufferedInputStream]
       with Readable[Reader, BufferedReader] with ReadableByteChannelable[ReadableByteChannel] {
   def open() = opener
   def reader(implicit codec:Codec = codec) =
     IoResource.fromReader(new InputStreamReader(opener, codec.charSet))
-  lazy val readableByteChannel = 
+  lazy val readableByteChannel =
     IoResource.fromReadableByteChannel(Channels.newChannel(open()))
 }
 
@@ -295,7 +536,7 @@ protected[io] class BufferedInputStreamIoResource(opener: => BufferedInputStream
  *
  * @see ManagedResource
  */
-protected[io] class OutputStreamIoResource(opener: => OutputStream, codec: Codec) extends IoResource[OutputStream]
+private[io] class OutputStreamIoResource(opener: => OutputStream, codec: Codec) extends IoResource[OutputStream]
       with Bufferable[BufferedOutputStream] with Writable[Writer, BufferedWriter]
       with WritableByteChannelable[WritableByteChannel] {
   def open() = opener
@@ -311,7 +552,7 @@ protected[io] class OutputStreamIoResource(opener: => OutputStream, codec: Codec
  *
  * @see ManagedResource
  */
-protected[io] class BufferedOutputStreamIoResource(opener: => BufferedOutputStream, codec: Codec) extends IoResource[BufferedOutputStream]
+private[io] class BufferedOutputStreamIoResource(opener: => BufferedOutputStream, codec: Codec) extends IoResource[BufferedOutputStream]
       with Writable[Writer, BufferedWriter] with WritableByteChannelable[WritableByteChannel] {
   def open() = opener
   def writer(implicit codec:Codec = codec) =
@@ -328,7 +569,7 @@ protected[io] class BufferedOutputStreamIoResource(opener: => BufferedOutputStre
  *
  * @see ManagedResource
  */
-protected[io] class ReaderIoResource(opener: => Reader) extends IoResource[Reader]
+private[io] class ReaderIoResource(opener: => Reader) extends IoResource[Reader]
       with Bufferable[BufferedReader] {
   def open() = opener
   val buffered = IoResource.fromBufferedReader(new BufferedReader(opener))
@@ -339,7 +580,7 @@ protected[io] class ReaderIoResource(opener: => Reader) extends IoResource[Reade
  *
  * @see ManagedResource
  */
-protected[io] class BufferedReaderIoResource(opener: => BufferedReader) extends IoResource[BufferedReader] {
+private[io] class BufferedReaderIoResource(opener: => BufferedReader) extends IoResource[BufferedReader] {
   def open() = opener
 }
 
@@ -349,7 +590,7 @@ protected[io] class BufferedReaderIoResource(opener: => BufferedReader) extends 
  *
  * @see ManagedResource
  */
-protected[io] class WriterIoResource(opener: => Writer) extends IoResource[Writer]
+private[io] class WriterIoResource(opener: => Writer) extends IoResource[Writer]
       with Bufferable[BufferedWriter] {
   def open() = opener
   val buffered = IoResource.fromBufferedWriter(new BufferedWriter(opener))
@@ -360,7 +601,7 @@ protected[io] class WriterIoResource(opener: => Writer) extends IoResource[Write
  *
  * @see ManagedResource
  */
-protected[io] class BufferedWriterIoResource(opener: => BufferedWriter) extends IoResource[BufferedWriter] {
+private[io] class BufferedWriterIoResource(opener: => BufferedWriter) extends IoResource[BufferedWriter] {
   def open() = opener
 }
 
@@ -371,7 +612,7 @@ protected[io] class BufferedWriterIoResource(opener: => BufferedWriter) extends 
  *
  * @see ManagedResource
  */
-protected[io] class ByteChannelIoResource(opener: => ByteChannel, codec: Codec) extends IoResource[ByteChannel]
+private[io] class ByteChannelIoResource(opener: => ByteChannel, codec: Codec) extends IoResource[ByteChannel]
       with InputStreamable[InputStream, BufferedInputStream] with Readable[Reader, BufferedReader]
       with OutputStreamable[OutputStream, BufferedOutputStream] with Writable[Writer, BufferedWriter]{
   def open() = opener
@@ -389,7 +630,7 @@ protected[io] class ByteChannelIoResource(opener: => ByteChannel, codec: Codec) 
  *
  * @see ManagedResource
  */
-protected[io] class ReadableByteChannelIoResource(opener: => ReadableByteChannel, codec: Codec) extends IoResource[ReadableByteChannel]
+private[io] class ReadableByteChannelIoResource(opener: => ReadableByteChannel, codec: Codec) extends IoResource[ReadableByteChannel]
       with InputStreamable[InputStream, BufferedInputStream] with Readable[Reader, BufferedReader] {
   def open() = opener
   lazy val inputStream = IoResource.fromInputStream(Channels.newInputStream(opener))
@@ -403,7 +644,7 @@ protected[io] class ReadableByteChannelIoResource(opener: => ReadableByteChannel
  *
  * @see ManagedResource
  */
-protected[io] class WritableByteChannelIoResource(opener: => WritableByteChannel, codec: Codec) extends IoResource[WritableByteChannel]
+private[io] class WritableByteChannelIoResource(opener: => WritableByteChannel, codec: Codec) extends IoResource[WritableByteChannel]
       with OutputStreamable[OutputStream, BufferedOutputStream] with Writable[Writer, BufferedWriter] {
   def open() = opener
   lazy val outputStream = IoResource.fromOutputStream(Channels.newOutputStream(opener))
@@ -416,7 +657,7 @@ protected[io] class WritableByteChannelIoResource(opener: => WritableByteChannel
  *
  * @see ManagedResource
  */
-protected[io] class FileChannelIoResource(opener: => FileChannel, codec: Codec) extends IoResource[FileChannel]
+private[io] class FileChannelIoResource(opener: => FileChannel, codec: Codec) extends IoResource[FileChannel]
       with InputStreamable[InputStream, BufferedInputStream] with Readable[Reader, BufferedReader]
       with OutputStreamable[OutputStream, BufferedOutputStream] with Writable[Writer, BufferedWriter] {
   def open() = opener

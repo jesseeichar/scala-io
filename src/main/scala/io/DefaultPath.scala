@@ -24,15 +24,16 @@ import Path._
 import Path.AccessModes._
 
 /** 
- *  A file reference that locates a file using a system independent path.
- *  The file is not required to exist.
- *
+ * <b>Not Part of API</b>
+ * <p>
+ * A file reference that locates a file using a system independent path.
+ * The file is not required to exist.
+ * </p>
  *  @author  Paul Phillips
  *  @author  Jesse Eichar
- *  @since   0.1
- * 
+ *  @since   1.0
  */
-class DefaultPath private[io] (val jfile: JFile, fileSystem: FileSystem) extends Path(fileSystem)
+private[io] class DefaultPath private[io] (val jfile: JFile, fileSystem: FileSystem) extends Path(fileSystem)
 {
   def toAbsolute: Path = if (isAbsolute) this else Path(jfile.getAbsolutePath())(fileSystem)
   def toURI: URI = jfile.toURI()

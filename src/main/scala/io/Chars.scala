@@ -10,7 +10,7 @@ package scalax.io
 
 import scalax.io.resource._
 import scala.collection.Traversable
-import StandardOpenOptions._
+import OpenOption._
 
 import java.io.{ 
   InputStream, PrintStream, File => JFile,
@@ -262,8 +262,8 @@ trait ReadChars extends Chars {
  * A trait for objects that have bytes written to them. For example an
  * OutputStream and File can both be WriteChars (or be converted to one).
  * Depending on the implementation and the underlying object the
- * {@link OpenOptions} may be restricted to a subset of the
- * {@link StandardOpenOptions}.
+ * {@link OpenOption} may be restricted to a subset of the
+ * {@link OpenOption}.
  * <p>
  * Note: Each invocation of a method will typically open a new stream or
  * channel.  That behaviour can be overrided by the implementation but

@@ -12,8 +12,14 @@ import java.lang.{ Process => JProcess }
 
 /**
  * A wrapper around java.lang.Process making it more idiomatic of Scala
- *
+ * <p>
+ * Not done !
+ * </p>
+ * 
  * @see java.lang.Process
+ * 
+ * @author  Jesse Eichar
+ * @since   1.0
  */
 class Process(process: JProcess) {
   def destroy(): Unit = process.destroy()

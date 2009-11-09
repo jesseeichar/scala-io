@@ -506,7 +506,7 @@ object Samples {
 
   { // implement custom copy method
     import scalax.io.Path
-    import scalax.io.StandardOpenOptions._
+    import scalax.io.OpenOption._
     // not necessarily the most efficient way to copy but demonstrates use of reading/writing bytes
     Path("to").fileOperations.writeBytes(
       Path("from").fileOperations.bytes()
@@ -591,12 +591,12 @@ object Samples {
 
   { // recommended way to read and write a file
     import scalax.io.{
-      FileOperations, Path, NotFileException,
-      NoSuchFileException}
+      FileOperations, Path, NotFileException}
+    import java.io.FileNotFoundException
     import scala.util.control.Exception._
     val file: FileOperations =  Path("file").fileOperations
     val result:Option[String] = catching (classOf[NotFileException],
-                                          classOf[NoSuchFileException]) opt { file.slurpString()}
+                                          classOf[FileNotFoundException]) opt { file.slurpString()}
 
     result match {
       case None => println("oops not a file maybe a directory?")
@@ -606,8 +606,8 @@ object Samples {
 
   { // several examples of writing data
     import scalax.io.{
-      FileOperations, Path, Codec, StandardOpenOptions}
-    import StandardOpenOptions._
+      FileOperations, Path, Codec, OpenOption}
+    import OpenOption._
 
     val file: FileOperations =  Path ("file").fileOperations
 
@@ -620,7 +620,7 @@ object Samples {
     // to specify in detail how the write should take place
     // the openOptions parameter takes a collections of OpenOptions objects
     // which are filesystem specific in general but the standard options
-    // are defined in the StandardOpenOptions object
+    // are defined in the OpenOption object
     // in addition to the definition common collections are also defined
     // WRITE_APPEND for example is a List(CREATE, APPEND, WRITE)
     file.writeBytes (List (1,2,3) map (_.toByte),
@@ -705,7 +705,7 @@ object Samples {
 
   { // several examples of obtaining IoResources
     import scalax.io._
-    import StandardOpenOptions._
+    import OpenOption._
     import java.nio.channels._
     import scalax.io.resource.{
       IoResource, Bufferable

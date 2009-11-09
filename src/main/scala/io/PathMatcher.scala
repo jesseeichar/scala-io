@@ -26,6 +26,9 @@ package scalax.io
  *
  * @see FileSystem#matcher(String,String)
  * @see Path#matcher(String,String)
+ * 
+ * @author  Jesse Eichar
+ * @since   1.0
  */
 abstract class PathMatcher extends Function[Path,Boolean] {
   def unapply(path: Path): Option[Path]
@@ -39,6 +42,9 @@ object PathMatcher {
    *
    * @see FileSystem#matcher(String,String) 
    * @see Path#matcher(String,String)
+   * 
+   * @author  Jesse Eichar
+   * @since   1.0
    */
   object StandardSyntax {
     /** Glob matcher sytax */

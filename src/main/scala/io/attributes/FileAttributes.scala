@@ -8,4 +8,11 @@
 
 package scalax.io.attributes
 
+/**
+ * Represents a implementation specific attribute
+ * of a file or directory.
+ * 
+ * @author  Jesse Eichar
+ * @since   1.0 
+ */
 case class FileAttribute[T] (name:String, value:T)
