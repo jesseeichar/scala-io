@@ -31,10 +31,14 @@ private[io] class DefaultFile(jfile:JFile, codec:Codec) extends FileOperations(c
 
   private implicit val defaultCodec = codec
 
-  def inputStream = IoResource.fromInputStream(new FileInputStream(jfile))
-  def outputStream(openOptions: OpenOption*) = IoResource.fromOutputStream(new FileOutputStream(jfile))
-  def channel( openOptions: OpenOption*) = IoResource.fromByteChannel(new FileInputStream(jfile).getChannel)
-  def fileChannel(openOptions: OpenOption*) = Some(IoResource.fromFileChannel(new FileInputStream(jfile).getChannel))
+  def inputStream = Resource.fromInputStream(new FileInputStream(jfile))
+  def readableByteChannel = Resource.fromReadableByteChannel(new FileInputStream(jfile).getChannel())
+
+  def outputStream(openOptions: OpenOption*) = Resource.fromOutputStream(new FileOutputStream(jfile))
+  def writableByteChannel(openOptions: OpenOption*) = Resource.fromWritableByteChannel(new FileInputStream(jfile).getChannel())
+
+  def channel( openOptions: OpenOption*) = Resource.fromByteChannel(new FileInputStream(jfile).getChannel)
+  def fileChannel(openOptions: OpenOption*) = Some(Resource.fromFileChannel(new FileInputStream(jfile).getChannel))
   
   def withCodec(codec:Codec) = new DefaultFile(jfile, codec)
 

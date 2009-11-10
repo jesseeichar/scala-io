@@ -59,28 +59,28 @@ object Bytes {
    * @param creator
    *          the function used to create an {@link InputStream}
    */
-  def fromInputStream(creator: => InputStream): ReadBytes = fromReadableByteChannel(Channels.newChannel(creator)) 
+  def fromInputStream(creator: => InputStream): ReadBytes = new Read(Channels.newChannel(creator), creator) 
   /**
    * Create a ReadBytes from an {@link ReadableByteChannel}
    *
    * @param creator
    *          the function used to create an {@link ReadableByteChannel}
    */
-  def fromReadableByteChannel(creator: => ReadableByteChannel): ReadBytes =  new Read(creator)
+  def fromReadableByteChannel(creator: => ReadableByteChannel): ReadBytes =  new Read(creator, Channels.newInputStream(creator))
   /**
    * Create a ReadBytes from an {@link OutputStream}
    *
    * @param creator
    *          the function used to create an {@link OutputStream}
    */
-  def fromOutputStream(creator: => OutputStream): WriteBytes = fromWritableByteChannel(Channels.newChannel(creator)) 
+  def fromOutputStream(creator: => OutputStream): WriteBytes = new Write(Channels.newChannel(creator), creator) 
   /**
    * Create a WriteBytes from an {@link WritableByteChannel}
    *
    * @param creator
    *          the function used to create an {@link WritableByteChannel}
    */
-  def fromWritableByteChannel(creator: => WritableByteChannel): WriteBytes =  new Write(creator)
+  def fromWritableByteChannel(creator: => WritableByteChannel): WriteBytes =  new Write(creator, Channels.newOutputStream(creator))
   /**
    * Create a ReadBytes with WriteBytes from an {@link ByteChannel}
    *
@@ -96,16 +96,19 @@ object Bytes {
    */
   def fromFileChannel(creator: => FileChannel): ReadBytes with WriteBytes =  new ReadWrite(creator)
 
-  private class Read (creator: => ReadableByteChannel) extends ReadBytes {
-    protected lazy val obtainReadableByteChannel = IoResource.fromReadableByteChannel(creator)
+  private class Read (channelCreator: => ReadableByteChannel, streamCreator: => InputStream) extends ReadBytes {
+    def readableByteChannel = Resource.fromReadableByteChannel(channelCreator)
+    def inputStream = Resource.fromInputStream(streamCreator)
   }
-  private class Write (creator: => WritableByteChannel) extends WriteBytes {
-    protected lazy val obtainWritableByteChannel = IoResource.fromWritableByteChannel(creator)
+  private class Write (channelCreator: => WritableByteChannel, streamCreator: => OutputStream) extends WriteBytes {
+    def writableByteChannel(openOptions: OpenOption*) = Resource.fromWritableByteChannel(channelCreator)
+    def outputStream(openOptions: OpenOption*) = Resource.fromOutputStream(streamCreator)
   }
-  private class ReadWrite (creator: => ByteChannel) extends ReadBytes with WriteBytes {
-    lazy val resource = IoResource.fromByteChannel(creator)
-    protected lazy val obtainWritableByteChannel = resource
-    protected lazy val obtainReadableByteChannel = resource
+  private class ReadWrite (channelCreator: => ByteChannel) extends ReadBytes with WriteBytes {
+    def writableByteChannel(openOptions: OpenOption*) = Resource.fromWritableByteChannel(channelCreator)
+    def outputStream(openOptions: OpenOption*) = Resource.fromOutputStream(Channels.newOutputStream(channelCreator))
+    def inputStream = Resource.fromInputStream(Channels.newInputStream(channelCreator))
+    def readableByteChannel = Resource.fromReadableByteChannel(channelCreator)
   }
 }
  
@@ -132,12 +135,17 @@ object Bytes {
  */
 trait ReadBytes {
   /**
-   * Obtains a {@ReadableByteResource} for input
+   * Obtains a {@link ReadableByteChannelResource} for input
    * operations
    */
-  protected def obtainReadableByteChannel: ManagedResource[ReadableByteChannel]
+  protected def readableByteChannel: ReadableByteChannelResource
+  /**
+   * Obtains a {@link InputStreamResource} for write
+   * operations
+   */
+  protected def inputStream: InputStreamResource
   private def withBufferedInputStream[R]( in: InputStream => R): R = {
-    obtainReadableByteChannel.acquireAndGet[R] (
+    readableByteChannel.acquireAndGet[R] (
       channel => {
         val buffered = Channels.newInputStream(channel)
         in(buffered)
@@ -260,10 +268,23 @@ trait ReadBytes {
  */
 trait WriteBytes {
   /**
-   * Obtains a {@ReadableByteResource} for input
+   * Obtains a {@link WritableByteChannel} for write
    * operations
+   *
+   * @param openOptions
+   *          The options declaring how the file will be opened
+   *          Default is WRITE/CREATE/TRUNCATE
    */
-  protected def obtainWritableByteChannel: ManagedResource[WritableByteChannel]
+  def writableByteChannel(openOptions: OpenOption*): WritableByteChannelResource
+  /**
+   * Obtains a {@link OutputStreamResource} for write
+   * operations
+   * 
+   * @param openOptions
+   *          The options declaring how the file will be opened
+   *          Default is WRITE/CREATE/TRUNCATE
+   */
+  def outputStream(openOptions: OpenOption*): OutputStreamResource
 
   /**
    * Write bytes to the file

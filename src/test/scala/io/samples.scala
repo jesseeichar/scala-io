@@ -173,7 +173,7 @@ object Samples {
       case File (file) => println ("it's a file!"+file)
       case Directory (dir) => println ("it's a directory!"+dir)
       case Exists (path) => println ("It exists... but what is it?"+path)
-      case NonExistant (path) => println ("It does not exist!"+path)
+      case NonExistent (path) => println ("It does not exist!"+path)
       case _ => println ("I give up")
     }
 
@@ -678,7 +678,7 @@ object Samples {
 // TODO Mention in writeBytes and patch that using an array is the most performant
  // TODO Bytes and Chars objects with both inputStreams and channels apply methods
  // TODO rename Bytes to ReadBytes
- // TODO remove little factory objects for IoResource and have 1 IoResource factory object
+ // TODO remove little factory objects for Resource and have 1 Resource factory object
 
 
   { // demonstrate several ways to interoperate existing java APIs
@@ -703,14 +703,14 @@ object Samples {
     val out: BufferedOutputStream = file.outputStream().buffered.open
   }
 
-  { // several examples of obtaining IoResources
+  { // several examples of obtaining Resources
     import scalax.io._
     import OpenOption._
     import java.nio.channels._
     import scalax.io.resource.{
-      IoResource, Bufferable
+      Resource, Bufferable, InputStreamResource,
+      OutputStreamResource, ByteChannelResource
     }
-    import scalax.io.resource.IoResource._
     import java.io.{
       InputStream, BufferedInputStream,
       OutputStream, BufferedOutputStream,
@@ -721,10 +721,10 @@ object Samples {
 
     // get various input streams, readers an channels
     val in: InputStreamResource = file.inputStream
-    val bufferedIn: IoResource[BufferedInputStream] = in.buffered
-    val readableChannel: IoResource[ReadableByteChannel] = in.readableByteChannel
-    val reader: IoResource[Reader] with Bufferable[BufferedReader] = in.reader
-    val bufferedReader: IoResource[BufferedReader] = reader.buffered
+    val bufferedIn: Resource[BufferedInputStream] = in.buffered
+    val readableChannel: Resource[ReadableByteChannel] = in.readableByteChannel
+    val reader: Resource[Reader] with Bufferable[BufferedReader] = in.reader
+    val bufferedReader: Resource[BufferedReader] = reader.buffered
 
     // get various output streams and channels
     // get default OutputStream
@@ -732,10 +732,10 @@ object Samples {
     var out: OutputStreamResource = file.outputStream()
     // create a appending stream
     var out2: OutputStreamResource = file.outputStream (WRITE_APPEND:_*)
-    val bufferedOut: IoResource[BufferedOutputStream] = out.buffered
-    val writableChannel: IoResource[WritableByteChannel] = out.writableByteChannel
-    val writer: IoResource[Writer] with Bufferable[BufferedWriter] = out.writer
-    val bufferedWriter: IoResource[BufferedWriter] = writer.buffered
+    val bufferedOut: Resource[BufferedOutputStream] = out.buffered
+    val writableChannel: Resource[WritableByteChannel] = out.writableByteChannel
+    val writer: Resource[Writer] with Bufferable[BufferedWriter] = out.writer
+    val bufferedWriter: Resource[BufferedWriter] = writer.buffered
     // TODO copy examples from input section
 
     // examples getting ByteChannels
@@ -775,7 +775,7 @@ object Samples {
 
   { // Examples of non-file IO
     import scalax.io._
-    import scalax.io.resource.IoResource
+    import scalax.io.resource.Resource
     import scala.resource.ManagedResource
     import java.net.URL
     import java.io.{
@@ -801,11 +801,11 @@ object Samples {
     Chars.fromWriter(new OutputStreamWriter(new ByteArrayOutputStream())).writeString("howdy")
     Chars.fromOutputStream(new PrintStream(new ByteArrayOutputStream())).writeString("howdy")
 
-    // Channels and streams can also be wrapped in IoResource objects
-    val resource = IoResource.fromInputStream (url.openStream ())
+    // Channels and streams can also be wrapped in Resource objects
+    val resource = Resource.fromInputStream (url.openStream ())
     resource.buffered acquireFor {in => println (in.read())}
 
-    // IoResources have convenience methods for converting between common types of resources
+    // Resources have convenience methods for converting between common types of resources
     resource.reader.buffered  acquireFor {in => println (in.readLine())}
 
     // a more general way of converting between resources is to use the ManagedResource API

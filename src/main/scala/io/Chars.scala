@@ -61,14 +61,14 @@ object Chars {
    * @param creator
    *          the function used to create an {@link InputStream}
    */
-  def fromInputStream(creator: => InputStream, codec:Codec = Codec.default): ReadChars with ReadBytes = fromReadableByteChannel(Channels.newChannel(creator), codec) 
+  def fromInputStream(creator: => InputStream, codec:Codec = Codec.default): ReadChars with ReadBytes = new Read(Channels.newChannel(creator), creator, codec) 
   /**
    * Create a ReadChars with ReadBytes from an {@link ReadableByteChannel}
    *
    * @param creator
    *          the function used to create an {@link ReadableByteChannel}
    */
-  def fromReadableByteChannel(creator: => ReadableByteChannel, codec:Codec = Codec.default): ReadChars with ReadBytes =  new Read(creator, codec)
+  def fromReadableByteChannel(creator: => ReadableByteChannel, codec:Codec = Codec.default): ReadChars with ReadBytes =  new Read(creator, Channels.newInputStream(creator), codec)
   /**
    * Create a ReadChars from an {@link Reader}
    *
@@ -83,14 +83,14 @@ object Chars {
    * @param creator
    *          the function used to create an {@link OutputStream}
    */
-  def fromOutputStream(creator: => OutputStream, codec:Codec = Codec.default): WriteChars with WriteBytes = fromWritableByteChannel(Channels.newChannel(creator), codec) 
+  def fromOutputStream(creator: => OutputStream, codec:Codec = Codec.default): WriteChars with WriteBytes = new Write(Channels.newChannel(creator), creator, codec) 
   /**
    * Create a WriteChars with WriteBytes from an {@link WritableByteChannel}
    *
    * @param creator
    *          the function used to create an {@link WritableByteChannel}
    */
-  def fromWritableByteChannel(creator: => WritableByteChannel, codec:Codec = Codec.default): WriteChars with WriteBytes =  new Write(creator, codec)
+  def fromWritableByteChannel(creator: => WritableByteChannel, codec:Codec = Codec.default): WriteChars with WriteBytes =  new Write(creator, Channels.newOutputStream(creator), codec)
   /**
    * Create a WriteChars from an {@link Writer}
    *
@@ -114,22 +114,32 @@ object Chars {
    */
   def fromFileChannel(creator: => FileChannel, codec:Codec = Codec.default): ReadChars with WriteChars with ReadBytes with WriteBytes =  new ReadWrite(creator, codec)
 
-  private class Read (creator: => ReadableByteChannel, codec: Codec = Codec.default) extends ReadChars with ReadBytes{
-    protected lazy val obtainReadableByteChannel = IoResource.fromReadableByteChannel (creator)
+  private class Read (channelCreator: => ReadableByteChannel, 
+                      streamCreator: => InputStream,
+                      codec: Codec = Codec.default) extends ReadChars with ReadBytes{
+    def readableByteChannel = Resource.fromReadableByteChannel(channelCreator)
+    def inputStream = Resource.fromInputStream(streamCreator)
+
     def sourceCodec: Codec = codec
-    def withCodec(codec:Codec) = new Read(creator, codec)
+    def withCodec(codec:Codec) = new Read(channelCreator, streamCreator, codec)
   }
-  private class Write (creator: => WritableByteChannel, codec: Codec = Codec.default) extends WriteChars with WriteBytes{
-    protected lazy val obtainWritableByteChannel = IoResource.fromWritableByteChannel (creator)
+  private class Write (channelCreator: => WritableByteChannel, 
+                       streamCreator: => OutputStream,
+                       codec: Codec = Codec.default) extends WriteChars with WriteBytes{
+    def writableByteChannel(openOptions: OpenOption*) = Resource.fromWritableByteChannel(channelCreator)
+    def outputStream(openOptions: OpenOption*) = Resource.fromOutputStream(streamCreator)
+
     def sourceCodec: Codec = codec
-    def withCodec(codec:Codec) = new Write(creator, codec)
+    def withCodec(codec:Codec) = new Write(channelCreator, streamCreator, codec)
   }
-  private class ReadWrite (creator: => ByteChannel, codec: Codec) extends ReadChars with WriteChars with ReadBytes with WriteBytes{
-    lazy val resource = IoResource.fromByteChannel (creator)
-    protected lazy val obtainWritableByteChannel = resource
-    protected lazy val obtainReadableByteChannel = resource
+  private class ReadWrite (channelCreator: => ByteChannel, codec: Codec) extends ReadChars with WriteChars with ReadBytes with WriteBytes{
+    def writableByteChannel(openOptions: OpenOption*) = Resource.fromWritableByteChannel(channelCreator)
+    def outputStream(openOptions: OpenOption*) = Resource.fromOutputStream(Channels.newOutputStream(channelCreator))
+    def inputStream = Resource.fromInputStream(Channels.newInputStream(channelCreator))
+    def readableByteChannel = Resource.fromReadableByteChannel(channelCreator)
+
     def sourceCodec: Codec = codec
-    def withCodec(codec:Codec) = new ReadWrite(creator, codec)
+    def withCodec(codec:Codec) = new ReadWrite(channelCreator, codec)
   }
 }
  

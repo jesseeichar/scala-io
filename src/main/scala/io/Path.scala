@@ -191,7 +191,7 @@ object Path
    * path match {
    *   case File(f) => println("A file was found")
    *   case Directory(d) => println("A directory was found")
-   *   case NonExistant(e) => println("Path does not Exist")
+   *   case NonExistent(e) => println("Path does not Exist")
    *   case Apple(apple) => println("A path named apple was found")
    *   case ReadWrite(apply) => println("Path is readable and writeable")
    *   case Path("c:/dir/file") => println("Found a path that is c:/dir/file or
@@ -216,7 +216,7 @@ object Path
       def unapply(path:Path):Option[Path] = None // TODO
     }
     /** matches a path if it does not Exist */
-    object NonExistant {
+    object NonExistent {
       def unapply(path:Path):Option[Path] = None // TODO
     }
     /**
