@@ -786,21 +786,24 @@ object Samples {
     
 
 
+    implicit val defaultCodec: Codec = Codec.UTF8
+
+
     // Note that in these example streams are closed automatically
     // Also note that normally a constructed stream is not passed to factory method because most factory methods are by-name parameters (=> R)
     // this means that the objects here can be reused without worrying about the stream being previously emptied
     val url = new URL("www.scala-lang.org")
     // A ReadChars (a trait of FileOperations) object can be created from a stream or channel
-    Chars.fromInputStream(url.openStream()).lines() foreach println _
-    Chars.fromReader(new InputStreamReader(url.openStream())).lines() foreach println _
+    Resource.fromInputStream(url.openStream()).reader.lines() foreach println _
+    Resource.fromReader(new InputStreamReader(url.openStream())).lines() foreach println _
     // ReadBytes can also be constructed
-    val bytes: Iterable[Byte] = Bytes.fromInputStream(url.openStream()).bytes()
+    val bytes: Iterable[Byte] = Resource.fromInputStream(url.openStream()).bytes()
     Path("scala.html").fileOperations writeBytes bytes
 
     // WriteChars and WriteBytes can be used to simplify writing to OutputStreams
-    Chars.fromOutputStream(new ByteArrayOutputStream()).writeString("howdy")
-    Chars.fromWriter(new OutputStreamWriter(new ByteArrayOutputStream())).writeString("howdy")
-    Chars.fromOutputStream(new PrintStream(new ByteArrayOutputStream())).writeString("howdy")
+    Resource.fromOutputStream(new ByteArrayOutputStream()).writer.writeString("howdy")
+    Resource.fromWriter(new OutputStreamWriter(new ByteArrayOutputStream())).writeString("howdy")
+    Resource.fromOutputStream(new PrintStream(new ByteArrayOutputStream())).writer.writeString("howdy")
 
     // Channels and streams can also be wrapped in Resource objects
     val resource = Resource.fromInputStream (url.openStream ())

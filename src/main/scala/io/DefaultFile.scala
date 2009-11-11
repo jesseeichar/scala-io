@@ -47,4 +47,6 @@ private[io] class DefaultFile(jfile:JFile, codec:Codec) extends FileOperations(c
   def withLock[R](start: Long = 0, size: Long = -1, shared: Boolean = false)(block: => R): Option[R] = {
     None
   }
+  
+  def bytesAsInts:Iterable[Int] = null // TODO
 }

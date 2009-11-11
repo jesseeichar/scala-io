@@ -194,28 +194,36 @@ trait ReadableByteChannelable[S <: Resource[ReadableByteChannel]] {
 
   /** A Resource with several conversion traits. */
   trait InputStreamResource extends Resource[InputStream] with Bufferable[InputStream, InputStreamResource]
-      with Readable[ReaderResource] with ReadableByteChannelable[ReadableByteChannelResource] 
+      with Readable[ReaderResource] with ReadableByteChannelable[ReadableByteChannelResource]
+      with ReadBytes
   /** A Resource with several conversion traits. */
   trait OutputStreamResource extends Resource[OutputStream] with Bufferable[OutputStream, OutputStreamResource]
       with Writable[WriterResource] with WritableByteChannelable[WritableByteChannelResource] 
+      with WriteBytes
   /** A Resource with several conversion traits. */
   trait ReaderResource extends Resource[Reader] with Bufferable[Reader, ReaderResource]
+      with ReadChars
   /** A Resource with several conversion traits. */
   trait WriterResource extends Resource[Writer] with Bufferable[Writer, WriterResource]
+      with WriteChars
   /** A Resource with several conversion traits. */
   trait ReadableByteChannelResource extends Resource[ReadableByteChannel]
       with InputStreamable[InputStreamResource] with Readable[ReaderResource] 
+      with ReadBytes
   /** A Resource with several conversion traits. */
   trait WritableByteChannelResource extends Resource[WritableByteChannel]
       with OutputStreamable[OutputStreamResource] with Writable[WriterResource]
+      with WriteBytes
   /** A Resource with several conversion traits. */
   trait ByteChannelResource extends Resource[ByteChannel]
       with InputStreamable[InputStreamResource] with Readable[ReaderResource]
       with OutputStreamable[OutputStreamResource] with Writable[WriterResource]
+      with ReadBytes with WriteBytes
   /** A Resource with several conversion traits. */
   trait FileChannelResource extends Resource[FileChannel]
       with InputStreamable[InputStreamResource] with Readable[ReaderResource]
       with OutputStreamable[OutputStreamResource] with Writable[WriterResource]
+      with ReadBytes with WriteBytes
 
 /**
  * Defines several factory methods for creating instances of Resource.
@@ -314,11 +322,13 @@ object Resource {
    * @param opener
    *          the function for opening a new Reader
    *          this is only important if the stream may be converted to a
+   * @param codec
+   *          the codec representing the encoding of the strings that the Reader will Read
    *
    * @return
    *          an ReaderResource
    */
-  def fromReader(opener: => Reader): ReaderResource = new ReaderResourceImpl(opener)
+  def fromReader(opener: => Reader)(implicit codec: Codec): ReaderResource = new ReaderResourceImpl(opener, codec: Codec)
   /**
    * Create an Resource instance with conversion traits from an BufferedReader.
    * <p>
@@ -330,11 +340,13 @@ object Resource {
    *
    * @param opener
    *          the function for opening a new BufferedReader
+   * @param codec
+   *          the codec representing the encoding of the strings that the Reader will Read
    *
    * @return
    *          a ReaderResource that is backed by a BufferedReader
    */
-  def fromBufferedReader(opener: => BufferedReader): ReaderResource = null // TODO
+  def fromBufferedReader(opener: => BufferedReader)(implicit codec: Codec): ReaderResource = null // TODO
 
   // Writer factory methods
   /**
@@ -348,11 +360,13 @@ object Resource {
    *
    * @param opener
    *          the function for opening a new Writer
+   * @param codec
+   *          the codec representing the encoding of the strings that the writer will write out
    *
    * @return
    *          an WriterResource
    */
-  def fromWriter(opener: => Writer): WriterResource = new WriterResourceImpl(opener)
+  def fromWriter(opener: => Writer)(implicit codec: Codec): WriterResource = new WriterResourceImpl(opener, codec)
   /**
    * Create an Resource instance with conversion traits from an BufferedWriter.
    * <p>
@@ -364,11 +378,12 @@ object Resource {
    *
    * @param opener
    *          the function for opening a new BufferedWriter
-   *
+   * @param codec
+   *          the codec representing the encoding of the strings that the writer will write out
    * @return
    *          a WriterResource that is backed by a BufferedWriter
    */
-  def fromBufferedWriter(opener: => BufferedWriter): WriterResource = null // TOOD
+  def fromBufferedWriter(opener: => BufferedWriter)(implicit codec: Codec): WriterResource = null // TOOD
 
   // Channel factory methods
   /**
@@ -450,6 +465,7 @@ private[io] class InputStreamResourceImpl(opener: => InputStream) extends InputS
     Resource.fromReader(new InputStreamReader(opener, codec.charSet))
   lazy val readableByteChannel =
     Resource.fromReadableByteChannel(Channels.newChannel(open()))
+  def bytesAsInts:Iterable[Int] = null // TODO
 }
 
 /***************************** OutputStreamResource ************************************/
@@ -475,9 +491,10 @@ private[io] class OutputStreamResourceImpl(opener: => OutputStream) extends Outp
  *
  * @see ManagedResource
  */
-private[io] class ReaderResourceImpl(opener: => Reader) extends ReaderResource {
+private[io] class ReaderResourceImpl(opener: => Reader, val sourceCodec:Codec) extends ReaderResource {
   def open() = opener
-  val buffered = Resource.fromBufferedReader(new BufferedReader(opener))
+  val buffered = Resource.fromBufferedReader(new BufferedReader(opener))(sourceCodec)
+  def withCodec(codec: Codec): ReaderResource = null // TODO
 }
 
 /***************************** WriterResource ************************************/
@@ -486,9 +503,10 @@ private[io] class ReaderResourceImpl(opener: => Reader) extends ReaderResource {
  *
  * @see ManagedResource
  */
-private[io] class WriterResourceImpl(opener: => Writer) extends WriterResource {
+private[io] class WriterResourceImpl(opener: => Writer, val sourceCodec:Codec) extends WriterResource {
   def open() = opener
-  val buffered = Resource.fromBufferedWriter(new BufferedWriter(opener))
+  val buffered = Resource.fromBufferedWriter(new BufferedWriter(opener))(sourceCodec)
+  def withCodec(codec: Codec): WriterResource = null // TODO
 }
 
 /***************************** ByteChannelResource ************************************/
@@ -503,6 +521,7 @@ private[io] class ByteChannelResourceImpl(opener: => ByteChannel) extends ByteCh
   lazy val outputStream = Resource.fromOutputStream(Channels.newOutputStream(opener))
   def reader(implicit codec: Codec = Codec.default) = Resource.fromReader(Channels.newReader(opener, codec.charSet.name()))
   def writer(implicit codec: Codec = Codec.default) = Resource.fromWriter(Channels.newWriter(opener, codec.charSet.name()))
+  def bytesAsInts:Iterable[Int] = null // TODO
 }
 
 
@@ -517,6 +536,7 @@ private[io] class ReadableByteChannelResourceImpl(opener: => ReadableByteChannel
   def open() = opener
   lazy val inputStream = Resource.fromInputStream(Channels.newInputStream(opener))
   def reader(implicit codec:Codec = Codec.default) = Resource.fromReader(Channels.newReader(opener, codec.charSet.name()))
+  def bytesAsInts:Iterable[Int] = null // TODO
 }
 
 /***************************** WritableByteChannelResource ************************************/
@@ -544,4 +564,5 @@ private[io] class FileChannelResourceImpl(opener: => FileChannel) extends FileCh
   lazy val outputStream = Resource.fromOutputStream(Channels.newOutputStream(opener))
   def reader(implicit codec:Codec = Codec.default) = Resource.fromReader(Channels.newReader(opener, codec.charSet.name()))
   def writer(implicit codec:Codec = Codec.default) = Resource.fromWriter(Channels.newWriter(opener, codec.charSet.name()))
+  def bytesAsInts:Iterable[Int] = null // TODO
 }
