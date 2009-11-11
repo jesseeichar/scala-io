@@ -700,7 +700,7 @@ object Samples {
     // here is how to get a raw java OutputStream from a file
     // and just for good measure it will be a BufferedOutputStream
     // streams and writer both have buffered versions, similar to their java counterparts
-    val out: BufferedOutputStream = file.outputStream().buffered.open
+    val out: OutputStream = file.outputStream().buffered.open
   }
 
   { // several examples of obtaining Resources
@@ -709,7 +709,8 @@ object Samples {
     import java.nio.channels._
     import scalax.io.resource.{
       Resource, Bufferable, InputStreamResource,
-      OutputStreamResource, ByteChannelResource
+      OutputStreamResource, ByteChannelResource,
+      ReaderResource, WriterResource
     }
     import java.io.{
       InputStream, BufferedInputStream,
@@ -721,10 +722,10 @@ object Samples {
 
     // get various input streams, readers an channels
     val in: InputStreamResource = file.inputStream
-    val bufferedIn: Resource[BufferedInputStream] = in.buffered
+    val bufferedIn: InputStreamResource = in.buffered
     val readableChannel: Resource[ReadableByteChannel] = in.readableByteChannel
-    val reader: Resource[Reader] with Bufferable[BufferedReader] = in.reader
-    val bufferedReader: Resource[BufferedReader] = reader.buffered
+    val reader: ReaderResource = in.reader
+    val bufferedReader: ReaderResource = reader.buffered
 
     // get various output streams and channels
     // get default OutputStream
@@ -732,10 +733,10 @@ object Samples {
     var out: OutputStreamResource = file.outputStream()
     // create a appending stream
     var out2: OutputStreamResource = file.outputStream (WRITE_APPEND:_*)
-    val bufferedOut: Resource[BufferedOutputStream] = out.buffered
+    val bufferedOut: OutputStreamResource = out.buffered
     val writableChannel: Resource[WritableByteChannel] = out.writableByteChannel
-    val writer: Resource[Writer] with Bufferable[BufferedWriter] = out.writer
-    val bufferedWriter: Resource[BufferedWriter] = writer.buffered
+    val writer: WriterResource = out.writer
+    val bufferedWriter: WriterResource = writer.buffered
     // TODO copy examples from input section
 
     // examples getting ByteChannels
@@ -780,7 +781,7 @@ object Samples {
     import java.net.URL
     import java.io.{
       ObjectInputStream, InputStreamReader, ByteArrayOutputStream,
-      PrintStream, OutputStreamWriter
+      PrintStream, OutputStreamWriter, BufferedReader
     }
     
 
@@ -806,7 +807,7 @@ object Samples {
     resource.buffered acquireFor {in => println (in.read())}
 
     // Resources have convenience methods for converting between common types of resources
-    resource.reader.buffered  acquireFor {in => println (in.readLine())}
+    resource.reader.buffered  acquireFor {in => println (in.asInstanceOf[BufferedReader].readLine())}
 
     // a more general way of converting between resources is to use the ManagedResource API
 //    val objectIn: ManagedResource[ObjectInputStream] = resource map (s => new ObjectInputStream (s))

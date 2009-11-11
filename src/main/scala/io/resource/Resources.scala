@@ -57,22 +57,24 @@ trait Resource[R <: Closeable] extends AbstractUntranslatedManagedResource[R] {
 }
 
 /**
- * An Object that has an associates Buffered object. For example InputStream
+ * An Object that has an associated Buffered object. For example InputStream
  * has BufferedInputStream
  *
+ * @param C
+ *          The resource type
  * @param B
- *          they type of the Buffered object
+ *          they type of the buffered resource 
  * 
  * @author  Jesse Eichar
  * @since   1.0
  */
-trait Bufferable[B <: Closeable] {
+trait Bufferable[C <: Closeable, R <: Resource[C]] {
   /**
    * Obtain the buffered version of this object.
    *
    * @return the buffered version of this object
    */
-  def buffered: Resource[B]
+  def buffered: R
 }
 
 /**
@@ -81,19 +83,17 @@ trait Bufferable[B <: Closeable] {
  *
  * @param S
  *          the type of InputStream that is created
- * @param B
- *          the type of buffered input stream that can also be created
  * 
  * @author  Jesse Eichar
  * @since   1.0
  */
-trait InputStreamable[S <: InputStream, B <: BufferedInputStream] {
+trait InputStreamable[S <: Resource[InputStream]] {
   /**
    * Obtain the InputStream Resource version of this object.
    *
    * @return the InputStream Resource version of this object.
    */
-  def inputStream: Resource[S] with Bufferable[B]
+  def inputStream: S
 }
 
 /**
@@ -102,19 +102,17 @@ trait InputStreamable[S <: InputStream, B <: BufferedInputStream] {
  *
  * @param S
  *          the type of OutputStream that is created
- * @param B
- *          the type of buffered output stream that can also be created
  * 
  * @author  Jesse Eichar
  * @since   1.0
  */
-trait OutputStreamable[S <: OutputStream, B <: BufferedOutputStream] {
+trait OutputStreamable[S <: Resource[OutputStream]] {
   /**
    * Obtain the InputStream Resource version of this object.
    *
    * @return the InputStream Resource version of this object.
    */
-  def outputStream: Resource[S] with Bufferable[B]
+  def outputStream: S
 }
 
 /**
@@ -123,19 +121,17 @@ trait OutputStreamable[S <: OutputStream, B <: BufferedOutputStream] {
  *
  * @param S
  *          the type of Reader that is created
- * @param B
- *          the type of BufferedReader that can also be created
  * 
  * @author  Jesse Eichar
  * @since   1.0
  */
-trait Readable[S <: Reader, B <: BufferedReader] {
+trait Readable[S <: Resource[Reader]] {
   /**
    * Obtain the Reader Resource version of this object.
    *
    * @return the Reader Resource version of this object.
    */
-  def reader(implicit codec: Codec = Codec.default): Resource[S] with Bufferable[B]
+  def reader(implicit codec: Codec = Codec.default): S
 }
 
 /**
@@ -144,19 +140,17 @@ trait Readable[S <: Reader, B <: BufferedReader] {
  *
  * @param S
  *          the type of Writer that is created
- * @param B
- *          the type of BufferedWriter that can also be created
  * 
  * @author  Jesse Eichar
  * @since   1.0
  */
-trait Writable[S <: Writer, B <: BufferedWriter] {
+trait Writable[S <: Resource[Writer]] {
   /**
    * Obtain the Writer Resource version of this object.
    *
    * @return the Writer Resource version of this object.
    */
-  def writer(implicit codec: Codec = Codec.default): Resource[S] with Bufferable[B]
+  def writer(implicit codec: Codec = Codec.default): S
 }
 
 /**
@@ -165,19 +159,17 @@ trait Writable[S <: Writer, B <: BufferedWriter] {
  *
  * @param S
  *          the type of WritableByteChannel that is created
- * @param B
- *          the type of BufferedWritableByteChannel that can also be created
  * 
  * @author  Jesse Eichar
  * @since   1.0
  */
-trait WritableByteChannelable[S <: WritableByteChannel] {
+trait WritableByteChannelable[S <: Resource[WritableByteChannel]] {
   /**
    * Obtain the Writer Resource version of this object.
    *
    * @return the Writer Resource version of this object.
    */
-  def writableByteChannel: Resource[S]
+  def writableByteChannel: S
 }
 
 /**
@@ -186,46 +178,44 @@ trait WritableByteChannelable[S <: WritableByteChannel] {
  *
  * @param S
  *          the type of ReadableByteChannel that is created
- * @param B
- *          the type of BufferedReadableByteChannel that can also be created
  * 
  * @author  Jesse Eichar
  * @since   1.0
  */
-trait ReadableByteChannelable[S <: ReadableByteChannel] {
+trait ReadableByteChannelable[S <: Resource[ReadableByteChannel]] {
   /**
    * Obtain the Reader Resource version of this object.
    *
    * @return the Reader Resource version of this object.
    */
-  def readableByteChannel: Resource[S]
+  def readableByteChannel: S
 }
 
 
   /** A Resource with several conversion traits. */
-  trait InputStreamResource extends Resource[InputStream] with Bufferable[BufferedInputStream]
-      with Readable[Reader, BufferedReader] with ReadableByteChannelable[ReadableByteChannel]
+  trait InputStreamResource extends Resource[InputStream] with Bufferable[InputStream, InputStreamResource]
+      with Readable[ReaderResource] with ReadableByteChannelable[ReadableByteChannelResource] 
   /** A Resource with several conversion traits. */
-  trait OutputStreamResource extends Resource[OutputStream] with Bufferable[BufferedOutputStream]
-      with Writable[Writer, BufferedWriter] with WritableByteChannelable[WritableByteChannel]
+  trait OutputStreamResource extends Resource[OutputStream] with Bufferable[OutputStream, OutputStreamResource]
+      with Writable[WriterResource] with WritableByteChannelable[WritableByteChannelResource] 
   /** A Resource with several conversion traits. */
-  trait ReaderResource extends Resource[Reader] with Bufferable[BufferedReader]
+  trait ReaderResource extends Resource[Reader] with Bufferable[Reader, ReaderResource]
   /** A Resource with several conversion traits. */
-  trait WriterResource extends Resource[Writer] with Bufferable[BufferedWriter]
+  trait WriterResource extends Resource[Writer] with Bufferable[Writer, WriterResource]
   /** A Resource with several conversion traits. */
   trait ReadableByteChannelResource extends Resource[ReadableByteChannel]
-      with InputStreamable[InputStream, BufferedInputStream] with Readable[Reader, BufferedReader]
+      with InputStreamable[InputStreamResource] with Readable[ReaderResource] 
   /** A Resource with several conversion traits. */
   trait WritableByteChannelResource extends Resource[WritableByteChannel]
-      with OutputStreamable[OutputStream, BufferedOutputStream] with Writable[Writer, BufferedWriter]
+      with OutputStreamable[OutputStreamResource] with Writable[WriterResource]
   /** A Resource with several conversion traits. */
   trait ByteChannelResource extends Resource[ByteChannel]
-      with InputStreamable[InputStream, BufferedInputStream] with Readable[Reader, BufferedReader]
-      with OutputStreamable[OutputStream, BufferedOutputStream] with Writable[Writer, BufferedWriter]
+      with InputStreamable[InputStreamResource] with Readable[ReaderResource]
+      with OutputStreamable[OutputStreamResource] with Writable[WriterResource]
   /** A Resource with several conversion traits. */
   trait FileChannelResource extends Resource[FileChannel]
-      with InputStreamable[InputStream, BufferedInputStream] with Readable[Reader, BufferedReader]
-      with OutputStreamable[OutputStream, BufferedOutputStream] with Writable[Writer, BufferedWriter]
+      with InputStreamable[InputStreamResource] with Readable[ReaderResource]
+      with OutputStreamable[OutputStreamResource] with Writable[WriterResource]
 
 /**
  * Defines several factory methods for creating instances of Resource.
@@ -273,9 +263,9 @@ object Resource {
    *          the function for opening a new BufferedInputStream
    *
    * @return
-   *          a BufferedInputStreamResource
+   *          a InputStreamResource that is backed by a BufferedInputStream
    */
-  def fromBufferedInputStream(opener: => BufferedInputStream): Resource[BufferedInputStream]  = null // TODO
+  def fromBufferedInputStream(opener: => BufferedInputStream): InputStreamResource  = null // TODO
 
   // OutputStream factory methods
   /**
@@ -307,9 +297,9 @@ object Resource {
    *          the function for opening a new BufferedOutputStream
    *
    * @return
-   *          a BufferedOutputStreamResource
+   *          a OutputStreamResource that is backed by a BufferedOutputStream
    */
-  def fromBufferedOutputStream(opener: => BufferedOutputStream): Resource[BufferedOutputStream] = null // TODO
+  def fromBufferedOutputStream(opener: => BufferedOutputStream): OutputStreamResource = null // TODO
 
   // Reader factory methods
   /**
@@ -342,9 +332,9 @@ object Resource {
    *          the function for opening a new BufferedReader
    *
    * @return
-   *          an BufferedReaderResource
+   *          a ReaderResource that is backed by a BufferedReader
    */
-  def fromBufferedReader(opener: => BufferedReader): Resource[BufferedReader]= null // TODO
+  def fromBufferedReader(opener: => BufferedReader): ReaderResource = null // TODO
 
   // Writer factory methods
   /**
@@ -364,7 +354,7 @@ object Resource {
    */
   def fromWriter(opener: => Writer): WriterResource = new WriterResourceImpl(opener)
   /**
-   * Create an Resource instance with conversion traits from an BufferedReader.
+   * Create an Resource instance with conversion traits from an BufferedWriter.
    * <p>
    * The opener param is a by-name argument an is use to open a new stream.
    * Out other words it is important to try and pass in a function for opening
@@ -373,12 +363,12 @@ object Resource {
    * </p>
    *
    * @param opener
-   *          the function for opening a new BufferedReader
+   *          the function for opening a new BufferedWriter
    *
    * @return
-   *          an BufferedReaderResource
+   *          a WriterResource that is backed by a BufferedWriter
    */
-  def fromBufferedWriter(opener: => BufferedWriter): Resource[BufferedWriter] = null // TOOD
+  def fromBufferedWriter(opener: => BufferedWriter): WriterResource = null // TOOD
 
   // Channel factory methods
   /**

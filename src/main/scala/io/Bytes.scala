@@ -144,6 +144,7 @@ trait ReadBytes {
    * operations
    */
   protected def inputStream: InputStreamResource
+  
   private def withBufferedInputStream[R]( in: InputStream => R): R = {
     readableByteChannel.acquireAndGet[R] (
       channel => {
