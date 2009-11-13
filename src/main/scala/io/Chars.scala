@@ -11,7 +11,7 @@ package scalax.io
 import scalax.io.resource._
 import scala.collection.Traversable
 import OpenOption._
-
+import Line._
 import java.io.{ 
   InputStream, PrintStream, File => JFile,
   InputStreamReader, OutputStream, Writer, Reader
@@ -137,9 +137,8 @@ trait ReadChars extends Chars {
    * @param codec
    *          The codec representing the desired encoding of the characters
    * @param terminator
-   *          The string to use as a line terminator. The string
-   *          length is restricted to 1 or 2 characters
-   *          Default is platform specific EOL
+   *          The strategy for determining the end of line
+   *          Default is to auto-detect the EOL
    * @param includeTerminator
    *          if true then the line will end with the line terminator
    *          Default is false
@@ -147,15 +146,15 @@ trait ReadChars extends Chars {
    * @return
    *          a non-strict iterable for iterating through all the lines
    */
-  def lines(terminator: String = compat.Platform.EOL,
+  def lines(terminator: Terminators.Terminator = Terminators.Auto,
             includeTerminator: Boolean = false,
-            codec: Codec = getCodec()): Iterable[String] =
-              {
-                require(terminator.length == 1 || terminator.length == 2, "Line terminator may be 1 or 2 characters only.")
-                new Iterable[String] {
-                  def iterator = new LineIterator(chars(codec), terminator, includeTerminator)
-                }
-              }
+            codec: Codec = getCodec()): Iterable[String] = {
+             /* require(terminator.length == 1 || terminator.length == 2, "Line terminator may be 1 or 2 characters only.")
+              new Iterable[String] {
+                def iterator = new LineIterator(chars(codec), terminator, includeTerminator)
+              }*/
+              null //TODO
+            }
   /**
    * Loads all the characters into memory. There is no protection against
    * loading very large files/amounts of data.
@@ -169,6 +168,8 @@ trait ReadChars extends Chars {
    */
   def slurpString(codec: Codec = getCodec()) = chars(codec).mkString
 
+/*
+ * TODO convert to use Line.Terminator for finding new line
   private class LineIterator(source: Iterable[Char], terminator: String, includeTerminator: Boolean) extends Iterator[String] {
     require(terminator.length == 1 || terminator.length == 2, "Line terminator may be 1 or 2 characters only.")
 
@@ -205,7 +206,7 @@ trait ReadChars extends Chars {
       while (getc()) { }
       sb.toString
     }
-  }
+  } */
 }
 
 /**
@@ -286,9 +287,9 @@ trait WriteChars extends Chars {
    * 
    * @param lines
    *          The data to write
-   * @param separator
-   *          The separator to insert between the strings
-   *          Default is platform dependent EOF
+   * @param terminator
+   *          The End of Line character or line terminator
+   *          Default is Line.Terminators.NewLine
    * @param codec
    *          The codec of the string to be written.
    *          The string will be converted to the encoding of {@link sourceCodec}
@@ -299,7 +300,7 @@ trait WriteChars extends Chars {
    *          Default is standard options write/create/truncate
    */
   def writeLines(strings: Traversable[String],
-                 separator: String = compat.Platform.EOL,
+                 terminator: Terminators.Terminator = Terminators.NewLine,
                  codec: Codec = getCodec(),
                  openOptions: Iterable[OpenOption] = WRITE_TRUNCATE): Unit = {
     // TODO

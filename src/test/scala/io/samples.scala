@@ -566,14 +566,14 @@ object Samples {
   }
 
   { // read and print out all lines in a file
-    import scalax.io.{FileOps, Path}
+    import scalax.io.{FileOps, Path, Line}
     // the codec must be defined either as a parameter of fileOps methods or as an implicit
     implicit val codec = scalax.io.Codec.UTF8
 
     val file: FileOps =  Path("file").fileOps
 
     // by default the line terminator is stripped and is
-    // the default terminator for the platform
+    // auto detected
     file.lines() foreach println _
 
     // now do not strip terminator
@@ -581,7 +581,7 @@ object Samples {
 
     // now declare explicitly the terminator
     // terminator is restricted to 1 or 2 characters
-    file.lines (terminator = "\n") foreach println _
+    file.lines (terminator = Line.Terminators.NewLine) foreach println _
   }
 
   { // explicitly declare the codecs to use
@@ -627,7 +627,7 @@ object Samples {
 
   { // several examples of writing data
     import scalax.io.{
-      FileOps, Path, Codec, OpenOption}
+      FileOps, Path, Codec, OpenOption, Line}
     import OpenOption._
     // the codec must be defined either as a parameter of fileOps methods or as an implicit
     implicit val codec = scalax.io.Codec.UTF8
@@ -667,7 +667,7 @@ object Samples {
 
     // Now all options
     file.writeLines("It costs" :: "one" :: "dollar" :: Nil,
-                    separator="||\n||",
+                    terminator=Line.Terminators.Custom("||\n||"),
                     codec = Codec.UTF8,
                     openOptions = List(CREATE_NEW, WRITE, SYNC))
   }
