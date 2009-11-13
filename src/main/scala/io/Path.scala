@@ -17,7 +17,7 @@ import collection.{ Traversable }
 import PartialFunction._
 import util.Random.nextASCIIString
 import java.lang.{ProcessBuilder}
-import FileSystem.defaultFileSystem
+
 /**
  * The object for constructing Path objects and for containing implicits from strings and
  * {@link java.io.File}s to Scala paths.
@@ -30,14 +30,14 @@ object Path
 {
   /**
    * Method to implicitly convert a string to a Path
-   * object on the default file system
+   * object 
    */
-  implicit def string2path(s: String): Path = apply(s)
+  implicit def string2path(s: String)(implicit fileSystem: FileSystem = FileSystem.default): Path = apply(s)(fileSystem)
   /**
    * Method to implicitly convert a {@link java.io.File} to a Path
-   * object on the default file system
+   * object 
    */
-  implicit def jfile2path(jfile: JFile): Path = apply(jfile.getPath)
+  implicit def jfile2path(jfile: JFile)(implicit fileSystem: FileSystem = FileSystem.default): Path = apply(jfile.getPath)(fileSystem)
 
   /**
    * Enumeration of the Access modes possible for accessing files
@@ -50,7 +50,7 @@ object Path
   /**
    * Lists the roots of the default filesystem
    */
-  def roots: List[Path] = defaultFileSystem.roots
+  def roots: List[Path] = FileSystem.default.roots
 
   /**
    * Create a Path from a string
@@ -63,7 +63,7 @@ object Path
    *          Default is the default filesystem
    *          This is an implicit parameter
    */
-  def apply(path: String)(implicit fileSystem: FileSystem = defaultFileSystem): Path = fileSystem(path)
+  def apply(path: String)(implicit fileSystem: FileSystem = FileSystem.default): Path = fileSystem(path)
 
   /**
    * Create a Path from a URI.
@@ -92,7 +92,7 @@ object Path
    * @param path
    *          the file to use for creating the Path
    */
-  def apply(jfile: JFile) = defaultFileSystem(jfile.getPath)
+  def apply(jfile: JFile) = FileSystem.default(jfile.getPath)
 
   /**
    * Creates an empty file in the provided directory with the provided prefix and suffixes.
@@ -126,7 +126,7 @@ object Path
                    dir: String = null,
                    deleteOnExit : Boolean = true,
                    attributes:Iterable[FileAttribute[_]] = Nil )
-                  (implicit fileSystem: FileSystem = defaultFileSystem) : Path = {
+                  (implicit fileSystem: FileSystem = FileSystem.default) : Path = {
     fileSystem.makeTempDirectory(prefix,suffix,dir,deleteOnExit)
   }
 
@@ -160,8 +160,8 @@ object Path
                         dir: String = null,
                         deleteOnExit : Boolean = true,
                         attributes:Iterable[FileAttribute[_]] = Nil)
-                       (implicit fileSystem: FileSystem = defaultFileSystem) : Path = {
-    defaultFileSystem.makeTempDirectory(prefix,suffix,dir,deleteOnExit)
+                       (implicit fileSystem: FileSystem = FileSystem.default) : Path = {
+    FileSystem.default.makeTempDirectory(prefix,suffix,dir,deleteOnExit)
   }
 
   /**

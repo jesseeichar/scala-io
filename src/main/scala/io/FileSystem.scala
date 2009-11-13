@@ -25,7 +25,7 @@ object FileSystem {
    *  and corresponds to the file system that is referenced by
    *  java.io.File objects</p>
    */
-  val defaultFileSystem: FileSystem = new DefaultFileSystem()
+  val default: FileSystem = new DefaultFileSystem()
 }
 
 /**
@@ -202,4 +202,5 @@ private[io] class DefaultFileSystem extends FileSystem {
   }
   def matcher(pattern:String, syntax:String = PathMatcher.StandardSyntax.GLOB): PathMatcher = null // TODO
 
+  override def toString = "Default File System"
 }

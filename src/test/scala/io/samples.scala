@@ -41,7 +41,7 @@ object Samples {
     import scalax.io.{Path, FileSystem}
     val roots1: List[Path] = Path.roots
     // This method delegates to the defaultFileSystem as follows
-    val roots2: List[Path] = FileSystem.defaultFileSystem.roots
+    val roots2: List[Path] = FileSystem.default.roots
   }
 
   { // Create a Path in the default filesystem explicitly
@@ -54,12 +54,12 @@ object Samples {
     val path3: Path = Path ("file://c:\\tmp\\file3")
 
     //now explicitly state the filesystem
-    val path4: Path = Path ("/tmp/file4")(FileSystem.defaultFileSystem)
+    val path4: Path = Path ("/tmp/file4")(FileSystem.default)
 
     // or declare an implicit val so it can be reused (this is bot really
     // required since the default paramter is the default filesystem but
     // it illustrates how another filesystem can be used
-    implicit val fs = FileSystem.defaultFileSystem
+    implicit val fs = FileSystem.default
     // fs will now be used to create the path
     val path5: Path = Path ("/tmp/file5")
 
@@ -111,11 +111,11 @@ object Samples {
     val tmpFile2: Path = Path.makeTempFile (prefix="tmpFile",
                                           suffix="tmp",
                                           dir="/tmp",
-                                          deleteOnExit=false)(FileSystem.defaultFileSystem)
+                                          deleteOnExit=false)(FileSystem.default)
 
     // Using the same pattern as Path you can can use implicits
     // to declare the FileSystem that is used by make temp file
-    implicit val fs = FileSystem.defaultFileSystem
+    implicit val fs = FileSystem.default
     // fs will now be used by makeTempFile
     val tmpFile3: Path = Path.makeTempFile ()
 
@@ -140,11 +140,11 @@ object Samples {
     val tmpFile2: Path = Path.makeTempDirectory (prefix="tmpFile",
                                           suffix="tmp",
                                           dir="/tmp",
-                                          deleteOnExit=false)(FileSystem.defaultFileSystem)
+                                          deleteOnExit=false)(FileSystem.default)
 
     // Using the same pattern as Path you can can use implicits
     // to declare the FileSystem that is used by make temp directory
-    implicit val fs = FileSystem.defaultFileSystem
+    implicit val fs = FileSystem.default
     // fs will now be used by makeTempDirectory
     val tmpFile3: Path = Path.makeTempDirectory ()
 
@@ -202,19 +202,18 @@ object Samples {
     val InTmpDir: PathMatcher = Path ("/tmp/file").matcher ("/tmp/**")
 
     // If you can also create through the FileSystem
-    val InBinDir: PathMatcher = FileSystem.defaultFileSystem.matcher ("/bin/*")
-    import FileSystem.defaultFileSystem
+    val InBinDir: PathMatcher = FileSystem.default.matcher ("/bin/*")
 
     // you can explicitly declare the GLOB matcher
     import PathMatcher.StandardSyntax.GLOB
-    val StartsWithH: PathMatcher = defaultFileSystem.matcher ("**/H*", GLOB)
+    val StartsWithH: PathMatcher = FileSystem.default.matcher ("**/H*", GLOB)
 
     // a Regex matcher is also available
     import PathMatcher.StandardSyntax.REGEX
-    val ContainsVowel: PathMatcher = defaultFileSystem.matcher (".*[aeiou].*", REGEX)
+    val ContainsVowel: PathMatcher = FileSystem.default.matcher (".*[aeiou].*", REGEX)
 
     // If a filesystem supports a filesystem specific sytax you can declare that
-    val CustomSyntaxMatcher: PathMatcher = defaultFileSystem.matcher ("/tmp/@123", "customSyntax")
+    val CustomSyntaxMatcher: PathMatcher = FileSystem.default.matcher ("/tmp/@123", "customSyntax")
 
     // now demonstrate use
     // See FileSystem.matcher for details on creating a matcher
