@@ -1,6 +1,9 @@
 import mass._
 
-class ScalaIo extends ScalaProject("scala-incubator", "0.1-SNAPSHOT", "2.8.0") {
+import mass.Artifacts.Plugin.Maven.Surefire
+import mass.Scope._
+
+class ScalaIo extends ScalaProject("scala-incubator", "0.1-SNAPSHOT", "2.8.0") with JUnit{
   name="Scala IO"
   description="The Scala IO incubator project"
   inceptionYear="2009"
@@ -13,5 +16,27 @@ class ScalaIo extends ScalaProject("scala-incubator", "0.1-SNAPSHOT", "2.8.0") {
     dep (group="scala-incubator", 
          id="scala-arm",
          version="0.1-SNAPSHOT")
+
+    // testing dependencies
+    dep (group="org.scalatest",
+         id="scalatest",
+         version="1.0-for-scala-2.8.0.20091026-SNAPSHOT",
+         scope=Scope.Test)
+    dep (group="org.scala-tools.testing",
+         id="scalacheck_2.8.0-SNAPSHOT",
+         version="1.7-SNAPSHOT",
+         scope=Scope.Test)
+    dep (group="org.mockito",
+         id="mockito-all",
+         version="1.8.0")
   }
+
+    new Build {
+      pluginA(Surefire, 
+              config = ("useSystemClassLoader" >> false,
+                        "argLine" >> "-Xmx512m",
+                        "includes" >> ("include" >> "**/*Spec.class")
+                      )
+            )
+    }
 }
