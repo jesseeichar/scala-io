@@ -27,7 +27,7 @@ import java.lang.{ProcessBuilder}
  * @author  Jesse Eichar
  * @since   1.0
  */
-private[io] class DefaultFile(jfile:JFile, codec:Codec) extends FileOperations(codec) {
+private[io] class DefaultFileOps(jfile:JFile, codec:Codec) extends FileOps(codec) {
 
   private implicit val defaultCodec = codec
 
@@ -40,9 +40,9 @@ private[io] class DefaultFile(jfile:JFile, codec:Codec) extends FileOperations(c
   def channel( openOptions: OpenOption*) = Resource.fromByteChannel(new FileInputStream(jfile).getChannel)
   def fileChannel(openOptions: OpenOption*) = Some(Resource.fromFileChannel(new FileInputStream(jfile).getChannel))
   
-  def withCodec(codec:Codec) = new DefaultFile(jfile, codec)
+  def withCodec(codec:Codec) = new DefaultFileOps(jfile, codec)
 
-  def open[R](openOptions: Iterable[OpenOption] = List(WRITE))(action: BasicFileOperations => R): R = null.asInstanceOf[R] // TODO
+  def open[R](openOptions: Iterable[OpenOption] = List(WRITE))(action: BasicFileOps => R): R = null.asInstanceOf[R] // TODO
 
   def withLock[R](start: Long = 0, size: Long = -1, shared: Boolean = false)(block: => R): Option[R] = {
     None

@@ -15,7 +15,7 @@ import Resource._
 /**
  * An object for reading and writing files.
  * <p>
- * Obtaining a FileOperations from a object does not open a
+ * Obtaining a FileOps from a object does not open a
  * file execution of methods will open a file. Thus it is important
  * to handle NotFileException and FileNotFoundException. Depending
  * on the method one or both exceptions must be handled.
@@ -41,14 +41,13 @@ import Resource._
  * 
  * @param sourceCodec
  *          the codec that the file was created with
- *          Default is Codec.default
  *
  * @author Jesse Eichar
  * @since 1.0
  */
-abstract class BasicFileOperations(override val sourceCodec:Codec = Codec.default) extends ReadChars with ReadBytes with WriteChars with WriteBytes {
+abstract class BasicFileOps(override val sourceCodec:Codec) extends ReadChars with ReadBytes with WriteChars with WriteBytes {
   
-  def withCodec(codec:Codec): BasicFileOperations
+  def withCodec(codec:Codec): BasicFileOps
 
   /**
    * Update a portion of the file content with string at
@@ -125,11 +124,11 @@ abstract class BasicFileOperations(override val sourceCodec:Codec = Codec.defaul
 }
 
 /**
- * An object for reading and writing files.  FileOperations provides
+ * An object for reading and writing files.  FileOps provides
  * access to Channels and streams as well as providing methods for
  * performing simple tasks on files easily.
  * <p>
- * Obtaining a FileOperations from a object does not open a
+ * Obtaining a FileOps from a object does not open a
  * file execution of methods will open a file. Thus it is important
  * to handle NotFileException and FileNotFoundException. Depending
  * on the method one or both exceptions must be handled.
@@ -174,13 +173,12 @@ abstract class BasicFileOperations(override val sourceCodec:Codec = Codec.defaul
  *
  * @param codec
  *          the codec that the file was created with
- *          Default is Codec.default
  * 
  * @author Jesse Eichar
  * @since 1.0
  */
-abstract class FileOperations(sourceCodec: Codec = Codec.default) extends BasicFileOperations(sourceCodec) {
-  def withCodec(codec:Codec): FileOperations
+abstract class FileOps(sourceCodec: Codec) extends BasicFileOps(sourceCodec) {
+  def withCodec(codec:Codec): FileOps
 
   /**
    * Obtains an input stream resource for reading from the file
@@ -238,7 +236,7 @@ abstract class FileOperations(sourceCodec: Codec = Codec.default) extends BasicF
    * @param action
    *          The function that will be executed within the block
    */
-  def open[R](openOptions: Iterable[OpenOption] = List(WRITE, CREATE))(action: BasicFileOperations => R): R
+  def open[R](openOptions: Iterable[OpenOption] = List(WRITE, CREATE))(action: BasicFileOps => R): R
                     
   /**
    * Performs an operation on the file with a FileLock

@@ -131,7 +131,7 @@ trait Readable[S <: Resource[Reader]] {
    *
    * @return the Reader Resource version of this object.
    */
-  def reader(implicit codec: Codec = Codec.default): S
+  def reader(implicit codec: Codec): S
 }
 
 /**
@@ -150,7 +150,7 @@ trait Writable[S <: Resource[Writer]] {
    *
    * @return the Writer Resource version of this object.
    */
-  def writer(implicit codec: Codec = Codec.default): S
+  def writer(implicit codec: Codec): S
 }
 
 /**
@@ -461,7 +461,7 @@ object Resource {
 private[io] class InputStreamResourceImpl(opener: => InputStream) extends InputStreamResource {
   def open() = opener
   val buffered = Resource.fromBufferedInputStream(new BufferedInputStream(opener))
-  def reader(implicit codec: Codec = Codec.default) =
+  def reader(implicit codec: Codec) =
     Resource.fromReader(new InputStreamReader(opener, codec.charSet))
   lazy val readableByteChannel =
     Resource.fromReadableByteChannel(Channels.newChannel(open()))
@@ -478,7 +478,7 @@ private[io] class InputStreamResourceImpl(opener: => InputStream) extends InputS
 private[io] class OutputStreamResourceImpl(opener: => OutputStream) extends OutputStreamResource {
   def open() = opener
   val buffered = Resource.fromBufferedOutputStream(new BufferedOutputStream(opener))
-  def writer(implicit codec:Codec = Codec.default) =
+  def writer(implicit codec:Codec) =
     Resource.fromWriter(new OutputStreamWriter(opener, codec.charSet))
   lazy val writableByteChannel =
     Resource.fromWritableByteChannel(Channels.newChannel(open()))
@@ -519,8 +519,8 @@ private[io] class ByteChannelResourceImpl(opener: => ByteChannel) extends ByteCh
   def open() = opener
   lazy val inputStream = Resource.fromInputStream(Channels.newInputStream(opener))
   lazy val outputStream = Resource.fromOutputStream(Channels.newOutputStream(opener))
-  def reader(implicit codec: Codec = Codec.default) = Resource.fromReader(Channels.newReader(opener, codec.charSet.name()))
-  def writer(implicit codec: Codec = Codec.default) = Resource.fromWriter(Channels.newWriter(opener, codec.charSet.name()))
+  def reader(implicit codec: Codec) = Resource.fromReader(Channels.newReader(opener, codec.charSet.name()))
+  def writer(implicit codec: Codec) = Resource.fromWriter(Channels.newWriter(opener, codec.charSet.name()))
   def bytesAsInts:Iterable[Int] = null // TODO
 }
 
@@ -535,7 +535,7 @@ private[io] class ByteChannelResourceImpl(opener: => ByteChannel) extends ByteCh
 private[io] class ReadableByteChannelResourceImpl(opener: => ReadableByteChannel) extends ReadableByteChannelResource {
   def open() = opener
   lazy val inputStream = Resource.fromInputStream(Channels.newInputStream(opener))
-  def reader(implicit codec:Codec = Codec.default) = Resource.fromReader(Channels.newReader(opener, codec.charSet.name()))
+  def reader(implicit codec:Codec) = Resource.fromReader(Channels.newReader(opener, codec.charSet.name()))
   def bytesAsInts:Iterable[Int] = null // TODO
 }
 
@@ -549,7 +549,7 @@ private[io] class ReadableByteChannelResourceImpl(opener: => ReadableByteChannel
 private[io] class WritableByteChannelResourceImpl(opener: => WritableByteChannel) extends WritableByteChannelResource {
   def open() = opener
   lazy val outputStream = Resource.fromOutputStream(Channels.newOutputStream(opener))
-  def writer(implicit codec:Codec = Codec.default) = Resource.fromWriter(Channels.newWriter(opener, codec.charSet.name()))
+  def writer(implicit codec:Codec) = Resource.fromWriter(Channels.newWriter(opener, codec.charSet.name()))
 }
 
 /***************************** FileChannelResource ************************************/
@@ -562,7 +562,7 @@ private[io] class FileChannelResourceImpl(opener: => FileChannel) extends FileCh
   def open() = opener
   lazy val inputStream = Resource.fromInputStream(Channels.newInputStream(opener))
   lazy val outputStream = Resource.fromOutputStream(Channels.newOutputStream(opener))
-  def reader(implicit codec:Codec = Codec.default) = Resource.fromReader(Channels.newReader(opener, codec.charSet.name()))
-  def writer(implicit codec:Codec = Codec.default) = Resource.fromWriter(Channels.newWriter(opener, codec.charSet.name()))
+  def reader(implicit codec:Codec) = Resource.fromReader(Channels.newReader(opener, codec.charSet.name()))
+  def writer(implicit codec:Codec) = Resource.fromWriter(Channels.newWriter(opener, codec.charSet.name()))
   def bytesAsInts:Iterable[Int] = null // TODO
 }

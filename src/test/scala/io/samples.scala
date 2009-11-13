@@ -506,14 +506,18 @@ object Samples {
   { // implement custom copy method
     import scalax.io.Path
     import scalax.io.OpenOption._
+
+    // the codec must be defined either as a parameter of fileOps methods or as an implicit
+    implicit val codec = scalax.io.Codec.UTF8
+
     // not necessarily the most efficient way to copy but demonstrates use of reading/writing bytes
-    Path("to").fileOperations.writeBytes(
-      Path("from").fileOperations.bytes()
+    Path("to").fileOps.writeBytes(
+      Path("from").fileOps.bytes()
     )
 
     // we could also append to file
-    Path("to").fileOperations.writeBytes(
-      Path("from").fileOperations.bytes(),
+    Path("to").fileOps.writeBytes(
+      Path("from").fileOps.bytes(),
       openOptions = WRITE_APPEND
     )
   }
@@ -521,20 +525,31 @@ object Samples {
   { // read comma seperated file
     import scalax.io.Path
 
-    val records: Iterable[Array[String]] = Path ("csv").fileOperations.lines().map (_ split 'x')
+    // the codec must be defined either as a parameter of fileOps methods or as an implicit
+    implicit val codec = scalax.io.Codec.UTF8
+
+    val records: Iterable[Array[String]] = Path ("csv").fileOps.lines().map (_ split 'x')
   }
 
   { // add all bytes in file together
-    import scalax.io.{FileOperations, Path}
-    val file:FileOperations = Path("file").fileOperations
+    import scalax.io.{FileOps, Path}
+
+    // the codec must be defined either as a parameter of fileOps methods or as an implicit
+    implicit val codec = scalax.io.Codec.UTF8
+
+    val file:FileOps = Path("file").fileOps
     val sum: Int = file.bytesAsInts().reduceLeft (_ + _)
   }
 
   { // quickly an unsafely load file into memory
 
     // first load as strings and remove vowels
-    import scalax.io.{FileOperations, Path}
-    val file:FileOperations = Path("file").fileOperations
+    import scalax.io.{FileOps, Path}
+
+    // the codec must be defined either as a parameter of fileOps methods or as an implicit
+    implicit val codec = scalax.io.Codec.UTF8
+
+    val file:FileOps = Path("file").fileOps
     val consonants = file.slurpString().filter (c => !("aeiou" contains c))
 
     // ok now as bytes
@@ -542,14 +557,20 @@ object Samples {
   }
 
   { // iterate over all character in file
-    import scalax.io.{FileOperations, Path}
-    val file: FileOperations =  Path("file").fileOperations
+    import scalax.io.{FileOps, Path}
+    // the codec must be defined either as a parameter of fileOps methods or as an implicit
+    implicit val codec = scalax.io.Codec.UTF8
+
+    val file: FileOps =  Path("file").fileOps
     val doubled: Iterable[String] = for ( c <- file.chars() ) yield "" + c + c
   }
 
   { // read and print out all lines in a file
-    import scalax.io.{FileOperations, Path}
-    val file: FileOperations =  Path("file").fileOperations
+    import scalax.io.{FileOps, Path}
+    // the codec must be defined either as a parameter of fileOps methods or as an implicit
+    implicit val codec = scalax.io.Codec.UTF8
+
+    val file: FileOps =  Path("file").fileOps
 
     // by default the line terminator is stripped and is
     // the default terminator for the platform
@@ -564,10 +585,8 @@ object Samples {
   }
 
   { // explicitly declare the codecs to use
-    import scalax.io.{FileOperations, Path, Codec}
-    // create the file so that all operations on the file
-    // will default to UTF8
-    val file: FileOperations =  Path("file").fileOperations (Codec.UTF8)
+    import scalax.io.{FileOps, Path, Codec}
+    val file: FileOps =  Path("file").fileOps (Codec.UTF8)
 
     // the withCodec method is useful for switching
     // to another codec
@@ -576,7 +595,7 @@ object Samples {
     //       is only affects how strings are encoded
     //       when written and how they are decoded
     //       when read.
-    val file2: FileOperations = file.withCodec (Codec.ISO8859)
+    val file2: FileOps = file.withCodec (Codec.ISO8859)
 
     // All methods for reading and writing characters/strings
     // have a codec parameter that used to explicitly declare the
@@ -590,10 +609,13 @@ object Samples {
 
   { // recommended way to read and write a file
     import scalax.io.{
-      FileOperations, Path, NotFileException}
+      FileOps, Path, NotFileException}
     import java.io.FileNotFoundException
     import scala.util.control.Exception._
-    val file: FileOperations =  Path("file").fileOperations
+    // the codec must be defined either as a parameter of fileOps methods or as an implicit
+    implicit val codec = scalax.io.Codec.UTF8
+
+    val file: FileOps =  Path("file").fileOps
     val result:Option[String] = catching (classOf[NotFileException],
                                           classOf[FileNotFoundException]) opt { file.slurpString()}
 
@@ -605,10 +627,13 @@ object Samples {
 
   { // several examples of writing data
     import scalax.io.{
-      FileOperations, Path, Codec, OpenOption}
+      FileOps, Path, Codec, OpenOption}
     import OpenOption._
+    // the codec must be defined either as a parameter of fileOps methods or as an implicit
+    implicit val codec = scalax.io.Codec.UTF8
 
-    val file: FileOperations =  Path ("file").fileOperations
+
+    val file: FileOps =  Path ("file").fileOps
 
     // write bytes
     // By default the file write will replace
@@ -648,8 +673,11 @@ object Samples {
   }
 
   { // perform an actions within a file lock
-    import scalax.io.{FileOperations, Path}
-    val file: FileOperations =  Path ("file").fileOperations
+    import scalax.io.{FileOps, Path}
+
+    implicit val codec = scalax.io.Codec.UTF8
+
+    val file: FileOps =  Path ("file").fileOps
 
     // By default the entire file is locked with exclusive access
     val result: Option[String] = file.withLock() {
@@ -681,9 +709,12 @@ object Samples {
 
 
   { // demonstrate several ways to interoperate existing java APIs
-    import scalax.io.{FileOperations, Path}
+    import scalax.io.{FileOps, Path}
     import java.io._
-    val file: FileOperations =  Path ("file").fileOperations
+    // the codec must be defined either as a parameter of fileOps methods or as an implicit
+    implicit val codec = scalax.io.Codec.UTF8
+
+    val file: FileOps =  Path ("file").fileOps
 
     // some APIs require a stream or channel. Using one of the io resources you can safely call the method and be guaranteed that the stream will be correctly closed and exceptions handled
     // see the documentation in scala.resource.ManagedResource for details on all the options available
@@ -717,7 +748,10 @@ object Samples {
       Reader, BufferedReader,
       Writer, BufferedWriter
     }
-    val file: FileOperations =  Path ("file").fileOperations
+    // the codec must be defined either as a parameter of fileOps methods or as an implicit
+    implicit val codec = scalax.io.Codec.UTF8
+
+    val file: FileOps =  Path ("file").fileOps
 
     // get various input streams, readers an channels
     val in: InputStreamResource = file.inputStream
@@ -748,8 +782,11 @@ object Samples {
   }
 
   { // examples of patching a file
-    import scalax.io.{FileOperations, Path, Codec}
-    val file: FileOperations =  Path ("file").fileOperations
+    import scalax.io.{FileOps, Path, Codec}
+    // the codec must be defined either as a parameter of fileOps methods or as an implicit
+    implicit val codec = scalax.io.Codec.UTF8
+
+    val file: FileOps =  Path ("file").fileOps
 
     // write "people" at byte 6
     // if the file is < 6 bytes an underflow exception is thrown
@@ -764,8 +801,11 @@ object Samples {
   { // when several operation need to be performed on a file it is often more performant to perform them within an function passed to the open method
     // this is because the underlying filesystem has options for optimizing the use of the file channels
     // for example a file could be mapped into memory for the duration of the function and all operations could be performed using the same channel object
-    import scalax.io.{FileOperations, Path, Codec}
-    val file: FileOperations =  Path ("file").fileOperations
+    import scalax.io.{FileOps, Path, Codec}
+    // the codec must be defined either as a parameter of fileOps methods or as an implicit
+    implicit val codec = scalax.io.Codec.UTF8
+
+    val file: FileOps =  Path ("file").fileOps
 
     file.open()( f => {
       val s = f.slurpString()
@@ -783,21 +823,18 @@ object Samples {
       PrintStream, OutputStreamWriter, BufferedReader
     }
     
-
-
-    implicit val defaultCodec: Codec = Codec.UTF8
-
+    implicit val defaultCodec: Codec = scalax.io.Codec.UTF8
 
     // Note that in these example streams are closed automatically
     // Also note that normally a constructed stream is not passed to factory method because most factory methods are by-name parameters (=> R)
     // this means that the objects here can be reused without worrying about the stream being previously emptied
     val url = new URL("www.scala-lang.org")
-    // A ReadChars (a trait of FileOperations) object can be created from a stream or channel
+    // A ReadChars (a trait of FileOps) object can be created from a stream or channel
     Resource.fromInputStream(url.openStream()).reader.lines() foreach println _
     Resource.fromReader(new InputStreamReader(url.openStream())).lines() foreach println _
     // ReadBytes can also be constructed
     val bytes: Iterable[Byte] = Resource.fromInputStream(url.openStream()).bytes()
-    Path("scala.html").fileOperations writeBytes bytes
+    Path("scala.html").fileOps writeBytes bytes
 
     // WriteChars and WriteBytes can be used to simplify writing to OutputStreams
     Resource.fromOutputStream(new ByteArrayOutputStream()).writer.writeString("howdy")

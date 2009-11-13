@@ -72,8 +72,8 @@ class Codec(val charSet: Charset)
 }
 
 object Codec {
-  final val ISO8859 = Charset forName "ISO-8859-1"
-  final val UTF8    = Charset forName "UTF-8"
+  final val ISO8859:Codec = apply(Charset forName "ISO-8859-1")
+  final val UTF8:Codec    = apply(Charset forName "UTF-8")
   
   def default                               = apply(Charset.defaultCharset)
   def apply(encoding: String): Codec        = new Codec(Charset forName encoding)
@@ -85,7 +85,7 @@ object Codec {
 
   def toUTF8(bytes: Array[Byte]): Array[Char] = {
     val bbuffer = java.nio.ByteBuffer wrap bytes
-    val cbuffer = UTF8 decode bbuffer
+    val cbuffer = UTF8.charSet decode bbuffer
     val chars = new Array[Char](cbuffer.remaining())
     cbuffer get chars
     
@@ -94,7 +94,7 @@ object Codec {
   
   def fromUTF8(cs: CharSequence): Array[Byte] = {
     val cbuffer = java.nio.CharBuffer wrap cs
-    val bbuffer = UTF8 encode cbuffer
+    val bbuffer = UTF8.charSet encode cbuffer
     val bytes = new Array[Byte](bbuffer.remaining())
     bbuffer get bytes
     

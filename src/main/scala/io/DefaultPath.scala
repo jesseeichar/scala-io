@@ -167,6 +167,6 @@ private[io] class DefaultPath private[io] (val jfile: JFile, fileSystem: FileSys
   def tree(filter:(Path,Path)=>Option[PathMatcher] = (origin,relativePath) => None, 
            depth:Int = -1) = null // TODO
 
-  def fileOperations(implicit codec:Codec = Codec.UTF8) = new DefaultFile(jfile,codec)
+  def fileOps(implicit codec:Codec):FileOps = new DefaultFileOps(jfile,codec)
 
 }

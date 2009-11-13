@@ -11,6 +11,7 @@ package scalaio.test
 import scalax.io._
 import org.scalatest.matchers.MustMatchers
 import org.scalatest.prop.Checkers
+import org.scalacheck.Prop
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 
@@ -18,8 +19,8 @@ import org.junit.runner.RunWith
 class PathSpec extends FileSystemFixture with Checkers with MustMatchers{
 
   def createContext = new Context(){
-    def property (assertion: TestData => Unit) = {
-      
+    def property (assertion: TestData => Unit):Prop = {
+      null
     }
   }
 

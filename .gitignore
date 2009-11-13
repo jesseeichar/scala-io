@@ -1,2 +1,4 @@
 target/
 *~
+.mass_build/
+.pom.sha
