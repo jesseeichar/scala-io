@@ -36,6 +36,16 @@ class PathSpec extends FileSystemFixture with Checkers with MustMatchers{
     "Respect file access restrictions" in {  fixture: Context =>
       check (fixture.property (respectsAccess _))
     }
+
+    "have exists and notExists methods that are not be equal" in {
+      val path = context.path
+      path.exists must not be (path.notExists)
+      path must not ('exists)
+      createFile()
+      path must ('exists)
+      path.exists must not be (path.notExists)
+    }
+
   }
 
   def standardPathComparisions(testData: TestData):Unit = {
