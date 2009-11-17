@@ -460,7 +460,7 @@ object Resource {
  */
 private[io] class InputStreamResourceImpl(opener: => InputStream) extends InputStreamResource {
   def open() = opener
-  val buffered = Resource.fromBufferedInputStream(new BufferedInputStream(opener))
+  def buffered = Resource.fromBufferedInputStream(new BufferedInputStream(opener))
   def reader(implicit codec: Codec) =
     Resource.fromReader(new InputStreamReader(opener, codec.charSet))
   def readableByteChannel =
@@ -477,7 +477,7 @@ private[io] class InputStreamResourceImpl(opener: => InputStream) extends InputS
  */
 private[io] class OutputStreamResourceImpl(opener: => OutputStream) extends OutputStreamResource {
   def open() = opener
-  val buffered = Resource.fromBufferedOutputStream(new BufferedOutputStream(opener))
+  def buffered = Resource.fromBufferedOutputStream(new BufferedOutputStream(opener))
   def writer(implicit codec:Codec) =
     Resource.fromWriter(new OutputStreamWriter(opener, codec.charSet))
   def writableByteChannel =
@@ -493,7 +493,7 @@ private[io] class OutputStreamResourceImpl(opener: => OutputStream) extends Outp
  */
 private[io] class ReaderResourceImpl(opener: => Reader, val sourceCodec:Codec) extends ReaderResource {
   def open() = opener
-  val buffered = Resource.fromBufferedReader(new BufferedReader(opener))(sourceCodec)
+  def buffered = Resource.fromBufferedReader(new BufferedReader(opener))(sourceCodec)
   def withCodec(codec: Codec): ReaderResource = null // TODO
 }
 
@@ -505,7 +505,7 @@ private[io] class ReaderResourceImpl(opener: => Reader, val sourceCodec:Codec) e
  */
 private[io] class WriterResourceImpl(opener: => Writer, val sourceCodec:Codec) extends WriterResource {
   def open() = opener
-  val buffered = Resource.fromBufferedWriter(new BufferedWriter(opener))(sourceCodec)
+  def buffered = Resource.fromBufferedWriter(new BufferedWriter(opener))(sourceCodec)
   def withCodec(codec: Codec): WriterResource = null // TODO
 }
 
