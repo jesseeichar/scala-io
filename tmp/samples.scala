@@ -528,7 +528,7 @@ object Samples {
     // the codec must be defined either as a parameter of fileOps methods or as an implicit
     implicit val codec = scalax.io.Codec.UTF8
 
-    val records: Iterable[Array[String]] = Path ("csv").fileOps.lines().map (_ split 'x')
+    val records: Traversable[Array[String]] = Path ("csv").fileOps.lines().map (_ split 'x')
   }
 
   { // add all bytes in file together
@@ -562,7 +562,7 @@ object Samples {
     implicit val codec = scalax.io.Codec.UTF8
 
     val file: FileOps =  Path("file").fileOps
-    val doubled: Iterable[String] = for ( c <- file.chars() ) yield "" + c + c
+    val doubled: Traversable[String] = for ( c <- file.chars() ) yield "" + c + c
   }
 
   { // read and print out all lines in a file
@@ -693,7 +693,7 @@ object Samples {
     def fail: Nothing = throw new AssertionError("Uh oh")
 
     // or perhaps we only lock part of the file
-    val result2: Iterable[Byte] = file.withLock(10, 20) {
+    val result2: Traversable[Byte] = file.withLock(10, 20) {
       file.bytes() slice (10,20)
     } getOrElse {fail}
 
@@ -833,7 +833,7 @@ object Samples {
     Resource.fromInputStream(url.openStream()).reader.lines() foreach println _
     Resource.fromReader(new InputStreamReader(url.openStream())).lines() foreach println _
     // ReadBytes can also be constructed
-    val bytes: Iterable[Byte] = Resource.fromInputStream(url.openStream()).bytes()
+    val bytes: Traversable[Byte] = Resource.fromInputStream(url.openStream()).bytes()
     Path("scala.html").fileOps writeBytes bytes
 
     // WriteChars and WriteBytes can be used to simplify writing to OutputStreams

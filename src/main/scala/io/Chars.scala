@@ -116,7 +116,7 @@ trait ReadChars extends Chars {
    * @return
    *          an iterable of all the characters
    */
-  def chars(codec: Codec = getCodec()): Iterable[Char] = null // TODO bytesAsInts() map (c => (codec wrap c).toChar)
+  def chars(codec: Codec = getCodec()): Traversable[Char] = null // TODO bytesAsInts() map (c => (codec wrap c).toChar)
   /**
    * Obtain an non-strict iterable for iterating through the lines in the object
    * <p>
@@ -148,9 +148,9 @@ trait ReadChars extends Chars {
    */
   def lines(terminator: Terminators.Terminator = Terminators.Auto,
             includeTerminator: Boolean = false,
-            codec: Codec = getCodec()): Iterable[String] = {
+            codec: Codec = getCodec()): Traversable[String] = {
              /* require(terminator.length == 1 || terminator.length == 2, "Line terminator may be 1 or 2 characters only.")
-              new Iterable[String] {
+              new Traversable[String] {
                 def iterator = new LineIterator(chars(codec), terminator, includeTerminator)
               }*/
               null //TODO
@@ -252,7 +252,7 @@ trait WriteChars extends Chars {
    */
   def writeString(string: String,
                   codec: Codec = getCodec(),
-                  openOptions: Iterable[OpenOption] = WRITE_TRUNCATE): Unit = {
+                  openOptions: Traversable[OpenOption] = WRITE_TRUNCATE): Unit = {
     // TODO
     ()
   }
@@ -275,7 +275,7 @@ trait WriteChars extends Chars {
    */  
   def writeStrings(strings: Traversable[String],
                    codec: Codec = getCodec(),
-                   openOptions: Iterable[OpenOption] = WRITE_TRUNCATE): Unit = {
+                   openOptions: Traversable[OpenOption] = WRITE_TRUNCATE): Unit = {
     // TODO
     ()
   }
@@ -302,7 +302,7 @@ trait WriteChars extends Chars {
   def writeLines(strings: Traversable[String],
                  terminator: Terminators.Terminator = Terminators.NewLine,
                  codec: Codec = getCodec(),
-                 openOptions: Iterable[OpenOption] = WRITE_TRUNCATE): Unit = {
+                 openOptions: Traversable[OpenOption] = WRITE_TRUNCATE): Unit = {
     // TODO
     ()
   }

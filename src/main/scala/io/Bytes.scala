@@ -57,7 +57,7 @@ trait ReadBytes {
   def length: Option[Long] = None
 
   /**
-   * Obtains a Iterable for conveniently processing the resource as bytes.
+   * Obtains a Traversable for conveniently processing the resource as bytes.
    * <p>
    * Depending on the underlying resource this may be slower than
    * {@link #bytesAsInts}
@@ -77,10 +77,10 @@ trait ReadBytes {
    *
    * @return an non-strict iterable over all the bytes
    */
-  def bytes(): Iterable[Byte] = bytesAsInts() map (_.toByte)
+  def bytes(): Traversable[Byte] = bytesAsInts() map (_.toByte)
 
   /**
-   * Obtains a Iterable for conveniently processing the file as Ints.
+   * Obtains a Traversable for conveniently processing the file as Ints.
    * <p>
    * Depending on the underlying resource this may be slower than
    * {@link #bytes}
@@ -105,7 +105,7 @@ trait ReadBytes {
    *
    * @return an non-strict iterable over all the bytes with the bytes being represented as Ints
    */
-  def bytesAsInts(): Iterable[Int]
+  def bytesAsInts(): Traversable[Int]
 
   /**
    * This method aspires to be the fastest way to read
@@ -176,8 +176,8 @@ trait ReadChannelBytes extends ReadBytes {
 
   def length: Long = -1
 
-  def bytes(): Iterable[Byte] = bytesAsInts() map (_.toByte)
-  def bytesAsInts(): Iterable[Int] = {
+  def bytes(): Traversable[Byte] = bytesAsInts() map (_.toByte)
+  def bytesAsInts(): Traversable[Int] = {
     withBufferedInputStream {
       in => Iterator continually in.read() takeWhile (_ != -1)
     }.toStream.view

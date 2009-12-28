@@ -9,19 +9,25 @@
 package scalaio.test
 
 import scalax.io._
+import Path.AccessModes._
+
 import org.scalatest.matchers.MustMatchers
 import org.scalatest.prop.Checkers
 import org.scalacheck.Prop
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 
+import java.io.IOException
+
 @RunWith(classOf[JUnitRunner])
-class PathSpec extends FileSystemFixture with Checkers with MustMatchers{
+class PathSpec extends FileSystemFixture with Checkers with MustMatchers {
+
 
   def createContext = new Context(){
     def property (assertion: TestData => Unit):Prop = {
       null
     }
+    def testData = new TestData("/tmp/file", 2)
   }
 
   "A Path" should {
@@ -37,13 +43,8 @@ class PathSpec extends FileSystemFixture with Checkers with MustMatchers{
       check (fixture.property (respectsAccess _))
     }
 
-    "have exists and notExists methods that are not be equal" in {
-      val path = context.path
-      path.exists must not be (path.notExists)
-      path must not ('exists)
-      createFile()
-      path must ('exists)
-      path.exists must not be (path.notExists)
+    "have exists and notExists methods that are not be equal" in { fixture: Context =>
+      check (fixture.property (existsTest _))
     }
 
   }
@@ -74,20 +75,49 @@ class PathSpec extends FileSystemFixture with Checkers with MustMatchers{
     val path = Path(pathString)
 
     //        path.notExists must (beTrue and be_!=(path.exists))
-    (path checkAccess access) must be === (false)
+    (path checkAccess (access:_*)) must be === (false)
     path createFile ()
     //        path.notExists must (beFalse and be_!=(path.exists))
-    (path checkAccess access) must be === (true)
+    (path checkAccess (access:_*)) must be === (true)
     path.delete()
 
     //        path.notExists must (beTrue and be_!=(path.exists))
-    (path checkAccess access) must be === (false)
+    (path checkAccess (access:_*)) must be === (false)
   }
 
   def respectsAccess(testData: TestData):Unit = {
     import testData._
 
     val path = Path(pathString)
-
+    (Path.AccessModes.values -- access) foreach { a => matchAccess(a, path, false) }
+    
+    access foreach { a => matchAccess(a, path, true) }
   }
+
+  def existsTest(testData : TestData) : Unit = {
+      val path = Path(testData.pathString)
+      path.exists must not be (path.notExists)
+      path must not be ('exists)
+      path.createFile()
+      path must be ('exists)
+      path.exists must not be ('notExists)
+  }
+
+  def verifyAccess (test: => Unit)(is : Boolean)={
+    if (is) test
+    else intercept[IOException] {test}
+  }
+  
+  def readTest(path: Path) = path.fileOps.chars().head
+  
+  def writeTest(path: Path) = path.fileOps.writeString("abc")
+  
+  def execTest(path: Path) = path.execute()
+  
+  def matchAccess(access: AccessMode, path: Path, is: Boolean) = access match {
+    case EXECUTE => verifyAccess (execTest(path))(is)
+    case WRITE => verifyAccess (writeTest(path))(is)
+    case READ => verifyAccess (readTest(path))(is)
+  }
+
 }
