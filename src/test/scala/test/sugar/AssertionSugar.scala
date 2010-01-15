@@ -6,11 +6,21 @@
 **                          |/                                          **
 \*                                                                      */
 
-package scalaio.test
+package scalax.test.sugar
+import scala.reflect.{
+  Manifest, ClassManifest
+}
+import ClassManifest.singleType
+import org.junit.Assert.fail
 
-import scalax.io.FileSystem
-import org.scalatest.mock.MockitoSugar
-
-object ScalaIoMocks extends MockitoSugar {
-  def fileSystemMock = mock[FileSystem]
+trait AssertionSugar {
+  def intercept[E <: Throwable](test : => Unit)(implicit m:Manifest[E]) : Unit = {
+    try {
+      test
+      fail("Expected "+m.toString+" but instead no exception was raised")
+    }catch{
+      case e if (m >:> singleType(e)) => ()
+      case e => fail("Expected "+m.toString+" but instead got "+e.getClass)
+    }
+  }
 }

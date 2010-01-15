@@ -15,7 +15,6 @@ import java.nio.channels.ByteChannel
 import java.net.{ URI, URL }
 import collection.{ Traversable }
 import PartialFunction._
-import util.Random.nextASCIIString
 import java.lang.{ProcessBuilder}
 
 /**
@@ -42,7 +41,7 @@ object Path
   /**
    * Enumeration of the Access modes possible for accessing files
    */
-  object AccessModes extends Enumeration("AccessMode") {
+  object AccessModes extends Enumeration {
     type AccessMode = Value
     val EXECUTE, READ, WRITE = Value
   }
@@ -121,13 +120,13 @@ object Path
    *          the filesystem that will create the temporary object
    *          Default is the default filesystem
    */
-  def makeTempFile(prefix: String = Path.randomPrefix,
+  def createTempFile(prefix: String = FileSystem.default.randomPrefix,
                    suffix: String = null,
                    dir: String = null,
                    deleteOnExit : Boolean = true,
                    attributes:Iterable[FileAttribute[_]] = Nil )
                   (implicit fileSystem: FileSystem = FileSystem.default) : Path = {
-    fileSystem.makeTempDirectory(prefix,suffix,dir,deleteOnExit)
+    fileSystem.createTempDirectory(prefix,suffix,dir,deleteOnExit)
   }
 
 
@@ -155,13 +154,13 @@ object Path
    *          The attributes to create on the file.
    *          Default is Nil(default system file attributes)
    */
-  def makeTempDirectory(prefix: String = Path.randomPrefix,
+  def createTempDirectory(prefix: String = FileSystem.default.randomPrefix,
                         suffix: String = null,
                         dir: String = null,
                         deleteOnExit : Boolean = true,
                         attributes:Iterable[FileAttribute[_]] = Nil)
                        (implicit fileSystem: FileSystem = FileSystem.default) : Path = {
-    FileSystem.default.makeTempDirectory(prefix,suffix,dir,deleteOnExit)
+    fileSystem.createTempDirectory(prefix,suffix,dir,deleteOnExit)
   }
 
   /**
@@ -238,8 +237,7 @@ object Path
   private[io] def closeQuietly(target: Closeable) {
     try target.close() catch { case e: IOException => }
   }
-
-  private[io] def randomPrefix = nextASCIIString(6)
+  
   private[io] def fail(msg: String) = throw new IOException(msg)
 }
 
@@ -368,7 +366,7 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    *          the constructed/resolved path
    *
    */
-  def resolve(other: Path): Path = null // TODO
+  def resolve(other: Path): Path = /(other)
   /**
    * Constructs a path from other using the same file system as this
    * path and resolves the this and other in the same manner as
@@ -386,23 +384,29 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    * </p>
    * @return relative path from the current path to the other path
    */
-  def relativize(other: Path): Path = null // TODO
+  def relativize(other: Path): Path = {
+    if(other.fileSystem != fileSystem) other
+    else if(other.root != root) other
+    else if(segments startsWith other.segments){
+      fileSystem(segments.drop(other.segments.size) mkString "")
+    } else {
+      null // TODO do we want to relativize this?
+    }
+  }
 
   // derived from identity
   /**
    * The root of the file system of the path if it can be determined.
-   * <p>
-   * @NOTE do we want to convert to absolute to try to determine root or always return None
-   *       if the path is relative?  (I think convert to absolute)
-   * </p>
    *
    * @return the root of the file system
    */
-  def root: Option[Path] = fileSystem.roots find (this startsWith _) // TODO convert to absolute?
+  def root: Option[Path] = fileSystem.roots find (this.toAbsolute startsWith _)
   /**
    * The segments in the path including the current element of the path.  If the
    * the path is relative only the segments defined are returned... NOT the absolute
    * path
+   * <p>Note segments.last should == name</p>
+   *
    * @return the segments in the path
    */
   def segments: List[String] = (path split separator).toList filterNot (_.isEmpty)
@@ -413,7 +417,8 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    */
   def parent: Option[Path]
   /**
-   * The path segments of the path excluding the current path segment
+   * The path segments of the path excluding the current path segment.  The first
+   * segment is the first segment in the path. 
    * @return The path segments of the path excluding the current path segment
    * @see segments
    */
@@ -560,7 +565,28 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    * Compares this path to the other lexigraphically.
    */
   def compare(other:Path):Int = toString.compare(other.toString)
-
+  
+  /**
+   * Sets the standard access modes on the underlying path.  If the 
+   * underlying object does not exist it will throw an exception.
+   * If the underlying system does not support support the mode the mode
+   * will be ignored
+   * 
+   * @param accessModes 
+   *          the modes to set on the file in (if possible)
+   *          a single atomic update
+   */
+  def access_=(accessModes:Iterable[AccessMode])
+  /**
+   * Reads the access modes from the file and returns the Set
+   * This does not lock the file so the modes could be out of date
+   * even by the time the method returns if used in a heavily
+   * parallel environment
+   *
+   * @return the access modes set on the file
+   */
+  def access : Set[AccessMode]
+  
   // creations
   /**
    * Create the file referenced by this path.
@@ -574,7 +600,7 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    * contains children
    * </p>
    * <p>
-   * An Wxception will also be thrown if the parent directory does not have write
+   * An Exception will also be thrown if the parent directory does not have write
    * permission
    * </p>
    * @param createParents
@@ -586,14 +612,20 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    *          If not possible to delete the object or it is a non-empty directory
    *            an exception will be thrown
    *          Default is true
-   *
+   * @param accessModes
+   *          The access modes that to set on the file
+   *          Default is Read,Write
+   * @param attributes
+   *          Filesystem specific attributes to apply to the file
+   *          Ignored unless on Java 7+ JVM
    * @throws IOException
    *           If file or directory already exists.
    *           In the next Java 7 only version it will throw FileAlreadyExistsException
    *           If the process does not have write permission to the parent directory
    *           If parent directory does not exist
    */
-  def createFile(createParents:Boolean = true, failIfExists: Boolean = true, attributes:Iterable[FileAttribute[_]]=Nil): Path
+  def createFile(createParents:Boolean = true, failIfExists: Boolean = true, 
+                 accessModes:Iterable[AccessMode]=List(READ,WRITE), attributes:Iterable[FileAttribute[_]]=Nil): Path
 
   /**
    * Create the directory referenced by this path.
@@ -609,15 +641,21 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    * An exception will also be thrown if the parent directory does not have write
    * permission
    * </p>
+   * @param createParents
+   *          If true then the containing directories will be created if they do not exist
+   *          Default is true
    * @param failIfExists
    *          If true and an object exists then an exception will be thrown
    *          If false then the object will be deleted if possible
    *          If not possible to delete the object or it is a non-empty directory
    *            an exception will be thrown
    *          Default is true
-   * @param createParents
-   *          If true then the containing directories will be created if they do not exist
-   *          Default is true
+   * @param accessModes
+   *          The access modes that to set on the file
+   *          Default is Read,Write
+   * @param attributes
+   *          Filesystem specific attributes to apply to the file
+   *          Ignored unless on Java 7+ JVM
    *
    * @throws IOException
    *           if file or directory already exists.
@@ -626,7 +664,8 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    *           If parent directory does not exist
    *
    */
-  def createDirectory(createParents: Boolean = true, failIfExists: Boolean = true, attributes:Iterable[FileAttribute[_]]=Nil): Path
+  def createDirectory(createParents: Boolean = true, failIfExists: Boolean = true, 
+                      accessModes:Iterable[AccessMode]=List(READ,WRITE), attributes:Iterable[FileAttribute[_]]=Nil): Path
 
   // deletions
   /**

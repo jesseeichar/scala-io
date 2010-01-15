@@ -9,6 +9,7 @@
 package scalax.io
 
 import java.io.{File=>JFile}
+import util.Random.nextInt
 
 /**
  * Factory object for obtaining filesystem objects
@@ -37,6 +38,9 @@ object FileSystem {
  * @since   1.0
  */
 abstract class FileSystem {
+  protected val legalChars = ('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9') ++ List('_','-','+','.') toList
+  def randomPrefix = 1 to (nextInt(5)+3) map {_=> legalChars(nextInt(legalChars.size))} mkString ""
+  
   /** The path segment separator string for the filesystem */
   def separator: String
   /**
@@ -124,7 +128,7 @@ abstract class FileSystem {
    * @throws java.lang.UnsupportedOperationException
    *          If the filesystem does not support temporary files
    */
-  def makeTempFile(prefix: String = Path.randomPrefix, 
+  def createTempFile(prefix: String = randomPrefix, 
                    suffix: String = null, 
                    dir: String = null,
                    deleteOnExit : Boolean = true
@@ -157,7 +161,7 @@ abstract class FileSystem {
    * @throws java.lang.UnsupportedOperationException
    *          If the filesystem does not support temporary files
    */
-  def makeTempDirectory(prefix: String = Path.randomPrefix,
+  def createTempDirectory(prefix: String = randomPrefix,
                         suffix: String = null, 
                         dir: String = null,
                         deleteOnExit : Boolean = true
@@ -177,22 +181,23 @@ private[io] class DefaultFileSystem extends FileSystem {
   def apply(path: String): DefaultPath = apply (new JFile (path))
   def apply(path: JFile): DefaultPath = new DefaultPath (path, this)
   def roots = JFile.listRoots().toList map {f=> apply (f.getPath)}
-  def makeTempFile(prefix: String = Path.randomPrefix, 
+  def createTempFile(prefix: String = randomPrefix, 
                    suffix: String = null, 
                    dir: String = null,
                    deleteOnExit : Boolean = true
                    /*attributes:List[FileAttributes] TODO */ ) : Path = {
-    val path = apply(JFile.createTempFile(prefix, suffix, new JFile(dir)).getPath)
+    val dirFile = if(dir==null) null else new JFile(dir)
+    val path = apply(JFile.createTempFile(prefix, suffix, dirFile).getPath)
     if(deleteOnExit) path.jfile.deleteOnExit
     path
   }
 
-  def makeTempDirectory(prefix: String = Path.randomPrefix,
+  def createTempDirectory(prefix: String = randomPrefix,
                         suffix: String = null, 
                         dir: String = null,
                         deleteOnExit : Boolean = true
                         /*attributes:List[FileAttributes] TODO */) : Path = {
-    val path = Path.makeTempFile(prefix, suffix, dir, false)
+    val path = createTempFile(prefix, suffix, dir, false)
     path.delete()
     path.createDirectory()
     if(deleteOnExit) {

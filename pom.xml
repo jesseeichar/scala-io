@@ -39,7 +39,13 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.4</version>
+            <version>4.7</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>1.8.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -66,32 +72,13 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-				<version>1.1.1</version>
-				<executions>
-					<execution>
-						<id>Run Tests</id>
-						<phase>test</phase>
-						<goals>
-							<goal>java</goal>
-						</goals>
-                		<configuration>
-                    		<mainClass>scalax.io.Testing</mainClass>
-							<arguments><arg>${test.trace}</arg></arguments>
-                    		<classpathScope>test</classpathScope>
-                		</configuration>
-					</execution>
-				</executions>
-            </plugin>
-            <plugin>
+			<plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <excludes>
-                        <exclude>**/*.class</exclude>
-                    </excludes>
+                    <includes>
+                        <include>**/*Test.class</include>
+                    </includes>
                 </configuration>
 			</plugin>
         </plugins>

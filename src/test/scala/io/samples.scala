@@ -101,14 +101,14 @@ object Samples {
     // by default the filesystem is the defaultFileSystem (surprise :-) )
     // using the default parameters will create a randomly named file in
     // the system temp directory which will be deleted when the JVM exists
-    val tmpFile1: Path = Path.makeTempFile ()
+    val tmpFile1: Path = Path.createTempFile ()
 
     // fully declare the temporary file parameters
     // all parameters have defaults so there are many option
     // Note that not all filesystems support creating temporary
     // files.
     // The default filesystem does
-    val tmpFile2: Path = Path.makeTempFile (prefix="tmpFile",
+    val tmpFile2: Path = Path.createTempFile (prefix="tmpFile",
                                           suffix="tmp",
                                           dir="/tmp",
                                           deleteOnExit=false)(FileSystem.default)
@@ -116,28 +116,28 @@ object Samples {
     // Using the same pattern as Path you can can use implicits
     // to declare the FileSystem that is used by make temp file
     implicit val fs = FileSystem.default
-    // fs will now be used by makeTempFile
-    val tmpFile3: Path = Path.makeTempFile ()
+    // fs will now be used by createTempFile
+    val tmpFile3: Path = Path.createTempFile ()
 
     // a file system can also be used to create temporary files/directories
-    fs.makeTempFile ()
+    fs.createTempFile ()
   }
 
   { // create temporary directories
-    // Note: Both makeTempFile and makeTempDirectory have the same parameters
+    // Note: Both createTempFile and createTempDirectory have the same parameters
     import scalax.io.{Path,FileSystem}
 
     // by default the filesystem is the defaultFileSystem (surprise :-) )
     // using the default parameters will create a randomly named directory in
     // the system temp directory which will be deleted when the JVM exists
-    val tmpFile1: Path = Path.makeTempDirectory ()
+    val tmpFile1: Path = Path.createTempDirectory ()
 
     // fully declare the temporary directory parameters
     // all parameters have defaults so there are many option
     // Note that not all filesystems support creating temporary
     // files/directories.
     // The default filesystem does
-    val tmpFile2: Path = Path.makeTempDirectory (prefix="tmpFile",
+    val tmpFile2: Path = Path.createTempDirectory (prefix="tmpFile",
                                           suffix="tmp",
                                           dir="/tmp",
                                           deleteOnExit=false)(FileSystem.default)
@@ -145,11 +145,11 @@ object Samples {
     // Using the same pattern as Path you can can use implicits
     // to declare the FileSystem that is used by make temp directory
     implicit val fs = FileSystem.default
-    // fs will now be used by makeTempDirectory
-    val tmpFile3: Path = Path.makeTempDirectory ()
+    // fs will now be used by createTempDirectory
+    val tmpFile3: Path = Path.createTempDirectory ()
 
     // a file system can also be used to create temporary files/directories
-    fs.makeTempFile ()
+    fs.createTempFile ()
   }
 
   { // Match a Path against the full path as a string
