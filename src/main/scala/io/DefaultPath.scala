@@ -177,8 +177,7 @@ private[io] class DefaultPath private[io] (val jfile: JFile, fileSystem: Default
   }
   def moveTo(target: Path, replaceExisting:Boolean=false, 
              atomicMove:Boolean=false): Path = null
-  def execute(args:String*)(implicit configuration:ProcessBuilder=>Unit = p =>()):Option[Process] = null // TODO
-  
+
   override def toString() = "Path(%s)".format(path)
   override def equals(other: Any) = other match {
     case x: Path  => path == x.path

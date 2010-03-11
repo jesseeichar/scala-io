@@ -67,6 +67,23 @@ abstract class FileSystemFixture(val fs : FileSystem, rnd : Random) {
     if(create) data.create(dataType)
     else data
   }
+  
+  def check(create:Boolean, test : TestData => Unit) : Unit = {
+    var data : TestData = null
+    for {count <- 1 to 50} 
+        try {
+           val t = if(Random.nextBoolean) TestDataType.File else TestDataType.Dir
+           data = fixture.testData(t, create)
+           test(data)
+        } catch {
+          case e => 
+            println(count+" tests passed before a failure case was encountered: \n"+data)
+            throw e
+        } finally {
+          if(data!=null) try{data.delete()}catch{case _ =>}
+        }
+  }
+  
   def after() : Unit = root.deleteRecursively()
 }
 

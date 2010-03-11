@@ -779,21 +779,6 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
   override def hashCode() = path.hashCode()
 
   /**
-   * Execute the file in a separate process if the path
-   * is executable.
-   *
-   * @param arguments
-   *          Arguments to send to the process
-   * @param configuration
-   *          An optional configuration function for configuring
-   *          the ProcessBuilder.  The default process builder will
-   *          be passed to the function.
-   *
-   * @return Process
-   */
-  def execute(args:String*)(implicit configuration:ProcessBuilder=>Unit = p=>()):Option[Process]
-
-  /**
    * Create a matcher from this path's filesystem
    * @see FileSystem#matcher(String,String)
    */

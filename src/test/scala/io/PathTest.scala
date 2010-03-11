@@ -46,7 +46,7 @@ class PathTest extends scalax.test.sugar.AssertionSugar {
   def path_should_respect_file_access_restrictions() : Unit = {
     check (false, respectsAccess _)
   }
-  @Test @Ignore
+  @Test 
   def path_should_have_exists_and_notExists_methods_that_are_not_equal() : Unit = {
     check (false, existsTest _)
   }
@@ -75,43 +75,8 @@ class PathTest extends scalax.test.sugar.AssertionSugar {
     copy( fixture.tree(), fixture.path, fixture.tree(), canReplace=false)
   }
 
-  def check(create:Boolean, test : TestData => Unit) : Unit = {
-    var data : TestData = null
-    for {count <- 1 to 50} 
-        try {
-           val t = if(Random.nextBoolean) TestDataType.File else TestDataType.Dir
-           data = fixture.testData(t, create)
-           test(data)
-        } catch {
-          case e => 
-            println(count+" tests passed before a failure case was encountered: \n"+data)
-            throw e
-        } finally {
-          if(data!=null) try{data.delete()}catch{case _ =>}
-        }
-  }
+  val check= fixture.check _
 
-  def verifyAccess (test: => Unit)(is : Boolean)={
-    if (is) test
-    else intercept[IOException] {test}
-  }
-
-  def readTest(path: Path) = path.fileOps.chars().head
-
-  def writeTest(path: Path) = path.fileOps.writeString("abc")
-
-  def execTest(path: Path) = path.execute()
-
-  def matchAccess(access: AccessMode, path: Path, is: Boolean) = access match {
-    case EXECUTE => verifyAccess (execTest(path))(is)
-    case WRITE => verifyAccess (writeTest(path))(is)
-    case READ => verifyAccess (readTest(path))(is)
-  }
-/*  
-  AccessModes.values intersect (access) foreach { a => verifyTest(access, path, is) }
-
-  access foreach { a => verifyTest(access, path, is) }
-*/
   def move(f1 :Path, f2: Path, exists: Path, canReplace: Boolean=true)={
     assertTrue(f1.exists)
     assertTrue(f2.notExists)
@@ -203,15 +168,6 @@ class PathTest extends scalax.test.sugar.AssertionSugar {
     assertFalse(!access.isEmpty && (path checkAccess (access:_*)))
   }
 
-  def respectsAccess(testData: TestData):Unit = {
-    import testData._
-
-    val path = fspath(pathName)
-    (Path.AccessModes.values -- access) foreach { a => matchAccess(a, path, false) }
-    
-    access foreach { a => matchAccess(a, path, true) }
-  }
-
   def existsTest(testData : TestData) : Unit = {
       val path = fspath(testData.pathName)
       assertTrue(path.exists != path.notExists)
@@ -220,4 +176,36 @@ class PathTest extends scalax.test.sugar.AssertionSugar {
       assertTrue(path.exists)
       assertTrue(path.exists != path.notExists)
   }
+
+  def respectsAccess(testData: TestData):Unit = {
+    import testData._
+
+    val path = fspath(pathName)
+    path.createFile()
+    path.access = access
+    (Path.AccessModes.values -- access) foreach { a => matchAccess(a, path, false) }
+    
+    access foreach { a => matchAccess(a, path, true) }
+  }
+  def verifyAccess (test: => Unit)(is : Boolean)={
+    if (is) test
+    else intercept[IOException] {test}
+  }
+
+  def readTest(path: Path) = path.fileOps.chars().head
+
+  def writeTest(path: Path) = path.fileOps.writeString("abc")
+
+  def execTest(path: Path) = path.fileOps.execute()
+
+  def matchAccess(access: AccessMode, path: Path, is: Boolean) = access match {
+    case EXECUTE => verifyAccess (execTest(path))(is)
+    case WRITE => verifyAccess (writeTest(path))(is)
+    case READ => verifyAccess (readTest(path))(is)
+  }
+  /*  
+    AccessModes.values intersect (access) foreach { a => verifyTest(access, path, is) }
+
+    access foreach { a => verifyTest(access, path, is) }
+  */
 }

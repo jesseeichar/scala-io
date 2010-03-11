@@ -49,4 +49,13 @@ private[io] class DefaultFileOps(jfile:JFile, codec:Codec) extends FileOps(codec
   }
   
   def bytesAsInts:Iterable[Int] = null // TODO
+  
+  def execute(args:String*)(implicit configuration:ProcessBuilder=>Unit = p =>()):Option[Process] = {
+    import Path.fail
+    
+    if(!jfile.exists) fail(path+" can not be executed as it does not exist")
+    if(!jfile.canExecute) fail(path+" can not be executed as the execution access option is not set")
+    
+    null // TODO
+  }
 }

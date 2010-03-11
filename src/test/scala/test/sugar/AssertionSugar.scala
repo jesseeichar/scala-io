@@ -19,8 +19,11 @@ trait AssertionSugar {
       test
       fail("Expected "+m.toString+" but instead no exception was raised")
     }catch{
+      case e:AssertionError => throw e
       case e if (m >:> singleType(e)) => ()
-      case e => fail("Expected "+m.toString+" but instead got "+e.getClass)
+      case e => 
+        e.printStackTrace
+        fail("Expected "+m.toString+" but instead got "+e.getClass)
     }
   }
 }

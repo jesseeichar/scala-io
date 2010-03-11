@@ -269,6 +269,20 @@ abstract class FileOps(sourceCodec: Codec) extends BasicFileOps(sourceCodec) {
   protected def obtainReadableByteChannel = channel()
   protected def obtainWritableByteChannel = channel()
 
-
+  
+  /**
+   * Execute the file in a separate process if the path
+   * is executable.
+   *
+   * @param arguments
+   *          Arguments to send to the process
+   * @param configuration
+   *          An optional configuration function for configuring
+   *          the ProcessBuilder.  The default process builder will
+   *          be passed to the function.
+   *
+   * @return Process
+   */
+  def execute(args:String*)(implicit configuration:ProcessBuilder=>Unit = p=>()):Option[Process]
 }
 
