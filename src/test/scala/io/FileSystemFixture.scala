@@ -36,6 +36,7 @@ case class TestData(fs : FileSystem, numSegments : Int, pathName : String) {
   }
 }
 
+
 abstract class FileSystemFixture(val fs : FileSystem, rnd : Random) {
   import rnd.{nextInt}
   protected def rndInt(i:Int) = nextInt(i-1)+1
@@ -44,22 +45,22 @@ abstract class FileSystemFixture(val fs : FileSystem, rnd : Random) {
   def segment = fs.randomPrefix
     
   def file(segments:Int) : String = 1 to segments map {_ => segment} mkString (fs.separator)
-  def file() : String = {
+  def file : String = {
     val seg = rndInt(10)
     file(seg)
   }
   
-  def path(segments : Int) = root / fs(file(segments))  
-  def path = root / fs(file())
+  def path(segments : Int) : Path = root / fs(file(segments))  
+  def path : Path = root / fs(file())
   
-  def tree(depth : Int = rndInt(5)) = {
+  def tree(depth : Int = rndInt(5)) : Path = {
     for {d <- 0 until depth
          files <- 0 until rndInt(5) } {
            path(d).createFile(failIfExists  = false)
          }
     root
   }
-  def testData(dataType : TestDataType.Type, create : Boolean = true) = {
+  def testData(dataType : TestDataType.Type, create : Boolean = true) : TestData = {
     import TestDataType._
     val seg = rndInt(10)
     val newFile = path(seg)
@@ -84,6 +85,18 @@ abstract class FileSystemFixture(val fs : FileSystem, rnd : Random) {
         }
   }
   
+  /**
+   * returns a path to a binary image file of size 6315.  It is a copy of the file 
+   * in the test resources directory 'image.png'
+   */
+  def image : Path
+  
+  /**
+   * returns a path to a text file.  It is a copy of the file 
+   * in the test resources directory 'text'
+   */
+  def text : Path
+
   def after() : Unit = root.deleteRecursively()
 }
 
@@ -93,4 +106,17 @@ class DefaultFileSystemFixture(val folder : TemporaryFolder, rnd : Random = new 
 
     override val root = Path(folder.getRoot)
     override def after = folder.delete()
+
+    /**
+     * Copy resource from test resources to filesystem
+     */
+    def copyResource(resourceName : String) : Path = {
+        val dest = file
+        val source = fs(getClass.getResource(resourceName).getFile)
+        dest.fileOps writeBytes source.fileOps
+        dest
+    }
+    
+    override def text = copyResource("text")
+    override def image = copyResource("image.png")
 }

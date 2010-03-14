@@ -3,10 +3,12 @@ version = '0.1-SNAPSHOT'
 description = 'The Scala IO incubator project'
 
 import com.camptocamp.gradle.*
+
 apply id: 'scala'
 apply type: ByteCodeQuality
 apply type: Cobertura
 
+env = System.getenv()
 
 repositories {
     mavenCentral()  // http://repo1.maven.org/maven2/
@@ -16,13 +18,15 @@ repositories {
     mavenRepo urls: "file://${localRepo}"
 }
 
+scalaVersion="2.8.0.Beta1"
+
 dependencies {
     // Libraries needed to run the scala tools
-    scalaTools "org.scala-lang:scala-compiler:${scalaVer}"
-    scalaTools "org.scala-lang:scala-library:${scalaVer}"
+    scalaTools "org.scala-lang:scala-compiler:${scalaVersion}"
+    scalaTools "org.scala-lang:scala-library:${scalaVersion}"
 
     // Libraries needed for scala api
-    compile "org.scala-lang:scala-library:${scalaVer}", 'com.github.jsuereth:scala-arm:0.2-SNAPSHOT'
+    compile "org.scala-lang:scala-library:${scalaVersion}", 'com.github.jsuereth:scala-arm:0.2-SNAPSHOT'
     testCompile 'junit:junit:4.7', 'org.mockito:mockito-all:1.8.0' 
 }
 

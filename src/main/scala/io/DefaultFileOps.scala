@@ -53,8 +53,8 @@ private[io] class DefaultFileOps(jfile:JFile, codec:Codec) extends FileOps(codec
   def execute(args:String*)(implicit configuration:ProcessBuilder=>Unit = p =>()):Option[Process] = {
     import Path.fail
     
-    if(!jfile.exists) fail(path+" can not be executed as it does not exist")
-    if(!jfile.canExecute) fail(path+" can not be executed as the execution access option is not set")
+    if(!jfile.exists) fail(jfile+" can not be executed as it does not exist")
+    if(!jfile.canExecute) fail(jfile+" can not be executed as the execution access option is not set")
     
     null // TODO
   }

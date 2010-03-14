@@ -3,3 +3,6 @@ target/
 .mass_build/
 .pom.sha
 .DS_Store
+.gradle
+build/
+project/

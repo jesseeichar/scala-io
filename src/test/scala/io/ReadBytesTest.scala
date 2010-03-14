@@ -20,11 +20,11 @@ import util.Random
 
 import java.io.IOException
 
-class PathTest extends scalax.test.sugar.AssertionSugar {
+class ReadBytesTest extends scalax.test.sugar.AssertionSugar {
   implicit val codec = Codec.UTF8
   
   var fixture : FileSystemFixture = _
-  
+
   @Before
   def before() : Unit = fixture = new DefaultFileSystemFixture(new TemporaryFolder())
   
@@ -32,8 +32,10 @@ class PathTest extends scalax.test.sugar.AssertionSugar {
   def after() : Unit = fixture.after()
 
   @Test
-  def path_should_support_standard_comparisons() : Unit = {
-    check (false, standardPathComparisions _)
+  def read_bytes_should_provide_length_for_files() : Unit = {
+    val size = fixture.png.fileOps.size
+    assertTrue(size.isDefined)
+    assertEquals(Constants.IMAGE_FILE_SIZE, size.get)
   }
   
 }

@@ -54,7 +54,7 @@ trait ReadBytes {
    * number of bytes in advance.
    * </p>
    */
-  def length: Option[Long] = None
+  def size: Option[Long] = None
 
   /**
    * Obtains a Traversable for conveniently processing the resource as bytes.
