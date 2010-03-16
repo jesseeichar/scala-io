@@ -33,9 +33,11 @@ class WriteBytesTest extends scalax.test.sugar.AssertionSugar {
 
   @Test
   def write_bytes_should_overwrite_and_append_binary_data() : Unit = {
-      val file = fixture.path
+//      val file = fixture.path
+val file = Path("/tmp/file")
       val bytes = "hello".getBytes
       file.fileOps writeBytes bytes
+      assertTrue(file.exists)
       assertEquals(bytes.size, file.fileOps.size)
   }
   

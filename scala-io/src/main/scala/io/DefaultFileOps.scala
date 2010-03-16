@@ -15,7 +15,7 @@ import java.io.{
 import java.net.{ URI, URL }
 
 
-import scala.resource.ManagedResource
+import scalax.resource.ManagedResource
 import OpenOption._
 import collection.{Traversable }
 import PartialFunction._
@@ -61,7 +61,7 @@ private[io] class DefaultFileOps(jfile:JFile, codec:Codec) extends FileOps(codec
       }
       
       if(openOptions contains DELETE_ON_CLOSE) {
-          new scalax.io.resources.DeletingFileOutputStream(jfile, append)
+          new DeletingFileOutputStream(jfile, append)
       } else {
           new FileOutputStream(jfile, append)
       }

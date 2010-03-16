@@ -11,7 +11,7 @@
 
 package scalax.io
 
-import scala.resource.ManagedResource
+import scalax.resource.ManagedResource
 import java.io.{ FileInputStream, InputStream, PrintStream, File => JFile }
 import java.net.{ URI, URL }
 

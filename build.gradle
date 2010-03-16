@@ -1,39 +1,47 @@
-group = 'scala-incubator'
-version = '0.1-SNAPSHOT'
-description = 'The Scala IO incubator project'
-
 import com.camptocamp.gradle.*
 
-apply id: 'scala'
-apply type: ByteCodeQuality
-apply type: Cobertura
+subprojects {    
+    group = 'scala-incubator'
+    version = '0.1-SNAPSHOT'
+    description = 'The Scala IO incubator project'
 
-env = System.getenv()
 
-repositories {
-    mavenCentral()  // http://repo1.maven.org/maven2/
-    mavenRepo(urls: 'http://scala-tools.org/repo-releases/')
+    apply id: 'scala'
+    apply type: ByteCodeQuality
+    apply type: Cobertura
+
+    env = System.getenv()
+
+    repositories {
+        mavenCentral()  // http://repo1.maven.org/maven2/
+        mavenRepo(urls: 'http://scala-tools.org/repo-releases/')
     
-    localRepo = env['MAVEN_REPO'] ?: env['HOME']+'/.m2/repository'
-    mavenRepo urls: "file://${localRepo}"
+        localRepo = env['MAVEN_REPO'] ?: env['HOME']+'/.m2/repository'
+        mavenRepo urls: "file://${localRepo}"
+    }
+
+    scalaVersion="2.8.0"
+
+    dependencies {
+        // Libraries needed to run the scala tools
+        scalaTools "org.scala-lang:scala-compiler:${scalaVersion}"
+        scalaTools "org.scala-lang:scala-library:${scalaVersion}"
+
+        // Libraries needed for scala api
+        compile "org.scala-lang:scala-library:${scalaVersion}"
+        testCompile 'junit:junit:4.7', 'org.mockito:mockito-all:1.8.0' 
+    }
+
+    compileScala.scalaCompileOptions.useCompileDaemon = true
+
+
+    task wrapper(type: Wrapper) { 
+      gradleVersion = '0.9'
+      jarPath = 'wrapper'
+    }
 }
-
-scalaVersion="2.8.0.Beta1"
-
-dependencies {
-    // Libraries needed to run the scala tools
-    scalaTools "org.scala-lang:scala-compiler:${scalaVersion}"
-    scalaTools "org.scala-lang:scala-library:${scalaVersion}"
-
-    // Libraries needed for scala api
-    compile "org.scala-lang:scala-library:${scalaVersion}", 'com.github.jsuereth:scala-arm:0.2-SNAPSHOT'
-    testCompile 'junit:junit:4.7', 'org.mockito:mockito-all:1.8.0' 
-}
-
-compileScala.scalaCompileOptions.useCompileDaemon = true
-
-
-task wrapper(type: Wrapper) { 
-  gradleVersion = '0.9'
-  jarPath = 'wrapper'
+project(':scala-io') {
+    dependencies { 
+        compile project(':scala-arm')
+    }
 }

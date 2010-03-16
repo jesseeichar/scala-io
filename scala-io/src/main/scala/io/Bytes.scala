@@ -9,7 +9,7 @@
 package scalax.io
 
 import scalax.io.resource._
-import scala.resource.ManagedResource
+import scalax.resource.ManagedResource
 import scala.collection.Traversable
 import OpenOption._
 

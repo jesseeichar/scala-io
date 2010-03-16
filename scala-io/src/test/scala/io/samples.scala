@@ -817,7 +817,7 @@ object Samples {
   { // Examples of non-file IO
     import scalax.io._
     import scalax.io.resource.Resource
-    import scala.resource.ManagedResource
+    import scalax.resource.ManagedResource
     import java.net.URL
     import java.io.{
       ObjectInputStream, InputStreamReader, ByteArrayOutputStream,

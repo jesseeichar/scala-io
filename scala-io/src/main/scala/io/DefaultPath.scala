@@ -8,7 +8,7 @@
 
 package scalax.io
 
-import scala.resource.ManagedResource
+import scalax.resource.ManagedResource
 import scalax.io.attributes.FileAttribute
 
 import java.io.{ 

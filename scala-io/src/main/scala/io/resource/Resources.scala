@@ -9,7 +9,7 @@
 package scalax.io.resource
 
 import scalax.io._
-import scala.resource.{
+import scalax.resource.{
   ManagedResource, AbstractUntranslatedManagedResource
 }
 import java.io.{

@@ -8,7 +8,7 @@
 
 package scalaio.test
 
-import scala.resource.ManagedResource
+import scalax.resource.ManagedResource
 import scalax.io.{
   FileSystem, Path, FileOps,Codec,PathMatcher,DirectoryStream
 }

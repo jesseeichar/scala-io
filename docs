@@ -1,7 +1,0 @@
-#!/bin/sh
-
-ROOT=/c/jesse/scala.io/
-OUT=$ROOT/target/docs
-rm -rf $OUT
-mkdir -p $OUT
-scaladoc -d $OUT $ROOT/src/main/scala/io/*.scala
