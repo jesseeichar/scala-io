@@ -8,7 +8,7 @@
 
 package scalax.io
 
-import scala.util.control.ControlException
+import scala.util.control.ControlThrowable
 import java.io.IOException
 
 /**
@@ -33,7 +33,7 @@ import java.io.IOException
  * @author  Jesse Eichar
  * @since   1.0
  */
-case class NotFileException() extends IOException with ControlException
+case class NotFileException() extends IOException with ControlThrowable
 
 /**
  * This is a control exception that indicates the underlying filesystem object either does not exist or is not a Directory
@@ -54,4 +54,4 @@ case class NotFileException() extends IOException with ControlException
  * @author  Jesse Eichar
  * @since   1.0
  */
-case class NotDirectoryException() extends IOException with ControlException
+case class NotDirectoryException() extends IOException with ControlThrowable

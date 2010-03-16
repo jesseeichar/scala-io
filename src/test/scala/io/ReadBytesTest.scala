@@ -33,7 +33,7 @@ class ReadBytesTest extends scalax.test.sugar.AssertionSugar {
 
   @Test
   def read_bytes_should_provide_length_for_files() : Unit = {
-    val size = fixture.png.fileOps.size
+    val size = fixture.image.fileOps.size
     assertTrue(size.isDefined)
     assertEquals(Constants.IMAGE_FILE_SIZE, size.get)
   }

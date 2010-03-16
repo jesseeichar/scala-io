@@ -119,8 +119,7 @@ abstract class BasicFileOps(override val sourceCodec:Codec) extends ReadChars wi
      require(position >= 0, "The patch starting position must be within the existing file")
                     // TODO implement
                     ()
-
-            }
+  }
 }
 
 /**
@@ -179,7 +178,6 @@ abstract class BasicFileOps(override val sourceCodec:Codec) extends ReadChars wi
  */
 abstract class FileOps(sourceCodec: Codec) extends BasicFileOps(sourceCodec) {
   def withCodec(codec:Codec): FileOps
-
   /**
    * Obtains an input stream resource for reading from the file
    */
@@ -236,7 +234,7 @@ abstract class FileOps(sourceCodec: Codec) extends BasicFileOps(sourceCodec) {
    * @param action
    *          The function that will be executed within the block
    */
-  def open[R](openOptions: Iterable[OpenOption] = List(WRITE, CREATE))(action: BasicFileOps => R): R
+  def open[R](openOptions: Seq[OpenOption] = List(WRITE, CREATE))(action: BasicFileOps => R): R
                     
   /**
    * Performs an operation on the file with a FileLock

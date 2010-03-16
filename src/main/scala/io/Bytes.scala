@@ -157,10 +157,13 @@ trait WriteBytes {
    *          Default is WRITE/CREATE/TRUNCATE
    */
   def writeBytes(bytes: Traversable[Byte],
-                 openOptions: Iterable[OpenOption] = WRITE_TRUNCATE): Unit = {
-    // TODO
-    ()
+                 openOptions : Seq[OpenOption] = WRITE_TRUNCATE): Unit = {
+    for (out <- outputStream(openOptions:_*)) {
+        bytes foreach {i => out write i.toInt}
+     }
   }
+
+  protected def outputStream(openOptions : OpenOption*) : ManagedResource[OutputStream]
 
 }
 

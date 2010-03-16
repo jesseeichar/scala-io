@@ -477,6 +477,7 @@ private[io] class InputStreamResourceImpl(opener: => InputStream) extends InputS
  */
 private[io] class OutputStreamResourceImpl(opener: => OutputStream) extends OutputStreamResource {
   def open() = opener
+  protected def outputStream(openOptions : OpenOption*) = this
   def buffered = Resource.fromBufferedOutputStream(new BufferedOutputStream(opener))
   def writer(implicit codec:Codec) =
     Resource.fromWriter(new OutputStreamWriter(opener, codec.charSet))
@@ -517,6 +518,8 @@ private[io] class WriterResourceImpl(opener: => Writer, val sourceCodec:Codec) e
  */
 private[io] class ByteChannelResourceImpl(opener: => ByteChannel) extends ByteChannelResource {
   def open() = opener
+  protected def outputStream(openOptions : OpenOption*) = outputStream
+  
   def inputStream = Resource.fromInputStream(Channels.newInputStream(opener))
   def outputStream = Resource.fromOutputStream(Channels.newOutputStream(opener))
   def reader(implicit codec: Codec) = Resource.fromReader(Channels.newReader(opener, codec.charSet.name()))
@@ -548,6 +551,7 @@ private[io] class ReadableByteChannelResourceImpl(opener: => ReadableByteChannel
  */
 private[io] class WritableByteChannelResourceImpl(opener: => WritableByteChannel) extends WritableByteChannelResource {
   def open() = opener
+  protected def outputStream(openOptions : OpenOption*) = outputStream
   def outputStream = Resource.fromOutputStream(Channels.newOutputStream(opener))
   def writer(implicit codec:Codec) = Resource.fromWriter(Channels.newWriter(opener, codec.charSet.name()))
 }
@@ -560,6 +564,7 @@ private[io] class WritableByteChannelResourceImpl(opener: => WritableByteChannel
  */
 private[io] class FileChannelResourceImpl(opener: => FileChannel) extends FileChannelResource {
   def open() = opener
+  protected def outputStream(openOptions : OpenOption*) = outputStream
   def inputStream = Resource.fromInputStream(Channels.newInputStream(opener))
   def outputStream = Resource.fromOutputStream(Channels.newOutputStream(opener))
   def reader(implicit codec:Codec) = Resource.fromReader(Channels.newReader(opener, codec.charSet.name()))

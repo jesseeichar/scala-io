@@ -22,7 +22,9 @@ package scalax.io
  * @author  Jesse Eichar
  * @since   1.0
  */
-trait OpenOption {}
+trait OpenOption {
+    OpenOption.definedValues = this :: OpenOption.values
+}
 
 /**
  * Several options that are supported by most
@@ -32,19 +34,25 @@ trait OpenOption {}
  * @since   1.0
  */
 object OpenOption {
+  private var definedValues = List[OpenOption]()
+  def values = definedValues
   /**
    * Append to an existing file.
    * A file will not be created if the file does not exist
    */
   final val APPEND = new OpenOption{}
   /**
-   * Creating a file if it does not exist
+   * Creating a file if it does not exist, but parent directories will not be created
    */
   final val CREATE = new OpenOption{}
   /**
    * Creating a new file and fail if the file already exists
    */
   final val CREATE_NEW = new OpenOption{}
+  /**
+   * Creating a new file and all parent directories
+   */
+  final val CREATE_FULL = new OpenOption{}
   /**
    * Delete file on close.
    * <p>
@@ -76,7 +84,7 @@ object OpenOption {
    * If file exists and is opened for WRITE access then truncate the file to
    * 0 bytes.  Ignored if opened for READ access
    */
-  final val TRUNCATE_EXISTING = new OpenOption{}
+  final val TRUNCATE = new OpenOption{}
   /**
    * Open file for write access
    */
@@ -85,11 +93,11 @@ object OpenOption {
   /**
    * Collection of options: {@link #CREATE}, {@link #TRUNCATE_EXISTING}, {@link #WRITE}
    */
-  final val WRITE_TRUNCATE = List(CREATE, TRUNCATE_EXISTING, WRITE)
+  final val WRITE_TRUNCATE = List(CREATE_FULL, TRUNCATE, WRITE)
   /**
    * Collection of options: {@link #CREATE}, {@link #APPEND}, {@link #WRITE}
    */
-  final val WRITE_APPEND = List(CREATE, APPEND, WRITE)
+  final val WRITE_APPEND = List(CREATE_FULL, APPEND, WRITE)
 }
 
 /**

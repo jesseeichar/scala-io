@@ -51,7 +51,7 @@ abstract class FileSystemFixture(val fs : FileSystem, rnd : Random) {
   }
   
   def path(segments : Int) : Path = root / fs(file(segments))  
-  def path : Path = root / fs(file())
+  def path : Path = root / fs(file)
   
   def tree(depth : Int = rndInt(5)) : Path = {
     for {d <- 0 until depth
@@ -74,7 +74,7 @@ abstract class FileSystemFixture(val fs : FileSystem, rnd : Random) {
     for {count <- 1 to 50} 
         try {
            val t = if(Random.nextBoolean) TestDataType.File else TestDataType.Dir
-           data = fixture.testData(t, create)
+           data = testData(t, create)
            test(data)
         } catch {
           case e => 
@@ -100,7 +100,7 @@ abstract class FileSystemFixture(val fs : FileSystem, rnd : Random) {
   def after() : Unit = root.deleteRecursively()
 }
 
-class DefaultFileSystemFixture(val folder : TemporaryFolder, rnd : Random = new Random()) 
+class DefaultFileSystemFixture(val folder : TemporaryFolder, rnd : Random = new Random()) (implicit val codec : Codec)
   extends FileSystemFixture(FileSystem.default, rnd) {
     folder.create()
 
@@ -111,9 +111,10 @@ class DefaultFileSystemFixture(val folder : TemporaryFolder, rnd : Random = new 
      * Copy resource from test resources to filesystem
      */
     def copyResource(resourceName : String) : Path = {
-        val dest = file
+        val dest = path
         val source = fs(getClass.getResource(resourceName).getFile)
-        dest.fileOps writeBytes source.fileOps
+        source.parent.foreach{_.createDirectory()}
+        dest.fileOps writeBytes (source.fileOps.bytes)
         dest
     }
     

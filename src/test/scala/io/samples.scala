@@ -394,7 +394,8 @@ object Samples {
 
     // attempt to execute the file.  If it is possible then the process will be
     // returned
-    val process:Option[Process] = path.execute("arg1", "arg2")
+    implicit val codec = scalax.io.Codec.UTF8
+    val process:Option[Process] = path.fileOps.execute("arg1", "arg2")
 
 
   }
