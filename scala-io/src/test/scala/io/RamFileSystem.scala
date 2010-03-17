@@ -57,7 +57,7 @@ class RamPath(name:String, fileSystem:FileSystem) extends Path(fileSystem) {
     def isHidden = false //TODO
     def lastModified = 0 //TODO
     def lastModified_=(time: Long) = 0 //TODO
-    def length = 0 //TODO
+    def size = 0 //TODO
     def access_=(accessModes:Iterable[AccessMode]) = () // TODO
     def access : Set[AccessMode] = null
     def createFile(createParents: Boolean = true, failIfExists: Boolean = true,

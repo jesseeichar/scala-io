@@ -27,7 +27,7 @@ import java.lang.{ProcessBuilder}
  * @author  Jesse Eichar
  * @since   1.0
  */
-private[io] class DefaultFileOps(jfile:JFile, codec:Codec) extends FileOps(codec) {
+private[io] class DefaultFileOps(path : DefaultPath, jfile:JFile, codec:Codec) extends FileOps(path, codec) {
 
   private implicit val defaultCodec = codec
 
@@ -40,7 +40,7 @@ private[io] class DefaultFileOps(jfile:JFile, codec:Codec) extends FileOps(codec
   def channel( openOptions: OpenOption*) = Resource fromByteChannel openOutput(openOptions).getChannel
   def fileChannel(openOptions: OpenOption*) = Some(Resource fromFileChannel openOutput(openOptions).getChannel)
  
-  def withCodec(codec:Codec) = new DefaultFileOps(jfile, codec)
+  def withCodec(codec:Codec) = new DefaultFileOps(path, jfile, codec)
 
   private def openOutput(openOptions: Seq[OpenOption]) = {
       var append = false

@@ -45,9 +45,11 @@ import Resource._
  * @author Jesse Eichar
  * @since 1.0
  */
-abstract class BasicFileOps(override val sourceCodec:Codec) extends ReadChars with ReadBytes with WriteChars with WriteBytes {
+abstract class BasicFileOps(path : Path, override val sourceCodec:Codec) extends ReadChars with ReadBytes with WriteChars with WriteBytes {
   
   def withCodec(codec:Codec): BasicFileOps
+
+  override def size = Some(path.size)
 
   /**
    * Update a portion of the file content with string at
@@ -176,8 +178,9 @@ abstract class BasicFileOps(override val sourceCodec:Codec) extends ReadChars wi
  * @author Jesse Eichar
  * @since 1.0
  */
-abstract class FileOps(sourceCodec: Codec) extends BasicFileOps(sourceCodec) {
+abstract class FileOps(path : Path, sourceCodec: Codec) extends BasicFileOps(path, sourceCodec) {
   def withCodec(codec:Codec): FileOps
+  
   /**
    * Obtains an input stream resource for reading from the file
    */

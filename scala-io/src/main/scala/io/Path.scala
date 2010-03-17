@@ -525,13 +525,18 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    */
   def lastModified_=(time: Long): Long
   /**
-   * The length of the file/directory in bytes or 0 if file does not exist
+   * The size of the file/directory in bytes or 0 if file does not exist
    *
-   * @return The length of the file/directory in bytes or 0 if file does not exist
+   * @return The size of the file/directory in bytes or 0 if file does not exist
    * @see java.io.File#length()
    */
-  def length: Long
-
+  def size: Long
+  /**
+   * The size of a file
+   * @see size
+   */
+  def length = size
+  
   // Boolean path comparisons
   /**
    * True if this path ends with the other path

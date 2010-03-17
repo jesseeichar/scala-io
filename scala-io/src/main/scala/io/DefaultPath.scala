@@ -61,7 +61,7 @@ private[io] class DefaultPath private[io] (val jfile: JFile, fileSystem: Default
   def isHidden = jfile.isHidden()
   def lastModified = jfile.lastModified()
   def lastModified_=(time: Long) = {jfile setLastModified time; time}
-  def length = jfile.length()
+  def size = jfile.length()
   
   def access_=(accessModes:Iterable[AccessMode]) = {
     if (notExists) fail("Path %s does not exist".format(path))
@@ -190,6 +190,6 @@ private[io] class DefaultPath private[io] (val jfile: JFile, fileSystem: Default
   def tree(filter:(Path,Path)=>Option[PathMatcher] = (origin,relativePath) => None, 
            depth:Int = -1) = null // TODO
 
-  def fileOps(implicit codec:Codec):FileOps = new DefaultFileOps(jfile,codec)
+  def fileOps(implicit codec:Codec):FileOps = new DefaultFileOps(this, jfile,codec)
 
 }
