@@ -465,7 +465,7 @@ private[io] class InputStreamResourceImpl(opener: => InputStream) extends InputS
     Resource.fromReader(new InputStreamReader(opener, codec.charSet))
   def readableByteChannel =
     Resource.fromReadableByteChannel(Channels.newChannel(open()))
-  def bytesAsInts:Iterable[Int] = null // TODO
+  def bytesAsInts:Traversable[Int] = toTraversable {in => StreamIterator(in)}
 }
 
 /***************************** OutputStreamResource ************************************/
@@ -496,6 +496,7 @@ private[io] class ReaderResourceImpl(opener: => Reader, val sourceCodec:Codec) e
   def open() = opener
   def buffered = Resource.fromBufferedReader(new BufferedReader(opener))(sourceCodec)
   def withCodec(codec: Codec): ReaderResource = null // TODO
+  def chars(implicit codec: Codec = getCodec()): Traversable[Char] = toTraversable {reader => StreamIterator(reader)}
 }
 
 /***************************** WriterResource ************************************/
@@ -524,7 +525,7 @@ private[io] class ByteChannelResourceImpl(opener: => ByteChannel) extends ByteCh
   def outputStream = Resource.fromOutputStream(Channels.newOutputStream(opener))
   def reader(implicit codec: Codec) = Resource.fromReader(Channels.newReader(opener, codec.charSet.name()))
   def writer(implicit codec: Codec) = Resource.fromWriter(Channels.newWriter(opener, codec.charSet.name()))
-  def bytesAsInts:Iterable[Int] = null // TODO
+  def bytesAsInts:Traversable[Int] = null // TODO
 }
 
 
@@ -539,7 +540,7 @@ private[io] class ReadableByteChannelResourceImpl(opener: => ReadableByteChannel
   def open() = opener
   def inputStream = Resource.fromInputStream(Channels.newInputStream(opener))
   def reader(implicit codec:Codec) = Resource.fromReader(Channels.newReader(opener, codec.charSet.name()))
-  def bytesAsInts:Iterable[Int] = null // TODO
+  def bytesAsInts:Traversable[Int] = null // TODO
 }
 
 /***************************** WritableByteChannelResource ************************************/
@@ -569,5 +570,5 @@ private[io] class FileChannelResourceImpl(opener: => FileChannel) extends FileCh
   def outputStream = Resource.fromOutputStream(Channels.newOutputStream(opener))
   def reader(implicit codec:Codec) = Resource.fromReader(Channels.newReader(opener, codec.charSet.name()))
   def writer(implicit codec:Codec) = Resource.fromWriter(Channels.newWriter(opener, codec.charSet.name()))
-  def bytesAsInts:Iterable[Int] = null // TODO
+  def bytesAsInts:Traversable[Int] = null // TODO
 }

@@ -20,22 +20,21 @@ import util.Random
 
 import java.io.IOException
 
-class ReadBytesTest extends scalax.test.sugar.AssertionSugar {
-  implicit val codec = Codec.UTF8
-  
-  var fixture : FileSystemFixture = _
+class DefaultFileSystemTest extends scalax.test.sugar.AssertionSugar {
+    implicit val codec = Codec.UTF8
 
-  @Before
-  def before() : Unit = fixture = new DefaultFileSystemFixture(new TemporaryFolder())
-  
-  @After
-  def after() : Unit = fixture.after()
+    var fixture : FileSystemFixture = _
 
-  @Test
-  def read_bytes_should_provide_length_for_files() : Unit = {
-    val size = fixture.image.fileOps.size
-    assertTrue(size.isDefined)
-    assertEquals(Constants.IMAGE_FILE_SIZE, size.get)
-  }
-  
+    @Before
+    def before() : Unit = fixture = new DefaultFileSystemFixture(new TemporaryFolder())
+
+    @After
+    def after() : Unit = fixture.after()
+
+    @Test
+    def fileSystem_apply_creates_a_path() : Unit = {
+        val path = FileSystem.default(getClass.getClassLoader.getResource("resources/text").getFile)
+        assertTrue(path.exists)
+        assertTrue(path.canRead)
+    }
 }

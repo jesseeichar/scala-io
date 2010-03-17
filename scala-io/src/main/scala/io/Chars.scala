@@ -116,7 +116,12 @@ trait ReadChars extends Chars {
    * @return
    *          an iterable of all the characters
    */
-  def chars(codec: Codec = getCodec()): Traversable[Char] = null // TODO bytesAsInts() map (c => (codec wrap c).toChar)
+  def chars(implicit codec: Codec = getCodec()): Traversable[Char]
+  
+  /**
+   * A method for assisting in implementing the chars method
+   */
+  protected def bytesAsInts(bytes : Traversable[Int])(implicit codec : Codec = getCodec()) = bytes map (c => (codec wrap c).toChar)
   /**
    * Obtain an non-strict iterable for iterating through the lines in the object
    * <p>
@@ -166,7 +171,7 @@ trait ReadChars extends Chars {
    * @param codec
    *          The codec representing the desired encoding of the characters  
    */
-  def slurpString(codec: Codec = getCodec()) = chars(codec).mkString
+  def slurpString(implicit codec: Codec = getCodec()) = chars(codec).mkString
 
 /*
  * TODO convert to use Line.Terminator for finding new line

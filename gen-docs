@@ -1,0 +1,1 @@
+scaladoc -d docs -sourcepath scala-arm/src/main/scala/scala/resource/*.scala -classpath scala-arm/build/classes/main/

@@ -51,11 +51,12 @@ private[io] class DefaultFileOps(path : DefaultPath, jfile:JFile, codec:Codec) e
             jfile.createNewFile()
           case CREATE_FULL if !jfile.exists =>
             jfile.getParentFile.mkdirs()
+            println(jfile.getParentFile.exists, jfile.exists)
             jfile.createNewFile()
           case CREATE_NEW =>
             if (jfile.exists) Path.fail(jfile+" already exists, openOption "+CREATE_NEW+" cannot be used with an existing file")
           case TRUNCATE if (openOptions contains WRITE) && (jfile.length > 0)=>
-            new FileOutputStream("/tmp/xx").close()  // truncate file
+            new FileOutputStream(jfile).close()  // truncate file
             
           case _ => ()
       }
@@ -76,7 +77,8 @@ private[io] class DefaultFileOps(path : DefaultPath, jfile:JFile, codec:Codec) e
     None
   }
   
-  def bytesAsInts:Iterable[Int] = null // TODO
+  def chars(implicit codec: Codec = getCodec()): Traversable[Char] = inputStream.reader(codec).chars(codec)
+  def bytesAsInts:Traversable[Int] = inputStream.bytesAsInts
   
   def execute(args:String*)(implicit configuration:ProcessBuilder=>Unit = p =>()):Option[Process] = {
     import Path.fail

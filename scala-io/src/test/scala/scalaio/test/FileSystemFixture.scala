@@ -113,11 +113,10 @@ class DefaultFileSystemFixture(val folder : TemporaryFolder, rnd : Random = new 
     def copyResource(resourceName : String) : Path = {
         val dest = path
         val source = fs(getClass.getClassLoader.getResource(resourceName).getFile)
-        source.parent.foreach{_.createDirectory(failIfExists=false)}
         dest.fileOps writeBytes (source.fileOps.bytes)
         dest
     }
     
-    override def text = copyResource("text")
-    override def image = copyResource("image.png")
+    override def text = copyResource("resources/text")
+    override def image = copyResource("resources/image.png")
 }

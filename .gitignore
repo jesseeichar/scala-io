@@ -1,8 +1,5 @@
-target/
-*~
-.mass_build/
-.pom.sha
+docs
+cobertura.ser
 .DS_Store
-.gradle
-build/
-project/
+build
+.gradle/
