@@ -6,13 +6,14 @@
 **                          |/                                          **
 \*                                                                      */
 
-package scalaio.test
+package scalaio.test.default
 
 import util.Random
 
 import scalax.io._
 import scalax.io.resource._
 import org.junit.rules.TemporaryFolder
+import scalaio.test.Constants
 
 object TestDataType extends Enumeration {
   type Type = Value

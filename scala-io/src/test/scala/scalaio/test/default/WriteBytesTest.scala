@@ -6,7 +6,7 @@
 **                          |/                                          **
 \*                                                                      */
 
-package scalaio.test
+package scalaio.test.default
 
 import scalax.io._
 import Path.AccessModes._

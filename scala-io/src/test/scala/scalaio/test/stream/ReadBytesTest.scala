@@ -6,9 +6,10 @@
 **                          |/                                          **
 \*                                                                      */
 
-package scalaio.test
+package scalaio.test.stream
 
 import scalax.io._
+import scalaio.test.Constants
 import Path.AccessModes._
 
 import org.junit.Assert._
@@ -19,22 +20,9 @@ import org.junit.rules.TemporaryFolder
 import util.Random
 
 import java.io.IOException
+import scalaio.test._
+import Constants.TEXT_VALUE
 
-class DefaultFileSystemTest extends scalax.test.sugar.AssertionSugar {
-    implicit val codec = Codec.UTF8
+class ReadBytesTest extends scalax.test.sugar.AssertionSugar {
 
-    var fixture : FileSystemFixture = _
-
-    @Before
-    def before() : Unit = fixture = new DefaultFileSystemFixture(new TemporaryFolder())
-
-    @After
-    def after() : Unit = fixture.after()
-
-    @Test
-    def fileSystem_apply_creates_a_path() : Unit = {
-        val path = FileSystem.default(getClass.getClassLoader.getResource("resources/text").getFile)
-        assertTrue(path.exists)
-        assertTrue(path.canRead)
-    }
 }

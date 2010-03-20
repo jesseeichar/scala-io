@@ -6,12 +6,12 @@
 **                          |/                                          **
 \*                                                                      */
 
-package scalaio.test
+package scalaio.test.default
 
 import org.junit.Assert._
 import org.junit.{Test,Ignore}
 import scalax.io._
-import ScalaIoMocks.fileSystemMock
+import scalaio.test.ScalaIoMocks.fileSystemMock
 
 class PathObjectTest {
   @Test
