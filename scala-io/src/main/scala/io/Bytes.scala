@@ -146,7 +146,7 @@ trait WriteBytes {
    * the underlying APIs
    * </p><p>
    * The bytes are either appended to the file or replace the contents of the
-   * file depending on the openOptions. By default the conents of the file
+   * file depending on the openOptions. By default the contents of the file
    * will be replaced.
    * </p>
    *
@@ -164,49 +164,4 @@ trait WriteBytes {
   }
 
   protected def outputStream(openOptions : OpenOption*) : ManagedResource[OutputStream]
-
 }
-
-
-/*
-trait ReadChannelBytes extends ReadBytes {
-  private def withBufferedInputStream[R]( in: InputStream => R): R = {
-    readableByteChannel.acquireAndGet[R] (
-      channel => {
-        val buffered = Channels.newInputStream(channel)
-        in(buffered)
-      })
-
-  def length: Long = -1
-
-  def bytes(): Traversable[Byte] = bytesAsInts() map (_.toByte)
-  def bytesAsInts(): Traversable[Int] = {
-    withBufferedInputStream {
-      in => Iterator continually in.read() takeWhile (_ != -1)
-    }.toStream.view
-  }
-  def slurpBytes(): Array[Byte] = {
-    // if we don't know the length, fall back on relative inefficiency
-    if (length == -1L)
-      return (new ArrayBuffer[Byte]() ++= bytes()).toArray
-
-    val arr = new Array[Byte](length.toInt)
-    val len = arr.length
-    var offset = 0
-
-    def loop(in:InputStream) {
-      if (offset < len) {
-        val read = in.read(arr, offset, len - offset)
-        if (read >= 0) {
-          offset += read
-          loop(in)
-        }
-      }
-    }
-    withBufferedInputStream (loop _)
-
-    if (offset == arr.length) arr
-    else fail("Could not read entire source (%d of %d bytes)".format(offset, len))
-  }
-  }
-*/

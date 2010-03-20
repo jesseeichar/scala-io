@@ -8,7 +8,7 @@ subprojects {
 
     apply id: 'scala'
     apply type: ByteCodeQuality
-    apply type: Cobertura
+//    apply type: Cobertura
 
     env = System.getenv()
 
