@@ -9,19 +9,11 @@
 package scalaio.test.default
 
 import scalax.io._
-import Path.AccessModes._
-
-import org.junit.Assert._
 import org.junit.{
-  Test, Before, After, Rule, Ignore
+  Before, After
 }
 import org.junit.rules.TemporaryFolder
-import util.Random
-
-import java.io.IOException
-
 import scalaio.test._
-import Constants.TEXT_VALUE
 
 class ReadBytesTest extends AbstractReadBytesT {
 
@@ -31,8 +23,8 @@ class ReadBytesTest extends AbstractReadBytesT {
 
     @After def after() : Unit = fixture.after()
 
-      protected def readBytes(t:Type) = t match {
-          case Text => fixture.text.fileOps
-          case Image => fixture.image.fileOps
-      }
+    protected def readBytes(t:Type) = t match {
+      case Text => fixture.text.fileOps
+      case Image => fixture.image.fileOps
+    }
 }

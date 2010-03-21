@@ -8,21 +8,14 @@
 
 package scalaio.test.stream
 
-import scalax.io._
-import scalaio.test.Constants
-import Path.AccessModes._
-
-import org.junit.Assert._
-import org.junit.{
-  Test, Before, After, Rule, Ignore
-}
-import org.junit.rules.TemporaryFolder
-import util.Random
-
-import java.io.IOException
+import scalax.io.resource._
 import scalaio.test._
-import Constants.TEXT_VALUE
 
-class ReadBytesTest extends scalax.test.sugar.AssertionSugar {
+class ReadBytesTest extends AbstractReadBytesT {
+    protected def readBytes(t:Type) = t match {
+      case Text => Resource.fromInputStream(Constants.TEXT.openStream())
+      case Image => Resource.fromInputStream(Constants.IMAGE.openStream())
+    }
 
+    override protected def sizeIsDefined = false
 }
