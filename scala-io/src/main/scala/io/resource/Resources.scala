@@ -447,7 +447,7 @@ class ReaderResource[+A <: Reader](opener: => A, val sourceCodec:Codec) extends 
     def readableByteChannel = Resource.fromReadableByteChannel(Channels.newChannel (new CharInputStream(Left(opener))))
 
     def bytesAsInts = charsToInts
-    override def chars(implicit codec: Codec = getCodec()): Traversable[Char] = toTraversable {reader => StreamIterator(reader)(codec)}
+    override def chars(implicit codec: Codec = getCodec()): Traversable[Char] = toTraversable {reader => StreamIterator(reader, sourceCodec, codec)}
     def withCodec(codec: Codec) = Resource.fromReader(opener)(codec)
 }
 

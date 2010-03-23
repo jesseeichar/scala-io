@@ -81,6 +81,8 @@ class Codec(val charSet: Charset) {
       bytes
     }
   
+  def translate(string:String)(to:Codec) = new String(string.getBytes(name), to.name)
+  
   def wrap(body: => Int): Int =
     try body catch { case e: CharacterCodingException => _onCodingException(e) }
 

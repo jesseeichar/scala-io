@@ -24,22 +24,32 @@ import java.io.{
     IOException, StringReader, InputStreamReader, BufferedReader
 }
 
-class CharInputStreamTest extends AssertionSugar with IOSugar{
+class StreamIteratorTest extends AssertionSugar with IOSugar{
     implicit val codec = Codec("UTF-8")
  
     val sample ="a1?£©àäカ゚ゼ"
 
     @Test
     def stream_converts_chars_to_bytes() : Unit = {
-        System.out.println(sample)
-        System.out.println("expecting "+new BufferedReader(new StringReader(sample)).readLine)
-        val reader = new StringReader(sample)
-        val in = new CharInputStream(Left(reader))(codec)
+        def reader = new BufferedReader(new StringReader(sample))
+
+        assertEquals(sample, reader.readLine)
         
-        
-        val in2 = new BufferedReader(new InputStreamReader(in, codec.name))
-        val read = in2.readLine
-        System.out.println("'%s' - '%s'".format(sample, read))
-        assertArrayEquals(sample.toArray, read.toArray)
+        assertEquals(sample, StreamIterator(reader) mkString "")
     }
+    
+    @Test
+    def convert_codec() : Unit = {
+        sample foreach {ch => 
+            val c = ch.toString
+            
+            val reader = new StringReader(c)
+            val iter = StreamIterator(reader, codec, Codec("UTF-16"))
+        
+            val converted : Char = iter.next
+            assertFalse(iter.hasNext)
+            assertEquals(new String(c.getBytes(codec.name), "UTF-16").head, converted)
+        }
+    }
+    
 }

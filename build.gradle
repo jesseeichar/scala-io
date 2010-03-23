@@ -32,7 +32,11 @@ subprojects {
         testCompile 'junit:junit:4.7', 'org.mockito:mockito-all:1.8.0' 
     }
 
-    compileScala.scalaCompileOptions.useCompileDaemon = true
+    compileScala {
+        scalaCompileOptions.useCompileDaemon = true
+        encoding = "UTF-8"
+    }
+    
 /*    
     tasks.addRule("Pattern: ~<ID>") { String taskName ->
         if (taskName.startsWith ("~")){

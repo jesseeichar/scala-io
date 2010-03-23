@@ -17,29 +17,31 @@ protected[resource] class CharInputStream(source : Either[Reader,Iterator[Char]]
         case Right(iterator) => iterator
     }
     
-    var bytes : Array[Byte] = _
-    var i = -1
+    var bytes : Array[Byte] = new Array[Byte](0)
+    var i = 0
     
     val encodeBuffer = Array[Char](1)
     def read : Int = {
-        if (i == -1) {
-            if (iter.hasNext)  {
+       val h = if(i == bytes.size) {
+            if(iter.hasNext) {
+                System.out.println("1")
+                i = 1
                 encodeBuffer(0) = iter.next
-                bytes = codec encode encodeBuffer  // TODO share array object
-                i=1
+                bytes = codec encode encodeBuffer
                 bytes(0)
             } else {
+                System.out.println("2")
                 -1
-            }
-        }else {
-            if (i == bytes.size) {
-                i = -1
-                bytes(bytes.size-1)
-            } else {
-                i += 1
-                bytes(i-1)
-            }
+            }            
+        } else {
+            System.out.println("3")
+            i += 1
+            bytes(i-1)
         }
+
+            
+        System.out.println(h)
+        h
     }
     
     override def close() = source match {

@@ -32,9 +32,14 @@ object StreamIterator {
         if(i == -1) None
         else Some(i)
     }
-    def apply(reader : Reader)(implicit codec : Codec) = apply[Char] {
+    def apply(reader : Reader) = apply[Char] {
         val i = reader.read()
         if(i == -1) None
-        else Some((codec wrap i).toChar)
+        else Some(i.toChar)
+    }
+    def apply(reader : Reader, from : Codec, to : Codec ) = apply[Char] {
+        val i = reader.read()
+        if(i == -1) None
+        else Some(from.translate(i.toChar.toString)(to).head)
     }
 }
