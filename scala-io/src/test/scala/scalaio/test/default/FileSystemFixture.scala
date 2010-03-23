@@ -13,6 +13,7 @@ import util.Random
 import scalax.io._
 import scalax.io.resource._
 import org.junit.rules.TemporaryFolder
+import java.io.InputStream
 import scalaio.test.Constants
 
 object TestDataType extends Enumeration {
@@ -112,7 +113,7 @@ class DefaultFileSystemFixture(val folder : TemporaryFolder, rnd : Random = new 
     /**
      * Copy resource from test resources to filesystem
      */
-    def copyResource(source : InputStreamResource) : Path = {
+    def copyResource(source : InputStreamResource[InputStream]) : Path = {
         val dest = path
         dest.fileOps writeBytes (source.bytes)
         dest

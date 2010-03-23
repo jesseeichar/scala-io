@@ -744,10 +744,11 @@ object Samples {
       ReaderResource, WriterResource
     }
     import java.io.{
-      InputStream, BufferedInputStream,
-      OutputStream, BufferedOutputStream,
-      Reader, BufferedReader,
-      Writer, BufferedWriter
+        FileInputStream,
+        InputStream, BufferedInputStream,
+        OutputStream, BufferedOutputStream,
+        Reader, BufferedReader,
+        Writer, BufferedWriter
     }
     // the codec must be defined either as a parameter of fileOps methods or as an implicit
     implicit val codec = scalax.io.Codec.UTF8
@@ -755,28 +756,28 @@ object Samples {
     val file: FileOps =  Path ("file").fileOps
 
     // get various input streams, readers an channels
-    val in: InputStreamResource = file.inputStream
-    val bufferedIn: InputStreamResource = in.buffered
+    val in: InputStreamResource[InputStream] = file.inputStream
+    val bufferedIn: InputStreamResource[BufferedInputStream] = in.buffered
     val readableChannel: Resource[ReadableByteChannel] = in.readableByteChannel
-    val reader: ReaderResource = in.reader
-    val bufferedReader: ReaderResource = reader.buffered
+    val reader: ReaderResource[Reader] = in.reader
+    val bufferedReader: ReaderResource[BufferedReader] = reader.buffered
 
     // get various output streams and channels
     // get default OutputStream
     // default will create fileif it does not exist and overwrite if it does
-    var out: OutputStreamResource = file.outputStream()
+    var out: OutputStreamResource[OutputStream] = file.outputStream()
     // create a appending stream
-    var out2: OutputStreamResource = file.outputStream (WRITE_APPEND:_*)
-    val bufferedOut: OutputStreamResource = out.buffered
+    var out2: OutputStreamResource[OutputStream] = file.outputStream (WRITE_APPEND:_*)
+    val bufferedOut: OutputStreamResource[BufferedOutputStream] = out.buffered
     val writableChannel: Resource[WritableByteChannel] = out.writableByteChannel
-    val writer: WriterResource = out.writer
-    val bufferedWriter: WriterResource = writer.buffered
+    val writer: WriterResource[Writer] = out.writer
+    val bufferedWriter: WriterResource[BufferedWriter] = writer.buffered
     // TODO copy examples from input section
 
     // examples getting ByteChannels
     // default is a read/write/create channel
-    val channel: ByteChannelResource = file.channel()
-    val channel2: ByteChannelResource = file.channel(READ,WRITE,APPEND)
+    val channel: ByteChannelResource[ByteChannel] = file.channel()
+    val channel2: ByteChannelResource[ByteChannel] = file.channel(READ,WRITE,APPEND)
 
     // Not all filesystems can support FileChannels so the fileChannel method returns an option
     file.fileChannel() foreach { fc => println("got a file channel") }

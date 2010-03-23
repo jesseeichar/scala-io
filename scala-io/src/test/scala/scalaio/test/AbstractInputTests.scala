@@ -19,19 +19,19 @@ import org.junit.{
 import java.io.IOException
 import Constants.TEXT_VALUE
 
-abstract class AbstractReadBytesT extends scalax.test.sugar.AssertionSugar {
+abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
     implicit val codec = Codec.UTF8
 
     sealed trait Type
     case object Image extends Type
     case object Text extends Type
 
-    protected def readBytes(t:Type) : ReadBytes
+    protected def input(t:Type) : Input
     protected def sizeIsDefined = true
 
     @Test
     def provide_length_for_files() : Unit = {
-        val size = readBytes(Image).size
+        val size = input(Image).size
         if(sizeIsDefined) {
           assertTrue(size.isDefined)
           assertEquals(Constants.IMAGE_FILE_SIZE, size.get)
@@ -42,7 +42,7 @@ abstract class AbstractReadBytesT extends scalax.test.sugar.AssertionSugar {
 
     @Test
     def read_all_bytes() : Unit = {
-        val bytes = readBytes(Text).bytes.toArray
+        val bytes = input(Text).bytes.toArray
 
         val expected = TEXT_VALUE getBytes  "UTF-8"
         val bytesString = new String(bytes, "UTF-8")
@@ -54,7 +54,7 @@ abstract class AbstractReadBytesT extends scalax.test.sugar.AssertionSugar {
 
     @Test
     def read_a_subset_of_bytes() = {
-        val bytes = readBytes(Text).bytes.slice(4,4).toArray
+        val bytes = input(Text).bytes.slice(4,4).toArray
 
         val expected = TEXT_VALUE getBytes "UTF-8" slice (4,4)
         val bytesString = new String(bytes, "UTF-8")
@@ -67,7 +67,7 @@ abstract class AbstractReadBytesT extends scalax.test.sugar.AssertionSugar {
 
     @Test
     def read_all_bytes_as_Ints() : Unit = {
-        val ints = readBytes(Text).bytesAsInts.toArray
+        val ints = input(Text).bytesAsInts.toArray
 
         val expected = {
             val in = Constants.TEXT.openStream
@@ -91,7 +91,7 @@ abstract class AbstractReadBytesT extends scalax.test.sugar.AssertionSugar {
 
     @Test
     def read_all_bytes_into_array() : Unit = {
-      val bytes = readBytes(Text).slurpBytes()
+      val bytes = input(Text).slurpBytes()
 
       val expected = TEXT_VALUE getBytes  "UTF-8"
       val bytesString = new String(bytes, "UTF-8")

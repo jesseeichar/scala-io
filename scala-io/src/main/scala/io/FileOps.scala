@@ -8,6 +8,12 @@
 
 package scalax.io
 
+import java.io.{
+    InputStream, OutputStream
+}
+import java.nio.channels.{
+    ByteChannel, FileChannel
+}
 import scalax.io.resource._
 import scala.collection.Traversable
 import OpenOption._
@@ -45,7 +51,7 @@ import Resource._
  * @author Jesse Eichar
  * @since 1.0
  */
-abstract class BasicFileOps(path : Path, override val sourceCodec:Codec) extends ReadChars with ReadBytes with WriteChars with WriteBytes {
+abstract class BasicFileOps(path : Path, override val sourceCodec:Codec) extends Input with Output {
   
   def withCodec(codec:Codec): BasicFileOps
 
@@ -184,7 +190,7 @@ abstract class FileOps(path : Path, sourceCodec: Codec) extends BasicFileOps(pat
   /**
    * Obtains an input stream resource for reading from the file
    */
-  def inputStream: InputStreamResource
+  def inputStream: InputStreamResource[InputStream]
   /**
   * Obtains an OutputStreamResource for writing to the file
   *
@@ -194,7 +200,7 @@ abstract class FileOps(path : Path, sourceCodec: Codec) extends BasicFileOps(pat
   *           the options that define how the file is opened when using the stream
   *           Default is write/create/truncate
   */
-  def outputStream(openOptions:OpenOption*): OutputStreamResource
+  def outputStream(openOptions:OpenOption*): OutputStreamResource[OutputStream]
   /**
    * Obtains a ByteChannel for read/write access to the file.
    *
@@ -204,7 +210,7 @@ abstract class FileOps(path : Path, sourceCodec: Codec) extends BasicFileOps(pat
   *           the options that define how the file is opened when using the stream
   *           Default is read/write/create/truncate
   */
-  def channel(openOptions:OpenOption*): ByteChannelResource
+  def channel(openOptions:OpenOption*): ByteChannelResource[ByteChannel]
   /**
    * Obtains a FileChannel for read/write access to the file.  Not all filesystems
    * can support FileChannels therefore None will be returned if the filesystem
@@ -216,7 +222,7 @@ abstract class FileOps(path : Path, sourceCodec: Codec) extends BasicFileOps(pat
   *          the options that define how the file is opened when using the stream
   *          Default is read/write/create/truncate
   */
-  def fileChannel(openOptions:OpenOption*): Option[FileChannelResource]
+  def fileChannel(openOptions:OpenOption*): Option[ByteChannelResource[FileChannel]]
 
   /**
    * Runs several operations as efficiently as possible. If the filesystem

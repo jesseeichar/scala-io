@@ -11,8 +11,8 @@ package scalaio.test.stream
 import scalax.io.resource._
 import scalaio.test._
 
-class ReadBytesTest extends AbstractReadBytesT {
-    protected def readBytes(t:Type) = t match {
+class InputTest extends AbstractInputTests {
+    protected def input(t:Type) = t match {
       case Text => Resource.fromInputStream(Constants.TEXT.openStream())
       case Image => Resource.fromInputStream(Constants.IMAGE.openStream())
     }

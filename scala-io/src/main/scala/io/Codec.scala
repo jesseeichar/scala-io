@@ -10,7 +10,10 @@
 
 package scalax.io
 
-import java.nio.charset.{ Charset, CharsetDecoder, CharsetEncoder, CharacterCodingException, CodingErrorAction => Action }
+import java.nio.charset.{ 
+    Charset, CharsetDecoder, CharsetEncoder, 
+    CharacterCodingException, CodingErrorAction => Action 
+}
 
 // Some notes about encodings for use in refining this implementation.
 //
@@ -26,8 +29,7 @@ import java.nio.charset.{ Charset, CharsetDecoder, CharsetEncoder, CharacterCodi
 /** A class for character encoding/decoding preferences.
  *
  */
-class Codec(val charSet: Charset)
-{
+class Codec(val charSet: Charset) {
   type Configure[T] = (T => T, Boolean)
   type Handler      = CharacterCodingException => Int
   
@@ -61,6 +63,24 @@ class Codec(val charSet: Charset)
       (_ replaceWith _decodingReplacement, _decodingReplacement != null)
     )
   
+    def decode (bytes: Array[Byte]): Array[Char] = {
+       val bbuffer = java.nio.ByteBuffer wrap bytes
+       val cbuffer = charSet decode bbuffer
+       val chars = new Array[Char](cbuffer.remaining())
+       cbuffer get chars
+
+       chars
+     }
+
+    def encode (cs: CharSequence): Array[Byte] = {
+      val cbuffer = java.nio.CharBuffer wrap cs
+      val bbuffer = charSet encode cbuffer
+      val bytes = new Array[Byte](bbuffer.remaining())
+      bbuffer get bytes
+
+      bytes
+    }
+  
   def wrap(body: => Int): Int =
     try body catch { case e: CharacterCodingException => _onCodingException(e) }
 
@@ -83,23 +103,9 @@ object Codec {
     new Codec(decoder.charset()) { override def decoder = _decoder }
   }
 
-  def toUTF8(bytes: Array[Byte]): Array[Char] = {
-    val bbuffer = java.nio.ByteBuffer wrap bytes
-    val cbuffer = UTF8.charSet decode bbuffer
-    val chars = new Array[Char](cbuffer.remaining())
-    cbuffer get chars
-    
-    chars
-  }
+  def decodeUTF8(bytes: Array[Byte]): Array[Char] = UTF8 decode bytes
   
-  def fromUTF8(cs: CharSequence): Array[Byte] = {
-    val cbuffer = java.nio.CharBuffer wrap cs
-    val bbuffer = UTF8.charSet encode cbuffer
-    val bytes = new Array[Byte](bbuffer.remaining())
-    bbuffer get bytes
-    
-    bytes
-  }
+  def encodeUTF8(cs: CharSequence): Array[Byte] = UTF8 encode cs
   
   implicit def string2codec(s: String) = apply(s)
   implicit def charset2codec(c: Charset) = apply(c)

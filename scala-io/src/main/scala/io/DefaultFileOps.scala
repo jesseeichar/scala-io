@@ -38,7 +38,7 @@ private[io] class DefaultFileOps(path : DefaultPath, jfile:JFile, codec:Codec) e
   def writableByteChannel(openOptions: OpenOption*) = Resource fromWritableByteChannel openOutput(openOptions).getChannel
 
   def channel( openOptions: OpenOption*) = Resource fromByteChannel openOutput(openOptions).getChannel
-  def fileChannel(openOptions: OpenOption*) = Some(Resource fromFileChannel openOutput(openOptions).getChannel)
+  def fileChannel(openOptions: OpenOption*) = Some(Resource fromByteChannel openOutput(openOptions).getChannel)
  
   def withCodec(codec:Codec) = new DefaultFileOps(path, jfile, codec)
 
@@ -77,7 +77,7 @@ private[io] class DefaultFileOps(path : DefaultPath, jfile:JFile, codec:Codec) e
     None
   }
   
-  def chars(implicit codec: Codec = getCodec()): Traversable[Char] = inputStream.reader(codec).chars(codec)
+  override def chars(implicit codec: Codec = getCodec()): Traversable[Char] = inputStream.reader.chars(codec)
   def bytesAsInts:Traversable[Int] = inputStream.bytesAsInts
   
   def execute(args:String*)(implicit configuration:ProcessBuilder=>Unit = p =>()):Option[Process] = {

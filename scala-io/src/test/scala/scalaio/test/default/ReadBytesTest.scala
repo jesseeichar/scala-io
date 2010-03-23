@@ -15,7 +15,7 @@ import org.junit.{
 import org.junit.rules.TemporaryFolder
 import scalaio.test._
 
-class ReadBytesTest extends AbstractReadBytesT {
+class InputTest extends AbstractInputTests {
 
     var fixture : FileSystemFixture = _
 
@@ -23,7 +23,7 @@ class ReadBytesTest extends AbstractReadBytesT {
 
     @After def after() : Unit = fixture.after()
 
-    protected def readBytes(t:Type) = t match {
+    protected def input(t:Type) = t match {
       case Text => fixture.text.fileOps
       case Image => fixture.image.fileOps
     }
