@@ -25,12 +25,12 @@ import java.io.{
 }
 
 class WriterOutputStreamTest extends AssertionSugar with IOSugar{
-    implicit val codec = Codec("UTF-16")
+    implicit val codec = Codec("UTF-8")
      
     val sample ="a1?£©àäカ゚ゼ"
 
-    @Test
-    def write_bytes_to_writer() : Unit = {
+    @Test @Ignore
+    def write_bytes_as_ints_to_writer() : Unit = {
         
         val writer = new StringWriter()
         val out = new WriterOutputStream(writer)
@@ -39,4 +39,28 @@ class WriterOutputStreamTest extends AssertionSugar with IOSugar{
         
         assertEquals(sample, writer.toString)
     }
+    
+    @Test
+    def write_byte_array_to_writer() : Unit = {
+        
+        val writer = new StringWriter()
+        val out = new WriterOutputStream(writer)
+        
+        out.write(sample.getBytes(codec.name))
+        
+        assertEquals(sample, writer.toString)
+    }
+    
+    
+    @Test
+    def write_sub_bytes_array_to_writer() : Unit = {
+        
+        val writer = new StringWriter()
+        val out = new WriterOutputStream(writer)
+        val bytes = sample.getBytes(codec.name)
+        out.write(bytes, 0 , bytes.length)
+        
+        assertEquals(sample, writer.toString)
+    }
+
 }

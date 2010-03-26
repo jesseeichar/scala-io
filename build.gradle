@@ -1,4 +1,4 @@
-import com.camptocamp.gradle.*
+import com.camptocamp.gradle.plugin.*
 
 subprojects {    
     group = 'scala-incubator'
@@ -6,8 +6,8 @@ subprojects {
     description = 'The Scala IO incubator project'
 
 
-    apply id: 'scala'
-    apply type: ByteCodeQuality
+    apply plugin: 'scala'
+    apply plugin: ByteCodeQuality
 //    apply type: Cobertura
 
     env = System.getenv()
