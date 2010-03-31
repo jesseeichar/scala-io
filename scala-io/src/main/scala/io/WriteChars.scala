@@ -45,35 +45,7 @@ import Path.fail
  * @see ReadBytes
  * @see Input
  */
-trait Output {
-
-    /**
-    * Write bytes to the file
-    *
-    * <strong>Important:</strong> The use of an Array is highly recommended
-    * because normally arrays can be more efficiently written using
-    * the underlying APIs
-    * </p><p>
-    * The bytes are either appended to the file or replace the contents of the
-    * file depending on the openOptions. By default the contents of the file
-    * will be replaced.
-    * </p>
-    *
-    * @param bytes
-    *          The bytes to write to the file
-    * @param openOptions
-    *          The options declaring how the file will be opened
-    *          Default is WRITE/CREATE/TRUNCATE
-    */
-    def writeBytes(bytes: Traversable[Byte],
-             openOptions : Seq[OpenOption] = WRITE_TRUNCATE): Unit = {
-        for (out <- outputStream(openOptions:_*)) {
-            bytes foreach {i => out write i.toInt}
-        }
-    }
-
-    protected def outputStream(openOptions : OpenOption*) : ManagedResource[OutputStream]
-
+trait WriteChars {
     /**
     * Writes a string. The open options that can be used are dependent
     * on the implementation and implementors should clearly document
@@ -91,7 +63,7 @@ trait Output {
     *          Default is standard options write/create/truncate
     */
     def writeString(string: String,
-                  openOptions: Traversable[OpenOption] = WRITE_TRUNCATE)(implicit codec: Codec): Unit = {
+                  openOptions: Traversable[OpenOption] = WRITE_TRUNCATE): Unit = {
     // TODO
     ()
     }
@@ -113,7 +85,7 @@ trait Output {
     *          Default is standard options write/create/truncate
     */  
     def writeStrings(strings: Traversable[String],
-                   openOptions: Traversable[OpenOption] = WRITE_TRUNCATE)(implicit codec: Codec): Unit = {
+                   openOptions: Traversable[OpenOption] = WRITE_TRUNCATE): Unit = {
     // TODO
     ()
     }
@@ -139,7 +111,7 @@ trait Output {
     */
     def writeLines(strings: Traversable[String],
                  terminator: Terminators.Terminator = Terminators.NewLine,
-                 openOptions: Traversable[OpenOption] = WRITE_TRUNCATE)(implicit codec: Codec): Unit = {
+                 openOptions: Traversable[OpenOption] = WRITE_TRUNCATE): Unit = {
     // TODO
     ()
     }

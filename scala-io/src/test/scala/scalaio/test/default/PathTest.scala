@@ -192,7 +192,7 @@ class PathTest extends scalax.test.sugar.AssertionSugar {
     else intercept[IOException] {test}
   }
 
-  def readTest(path: Path) = path.fileOps.chars().head
+  def readTest(path: Path) = path.fileOps.chars.head
 
   def writeTest(path: Path) = path.fileOps.writeString("abc")
 

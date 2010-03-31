@@ -45,16 +45,12 @@ import Resource._
  * }
  * </code></pre>
  * 
- * @param sourceCodec
- *          the codec that the file was created with
  *
  * @author Jesse Eichar
  * @since 1.0
  */
-abstract class BasicFileOps(path : Path, override val sourceCodec:Codec) extends Input with Output {
+abstract class BasicFileOps(path : Path) extends Input with Output {
   
-  def withCodec(codec:Codec): BasicFileOps
-
   override def size = Some(path.size)
 
   /**
@@ -65,7 +61,7 @@ abstract class BasicFileOps(path : Path, override val sourceCodec:Codec) extends
    * Exception will be thrown
    * </p><p>
    * If the position is within the file but the
-   * <code>position + codecConvertedString.getBytes.length</code>
+   * <code>position + string.getBytes(codec).length</code>
    * is beyond the end of the file the file will be enlarged so
    * that the entire string can fit in the file
    * </p><p>
@@ -85,8 +81,7 @@ abstract class BasicFileOps(path : Path, override val sourceCodec:Codec) extends
    */
   def patchString(position: Long, 
                   string: String,
-                  codec: Codec = getCodec(),
-                  openOptions: Iterable[OpenOption] = List(WRITE)): Unit = {
+                  openOptions: Iterable[OpenOption] = List(WRITE))(implicit codec: Codec): Unit = {
                     // TODO implement
                     ()
                   }
@@ -178,14 +173,11 @@ abstract class BasicFileOps(path : Path, override val sourceCodec:Codec) extends
  * </li>
  * </ul>
  *
- * @param codec
- *          the codec that the file was created with
  * 
  * @author Jesse Eichar
  * @since 1.0
  */
-abstract class FileOps(path : Path, sourceCodec: Codec) extends BasicFileOps(path, sourceCodec) {
-  def withCodec(codec:Codec): FileOps
+abstract class FileOps(path : Path) extends BasicFileOps(path) {
   
   /**
    * Obtains an input stream resource for reading from the file

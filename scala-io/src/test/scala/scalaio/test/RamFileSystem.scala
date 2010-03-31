@@ -85,5 +85,5 @@ class RamPath(name:String, fileSystem:FileSystem) extends Path(fileSystem) {
 
     def tree(filter:(Path,Path)=>Option[PathMatcher], depth:Int):DirectoryStream[Path] = null //TODO
 
-    def fileOps(implicit codec:Codec):FileOps = null //TODO
+    def fileOps:FileOps = null //TODO
 }

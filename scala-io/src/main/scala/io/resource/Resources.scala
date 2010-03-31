@@ -129,7 +129,7 @@ trait InputResource[+R <: Closeable] extends Resource[R] with Input {
      *
      * @return the Reader Resource version of this object.
      */
-    def reader : InputResource[Reader]
+    def reader(implicit sourceCodec: Codec) : ReadCharsResource[Reader]
     /**
      * Obtain the Reader Resource version of this object.
      *
@@ -137,6 +137,18 @@ trait InputResource[+R <: Closeable] extends Resource[R] with Input {
      */
     def readableByteChannel: InputResource[ReadableByteChannel]
 }
+
+/**
+ * An object that can be converted to an input stream. For example
+ * a ReadableByteChannel
+ *
+ * @param S
+ *          the type of InputStream that is created
+ * 
+ * @author  Jesse Eichar
+ * @since   1.0
+ */
+trait ReadCharsResource[+R <: Closeable] extends Resource[R] with ReadChars
 
 /**
  * An object that can be converted to an output stream. For example
@@ -160,7 +172,7 @@ trait OutputResource[+R <: Closeable] extends Resource[R] with Output {
    *
    * @return the Writer Resource version of this object.
    */
-  def writer : OutputResource[Writer]
+  def writer(implicit sourceCodec: Codec) : WriteCharsResource[Writer]
   /**
    * Obtain the Writer Resource version of this object.
    *
@@ -169,8 +181,23 @@ trait OutputResource[+R <: Closeable] extends Resource[R] with Output {
   def writableByteChannel: OutputResource[WritableByteChannel]
 }
 
+
+/**
+ * An object that can be converted to an input stream. For example
+ * a ReadableByteChannel
+ *
+ * @param S
+ *          the type of InputStream that is created
+ * 
+ * @author  Jesse Eichar
+ * @since   1.0
+ */
+trait WriteCharsResource[+R <: Closeable] extends Resource[R] with WriteChars
+
 trait BufferableInputResource[+C <: Closeable, B <: Closeable] extends InputResource[C] with Bufferable[InputResource[B]]
 trait BufferableOutputResource[+C <: Closeable, B <: Closeable] extends OutputResource[C] with Bufferable[OutputResource[B]]
+trait BufferableReadCharsResource[+C <: Closeable, B <: Closeable] extends ReadCharsResource[C] with Bufferable[ReadCharsResource[B]]
+trait BufferableWriteCharsResource[+C <: Closeable, B <: Closeable] extends WriteCharsResource[C] with Bufferable[WriteCharsResource[B]]
 
 /**
  * Defines several factory methods for creating instances of Resource.
@@ -204,7 +231,7 @@ object Resource {
    * @return
    *          an InputResource
    */
-  def fromInputStream[A <: InputStream](opener: => A)(implicit codec: Codec) : InputStreamResource[A] = new InputStreamResource[A](opener, codec)
+  def fromInputStream[A <: InputStream](opener: => A) : InputStreamResource[A] = new InputStreamResource[A](opener)
   /**
    * Create an Input Resource instance from a BufferedInputStream
    * <p>
@@ -220,7 +247,7 @@ object Resource {
    * @return
    *          a InputStreamResource that is backed by a BufferedInputStream
    */
-  def fromBufferedInputStream[A <: BufferedInputStream](opener: => A)(implicit codec: Codec) : InputStreamResource[A]  = new InputStreamResource[A](opener, codec){
+  def fromBufferedInputStream[A <: BufferedInputStream](opener: => A) : InputStreamResource[A]  = new InputStreamResource[A](opener){
       override def buffered = this;
   }
 
@@ -240,7 +267,7 @@ object Resource {
    * @return
    *          an OutputStreamResource
    */
-  def fromOutputStream[A <: OutputStream](opener: => A)(implicit codec: Codec) : OutputStreamResource[A] = new OutputStreamResource[A](opener, codec)
+  def fromOutputStream[A <: OutputStream](opener: => A) : OutputStreamResource[A] = new OutputStreamResource[A](opener)
   /**
    * Create an Output Resource instance from a BufferedOutputStream
    * <p>
@@ -256,7 +283,7 @@ object Resource {
    * @return
    *          a OutputStreamResource that is backed by a BufferedOutputStream
    */
-  def fromBufferedOutputStream[A <: BufferedOutputStream](opener: => A)(implicit codec: Codec) : OutputStreamResource[A] = new OutputStreamResource[A](opener, codec) {
+  def fromBufferedOutputStream[A <: BufferedOutputStream](opener: => A) : OutputStreamResource[A] = new OutputStreamResource[A](opener) {
       override def buffered = this
   }
 
@@ -356,7 +383,7 @@ object Resource {
    * @return
    *          an ReadableByteChannelResource
    */
-  def fromReadableByteChannel[A <: ReadableByteChannel](opener: => A)(implicit codec: Codec) : ReadableByteChannelResource[A] = new ReadableByteChannelResource[A](opener, codec)
+  def fromReadableByteChannel[A <: ReadableByteChannel](opener: => A) : ReadableByteChannelResource[A] = new ReadableByteChannelResource[A](opener)
   /**
    * Create an Output Resource instance with several conversion traits from an WritableByteChannel.
    * <p>
@@ -372,7 +399,7 @@ object Resource {
    * @return
    *          an WritableByteChannelResource
    */
-  def fromWritableByteChannel[A <: WritableByteChannel](opener: => A)(implicit codec: Codec) : WritableByteChannelResource[A] = new WritableByteChannelResource[A](opener, codec)
+  def fromWritableByteChannel[A <: WritableByteChannel](opener: => A) : WritableByteChannelResource[A] = new WritableByteChannelResource[A](opener)
   /**
    * Create an Input/Output Resource instance with several conversion traits from an ByteChannel.
    * <p>
@@ -388,7 +415,7 @@ object Resource {
    * @return
    *          an ByteChannelResource
    */
-  def fromByteChannel[A <: ByteChannel](opener: => A)(implicit codec: Codec) : ByteChannelResource[A] = new ByteChannelResource[A](opener, codec)
+  def fromByteChannel[A <: ByteChannel](opener: => A) : ByteChannelResource[A] = new ByteChannelResource[A](opener)
 }
 
 /***************************** InputStreamResource ************************************/
@@ -397,17 +424,15 @@ object Resource {
  *
  * @see ManagedResource
  */
-class InputStreamResource[+A <: InputStream](opener: => A, val sourceCodec: Codec) extends BufferableInputResource[A, BufferedInputStream] {
-    implicit val codec = getCodec()
+class InputStreamResource[+A <: InputStream](opener: => A) extends BufferableInputResource[A, BufferedInputStream] {
     def open() = opener
 
     def inputStream = this
     def buffered = Resource.fromBufferedInputStream(new BufferedInputStream(opener))
-    def reader = Resource.fromReader(new InputStreamReader(opener, sourceCodec.charSet))
+    def reader(implicit sourceCodec: Codec) = Resource.fromReader(new InputStreamReader(opener, sourceCodec.charSet))
     def readableByteChannel = Resource.fromReadableByteChannel(Channels.newChannel(open()))
 
     def bytesAsInts:Traversable[Int] = toTraversable {in => StreamIterator(in)}
-    def withCodec(codec: Codec) = Resource.fromInputStream(opener)(codec)
 }
 
 /***************************** OutputStreamResource ************************************/
@@ -417,17 +442,15 @@ class InputStreamResource[+A <: InputStream](opener: => A, val sourceCodec: Code
  *
  * @see ManagedResource
  */
-class OutputStreamResource[+A <: OutputStream](opener: => A, val sourceCodec: Codec) extends BufferableOutputResource[A, BufferedOutputStream] {
-    implicit val codec = getCodec()
+class OutputStreamResource[+A <: OutputStream](opener: => A) extends BufferableOutputResource[A, BufferedOutputStream] {
     def open() = opener
 
     def outputStream = this
     def buffered = Resource.fromBufferedOutputStream(new BufferedOutputStream(opener))
-    def writer = Resource.fromWriter(new OutputStreamWriter(opener, sourceCodec.charSet))
+    def writer(implicit sourceCodec: Codec) = Resource.fromWriter(new OutputStreamWriter(opener, sourceCodec.charSet))
     def writableByteChannel = Resource.fromWritableByteChannel(Channels.newChannel(open()))
 
     protected def outputStream(openOptions : OpenOption*) = this
-    def withCodec(codec: Codec) = Resource.fromOutputStream(opener)(codec)
 }
 
 /***************************** ReaderResource ************************************/
@@ -437,18 +460,12 @@ class OutputStreamResource[+A <: OutputStream](opener: => A, val sourceCodec: Co
  *
  * @see ManagedResource
  */
-class ReaderResource[+A <: Reader](opener: => A, val sourceCodec:Codec) extends BufferableInputResource[A, BufferedReader] {
-    implicit val codec = getCodec()
+class ReaderResource[+A <: Reader](opener: => A, val sourceCodec:Codec) extends BufferableReadCharsResource[A, BufferedReader] {
     def open() = opener
 
-    def buffered = Resource.fromBufferedReader(new BufferedReader(opener))
-    def reader = this
-    def inputStream = Resource.fromInputStream(new CharInputStream(Left(opener)))
-    def readableByteChannel = Resource.fromReadableByteChannel(Channels.newChannel (new CharInputStream(Left(opener))))
+    def buffered = Resource.fromBufferedReader(new BufferedReader(opener))(sourceCodec)
 
-    def bytesAsInts = charsToInts
-    override def chars(implicit codec: Codec = getCodec()): Traversable[Char] = toTraversable {reader => StreamIterator(reader, sourceCodec, codec)}
-    def withCodec(codec: Codec) = Resource.fromReader(opener)(codec)
+    override def chars : Traversable[Char] = toTraversable {reader => StreamIterator(reader)}
 }
 
 /***************************** WriterResource ************************************/
@@ -457,17 +474,11 @@ class ReaderResource[+A <: Reader](opener: => A, val sourceCodec:Codec) extends 
  *
  * @see ManagedResource
  */
-class WriterResource[+A <: Writer](opener: => A, val sourceCodec:Codec) extends BufferableOutputResource[A, BufferedWriter] {
-    implicit val codec = getCodec()
+class WriterResource[+A <: Writer](opener: => A, val sourceCodec:Codec) extends BufferableWriteCharsResource[A, BufferedWriter] {
     def open() = opener
 
-    def writer = this
     def buffered = Resource.fromBufferedWriter(new BufferedWriter(opener))(sourceCodec)
-    def outputStream = Resource.fromOutputStream(new WriterOutputStream(opener))
-    def writableByteChannel = Resource.fromWritableByteChannel(Channels.newChannel(new WriterOutputStream(opener)))
 
-    protected def outputStream(openOptions : OpenOption*) = outputStream
-    def withCodec(codec: Codec) = Resource.fromWriter(opener)(codec)
 }
 
 /***************************** ByteChannelResource ************************************/
@@ -476,20 +487,18 @@ class WriterResource[+A <: Writer](opener: => A, val sourceCodec:Codec) extends 
  *
  * @see ManagedResource
  */
-class ByteChannelResource[+A <: ByteChannel](opener: => A, val sourceCodec:Codec) extends InputResource[A] with OutputResource[A] {
-    implicit val codec = getCodec()
+class ByteChannelResource[+A <: ByteChannel](opener: => A) extends InputResource[A] with OutputResource[A] {
     def open() = opener
     protected def outputStream(openOptions : OpenOption*) = outputStream
 
     def inputStream = Resource.fromInputStream(Channels.newInputStream(opener))
     def outputStream = Resource.fromOutputStream(Channels.newOutputStream(opener))
-    def reader = Resource.fromReader(Channels.newReader(opener, sourceCodec.charSet.name()))
-    def writer = Resource.fromWriter(Channels.newWriter(opener, sourceCodec.charSet.name()))
+    def reader(implicit sourceCodec: Codec) = Resource.fromReader(Channels.newReader(opener, sourceCodec.charSet.name()))
+    def writer(implicit sourceCodec: Codec) = Resource.fromWriter(Channels.newWriter(opener, sourceCodec.charSet.name()))
     def writableByteChannel = Resource.fromWritableByteChannel(opener)
     def readableByteChannel = Resource.fromReadableByteChannel(opener)
 
     def bytesAsInts:Traversable[Int] = toTraversable {in => StreamIterator(Channels.newInputStream(opener))}
-    def withCodec(codec: Codec) = Resource.fromByteChannel(opener)(codec)
 }
 
 
@@ -500,17 +509,14 @@ class ByteChannelResource[+A <: ByteChannel](opener: => A, val sourceCodec:Codec
  *
  * @see ManagedResource
  */
-class ReadableByteChannelResource[+A <: ReadableByteChannel](opener: => A, val sourceCodec:Codec) extends BufferableInputResource[A, BufferedInputStream] {
-    implicit val codec = getCodec()
+class ReadableByteChannelResource[+A <: ReadableByteChannel](opener: => A) extends BufferableInputResource[A, BufferedInputStream] {
     def open() = opener
     
     def buffered = inputStream.buffered
     def inputStream = Resource.fromInputStream(Channels.newInputStream(opener))
-    def reader = Resource.fromReader(Channels.newReader(opener, sourceCodec.charSet.name()))
+    def reader(implicit sourceCodec: Codec) = Resource.fromReader(Channels.newReader(opener, sourceCodec.charSet.name()))
     def readableByteChannel = this
     def bytesAsInts:Traversable[Int] = toTraversable {in => StreamIterator(Channels.newInputStream(opener))}
-    
-    def withCodec(codec: Codec) = Resource.fromReadableByteChannel(opener)(codec)
 }
 
 /***************************** WritableByteChannelResource ************************************/
@@ -520,16 +526,13 @@ class ReadableByteChannelResource[+A <: ReadableByteChannel](opener: => A, val s
  *
  * @see ManagedResource
  */
-class WritableByteChannelResource[+A <: WritableByteChannel](opener: => A, val sourceCodec:Codec) extends BufferableOutputResource[A, BufferedOutputStream] {
-    implicit val codec = getCodec()
+class WritableByteChannelResource[+A <: WritableByteChannel](opener: => A) extends BufferableOutputResource[A, BufferedOutputStream] {
     def open() = opener
     protected def outputStream(openOptions : OpenOption*) = outputStream
 
     def buffered = outputStream.buffered    
     def outputStream = Resource.fromOutputStream(Channels.newOutputStream(opener))
-    def writer = Resource.fromWriter(Channels.newWriter(opener, sourceCodec.charSet.name()))
+    def writer(implicit sourceCodec: Codec) = Resource.fromWriter(Channels.newWriter(opener, sourceCodec.charSet.name()))
     def writableByteChannel = this
-    
-    def withCodec(codec: Codec) = Resource.fromWritableByteChannel(opener)(codec)
 }
 

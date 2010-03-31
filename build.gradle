@@ -1,4 +1,3 @@
-import com.camptocamp.gradle.plugin.*
 
 subprojects {    
     group = 'scala-incubator'
@@ -7,8 +6,6 @@ subprojects {
 
 
     apply plugin: 'scala'
-    apply plugin: ByteCodeQuality
-//    apply type: Cobertura
 
     env = System.getenv()
 
@@ -36,28 +33,7 @@ subprojects {
         scalaCompileOptions.useCompileDaemon = true
         encoding = "UTF-8"
     }
-    
-/*    
-    tasks.addRule("Pattern: ~<ID>") { String taskName ->
-        if (taskName.startsWith ("~")){
-            task(taskName) << {
-                doFirst {
-                    def targetName = taskName.substring(1)
-                    def found = getTasksByName(targetName,false)
-                    println("found: $found")
-                    if(found.size() == 0) {
-                        throw new AssertionError("$targetName is not a known task")
-                    } else if (found.size() > 1){
-                        throw new AssertionError("$targetName matches multiple tasks: $found")
-                    }
-
-                    println("continuous $targetName")
-                    def taskToExec = found.iterator().next()
-                }
-            }
-        }
-    }*/
-
+ 
 }
 project(':scala-io') {
     dependencies { 

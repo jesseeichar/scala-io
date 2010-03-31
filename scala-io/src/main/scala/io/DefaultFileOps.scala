@@ -27,9 +27,7 @@ import java.lang.{ProcessBuilder}
  * @author  Jesse Eichar
  * @since   1.0
  */
-private[io] class DefaultFileOps(path : DefaultPath, jfile:JFile, codec:Codec) extends FileOps(path, codec) {
-
-  private implicit val defaultCodec = codec
+private[io] class DefaultFileOps(path : DefaultPath, jfile:JFile) extends FileOps(path) {
 
   def inputStream = Resource.fromInputStream(new FileInputStream(jfile))
   def readableByteChannel = Resource.fromReadableByteChannel(new FileInputStream(jfile).getChannel())
@@ -40,8 +38,6 @@ private[io] class DefaultFileOps(path : DefaultPath, jfile:JFile, codec:Codec) e
   def channel( openOptions: OpenOption*) = Resource fromByteChannel openOutput(openOptions).getChannel
   def fileChannel(openOptions: OpenOption*) = Some(Resource fromByteChannel openOutput(openOptions).getChannel)
  
-  def withCodec(codec:Codec) = new DefaultFileOps(path, jfile, codec)
-
   private def openOutput(openOptions: Seq[OpenOption]) = {
       var append = false
       openOptions foreach {
@@ -77,7 +73,7 @@ private[io] class DefaultFileOps(path : DefaultPath, jfile:JFile, codec:Codec) e
     None
   }
   
-  override def chars(implicit codec: Codec = getCodec()): Traversable[Char] = inputStream.reader.chars(codec)
+  override def chars(implicit codec: Codec): Traversable[Char] = inputStream.reader(codec).chars
   def bytesAsInts:Traversable[Int] = inputStream.bytesAsInts
   
   def execute(args:String*)(implicit configuration:ProcessBuilder=>Unit = p =>()):Option[Process] = {

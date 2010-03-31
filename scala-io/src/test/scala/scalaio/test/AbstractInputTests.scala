@@ -91,7 +91,7 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
 
     @Test
     def read_all_bytes_into_array() : Unit = {
-      val bytes = input(Text).slurpBytes()
+      val bytes = input(Text).slurpBytes
 
       val expected = TEXT_VALUE getBytes  "UTF-8"
       val bytesString = new String(bytes, "UTF-8")

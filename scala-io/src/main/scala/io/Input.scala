@@ -39,24 +39,12 @@ import Path.fail
  * Default implementation is based on providing an implementation for 
  * bytesAsInts and all other methods are implemented using
  * that method.  
- * <p>
- * An alternate way to provide an implementation is to override chars and implement bytesAsInts 
- * by calling charsToInts
- * </p>
  * @author Jesse Eichar
  * @since 1.0
  *
  * @see Output
  */
-trait Input extends CodecDependent {
-
-    protected def charsToInts = {
-        val builder = new StringBuilder(1)
-        chars flatMap {c => 
-                builder.setCharAt(0, c)
-                getCodec() encode builder
-            } map {_.toInt}
-        }
+trait Input {
 
     /**
     * The number of bytes available for reading
@@ -88,7 +76,7 @@ trait Input extends CodecDependent {
     *
     * @return an non-strict iterable over all the bytes
     */
-    def bytes(): Traversable[Byte] = bytesAsInts() map (_.toByte)
+    def bytes: Traversable[Byte] = bytesAsInts map (_.toByte)
 
     /**
     * Obtains a Traversable for conveniently processing the file as Ints.
@@ -116,13 +104,13 @@ trait Input extends CodecDependent {
     *
     * @return an non-strict iterable over all the bytes with the bytes being represented as Ints
     */
-    def bytesAsInts(): Traversable[Int]
+    def bytesAsInts: Traversable[Int]
 
     /**
     * This method aspires to be the fastest way to read
     * a stream of known length into memory.
     */
-    def slurpBytes(): Array[Byte] = bytes.toArray
+    def slurpBytes: Array[Byte] = bytes.toArray
 
     /**
      * The characters in the object.
@@ -146,7 +134,7 @@ trait Input extends CodecDependent {
      * @return
      *          an iterable of all the characters
      */
-    def chars(implicit codec: Codec = getCodec()): Traversable[Char] = bytesAsInts map (c => (codec wrap c).toChar)
+    def chars(implicit codec: Codec): Traversable[Char] = bytesAsInts map (c => (codec wrap c).toChar)
     /**
      * Obtain an non-strict iterable for iterating through the lines in the object
      * <p>
@@ -177,8 +165,7 @@ trait Input extends CodecDependent {
      *          a non-strict iterable for iterating through all the lines
      */
     def lines(terminator: Terminators.Terminator = Terminators.Auto,
-              includeTerminator: Boolean = false,
-              codec: Codec = getCodec()): Traversable[String] = {
+              includeTerminator: Boolean = false)(implicit codec: Codec): Traversable[String] = {
                /* require(terminator.length == 1 || terminator.length == 2, "Line terminator may be 1 or 2 characters only.")
                 new Traversable[String] {
                   def iterator = new LineIterator(chars(codec), terminator, includeTerminator)
@@ -196,45 +183,5 @@ trait Input extends CodecDependent {
      * @param codec
      *          The codec representing the desired encoding of the characters  
      */
-    def slurpString(implicit codec: Codec = getCodec()) = chars(codec).mkString
-
-  /*
-   * TODO convert to use Line.Terminator for finding new line
-    private class LineIterator(source: Iterable[Char], terminator: String, includeTerminator: Boolean) extends Iterator[String] {
-      require(terminator.length == 1 || terminator.length == 2, "Line terminator may be 1 or 2 characters only.")
-
-      lazy val iter = source.iterator.buffered
-      // For two character newline sequences like \r\n, we peek at
-      // the iterator head after seeing \r, and drop the \n if present.
-      val isNewline: Char => Boolean = {
-        val firstCh = terminator(0)
-        if (terminator.length == 1) (_ == firstCh)
-        else (ch: Char) => (ch == firstCh) && iter.hasNext && {
-          val res = iter.head == terminator(1)
-          if (res) { iter.next }  // drop the second character
-          res
-        }
-      }
-      private[this] val sb = new StringBuilder
-
-      private def getc() =
-        if (!iter.hasNext) false
-        else {
-          val ch = iter.next
-          if (isNewline(ch)) {
-            if (includeTerminator) sb append ch
-            false
-          } else {
-            sb append ch
-            true
-          }
-        }
-
-      def hasNext = iter.hasNext
-      def next = {
-        sb.clear
-        while (getc()) { }
-        sb.toString
-      }
-    } */
+    def slurpString(implicit codec: Codec) = chars(codec).mkString
 }

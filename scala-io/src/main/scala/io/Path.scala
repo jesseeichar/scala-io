@@ -860,7 +860,7 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    *          This codec will be the default used for reading and
    *          writing to the file
    */
-  def fileOps(implicit codec: Codec /*LinkOption... options*/):FileOps
+  def fileOps(/*LinkOption... options*/):FileOps
 
 
 /* ****************** The following require jdk7's nio.file ************************** */

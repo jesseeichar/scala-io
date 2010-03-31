@@ -513,12 +513,12 @@ object Samples {
 
     // not necessarily the most efficient way to copy but demonstrates use of reading/writing bytes
     Path("to").fileOps.writeBytes(
-      Path("from").fileOps.bytes()
+      Path("from").fileOps.bytes
     )
 
     // we could also append to file
     Path("to").fileOps.writeBytes(
-      Path("from").fileOps.bytes(),
+      Path("from").fileOps.bytes,
       openOptions = WRITE_APPEND
     )
   }
@@ -539,7 +539,7 @@ object Samples {
     implicit val codec = scalax.io.Codec.UTF8
 
     val file:FileOps = Path("file").fileOps
-    val sum: Int = file.bytesAsInts().reduceLeft (_ + _)
+    val sum: Int = file.bytesAsInts.reduceLeft (_ + _)
   }
 
   { // quickly an unsafely load file into memory
@@ -551,10 +551,10 @@ object Samples {
     implicit val codec = scalax.io.Codec.UTF8
 
     val file:FileOps = Path("file").fileOps
-    val consonants = file.slurpString().filter (c => !("aeiou" contains c))
+    val consonants = file.slurpString.filter (c => !("aeiou" contains c))
 
     // ok now as bytes
-    val (small, large) = file.slurpBytes() partition (_ < 128)
+    val (small, large) = file.slurpBytes partition (_ < 128)
   }
 
   { // iterate over all character in file
@@ -563,7 +563,7 @@ object Samples {
     implicit val codec = scalax.io.Codec.UTF8
 
     val file: FileOps =  Path("file").fileOps
-    val doubled: Traversable[String] = for ( c <- file.chars() ) yield "" + c + c
+    val doubled: Traversable[String] = for ( c <- file.chars ) yield "" + c + c
   }
 
   { // read and print out all lines in a file
@@ -587,16 +587,7 @@ object Samples {
 
   { // explicitly declare the codecs to use
     import scalax.io.{FileOps, Path, Codec}
-    val file: FileOps =  Path("file").fileOps (Codec.UTF8)
-
-    // the withCodec method is useful for switching
-    // to another codec
-    //
-    // NOTE: This does not change the underlying file
-    //       is only affects how strings are encoded
-    //       when written and how they are decoded
-    //       when read.
-    val file2: FileOps = file.withCodec (Codec.ISO8859)
+    val file: FileOps =  Path("file").fileOps
 
     // All methods for reading and writing characters/strings
     // have a codec parameter that used to explicitly declare the
@@ -605,7 +596,7 @@ object Samples {
 
     // If there is not a constant for the desired codec
     // one can easily be created
-    file.lines (codec = Codec("UTF-16"))
+    file.lines()(codec = Codec("UTF-16"))
   }
 
   { // recommended way to read and write a file
@@ -618,7 +609,7 @@ object Samples {
 
     val file: FileOps =  Path("file").fileOps
     val result:Option[String] = catching (classOf[NotFileException],
-                                          classOf[FileNotFoundException]) opt { file.slurpString()}
+                                          classOf[FileNotFoundException]) opt { file.slurpString}
 
     result match {
       case None => println("oops not a file maybe a directory?")
@@ -656,8 +647,7 @@ object Samples {
 
     // with all options (these are the default options explicitely declared)
     file.writeString("Hello my dear file",
-                     codec = Codec.UTF8,
-                     openOptions = WRITE_TRUNCATE)
+                     openOptions = WRITE_TRUNCATE)(codec = Codec.UTF8)
 
     // Convert several strings to the file
     // same options apply as for writeString
@@ -669,25 +659,24 @@ object Samples {
     // Now all options
     file.writeLines("It costs" :: "one" :: "dollar" :: Nil,
                     terminator=Line.Terminators.Custom("||\n||"),
-                    codec = Codec.UTF8,
-                    openOptions = List(CREATE_NEW, WRITE, SYNC))
+                    openOptions = List(CREATE_NEW, WRITE, SYNC))(codec = Codec.UTF8)
   }
 
   { // perform an actions within a file lock
     import scalax.io.{FileOps, Path}
 
-    implicit val codec = scalax.io.Codec.UTF8
-
     val file: FileOps =  Path ("file").fileOps
+
+    implicit val codec = scalax.io.Codec.UTF8
 
     // By default the entire file is locked with exclusive access
     val result: Option[String] = file.withLock() {
-      file.slurpString()
+      file.slurpString
     }
 
     // if the filesystem does not support locking then None will be returned
     result match {
-      case None => file.slurpString() // oh well this is the best I can do
+      case None => file.slurpString // oh well this is the best I can do
       case Some(data) => data
     }
 
@@ -695,7 +684,7 @@ object Samples {
 
     // or perhaps we only lock part of the file
     val result2: Traversable[Byte] = file.withLock(10, 20) {
-      file.bytes() slice (10,20)
+      file.bytes slice (10,20)
     } getOrElse {fail}
 
 
@@ -794,7 +783,7 @@ object Samples {
     // if the file is < 6 bytes an underflow exception is thrown
     // if the patch extends past the end of the file then the file is extended
     file.patchString(6, "people")
-    file.patchString(6, "people", Codec.UTF8)
+    file.patchString(6, "people")(Codec.UTF8)
 
     // patch the file with a traversable of bytes
     file.patch(6, "people".getBytes)
@@ -810,7 +799,7 @@ object Samples {
     val file: FileOps =  Path ("file").fileOps
 
     file.open()( f => {
-      val s = f.slurpString()
+      val s = f.slurpString
       file.writeString(s.replaceAll("l", "L"))
     })
   }
@@ -835,7 +824,7 @@ object Samples {
     Resource.fromInputStream(url.openStream()).reader.lines() foreach println _
     Resource.fromReader(new InputStreamReader(url.openStream())).lines() foreach println _
     // ReadBytes can also be constructed
-    val bytes: Traversable[Byte] = Resource.fromInputStream(url.openStream()).bytes()
+    val bytes: Traversable[Byte] = Resource.fromInputStream(url.openStream()).bytes
     Path("scala.html").fileOps writeBytes bytes
 
     // WriteChars and WriteBytes can be used to simplify writing to OutputStreams
