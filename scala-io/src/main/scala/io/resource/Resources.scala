@@ -431,6 +431,7 @@ class InputStreamResource[+A <: InputStream](opener: => A) extends BufferableInp
     def buffered = Resource.fromBufferedInputStream(new BufferedInputStream(opener))
     def reader(implicit sourceCodec: Codec) = Resource.fromReader(new InputStreamReader(opener, sourceCodec.charSet))
     def readableByteChannel = Resource.fromReadableByteChannel(Channels.newChannel(open()))
+    def chars(implicit codec: Codec): Traversable[Char] = reader(codec).chars
 
     def bytesAsInts:Traversable[Int] = toTraversable {in => StreamIterator(in)}
 }
@@ -499,6 +500,7 @@ class ByteChannelResource[+A <: ByteChannel](opener: => A) extends InputResource
     def readableByteChannel = Resource.fromReadableByteChannel(opener)
 
     def bytesAsInts:Traversable[Int] = toTraversable {in => StreamIterator(Channels.newInputStream(opener))}
+    def chars(implicit codec: Codec): Traversable[Char] = reader(codec).chars
 }
 
 
@@ -517,6 +519,7 @@ class ReadableByteChannelResource[+A <: ReadableByteChannel](opener: => A) exten
     def reader(implicit sourceCodec: Codec) = Resource.fromReader(Channels.newReader(opener, sourceCodec.charSet.name()))
     def readableByteChannel = this
     def bytesAsInts:Traversable[Int] = toTraversable {in => StreamIterator(Channels.newInputStream(opener))}
+    def chars(implicit codec: Codec): Traversable[Char] = reader(codec).chars
 }
 
 /***************************** WritableByteChannelResource ************************************/

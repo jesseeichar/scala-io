@@ -72,10 +72,7 @@ private[io] class DefaultFileOps(path : DefaultPath, jfile:JFile) extends FileOp
   def withLock[R](start: Long = 0, size: Long = -1, shared: Boolean = false)(block: => R): Option[R] = {
     None
   }
-  
-  override def chars(implicit codec: Codec): Traversable[Char] = inputStream.reader(codec).chars
-  def bytesAsInts:Traversable[Int] = inputStream.bytesAsInts
-  
+    
   def execute(args:String*)(implicit configuration:ProcessBuilder=>Unit = p =>()):Option[Process] = {
     import Path.fail
     

@@ -283,5 +283,8 @@ abstract class FileOps(path : Path) extends BasicFileOps(path) {
    * @return Process
    */
   def execute(args:String*)(implicit configuration:ProcessBuilder=>Unit = p=>()):Option[Process]
+  
+  def chars(implicit codec: Codec): Traversable[Char] = inputStream.reader(codec).chars
+  def bytesAsInts:Traversable[Int] = inputStream.bytesAsInts
 }
 

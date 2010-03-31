@@ -103,7 +103,7 @@ abstract class FileSystemFixture(val fs : FileSystem, rnd : Random) {
   def after() : Unit = root.deleteRecursively()
 }
 
-class DefaultFileSystemFixture(val folder : TemporaryFolder, rnd : Random = new Random()) (implicit val codec : Codec)
+class DefaultFileSystemFixture(val folder : TemporaryFolder, rnd : Random = new Random())
   extends FileSystemFixture(FileSystem.default, rnd) {
     folder.create()
 

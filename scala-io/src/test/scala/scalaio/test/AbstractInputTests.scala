@@ -9,6 +9,8 @@
 package scalaio.test
 
 import scalax.io._
+import Codec._
+
 import Path.AccessModes._
 
 import org.junit.Assert._
@@ -20,7 +22,6 @@ import java.io.IOException
 import Constants.TEXT_VALUE
 
 abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
-    implicit val codec = Codec.UTF8
 
     sealed trait Type
     case object Image extends Type
@@ -100,4 +101,35 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
       assertArrayEquals("expected '"+TEXT_VALUE+"' but got '"+bytesString+"'", 
                  expected, bytes)
     }
+    
+    // byte ops done now chars
+    
+    @Test
+    def read_all_chars() : Unit = {
+        val read = input(Text).chars(UTF8).toArray
+
+        val expected = TEXT_VALUE.toArray
+
+        assertArrayEquals("expected "+expected.mkString +" but got "+read.mkString, expected, read)
+    }
+
+    @Test
+    def read_a_subset_of_chars() = {
+        val read = input(Text).chars(UTF8).slice(4,2).toArray
+
+        val expected = {TEXT_VALUE slice (4,4) toArray}
+
+        assertArrayEquals("expected "+expected.mkString +" but got "+read.mkString,expected, read)
+    }
+
+    @Test
+    def read_all_chars_into_String() : Unit = {
+      val read = input(Text).slurpString(UTF8)
+
+      val expected = TEXT_VALUE
+      
+      assertEquals(expected, read)
+    }
+
+    
 }

@@ -134,7 +134,8 @@ trait Input {
      * @return
      *          an iterable of all the characters
      */
-    def chars(implicit codec: Codec): Traversable[Char] = bytesAsInts map (c => (codec wrap c).toChar)
+    def chars(implicit codec: Codec): Traversable[Char]
+    
     /**
      * Obtain an non-strict iterable for iterating through the lines in the object
      * <p>
