@@ -12,6 +12,7 @@ import scalax.io._
 import Codec._
 
 import Path.AccessModes._
+import Line.Terminators._
 
 import org.junit.Assert._
 import org.junit.{
@@ -131,5 +132,47 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
       assertEquals(expected, read)
     }
 
+    @Test
+    def read_all_lines_auto() : Unit = {
+      val read = input(Text).lines()(UTF8).toList
+      val expected = TEXT_VALUE.split("\n").toList
+      
+      assertEquals(expected, read)
+    }
+
+    @Test
+    def read_all_lines_NewLine() : Unit = {
+        val read = input(Text).lines(terminator = NewLine)(UTF8).toList
+        val expected = TEXT_VALUE.split("\n").toList
+
+        assertEquals(expected, read)
+    }
+
+    @Test
+    def read_all_lines_CarriageReturn() : Unit = {
+        fail("not implemented")
+    }
+
+    @Test
+    def read_all_lines_Pair() : Unit = {
+        fail("not implemented")
+    }
+
+    @Test
+    def read_all_lines_Custom() : Unit = {
+        fail("not implemented")
+    }
     
+    
+    @Test
+    def read_all_lines_includeTerminator() : Unit = {
+        fail("not implemented")
+    }
+    
+    @Test
+    def read_some_lines() : Unit = {
+        fail("not implemented")
+    }
+
+
 }

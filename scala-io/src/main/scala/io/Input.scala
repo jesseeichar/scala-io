@@ -165,14 +165,10 @@ trait Input {
      * @return
      *          a non-strict iterable for iterating through all the lines
      */
-    def lines(terminator: Terminators.Terminator = Terminators.Auto,
+    def lines(terminator: Terminators.Terminator = new Terminators.Auto(),
               includeTerminator: Boolean = false)(implicit codec: Codec): Traversable[String] = {
-               /* require(terminator.length == 1 || terminator.length == 2, "Line terminator may be 1 or 2 characters only.")
-                new Traversable[String] {
-                  def iterator = new LineIterator(chars(codec), terminator, includeTerminator)
-                }*/
-                null //TODO
-              }
+                  new LineTraverseable(chars(codec), terminator, includeTerminator)
+        }
     /**
      * Loads all the characters into memory. There is no protection against
      * loading very large files/amounts of data.

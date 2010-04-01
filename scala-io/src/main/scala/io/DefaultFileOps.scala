@@ -47,7 +47,6 @@ private[io] class DefaultFileOps(path : DefaultPath, jfile:JFile) extends FileOp
             jfile.createNewFile()
           case CREATE_FULL if !jfile.exists =>
             jfile.getParentFile.mkdirs()
-            println(jfile.getParentFile.exists, jfile.exists)
             jfile.createNewFile()
           case CREATE_NEW =>
             if (jfile.exists) Path.fail(jfile+" already exists, openOption "+CREATE_NEW+" cannot be used with an existing file")

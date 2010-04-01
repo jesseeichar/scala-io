@@ -31,15 +31,12 @@ class CharInputStreamTest extends AssertionSugar with IOSugar{
 
     @Test
     def stream_converts_chars_to_bytes() : Unit = {
-        System.out.println(sample)
-        System.out.println("expecting "+new BufferedReader(new StringReader(sample)).readLine)
         val reader = new StringReader(sample)
         val in = new CharInputStream(Left(reader))(codec)
         
         
         val in2 = new BufferedReader(new InputStreamReader(in, codec.name))
         val read = in2.readLine
-        System.out.println("'%s' - '%s'".format(sample, read))
         assertArrayEquals(sample.toArray, read.toArray)
     }
 }

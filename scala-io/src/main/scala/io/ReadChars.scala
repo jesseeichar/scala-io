@@ -101,7 +101,7 @@ trait ReadChars {
    * @return
    *          a non-strict iterable for iterating through all the lines
    */
-  def lines(terminator: Terminators.Terminator = Terminators.Auto,
+  def lines(terminator: Terminators.Terminator = new Terminators.Auto(),
             includeTerminator: Boolean = false): Traversable[String] = {
              /* require(terminator.length == 1 || terminator.length == 2, "Line terminator may be 1 or 2 characters only.")
               new Traversable[String] {
@@ -122,43 +122,4 @@ trait ReadChars {
    */
   def slurpString = chars.mkString
 
-/*
- * TODO convert to use Line.Terminator for finding new line
-  private class LineIterator(source: Iterable[Char], terminator: String, includeTerminator: Boolean) extends Iterator[String] {
-    require(terminator.length == 1 || terminator.length == 2, "Line terminator may be 1 or 2 characters only.")
-
-    lazy val iter = source.iterator.buffered
-    // For two character newline sequences like \r\n, we peek at
-    // the iterator head after seeing \r, and drop the \n if present.
-    val isNewline: Char => Boolean = {
-      val firstCh = terminator(0)
-      if (terminator.length == 1) (_ == firstCh)
-      else (ch: Char) => (ch == firstCh) && iter.hasNext && {
-        val res = iter.head == terminator(1)
-        if (res) { iter.next }  // drop the second character
-        res
-      }
-    }
-    private[this] val sb = new StringBuilder
-
-    private def getc() =
-      if (!iter.hasNext) false
-      else {
-        val ch = iter.next
-        if (isNewline(ch)) {
-          if (includeTerminator) sb append ch
-          false
-        } else {
-          sb append ch
-          true
-        }
-      }
-
-    def hasNext = iter.hasNext
-    def next = {
-      sb.clear
-      while (getc()) { }
-      sb.toString
-    }
-  } */
 }
