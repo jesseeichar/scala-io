@@ -450,8 +450,6 @@ class OutputStreamResource[+A <: OutputStream](opener: => A) extends BufferableO
     def buffered = Resource.fromBufferedOutputStream(new BufferedOutputStream(opener))
     def writer(implicit sourceCodec: Codec) = Resource.fromWriter(new OutputStreamWriter(opener, sourceCodec.charSet))
     def writableByteChannel = Resource.fromWritableByteChannel(Channels.newChannel(open()))
-
-    protected def outputStream(openOptions : OpenOption*) = this
 }
 
 /***************************** ReaderResource ************************************/
@@ -490,7 +488,6 @@ class WriterResource[+A <: Writer](opener: => A, val sourceCodec:Codec) extends 
  */
 class ByteChannelResource[+A <: ByteChannel](opener: => A) extends InputResource[A] with OutputResource[A] {
     def open() = opener
-    protected def outputStream(openOptions : OpenOption*) = outputStream
 
     def inputStream = Resource.fromInputStream(Channels.newInputStream(opener))
     def outputStream = Resource.fromOutputStream(Channels.newOutputStream(opener))
@@ -531,7 +528,6 @@ class ReadableByteChannelResource[+A <: ReadableByteChannel](opener: => A) exten
  */
 class WritableByteChannelResource[+A <: WritableByteChannel](opener: => A) extends BufferableOutputResource[A, BufferedOutputStream] {
     def open() = opener
-    protected def outputStream(openOptions : OpenOption*) = outputStream
 
     def buffered = outputStream.buffered    
     def outputStream = Resource.fromOutputStream(Channels.newOutputStream(opener))

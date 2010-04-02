@@ -231,11 +231,11 @@ abstract class FileOps(path : Path) extends BasicFileOps(path) {
    * @param openOptions
    *          The options that define how the file is opened for the duration of the
    *          operation
-   *          Default is WRITE/CREATE
+   *          Default is WRITE/CREATE/TRUNCATE
    * @param action
    *          The function that will be executed within the block
    */
-  def open[R](openOptions: Seq[OpenOption] = List(WRITE, CREATE))(action: BasicFileOps => R): R
+  def open[R](openOptions: Seq[OpenOption] = WRITE_TRUNCATE)(action: BasicFileOps => R): R
                     
   /**
    * Performs an operation on the file with a FileLock
@@ -284,7 +284,11 @@ abstract class FileOps(path : Path) extends BasicFileOps(path) {
    */
   def execute(args:String*)(implicit configuration:ProcessBuilder=>Unit = p=>()):Option[Process]
   
+  // required methods for Input trait
   def chars(implicit codec: Codec): Traversable[Char] = inputStream.reader(codec).chars
   def bytesAsInts:Traversable[Int] = inputStream.bytesAsInts
+  
+  // required method for Output trait
+  protected def outputStream = outputStream()
 }
 

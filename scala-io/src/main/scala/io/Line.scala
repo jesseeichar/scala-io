@@ -25,6 +25,7 @@ object Line {
         def size : Int
         def lineEnd(chars: Seq[Char]) : Boolean
     }
+    
     /**
      * The Auto terminator declares that the line terminator should
      * be detected.  It can detect N,R and RN line terminators

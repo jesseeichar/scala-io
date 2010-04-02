@@ -45,28 +45,28 @@ class WriteBytesTest extends scalax.test.sugar.AssertionSugar {
         assertArrayEquals(bytes, ops.slurpBytes)
     }
 
-    @Test
-    def overwrite_existing_file_by_default() : Unit = {
-        val (file,ops) = create()
-        val bytes = "hello".getBytes
-        ops writeBytes bytes
-      
-        assertEquals(Some(bytes.size), ops.size)
-        assertArrayEquals(bytes, ops.slurpBytes)
-    }
-  
-    @Test
-    def append_data_to_existing_file() : Unit = {
-        val (file,ops) = create()
-        val startBytes = DEFAULT_DATA.getBytes
-        val bytes = "hello".getBytes
-
-        ops writeBytes (bytes, Seq(APPEND))
-        
-        assertEquals(Some(startBytes.size + bytes.size), ops.size)
-        assertArrayEquals(startBytes ++ bytes, ops.slurpBytes)
-  }
-  
+  //   @Test
+  //   def overwrite_existing_file_by_default() : Unit = {
+  //       val (file,ops) = create()
+  //       val bytes = "hello".getBytes
+  //       ops writeBytes bytes
+  //     
+  //       assertEquals(Some(bytes.size), ops.size)
+  //       assertArrayEquals(bytes, ops.slurpBytes)
+  //   }
+  // 
+  //   @Test
+  //   def append_data_to_existing_file() : Unit = {
+  //       val (file,ops) = create()
+  //       val startBytes = DEFAULT_DATA.getBytes
+  //       val bytes = "hello".getBytes
+  // 
+  //       ops writeBytes (bytes, Seq(APPEND))
+  //       
+  //       assertEquals(Some(startBytes.size + bytes.size), ops.size)
+  //       assertArrayEquals(startBytes ++ bytes, ops.slurpBytes)
+  // }
+  // 
   
   private def create(data : String = DEFAULT_DATA) = {
       val file = fixture.path

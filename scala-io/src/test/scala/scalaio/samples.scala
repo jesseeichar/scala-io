@@ -518,9 +518,7 @@ object Samples {
 
     // we could also append to file
     Path("to").fileOps.writeBytes(
-      Path("from").fileOps.bytes,
-      openOptions = WRITE_APPEND
-    )
+      Path("from").fileOps.bytes)
   }
 
   { // read comma seperated file
@@ -639,15 +637,13 @@ object Samples {
     // are defined in the OpenOption object
     // in addition to the definition common collections are also defined
     // WRITE_APPEND for example is a List(CREATE, APPEND, WRITE)
-    file.writeBytes (List (1,2,3) map (_.toByte),
-                     openOptions = WRITE_APPEND)
+    file.writeBytes (List (1,2,3) map (_.toByte))
 
     // write a string to the file
     file.writeString("Hello my dear file")
 
     // with all options (these are the default options explicitely declared)
-    file.writeString("Hello my dear file",
-                     openOptions = WRITE_TRUNCATE)(codec = Codec.UTF8)
+    file.writeString("Hello my dear file")(codec = Codec.UTF8)
 
     // Convert several strings to the file
     // same options apply as for writeString
@@ -658,8 +654,7 @@ object Samples {
 
     // Now all options
     file.writeLines("It costs" :: "one" :: "dollar" :: Nil,
-                    terminator=Line.Terminators.Custom("||\n||"),
-                    openOptions = List(CREATE_NEW, WRITE, SYNC))(codec = Codec.UTF8)
+                    terminator=Line.Terminators.Custom("||\n||"))(codec = Codec.UTF8)
   }
 
   { // perform an actions within a file lock

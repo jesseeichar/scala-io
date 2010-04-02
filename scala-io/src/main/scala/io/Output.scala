@@ -30,9 +30,7 @@ import Path.fail
 /**
  * A trait for objects that can have data written to them. For example an
  * OutputStream and File can be an Output object (or be converted to one).
- * Depending on the implementation and the underlying object the
- * {@link OpenOptions} may be restricted to a subset of the
- * {@link OpenOption}.
+ * 
  * <p>
  * Note: Each invocation of a method will typically open a new stream or
  * channel.  That behaviour can be overrided by the implementation but
@@ -46,7 +44,6 @@ import Path.fail
  * @see Input
  */
 trait Output {
-
     /**
     * Write bytes to the file
     *
@@ -61,18 +58,14 @@ trait Output {
     *
     * @param bytes
     *          The bytes to write to the file
-    * @param openOptions
-    *          The options declaring how the file will be opened
-    *          Default is WRITE/CREATE/TRUNCATE
     */
-    def writeBytes(bytes: Traversable[Byte],
-             openOptions : Seq[OpenOption] = WRITE_TRUNCATE): Unit = {
-        for (out <- outputStream(openOptions:_*)) {
+    def writeBytes(bytes: Traversable[Byte]): Unit = {
+        for (out <- outputStream) {
             bytes foreach {i => out write i.toInt}
         }
     }
 
-    protected def outputStream(openOptions : OpenOption*) : ManagedResource[OutputStream]
+    protected def outputStream : ManagedResource[OutputStream]
 
     /**
     * Writes a string. The open options that can be used are dependent
@@ -85,13 +78,8 @@ trait Output {
     *          the codec of the string to be written. The string will
     *          be converted to the encoding of {@link sourceCodec}
     *          Default is sourceCodec
-    * @param openOptions
-    *          the options to use when preparing to write. The implementation
-    *          must declare which options can be used.
-    *          Default is standard options write/create/truncate
     */
-    def writeString(string: String,
-                  openOptions: Traversable[OpenOption] = WRITE_TRUNCATE)(implicit codec: Codec): Unit = {
+    def writeString(string: String)(implicit codec: Codec): Unit = {
     // TODO
     ()
     }
@@ -107,13 +95,8 @@ trait Output {
     *          The codec of the strings to be written. The strings will
     *          be converted to the encoding of {@link sourceCodec}
     *          Default is sourceCodec
-    * @param openOptions
-    *          The options to use when preparing to write. The implementation
-    *          must declare which options can be used.
-    *          Default is standard options write/create/truncate
     */  
-    def writeStrings(strings: Traversable[String],
-                   openOptions: Traversable[OpenOption] = WRITE_TRUNCATE)(implicit codec: Codec): Unit = {
+    def writeStrings(strings: Traversable[String])(implicit codec: Codec): Unit = {
     // TODO
     ()
     }
@@ -126,20 +109,16 @@ trait Output {
     * @param lines
     *          The data to write
     * @param terminator
-    *          The End of Line character or line terminator
+    *          The End of Line character or line terminator (Cannot be Auto)
     *          Default is Line.Terminators.NewLine
     * @param codec
     *          The codec of the string to be written.
     *          The string will be converted to the encoding of {@link sourceCodec}
     *          Default is sourceCodec
-    * @param openOptions
-    *          The options to use when preparing to write.
-    *          The implementation must declare which options can be used.
-    *          Default is standard options write/create/truncate
     */
     def writeLines(strings: Traversable[String],
-                 terminator: Terminators.Terminator = Terminators.NewLine,
-                 openOptions: Traversable[OpenOption] = WRITE_TRUNCATE)(implicit codec: Codec): Unit = {
+                 terminator: Terminators.Terminator = Terminators.NewLine)(implicit codec: Codec): Unit = {
+        require(!terminator.isInstanceOf[Terminators.Auto] )
     // TODO
     ()
     }

@@ -30,9 +30,6 @@ import Path.fail
 /**
  * A trait for objects that can have data written to them. For example an
  * OutputStream and File can be an Output object (or be converted to one).
- * Depending on the implementation and the underlying object the
- * {@link OpenOptions} may be restricted to a subset of the
- * {@link OpenOption}.
  * <p>
  * Note: Each invocation of a method will typically open a new stream or
  * channel.  That behaviour can be overrided by the implementation but
@@ -57,13 +54,8 @@ trait WriteChars {
     *          the codec of the string to be written. The string will
     *          be converted to the encoding of {@link sourceCodec}
     *          Default is sourceCodec
-    * @param openOptions
-    *          the options to use when preparing to write. The implementation
-    *          must declare which options can be used.
-    *          Default is standard options write/create/truncate
     */
-    def writeString(string: String,
-                  openOptions: Traversable[OpenOption] = WRITE_TRUNCATE): Unit = {
+    def writeString(string: String): Unit = {
     // TODO
     ()
     }
@@ -79,13 +71,8 @@ trait WriteChars {
     *          The codec of the strings to be written. The strings will
     *          be converted to the encoding of {@link sourceCodec}
     *          Default is sourceCodec
-    * @param openOptions
-    *          The options to use when preparing to write. The implementation
-    *          must declare which options can be used.
-    *          Default is standard options write/create/truncate
     */  
-    def writeStrings(strings: Traversable[String],
-                   openOptions: Traversable[OpenOption] = WRITE_TRUNCATE): Unit = {
+    def writeStrings(strings: Traversable[String]): Unit = {
     // TODO
     ()
     }
@@ -104,14 +91,9 @@ trait WriteChars {
     *          The codec of the string to be written.
     *          The string will be converted to the encoding of {@link sourceCodec}
     *          Default is sourceCodec
-    * @param openOptions
-    *          The options to use when preparing to write.
-    *          The implementation must declare which options can be used.
-    *          Default is standard options write/create/truncate
     */
     def writeLines(strings: Traversable[String],
-                 terminator: Terminators.Terminator = Terminators.NewLine,
-                 openOptions: Traversable[OpenOption] = WRITE_TRUNCATE): Unit = {
+                 terminator: Terminators.Terminator = Terminators.NewLine): Unit = {
     // TODO
     ()
     }

@@ -39,8 +39,12 @@ private[io] class DefaultFileOps(path : DefaultPath, jfile:JFile) extends FileOp
   def fileChannel(openOptions: OpenOption*) = Some(Resource fromByteChannel openOutput(openOptions).getChannel)
  
   private def openOutput(openOptions: Seq[OpenOption]) = {
+
+      val options = if(openOptions.isEmpty) OpenOption.WRITE_TRUNCATE
+                    else openOptions
+
       var append = false
-      openOptions foreach {
+      options foreach {
           case APPEND => 
               append = true
           case CREATE if !jfile.exists =>
@@ -56,7 +60,7 @@ private[io] class DefaultFileOps(path : DefaultPath, jfile:JFile) extends FileOp
           case _ => ()
       }
       
-      if(openOptions contains DELETE_ON_CLOSE) {
+      if(options contains DELETE_ON_CLOSE) {
           new DeletingFileOutputStream(jfile, append)
       } else {
           new FileOutputStream(jfile, append)
