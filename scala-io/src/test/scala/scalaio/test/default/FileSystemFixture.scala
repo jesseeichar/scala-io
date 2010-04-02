@@ -12,6 +12,7 @@ import util.Random
 
 import scalax.io._
 import scalax.io.resource._
+import Line.Terminators._
 import org.junit.rules.TemporaryFolder
 import java.io.InputStream
 import scalaio.test.Constants
@@ -98,7 +99,7 @@ abstract class FileSystemFixture(val fs : FileSystem, rnd : Random) {
    * returns a path to a text file.  It is a copy of the file 
    * in the test resources directory 'text'
    */
-  def text : Path
+  def text(sep:String) : Path
 
   def after() : Unit = root.deleteRecursively()
 }
@@ -118,7 +119,12 @@ class DefaultFileSystemFixture(val folder : TemporaryFolder, rnd : Random = new 
         dest.fileOps writeBytes (source.bytes)
         dest
     }
-    
-    override def text = copyResource(Resource.fromInputStream(Constants.TEXT.openStream))
+    override def text(sep:String) = {
+        val resource = Resource.fromInputStream {
+            val bytes = Constants.TEXT_VALUE.replaceAll("""\n""", sep).getBytes(Codec.UTF8.name)
+            new java.io.ByteArrayInputStream(bytes)
+        }
+        copyResource(resource)
+    }
     override def image = copyResource(Resource.fromInputStream(Constants.IMAGE.openStream))
 }

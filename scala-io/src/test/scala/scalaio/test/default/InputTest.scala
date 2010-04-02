@@ -9,6 +9,8 @@
 package scalaio.test.default
 
 import scalax.io._
+import Line.Terminators._
+
 import org.junit.{
   Before, After
 }
@@ -24,7 +26,10 @@ class InputTest extends AbstractInputTests {
     @After def after() : Unit = fixture.after()
 
     protected def input(t:Type) = t match {
-      case Text => fixture.text.fileOps
-      case Image => fixture.image.fileOps
+        case t @ TextNewLine => fixture.text(t.sep).fileOps
+        case t @ TextPair => fixture.text(t.sep).fileOps
+        case t @ TextCarriageReturn => fixture.text(t.sep).fileOps
+        case TextCustom(sep) => fixture.text(sep).fileOps
+        case Image => fixture.image.fileOps
     }
 }
