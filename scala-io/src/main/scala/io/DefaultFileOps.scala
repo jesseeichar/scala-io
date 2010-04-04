@@ -68,7 +68,7 @@ private[io] class DefaultFileOps(path : DefaultPath, jfile:JFile) extends FileOp
   }
   
 
-  def open[R](openOptions: Seq[OpenOption] = List(WRITE))(action: BasicFileOps => R): R =  {
+  def open[R](openOptions: Seq[OpenOption] = List(WRITE))(action: Seekable => R): R =  {
       null.asInstanceOf[R]
   }
 

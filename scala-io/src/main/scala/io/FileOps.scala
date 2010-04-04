@@ -18,166 +18,6 @@ import scalax.io.resource._
 import scala.collection.Traversable
 import OpenOption._
 import Resource._
-/**
- * An object for reading and writing files.
- * <p>
- * Obtaining a FileOps from a object does not open a
- * file execution of methods will open a file. Thus it is important
- * to handle NotFileException and FileNotFoundException. Depending
- * on the method one or both exceptions must be handled.
- * </p><p>
- * Examples of exception handling:
- * <pre><code>
- *  try {
- *   file.lines flatMap _.split(":")
- *  } catch {
- *   case FileNotFoundException => fail
- *   case NotFileException => fail
- *  }
- * </code></pre>
- * or using the Exceptions object
- * <pre><code>
- * import scala.util.control.Exceptions
- * val catcher = catching(classOf[NotFileException], classOf[FileNotFoundException])
- *
- * catcher {
- *   file.lines flatMap _.split(":")
- * }
- * </code></pre>
- * 
- *
- * @author Jesse Eichar
- * @since 1.0
- */
-abstract class BasicFileOps(path : Path) extends Input with Output {
-  
-  override def size = Some(path.size)
-
-  /**
-   * Update a portion of the file content with string at
-   * the declared location.
-   * <p>
-   * If the position is beyond the end of the file a BufferUnderflow
-   * Exception will be thrown
-   * </p><p>
-   * If the position is within the file but the
-   * <code>position + string.getBytes(codec).length</code>
-   * is beyond the end of the file the file will be enlarged so
-   * that the entire string can fit in the file
-   * </p><p>
-   * The write begins at the position indicated.  So if position = 0
-   * then the write will begin at the first byte of the file.
-   * </p>
-   * @param position
-   *          The start position of the update starting at 0.
-   *          The position must be within the file
-   * @param string
-   *          The string to write to the file starting at
-   *          position.
-   * @param openOptions
-   *          The options to use for opening the file
-   *          Default is WRITE
-   * @see patch(Long,Traversable[Byte],Iterable[OpenOption])
-   */
-  def patchString(position: Long, 
-                  string: String,
-                  openOptions: Iterable[OpenOption] = List(WRITE))(implicit codec: Codec): Unit = {
-                    // TODO implement
-                    ()
-                  }
-
-  /**
-   * Update a portion of the file content with several bytes at
-   * the declared location.
-   * <p>
-   * <strong>Important:</strong> The use of an Array is highly recommended
-   * because normally arrays can be more efficiently written using
-   * the underlying APIs
-   * </p>
-   * <p>
-   * If the position is beyond the end of the file a BufferUnderflow
-   * Exception will be thrown
-   * </p><p>
-   * If the position is within the file but the
-   * <code>position + bytes.length</code>
-   * is beyond the end of the file the file will be enlarged so
-   * that the entire string can fit in the file
-   * </p><p>
-   * The write begins at the position indicated.  So if position = 0
-   * then the write will begin at the first byte of the file.
-   * </p>
-   * @param position
-   *          The start position of the update starting at 0.
-   *          The position must be within the file
-   * @param bytes
-   *          The bytes to write to the file starting at
-   *          position.
-   * @param openOptions
-   *          The options to use for opening the file
-   *          Default is WRITE
-   */
-  def patch(position: Long,
-            bytes: Traversable[Byte],
-            openOptions: Iterable[OpenOption] = List(WRITE)): Unit = {
-     require(position >= 0, "The patch starting position must be within the existing file")
-                    // TODO implement
-                    ()
-  }
-
-  /**
-  * Append bytes to the end of a file
-  *
-  * <strong>Important:</strong> The use of an Array is highly recommended
-  * because normally arrays can be more efficiently written using
-  * the underlying APIs
-  *
-  * @param bytes
-  *          The bytes to write to the file
-  */
-  def appendBytes(bytes: Traversable[Byte]): Unit = {
-      for (out <- outputStream) {
-          bytes foreach {i => out write i.toInt}
-      }
-  }
-
-  /**
-  * Writes a string. The open options that can be used are dependent
-  * on the implementation and implementors should clearly document
-  * which option are permitted.
-  * 
-  * @param string
-  *          the data to write
-  * @param codec
-  *          the codec of the string to be written. The string will
-  *          be converted to the encoding of {@link sourceCodec}
-  *          Default is sourceCodec
-  */
-  def appendString(string: String)(implicit codec: Codec): Unit = {
-      // TODO
-      ()
-  }
-
-  /**
-  * Write several strings. The open options that can be used are dependent
-  * on the implementation and implementors should clearly document
-  * which option are permitted.
-  * 
-  * @param strings
-  *          The data to write
-  * @param separator
-  *          A string to add between each string.  
-  *          It is not added to the before the first string
-  *          or after the last.
-  * @param codec
-  *          The codec of the strings to be written. The strings will
-  *          be converted to the encoding of {@link sourceCodec}
-  *          Default is sourceCodec
-  */  
-  def appendStrings(strings: Traversable[String], separator:String = "")(implicit codec: Codec): Unit = {
-      // TODO
-      ()
-  }
-}
 
 /**
  * An object for reading and writing files.  FileOps provides
@@ -231,7 +71,9 @@ abstract class BasicFileOps(path : Path) extends Input with Output {
  * @author Jesse Eichar
  * @since 1.0
  */
-abstract class FileOps(path : Path) extends BasicFileOps(path) {
+abstract class FileOps(path : Path) extends Seekable {
+  
+    override def size = Some(path.size)
   
   /**
    * Obtains an input stream resource for reading from the file
@@ -289,7 +131,7 @@ abstract class FileOps(path : Path) extends BasicFileOps(path) {
    * @param action
    *          The function that will be executed within the block
    */
-  def open[R](openOptions: Seq[OpenOption] = WRITE_TRUNCATE)(action: BasicFileOps => R): R
+  def open[R](openOptions: Seq[OpenOption] = WRITE_TRUNCATE)(action: Seekable => R): R
                     
   /**
    * Performs an operation on the file with a FileLock
@@ -339,10 +181,11 @@ abstract class FileOps(path : Path) extends BasicFileOps(path) {
   def execute(args:String*)(implicit configuration:ProcessBuilder=>Unit = p=>()):Option[Process]
   
   // required methods for Input trait
-  def chars(implicit codec: Codec): Traversable[Char] = inputStream.reader(codec).chars
-  def bytesAsInts:Traversable[Int] = inputStream.bytesAsInts
+  override def chars(implicit codec: Codec): Traversable[Char] = inputStream.reader(codec).chars
+  override def bytesAsInts:Traversable[Int] = inputStream.bytesAsInts
   
   // required method for Output trait
-  protected def outputStream = outputStream()
+  override protected def outputStream = outputStream()
+  protected def seekableChannel(openOptions:OpenOption*) = fileChannel(openOptions:_*).get // not safe, but for pre Java 7 I do not have an alternative
 }
 
