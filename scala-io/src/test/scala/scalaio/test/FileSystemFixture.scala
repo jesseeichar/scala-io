@@ -6,7 +6,7 @@
 **                          |/                                          **
 \*                                                                      */
 
-package scalaio.test.default
+package scalaio.test
 
 import util.Random
 
@@ -15,7 +15,6 @@ import scalax.io.resource._
 import Line.Terminators._
 import org.junit.rules.TemporaryFolder
 import java.io.InputStream
-import scalaio.test.Constants
 
 object TestDataType extends Enumeration {
   type Type = Value
@@ -102,29 +101,4 @@ abstract class FileSystemFixture(val fs : FileSystem, rnd : Random) {
   def text(sep:String) : Path
 
   def after() : Unit = root.deleteRecursively()
-}
-
-class DefaultFileSystemFixture(val folder : TemporaryFolder, rnd : Random = new Random())
-  extends FileSystemFixture(FileSystem.default, rnd) {
-    folder.create()
-
-    override val root = Path(folder.getRoot)
-    override def after = folder.delete()
-
-    /**
-     * Copy resource from test resources to filesystem
-     */
-    def copyResource(source : InputStreamResource[InputStream]) : Path = {
-        val dest = path
-        dest.ops write (source.bytes)
-        dest
-    }
-    override def text(sep:String) = {
-        val resource = Resource.fromInputStream {
-            val bytes = Constants.TEXT_VALUE.replaceAll("""\n""", sep).getBytes(Codec.UTF8.name)
-            new java.io.ByteArrayInputStream(bytes)
-        }
-        copyResource(resource)
-    }
-    override def image = copyResource(Resource.fromInputStream(Constants.IMAGE.openStream))
 }

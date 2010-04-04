@@ -13,14 +13,7 @@ import scalax.resource._
 import scala.collection.Traversable
 import OpenOption._
 import Line._
-import java.io.{ 
-  InputStream, PrintStream, File => JFile,
-  InputStreamReader, OutputStream, Writer, Reader
-}
-import java.nio.channels.{
-  ByteChannel, WritableByteChannel, FileChannel, ReadableByteChannel,
-  Channels
-}
+import java.io.Writer
 import java.net.{ URI, URL }
 
 import collection.mutable.ArrayBuffer
@@ -44,6 +37,8 @@ import Path.fail
  */
 trait WriteChars {
 
+    protected def writer : WriteCharsResource[Writer]
+
     /**
     * Writes a string. The open options that can be used are dependent
     * on the implementation and implementors should clearly document
@@ -53,8 +48,9 @@ trait WriteChars {
     *          the data to write
     */
     def writeString(string : String) : Unit = {
-        // TODO
-        ()
+        for (out <- writer) {
+            out write string
+        }
     }
 
     /**
@@ -70,7 +66,16 @@ trait WriteChars {
     *          or after the last.
     */  
     def writeStrings(strings : Traversable[String], separator : String = "") : Unit = {
-        // TODO
-        ()
+        for (out <- writer) {
+            (strings foldLeft true) {
+                case (true, s) =>
+                    out write s
+                    false
+                case (false, s) =>
+                    out write separator
+                    out write s
+                    false
+            }
+        }
     }
 }

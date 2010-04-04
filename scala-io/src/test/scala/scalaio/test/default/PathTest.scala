@@ -17,13 +17,16 @@ import org.junit.{
 }
 import org.junit.rules.TemporaryFolder
 import util.Random
+import scalaio.test.{
+    FileSystemFixture, TestData
+}
 
 import java.io.IOException
 
 class PathTest extends scalax.test.sugar.AssertionSugar {
   implicit val codec = Codec.UTF8
   
-  var fixture : FileSystemFixture = _
+  var fixture : DefaultFileSystemFixture = _
   
   @Before
   def before() : Unit = fixture = new DefaultFileSystemFixture(new TemporaryFolder())
@@ -34,11 +37,11 @@ class PathTest extends scalax.test.sugar.AssertionSugar {
   def fspath(name:String) = fixture.fs(name)
   def fspath(name:Path) = fixture.fs(name.path)
   
-  @Test
+  @Test @Ignore
   def path_should_support_standard_comparisons() : Unit = {
     check (false, standardPathComparisions _)
   }
-  @Test
+  @Test @Ignore
   def path_should_be_creatable_and_deletable() : Unit = {
     check (false, creatableAndDeletable _)
   }
@@ -46,7 +49,7 @@ class PathTest extends scalax.test.sugar.AssertionSugar {
   def path_should_respect_file_access_restrictions() : Unit = {
     check (false, respectsAccess _)
   }
-  @Test 
+  @Test  @Ignore
   def path_should_have_exists_and_notExists_methods_that_are_not_equal() : Unit = {
     check (false, existsTest _)
   }

@@ -10,7 +10,7 @@ package scalaio.test.stream
 
 import scalax.io.resource.Resource
 import scalax.io.{
-    Input,Output
+    ReadChars,WriteChars
 }
 import scalax.io.Line.Terminators._
 import scalax.io.Codec
@@ -20,13 +20,14 @@ import java.io.{
     PipedInputStream, PipedOutputStream
 }
 
-class OutputTest extends AbstractOutputTests {
-    def open() : (Input, Output) = {
+class WriteCharsTest extends AbstractWriteCharsTests {
+    def open() : (ReadChars, WriteChars) = {
+        
         val in = new PipedInputStream()
         val out = new PipedOutputStream(in)
         
-        val inResource = Resource.fromInputStream(in)
-        val outResource = Resource.fromOutputStream(out)
+        val inResource = Resource.fromInputStream(in).reader(Codec.UTF8)
+        val outResource = Resource.fromOutputStream(out).writer(Codec.UTF8)
         
         (inResource, outResource)
     }

@@ -33,7 +33,7 @@ abstract class AbstractReadCharsTests extends scalax.test.sugar.AssertionSugar {
     protected def readChars(t:Type) : ReadChars
     protected def sizeIsDefined = true
 
-    @Test
+    @Test(timeout = 3000)
     def read_all_chars() : Unit = {
         val read = readChars(TextNewLine).chars.toArray
         val expected = TEXT_VALUE.toArray
@@ -41,7 +41,7 @@ abstract class AbstractReadCharsTests extends scalax.test.sugar.AssertionSugar {
         assertArrayEquals("expected "+expected.mkString +" but got "+read.mkString, expected, read)
     }
 
-    @Test
+    @Test(timeout = 3000)
     def read_a_subset_of_chars() = {
         val read = readChars(TextNewLine).chars.slice(4,2).toArray
         val expected = {TEXT_VALUE slice (4,4) toArray}
@@ -49,7 +49,7 @@ abstract class AbstractReadCharsTests extends scalax.test.sugar.AssertionSugar {
         assertArrayEquals("expected "+expected.mkString +" but got "+read.mkString,expected, read)
     }
 
-    @Test
+    @Test(timeout = 3000)
     def read_all_chars_into_String() : Unit = {
       val read = readChars(TextNewLine).slurpString
       val expected = TEXT_VALUE
@@ -57,7 +57,7 @@ abstract class AbstractReadCharsTests extends scalax.test.sugar.AssertionSugar {
       assertEquals(expected, read)
     }
 
-    @Test
+    @Test(timeout = 3000)
     def read_all_lines_auto() : Unit = {
         testLines("NewLine", TextNewLine, Auto(), false)
         testLines("Pair", TextPair, Auto(), false)
@@ -68,7 +68,7 @@ abstract class AbstractReadCharsTests extends scalax.test.sugar.AssertionSugar {
         testLines("include CarriageReturn", TextCarriageReturn, Auto(), true)
     }
 
-    @Test
+    @Test(timeout = 3000)
     def read_all_lines() : Unit = {
         testLines("NewLine", TextNewLine, NewLine, false)
         testLines("Pair", TextPair, Pair, false)
@@ -77,7 +77,7 @@ abstract class AbstractReadCharsTests extends scalax.test.sugar.AssertionSugar {
     }
     
     
-    @Test
+    @Test(timeout = 3000)
     def read_all_lines_includeTerminator() : Unit = {
         testLines("Auto", TextNewLine, Auto(), true)
         testLines("NewLine", TextNewLine, NewLine, true)
@@ -96,7 +96,7 @@ abstract class AbstractReadCharsTests extends scalax.test.sugar.AssertionSugar {
         assertEquals(msg, expected, read)
     }
     
-    @Test
+    @Test(timeout = 3000)
     def read_some_lines() : Unit = {
         val read = readChars(TextNewLine).lines().drop(2).take(2).toList
         val expected = TEXT_VALUE.split("\n").toList.drop(2).take(2)

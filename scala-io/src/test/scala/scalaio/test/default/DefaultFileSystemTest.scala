@@ -23,7 +23,7 @@ import java.io.IOException
 class DefaultFileSystemTest extends scalax.test.sugar.AssertionSugar {
     implicit val codec = Codec.UTF8
 
-    var fixture : FileSystemFixture = _
+    var fixture : DefaultFileSystemFixture = _
 
     @Before
     def before() : Unit = fixture = new DefaultFileSystemFixture(new TemporaryFolder())

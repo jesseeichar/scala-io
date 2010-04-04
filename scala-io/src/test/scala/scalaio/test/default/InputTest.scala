@@ -18,7 +18,6 @@ import org.junit.rules.TemporaryFolder
 import scalaio.test._
 
 class InputTest extends AbstractInputTests {
-
     var fixture : FileSystemFixture = _
 
     @Before def before() : Unit = fixture = new DefaultFileSystemFixture(new TemporaryFolder())

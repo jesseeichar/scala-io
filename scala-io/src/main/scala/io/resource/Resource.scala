@@ -478,6 +478,7 @@ class WriterResource[+A <: Writer](opener: => A, val sourceCodec:Codec) extends 
 
     def buffered = Resource.fromBufferedWriter(new BufferedWriter(opener))(sourceCodec)
 
+    protected def writer = this
 }
 
 /***************************** ByteChannelResource ************************************/

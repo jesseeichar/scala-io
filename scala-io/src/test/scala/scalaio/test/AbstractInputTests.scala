@@ -23,7 +23,6 @@ import java.io.IOException
 import Constants.TEXT_VALUE
 
 abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
-
     sealed trait Type
     case object Image extends Type
     abstract class Text(val sep:String) extends Type
@@ -35,7 +34,7 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
     protected def input(t:Type) : Input
     protected def sizeIsDefined = true
 
-    @Test
+    @Test(timeout = 3000)
     def provide_length_for_files() : Unit = {
         val size = input(Image).size
         if(sizeIsDefined) {
@@ -46,7 +45,7 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
         }
     }
 
-    @Test
+    @Test(timeout = 3000)
     def read_all_bytes() : Unit = {
         val bytes = input(TextNewLine).bytes.toArray
 
@@ -58,7 +57,7 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
                  expected, bytes)
     }
 
-    @Test
+    @Test(timeout = 3000)
     def read_a_subset_of_bytes() = {
         val bytes = input(TextNewLine).bytes.slice(4,4).toArray
 
@@ -71,7 +70,7 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
     }
 
 
-    @Test
+    @Test(timeout = 3000)
     def read_all_bytes_as_Ints() : Unit = {
         val ints = input(TextNewLine).bytesAsInts.toArray
         val expected = {
@@ -94,7 +93,7 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
     }
 
 
-    @Test
+    @Test(timeout = 3000)
     def read_all_bytes_into_array() : Unit = {
       val bytes = input(TextNewLine).slurpBytes
 
@@ -108,7 +107,7 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
     
     // byte ops done now chars
     
-    @Test
+    @Test(timeout = 3000)
     def read_all_chars() : Unit = {
         val read = input(TextNewLine).chars(UTF8).toArray
 
@@ -117,7 +116,7 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
         assertArrayEquals("expected "+expected.mkString +" but got "+read.mkString, expected, read)
     }
 
-    @Test
+    @Test(timeout = 3000)
     def read_a_subset_of_chars() = {
         val read = input(TextNewLine).chars(UTF8).slice(4,2).toArray
 
@@ -126,7 +125,7 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
         assertArrayEquals("expected "+expected.mkString +" but got "+read.mkString,expected, read)
     }
 
-    @Test
+    @Test(timeout = 3000)
     def read_all_chars_into_String() : Unit = {
       val read = input(TextNewLine).slurpString(UTF8)
 
@@ -135,7 +134,7 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
       assertEquals(expected, read)
     }
 
-    @Test
+    @Test(timeout = 3000)
     def read_all_lines_auto() : Unit = {
         testLines("NewLine", TextNewLine, Auto(), false)
         testLines("Pair", TextPair, Auto(), false)
@@ -146,7 +145,7 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
         testLines("include CarriageReturn", TextCarriageReturn, Auto(), true)
     }
 
-    @Test
+    @Test(timeout = 3000)
     def read_all_lines() : Unit = {
         testLines("NewLine", TextNewLine, NewLine, false)
         testLines("Pair", TextPair, Pair, false)
@@ -155,7 +154,7 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
     }
     
     
-    @Test
+    @Test(timeout = 3000)
     def read_all_lines_includeTerminator() : Unit = {
         testLines("Auto", TextNewLine, Auto(), true)
         testLines("NewLine", TextNewLine, NewLine, true)
@@ -174,7 +173,7 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
         assertEquals(msg, expected, read)
     }
     
-    @Test
+    @Test(timeout = 3000)
     def read_some_lines() : Unit = {
         val read = input(TextNewLine).lines()(UTF8).drop(2).take(2).toList
         val expected = TEXT_VALUE.split("\n").toList.drop(2).take(2)
