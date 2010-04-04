@@ -110,7 +110,7 @@ trait Input {
     * This method aspires to be the fastest way to read
     * a stream of known length into memory.
     */
-    def slurpBytes: Array[Byte] = bytes.toArray
+    def byteArray: Array[Byte] = bytes.toArray
 
     /**
      * The characters in the object.

@@ -58,10 +58,16 @@ trait Seekable extends Input with Output {
    * @param openOptions
    *          The options to use for opening the file
    *          Default is WRITE
+   * @param replaced
+   *          The number of elements from bytes to replace.  If 
+   *          larger than bytes then all bytes will be used
+   *          The stream will be grown as needed.
+   *          Default is Long.MaxValue
    * @see patch(Long,Traversable[Byte],Iterable[OpenOption])
    */
   def patchString(position: Long, 
                   string: String,
+                  replaced : Long = Long.MaxValue,
                   openOptions: Iterable[OpenOption] = List(WRITE))(implicit codec: Codec): Unit = {
                     // TODO implement
                     ()
@@ -93,12 +99,18 @@ trait Seekable extends Input with Output {
    * @param bytes
    *          The bytes to write to the file starting at
    *          position.
+   * @param replaced
+   *          The number of elements from bytes to replace.  If 
+   *          larger than bytes then all bytes will be used
+   *          The stream will be grown as needed.
+   *          Default is Long.MaxValue
    * @param openOptions
    *          The options to use for opening the file
    *          Default is WRITE
    */
   def patch(position: Long,
             bytes: Traversable[Byte],
+            replaced : Long = Long.MaxValue,
             openOptions: Iterable[OpenOption] = List(WRITE)): Unit = {
      require(position >= 0, "The patch starting position must be within the existing file")
                     // TODO implement

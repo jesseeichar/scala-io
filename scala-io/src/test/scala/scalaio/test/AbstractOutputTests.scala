@@ -35,7 +35,7 @@ abstract class AbstractOutputTests extends scalax.test.sugar.AssertionSugar {
 
         output write bytes
 
-        assertArrayEquals(bytes, input.slurpBytes)
+        assertArrayEquals(bytes, input.byteArray)
     }
 
     @Test

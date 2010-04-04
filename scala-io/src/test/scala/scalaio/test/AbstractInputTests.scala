@@ -95,7 +95,7 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
 
     @Test(timeout = 3000)
     def read_all_bytes_into_array() : Unit = {
-      val bytes = input(TextNewLine).slurpBytes
+      val bytes = input(TextNewLine).byteArray
 
       val expected = TEXT_VALUE getBytes  UTF8.name
       val bytesString = new String(bytes, UTF8.name)

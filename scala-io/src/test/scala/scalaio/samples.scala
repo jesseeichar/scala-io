@@ -552,7 +552,7 @@ object Samples {
     val consonants = file.slurpString.filter (c => !("aeiou" contains c))
 
     // ok now as bytes
-    val (small, large) = file.slurpBytes partition (_ < 128)
+    val (small, large) = file.byteArray partition (_ < 128)
   }
 
   { // iterate over all character in file

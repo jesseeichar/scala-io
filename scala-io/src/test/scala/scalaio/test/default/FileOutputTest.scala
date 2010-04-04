@@ -54,7 +54,7 @@ class FileOutputTest extends AbstractOutputTests {
 
         val bytes = DEFAULT_DATA.getBytes
         assertEquals(bytes.size, path.size)
-        assertArrayEquals(bytes, ops.slurpBytes)
+        assertArrayEquals(bytes, ops.byteArray)
     }
     
     @Test
