@@ -236,7 +236,7 @@ abstract class FileOps(path : Path) extends BasicFileOps(path) {
   /**
    * Obtains an input stream resource for reading from the file
    */
-  def inputStream: InputStreamResource[InputStream]
+  def inputStream(): InputStreamResource[InputStream]
   /**
   * Obtains an OutputStreamResource for writing to the file
   *

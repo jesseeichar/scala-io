@@ -53,14 +53,12 @@ abstract class AbstractOutputTests extends scalax.test.sugar.AssertionSugar {
         val (input,output) = open()
 
         output writeStrings (DEFAULT_DATA :: DEFAULT_DATA :: DEFAULT_DATA :: Nil)
-
         assertEquals(DEFAULT_DATA+DEFAULT_DATA+DEFAULT_DATA, input.slurpString)
 
-        output writeStrings (DEFAULT_DATA :: DEFAULT_DATA :: DEFAULT_DATA :: Nil, "-")
+        val (input2,output2) = open()
 
-        assertEquals(DEFAULT_DATA+"-"+DEFAULT_DATA+"-"+DEFAULT_DATA, input.slurpString)
-
-        
+        output2 writeStrings (DEFAULT_DATA :: DEFAULT_DATA :: DEFAULT_DATA :: Nil, "-")
+        assertEquals(DEFAULT_DATA+"-"+DEFAULT_DATA+"-"+DEFAULT_DATA, input2.slurpString)
     }
 
 }

@@ -97,6 +97,7 @@ trait Output {
     *          Default is sourceCodec
     */  
     def writeStrings(strings: Traversable[String], separator:String = "")(implicit codec: Codec): Unit = {
+        
         for (out <- outputStream.writer) {
             (strings foldLeft true) {
                 case (true, s) =>
