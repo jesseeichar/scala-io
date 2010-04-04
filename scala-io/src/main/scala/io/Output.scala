@@ -45,27 +45,22 @@ import Path.fail
  */
 trait Output {
     /**
-    * Write bytes to the file
+    * Write bytes
     *
     * <strong>Important:</strong> The use of an Array is highly recommended
     * because normally arrays can be more efficiently written using
     * the underlying APIs
-    * </p><p>
-    * The bytes are either appended to the file or replace the contents of the
-    * file depending on the openOptions. By default the contents of the file
-    * will be replaced.
-    * </p>
     *
     * @param bytes
-    *          The bytes to write to the file
+    *          The bytes to write to underlying object
     */
-    def writeBytes(bytes: Traversable[Byte]): Unit = {
+    def write(bytes: Traversable[Byte]): Unit = {
         for (out <- outputStream) {
             bytes foreach {i => out write i.toInt}
         }
     }
 
-    protected def outputStream : ManagedResource[OutputStream]
+    protected def outputStream : OutputResource[OutputStream]
 
     /**
     * Writes a string. The open options that can be used are dependent
@@ -80,8 +75,9 @@ trait Output {
     *          Default is sourceCodec
     */
     def writeString(string: String)(implicit codec: Codec): Unit = {
-    // TODO
-    ()
+        for (out <- outputStream.writer) {
+            out write string
+        }
     }
 
     /**
@@ -91,35 +87,26 @@ trait Output {
     * 
     * @param strings
     *          The data to write
+    * @param separator
+    *          A string to add between each string.  
+    *          It is not added to the before the first string
+    *          or after the last.
     * @param codec
     *          The codec of the strings to be written. The strings will
     *          be converted to the encoding of {@link sourceCodec}
     *          Default is sourceCodec
     */  
-    def writeStrings(strings: Traversable[String])(implicit codec: Codec): Unit = {
-    // TODO
-    ()
-    }
-
-    /**
-    * Writes several strings to file adding a separator between each string.
-    * The open options that can be used are dependent on the implementation
-    * and implementors should clearly document which option are permitted.
-    * 
-    * @param lines
-    *          The data to write
-    * @param terminator
-    *          The End of Line character or line terminator (Cannot be Auto)
-    *          Default is Line.Terminators.NewLine
-    * @param codec
-    *          The codec of the string to be written.
-    *          The string will be converted to the encoding of {@link sourceCodec}
-    *          Default is sourceCodec
-    */
-    def writeLines(strings: Traversable[String],
-                 terminator: Terminators.Terminator = Terminators.NewLine)(implicit codec: Codec): Unit = {
-        require(!terminator.isInstanceOf[Terminators.Auto] )
-    // TODO
-    ()
+    def writeStrings(strings: Traversable[String], separator:String = "")(implicit codec: Codec): Unit = {
+        for (out <- outputStream.writer) {
+            (strings foldLeft true) {
+                case (true, s) =>
+                    out write s
+                    false
+                case (false, s) =>
+                    out write separator
+                    out write s
+                    false
+            }
+        }
     }
 }

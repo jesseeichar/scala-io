@@ -43,6 +43,7 @@ import Path.fail
  * @see Input
  */
 trait WriteChars {
+
     /**
     * Writes a string. The open options that can be used are dependent
     * on the implementation and implementors should clearly document
@@ -50,14 +51,10 @@ trait WriteChars {
     * 
     * @param string
     *          the data to write
-    * @param codec
-    *          the codec of the string to be written. The string will
-    *          be converted to the encoding of {@link sourceCodec}
-    *          Default is sourceCodec
     */
-    def writeString(string: String): Unit = {
-    // TODO
-    ()
+    def writeString(string : String) : Unit = {
+        // TODO
+        ()
     }
 
     /**
@@ -67,34 +64,13 @@ trait WriteChars {
     * 
     * @param strings
     *          The data to write
-    * @param codec
-    *          The codec of the strings to be written. The strings will
-    *          be converted to the encoding of {@link sourceCodec}
-    *          Default is sourceCodec
+    * @param separator
+    *          A string to add between each string.  
+    *          It is not added to the before the first string
+    *          or after the last.
     */  
-    def writeStrings(strings: Traversable[String]): Unit = {
-    // TODO
-    ()
-    }
-
-    /**
-    * Writes several strings to file adding a separator between each string.
-    * The open options that can be used are dependent on the implementation
-    * and implementors should clearly document which option are permitted.
-    * 
-    * @param lines
-    *          The data to write
-    * @param terminator
-    *          The End of Line character or line terminator
-    *          Default is Line.Terminators.NewLine
-    * @param codec
-    *          The codec of the string to be written.
-    *          The string will be converted to the encoding of {@link sourceCodec}
-    *          Default is sourceCodec
-    */
-    def writeLines(strings: Traversable[String],
-                 terminator: Terminators.Terminator = Terminators.NewLine): Unit = {
-    // TODO
-    ()
+    def writeStrings(strings : Traversable[String], separator : String = "") : Unit = {
+        // TODO
+        ()
     }
 }

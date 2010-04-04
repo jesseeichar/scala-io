@@ -116,7 +116,7 @@ class DefaultFileSystemFixture(val folder : TemporaryFolder, rnd : Random = new 
      */
     def copyResource(source : InputStreamResource[InputStream]) : Path = {
         val dest = path
-        dest.fileOps writeBytes (source.bytes)
+        dest.ops write (source.bytes)
         dest
     }
     override def text(sep:String) = {

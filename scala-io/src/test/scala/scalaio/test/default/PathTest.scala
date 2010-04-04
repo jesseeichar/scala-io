@@ -192,11 +192,11 @@ class PathTest extends scalax.test.sugar.AssertionSugar {
     else intercept[IOException] {test}
   }
 
-  def readTest(path: Path) = path.fileOps.chars.head
+  def readTest(path: Path) = path.ops.chars.head
 
-  def writeTest(path: Path) = path.fileOps.writeString("abc")
+  def writeTest(path: Path) = path.ops.writeString("abc")
 
-  def execTest(path: Path) = path.fileOps.execute()
+  def execTest(path: Path) = path.ops.execute()
 
   def matchAccess(access: AccessMode, path: Path, is: Boolean) = access match {
     case EXECUTE => verifyAccess (execTest(path))(is)

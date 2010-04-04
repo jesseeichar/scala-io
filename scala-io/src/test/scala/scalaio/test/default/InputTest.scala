@@ -26,10 +26,10 @@ class InputTest extends AbstractInputTests {
     @After def after() : Unit = fixture.after()
 
     protected def input(t:Type) = t match {
-        case t @ TextNewLine => fixture.text(t.sep).fileOps
-        case t @ TextPair => fixture.text(t.sep).fileOps
-        case t @ TextCarriageReturn => fixture.text(t.sep).fileOps
-        case TextCustom(sep) => fixture.text(sep).fileOps
-        case Image => fixture.image.fileOps
+        case t @ TextNewLine => fixture.text(t.sep).ops
+        case t @ TextPair => fixture.text(t.sep).ops
+        case t @ TextCarriageReturn => fixture.text(t.sep).ops
+        case TextCustom(sep) => fixture.text(sep).ops
+        case Image => fixture.image.ops
     }
 }

@@ -395,7 +395,7 @@ object Samples {
     // attempt to execute the file.  If it is possible then the process will be
     // returned
     implicit val codec = scalax.io.Codec.UTF8
-    val process:Option[Process] = path.fileOps.execute("arg1", "arg2")
+    val process:Option[Process] = path.ops.execute("arg1", "arg2")
 
 
   }
@@ -508,35 +508,35 @@ object Samples {
     import scalax.io.Path
     import scalax.io.OpenOption._
 
-    // the codec must be defined either as a parameter of fileOps methods or as an implicit
+    // the codec must be defined either as a parameter of ops methods or as an implicit
     implicit val codec = scalax.io.Codec.UTF8
 
     // not necessarily the most efficient way to copy but demonstrates use of reading/writing bytes
-    Path("to").fileOps.writeBytes(
-      Path("from").fileOps.bytes
+    Path("to").ops.write(
+      Path("from").ops.bytes
     )
 
     // we could also append to file
-    Path("to").fileOps.writeBytes(
-      Path("from").fileOps.bytes)
+    Path("to").ops.write(
+      Path("from").ops.bytes)
   }
 
   { // read comma seperated file
     import scalax.io.Path
 
-    // the codec must be defined either as a parameter of fileOps methods or as an implicit
+    // the codec must be defined either as a parameter of ops methods or as an implicit
     implicit val codec = scalax.io.Codec.UTF8
 
-    val records: Traversable[Array[String]] = Path ("csv").fileOps.lines().map (_ split 'x')
+    val records: Traversable[Array[String]] = Path ("csv").ops.lines().map (_ split 'x')
   }
 
   { // add all bytes in file together
     import scalax.io.{FileOps, Path}
 
-    // the codec must be defined either as a parameter of fileOps methods or as an implicit
+    // the codec must be defined either as a parameter of ops methods or as an implicit
     implicit val codec = scalax.io.Codec.UTF8
 
-    val file:FileOps = Path("file").fileOps
+    val file:FileOps = Path("file").ops
     val sum: Int = file.bytesAsInts.reduceLeft (_ + _)
   }
 
@@ -545,10 +545,10 @@ object Samples {
     // first load as strings and remove vowels
     import scalax.io.{FileOps, Path}
 
-    // the codec must be defined either as a parameter of fileOps methods or as an implicit
+    // the codec must be defined either as a parameter of ops methods or as an implicit
     implicit val codec = scalax.io.Codec.UTF8
 
-    val file:FileOps = Path("file").fileOps
+    val file:FileOps = Path("file").ops
     val consonants = file.slurpString.filter (c => !("aeiou" contains c))
 
     // ok now as bytes
@@ -557,19 +557,19 @@ object Samples {
 
   { // iterate over all character in file
     import scalax.io.{FileOps, Path}
-    // the codec must be defined either as a parameter of fileOps methods or as an implicit
+    // the codec must be defined either as a parameter of ops methods or as an implicit
     implicit val codec = scalax.io.Codec.UTF8
 
-    val file: FileOps =  Path("file").fileOps
+    val file: FileOps =  Path("file").ops
     val doubled: Traversable[String] = for ( c <- file.chars ) yield "" + c + c
   }
 
   { // read and print out all lines in a file
     import scalax.io.{FileOps, Path, Line}
-    // the codec must be defined either as a parameter of fileOps methods or as an implicit
+    // the codec must be defined either as a parameter of ops methods or as an implicit
     implicit val codec = scalax.io.Codec.UTF8
 
-    val file: FileOps =  Path("file").fileOps
+    val file: FileOps =  Path("file").ops
 
     // by default the line terminator is stripped and is
     // auto detected
@@ -585,7 +585,7 @@ object Samples {
 
   { // explicitly declare the codecs to use
     import scalax.io.{FileOps, Path, Codec}
-    val file: FileOps =  Path("file").fileOps
+    val file: FileOps =  Path("file").ops
 
     // All methods for reading and writing characters/strings
     // have a codec parameter that used to explicitly declare the
@@ -602,10 +602,10 @@ object Samples {
       FileOps, Path, NotFileException}
     import java.io.FileNotFoundException
     import scala.util.control.Exception._
-    // the codec must be defined either as a parameter of fileOps methods or as an implicit
+    // the codec must be defined either as a parameter of ops methods or as an implicit
     implicit val codec = scalax.io.Codec.UTF8
 
-    val file: FileOps =  Path("file").fileOps
+    val file: FileOps =  Path("file").ops
     val result:Option[String] = catching (classOf[NotFileException],
                                           classOf[FileNotFoundException]) opt { file.slurpString}
 
@@ -619,25 +619,25 @@ object Samples {
     import scalax.io.{
       FileOps, Path, Codec, OpenOption, Line}
     import OpenOption._
-    // the codec must be defined either as a parameter of fileOps methods or as an implicit
+    // the codec must be defined either as a parameter of ops methods or as an implicit
     implicit val codec = scalax.io.Codec.UTF8
 
 
-    val file: FileOps =  Path ("file").fileOps
+    val file: FileOps =  Path ("file").ops
 
     // write bytes
     // By default the file write will replace
     // an existing file with the new data
-    file.writeBytes (Array (1,2,3) map ( _.toByte))
+    file.write (Array (1,2,3) map ( _.toByte))
 
-    // another option for writeBytes is openOptions which allows the caller
+    // another option for write is openOptions which allows the caller
     // to specify in detail how the write should take place
     // the openOptions parameter takes a collections of OpenOptions objects
     // which are filesystem specific in general but the standard options
     // are defined in the OpenOption object
     // in addition to the definition common collections are also defined
     // WRITE_APPEND for example is a List(CREATE, APPEND, WRITE)
-    file.writeBytes (List (1,2,3) map (_.toByte))
+    file.write (List (1,2,3) map (_.toByte))
 
     // write a string to the file
     file.writeString("Hello my dear file")
@@ -649,18 +649,15 @@ object Samples {
     // same options apply as for writeString
     file.writeStrings( "It costs" :: "one" :: "dollar" :: Nil)
 
-    // write a collection of strings as lines in the file
-    file.writeLines("It costs" :: "one" :: "dollar" :: Nil)
-
     // Now all options
-    file.writeLines("It costs" :: "one" :: "dollar" :: Nil,
-                    terminator=Line.Terminators.Custom("||\n||"))(codec = Codec.UTF8)
+    file.writeStrings("It costs" :: "one" :: "dollar" :: Nil,
+                    separator="||\n||")(codec = Codec.UTF8)
   }
 
   { // perform an actions within a file lock
     import scalax.io.{FileOps, Path}
 
-    val file: FileOps =  Path ("file").fileOps
+    val file: FileOps =  Path ("file").ops
 
     implicit val codec = scalax.io.Codec.UTF8
 
@@ -686,20 +683,13 @@ object Samples {
 
   }
 
-// TODO resource examples without file
-// TODO Mention in writeBytes and patch that using an array is the most performant
- // TODO Bytes and Chars objects with both inputStreams and channels apply methods
- // TODO rename Bytes to ReadBytes
- // TODO remove little factory objects for Resource and have 1 Resource factory object
-
-
   { // demonstrate several ways to interoperate existing java APIs
     import scalax.io.{FileOps, Path}
     import java.io._
-    // the codec must be defined either as a parameter of fileOps methods or as an implicit
+    // the codec must be defined either as a parameter of ops methods or as an implicit
     implicit val codec = scalax.io.Codec.UTF8
 
-    val file: FileOps =  Path ("file").fileOps
+    val file: FileOps =  Path ("file").ops
 
     // some APIs require a stream or channel. Using one of the io resources you can safely call the method and be guaranteed that the stream will be correctly closed and exceptions handled
     // see the documentation in scala.resource.ManagedResource for details on all the options available
@@ -734,10 +724,10 @@ object Samples {
         Reader, BufferedReader,
         Writer, BufferedWriter
     }
-    // the codec must be defined either as a parameter of fileOps methods or as an implicit
+    // the codec must be defined either as a parameter of ops methods or as an implicit
     implicit val codec = scalax.io.Codec.UTF8
 
-    val file: FileOps =  Path ("file").fileOps
+    val file: FileOps =  Path ("file").ops
 
     // get various input streams, readers an channels
     val in: InputStreamResource[InputStream] = file.inputStream
@@ -769,10 +759,10 @@ object Samples {
 
   { // examples of patching a file
     import scalax.io.{FileOps, Path, Codec}
-    // the codec must be defined either as a parameter of fileOps methods or as an implicit
+    // the codec must be defined either as a parameter of ops methods or as an implicit
     implicit val codec = scalax.io.Codec.UTF8
 
-    val file: FileOps =  Path ("file").fileOps
+    val file: FileOps =  Path ("file").ops
 
     // write "people" at byte 6
     // if the file is < 6 bytes an underflow exception is thrown
@@ -788,10 +778,10 @@ object Samples {
     // this is because the underlying filesystem has options for optimizing the use of the file channels
     // for example a file could be mapped into memory for the duration of the function and all operations could be performed using the same channel object
     import scalax.io.{FileOps, Path, Codec}
-    // the codec must be defined either as a parameter of fileOps methods or as an implicit
+    // the codec must be defined either as a parameter of ops methods or as an implicit
     implicit val codec = scalax.io.Codec.UTF8
 
-    val file: FileOps =  Path ("file").fileOps
+    val file: FileOps =  Path ("file").ops
 
     file.open()( f => {
       val s = f.slurpString
@@ -820,7 +810,7 @@ object Samples {
     Resource.fromReader(new InputStreamReader(url.openStream())).lines() foreach println _
     // ReadBytes can also be constructed
     val bytes: Traversable[Byte] = Resource.fromInputStream(url.openStream()).bytes
-    Path("scala.html").fileOps writeBytes bytes
+    Path("scala.html").ops write bytes
 
     // WriteChars and WriteBytes can be used to simplify writing to OutputStreams
     Resource.fromOutputStream(new ByteArrayOutputStream()).writer.writeString("howdy")

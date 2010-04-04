@@ -190,6 +190,6 @@ private[io] class DefaultPath private[io] (val jfile: JFile, fileSystem: Default
   def tree(filter:(Path,Path)=>Option[PathMatcher] = (origin,relativePath) => None, 
            depth:Int = -1) = null // TODO
 
-  def fileOps:FileOps = new DefaultFileOps(this, jfile)
+  def ops:FileOps = new DefaultFileOps(this, jfile)
 
 }

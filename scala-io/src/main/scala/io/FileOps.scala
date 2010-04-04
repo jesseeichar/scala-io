@@ -123,6 +123,60 @@ abstract class BasicFileOps(path : Path) extends Input with Output {
                     // TODO implement
                     ()
   }
+
+  /**
+  * Append bytes to the end of a file
+  *
+  * <strong>Important:</strong> The use of an Array is highly recommended
+  * because normally arrays can be more efficiently written using
+  * the underlying APIs
+  *
+  * @param bytes
+  *          The bytes to write to the file
+  */
+  def appendBytes(bytes: Traversable[Byte]): Unit = {
+      for (out <- outputStream) {
+          bytes foreach {i => out write i.toInt}
+      }
+  }
+
+  /**
+  * Writes a string. The open options that can be used are dependent
+  * on the implementation and implementors should clearly document
+  * which option are permitted.
+  * 
+  * @param string
+  *          the data to write
+  * @param codec
+  *          the codec of the string to be written. The string will
+  *          be converted to the encoding of {@link sourceCodec}
+  *          Default is sourceCodec
+  */
+  def appendString(string: String)(implicit codec: Codec): Unit = {
+      // TODO
+      ()
+  }
+
+  /**
+  * Write several strings. The open options that can be used are dependent
+  * on the implementation and implementors should clearly document
+  * which option are permitted.
+  * 
+  * @param strings
+  *          The data to write
+  * @param separator
+  *          A string to add between each string.  
+  *          It is not added to the before the first string
+  *          or after the last.
+  * @param codec
+  *          The codec of the strings to be written. The strings will
+  *          be converted to the encoding of {@link sourceCodec}
+  *          Default is sourceCodec
+  */  
+  def appendStrings(strings: Traversable[String], separator:String = "")(implicit codec: Codec): Unit = {
+      // TODO
+      ()
+  }
 }
 
 /**
