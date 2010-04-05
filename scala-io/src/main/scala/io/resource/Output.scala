@@ -8,7 +8,6 @@
 
 package scalax.io.resource
 
-import scalax.resource.ManagedResourceOperations
 import scalax.io._
 import scalax.resource._
 import scala.collection.Traversable
@@ -97,35 +96,4 @@ trait Output {
     def writeStrings(strings: Traversable[String], separator:String = "")(implicit codec: Codec): Unit = {        
         outputStream.writer.writeStrings(strings,separator)
     }
-}
-
-/**
- * An object that can be converted to an output stream. For example
- * a WritableByteChannel
- *
- * @param S
- *          the type of OutputStream that is created
- * 
- * @author  Jesse Eichar
- * @since   1.0
- */
-trait OutputResource[+R] extends ManagedResourceOperations[R] with Output {
-  /**
-   * Obtain the InputStream Resource version of this object.
-   *
-   * @return the InputStream Resource version of this object.
-   */
-  def outputStream: OutputResource[OutputStream]
-  /**
-   * Obtain the Writer Resource version of this object.
-   *
-   * @return the Writer Resource version of this object.
-   */
-  def writer(implicit sourceCodec: Codec) : WriteCharsResource[Writer]
-  /**
-   * Obtain the Writer Resource version of this object.
-   *
-   * @return the Writer Resource version of this object.
-   */
-  def writableByteChannel: OutputResource[WritableByteChannel]
 }
