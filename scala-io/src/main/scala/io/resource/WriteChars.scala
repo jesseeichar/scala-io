@@ -6,9 +6,9 @@
 **                          |/                                          **
 \*                                                                      */
 
-package scalax.io
+package scalax.io.resource
 
-import scalax.io.resource._
+import scalax.io._
 import scalax.resource._
 import scala.collection.Traversable
 import OpenOption._

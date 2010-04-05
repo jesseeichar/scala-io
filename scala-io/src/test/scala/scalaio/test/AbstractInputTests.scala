@@ -9,6 +9,7 @@
 package scalaio.test
 
 import scalax.io._
+import scalax.io.resource.Input
 import Codec.UTF8
 import Line.Terminators._
 

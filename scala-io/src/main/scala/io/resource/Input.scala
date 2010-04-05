@@ -6,11 +6,11 @@
 **                          |/                                          **
 \*                                                                      */
 
-package scalax.io
+package scalax.io.resource
 
-import scalax.io.resource._
+import scalax.io._
 import scala.collection.Traversable
-import OpenOption._
+
 import Line._
 import java.io.{ 
   InputStream, PrintStream, File => JFile,
