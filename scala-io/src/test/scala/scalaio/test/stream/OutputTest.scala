@@ -8,7 +8,10 @@
 
 package scalaio.test.stream
 
-import scalax.io.resource._
+import scalax.io.resource.Resource
+import scalax.io.{
+    Input,Output
+}
 import scalax.io.Line.Terminators._
 import scalax.io.Codec
 import scalaio.test._

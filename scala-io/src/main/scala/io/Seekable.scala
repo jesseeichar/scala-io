@@ -6,7 +6,7 @@
 **                          |/                                          **
 \*                                                                      */
 
-package scalax.io.resource
+package scalax.io
 
 import java.io.{
     InputStream, OutputStream
@@ -14,9 +14,7 @@ import java.io.{
 import java.nio.channels.{
     ByteChannel, FileChannel
 }
-import scalax.io.{
-    OpenOption, Codec
-}
+import scalax.io.resource._
 import scala.collection.Traversable
 import OpenOption._
 import Resource._

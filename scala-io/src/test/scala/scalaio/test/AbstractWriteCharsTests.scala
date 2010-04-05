@@ -11,7 +11,6 @@ package scalaio.test
 import scalax.io._
 import Codec.UTF8
 import Line.Terminators._
-import scalax.io.resource._
 
 import Path.AccessModes._
 
