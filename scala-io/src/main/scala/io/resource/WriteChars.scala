@@ -8,6 +8,7 @@
 
 package scalax.io.resource
 
+import scalax.resource.ManagedResourceOperations
 import scalax.io._
 import scalax.resource._
 import scala.collection.Traversable
@@ -79,3 +80,16 @@ trait WriteChars {
         }
     }
 }
+
+
+/**
+ * An object that can be converted to an input stream. For example
+ * a ReadableByteChannel
+ *
+ * @param S
+ *          the type of InputStream that is created
+ * 
+ * @author  Jesse Eichar
+ * @since   1.0
+ */
+trait WriteCharsResource[+R] extends ManagedResourceOperations[R] with WriteChars

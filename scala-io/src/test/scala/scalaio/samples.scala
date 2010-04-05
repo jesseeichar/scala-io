@@ -724,6 +724,8 @@ object Samples {
         Reader, BufferedReader,
         Writer, BufferedWriter
     }
+    import scalax.resource.ManagedResourceOperations
+    
     // the codec must be defined either as a parameter of ops methods or as an implicit
     implicit val codec = scalax.io.Codec.UTF8
 
@@ -732,7 +734,7 @@ object Samples {
     // get various input streams, readers an channels
     val in: InputStreamResource[InputStream] = file.inputStream
     val bufferedIn: InputStreamResource[BufferedInputStream] = in.buffered
-    val readableChannel: Resource[ReadableByteChannel] = in.readableByteChannel
+    val readableChannel: ManagedResourceOperations[ReadableByteChannel] = in.readableByteChannel
     val reader: ReaderResource[Reader] = in.reader
     val bufferedReader: ReaderResource[BufferedReader] = reader.buffered
 
@@ -743,7 +745,7 @@ object Samples {
     // create a appending stream
     var out2: OutputStreamResource[OutputStream] = file.outputStream (WRITE_APPEND:_*)
     val bufferedOut: OutputStreamResource[BufferedOutputStream] = out.buffered
-    val writableChannel: Resource[WritableByteChannel] = out.writableByteChannel
+    val writableChannel: ManagedResourceOperations[WritableByteChannel] = out.writableByteChannel
     val writer: WriterResource[Writer] = out.writer
     val bufferedWriter: WriterResource[BufferedWriter] = writer.buffered
     // TODO copy examples from input section
