@@ -40,19 +40,19 @@ object OpenOption {
    * Append to an existing file.
    * A file will not be created if the file does not exist
    */
-  final val APPEND = new OpenOption{}
+   case object APPEND extends OpenOption
   /**
    * Creating a file if it does not exist, but parent directories will not be created
    */
-  final val CREATE = new OpenOption{}
+  case object CREATE extends OpenOption
   /**
    * Creating a new file and fail if the file already exists
    */
-  final val CREATE_NEW = new OpenOption{}
+  case object CREATE_NEW extends OpenOption
   /**
    * Creating a new file and all parent directories
    */
-  final val CREATE_FULL = new OpenOption{}
+  case object CREATE_FULL extends OpenOption
   /**
    * Delete file on close.
    * <p>
@@ -61,34 +61,34 @@ object OpenOption {
    * then the file will be deleted on VM termination (if possible)
    * </p>
    */
-  final val DELETE_ON_CLOSE = new OpenOption{}
+  case object DELETE_ON_CLOSE extends OpenOption
   /**
    * Requires that every update to the file's content (but not metadata)
    * be written synchronously to the underlying storage device
    */
-  final val DSYNC = new OpenOption{}
+  case object DSYNC extends OpenOption
   /**
    * Open a file for read access
    */
-  final val READ = new OpenOption{}
+  case object READ extends OpenOption
   /**
    * A hint to create a sparse file if used with {@link #CREATE_NEW}
    */
-  final val SPARSE = new OpenOption{}
+  case object SPARSE extends OpenOption
   /**
    * Requires that every update to the file's content or metadata be
    * written synchronously to the underlying storage device
    */
-  final val SYNC = new OpenOption{}
+  case object SYNC extends OpenOption
   /**
    * If file exists and is opened for WRITE access then truncate the file to
    * 0 bytes.  Ignored if opened for READ access
    */
-  final val TRUNCATE = new OpenOption{}
+  case object TRUNCATE extends OpenOption
   /**
    * Open file for write access
    */
-  final val WRITE = new OpenOption{}
+  case object WRITE extends OpenOption
 
   /**
    * Collection of options: {@link #CREATE}, {@link #TRUNCATE_EXISTING}, {@link #WRITE}
@@ -118,7 +118,7 @@ trait LinkOption
  * @since   1.0
  */
 object LinkOption {
-  val NOFOLLOW_LINKS = new LinkOption() with OpenOption with CopyOption {}
+  case object NOFOLLOW_LINKS extends LinkOption() with OpenOption with CopyOption {}
 }
 
 /**

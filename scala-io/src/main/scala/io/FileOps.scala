@@ -86,6 +86,7 @@ abstract class FileOps(path : Path) extends Seekable {
   *
   *  @param openOptions
   *           the options that define how the file is opened when using the stream
+  *           The WRITE option is implicitly added to the set of options
   *           Default is write/create/truncate
   */
   def outputStream(openOptions:OpenOption*): OutputStreamResource[OutputStream]
@@ -161,9 +162,6 @@ abstract class FileOps(path : Path) extends Seekable {
   def withLock[R](start: Long = 0, size: Long = -1, shared: Boolean = false)(block: => R): Option[R]
 
   // API ends here.
-  protected def obtainReadableByteChannel = channel()
-  protected def obtainWritableByteChannel = channel()
-
   
   /**
    * Execute the file in a separate process if the path
@@ -186,6 +184,5 @@ abstract class FileOps(path : Path) extends Seekable {
   
   // required method for Output trait
   override protected def outputStream = outputStream()
-  protected def seekableChannel(openOptions:OpenOption*) = fileChannel(openOptions:_*).get // not safe, but for pre Java 7 I do not have an alternative
 }
 

@@ -11,8 +11,9 @@ package scalax.io
 import java.io.{
     InputStream, OutputStream
 }
+import java.nio.ByteBuffer
 import java.nio.channels.{
-    ByteChannel, FileChannel
+    ByteChannel, FileChannel, WritableByteChannel
 }
 import scalax.io.resource._
 import scala.collection.Traversable
@@ -26,6 +27,7 @@ import Resource._
  * @since 1.0
  */
 trait Seekable extends Input with Output {
+    private final val BUFFER_SIZE=8192
 
     // for Java 7 change this to a Seekable Channel
     /**
@@ -55,21 +57,18 @@ trait Seekable extends Input with Output {
    * @param string
    *          The string to write to the file starting at
    *          position.
-   * @param openOptions
-   *          The options to use for opening the file
-   *          Default is WRITE
    * @param replaced
    *          The number of elements from bytes to replace.  If 
-   *          larger than bytes then all bytes will be used
+   *          -1 then all bytes will be used
    *          The stream will be grown as needed.
-   *          Default is Long.MaxValue
+   *          Default is -1
    * @see patch(Long,Traversable[Byte],Iterable[OpenOption])
    */
   def patchString(position: Long, 
                   string: String,
-                  replaced : Long = Long.MaxValue,
-                  openOptions: Iterable[OpenOption] = List(WRITE))(implicit codec: Codec): Unit = {
+                  replaced : Long = -1)(implicit codec: Codec): Unit = {
                     // TODO implement
+                    assert(false, "not implemented")
                     ()
                   }
 
@@ -80,10 +79,8 @@ trait Seekable extends Input with Output {
    * <strong>Important:</strong> The use of an Array is highly recommended
    * because normally arrays can be more efficiently written using
    * the underlying APIs
-   * </p>
-   * <p>
-   * If the position is beyond the end of the file a BufferUnderflow
-   * Exception will be thrown
+   * </p><p>
+   * To append data the position must >= size
    * </p><p>
    * If the position is within the file but the
    * <code>position + bytes.length</code>
@@ -95,7 +92,7 @@ trait Seekable extends Input with Output {
    * </p>
    * @param position
    *          The start position of the update starting at 0.
-   *          The position must be within the file
+   *          The position must be within the file or == size (for appending)
    * @param bytes
    *          The bytes to write to the file starting at
    *          position.
@@ -103,18 +100,27 @@ trait Seekable extends Input with Output {
    *          The number of elements from bytes to replace.  If 
    *          larger than bytes then all bytes will be used
    *          The stream will be grown as needed.
-   *          Default is Long.MaxValue
-   * @param openOptions
-   *          The options to use for opening the file
-   *          Default is WRITE
+   *          Default is -1
    */
-  def patch(position: Long,
-            bytes: Traversable[Byte],
-            replaced : Long = Long.MaxValue,
-            openOptions: Iterable[OpenOption] = List(WRITE)): Unit = {
-     require(position >= 0, "The patch starting position must be within the existing file")
-                    // TODO implement
-                    ()
+  def patch[T <% Traversable[Byte]](position: Long,
+            bytes: T,
+            replaced : Long = Long.MaxValue): Unit = {
+    require(position >= 0, "The patch starting position must be greater than or equal 0")
+
+    
+    if(size.forall{position == _}) {
+        replaced match {
+            case -1 | _ if(replaced == bytes.size) =>
+                append(bytes)
+            case _ =>
+                append(bytes, replaced)
+        }
+    } else {
+        for(channel <- seekableChannel(WRITE) ){
+            channel.position(position)
+            writeTo(channel,bytes, replaced)
+        }
+    }
   }
 
   /**
@@ -126,10 +132,34 @@ trait Seekable extends Input with Output {
   *
   * @param bytes
   *          The bytes to write to the file
+  * @param take
+  *          The number of bytes to append -1 to take all
+  *          default is -1
   */
-  def appendBytes(bytes: Traversable[Byte]): Unit = {
-      for (out <- outputStream) {
-          bytes foreach {i => out write i.toInt}
+  def append[T <% Traversable[Byte]](bytes: T, take : Long = -1): Unit = {
+      for (c <- seekableChannel(APPEND)) writeTo(c, bytes, take)
+  }
+
+  private def writeTo[T <% Traversable[Byte]](c : WritableByteChannel, bytes : T, length : Long) = {
+      bytes match {
+          case array : Array[Byte] =>
+          
+              val count = if(length == -1) bytes.size else length.min(bytes.size)
+              
+              c.write(ByteBuffer.wrap(array, 0, count.toInt))
+          case _ =>
+              val buf = ByteBuffer.allocateDirect(BUFFER_SIZE)
+              def write[T <% Traversable[Byte]](written : Long, data:T) : Unit = {
+                  val numBytes = (length - written).min(BUFFER_SIZE).toInt
+                  val (toWrite, remaining) = data.splitAt(numBytes)
+                  
+                  toWrite foreach buf.put
+                  buf.flip
+                  c write buf
+                  
+                  if (remaining.nonEmpty) write (written + toWrite.size, remaining)
+              }
+              write(0, bytes)
       }
   }
 
@@ -146,8 +176,7 @@ trait Seekable extends Input with Output {
   *          Default is sourceCodec
   */
   def appendString(string: String)(implicit codec: Codec): Unit = {
-      // TODO
-      ()
+      append(string getBytes codec.name)
   }
 
   /**
@@ -167,8 +196,11 @@ trait Seekable extends Input with Output {
   *          Default is sourceCodec
   */  
   def appendStrings(strings: Traversable[String], separator:String = "")(implicit codec: Codec): Unit = {
-      // TODO
-      ()
+      assert (false, "not implemented")
+  }
+  
+  def truncate(position : Long) : Unit = {
+      assert (false, "not implemented")
   }
   
   // required methods for Input trait
