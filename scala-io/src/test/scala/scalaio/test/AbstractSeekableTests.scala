@@ -30,14 +30,22 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
      */
     def open() : Seekable
 
+    val patchParams = 
+        ("replaced is MaxValue", 2,"ア",Int.MaxValue) ::
+        ("too large max", 2,"ア",8) ::
+        ("basic", 2,"ア",-2) ::
+        ("insert", 2,"ア",-1) ::
+        ("start at 0", 0,"ア",-2) ::
+        ("to large position", 199,"ア",-2) ::
+        ("very large patch", 2,(1 to 100 mkString ""),-2) ::
+        ("0 length", 2,"ア",0) ::
+        ("use only part of data", 2,"its a long one!",3) ::
+        Nil
+
     @Test @Ignore
     def patchString() : Unit = {
-        testPatchString("too large max", 2,"ア",Long.MaxValue)
-        testPatchString("basic", 2,"ア",-1)
-        testPatchString("to large position", 199,"ア",-1)
-        testPatchString("very large patch", 2,(1 to 100 mkString ""),-1)
-        testPatchString("0 length", 2,"ア",0)
-        testPatchString("use only part of data", 2,"its a long one!",3)
+        val testFunction = Function tupled testPatchString _
+        patchParams foreach testFunction
         
         intercept[IllegalArgumentException] {
             open.patchString(-1, "@", 3)
@@ -45,7 +53,7 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
     // test UTF16?        
     }
     
-    private def testPatchString(msg:String, from:Long, data:String, length : Long) = {
+    private def testPatchString(msg:String, from:Int, data:String, length : Int) = {
         val seekable = open()
         val expected = TEXT_VALUE patch (from.min(Int.MaxValue).toInt, data, length.min(Int.MaxValue).toInt )
         seekable.patchString(from,data,length)
@@ -54,46 +62,54 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
 
     @Test
     def patch() : Unit = {
-        testPatch("replaced is MaxValue", 2,"ア",Int.MaxValue)
-        testPatch("too large max", 2,"ア",8)
-        testPatch("basic", 2,"ア",-1)
-        testPatch("to large position", 199,"ア",-1)
-        testPatch("very large patch", 2,(1 to 100 mkString ""),-1)
-        testPatch("0 length", 2,"ア",0)
-        testPatch("use only part of data", 2,"its a long one!",3)
+        val testFunction = Function tupled testPatch _
+        patchParams foreach testFunction 
 
         intercept[IllegalArgumentException] {
             open.patch(-1, "@".getBytes(UTF8.name), 3)
         }
     }
     
+    
     private def testPatch(msg:String, fromInChars:Int, dataString:String, lengthInChars : Int) = {
         System.err.println("starting '"+msg+"'")
 
+
+        val MAX_VALUE = Int.MaxValue
+
         val from = TEXT_VALUE.take(fromInChars).getBytes(UTF8.name).size
-        val length = if(lengthInChars == Int.MaxValue) Long.MaxValue
-                     else TEXT_VALUE.slice(fromInChars, fromInChars + lengthInChars).getBytes(UTF8.name).size
+        val length = lengthInChars match {
+            case MAX_VALUE => Long.MaxValue
+            case -1 => -1
+            case -2 => -2
+            case _ => TEXT_VALUE.slice(fromInChars, fromInChars + lengthInChars).getBytes(UTF8.name).size
+        }
 
         val data = dataString.getBytes(UTF8.name)
 
-        def test(list : Boolean) = {
+        def test[T <% Traversable[Byte]](datatype: String, dataTransform : Array[Byte] => T) = {
             val seekable = open()
             assertEquals(TEXT_VALUE, seekable.slurpString)
 
-            val expected = TEXT_VALUE patch (fromInChars, dataString, lengthInChars )
-            if(list) {
-                val bytes = data.toList
-                seekable.patch(from,bytes,length)
-            } else {
-                val bytes = data
-                seekable.patch(from,bytes,length)
+            val expected = lengthInChars match {
+                case -2 => TEXT_VALUE.getBytes(UTF8.name)  patch (from, data, data.size)
+                case _ if(lengthInChars == MAX_VALUE) => TEXT_VALUE.getBytes(UTF8.name)  patch (from, data, MAX_VALUE)
+                case _ => TEXT_VALUE.getBytes(UTF8.name)  patch (from, data, length.toInt)
             }
+            
+            val bytes = dataTransform(data)
+            seekable.patch(from,bytes,length)
+                
+            System.err.println("before:   "+(TEXT_VALUE.getBytes(UTF8.name) mkString ","))
             System.err.println("actual:   "+(seekable.byteArray mkString ","))
-            System.err.println("expected: "+(expected.getBytes(UTF8.name) mkString ","))
-            assertEquals("is list = "+list+" patch: '"+msg+"'", expected.getBytes(UTF8.name) mkString ",", seekable.byteArray mkString ",")
+            System.err.println("expected: "+(expected mkString ","))
+            assertEquals(datatype+" - patch: '"+msg+"'", expected mkString ",", seekable.byteArray mkString ",")
         }
-        test(false)
-        test(true)
+        
+        test("array", a => a)
+        test("list", a => a.toList)
+        test("stream", a => a.toStream)
+        
         System.err.println("done '"+msg+"'")
         System.err.println()
         System.err.println()
