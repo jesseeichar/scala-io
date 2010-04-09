@@ -104,11 +104,11 @@ trait Seekable extends Input with Output {
    */
   def patch[T <% Traversable[Byte]](position: Long,
             bytes: T,
-            replaced : Long = Long.MaxValue): Unit = {
+            replaced : Long = -1): Unit = {
     require(position >= 0, "The patch starting position must be greater than or equal 0")
 
-    
-    if(size.forall{position == _}) {
+    val doAppend = size.forall{position == _}
+    if(doAppend) {
         replaced match {
             case -1 | _ if(replaced == bytes.size) =>
                 append(bytes)
@@ -118,10 +118,39 @@ trait Seekable extends Input with Output {
     } else {
         for(channel <- seekableChannel(WRITE) ){
             channel.position(position)
-            writeTo(channel,bytes, replaced)
+            val wrote = writeTo(channel,bytes, replaced)
+            
+            if(replaced > channel.size || // need this in the case where replaced == Long.MaxValue
+               position + replaced > channel.size) {
+                channel.truncate(channel.position())
+            } else if (replaced > wrote) {
+                val length = channel.size - position - replaced
+                val srcIndex = position + replaced
+                val destIndex = position + wrote
+                copySlice(channel, srcIndex, destIndex, length.toInt)
+                System.err.println("size "+(channel.size))
+                System.err.println("truncating to "+(srcIndex+length))
+                channel.truncate(destIndex+length)
+            }
         }
     }
   }
+
+  private def copySlice(channel : FileChannel, srcIndex : Long, destIndex : Long, length : Int) : Unit = {
+      val buf = ByteBuffer.allocate(BUFFER_SIZE.min(length))
+      
+      def write(done : Int) = {
+          if(length < done + BUFFER_SIZE) buf.limit((length - done).toInt)
+
+          buf.clear()
+          val read = channel.read(buf, srcIndex + done)
+          buf.flip()
+          val written = channel.write(buf, destIndex + done)
+      }
+      
+      (0 to length by BUFFER_SIZE) foreach write
+  }
+
 
   /**
   * Append bytes to the end of a file
@@ -140,24 +169,25 @@ trait Seekable extends Input with Output {
       for (c <- seekableChannel(APPEND)) writeTo(c, bytes, take)
   }
 
-  private def writeTo[T <% Traversable[Byte]](c : WritableByteChannel, bytes : T, length : Long) = {
+  private def writeTo[T <% Traversable[Byte]](c : WritableByteChannel, bytes : T, length : Long) : Long = {
       bytes match {
           case array : Array[Byte] =>
-          
+            // for performance try to write Arrays directly
               val count = if(length == -1) bytes.size else length.min(bytes.size)
               
               c.write(ByteBuffer.wrap(array, 0, count.toInt))
           case _ =>
               val buf = ByteBuffer.allocateDirect(BUFFER_SIZE)
-              def write[T <% Traversable[Byte]](written : Long, data:T) : Unit = {
+              def write[T <% Traversable[Byte]](written : Long, data:T) : Long = {
                   val numBytes = (length - written).min(BUFFER_SIZE).toInt
                   val (toWrite, remaining) = data.splitAt(numBytes)
                   
                   toWrite foreach buf.put
                   buf.flip
-                  c write buf
+                  val currentWrite : Long = c write buf
                   
-                  if (remaining.nonEmpty) write (written + toWrite.size, remaining)
+                  if (remaining.isEmpty) currentWrite
+                  else currentWrite + write (written + toWrite.size, remaining)
               }
               write(0, bytes)
       }
