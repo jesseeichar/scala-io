@@ -22,14 +22,13 @@ trait LongTraversable[A] extends Traversable[A]
 
   override def companion : GenericCompanion[LongTraversable] = LongTraversable
   
-  def longCount(p: A => Boolean): Long = {
+  def lcount(p: A => Boolean): Long = {
       var cnt = 0L
       for (x : A <- this) if (p(x)) cnt += 1
       cnt
   }
 
-  override def drop(n: Int) : LongTraversable[A] = super.drop (n)
-  def drop(n: Long) : LongTraversable[A] = {
+  def ldrop(n: Long) : LongTraversable[A] = {
     def doDrop(remaining : Long, t : LongTraversable[A]) : LongTraversable[A] = {
       if(remaining < Int.MaxValue) t.drop(remaining.toInt)
       else doDrop(remaining - Int.MaxValue, t.drop(Int.MaxValue))
@@ -38,12 +37,12 @@ trait LongTraversable[A] extends Traversable[A]
   }
 
   override def hasDefiniteSize = false
-  def longSize: Long = foldLeft(0L){(c,_) => c + 1}
+  def lsize: Long = foldLeft(0L){(c,_) => c + 1}
   
-  def slice(from: Long, until: Long): LongTraversable[A] = drop(from).take(until)
-  def splitAt(n: Long): (LongTraversable[A], LongTraversable[A]) = (take(n), drop(n))
+  def lslice(from: Long, until: Long): LongTraversable[A] = ldrop(from).ltake(until)
+  def lsplitAt(n: Long): (LongTraversable[A], LongTraversable[A]) = (ltake(n), ldrop(n))
   
-  def take(n: Long) : LongTraversable[A] = new LongTraversable[A] {
+  def ltake(n: Long) : LongTraversable[A] = new LongTraversable[A] {
     def foreach[U](f: (A) => U): Unit = {
       import util.control.Breaks._
       

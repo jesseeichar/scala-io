@@ -13,7 +13,7 @@ import scala.collection._
 import scala.collection.generic._
 
 import java.io.{
-  InputStream, Reader
+  InputStream, Reader, Closeable
 }
 
 object Alias {
@@ -27,7 +27,7 @@ type ReadableSkippable = {
  * A stream based LongTraversable
  *
  */
-protected[io] class ResourceTraversable[R <: Alias.ReadableSkippable,A](resource : Resource[R], conv : Int => A, start : Long = 0, end : Long = Long.MaxValue ) 
+protected[io] class ResourceTraversable[R <: Closeable with Alias.ReadableSkippable,A](resource : Resource[R], conv : Int => A, start : Long = 0, end : Long = Long.MaxValue ) 
                   extends LongTraversable[A]
                      with GenericTraversableTemplate[A,LongTraversable] {
                     
@@ -46,10 +46,10 @@ protected[io] class ResourceTraversable[R <: Alias.ReadableSkippable,A](resource
     }
   }
   
-  def take(i : Int) = new ResourceTraversable[R,A](resource, conv, start, i.toLong.min(end))
-  def take(i : Long) = new ResourceTraversable[R,A](resource, conv, start, i.min(end))
-  def drop(i : Int) = new ResourceTraversable[R,A](resource, conv, start + i, end)
-  def drop(i : Long) = new ResourceTraversable[R,A](resource, conv, start + i, end)
+  override def take(i : Int) = new ResourceTraversable[R,A](resource, conv, start, i.toLong.min(end))
+  override def ltake(i : Long) = new ResourceTraversable[R,A](resource, conv, start, i.min(end))
+  override def drop(i : Int) = new ResourceTraversable[R,A](resource, conv, start + i, end)
+  override def ldrop(i : Long) = new ResourceTraversable[R,A](resource, conv, start + i, end)
 
 }
 

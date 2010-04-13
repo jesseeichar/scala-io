@@ -4,9 +4,9 @@ WriteChars
 Input
 Output
 Streamable (need details on how patching works)
-
+LongTraversable
+ResourceTraversable
 
 == Misc
 Make LineTraversable a LongTraversable
 Test that Traversables in Input are lazy
-
