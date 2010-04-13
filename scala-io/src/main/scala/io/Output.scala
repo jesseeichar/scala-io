@@ -59,7 +59,23 @@ trait Output {
             bytes foreach {i => out write i.toInt}
         }
     }
-
+    
+    /**
+    * Write ints
+    *
+    * <strong>Important:</strong> The use of an Array is highly recommended
+    * because normally arrays can be more efficiently written using
+    * the underlying APIs
+    *
+    * @param ints
+    *          The ints to write to underlying object
+    */
+    def writeInts(ints: Traversable[Int]): Unit = {
+        for (out <- outputStream) {
+            ints foreach {i => out write i}
+        }
+    }
+    
     protected def outputStream : OutputResource[OutputStream]
 
     /**

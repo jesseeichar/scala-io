@@ -152,11 +152,24 @@ trait Seekable extends Input with Output {
       }
   }
 
+  /**
+   * Create a temporary file to use for performing certain operations.  It should
+   * be as efficient as possible to copy from the temporary file to this Seekable and 
+   * vice-versa
+   */
+  protected def tempFile() : Path = Path.createTempFile()
+
   private def insertDataTmpFile[T <% Traversable[Byte]](position : Long, bytes : T) = {
-      assert(false, "Not implemented")
+      val tmp = tempFile()
+      
+      var i = -1
+      
+      tmp.ops writeInts (bytesAsInts.asInstanceOf[LongTraversable[Int]] drop position)
+      
       for(channel <- seekableChannel(WRITE) ) {
            channel position  position
-//           if()
+           writeTo(channel, bytes, -1)
+           writeTo(channel, tmp.ops.bytes, tmp.size)
       }
   }
   
@@ -282,8 +295,8 @@ trait Seekable extends Input with Output {
   }
   
   // required methods for Input trait
-  def chars(implicit codec: Codec): Traversable[Char] = seekableChannel(READ).reader(codec).chars
-  def bytesAsInts:Traversable[Int] = seekableChannel(READ).bytesAsInts
+  def chars(implicit codec: Codec): LongTraversable[Char] = (seekableChannel(READ).reader(codec).chars).asInstanceOf[LongTraversable[Char]]  // TODO this is broke
+  def bytesAsInts:LongTraversable[Int] = seekableChannel(READ).bytesAsInts
   
   // required method for Output trait
   protected def outputStream = seekableChannel(WRITE_TRUNCATE:_*).outputStream

@@ -162,27 +162,17 @@ abstract class FileOps(path : Path) extends Seekable {
   def withLock[R](start: Long = 0, size: Long = -1, shared: Boolean = false)(block: => R): Option[R]
 
   // API ends here.
-  
-  /**
-   * Execute the file in a separate process if the path
-   * is executable.
-   *
-   * @param arguments
-   *          Arguments to send to the process
-   * @param configuration
-   *          An optional configuration function for configuring
-   *          the ProcessBuilder.  The default process builder will
-   *          be passed to the function.
-   *
-   * @return Process
-   */
+  // required for path
   def execute(args:String*)(implicit configuration:ProcessBuilder=>Unit = p=>()):Option[Process]
   
   // required methods for Input trait
-  override def chars(implicit codec: Codec): Traversable[Char] = inputStream.reader(codec).chars
-  override def bytesAsInts:Traversable[Int] = inputStream.bytesAsInts
+  override def chars(implicit codec: Codec): LongTraversable[Char] = inputStream.reader(codec).chars
+  override def bytesAsInts:LongTraversable[Int] = inputStream.bytesAsInts
   
   // required method for Output trait
   override protected def outputStream = outputStream()
+  
+  // Optimization for Seekable
+  override protected def tempFile() : Path = path.fileSystem.createTempFile()
 }
 

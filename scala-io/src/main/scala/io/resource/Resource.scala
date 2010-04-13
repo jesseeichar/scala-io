@@ -431,9 +431,9 @@ class InputStreamResource[+A <: InputStream](opener: => A) extends BufferableInp
     def buffered = Resource.fromBufferedInputStream(new BufferedInputStream(opener))
     def reader(implicit sourceCodec: Codec) = Resource.fromReader(new InputStreamReader(opener, sourceCodec.charSet))
     def readableByteChannel = Resource.fromReadableByteChannel(Channels.newChannel(open()))
-    def chars(implicit codec: Codec): Traversable[Char] = reader(codec).chars
+    def chars(implicit codec: Codec): LongTraversable[Char] = reader(codec).chars
 
-    def bytesAsInts:Traversable[Int] = toTraversable {in => StreamIterator(in)}
+    def bytesAsInts:LongTraversable[Int] = ResourceTraversable(this)
 }
 
 /***************************** OutputStreamResource ************************************/
@@ -464,7 +464,7 @@ class ReaderResource[+A <: Reader](opener: => A, val sourceCodec:Codec) extends 
 
     def buffered = Resource.fromBufferedReader(new BufferedReader(opener))(sourceCodec)
 
-    override def chars : Traversable[Char] = toTraversable {reader => StreamIterator(reader)}
+    override def chars : LongTraversable[Char] = ResourceTraversable(this)
 }
 
 /***************************** WriterResource ************************************/
@@ -496,9 +496,9 @@ class ByteChannelResource[+A <: ByteChannel](opener: => A) extends InputResource
     def writer(implicit sourceCodec: Codec) = Resource.fromWriter(Channels.newWriter(opener, sourceCodec.charSet.name()))
     def writableByteChannel = Resource.fromWritableByteChannel(opener)
     def readableByteChannel = Resource.fromReadableByteChannel(opener)
-
-    def bytesAsInts:Traversable[Int] = toTraversable {in => StreamIterator(Channels.newInputStream(opener))}
-    def chars(implicit codec: Codec): Traversable[Char] = reader(codec).chars
+    
+    def bytesAsInts:LongTraversable[Int] = inputStream.bytesAsInts // TODO optimize for byteChannel
+    def chars(implicit codec: Codec): LongTraversable[Char] = reader(codec).chars  // TODO optimize for byteChannel
 }
 
 
@@ -516,8 +516,8 @@ class ReadableByteChannelResource[+A <: ReadableByteChannel](opener: => A) exten
     def inputStream = Resource.fromInputStream(Channels.newInputStream(opener))
     def reader(implicit sourceCodec: Codec) = Resource.fromReader(Channels.newReader(opener, sourceCodec.charSet.name()))
     def readableByteChannel = this
-    def bytesAsInts:Traversable[Int] = toTraversable {in => StreamIterator(Channels.newInputStream(opener))}
-    def chars(implicit codec: Codec): Traversable[Char] = reader(codec).chars
+    def bytesAsInts:LongTraversable[Int] = inputStream.bytesAsInts // TODO optimize for byteChannel
+    def chars(implicit codec: Codec): LongTraversable[Char] = reader(codec).chars  // TODO optimize for byteChannel
 }
 
 /***************************** WritableByteChannelResource ************************************/

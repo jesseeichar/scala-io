@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>src/main/scala/io/Output.scala</string>
+	<string>src/main/scala/io/LongTraversable.scala</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -18,154 +18,213 @@
 		</dict>
 	</array>
 	<key>fileHierarchyDrawerWidth</key>
-	<integer>200</integer>
+	<integer>195</integer>
 	<key>metaData</key>
 	<dict>
+		<key>integration-tests</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>36</integer>
+				<key>line</key>
+				<integer>3</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
+		<key>peformanceTests</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>24</integer>
+				<key>line</key>
+				<integer>8</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
+		<key>src/main/scala/io/DefaultFileOps.scala</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>44</integer>
+				<key>line</key>
+				<integer>94</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>82</integer>
+		</dict>
 		<key>src/main/scala/io/FileOps.scala</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>57</integer>
+				<integer>22</integer>
 				<key>line</key>
-				<integer>248</integer>
-			</dict>
-			<key>columnSelection</key>
-			<false/>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>233</integer>
-			<key>selectFrom</key>
-			<dict>
-				<key>column</key>
-				<integer>45</integer>
-				<key>line</key>
-				<integer>248</integer>
-			</dict>
-			<key>selectTo</key>
-			<dict>
-				<key>column</key>
-				<integer>65</integer>
-				<key>line</key>
-				<integer>248</integer>
-			</dict>
-		</dict>
-		<key>src/main/scala/io/Output.scala</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>47</integer>
-				<key>line</key>
-				<integer>62</integer>
+				<integer>164</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>42</integer>
+			<integer>142</integer>
 		</dict>
-		<key>src/main/scala/io/resource/Resources.scala</key>
+		<key>src/main/scala/io/Input.scala</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>34</integer>
+				<integer>74</integer>
 				<key>line</key>
 				<integer>168</integer>
 			</dict>
-			<key>columnSelection</key>
-			<false/>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
 			<integer>148</integer>
-			<key>selectFrom</key>
+		</dict>
+		<key>src/main/scala/io/LongTraversable.scala</key>
+		<dict>
+			<key>caret</key>
 			<dict>
 				<key>column</key>
+				<integer>80</integer>
+				<key>line</key>
 				<integer>20</integer>
-				<key>line</key>
-				<integer>168</integer>
-			</dict>
-			<key>selectTo</key>
-			<dict>
-				<key>column</key>
-				<integer>34</integer>
-				<key>line</key>
-				<integer>168</integer>
-			</dict>
-		</dict>
-		<key>src/test/scala/scalaio/test/AbstractOutputTests.scala</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>0</integer>
-				<key>line</key>
-				<integer>46</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>25</integer>
-		</dict>
-		<key>src/test/scala/scalaio/test/default/FileOutputTest.scala</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>0</integer>
-				<key>line</key>
-				<integer>40</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>14</integer>
-		</dict>
-		<key>src/test/scala/scalaio/test/default/InputTest.scala</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>21</integer>
-				<key>line</key>
-				<integer>17</integer>
 			</dict>
 			<key>columnSelection</key>
 			<false/>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>0</integer>
+			<integer>43</integer>
 			<key>selectFrom</key>
 			<dict>
 				<key>column</key>
-				<integer>0</integer>
+				<integer>33</integer>
 				<key>line</key>
-				<integer>17</integer>
+				<integer>20</integer>
 			</dict>
 			<key>selectTo</key>
 			<dict>
 				<key>column</key>
+				<integer>80</integer>
+				<key>line</key>
+				<integer>20</integer>
+			</dict>
+		</dict>
+		<key>src/main/scala/io/Path.scala</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>28</integer>
+				<key>line</key>
+				<integer>254</integer>
+			</dict>
+			<key>columnSelection</key>
+			<false/>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>230</integer>
+			<key>selectFrom</key>
+			<dict>
+				<key>column</key>
+				<integer>25</integer>
+				<key>line</key>
+				<integer>254</integer>
+			</dict>
+			<key>selectTo</key>
+			<dict>
+				<key>column</key>
+				<integer>35</integer>
+				<key>line</key>
+				<integer>254</integer>
+			</dict>
+		</dict>
+		<key>src/main/scala/io/Position.scala</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>0</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
+		<key>src/main/scala/io/Seekable.scala</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>6</integer>
+				<key>line</key>
+				<integer>165</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>133</integer>
+		</dict>
+		<key>src/test/scala/scalaio/test/AbstractSeekableTests.scala</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
 				<integer>21</integer>
 				<key>line</key>
-				<integer>17</integer>
+				<integer>89</integer>
 			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>79</integer>
+		</dict>
+		<key>todo</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>10</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
 		</dict>
 	</dict>
 	<key>openDocuments</key>
 	<array>
-		<string>src/test/scala/scalaio/test/default/FileOutputTest.scala</string>
+		<string>src/test/scala/scalaio/test/AbstractSeekableTests.scala</string>
+		<string>src/main/scala/io/Seekable.scala</string>
+		<string>src/main/scala/io/LongTraversable.scala</string>
+		<string>src/main/scala/io/Input.scala</string>
+		<string>src/main/scala/io/Path.scala</string>
+		<string>peformanceTests</string>
+		<string>integration-tests</string>
+		<string>todo</string>
+		<string>src/main/scala/io/Position.scala</string>
+		<string>src/main/scala/io/DefaultFileOps.scala</string>
 		<string>src/main/scala/io/FileOps.scala</string>
-		<string>src/main/scala/io/resource/Resources.scala</string>
-		<string>src/test/scala/scalaio/test/default/InputTest.scala</string>
-		<string>src/test/scala/scalaio/test/AbstractOutputTests.scala</string>
-		<string>src/main/scala/io/Output.scala</string>
 	</array>
 	<key>showFileHierarchyDrawer</key>
 	<true/>
 	<key>windowFrame</key>
-	<string>{{61, 2}, {938, 776}}</string>
+	<string>{{66, 69}, {995, 709}}</string>
 </dict>
 </plist>

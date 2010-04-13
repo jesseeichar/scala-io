@@ -1,0 +1,10 @@
+Input
+Output
+Seekable
+ReadChars
+WriteChars
+
+test things like:
+  file.ops.bytes.take(10).drop(300)
+  file.ops.bytes.slice(10,300)
+  

@@ -76,7 +76,7 @@ trait Input {
     *
     * @return an non-strict iterable over all the bytes
     */
-    def bytes: Traversable[Byte] = bytesAsInts map (_.toByte)
+    def bytes: LongTraversable[Byte] = (bytesAsInts map {_.toByte}).asInstanceOf[LongTraversable[Byte]]    // TODO this is broke
 
     /**
     * Obtains a Traversable for conveniently processing the file as Ints.
@@ -104,7 +104,7 @@ trait Input {
     *
     * @return an non-strict iterable over all the bytes with the bytes being represented as Ints
     */
-    def bytesAsInts: Traversable[Int]
+    def bytesAsInts: LongTraversable[Int]
 
     /**
     * This method aspires to be the fastest way to read
@@ -134,7 +134,7 @@ trait Input {
      * @return
      *          an iterable of all the characters
      */
-    def chars(implicit codec: Codec): Traversable[Char]
+    def chars(implicit codec: Codec): LongTraversable[Char]
     
     /**
      * Obtain an non-strict iterable for iterating through the lines in the object
