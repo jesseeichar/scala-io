@@ -20,7 +20,7 @@ import scalax.resource.ManagedResource
 import OpenOption._
 import collection.{Traversable }
 import PartialFunction._
-import util.Random.nextASCIIString
+import util.Random.nextPrintableChar
 import java.lang.{ProcessBuilder}
 
 /**

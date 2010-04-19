@@ -17,7 +17,7 @@ import java.io.{
 import java.net.{ URI, URL }
 import collection.{Traversable }
 import PartialFunction._
-import util.Random.nextASCIIString
+import util.Random.nextPrintableChar
 import java.lang.{ProcessBuilder}
 
 import Path._

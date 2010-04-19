@@ -32,9 +32,15 @@ subprojects {
     compileScala {
         scalaCompileOptions.useCompileDaemon = true
         encoding = "UTF-8"
-        scalaCompileOptions.additionalParameters = ['-make:transitivenocp', '-Xlog-implicits']
+        scalaCompileOptions.additionalParameters = ['-make:transitivenocp', '-Xlog-implicits', '-unchecked']
     }
- 
+
+    test {
+        if (project.hasProperty('testPattern')) {
+            include testPattern
+        }
+    }
+
 }
 project(':scala-io') {
     dependencies { 

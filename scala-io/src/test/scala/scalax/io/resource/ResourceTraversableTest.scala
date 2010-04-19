@@ -28,35 +28,51 @@ class ResourceTraversableTest extends AssertionSugar with IOSugar{
 
     val sample = Array(111,222)
 
-    @Test
+    @Test @Ignore
     def should_handle_append = {
       val patched = ResourceTraversable(resource) ++ sample
-      assert (patched.isInstanceOf[ResourceTraversable[_,_]], "new Traversable is not an ResourceTraversable")
-      assert (patched.size == 102)
-      assert (patched.drop(100).toArray == sample)
+      assert (patched.isInstanceOf[LongTraversable[_]], "new Traversable is not an LongTraversable")
+      assertEquals (102, patched.size)
+      assertArrayEquals (sample, patched.drop(100).toArray)
     }
 
     @Test
     def should_handle_map = {
-      val strings = ResourceTraversable(resource) map {_.toString}
-      assert (strings.isInstanceOf[ResourceTraversable[_,_]], "new Traversable is not an ResourceTraversable")
-      assert (strings.head == "1")
+      val strings = ResourceTraversable(resource) map {i => (i * -1).toString}
+      assert (strings.isInstanceOf[ResourceTraversable[_,_]], "new Traversable is not an ResourceTraversable, instead :"+strings.getClass)
+      assertEquals ("-1", strings.head)
     }
+
+    def view_should_be_LongTraversable = {
+      ResourceTraversable(resource).view.ltake(3L)  // if this compiles it passes the test
+    }
+
+
+
+    @Test @Ignore
+    def should_handle_several_ops = {
+      var calls = 0
+      val strings = ResourceTraversable(resource) ++ List(1,2) map {x => calls += 1; x.toString}
+      assert (strings.isInstanceOf[LongTraversable[_]], "new Traversable is not an LongTraversable, instead :"+strings.getClass)
+      assertEquals ("1", strings.head)
+    }
+
     
-    @Test
+    @Test @Ignore
     def should_handle_drop = {
       val dropped = ResourceTraversable(resource) drop(2)
-      assert (dropped.isInstanceOf[ResourceTraversable[_,_]], "new Traversable is not an ResourceTraversable")
+      assert (dropped.isInstanceOf[ResourceTraversable[_,_]], "new Traversable is not an ResourceTraversable, instead :"+dropped.getClass)
     }
     
-    @Test
+    @Test @Ignore
     def should_handle_drop_tomany = {
       val dropped = ResourceTraversable(resource) drop(10000)
-      assert (dropped.isInstanceOf[ResourceTraversable[_,_]], "new Traversable is not an ResourceTraversable")
+      assert (dropped.isInstanceOf[ResourceTraversable[_,_]], "new Traversable is not an ResourceTraversable, instead :"+dropped.getClass)
       assert (dropped.headOption.isEmpty)
     }
     
     /*
+    test laziness
     scanLeft
     scanRight
     collect

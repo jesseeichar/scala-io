@@ -6,7 +6,15 @@ Output
 Streamable (need details on how patching works)
 LongTraversable
 ResourceTraversable
+SeqLongTraversable
 
 == Misc
 Make LineTraversable a LongTraversable
 Test that Traversables in Input are lazy
+Make SeqLongTraversable more performant with drop etc...
+Try to make LongTraversable implementations views
+
+
+== Considerations
+Add protected aliasing/imports to java classes in package to reduce number or required imports
+Consider adding Path implicits to a package object

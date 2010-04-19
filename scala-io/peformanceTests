@@ -7,4 +7,5 @@ WriteChars
 test things like:
   file.ops.bytes.take(10).drop(300)
   file.ops.bytes.slice(10,300)
+  file.ops.bytes.slice(10,300) ++ List[Byte](1,2,3,4,5,6)
   
