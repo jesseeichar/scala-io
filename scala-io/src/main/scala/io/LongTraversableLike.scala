@@ -20,7 +20,6 @@ import scala.collection.generic._
 trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends TraversableLike[A, Repr] {
   self =>
 
-
   override protected[this] def thisCollection: LongTraversable[A] = this.asInstanceOf[LongTraversable[A]]
   override protected[this] def toCollection(repr: Repr): LongTraversable[A] = repr.asInstanceOf[LongTraversable[A]]
 

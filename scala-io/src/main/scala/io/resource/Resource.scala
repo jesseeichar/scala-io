@@ -433,7 +433,7 @@ class InputStreamResource[+A <: InputStream](opener: => A) extends BufferableInp
     def readableByteChannel = Resource.fromReadableByteChannel(Channels.newChannel(open()))
     def chars(implicit codec: Codec): LongTraversable[Char] = reader(codec).chars
 
-    def bytesAsInts:LongTraversable[Int] = ResourceTraversable(this)
+    def bytesAsInts:LongTraversable[Int] = StreamLongTraversable(this, i => Some(i))
 }
 
 /***************************** OutputStreamResource ************************************/
@@ -464,7 +464,7 @@ class ReaderResource[+A <: Reader](opener: => A, val sourceCodec:Codec) extends 
 
     def buffered = Resource.fromBufferedReader(new BufferedReader(opener))(sourceCodec)
 
-    override def chars : LongTraversable[Char] = ResourceTraversable(this)
+    override def chars : LongTraversable[Char] = null // TODO ResourceTraversable(this)
 }
 
 /***************************** WriterResource ************************************/
