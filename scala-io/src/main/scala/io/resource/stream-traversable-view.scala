@@ -31,56 +31,44 @@ trait StreamLongTraversableViewLike[A, +Coll, +This <: StreamLongTraversableView
       extends StreamLongTraversable[A] with LongTraversableView[A,Coll] with LongTraversableViewLike[A,Coll,This]{
   self =>
 
-  trait Transformed[B] extends StreamLongTraversableView[B, Coll] with super.Transformed[B]
+  trait Transformed[B] extends StreamLongTraversableView[B, Coll] with super.Transformed[B] {
+    type In = self.In
+    type SourceOut = self.SourceOut
+    def source = self.source
+    def start = self.start
+    def end = self.end
+  }
   
+  trait Identity[A] extends StreamLongTraversableView[A, Coll] with super.Transformed[A] {
+  }
+    
 //  trait Forced[B] extends Transformed[B] with super.Forced[B]
   trait Sliced extends Transformed[A] with super.Sliced {
-    def in = self.in
+    override def start = self.start + from
+    override def end = until
     def conv = self.conv
-    def start = self.start + from
-    def end = until
     
     override def foreach[U](f: A => U) = doForeach(f)
   }
   trait Mapped[B] extends Transformed[B] with super.Mapped[B] {
-    val in = self.in
-    val conv = self.conv andThen up
-    val start = self.start
-    val end = self.end
-
+    def conv = self.conv andThen up
     private def up(i:Traversable[A]):Traversable[B] = i map mapping
   }
   trait FlatMapped[B] extends Transformed[B] with super.FlatMapped[B] {
-    val in = self.in
-    val conv = self.conv andThen up
-    val start = self.start
-    val end = self.end
-
+    def conv = self.conv andThen up
     private def up(i:Traversable[A]):Traversable[B] = i flatMap mapping
   }
-  trait Appended[B >: A] extends Transformed[B] with super.Appended[B]   {
-    val in = self.in
-    val conv = self.conv
-    val start = self.start
-    val end = self.end
+  trait Appended[B >: A] extends Transformed[B] with super.Appended[B] {
+    def conv = self.conv
   }
   trait Filtered extends Transformed[A] with super.Filtered {
-    val in = self.in
-    val conv = self.conv
-    val start = self.start
-    val end = self.end
+    def conv = self.conv
   }
-  trait TakenWhile extends Transformed[A] with super.TakenWhile {
-    val in = self.in
-    val conv = self.conv
-    val start = self.start
-    val end = self.end
+  trait TakenWhile extends Transformed[A] with super.TakenWhile{
+    def conv = self.conv
   }
-  trait DroppedWhile extends Transformed[A] with super.DroppedWhile {
-    val in = self.in
-    val conv = self.conv
-    val start = self.start
-    val end = self.end
+  trait DroppedWhile extends Transformed[A] with super.DroppedWhile{
+    def conv = self.conv
   }
 
 
