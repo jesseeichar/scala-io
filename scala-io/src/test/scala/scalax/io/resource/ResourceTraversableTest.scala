@@ -22,145 +22,145 @@ import util.Random
 import java.io._
 
 class ResourceTraversableTest extends AssertionSugar with IOSugar{
-    implicit val codec = Codec.UTF8
-    def newResource[A](conv:Int=>Traversable[A] = (i:Int)=>List(i)) = {
-        def stream = new ByteArrayInputStream(1 to 100 map {_.toByte} toArray)
-        ResourceTraversable(Resource.fromInputStream(stream), _conv=conv)
-      }
-    val sample = Array(111,222)
-
-    @Test //@Ignore
-    def should_handle_append = assertSizeAndType(newResource(), _ ++ sample)
-
-    @Test //@Ignore
-    def size_should_work_like_lists = {
-      val traversable = newResource()
-
-      assertSizeAndType(traversable, t => t.slice(-1,300))
-      assertSizeAndType(traversable, t => t.slice(0,0))
-      assertSizeAndType(traversable, t => t.drop(300))
-      assertSizeAndType(traversable, t => t.drop(-1))
-      assertSizeAndType(traversable, t => t)
-      assertSizeAndType(traversable, t => t.drop(0))
-      assertSizeAndType(traversable, t => t.drop(0))
-      assertSizeAndType(traversable, t => t.drop(2))
-      assertSizeAndType(traversable, t => t.slice(2,10))
-      assertSizeAndType(traversable, t => t.map{_.toChar}.slice(2,10))
-      assertSizeAndType(traversable, t => t.slice(2,10).drop(5))
+  implicit val codec = Codec.UTF8
+  def newResource[A](conv:Int=>Traversable[A] = (i:Int)=>List(i)) = {
+      def stream = new ByteArrayInputStream(1 to 100 map {_.toByte} toArray)
+      ResourceTraversable(Resource.fromInputStream(stream), _conv=conv)
     }
+  val sample = Array(111,222)
 
-    @Test //@Ignore
-    def slice_and_flatmap = assertSizeAndType(newResource(), t => t.flatMap{"_"+_.toChar}.slice(2,10))
-    
-    @Test //@Ignore
-    def should_handle_map = assertSizeAndType(newResource(), _ map {i => (i * -1).toString})
+  @Test //@Ignore
+  def should_handle_append = assertSizeAndType(newResource(), _ ++ sample)
 
-    @Test //@Ignore
-    def should_handle_several_ops = assertSizeAndType(newResource(), t => t ++ List(1,2) map {_.toString})
+  @Test //@Ignore
+  def size_should_work_like_lists = {
+    val traversable = newResource()
+
+    assertSizeAndType(traversable, t => t.slice(-1,300))
+    assertSizeAndType(traversable, t => t.slice(0,0))
+    assertSizeAndType(traversable, t => t.drop(300))
+    assertSizeAndType(traversable, t => t.drop(-1))
+    assertSizeAndType(traversable, t => t)
+    assertSizeAndType(traversable, t => t.drop(0))
+    assertSizeAndType(traversable, t => t.drop(0))
+    assertSizeAndType(traversable, t => t.drop(2))
+    assertSizeAndType(traversable, t => t.slice(2,10))
+    assertSizeAndType(traversable, t => t.map{_.toChar}.slice(2,10))
+    assertSizeAndType(traversable, t => t.slice(2,10).drop(5))
+  }
+
+  @Test //@Ignore
+  def slice_and_flatmap = assertSizeAndType(newResource(), t => t.flatMap{"_"+_.toChar}.slice(2,10))
+  
+  @Test //@Ignore
+  def should_handle_map = assertSizeAndType(newResource(), _ map {i => (i * -1).toString})
+
+  @Test //@Ignore
+  def should_handle_several_ops = assertSizeAndType(newResource(), t => t ++ List(1,2) map {_.toString})
+  
+  @Test //@Ignore
+  def should_handle_drop = assertSizeAndType(newResource(), _ drop 2)
+  
+  @Test //@Ignore
+  def should_handle_drop_tomany = assertSizeAndType(newResource(), _ drop 10000)
+  
+  @Test //@Ignore
+  def should_remain_traversable_after_several_operations = 
+    assertSizeAndType(newResource(), t => t ++ sample drop 100 )
+  
+  @Test //@Ignore
+  def should_handle_scanLeft_Right = {
+    val r = newResource()
+    assertSizeAndType(r, _.scanLeft(2){_ + _})
+    assertSizeAndType(r, _.scanRight(2){_ + _})
+  }
+
+  @Test //@Ignore
+  def should_handle_collect = {
+    val r = newResource()
+    assertSizeAndType(r, _ collect {case i if i < 3 => i+1})
+    assertSizeAndType(r, _ collect {case i if i < 3 => "a"+i})
+  }
+
+  @Test //@Ignore
+  def should_handle_flatMap = assertSizeAndType(newResource(), _ flatMap {i => 1 to 3 map {i + _}})
+
+  @Test //@Ignore
+  def should_handle_flatten = {
+    val traversable = newResource(i => List(List(i,i))) flatten
+    val list = 1 to 100 map (i => List(i,i)) flatten
+
+    assertEquals (list.size, traversable.size)
+    assertEquals (list.toList, traversable.toList)      
+  }
+
+  @Test //@Ignore
+  def should_handle_dropWhile = assertSizeAndType(newResource(), _ dropWhile {_ < 55})
+  
+  @Test //@Ignore
+  def should_handle_filter = assertSizeAndType(newResource(), _ filter {_ > 55})
+  
+  @Test //@Ignore
+  def should_handle_filterNot = assertSizeAndType(newResource(), _ filterNot {_ > 55})
+  
+  @Test //@Ignore
+  def should_handle_groupBy = {
+    def f(t : Traversable[Int]) = t groupBy {_.toString()(0)}
+    val list = f(1 to 100 toList) 
+    val applied = f(newResource()) map {case (k,v) => (k,v.toList)}
+
+    assertEquals (list.size, applied.size)
+    assertEquals (list.toList, applied.toList)
+  }
+
+  @Test //@Ignore
+  def should_handle_init = assertSizeAndType(newResource(), _ init)
+
+  @Test //@Ignore
+  def should_handle_slice = assertSizeAndType(newResource(), _ slice(3,10))
+  
+  @Test //@Ignore
+  def should_handle_tail = assertSizeAndType(newResource(), _ tail)
+  
+  @Test //@Ignore
+  def should_handle_take = {
+    assertSizeAndType(newResource(), _ take(10))
+    assertSizeAndType(newResource(), _ take(-1))
+    assertSizeAndType(newResource(), _ take(30000))
+  }
+  
+  @Test //@Ignore
+  def should_handle_takeWhile = assertSizeAndType(newResource(), _ takeWhile {_ < 23})
+  
+  @Test //@Ignore
+  def should_handle_partition = {
+    assertProductSizeAndType (newResource(), _ span {_ < 30})
+    assertProductSizeAndType (newResource(), _ span {_ < -1})
+  }
+  @Test //@Ignore
+  def should_handle_splitAt = {
+    assertProductSizeAndType (newResource(), _ splitAt 13)
+    assertProductSizeAndType (newResource(), _ splitAt -1)
+    assertProductSizeAndType (newResource(), _ splitAt 50000)
+  }
+
+  @Test //@Ignore
+  def should_handle_transpose = {
+    val expected = (1 to 100).map (i => List(i,i+2,i+3)).transpose
+    val actual = newResource(i => List(List(i,i+2,i+3))).transpose
     
-    @Test //@Ignore
-    def should_handle_drop = assertSizeAndType(newResource(), _ drop 2)
+    println(actual.take(5))
     
-    @Test //@Ignore
-    def should_handle_drop_tomany = assertSizeAndType(newResource(), _ drop 10000)
-    
-    @Test //@Ignore
-    def should_remain_traversable_after_several_operations = 
-      assertSizeAndType(newResource(), t => t ++ sample drop 100 )
-    
-    @Test //@Ignore
-    def should_handle_scanLeft_Right = {
-      val r = newResource()
-      assertSizeAndType(r, _.scanLeft(2){_ + _})
-      assertSizeAndType(r, _.scanRight(2){_ + _})
+    expected.zipWithIndex zip actual.toList foreach { 
+      case ((expected:Traversable[_], index),actual:Traversable[_]) => 
+        assertEquals (expected.size, actual.size)
+        assertEquals (expected.toList, actual.toList)
     }
+  }
+  
+  @Test //@Ignore
+  def should_handle_unzip = assertProductSizeAndType (newResource(), _.unzip(i => (1,i)))
 
-    @Test //@Ignore
-    def should_handle_collect = {
-      val r = newResource()
-      assertSizeAndType(r, _ collect {case i if i < 3 => i+1})
-      assertSizeAndType(r, _ collect {case i if i < 3 => "a"+i})
-    }
-
-    @Test //@Ignore
-    def should_handle_flatMap = assertSizeAndType(newResource(), _ flatMap {i => 1 to 3 map {i + _}})
-
-    @Test //@Ignore
-    def should_handle_flatten = {
-      val traversable = newResource(i => List(List(i,i))) flatten
-      val list = 1 to 100 map (i => List(i,i)) flatten
-
-      assertEquals (list.size, traversable.size)
-      assertEquals (list.toList, traversable.toList)      
-    }
-
-    @Test //@Ignore
-    def should_handle_dropWhile = assertSizeAndType(newResource(), _ dropWhile {_ < 55})
-    
-    @Test //@Ignore
-    def should_handle_filter = assertSizeAndType(newResource(), _ filter {_ > 55})
-    
-    @Test //@Ignore
-    def should_handle_filterNot = assertSizeAndType(newResource(), _ filterNot {_ > 55})
-    
-    @Test //@Ignore
-    def should_handle_groupBy = {
-      def f(t : Traversable[Int]) = t groupBy {_.toString()(0)}
-      val list = f(1 to 100 toList) 
-      val applied = f(newResource()) map {case (k,v) => (k,v.toList)}
-
-      assertEquals (list.size, applied.size)
-      assertEquals (list.toList, applied.toList)
-    }
-
-    @Test //@Ignore
-    def should_handle_init = assertSizeAndType(newResource(), _ init)
-
-    @Test //@Ignore
-    def should_handle_slice = assertSizeAndType(newResource(), _ slice(3,10))
-    
-    @Test //@Ignore
-    def should_handle_tail = assertSizeAndType(newResource(), _ tail)
-    
-    @Test //@Ignore
-    def should_handle_take = {
-      assertSizeAndType(newResource(), _ take(10))
-      assertSizeAndType(newResource(), _ take(-1))
-      assertSizeAndType(newResource(), _ take(30000))
-    }
-    
-    @Test //@Ignore
-    def should_handle_takeWhile = assertSizeAndType(newResource(), _ takeWhile {_ < 23})
-    
-    @Test //@Ignore
-    def should_handle_partition = {
-      assertProductSizeAndType (newResource(), _ span {_ < 30})
-      assertProductSizeAndType (newResource(), _ span {_ < -1})
-    }
-    @Test //@Ignore
-    def should_handle_splitAt = {
-      assertProductSizeAndType (newResource(), _ splitAt 13)
-      assertProductSizeAndType (newResource(), _ splitAt -1)
-      assertProductSizeAndType (newResource(), _ splitAt 50000)
-    }
-
-    @Test //@Ignore
-    def should_handle_transpose = {
-      def f(t : Traversable[Int]) = {
-        val newT = t transpose {i => List(1,i)}
-        new Product {
-          val list = newT.toList
-          def canEqual(that: Any) = false
-          def productArity = list.size
-          def productElement(n:Int) = list(n)
-        }
-      }
-      assertProductSizeAndType (newResource(), f, false)
-    }
-    
-    @Test //@Ignore
-    def should_handle_unzip = assertProductSizeAndType (newResource(), _.unzip(i => (1,i)))
-    
   private def assertProductSizeAndType(traversable : Traversable[Int], f : Traversable[Int] => Product, areLongTraversable:Boolean = true) = {
     val list = f(1 to 100 toList)
     val applied = f(traversable)
@@ -185,8 +185,8 @@ class ResourceTraversableTest extends AssertionSugar with IOSugar{
     assertEquals (list.toList, applied.toList)
   }
 
-    def traversable_should_be_LongTraversable = {
-      newResource().ltake(3L)  // if this compiles it passes the test
-    }
+  def traversable_should_be_LongTraversable = {
+    newResource().ltake(3L)  // if this compiles it passes the test
+  }
    
 }
