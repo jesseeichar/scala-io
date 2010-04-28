@@ -49,7 +49,7 @@ class ResourceTraversableTest extends AssertionSugar with IOSugar{
       assertSizeAndType(traversable, t => t.slice(2,10).drop(5))
     }
 
-    @Test
+    @Test //@Ignore
     def slice_and_flatmap = assertSizeAndType(newResource(), t => t.flatMap{"_"+_.toChar}.slice(2,10))
     
     @Test //@Ignore
@@ -85,39 +85,106 @@ class ResourceTraversableTest extends AssertionSugar with IOSugar{
     @Test //@Ignore
     def should_handle_flatMap = assertSizeAndType(newResource(), _ flatMap {i => 1 to 3 map {i + _}})
 
-    //@Test //@Ignore
-    // def should_handle_flatten = {
-    //   assertSizeAndType(newResource(), _ flatMap {i => 1 to 3 map {i + _}}, )
-    // }
-    /*
-    test laziness
-    flatten
-    dropWhile
-    filter
-    filterNot
-    groupBy
-    init
-    partition
-    repr
-    slice
-    span
-    splitAt
-    tail
-    take
-    takeWhile
-    dropWhile
-    transpose
-    unzip
-    */
+    @Test //@Ignore
+    def should_handle_flatten = {
+      val traversable = newResource(i => List(List(i,i))) flatten
+      val list = 1 to 100 map (i => List(i,i)) flatten
+
+      assertEquals (list.size, traversable.size)
+      assertEquals (list.toList, traversable.toList)      
+    }
+
+    @Test //@Ignore
+    def should_handle_dropWhile = assertSizeAndType(newResource(), _ dropWhile {_ < 55})
     
+    @Test //@Ignore
+    def should_handle_filter = assertSizeAndType(newResource(), _ filter {_ > 55})
     
-    private def assertSizeAndType[A](traversable : Traversable[Int], f : Traversable[Int] => Traversable[A], init : List[Int] = (1 to 100 toList)) = {
-      val list : Traversable[A] = f(init)
-      val applied : LongTraversable[A] = f(traversable).asInstanceOf[LongTraversable[A]]
+    @Test //@Ignore
+    def should_handle_filterNot = assertSizeAndType(newResource(), _ filterNot {_ > 55})
+    
+    @Test //@Ignore
+    def should_handle_groupBy = {
+      def f(t : Traversable[Int]) = t groupBy {_.toString()(0)}
+      val list = f(1 to 100 toList) 
+      val applied = f(newResource()) map {case (k,v) => (k,v.toList)}
+
       assertEquals (list.size, applied.size)
       assertEquals (list.toList, applied.toList)
     }
- 
+
+    @Test //@Ignore
+    def should_handle_init = assertSizeAndType(newResource(), _ init)
+
+    @Test //@Ignore
+    def should_handle_slice = assertSizeAndType(newResource(), _ slice(3,10))
+    
+    @Test //@Ignore
+    def should_handle_tail = assertSizeAndType(newResource(), _ tail)
+    
+    @Test //@Ignore
+    def should_handle_take = {
+      assertSizeAndType(newResource(), _ take(10))
+      assertSizeAndType(newResource(), _ take(-1))
+      assertSizeAndType(newResource(), _ take(30000))
+    }
+    
+    @Test //@Ignore
+    def should_handle_takeWhile = assertSizeAndType(newResource(), _ takeWhile {_ < 23})
+    
+    @Test //@Ignore
+    def should_handle_partition = {
+      assertProductSizeAndType (newResource(), _ span {_ < 30})
+      assertProductSizeAndType (newResource(), _ span {_ < -1})
+    }
+    @Test //@Ignore
+    def should_handle_splitAt = {
+      assertProductSizeAndType (newResource(), _ splitAt 13)
+      assertProductSizeAndType (newResource(), _ splitAt -1)
+      assertProductSizeAndType (newResource(), _ splitAt 50000)
+    }
+
+    @Test //@Ignore
+    def should_handle_transpose = {
+      def f(t : Traversable[Int]) = {
+        val newT = t transpose {i => List(1,i)}
+        new Product {
+          val list = newT.toList
+          def canEqual(that: Any) = false
+          def productArity = list.size
+          def productElement(n:Int) = list(n)
+        }
+      }
+      assertProductSizeAndType (newResource(), f, false)
+    }
+    
+    @Test //@Ignore
+    def should_handle_unzip = assertProductSizeAndType (newResource(), _.unzip(i => (1,i)))
+    
+  private def assertProductSizeAndType(traversable : Traversable[Int], f : Traversable[Int] => Product, areLongTraversable:Boolean = true) = {
+    val list = f(1 to 100 toList)
+    val applied = f(traversable)
+    if(areLongTraversable) {
+      applied.productIterator foreach {t => assert(t.isInstanceOf[LongTraversable[_]], "new traversable is not a LongTraversable: "+applied.getClass.getName)}
+    }
+    assertEquals (list.productArity, applied.productArity)
+
+    list.productIterator.zipWithIndex zip applied.productIterator foreach { 
+      case ((expected:Traversable[_], index),actual:Traversable[_]) => 
+        assertEquals (expected.size, actual.size)
+        assertEquals (expected.toList, actual.toList)
+    }
+  }
+  
+  private def assertSizeAndType[A](traversable : Traversable[Int], f : Traversable[Int] => Traversable[A], isLongTraversable:Boolean = true) = {
+    val list = f(1 to 100 toList)
+    val applied = f(traversable)
+    if(isLongTraversable)
+      assert(applied.isInstanceOf[LongTraversable[_]], "new traversable is not a LongTraversable: "+applied.getClass.getName)
+    assertEquals (list.size, applied.size)
+    assertEquals (list.toList, applied.toList)
+  }
+
     def traversable_should_be_LongTraversable = {
       newResource().ltake(3L)  // if this compiles it passes the test
     }
