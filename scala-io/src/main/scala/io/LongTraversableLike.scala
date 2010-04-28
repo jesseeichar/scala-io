@@ -70,6 +70,5 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
     def foreach[U](f: (A) => U): Unit = self foreach f
   }
   override def view(from: Int, until: Int) = view.slice(from, until)
-
-//  def lview(from: Long, until: Long) : LongTraversableView[A,Repr] = this.view.lslice(from, until)
+  def lview(from: Long, until: Long) : LongTraversableView[A,Repr] = this.view.lslice(from, until)
 }

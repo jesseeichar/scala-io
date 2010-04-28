@@ -23,60 +23,74 @@ import java.io._
 
 class ResourceTraversableTest extends AssertionSugar with IOSugar{
     implicit val codec = Codec.UTF8
-
-    def resource = Resource.fromInputStream(new ByteArrayInputStream(1 to 100 map {_.toByte} toArray))
-
+    def newResource[A](conv:Int=>Traversable[A] = (i:Int)=>List(i)) = {
+        def stream = new ByteArrayInputStream(1 to 100 map {_.toByte} toArray)
+        ResourceTraversable(Resource.fromInputStream(stream), _conv=conv)
+      }
     val sample = Array(111,222)
 
-    @Test @Ignore
-    def should_handle_append = {
-      val patched = ResourceTraversable(resource) ++ sample
-      assert (patched.isInstanceOf[LongTraversable[_]], "new Traversable is not an LongTraversable")
-      assertEquals (102, patched.size)
-      assertArrayEquals (sample, patched.drop(100).toArray)
+    @Test //@Ignore
+    def should_handle_append = assertSizeAndType(newResource(), _ ++ sample)
+
+    @Test //@Ignore
+    def size_should_work_like_lists = {
+      val traversable = newResource()
+
+      assertSizeAndType(traversable, t => t.slice(-1,300))
+      assertSizeAndType(traversable, t => t.slice(0,0))
+      assertSizeAndType(traversable, t => t.drop(300))
+      assertSizeAndType(traversable, t => t.drop(-1))
+      assertSizeAndType(traversable, t => t)
+      assertSizeAndType(traversable, t => t.drop(0))
+      assertSizeAndType(traversable, t => t.drop(0))
+      assertSizeAndType(traversable, t => t.drop(2))
+      assertSizeAndType(traversable, t => t.slice(2,10))
+      assertSizeAndType(traversable, t => t.map{_.toChar}.slice(2,10))
+      assertSizeAndType(traversable, t => t.slice(2,10).drop(5))
     }
 
     @Test
-    def should_handle_map = {
-      val strings = ResourceTraversable(resource) map {i => (i * -1).toString}
-      assert (strings.isInstanceOf[ResourceTraversable[_,_]], "new Traversable is not an ResourceTraversable, instead :"+strings.getClass)
-      assertEquals ("-1", strings.head)
-    }
-
-    def view_should_be_LongTraversable = {
-      ResourceTraversable(resource).view.ltake(3L)  // if this compiles it passes the test
-    }
-
-
-
-    @Test @Ignore
-    def should_handle_several_ops = {
-      var calls = 0
-      val strings = ResourceTraversable(resource) ++ List(1,2) map {x => calls += 1; x.toString}
-      assert (strings.isInstanceOf[LongTraversable[_]], "new Traversable is not an LongTraversable, instead :"+strings.getClass)
-      assertEquals ("1", strings.head)
-    }
-
+    def slice_and_flatmap = assertSizeAndType(newResource(), t => t.flatMap{"_"+_.toChar}.slice(2,10))
     
-    @Test @Ignore
-    def should_handle_drop = {
-      val dropped = ResourceTraversable(resource) drop(2)
-      assert (dropped.isInstanceOf[ResourceTraversable[_,_]], "new Traversable is not an ResourceTraversable, instead :"+dropped.getClass)
-    }
+    @Test //@Ignore
+    def should_handle_map = assertSizeAndType(newResource(), _ map {i => (i * -1).toString})
+
+    @Test //@Ignore
+    def should_handle_several_ops = assertSizeAndType(newResource(), t => t ++ List(1,2) map {_.toString})
     
-    @Test @Ignore
-    def should_handle_drop_tomany = {
-      val dropped = ResourceTraversable(resource) drop(10000)
-      assert (dropped.isInstanceOf[ResourceTraversable[_,_]], "new Traversable is not an ResourceTraversable, instead :"+dropped.getClass)
-      assert (dropped.headOption.isEmpty)
-    }
+    @Test //@Ignore
+    def should_handle_drop = assertSizeAndType(newResource(), _ drop 2)
     
+    @Test //@Ignore
+    def should_handle_drop_tomany = assertSizeAndType(newResource(), _ drop 10000)
+    
+    @Test //@Ignore
+    def should_remain_traversable_after_several_operations = 
+      assertSizeAndType(newResource(), t => t ++ sample drop 100 )
+    
+    @Test //@Ignore
+    def should_handle_scanLeft_Right = {
+      val r = newResource()
+      assertSizeAndType(r, _.scanLeft(2){_ + _})
+      assertSizeAndType(r, _.scanRight(2){_ + _})
+    }
+
+    @Test //@Ignore
+    def should_handle_collect = {
+      val r = newResource()
+      assertSizeAndType(r, _ collect {case i if i < 3 => i+1})
+      assertSizeAndType(r, _ collect {case i if i < 3 => "a"+i})
+    }
+
+    @Test //@Ignore
+    def should_handle_flatMap = assertSizeAndType(newResource(), _ flatMap {i => 1 to 3 map {i + _}})
+
+    //@Test //@Ignore
+    // def should_handle_flatten = {
+    //   assertSizeAndType(newResource(), _ flatMap {i => 1 to 3 map {i + _}}, )
+    // }
     /*
     test laziness
-    scanLeft
-    scanRight
-    collect
-    flatMap
     flatten
     dropWhile
     filter
@@ -95,4 +109,17 @@ class ResourceTraversableTest extends AssertionSugar with IOSugar{
     transpose
     unzip
     */
+    
+    
+    private def assertSizeAndType[A](traversable : Traversable[Int], f : Traversable[Int] => Traversable[A], init : List[Int] = (1 to 100 toList)) = {
+      val list : Traversable[A] = f(init)
+      val applied : LongTraversable[A] = f(traversable).asInstanceOf[LongTraversable[A]]
+      assertEquals (list.size, applied.size)
+      assertEquals (list.toList, applied.toList)
+    }
+ 
+    def traversable_should_be_LongTraversable = {
+      newResource().ltake(3L)  // if this compiles it passes the test
+    }
+   
 }

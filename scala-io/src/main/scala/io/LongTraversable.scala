@@ -32,9 +32,8 @@ object LongTraversable extends TraversableFactory[LongTraversable] {
   // TODO consider a correct implementation
   def newBuilder[A] = new scala.collection.mutable.LazyBuilder[A,LongTraversable[A]] {
     def result = {
-      System.err.println(parts mkString ("\n\n","\n", ""))
       val traversables = parts map {
-        case x : Traversable[A] => x
+        case Seq(x : Traversable[_]) => x.asInstanceOf[Traversable[A]]  // get around type erasure warning
         case x => x.toTraversable
       }
       new SeqLongTraversable(traversables)

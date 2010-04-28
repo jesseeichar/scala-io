@@ -70,5 +70,8 @@ trait LongTraversableViewLike[+A, +Coll, +This <: LongTraversableView[A,Coll] wi
   override def drop(n: Int): This = newLSliced(n max 0, Long.MaxValue).asInstanceOf[This]
   override def ldrop(n: Long): This = newLSliced(n max 0, Long.MaxValue).asInstanceOf[This]
   
+  override def take(n: Int): This = newLSliced(0, n).asInstanceOf[This]
+  override def ltake(n: Long): This = newLSliced(0, n).asInstanceOf[This]
+  
   override def stringPrefix = "LongTraversableView"
 }
