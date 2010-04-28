@@ -46,7 +46,7 @@ trait ResourceTraversableViewLike[A, +Coll, +This <: ResourceTraversableView[A,C
 //  trait Forced[B] extends Transformed[B] with super.Forced[B]
   trait Sliced extends Transformed[A] with super.Sliced {
     override def start = self.start + (from max 0)
-    override def end = self.end min (until - start)
+    override def end = self.end min until
     def conv = self.conv
     
     override def foreach[U](f: A => U) = doForeach(f)
