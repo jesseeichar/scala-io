@@ -433,7 +433,7 @@ class InputStreamResource[+A <: InputStream](opener: => A) extends BufferableInp
     def readableByteChannel = Resource.fromReadableByteChannel(Channels.newChannel(open()))
     def chars(implicit codec: Codec): LongTraversable[Char] = reader(codec).chars
 
-    def bytesAsInts:LongTraversable[Int] = ResourceTraversable(this, i => Some(i))
+    def bytesAsInts:LongTraversable[Int] = ResourceTraversable(this, i => i)
 }
 
 /***************************** OutputStreamResource ************************************/

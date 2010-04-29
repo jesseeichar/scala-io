@@ -54,8 +54,7 @@ trait ResourceTraversableViewLike[A, +Coll, +This <: ResourceTraversableView[A,C
     override def foreach[U](f: A => U) = doForeach(f)
   }
   trait Mapped[B] extends Transformed[B] with super.Mapped[B] {
-    def conv = self.conv andThen up
-    private def up(i:Traversable[A]):Traversable[B] = i map mapping
+    def conv = self.conv andThen mapping
   }
   trait TakenWhile extends Identity with super.TakenWhile
   trait DroppedWhile extends Identity with super.DroppedWhile

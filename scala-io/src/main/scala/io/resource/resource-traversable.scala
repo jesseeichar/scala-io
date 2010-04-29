@@ -34,7 +34,7 @@ trait ResourceTraversable[A] extends LongTraversable[A]
   
   def source : TraversableSource[In,SourceOut]
 
-  protected def conv : SourceOut => Traversable[A]
+  protected def conv : SourceOut => A
   protected def start : Long
   protected def end : Long
 
@@ -45,9 +45,9 @@ trait ResourceTraversable[A] extends LongTraversable[A]
 
       var v = source.read(stream)
       var c = start
-      val funAndInc = f andThen {f => c += 1}
+      val funAndInc = conv andThen f andThen {f => c += 1}
       while(v != None && c < end) {
-        conv(v.get) foreach funAndInc
+        funAndInc(v.get)
         v = source.read(stream)
       }
     }
@@ -81,7 +81,7 @@ trait ResourceTraversable[A] extends LongTraversable[A]
     }
    override def view(from: Int, until: Int) = view.slice(from, until);
    
-   private def copy[B](_conv : this.SourceOut => Traversable[B] = conv, _start : Long = start, _end : Long = end) : LongTraversable[B] = {
+   private def copy[B](_conv : this.SourceOut => B = conv, _start : Long = start, _end : Long = end) : LongTraversable[B] = {
      new ResourceTraversable[B] {
        type In = self.In
        type SourceOut = self.SourceOut
@@ -94,7 +94,7 @@ trait ResourceTraversable[A] extends LongTraversable[A]
 }
 
 object ResourceTraversable {
-  def apply[A](_in : Resource[InputStream], _conv : Int => Traversable[A] = (i:Int) => List(i), _start : Long = 0, _end : Long = Long.MaxValue) = {
+  def apply[A](_in : Resource[InputStream], _conv : Int => A = (i:Int) => List(i), _start : Long = 0, _end : Long = Long.MaxValue) = {
     new ResourceTraversable[A] {
       type In = InputStream
       type SourceOut = Int
@@ -113,5 +113,4 @@ object ResourceTraversable {
       def end = _end
     }
   }
-  
 }

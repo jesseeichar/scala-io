@@ -23,7 +23,7 @@ import java.io._
 
 class ResourceTraversableViewTest extends ResourceTraversableTest with AssertionSugar with IOSugar{
 
-    override def newResource[A](conv:Int=>Traversable[A]) = super.newResource(conv).view
+    override def newResource[A](conv:Int=>A) = super.newResource(conv).view
     
     @Test //@Ignore
     def map_should_not_trigger_resolution = {

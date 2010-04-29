@@ -23,7 +23,7 @@ import java.io._
 
 class ResourceTraversableTest extends AssertionSugar with IOSugar{
   implicit val codec = Codec.UTF8
-  def newResource[A](conv:Int=>Traversable[A] = (i:Int)=>List(i)) = {
+  def newResource[A](conv:Int=>A = (i:Int)=>i) = {
       def stream = new ByteArrayInputStream(1 to 100 map {_.toByte} toArray)
       ResourceTraversable(Resource.fromInputStream(stream), _conv=conv)
     }
@@ -86,7 +86,7 @@ class ResourceTraversableTest extends AssertionSugar with IOSugar{
 
   @Test //@Ignore
   def should_handle_flatten = {
-    val traversable = newResource(i => List(List(i,i))) flatten
+    val traversable = newResource(i => List(i,i)) flatten
     val list = 1 to 100 map (i => List(i,i)) flatten
 
     assertEquals (list.size, traversable.size)
@@ -146,7 +146,7 @@ class ResourceTraversableTest extends AssertionSugar with IOSugar{
   @Test //@Ignore
   def should_handle_transpose = {
     val expected = (1 to 100).map (i => List(i,i+2,i+3)).transpose
-    val actual = newResource(i => List(List(i,i+2,i+3))).transpose
+    val actual = newResource(i => List(i,i+2,i+3)).transpose
 
     expected.zipWithIndex zip actual.toList foreach { 
       case ((expected:Traversable[_], index),actual:Traversable[_]) => 
