@@ -9,3 +9,9 @@ test things like:
   file.ops.bytes.slice(10,300)
   file.ops.bytes.slice(10,300) ++ List[Byte](1,2,3,4,5,6)
   
+specifically test:
+  (Chars and ints)
+  file.ops.bytes ++ List(1,2,3,4,5).map{_.toByte}.drop(1000000)
+  file.ops.bytes flatMap {i => List(1,i)}.drop(1000000)
+  file.ops.bytes filter {i => List(1,i)}.drop(1000000)
+

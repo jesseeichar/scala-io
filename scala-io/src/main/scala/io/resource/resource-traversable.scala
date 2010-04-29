@@ -56,11 +56,18 @@ trait ResourceTraversable[A] extends LongTraversable[A]
   override def ldrop(length : Long) : LongTraversable[A] = lslice(length,Long.MaxValue)
   override def drop(length : Int) = ldrop(length.toLong)
 
-  override def ltake(length : Long) = lslice(0, length)
+  override def ltake(length : Long) = lslice(0, safeSum(start,length))
   override def take(length : Int) = ltake(length.toLong)
 
-  override def lslice(_start : Long, _end : Long) = copy(_start = start + (0L max _start), _end = (_end min end))
+  override def lslice(_start : Long, _end : Long) = copy(_start = safeSum(start,0L max _start), _end = (_end min end))
   override def slice(_start : Int, _end : Int) = lslice(_start.toLong,_end.toLong)
+
+  // make sure that when adding 2 number it doesn't overflow to a lower number
+  protected def safeSum(numbers : Long*) = (0L /: numbers) { (next,acc) =>
+      val sum = acc + next
+      if(sum < acc) Long.MaxValue
+      else sum
+    }
 
    override def view = new ResourceTraversableView[A, LongTraversable[A]] {
       protected lazy val underlying = self.repr

@@ -10,9 +10,8 @@ SeqLongTraversable
 
 == Misc
 Make LineTraversable a LongTraversable
-Test that Traversables in Input are lazy
-Make SeqLongTraversable more performant with drop etc...
-Try to make LongTraversable implementations views
+Make ResourceTraversableView's append,filter,flatmap efficient when a drop is performed after the operation
+
 
 
 == Considerations
