@@ -56,10 +56,16 @@ trait ResourceTraversable[A] extends LongTraversable[A]
   override def ldrop(length : Long) : LongTraversable[A] = lslice(length,Long.MaxValue)
   override def drop(length : Int) = ldrop(length.toLong)
 
-  override def ltake(length : Long) = lslice(0, safeSum(start,length))
+  override def ltake(length : Long) = lslice(0, length)
   override def take(length : Int) = ltake(length.toLong)
 
-  override def lslice(_start : Long, _end : Long) = copy(_start = safeSum(start,0L max _start), _end = (_end min end))
+  override def lslice(_start : Long, _end : Long) = {
+    val newStart = self.start + (_start max 0)
+    val newEnd = if (_end > self.end) self.end 
+                 else safeSum(self.start,(_end max 0))
+    
+    copy(_start = newStart, _end = newEnd)
+  }
   override def slice(_start : Int, _end : Int) = lslice(_start.toLong,_end.toLong)
 
   // make sure that when adding 2 number it doesn't overflow to a lower number
@@ -94,7 +100,7 @@ trait ResourceTraversable[A] extends LongTraversable[A]
 }
 
 object ResourceTraversable {
-  def apply[A](_in : Resource[InputStream], _conv : Int => A = (i:Int) => List(i), _start : Long = 0, _end : Long = Long.MaxValue) = {
+  def streamBased[A](_in : Resource[InputStream], _conv : Int => A = (i:Int) => i, _start : Long = 0, _end : Long = Long.MaxValue) = {
     new ResourceTraversable[A] {
       type In = InputStream
       type SourceOut = Int
@@ -105,6 +111,25 @@ object ResourceTraversable {
         def read(stream:InputStream) = stream.read match {
           case -1 => None
           case i => Some(i)
+        }
+      }
+      
+      def conv = _conv
+      def start = _start
+      def end = _end
+    }
+  }
+  def readerBased[A](_in : Resource[Reader], _conv : Char => A = (c:Char) => c, _start : Long = 0, _end : Long = Long.MaxValue) = {
+    new ResourceTraversable[A] {
+      type In = Reader
+      type SourceOut = Char
+      
+      def source = new TraversableSource[Reader, Char] {
+        def resource = _in
+        def skip(reader:Reader, count:Long) = reader.skip(count)
+        def read(reader:Reader) = reader.read match {
+          case -1 => None
+          case i => Some(i.toChar)
         }
       }
       

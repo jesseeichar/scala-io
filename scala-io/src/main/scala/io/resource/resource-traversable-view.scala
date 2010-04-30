@@ -70,8 +70,6 @@ trait ResourceTraversableViewLike[A, +Coll, +This <: ResourceTraversableView[A,C
   protected override def newTakenWhile(p: A => Boolean): Transformed[A] = new TakenWhile { val pred = p }
 
 
-  override def ldrop(length : Long) = lslice(length, Long.MaxValue)
-  override def ltake(length : Long) = lslice(0, safeSum(start,length))
   override def lslice(_start : Long, _end : Long) = newLSliced(safeSum(start,0L max _start), _end min end).asInstanceOf[This]
 
   override def stringPrefix = "ResourceTraversableView"

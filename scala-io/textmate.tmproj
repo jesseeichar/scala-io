@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>src/main/scala/io/resource/Resource.scala</string>
+	<string>src/main/scala/io/resource/resource-traversable.scala</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -21,134 +21,118 @@
 	<integer>358</integer>
 	<key>metaData</key>
 	<dict>
-		<key>src/main/scala/io/LongTraversable.scala</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>40</integer>
-				<key>line</key>
-				<integer>21</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>4</integer>
-		</dict>
-		<key>src/main/scala/io/LongTraversableLike.scala</key>
+		<key>src/main/scala/io/Codec.scala</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
 				<integer>0</integer>
 				<key>line</key>
-				<integer>71</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>37</integer>
-		</dict>
-		<key>src/main/scala/io/long-traversable-view.scala</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
 				<integer>0</integer>
-				<key>line</key>
-				<integer>69</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>37</integer>
+			<integer>25</integer>
 		</dict>
 		<key>src/main/scala/io/resource/Resource.scala</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>0</integer>
+				<integer>79</integer>
 				<key>line</key>
-				<integer>0</integer>
+				<integer>435</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>429</integer>
+			<integer>418</integer>
 		</dict>
-		<key>src/main/scala/io/resource/stream-traversable-view.scala</key>
+		<key>src/main/scala/io/resource/resource-traversable-view.scala</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
 				<integer>0</integer>
 				<key>line</key>
-				<integer>0</integer>
+				<integer>49</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>12</integer>
+			<integer>40</integer>
 		</dict>
-		<key>src/main/scala/io/resource/stream-traversable.scala</key>
+		<key>src/main/scala/io/resource/resource-traversable.scala</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>0</integer>
+				<integer>1</integer>
 				<key>line</key>
-				<integer>0</integer>
+				<integer>135</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>54</integer>
+			<integer>74</integer>
+		</dict>
+		<key>src/test/scala/scalax/io/resource/ReaderResourceTraversableTest.scala</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>81</integer>
+				<key>line</key>
+				<integer>21</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
 		</dict>
 		<key>src/test/scala/scalax/io/resource/ResourceTraversableTest.scala</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>22</integer>
+				<integer>2</integer>
 				<key>line</key>
-				<integer>23</integer>
+				<integer>35</integer>
 			</dict>
-			<key>columnSelection</key>
-			<false/>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>5</integer>
-			<key>selectFrom</key>
+			<integer>29</integer>
+		</dict>
+		<key>src/test/scala/scalax/io/resource/ResourceTraversableViewTest.scala</key>
+		<dict>
+			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>6</integer>
+				<integer>10</integer>
 				<key>line</key>
-				<integer>23</integer>
+				<integer>18</integer>
 			</dict>
-			<key>selectTo</key>
-			<dict>
-				<key>column</key>
-				<integer>29</integer>
-				<key>line</key>
-				<integer>23</integer>
-			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
 		</dict>
 	</dict>
 	<key>openDocuments</key>
 	<array>
-		<string>src/main/scala/io/resource/stream-traversable-view.scala</string>
+		<string>src/main/scala/io/resource/resource-traversable.scala</string>
+		<string>src/main/scala/io/Codec.scala</string>
 		<string>src/main/scala/io/resource/Resource.scala</string>
-		<string>src/main/scala/io/resource/stream-traversable.scala</string>
-		<string>src/main/scala/io/LongTraversableLike.scala</string>
-		<string>src/main/scala/io/LongTraversable.scala</string>
+		<string>src/main/scala/io/resource/resource-traversable-view.scala</string>
 		<string>src/test/scala/scalax/io/resource/ResourceTraversableTest.scala</string>
-		<string>src/main/scala/io/long-traversable-view.scala</string>
+		<string>src/test/scala/scalax/io/resource/ResourceTraversableViewTest.scala</string>
+		<string>src/test/scala/scalax/io/resource/ReaderResourceTraversableTest.scala</string>
 	</array>
 	<key>showFileHierarchyDrawer</key>
 	<true/>
 	<key>windowFrame</key>
-	<string>{{84, 48}, {854, 730}}</string>
+	<string>{{130, -49}, {1006, 690}}</string>
 </dict>
 </plist>

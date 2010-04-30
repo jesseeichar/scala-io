@@ -9,25 +9,23 @@
 package scalax.io.resource
 
 import scalax.io._
-import Path.AccessModes._
-import scalax.test.sugar._
 
 import org.junit.Assert._
 import org.junit.{
-  Test, Before, After, Rule, Ignore
+  Test, Ignore
 }
-import org.junit.rules.TemporaryFolder
-import util.Random
 
 import java.io._
 
-class ResourceTraversableTest extends AssertionSugar with IOSugar{
+class ResourceTraversableTest {
   implicit val codec = Codec.UTF8
-  def newResource[A](conv:Int=>A = (i:Int)=>i) = {
+  protected def newResource[A](conv:Int=>A = (i:Int)=>i) : ResourceTraversable[A] = {
       def stream = new ByteArrayInputStream(1 to 100 map {_.toByte} toArray)
-      ResourceTraversable(Resource.fromInputStream(stream), _conv=conv)
+      ResourceTraversable.streamBased(Resource.fromInputStream(stream), _conv=conv)
     }
   val sample = Array(111,222)
+
+  protected def expectedData : Traversable[Int] = 1 to 100
 
   @Test //@Ignore
   def should_handle_append = assertSizeAndType(newResource(), _ ++ sample)
@@ -48,6 +46,8 @@ class ResourceTraversableTest extends AssertionSugar with IOSugar{
     assertSizeAndType(traversable, t => t.map{_.toChar}.slice(2,10))
     assertSizeAndType(traversable, t => t.take(10).drop(5))
     assertSizeAndType(traversable, t => t.take(10).drop(5).take(2))
+    assertSizeAndType(traversable, t => t.drop(10).take(5).drop(20))
+    assertSizeAndType(traversable, t => t.drop(10).drop(5).drop(20))
     assertSizeAndType(traversable, t => t.slice(2,10).slice(1,5))
     assertSizeAndType(traversable, t => t.slice(2,10).drop(5))
   }
@@ -87,7 +87,7 @@ class ResourceTraversableTest extends AssertionSugar with IOSugar{
   @Test //@Ignore
   def should_handle_flatten = {
     val traversable = newResource(i => List(i,i)) flatten
-    val list = 1 to 100 map (i => List(i,i)) flatten
+    val list = expectedData map (i => List(i,i)) flatten
 
     assertEquals (list.size, traversable.size)
     assertEquals (list.toList, traversable.toList)      
@@ -105,7 +105,7 @@ class ResourceTraversableTest extends AssertionSugar with IOSugar{
   @Test //@Ignore
   def should_handle_groupBy = {
     def f(t : Traversable[Int]) = t groupBy {_.toString()(0)}
-    val list = f(1 to 100 toList) 
+    val list = f(expectedData toList) 
     val applied = f(newResource()) map {case (k,v) => (k,v.toList)}
 
     assertEquals (list.size, applied.size)
@@ -145,7 +145,7 @@ class ResourceTraversableTest extends AssertionSugar with IOSugar{
 
   @Test //@Ignore
   def should_handle_transpose = {
-    val expected = (1 to 100).map (i => List(i,i+2,i+3)).transpose
+    val expected = (expectedData.toList).map (i => List(i,i+2,i+3)).transpose
     val actual = newResource(i => List(i,i+2,i+3)).transpose
 
     expected.zipWithIndex zip actual.toList foreach { 
@@ -198,7 +198,7 @@ class ResourceTraversableTest extends AssertionSugar with IOSugar{
 
 
   private def assertProductSizeAndType(traversable : Traversable[Int], f : Traversable[Int] => Product, areLongTraversable:Boolean = true) = {
-    val list = f(1 to 100 toList)
+    val list = f(expectedData toList)
     val applied = f(traversable)
     if(areLongTraversable) {
       applied.productIterator foreach {t => assert(t.isInstanceOf[LongTraversable[_]], "new traversable is not a LongTraversable: "+applied.getClass.getName)}
@@ -213,7 +213,7 @@ class ResourceTraversableTest extends AssertionSugar with IOSugar{
   }
   
   private def assertSizeAndType[A](traversable : Traversable[Int], f : Traversable[Int] => Traversable[A], isLongTraversable:Boolean = true) = {
-    val list = f(1 to 100 toList)
+    val list = f(expectedData toList)
     val applied = f(traversable)
     if(isLongTraversable)
       assert(applied.isInstanceOf[LongTraversable[_]], "new traversable is not a LongTraversable: "+applied.getClass.getName)
