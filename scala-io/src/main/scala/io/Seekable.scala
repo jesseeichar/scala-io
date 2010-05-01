@@ -19,7 +19,7 @@ import scalax.io.resource._
 import scala.collection.Traversable
 import OpenOption._
 import Resource._
-
+import scala.annotation._
 /**
  * An object for reading and writing to Random Access IO objects such as Files.
  *
@@ -29,6 +29,8 @@ import Resource._
 trait Seekable extends Input with Output {
     private final val BufferSize=8192
     private final val MaxPermittedInMemory=8192
+    
+    private final val Overwrite = Long.MinValue
     
 
     // for Java 7 change this to a Seekable Channel
@@ -67,7 +69,7 @@ trait Seekable extends Input with Output {
    */
   def patchString(position: Long, 
                   string: String,
-                  replaced : Long = -2)(implicit codec: Codec): Unit = {
+                  replaced : Long = Overwrite)(implicit codec: Codec): Unit = {
                     // TODO implement
                     assert(false, "not implemented")
                     ()
@@ -105,23 +107,27 @@ trait Seekable extends Input with Output {
    */
   def patch[T <% Traversable[Byte]](position: Long,
             bytes: T,
-            replaced : Long = -2): Unit = {
+            replaced : Long = Overwrite): Unit = {
     require(position >= 0, "The patch starting position must be greater than or equal 0")
 
     val appendData = size.forall{position == _}
-    val insertData = replaced == -1
+    val insertData = replaced <= 0 && replaced != Overwrite
         
     if(appendData) {
         append(bytes, replaced)
     } else if(insertData) {
-        if (bytes.hasDefiniteSize && bytes.size <= MaxPermittedInMemory) {
-            insertDataInMemory(position, bytes)
-        } else {
-            insertDataTmpFile(position, bytes)
-        }
+      insert(position : Long, bytes : T)
     } else {
         // overwrite data
         overwriteFileData(position, bytes, replaced)
+    }
+  }
+  
+  private def insert[T <% Traversable[Byte]](position : Long, bytes : T) = {
+    if (bytes.hasDefiniteSize && bytes.size <= MaxPermittedInMemory) {
+        insertDataInMemory(position, bytes)
+    } else {
+        insertDataTmpFile(position, bytes)
     }
   }
 
@@ -139,7 +145,7 @@ trait Seekable extends Input with Output {
             
             while(channel.position < channel.size - buffers._2.remaining) {
                 
-                System.out.println("inserting at "+channel.position+" remaining: "+(channel.size - buffers._2.remaining))
+//                System.out.println("inserting at "+channel.position+" remaining: "+(channel.size - buffers._2.remaining))
                 channel read buffers._1
                 buffers._1.flip
 
@@ -176,8 +182,11 @@ trait Seekable extends Input with Output {
   private def overwriteFileData[T <% Traversable[Byte]](position : Long, bytes : T, replaced : Long) = {
       for(channel <- seekableChannel(WRITE) ) {
           channel.position(position)
-          val wrote = writeTo(channel,bytes, replaced)
+            println("byte size,replaced",bytes.size,replaced)
+          val (wrote, earlyTermination) = writeTo(channel,bytes, replaced)
           
+          println("wrote,earlyTermination",wrote,earlyTermination)
+
           if(replaced > channel.size // need this in the case where replaced == Long.MaxValue
              || position + replaced > channel.size) {
               channel.truncate(channel.position())
@@ -187,6 +196,12 @@ trait Seekable extends Input with Output {
               val destIndex = position + wrote
               copySlice(channel, srcIndex, destIndex, length.toInt)
               channel.truncate(destIndex+length)
+          } else if (earlyTermination) {
+            val adjustedPosition = position +  replaced
+            bytes match {
+              case b : LongTraversable[Byte] => insert(adjustedPosition,b ldrop wrote)
+              case _ => insert(adjustedPosition,bytes drop wrote.toInt)
+            }
           }
       }
   }
@@ -224,33 +239,49 @@ trait Seekable extends Input with Output {
       for (c <- seekableChannel(APPEND)) writeTo(c, bytes, take)
   }
 
-  private def writeTo[T <% Traversable[Byte]](c : WritableByteChannel, bytes : T, length : Long) : Long = {
+  // returns (wrote,earlyTermination)
+  private def writeTo[T <% Traversable[Byte]](c : WritableByteChannel, bytes : T, length : Long) : (Long,Boolean) = {
       bytes match {
           case array : Array[Byte] =>
             // for performance try to write Arrays directly
               val count = if(length < 0) bytes.size else length.min(bytes.size)
+              val wrote = c.write(ByteBuffer.wrap(array, 0, count.toInt))
+
+              println("count,bytes.size,wrote,length",count,bytes.size,wrote,length)
               
-              c.write(ByteBuffer.wrap(array, 0, count.toInt))
+              val isWriteAll = length > 0
+              (wrote, isWriteAll && length < bytes.size)
           case _ =>
+            // TODO user hasDefinitateSize to improve performance
+            // if the size is small enough we can probably open a memory mapped buffer
+            // or at least copy to a buffer in one go.
               val buf = ByteBuffer.allocateDirect(BufferSize)
+              var earlyTermination = false
+              
+// TODO add this back when I can get tailrec working              
+//              @tailrec
               def write[T <% Traversable[Byte]](written : Long, data:T) : Long = {
                   val numBytes = length match {
-                      case -1 | -2 => BufferSize
+                      case -1 | Overwrite => BufferSize
                       case _ => (length - written).min(BufferSize).toInt
                   }
                   
-                  System.err.println("writing bytes: "+numBytes)
+                  println("writing bytes: "+numBytes)
                   
                   val (toWrite, remaining) = data.splitAt(numBytes)
+                  
+                  assert(numBytes > 0 || remaining.nonEmpty)                  
                   
                   toWrite foreach buf.put
                   buf.flip
                   val currentWrite : Long = c write buf
+                  earlyTermination = length <= written + numBytes && remaining.nonEmpty
                   
-                  if (remaining.isEmpty) currentWrite
-                  else currentWrite + write (written + toWrite.size, remaining)
+                  if (earlyTermination || remaining.isEmpty) currentWrite
+                  else currentWrite + write (written + numBytes, remaining)
               }
-              write(0, bytes)
+              
+             (write(0, bytes), earlyTermination)
       }
   }
 

@@ -31,15 +31,15 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
     def open() : Seekable
 
     val patchParams = 
-        ("replaced is MaxValue", 2,"ア",Int.MaxValue) ::
-        ("too large max", 2,"ア",8) ::
-        ("basic", 2,"ア",-2) ::
-        ("insert", 2,"ア",-1) ::
-        ("start at 0", 0,"ア",-2) ::
-        ("to large position", 199,"ア",-2) ::
-        ("very large patch", 2,(1 to 100 mkString ""),-2) ::
-        ("0 length", 2,"ア",0) ::
-        ("use only part of data", 2,"its a long one!",3) ::
+        ("replaced is MaxValue", 2,"ア",Some(Int.MaxValue)) ::
+        ("too large max", 2,"ア",Some(8)) ::
+        ("basic", 2,"ア",None) ::
+        ("insert", 2,"ア",Some(-1)) ::
+        ("start at 0", 0,"ア",None) ::
+        ("to large position", 199,"ア",None) ::
+        ("very large patch", 2,(1 to 100 mkString ""),None) ::
+        ("0 length", 2,"ア",Some(0)) ::
+        ("partial overwite",  2,"its a long one!",Some(3)) ::
         Nil
 
     @Test @Ignore
@@ -53,10 +53,19 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
     // test UTF16?        
     }
     
-    private def testPatchString(msg:String, from:Int, data:String, length : Int) = {
+    private def testPatchString(msg:String, from:Int, data:String, length : Option[Int]) = {
         val seekable = open()
-        val expected = TEXT_VALUE patch (from.min(Int.MaxValue).toInt, data, length.min(Int.MaxValue).toInt )
-        seekable.patchString(from,data,length)
+        
+        val expected = length match {
+          case Some(length) => TEXT_VALUE patch (from.min(Int.MaxValue).toInt, data, length )
+          case None => TEXT_VALUE patch (from.min(Int.MaxValue).toInt, data, length.size)
+        }
+        
+        length match {
+          case Some(length) => seekable.patchString(from,data,length)
+          case None => seekable.patchString(from,data)
+        }
+        
         assertEquals(msg, expected, seekable.slurpString)
     }
 
@@ -71,18 +80,17 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
     }
     
     
-    private def testPatch(msg:String, fromInChars:Int, dataString:String, lengthInChars : Int) = {
-        System.err.println("starting '"+msg+"'")
-
+    private def testPatch(msg:String, fromInChars:Int, dataString:String, lengthInChars : Option[Int]) = {
+        println("starting '"+msg+"'")
 
         val MAX_VALUE = Int.MaxValue
 
         val from = TEXT_VALUE.take(fromInChars).getBytes(UTF8.name).size
-        val length = lengthInChars match {
-            case MAX_VALUE => Long.MaxValue
-            case -1 => -1
-            case -2 => -2
-            case _ => TEXT_VALUE.slice(fromInChars, fromInChars + lengthInChars).getBytes(UTF8.name).size
+        val length : Option[Long] = lengthInChars match {
+            case Some(MAX_VALUE) => Some(Long.MaxValue)
+            case Some(-1) => Some(-1L)
+            case Some(lengthInChars) => Some(TEXT_VALUE.slice(fromInChars, fromInChars + lengthInChars).getBytes(UTF8.name).size toLong)
+            case None => None
         }
 
         val data = dataString.getBytes(UTF8.name)
@@ -92,17 +100,22 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
             assertEquals(TEXT_VALUE, seekable.slurpString)
 
             val expected = lengthInChars match {
-                case -2 => TEXT_VALUE.getBytes(UTF8.name)  patch (from, data, data.size)
-                case _ if(lengthInChars == MAX_VALUE) => TEXT_VALUE.getBytes(UTF8.name)  patch (from, data, MAX_VALUE)
-                case _ => TEXT_VALUE.getBytes(UTF8.name)  patch (from, data, length.toInt)
+                case None => TEXT_VALUE.getBytes(UTF8.name)  patch (from, data, data.size)
+                case Some(lengthInChars) if(lengthInChars == MAX_VALUE) => TEXT_VALUE.getBytes(UTF8.name)  patch (from, data, MAX_VALUE)
+                case Some(lengthInChars) => TEXT_VALUE.getBytes(UTF8.name)  patch (from, data, length.get.toInt)
             }
             
             val bytes = dataTransform(data)
-            seekable.patch(from,bytes,length)
+            length match {
+              case Some(length) => seekable.patch(from,bytes,length)
+              case None => seekable.patch(from,bytes)
+            }
+            
                 
-            System.err.println("before:   "+(TEXT_VALUE.getBytes(UTF8.name) mkString ","))
-            System.err.println("actual:   "+(seekable.byteArray mkString ","))
-            System.err.println("expected: "+(expected mkString ","))
+            println("before:   "+(TEXT_VALUE.getBytes(UTF8.name) mkString ","))
+            println("patch:    "+(bytes mkString ","))
+            println("actual:   "+(seekable.byteArray mkString ","))
+            println("expected: "+(expected mkString ","))
             assertEquals(datatype+" - patch: '"+msg+"'", expected mkString ",", seekable.byteArray mkString ",")
         }
         
@@ -110,9 +123,9 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
         test("list", a => a.toList)
         test("stream", a => a.toStream)
         
-        System.err.println("done '"+msg+"'")
-        System.err.println()
-        System.err.println()
+        println("done '"+msg+"'")
+        println()
+        println()
         
     }
 
