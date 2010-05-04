@@ -2,3 +2,4 @@ Move more bytes in a single file than can fit in buffer
 Patch more bytes than can fit in buffer
 append more bytes than can fit in buffer
 insert data into start of large file
+patch a file with a very large string (several MB) in to a large file

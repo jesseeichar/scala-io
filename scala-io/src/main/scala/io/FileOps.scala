@@ -166,8 +166,8 @@ abstract class FileOps(path : Path) extends Seekable {
   def execute(args:String*)(implicit configuration:ProcessBuilder=>Unit = p=>()):Option[Process]
   
   // required methods for Input trait
-  override def chars(implicit codec: Codec): LongTraversable[Char] = inputStream.reader(codec).chars
-  override def bytesAsInts:LongTraversable[Int] = inputStream.bytesAsInts
+  override def chars(implicit codec: Codec): ResourceView[Char] = inputStream.reader(codec).chars
+  override def bytesAsInts:ResourceView[Int] = inputStream.bytesAsInts
   
   // required method for Output trait
   override protected def outputStream = outputStream()

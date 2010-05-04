@@ -62,6 +62,7 @@ class Codec(val charSet: Charset) {
       (_ onUnmappableCharacter _onUnmappableCharacter, _onUnmappableCharacter != null),
       (_ replaceWith _decodingReplacement, _decodingReplacement != null)
     )
+  lazy val hasConstantSize = encoder.averageBytesPerChar - encoder.maxBytesPerChar < 0.000001
   
     def decode (bytes: Array[Byte]): Array[Char] = {
        val bbuffer = java.nio.ByteBuffer wrap bytes

@@ -42,7 +42,7 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
         ("partial overwite",  2,"its a long one!",Some(3)) ::
         Nil
 
-    @Test @Ignore
+    @Test //@Ignore
     def patchString() : Unit = {
         val testFunction = Function tupled testPatchString _
         patchParams foreach testFunction
@@ -129,7 +129,7 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
         
     }
 
-    @Test  @Ignore
+    @Test  //@Ignore
     def appendString : Unit = {
         val data = "ア"
         val seekable = open()
@@ -148,7 +148,7 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
         fail("not implemented")
     }
 
-    @Test  @Ignore
+    @Test // @Ignore
     def append : Unit = {
         def test(list : Boolean) = {
             val data : String = "ア"

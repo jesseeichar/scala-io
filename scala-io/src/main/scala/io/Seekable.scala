@@ -11,7 +11,7 @@ package scalax.io
 import java.io.{
     InputStream, OutputStream
 }
-import java.nio.ByteBuffer
+import java.nio.{ByteBuffer, CharBuffer}
 import java.nio.channels.{
     ByteChannel, FileChannel, WritableByteChannel
 }
@@ -57,7 +57,9 @@ trait Seekable extends Input with Output {
    * </p>
    * @param position
    *          The start position of the update starting at 0.
-   *          The position must be within the file
+   *          The position is the position'th character in the file using
+   *          the codec for decoding the file
+   *          The position must be within the file.
    * @param string
    *          The string to write to the file starting at
    *          position.
@@ -70,10 +72,40 @@ trait Seekable extends Input with Output {
   def patchString(position: Long, 
                   string: String,
                   replaced : Long = Overwrite)(implicit codec: Codec): Unit = {
-                    // TODO implement
-                    assert(false, "not implemented")
-                    ()
-                  }
+    require(position >= 0, "The patch starting position must be greater than or equal 0")
+
+    if(size.forall{position > _}){
+      // special case where there is no alternative but to be append
+      append(string getBytes codec.name)
+    } else if (codec.hasConstantSize) {
+      // special case where the codec is constant in size (like ASCII or latin1)
+      val bytesPerChar = codec.encoder.maxBytesPerChar.toLong
+      val posInBytes = if(position > 0) position * bytesPerChar else position
+      val replacedInBytes = if(replaced > 0) replaced * bytesPerChar else replaced
+      
+      patch(posInBytes, string.getBytes(codec.name), replacedInBytes)
+    } else {
+      // when a charset is not constant (like UTF-8 or UTF-16) the only
+      // way is to find position is to iterate to the position counting characters
+      // Same with figuring out what replaced is in bytes
+      val encoder = codec.encoder
+      val byteBuffer = ByteBuffer.allocateDirect(encoder.maxBytesPerChar.toInt)
+      val charBuffer = CharBuffer.allocate(1)
+    
+      def sizeInBytes(c : Char) = {
+        byteBuffer.clear
+        charBuffer.put(0,c)
+        encoder.encode(charBuffer, byteBuffer, true)
+        byteBuffer.limit
+      }
+    
+      val posInBytes = (0L /: seekableChannel(READ).chars.ltake(replaced) ) {
+        (posInBytes, nextChar) => posInBytes + sizeInBytes(nextChar)
+      }
+    
+      patch(posInBytes, string.getBytes(codec.name), string.take(replaced.toInt).getBytes(codec.name).size)
+    }
+  }
 
   /**
    * Update a portion of the file content with several bytes at
@@ -182,10 +214,10 @@ trait Seekable extends Input with Output {
   private def overwriteFileData[T <% Traversable[Byte]](position : Long, bytes : T, replaced : Long) = {
       for(channel <- seekableChannel(WRITE) ) {
           channel.position(position)
-            println("byte size,replaced",bytes.size,replaced)
+//            println("byte size,replaced",bytes.size,replaced)
           val (wrote, earlyTermination) = writeTo(channel,bytes, replaced)
           
-          println("wrote,earlyTermination",wrote,earlyTermination)
+//          println("wrote,earlyTermination",wrote,earlyTermination)
 
           if(replaced > channel.size // need this in the case where replaced == Long.MaxValue
              || position + replaced > channel.size) {
@@ -247,7 +279,7 @@ trait Seekable extends Input with Output {
               val count = if(length < 0) bytes.size else length.min(bytes.size)
               val wrote = c.write(ByteBuffer.wrap(array, 0, count.toInt))
 
-              println("count,bytes.size,wrote,length",count,bytes.size,wrote,length)
+//              println("count,bytes.size,wrote,length",count,bytes.size,wrote,length)
               
               val isWriteAll = length > 0
               (wrote, isWriteAll && length < bytes.size)
@@ -266,7 +298,7 @@ trait Seekable extends Input with Output {
                       case _ => (length - written).min(BufferSize).toInt
                   }
                   
-                  println("writing bytes: "+numBytes)
+//                  println("writing bytes: "+numBytes)
                   
                   val (toWrite, remaining) = data.splitAt(numBytes)
                   
@@ -326,8 +358,8 @@ trait Seekable extends Input with Output {
   }
   
   // required methods for Input trait
-  def chars(implicit codec: Codec): LongTraversable[Char] = (seekableChannel(READ).reader(codec).chars).asInstanceOf[LongTraversable[Char]]  // TODO this is broke
-  def bytesAsInts:LongTraversable[Int] = seekableChannel(READ).bytesAsInts
+  def chars(implicit codec: Codec): ResourceView[Char] = (seekableChannel(READ).reader(codec).chars).asInstanceOf[ResourceView[Char]]  // TODO this is broke
+  def bytesAsInts:ResourceView[Int] = seekableChannel(READ).bytesAsInts
   
   // required method for Output trait
   protected def outputStream = seekableChannel(WRITE_TRUNCATE:_*).outputStream

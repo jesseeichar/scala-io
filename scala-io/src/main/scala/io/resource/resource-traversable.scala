@@ -11,13 +11,13 @@ package scalax.io.resource
 import scalax.io.{
   LongTraversableLike, LongTraversableViewLike, LongTraversable
 }
+
 import scala.collection._
 import scala.collection.generic._
 
 import java.io.{
   InputStream, Reader, Closeable
 }
-
 
 protected[resource] trait TraversableSource[In <: java.io.Closeable, A] {
   def resource : Resource[In]
@@ -138,4 +138,47 @@ object ResourceTraversable {
       def end = _end
     }
   }
+  /*
+  def byteChannelBased[A](_in : Resource[ReadableByteChannel],
+                          _byteBuffer : => NioByteBuffer,
+                          _conv : NioByteBuffer => A = (c:NioByteBuffer) => JavaConversions.byteBufferToTraversable(c) : Traversable[Byte], 
+                          _start : Long = 0, _end : Long = Long.MaxValue) = {
+    new ResourceTraversable[A] {
+      type In = ReadableByteChannel
+      type SourceOut = NioByteBuffer
+      
+      def source = new TraversableSource[ReadableByteChannel, NioByteBuffer] {
+        val buffer = _byteBuffer
+        
+        def resource = _in
+        def skip(channel:ReadableByteChannel, count:Long) = {
+          if(count > 0) {
+            val toRead = buffer.capacity min count.toInt
+          
+            buffer.clear.limit(toRead)
+            
+            val read = channel read buffer
+            if(read > -1) skip(channel, count - read)
+          }
+        }
+        
+        def read(channel:ReadableByteChannel) = {
+          buffer.clear
+          channel read buffer match {
+            case -1 => 
+              None
+            case i => 
+              buffer.flip
+              Some(buffer)
+          }
+        }
+      }
+
+      def conv = _conv
+      def start = _start
+      def end = _end
+    }
+  }*/
+
+  
 }
