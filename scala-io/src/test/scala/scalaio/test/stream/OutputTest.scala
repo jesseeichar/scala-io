@@ -17,17 +17,18 @@ import scalax.io.Codec
 import scalaio.test._
 
 import java.io.{
-    PipedInputStream, PipedOutputStream
+    ByteArrayInputStream, ByteArrayOutputStream
 }
 
 class OutputTest extends AbstractOutputTests {
-    def open() : (Input, Output) = {
-        val in = new PipedInputStream()
-        val out = new PipedOutputStream(in)
-        
-        val inResource = Resource.fromInputStream(in)
-        val outResource = Resource.fromOutputStream(out)
-        
-        (inResource, outResource)
-    }
+  def open() : (Input, Output) = {
+    val cache = new Array[Byte](1000)
+    val out = new ByteArrayOutputStream()
+    def in = new ByteArrayInputStream(out.toByteArray)
+
+    val inResource = Resource.fromInputStream(in)
+    val outResource = Resource.fromOutputStream(out)
+
+    (inResource, outResource)
+  }
 }

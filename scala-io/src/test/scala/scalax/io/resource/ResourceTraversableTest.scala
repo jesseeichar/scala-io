@@ -195,7 +195,8 @@ class ResourceTraversableTest {
   def append_then_drop = 
     assertSizeAndType(newResource(), t => t ++ sample drop 98 )
 
-
+    @Test //@Ignore
+    def size = assertFalse(newResource().hasDefiniteSize)
 
   private def assertProductSizeAndType(traversable : Traversable[Int], f : Traversable[Int] => Product, areLongTraversable:Boolean = true) = {
     val list = f(expectedData toList)
