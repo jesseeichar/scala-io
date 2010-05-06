@@ -92,49 +92,16 @@ trait Seekable extends Input with Output {
       // way is to find position is to iterate to the position counting characters
       // Same with figuring out what replaced is in bytes
       println("3")
-      val encoder = codec.encoder
-      val byteBuffer = ByteBuffer.allocateDirect(encoder.maxBytesPerChar.toInt)
-      val charBuffer = CharBuffer.allocate(1)
-    
-      def sizeInBytes(c : Char) = {
-        c.toString.getBytes(codec.name).size // this is very inefficient
-        
-        /* TODO There is a bug in this implementation when encoding certain characters like \n
-        
-        encoder.reset
-        byteBuffer.clear()
-        charBuffer.put(0,c)
-        charBuffer.position(0)
-        val result = encoder.encode(charBuffer, byteBuffer, true)
-        
-        assert(!result.isUnderflow, "Attempted to encode "+c+" in charset "+codec.name+" but got an underflow error")
-        assert(!result.isOverflow, "Attempted to encode "+c+" in charset "+codec.name+" but got an overflow error")
-        assert(!result.isError, "Attempted to encode "+c+" in charset "+codec.name+" but got an error")
-        
-        println("sizeInBytes of '"+c+"' is "+byteBuffer.position)
-        
-        byteBuffer.position
-        */
-      }
-    
+
       // this is very inefficient.  The file is opened 3 times.
-      val posInBytes = (0L /: seekableChannel(READ).chars.ltake(position) ) {
-        (posInBytes, nextChar) => posInBytes + sizeInBytes(nextChar)
-      }
+      val posInBytes = charCountToByteCount(0, position)
 
-      val replacedInBytes = (0L /: seekableChannel(READ).chars.lslice(position,position+replaced) ) {
-        (replacedInBytes, nextChar) => 
-        println("nextChar, byteSize", nextChar, sizeInBytes(nextChar))
-        replacedInBytes + sizeInBytes(nextChar)
-      }
+      val replacedInBytes = charCountToByteCount(position, position+replaced)
 
-      println("posInBytes, replacedInBytes", posInBytes, replacedInBytes)
-
-//      val replacedInBytes = replaced max (string.take(replaced.toInt).getBytes(codec.name).size)
       patch(posInBytes, string.getBytes(codec.name), replaced max replacedInBytes)
     }
   }
-
+  
   /**
    * Update a portion of the file content with several bytes at
    * the declared location.
@@ -358,7 +325,7 @@ trait Seekable extends Input with Output {
   *          Default is sourceCodec
   */
   def appendString(string: String)(implicit codec: Codec): Unit = {
-      append(string getBytes codec.name)
+      append(codec encode string)
   }
 
   /**
@@ -378,11 +345,23 @@ trait Seekable extends Input with Output {
   *          Default is sourceCodec
   */  
   def appendStrings(strings: Traversable[String], separator:String = "")(implicit codec: Codec): Unit = {
-      assert (false, "not implemented")
+    val sepBytes = codec encode separator
+    for (c <- seekableChannel(APPEND)) (strings foldLeft false){ 
+      (addSep, string) =>
+        if(addSep) writeTo(c, sepBytes, Long.MaxValue)
+        writeTo(c, codec encode string, Long.MaxValue)
+        
+        true
+    }
   }
   
-  def truncate(position : Long) : Unit = {
-      assert (false, "not implemented")
+  def chop(position : Long) : Unit = {
+       seekableChannel(APPEND) foreach {_.truncate(position)}
+  }
+  
+  def chopString(position : Long)(implicit codec:Codec) : Unit = {
+    val posInBytes = charCountToByteCount(0,position)
+    seekableChannel(APPEND) foreach {_.truncate(posInBytes)}
   }
   
   // required methods for Input trait
@@ -391,5 +370,41 @@ trait Seekable extends Input with Output {
   
   // required method for Output trait
   protected def outputStream = seekableChannel(WRITE_TRUNCATE:_*).outputStream
+
+
+
+  private def charCountToByteCount(start:Long, end:Long)(implicit codec:Codec) = {
+    val encoder = codec.encoder
+    val byteBuffer = ByteBuffer.allocateDirect(encoder.maxBytesPerChar.toInt)
+    val charBuffer = CharBuffer.allocate(1)
+
+    def sizeInBytes(c : Char) = {
+      c.toString.getBytes(codec.name).size // this is very inefficient
+
+      /* TODO There is a bug in this implementation when encoding certain characters like \n
+
+      encoder.reset
+      byteBuffer.clear()
+      charBuffer.put(0,c)
+      charBuffer.position(0)
+      val result = encoder.encode(charBuffer, byteBuffer, true)
+
+      assert(!result.isUnderflow, "Attempted to encode "+c+" in charset "+codec.name+" but got an underflow error")
+      assert(!result.isOverflow, "Attempted to encode "+c+" in charset "+codec.name+" but got an overflow error")
+      assert(!result.isError, "Attempted to encode "+c+" in charset "+codec.name+" but got an error")
+
+      println("sizeInBytes of '"+c+"' is "+byteBuffer.position)
+
+      byteBuffer.position
+      */
+    }
+
+    //assert(start < end && start > -1 && end > -1, "start="+start+", end="+end)
+
+    val segment = seekableChannel(READ).chars.lslice(start, end)
+    (0L /: segment ) { (replacedInBytes, nextChar) => 
+      replacedInBytes + sizeInBytes(nextChar)
+    }    
+  }
   
 }

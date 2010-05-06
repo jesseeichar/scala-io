@@ -28,7 +28,7 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
     /**
      * Seekable containing TEXT_VALUE
      */
-    def open() : Seekable
+    def open(data : Option[String] = None) : Seekable
 
     val patchParams = 
         ("replaced is MaxValue", 2,"ア",Some(Int.MaxValue)) ::
@@ -46,13 +46,21 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
     def patchString() : Unit = {
         val testFunction = Function tupled testPatchString _
         patchParams foreach testFunction
-        
+
         intercept[IllegalArgumentException] {
-            open.patchString(-1, "@", 3)
+            open().patchString(-1, "@", 3)
         }
     // test UTF16?        
     }
-    
+    @Test //@Ignore
+    def patchStringASCII() : Unit = {
+        val seekable = open(Some("abc"))
+        
+        seekable.patchString(1,"x",1)(Codec.ISO8859)
+        
+        assertEquals("axc", seekable.slurpString)
+    }
+
     private def testPatchString(msg:String, from:Int, data:String, length : Option[Int]) = {
         val seekable = open()
         
@@ -79,7 +87,7 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
         patchParams foreach testFunction 
 
         intercept[IllegalArgumentException] {
-            open.patch(-1, "@".getBytes(UTF8.name), 3)
+            open().patch(-1, "@".getBytes(UTF8.name), 3)
         }
     }
     
@@ -133,14 +141,40 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
         assertEquals(expected, seekable.slurpString)
     }
     
-    @Test @Ignore
+    @Test //@Ignore
     def appendStrings : Unit = {
-        fail("not implemented")
+      val data = "ア" :: "%" :: "~µ" :: Nil
+
+      def test(sep:String) = {
+        val seekable = open()
+        val expected = TEXT_VALUE + (data mkString sep)
+        seekable.appendStrings(data, sep)
+        assertEquals(expected, seekable.slurpString)
+      }
+      
+      val seekable = open()
+      val expected = TEXT_VALUE + (data mkString "")
+      seekable.appendStrings(data)
+      assertEquals(expected, seekable.slurpString)
+      
+      test("123")
+      test(",")
     }
 
-    @Test  @Ignore
-    def truncate : Unit = {
-        fail("not implemented")
+    @Test  //@Ignore
+    def charChop : Unit = {
+      val seekable = open()
+      val expected = TEXT_VALUE take 2
+      seekable.chopString(2)
+      assertEquals(expected, seekable.slurpString)
+    }
+
+    @Test  // @Ignore
+    def chop : Unit = {
+      val seekable = open()
+      val expected = TEXT_VALUE take 2
+      seekable.chop(UTF8 encode expected size)
+      assertEquals(expected, seekable.slurpString)
     }
 
     @Test //@Ignore

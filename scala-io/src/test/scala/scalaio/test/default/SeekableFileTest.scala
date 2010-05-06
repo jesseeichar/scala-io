@@ -36,5 +36,12 @@ class SeekableFileTest extends AbstractSeekableTests {
     @After
     def after() : Unit = fixture.after()
 
-    def open() : Seekable = fixture.text("\n").ops
+    def open(data : Option[String] = None) : Seekable = data match {
+      case None => 
+        fixture.text("\n").ops
+      case Some(text) => 
+        val path = fixture.path
+        path.ops writeString text
+        path.ops
+    }
 }
