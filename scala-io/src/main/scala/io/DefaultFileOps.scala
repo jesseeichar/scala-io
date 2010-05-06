@@ -105,7 +105,7 @@ private[io] class DefaultFileOps(path : DefaultPath, jfile:JFile) extends FileOp
       val chars = if(sortedChars.mkString endsWith "sd") sortedChars.takeWhile(_ != 's') 
                   else sortedChars
       
-      val file = if(chars contains "r") {
+      val file = if(chars contains 'r') {
           new RandomAccessFile(jfile, chars mkString)
       } else {
           new RandomAccessFile(jfile, 'r' + chars.mkString)          

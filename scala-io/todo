@@ -9,13 +9,13 @@ ResourceTraversable
 SeqLongTraversable
 
 == Misc
+Make ReadChars use LongTraversable
 Make LineTraversable a LongTraversable
 Make ResourceTraversableView's append,filter,flatmap efficient when a drop is performed after the operation
 Make Codec immutable
-Make Chars/Bytes have views not traversables
-Make ReadChars use LongTraversable
 
 == Considerations
 Add protected aliasing/imports to java classes in package to reduce number or required imports
 Consider adding Path implicits to a package object
 Should BufferSize be a global variable? (I think probably settable.  Maybe like a logger so different situations/objects can have different sizes)
+How should singly traversable streams be handled

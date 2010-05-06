@@ -76,9 +76,12 @@ trait Seekable extends Input with Output {
 
     if(size.forall{position > _}){
       // special case where there is no alternative but to be append
+      
+      println("1")
       append(string getBytes codec.name)
     } else if (codec.hasConstantSize) {
       // special case where the codec is constant in size (like ASCII or latin1)
+      println("2")
       val bytesPerChar = codec.encoder.maxBytesPerChar.toLong
       val posInBytes = if(position > 0) position * bytesPerChar else position
       val replacedInBytes = if(replaced > 0) replaced * bytesPerChar else replaced
@@ -88,22 +91,47 @@ trait Seekable extends Input with Output {
       // when a charset is not constant (like UTF-8 or UTF-16) the only
       // way is to find position is to iterate to the position counting characters
       // Same with figuring out what replaced is in bytes
+      println("3")
       val encoder = codec.encoder
       val byteBuffer = ByteBuffer.allocateDirect(encoder.maxBytesPerChar.toInt)
       val charBuffer = CharBuffer.allocate(1)
     
       def sizeInBytes(c : Char) = {
-        byteBuffer.clear
+        c.toString.getBytes(codec.name).size // this is very inefficient
+        
+        /* TODO There is a bug in this implementation when encoding certain characters like \n
+        
+        encoder.reset
+        byteBuffer.clear()
         charBuffer.put(0,c)
-        encoder.encode(charBuffer, byteBuffer, true)
-        byteBuffer.limit
+        charBuffer.position(0)
+        val result = encoder.encode(charBuffer, byteBuffer, true)
+        
+        assert(!result.isUnderflow, "Attempted to encode "+c+" in charset "+codec.name+" but got an underflow error")
+        assert(!result.isOverflow, "Attempted to encode "+c+" in charset "+codec.name+" but got an overflow error")
+        assert(!result.isError, "Attempted to encode "+c+" in charset "+codec.name+" but got an error")
+        
+        println("sizeInBytes of '"+c+"' is "+byteBuffer.position)
+        
+        byteBuffer.position
+        */
       }
     
-      val posInBytes = (0L /: seekableChannel(READ).chars.ltake(replaced) ) {
+      // this is very inefficient.  The file is opened 3 times.
+      val posInBytes = (0L /: seekableChannel(READ).chars.ltake(position) ) {
         (posInBytes, nextChar) => posInBytes + sizeInBytes(nextChar)
       }
-    
-      patch(posInBytes, string.getBytes(codec.name), string.take(replaced.toInt).getBytes(codec.name).size)
+
+      val replacedInBytes = (0L /: seekableChannel(READ).chars.lslice(position,position+replaced) ) {
+        (replacedInBytes, nextChar) => 
+        println("nextChar, byteSize", nextChar, sizeInBytes(nextChar))
+        replacedInBytes + sizeInBytes(nextChar)
+      }
+
+      println("posInBytes, replacedInBytes", posInBytes, replacedInBytes)
+
+//      val replacedInBytes = replaced max (string.take(replaced.toInt).getBytes(codec.name).size)
+      patch(posInBytes, string.getBytes(codec.name), replaced max replacedInBytes)
     }
   }
 
@@ -231,7 +259,7 @@ trait Seekable extends Input with Output {
           } else if (earlyTermination) {
             val adjustedPosition = position +  replaced
             bytes match {
-              case b : LongTraversable[Byte] => insert(adjustedPosition,b ldrop wrote)
+              case b : LongTraversable[_] => insert(adjustedPosition,b.asInstanceOf[LongTraversable[Byte]] ldrop wrote)
               case _ => insert(adjustedPosition,bytes drop wrote.toInt)
             }
           }

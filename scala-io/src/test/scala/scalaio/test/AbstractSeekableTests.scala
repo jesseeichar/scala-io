@@ -57,19 +57,23 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
         val seekable = open()
         
         val expected = length match {
-          case Some(length) => TEXT_VALUE patch (from.min(Int.MaxValue).toInt, data, length )
-          case None => TEXT_VALUE patch (from.min(Int.MaxValue).toInt, data, length.size)
+          case Some(length) => TEXT_VALUE.toList.patch (from.min(Int.MaxValue).toInt, data, length).mkString
+          case None => TEXT_VALUE.toList.patch (from.min(Int.MaxValue).toInt, data, length.size).mkString
         }
         
         length match {
           case Some(length) => seekable.patchString(from,data,length)
           case None => seekable.patchString(from,data)
         }
+        // println("before:   "+(TEXT_VALUE mkString ",").replaceAll("\n","\\\\n"))
+        // println("patch:    "+(data mkString ",").replaceAll("\n","\\\\n"))
+        // println("actual:   "+(seekable.slurpString mkString ",").replaceAll("\n","\\\\n"))
+        // println("expected: "+(expected mkString ",").replaceAll("\n","\\\\n"))
         
         assertEquals(msg, expected, seekable.slurpString)
     }
 
-    @Test
+    @Test //@Ignore
     def patch() : Unit = {
         val testFunction = Function tupled testPatch _
         patchParams foreach testFunction 
@@ -81,7 +85,6 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
     
     
     private def testPatch(msg:String, fromInChars:Int, dataString:String, lengthInChars : Option[Int]) = {
-        println("starting '"+msg+"'")
 
         val MAX_VALUE = Int.MaxValue
 
@@ -112,20 +115,12 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
             }
             
                 
-            println("before:   "+(TEXT_VALUE.getBytes(UTF8.name) mkString ","))
-            println("patch:    "+(bytes mkString ","))
-            println("actual:   "+(seekable.byteArray mkString ","))
-            println("expected: "+(expected mkString ","))
             assertEquals(datatype+" - patch: '"+msg+"'", expected mkString ",", seekable.byteArray mkString ",")
         }
         
         test("array", a => a)
         test("list", a => a.toList)
         test("stream", a => a.toStream)
-        
-        println("done '"+msg+"'")
-        println()
-        println()
         
     }
 
@@ -148,7 +143,7 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
         fail("not implemented")
     }
 
-    @Test // @Ignore
+    @Test //@Ignore
     def append : Unit = {
         def test(list : Boolean) = {
             val data : String = "ア"
