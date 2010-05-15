@@ -789,7 +789,7 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
        case _ if this.isDirectory && target.isFile => fail("cannot overwrite a file with a directory")
        case _ if (target.notExists || target.isFile) && this.isFile => moveFile(target,atomicMove)
        case _ if target.notExists && this.isDirectory => moveDirectory(target,depth,atomicMove)
-       case _ => throw new Error("not yet handled")
+       case _ => throw new Error("not yet handled ")
      }
      target
 
@@ -834,7 +834,7 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    * @see Path.Matching
    * @see FileSystem#matcher(String,String)
    */
-   def children(filter:Path => Boolean = PathMatcher.ALL) : DirectoryStream[Path] = descendants(filter, depth=1)
+   def children(filter:Path => Boolean = PathMatcher.ALL, options:Traversable[LinkOption]=Nil) : DirectoryStream[Path] = descendants(filter, depth=1, options)
 
   /**
    * An iterable that traverses all the elements in the directory tree down to the specified depth
@@ -876,7 +876,7 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    * @see FileSystem#matcher(String,String)
    */
   def descendants(filter:Path => Boolean = PathMatcher.ALL, 
-           depth:Int = -1 /*LinkOption... options*/): DirectoryStream[Path]
+           depth:Int = -1, options:Traversable[LinkOption]=Nil): DirectoryStream[Path]
 
   /**
    * Obtains an object for performing reads and writes to files
@@ -886,7 +886,7 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    *          This codec will be the default used for reading and
    *          writing to the file
    */
-  def ops(/*LinkOption... options*/):FileOps
+  def ops:FileOps
 
 
 /* ****************** The following require jdk7's nio.file ************************** */

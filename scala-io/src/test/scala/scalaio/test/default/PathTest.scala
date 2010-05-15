@@ -117,9 +117,9 @@ class PathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
       path.createFile() moveTo (path.createDirectory(), replace=true)
     }
   }
-  @Test @Ignore
+  @Test //@Ignore
   def path_can_move_directories() : Unit = {
-    move( fixture.path.createDirectory (), fixture.path, fixture.path.createDirectory ())
+    move(fixture.path.createDirectory (), fixture.path, fixture.path.createDirectory ())
   }
   @Test @Ignore
   def path_can_copy_files() : Unit = {
