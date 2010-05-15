@@ -309,7 +309,7 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    *
    * @see Path#/(String)
    */
-  def /(child: String): Path
+  def \(child: String): Path
 
   /**
    * If child is relative, creates a new Path based on the current path with the
@@ -332,7 +332,7 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    * @return A new path with the specified path appended
    * @see #/(String)
    */
-  def /(child: Path): Path = /(child.path)
+  def \(child: Path): Path = \(child.path)
 
   // identity
   /**
@@ -366,7 +366,7 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    *          the constructed/resolved path
    *
    */
-  def resolve(other: Path): Path = /(other)
+  def resolve(other: Path): Path = \(other)
   /**
    * Constructs a path from other using the same file system as this
    * path and resolves the this and other in the same manner as
@@ -388,7 +388,7 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
     if(other.fileSystem != fileSystem) other
     else if(other.root != root) other
     else if(segments startsWith other.segments){
-      fileSystem(segments.drop(other.segments.size) mkString "")
+      fileSystem(segments.drop(other.segments.size) mkString fileSystem.separator)
     } else {
       null // TODO do we want to relativize this?
     }
@@ -505,7 +505,7 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    * @return True if the file is a symlink.
    */
   def isSymlink = parent.isDefined && {
-    val x = parent.get / name
+    val x = parent.get \ name
     x.normalize != x.toAbsolute
   }
 
@@ -763,6 +763,9 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    *           unless it is a non-empty directory in which case
    *           an IOException is thrown.
    *           False by default
+   *  @param depth
+   *           The depth of the copy if the path is a Directory. 
+   *           default is entire tree
    *  @param atomicMove
    *           it will guarantee atomicity of the move
    *           False by default
@@ -773,8 +776,27 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    *           if the move could not be satisfied because the target could
    *           not be written to or if this path cannot be moved
    */
-  def moveTo(target: Path, replaceExisting:Boolean=false,
-             atomicMove:Boolean=false): Path
+  def moveTo(target: Path, replace:Boolean=false,
+             depth : Int = -1,
+             atomicMove:Boolean=false): Path = {
+   def fail(msg:String) = throw new IOException(msg)
+   
+   target match {
+       case _ if this.notExists => fail("attempted to move "+path+" but it does not exist")
+       case _ if target == this => ()
+       case _ if !replace && target.exists => fail(target+" exists but replace parameter is false")
+       case _ if this.isFile && target.isDirectory => fail("cannot overwrite a directory with a file")
+       case _ if this.isDirectory && target.isFile => fail("cannot overwrite a file with a directory")
+       case _ if (target.notExists || target.isFile) && this.isFile => moveFile(target,atomicMove)
+       case _ if target.notExists && this.isDirectory => moveDirectory(target,depth,atomicMove)
+       case _ => throw new Error("not yet handled")
+     }
+     target
+
+  }
+  
+  protected def moveFile(target:Path, atomicMove : Boolean) : Unit
+  protected def moveDirectory(target:Path, depth:Int, atomicMove : Boolean) : Unit
 
   override def toString() = "Path(%s)".format(path)
   override def equals(other: Any) = other match {
@@ -801,7 +823,10 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    * 
    * @param filter
    *          A filter that restricts what paths are available in the DirectoryStream
-   *          Default is None
+   *          If the filter is a PathMatcher and the underlying filesystem supports the PatchMatcher
+   *          implementation then the maximum performance will be achieved.
+   *          All Paths that are passed to matcher is relative to this Path
+   *          Default is PathMatcher.ALL
    * @return
    *          A managed resource managing a DirectoryStream.
    *
@@ -809,7 +834,7 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    * @see Path.Matching
    * @see FileSystem#matcher(String,String)
    */
-  def directoryStream(filter:Option[PathMatcher] = None) : DirectoryStream[Path]
+   def children(filter:Path => Boolean = PathMatcher.ALL) : DirectoryStream[Path] = descendants(filter, depth=1)
 
   /**
    * An iterable that traverses all the elements in the directory tree down to the specified depth
@@ -833,9 +858,10 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    * </p>
    * @param filter
    *          A filter that restricts what paths are available in the DirectoryStream
-   *          The directoryStream methods explains why this is often the efficient method
-   *          for filtering directories
-   *          Default is None
+   *          If the filter is a PathMatcher and the underlying filesystem supports the PatchMatcher
+   *          implementation then the maximum performance will be achieved.
+   *          All Paths that are passed to matcher is relative to this Path
+   *          Default is PathMatcher.ALL
    * @param depth
    *          How deep down the tree to traverse
    *          1 is just visit the object in the directory
@@ -849,7 +875,7 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    * @see Path.Matching
    * @see FileSystem#matcher(String,String)
    */
-  def tree(filter:(Path,Path)=>Option[PathMatcher] = (origin,relativePath) => None, 
+  def descendants(filter:Path => Boolean = PathMatcher.ALL, 
            depth:Int = -1 /*LinkOption... options*/): DirectoryStream[Path]
 
   /**

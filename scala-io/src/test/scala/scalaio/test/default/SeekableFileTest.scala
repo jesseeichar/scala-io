@@ -16,26 +16,15 @@ import OpenOption._
 
 import org.junit.Assert._
 import org.junit.{
-  Test, Before, After, Rule, Ignore
+  Test, Ignore
 }
-import org.junit.rules.TemporaryFolder
-
-import scalaio.test._
+import scalaio.test.AbstractSeekableTests
 
 import java.io.{
     IOException, DataInputStream, DataOutputStream
 }
 
-class SeekableFileTest extends AbstractSeekableTests {
-    
-    var fixture : FileSystemFixture = _
-
-    @Before
-    def before() : Unit = fixture = new DefaultFileSystemFixture(new TemporaryFolder())
-
-    @After
-    def after() : Unit = fixture.after()
-
+class SeekableFileTest extends AbstractSeekableTests with DefaultFixture {
     def open(data : Option[String] = None) : Seekable = data match {
       case None => 
         fixture.text("\n").ops

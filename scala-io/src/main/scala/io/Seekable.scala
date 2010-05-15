@@ -77,11 +77,9 @@ trait Seekable extends Input with Output {
     if(size.forall{position > _}){
       // special case where there is no alternative but to be append
       
-      println("1")
       append(string getBytes codec.name)
     } else if (codec.hasConstantSize) {
       // special case where the codec is constant in size (like ASCII or latin1)
-      println("2")
       val bytesPerChar = codec.encoder.maxBytesPerChar.toLong
       val posInBytes = if(position > 0) position * bytesPerChar else position
       val replacedInBytes = if(replaced > 0) replaced * bytesPerChar else replaced
@@ -91,7 +89,6 @@ trait Seekable extends Input with Output {
       // when a charset is not constant (like UTF-8 or UTF-16) the only
       // way is to find position is to iterate to the position counting characters
       // Same with figuring out what replaced is in bytes
-      println("3")
 
       // this is very inefficient.  The file is opened 3 times.
       val posInBytes = charCountToByteCount(0, position)
@@ -398,8 +395,6 @@ trait Seekable extends Input with Output {
       byteBuffer.position
       */
     }
-
-    //assert(start < end && start > -1 && end > -1, "start="+start+", end="+end)
 
     val segment = seekableChannel(READ).chars.lslice(start, end)
     (0L /: segment ) { (replacedInBytes, nextChar) => 

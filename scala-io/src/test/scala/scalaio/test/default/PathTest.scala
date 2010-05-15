@@ -9,61 +9,121 @@
 package scalaio.test.default
 
 import scalax.io._
+import scalax.io.ram._
 import Path.AccessModes._
 
 import org.junit.Assert._
 import org.junit.{
-  Test, Before, After, Rule, Ignore
+  Test, Ignore
 }
-import org.junit.rules.TemporaryFolder
 import util.Random
 import scalaio.test.{
-    FileSystemFixture, TestData
+  TestData
 }
 
 import java.io.IOException
 
-class PathTest extends scalax.test.sugar.AssertionSugar {
+class PathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
   implicit val codec = Codec.UTF8
-  
-  var fixture : DefaultFileSystemFixture = _
-  
-  @Before
-  def before() : Unit = fixture = new DefaultFileSystemFixture(new TemporaryFolder())
-  
-  @After
-  def after() : Unit = fixture.after()
   
   def fspath(name:String) = fixture.fs(name)
   def fspath(name:Path) = fixture.fs(name.path)
-  
-  @Test @Ignore
+
+  @Test // @Ignore  
+  def relativize_should_make_a_child_relative_to_parent = {
+    val p = fixture.root \ "c1" \ "c2"
+    assertEquals(2, (p relativize fixture.root).segments.size)
+    assertFalse(fixture.root.path == p.path)
+  }
+
+  @Test //@Ignore  
+  def relativize_return_other_when_not_same_fileSystem = {
+    val other = new RamFileSystem()("other")
+    assertSame(other, fixture.root relativize other)
+  }
+  @Test //@Ignore
+  def createFile_should_fail_to_overwrite_exiting_by_default = {
+    val p = (fixture.root \ "c1")
+    
+    p.createFile()
+    
+    intercept[java.io.IOException] {
+      p.createFile()
+    }
+  }
+
+  @Test //@Ignore
+  def createFile_should_allow_option_to_fail_when_parent_is_missing = {
+    val p = (fixture.root \ "c1" \ "c2" \ "c3")
+    intercept[java.io.IOException] {
+      p.createFile(createParents=false)
+    }
+    assertTrue(p.notExists)
+  }
+  @Test //@Ignore
+  def createFile_should_create_parent_file_by_default = {
+    val p = (fixture.root \ "c1" \ "c2" \ "c3").createFile()
+    assertTrue(p.exists)
+  }
+  @Test //@Ignore  
+  def slash_method_should_create_child_path = {
+    val p = fixture.root \ "c1" \ "c2"
+    assertEquals(2, (p relativize fixture.root).segments.size)
+  }
+  @Test //@Ignore
+  def slash_method_should_split_on_separator = {
+    val p = fixture.root \ ("c1"+fixture.fs.separator+"c2")
+    assertEquals(2, (p relativize fixture.root).segments.size)
+  }
+  @Test //@Ignore
   def path_should_support_standard_comparisons() : Unit = {
     check (false, standardPathComparisions _)
   }
-  @Test @Ignore
+  @Test //@Ignore
   def path_should_be_creatable_and_deletable() : Unit = {
     check (false, creatableAndDeletable _)
   }
-  @Test @Ignore
+  @Test //@Ignore
   def path_should_respect_file_access_restrictions() : Unit = {
     check (false, respectsAccess _)
   }
-  @Test  @Ignore
+  @Test //@Ignore
   def path_should_have_exists_and_notExists_methods_that_are_not_equal() : Unit = {
     check (false, existsTest _)
   }
-  @Test @Ignore
+  @Test //@Ignore
   def path_can_move_files() : Unit = {
-    move( fixture.path.createFile (), fixture.path, fixture.path.createFile ())
+    val f1 = fixture.path
+    f1.ops.writeString("file to move")
+    
+    val exists = fixture.path
+    exists.ops.writeString("pre existing file")
+    
+    move( f1, fixture.path, exists)
   }
-  @Test @Ignore
-  def path_can_copy_files() : Unit = {
-    copy( fixture.path.createFile (), fixture.path, fixture.path.createFile ())
+  @Test //@Ignore
+  def directories_cannot_overwrite_files = {
+    val f = fixture
+    import f.path
+    intercept[IOException] {
+      path.createDirectory() moveTo (path.createFile(), replace=true)
+    }
+  }
+  @Test //@Ignore
+  def files_cannot_overwrite_directories = {
+    val f = fixture
+    import f.path
+    intercept[IOException] {
+      path.createFile() moveTo (path.createDirectory(), replace=true)
+    }
   }
   @Test @Ignore
   def path_can_move_directories() : Unit = {
     move( fixture.path.createDirectory (), fixture.path, fixture.path.createDirectory ())
+  }
+  @Test @Ignore
+  def path_can_copy_files() : Unit = {
+    copy( fixture.path.createFile (), fixture.path, fixture.path.createFile ())
   }
   @Test @Ignore
   def path_can_copy_directories() : Unit = {
@@ -71,36 +131,54 @@ class PathTest extends scalax.test.sugar.AssertionSugar {
   }
   @Test  @Ignore
   def path_can_move_directory_trees() : Unit = {
-    move( fixture.tree(), fixture.path, fixture.tree(), canReplace=false)
+    move( fixture.tree()._1, fixture.path, fixture.tree()._1, canReplace=false)
   }
   @Test @Ignore
   def path_can_copy_directory_trees() : Unit = {
-    copy( fixture.tree(), fixture.path, fixture.tree(), canReplace=false)
+    copy( fixture.tree()._1, fixture.path, fixture.tree()._1, canReplace=false)
   }
 
-  val check= fixture.check _
+  def check = fixture.check _
 
   def move(f1 :Path, f2: Path, exists: Path, canReplace: Boolean=true)={
-    assertTrue(f1.exists)
-    assertTrue(f2.notExists)
-    f1 moveTo f2
-    assertTrue(f2.exists)
-    assertTrue(f1.notExists)
+    assertTrue("expected 'exists' to exist before test", exists.exists)
+    assertTrue("expected f1 to exist before move", f1.exists)
+    assertTrue("expected f2 to NOT exist before move", f2.notExists)
+    assertEquals(f2, f1 moveTo f2)
+    assertTrue("expected f2 to exist after move", f2.exists)
+    assertTrue("expected f1 to NOT exist after move", f1.notExists)
 
     f2 moveTo f2
+    assertTrue("expected f2 to exist after move to self", f2.exists)
     intercept[IOException] {
       f1 moveTo f2
     }
+    assertTrue("expected f2 to exist after attempting to move a nonexisting f1 to f2", f2.exists)
+    
+    val existsBeforeMove = if(exists.isFile) {
+        val content = exists.ops.chars mkString ""
+        assertFalse("contents of exists should not equal f2", content == (f2.ops.chars mkString ""))
+        content
+      } else {
+        ""
+      }
     intercept[IOException] {
       f2 moveTo exists
     }
-    def replace = {
-      f2.moveTo (exists, replaceExisting=true)
+    assertTrue("expected f2 to exist after attempting a non-overwrite move to an existing file", f2.exists)
+    assertTrue("expected exists to exist after attempting a non-overwrite", exists.exists)
+    if(exists.isFile) {
+      assertTrue("expected exists to have the same contents after an illegal replace", existsBeforeMove == (exists.ops.chars mkString ""))
+    }
+    def tryReplace = {
+      assertTrue("expected f2 to exist before replace", f2.exists)
+      f2.moveTo (exists, replace=true)
       assertTrue (f2.notExists)
       assertTrue (exists.exists)
     }
-    if (canReplace) replace
-    else intercept[IOException] {replace}
+    
+    if (canReplace) tryReplace
+    else intercept[IOException] {tryReplace}
   }
 
 
@@ -185,6 +263,7 @@ class PathTest extends scalax.test.sugar.AssertionSugar {
 
     val path = fspath(pathName)
     path.createFile()
+    path.ops.writeString("some test data")
     path.access = access
     (Path.AccessModes.values -- access) foreach { a => matchAccess(a, path, false) }
     

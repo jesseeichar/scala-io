@@ -8,10 +8,12 @@
 
 package scalaio.test
 
+import collection.mutable.ListBuffer
 import util.Random
 
 import scalax.io._
 import scalax.io.resource._
+
 import Line.Terminators._
 import org.junit.rules.TemporaryFolder
 import java.io.InputStream
@@ -39,6 +41,12 @@ case class TestData(fs : FileSystem, numSegments : Int, pathName : String) {
   }
 }
 
+case class Node(path : String, parent : Option[Node], children : ListBuffer[Node] = ListBuffer[Node]()) {
+  self =>
+  parent.foreach {_.children += self}
+  
+  def name = path.split("/").takeRight(1)
+}
 
 abstract class FileSystemFixture(val fs : FileSystem, rnd : Random) {
   import rnd.{nextInt}
@@ -53,16 +61,29 @@ abstract class FileSystemFixture(val fs : FileSystem, rnd : Random) {
     file(seg)
   }
   
-  def path(segments : Int) : Path = root / fs(file(segments))  
-  def path : Path = root / fs(file)
+  def path(segments : Int) : Path = root \ fs(file(segments))  
+  def path : Path = root \ fs(file)
   
-  def tree(depth : Int = rndInt(5)) : Path = {
-    for {d <- 0 until depth
-         files <- 0 until rndInt(5) } {
-           path(d).createFile(failIfExists  = false)
-         }
-    root
+  /* Returns a Path and a Node.  Both the Node and the Path
+   * have the same structure.  The nodes have the same names and subtree
+   * as the equivalent path
+   */
+  def tree(depth : Int = rndInt(5)) : (Path, Node) = {
+    
+    
+    val structure = Node(root.segments mkString "/", None)
+      for (d <- 1 until depth;
+           files <- 0 until rndInt(5)) {
+          val p = path(d).createFile(failIfExists = false)
+          
+          p.relativize(root).segments.foldLeft (structure){
+            (parent, label) => Node(parent.path + "/"+label, Some(parent))
+          }
+       }
+    (root, structure)
   }
+  
+  
   def testData(dataType : TestDataType.Type, create : Boolean = true) : TestData = {
     import TestDataType._
     val seg = rndInt(10)

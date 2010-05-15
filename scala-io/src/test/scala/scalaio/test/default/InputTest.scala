@@ -11,19 +11,9 @@ package scalaio.test.default
 import scalax.io._
 import Line.Terminators._
 
-import org.junit.{
-  Before, After
-}
-import org.junit.rules.TemporaryFolder
 import scalaio.test._
 
-class InputTest extends AbstractInputTests {
-    var fixture : FileSystemFixture = _
-
-    @Before def before() : Unit = fixture = new DefaultFileSystemFixture(new TemporaryFolder())
-
-    @After def after() : Unit = fixture.after()
-
+class InputTest extends AbstractInputTests with DefaultFixture {
     protected def input(t:Type) = t match {
         case t @ TextNewLine => fixture.text(t.sep).ops
         case t @ TextPair => fixture.text(t.sep).ops

@@ -234,15 +234,15 @@ object Samples {
 
     val path: Path = Path ("file")
 
-    // if path is a directory then you can use the /
+    // if path is a directory then you can use the \
     // methods to make a new path based on that directory
-    val child1: Path = path / "childFile"
-    val child2: Path = path / "dir1/f2"
-    val child3: Path = path / "dir1" / "f3"
-    val child4: Path = path / Path ("f4")
-    val child5: Path = path / Path ("dir2") / Path ("f5")
+    val child1: Path = path \ "childFile"
+    val child2: Path = path \ "dir1/f2"
+    val child3: Path = path \ "dir1" \ "f3"
+    val child4: Path = path \ Path ("f4")
+    val child5: Path = path \ Path ("dir2") \ Path ("f5")
 
-    // the resolve methods is essentially an alias for / for those
+    // the resolve methods is essentially an alias for \ for those
     // who are uncomfortable with operator type methods.  Also to
     // maintain a familiar feel with NIO Path
     val child6: Path = path.resolve ("child")
@@ -382,7 +382,7 @@ object Samples {
     // and will fail if a copy is required (similar to java.io.File.renameTo)
     // if a failure occures an exception is thrown
     path.moveTo (target=dest,
-                 replaceExisting=true,
+                 replace=true,
                  atomicMove=true)
   }
 
@@ -411,18 +411,18 @@ object Samples {
     val path:Path = Path("/tmp/")
 
     // print the name of each object in the directory
-    path.directoryStream ().filterEach {case path => println (path.name)}
+    path.children ().collect {case path => println (path.name)}
 
     // Now print names of each directory
-    path.directoryStream ().filterEach {case File(file) => println (file.name)}
+    path.children ().collect {case File(file) => println (file.name)}
 
     // remove spaces from names of paths
     // renaming with this method can be dangerous because the stream may be calculated lazily on some filesystems and the renamed file could also be processed resulting in a infinite loop
     val ContainsSpace:PathMatcher = path.matcher ("* *")
-    path.directoryStream ().filterEach {case ContainsSpace (path) => path.moveTo (Path (path.name.filter (_ != ' ')))}
+    path.children ().collect {case ContainsSpace (path) => path.moveTo (Path (path.name.filter (_ != ' ')))}
 
     // count the number of directories
-    val fileCount: Option[Int] = path.directoryStream ().filterFold (0){case (count, File (_)) => count+1}
+    val fileCount: Int = path.children ().collect{case File (f)=> f}.foldLeft (0){(count, _) => count+1}
 
     // A directory stream can also be constructed with a filter
     // this is sometime preferable because using a PathMatcher as a filter may offer operating system
@@ -432,8 +432,10 @@ object Samples {
     // directoryStream that traverses many levels of the filesystem tree and the filter
     // function allows a new Matcher to be defined at each level of the tree
     val matcher: PathMatcher = path.matcher("S*")
-    path.directoryStream (Some(matcher)).foreach (println _)
+    path.children (matcher).foreach (println _)
 
+    path.children({_.isFile}).foreach (println _)
+    
 /*
  * Disabled until Java 7 version because implementation is impossible until then
     // Also you can attempt to perform atomic operations on a DirectoryStream
@@ -457,10 +459,10 @@ object Samples {
     // pre-order traversal
 
     // search for a .gitignore file down to a depth of 4
-    val gitIgnoreRestrictedTree: Option[Path] = path.tree (depth=4).find (_.name == ".gitignore")
+    val gitIgnoreRestrictedTree: Option[Path] = path.descendants (depth=4).find (_.name == ".gitignore")
 
     // search for a .gitignore in the entire subtree
-    val gitIgnoreFullTree: Option[Path] = path.tree ().find (_.name == ".gitignore")
+    val gitIgnoreFullTree: Option[Path] = path.descendants ().find (_.name == ".gitignore")
 
     // search for the .git directory and println all files from that directory and below up to
     // a depth of 10 and does it on a locked directory
@@ -490,7 +492,7 @@ object Samples {
     import scala.util.control.Exception._
 
     catching (classOf[NotDirectoryException]) opt {
-      Path ("/tmp/dir").directoryStream() map ( _.name)
+      Path ("/tmp/dir").children() map ( _.name)
     } match {
       case None => println ("Not a direcory")
       case Some(names) => println ("files names = "+names)

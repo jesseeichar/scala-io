@@ -31,10 +31,13 @@ package scalax.io
  * @since   1.0
  */
 abstract class PathMatcher extends Function[Path,Boolean] {
-  def unapply(path: Path): Option[Path]
+  def unapply(path: Path) = if(apply(path)) Some(path) else None
 }
 
 object PathMatcher {
+  val ALL = new PathMatcher{
+    def apply(path: Path) = true
+  }
   /**
    * Contains the constants for the different
    * PathMatcher syntaxes that are supported by all

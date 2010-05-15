@@ -9,6 +9,7 @@
 package scalaio.test
 
 import scalax.io.FileSystem
+import scalax.io.ram.RamFileSystem
 import scalax.test.sugar.MockitoSugarSupport.mock
 
 object ScalaIoMocks {

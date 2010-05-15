@@ -16,9 +16,8 @@ import OpenOption._
 
 import org.junit.Assert._
 import org.junit.{
-  Test, Before, After, Rule, Ignore
+  Test, Ignore
 }
-import org.junit.rules.TemporaryFolder
 
 import scalaio.test._
 
@@ -26,17 +25,9 @@ import java.io.{
     IOException, DataInputStream, DataOutputStream
 }
 
-class FileOutputTest extends AbstractOutputTests {
-
-    var fixture : FileSystemFixture = _
+class FileOutputTest extends AbstractOutputTests with DefaultFixture {
 
     final val DEFAULT_DATA = "to be overwritten"
-
-    @Before
-    def before() : Unit = fixture = new DefaultFileSystemFixture(new TemporaryFolder())
-
-    @After
-    def after() : Unit = fixture.after()
 
     def open() : (Input, Output) = {
         val path = fixture.path
