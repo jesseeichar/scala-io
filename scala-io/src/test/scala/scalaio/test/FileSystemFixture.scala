@@ -34,6 +34,7 @@ case class TestData(fs : FileSystem, numSegments : Int, pathName : String) {
     }
     this
   }
+  import Path.AccessModes.AccessMode
   lazy val access = Path.AccessModes.values filter {_ => Random.nextBoolean()} toSeq
   
   override def toString() = {

@@ -7,10 +7,12 @@ Streamable (need details on how patching works)
 LongTraversable
 ResourceTraversable
 SeqLongTraversable
+Path
 
 == Misc
 Make ReadChars use LongTraversable
 Make LineTraversable a LongTraversable
+Remove parameter defaults from overridden methods 
 Make ResourceTraversableView's append,filter,flatmap efficient when a drop is performed after the operation
 Make Codec immutable
 
