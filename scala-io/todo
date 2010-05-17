@@ -15,6 +15,7 @@ Make LineTraversable a LongTraversable
 Remove parameter defaults from overridden methods 
 Make ResourceTraversableView's append,filter,flatmap efficient when a drop is performed after the operation
 Make Codec immutable
+test copy and move between filesystems
 
 == Considerations
 Add protected aliasing/imports to java classes in package to reduce number or required imports
