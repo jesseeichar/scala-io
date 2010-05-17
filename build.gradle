@@ -6,6 +6,7 @@ subprojects {
 
 
     apply plugin: 'scala'
+    apply plugin: 'eclipse'
 
     env = System.getenv()
 

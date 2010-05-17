@@ -1,6 +1,3 @@
-[submodule "buildSrc"]
-	path = buildSrc
-	url = git@github.com:jesseeichar/gradle-extensions.git
 [submodule "scala-arm"]
 	path = scala-arm
 	url = git://github.com/jsuereth/scala-arm.git

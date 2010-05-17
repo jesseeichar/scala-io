@@ -1,5 +1,6 @@
 docs
 cobertura.ser
 .DS_Store
-build
-.gradle/
+project/boot/
+target/
+lib_managed/
