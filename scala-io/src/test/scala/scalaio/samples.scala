@@ -32,7 +32,7 @@ object Samples {
   { // implicitly convert files to paths
     import java.io.File
     import scalax.io.Path
-    import Path.string2path
+    import Path.jfile2path
 
     val filePath: Path = new File ("/tmp/file")
   }

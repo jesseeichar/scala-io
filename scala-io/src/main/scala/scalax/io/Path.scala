@@ -788,7 +788,7 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    if( target.exists && replace) {
 	   target match {
 		   case _ if target.isDirectory && target.children().nonEmpty => fail("can not replace a non-empty directory: "+target)
-	       case _ => target.delete()
+	     case _ => target.delete()
 	   }
    }
    

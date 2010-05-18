@@ -36,11 +36,15 @@ private[defaultfs] class DefaultDirectoryStream(parent : DefaultPath,
         // TODO check case where matcher does not match...
         // path passed to matcher must be relative to parent
         case d :: _ if d.isDirectory =>
-          toVisit = d.listFiles.toList ::: toVisit.tail
-          new DefaultPath(d, parent.fileSystem)
+          val path = parent.fileSystem(d)
+          if(depth < path.relativize(parent).segments.size)
+            toVisit = d.listFiles.toList ::: toVisit.tail
+          else 
+            toVisit = toVisit.tail
+          path
         case f :: _ => 
           toVisit = toVisit.tail
-          new DefaultPath(f, parent.fileSystem)
+          parent.fileSystem(f)
       }
     }
   }

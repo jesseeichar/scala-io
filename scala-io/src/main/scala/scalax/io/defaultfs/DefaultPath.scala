@@ -36,7 +36,8 @@ import Path.AccessModes._
  *  @author  Jesse Eichar
  *  @since   1.0
  */
-private[io] class DefaultPath private[io] (val jfile: JFile, override val fileSystem: DefaultFileSystem) extends Path(fileSystem)
+//private[io] 
+class DefaultPath private[io] (val jfile: JFile, override val fileSystem: DefaultFileSystem) extends Path(fileSystem)
 {
   self =>
   
@@ -142,7 +143,7 @@ private[io] class DefaultPath private[io] (val jfile: JFile, override val fileSy
   }
   
   def delete(): Unit = {
-    if (!(canWrite && jfile.delete)) {
+    if (!canWrite || !jfile.delete) {
       fail("File is not writeable so the file cannot be deleted")
     }
     ()
@@ -217,12 +218,15 @@ private[io] class DefaultPath private[io] (val jfile: JFile, override val fileSy
   }
   
   protected def moveDirectory(target:Path, depth:Int, atomicMove : Boolean) : Unit = {
+    val y = target.exists
     target match {
       case target : DefaultPath if (jfile renameTo target.jfile) => 
         () // moved worked as part of guard
       case _ =>
+        val x = target.exists
         target.createDirectory()
-        descendants(depth = depth) foreach { path =>
+        val z = descendants() forall {_.exists}
+        children() foreach { path =>
           path moveTo (target \ path.relativize(self))
         }
         delete()

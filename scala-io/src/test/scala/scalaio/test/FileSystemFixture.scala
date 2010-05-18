@@ -62,26 +62,27 @@ abstract class FileSystemFixture(val fs : FileSystem, rnd : Random) {
     file(seg)
   }
   
-  def path(segments : Int) : Path = root \ fs(file(segments))  
+  def path(segments : Int, root : Path = root) : Path = root \ fs(file(segments))  
   def path : Path = root \ fs(file)
   
   /* Returns a Path and a Node.  Both the Node and the Path
    * have the same structure.  The nodes have the same names and subtree
    * as the equivalent path
    */
-  def tree(depth : Int = rndInt(5)) : (Path, Node) = {
-    
-    
-    val structure = Node(root.segments mkString "/", None)
+  def tree(depth : Int = rndInt(5)+2) : (Path, Node) = {
+
+    val newRoot = path(1)
+    newRoot.createDirectory(true)
+    val structure = Node(newRoot.segments mkString "/", None)
       for (d <- 1 until depth;
            files <- 0 until rndInt(5)) {
-          val p = path(d).createFile(failIfExists = false)
+          val p = path(d, newRoot).createFile(failIfExists = false)
           
           p.relativize(root).segments.foldLeft (structure){
             (parent, label) => Node(parent.path + "/"+label, Some(parent))
           }
        }
-    (root, structure)
+    (newRoot, structure)
   }
   
   

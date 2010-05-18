@@ -132,14 +132,27 @@ class PathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
   def path_can_copy_directories() : Unit = {
     repeat {copy( fixture.path.createDirectory (), fixture.path, fixture.path.createDirectory ())}
   }
-  @Test  @Ignore
+  @Test //@Ignore
   def path_can_move_directory_trees() : Unit = {
-    repeat {move( fixture.tree()._1, fixture.path, fixture.tree()._1, canReplace=false)}
+    repeat {
+      val tree1 = fixture.tree()._1
+      val tree2 = fixture.tree()._1
+      val target = fixture.path
+      move( tree1, target, tree2, canReplace=false)
+     }
   }
   @Test //@Ignore
   def path_can_copy_directory_trees() : Unit = {
     repeat {copy( fixture.tree()._1, fixture.path, fixture.tree()._1, canReplace=false)}
   }
+  @Test //@Ignore
+  def path_children_only_lists_directly_contained_files() : Unit = {
+    val path = fixture.tree(5)._1
+    
+    val onlyChildren = path.children() forall {_.parent.get == path}
+    assertTrue((path.children() mkString ",")+" contains more files than just children", onlyChildren)
+  }
+
 
   def check = fixture.check _
 
