@@ -47,7 +47,7 @@ class RamPath(name:String, fileSystem:FileSystem) extends Path(fileSystem) {
     def createDirectory(createParents: Boolean = true, failIfExists: Boolean = true,
                         accessModes:Iterable[AccessMode]=List(READ,WRITE), 
                         attributes:Iterable[FileAttribute[_]]=Nil) = null //TODO
-    def delete(): Unit = () //TODO
+    def delete(): Path = this //TODO
     def deleteRecursively(continueOnFailure:Boolean=false): (Int,Int) = null //TODO
     def copyTo(target: Path, 
                createParents : Boolean = true,

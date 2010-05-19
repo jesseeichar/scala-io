@@ -29,6 +29,17 @@ class PathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
   def fspath(name:String) = fixture.fs(name)
   def fspath(name:Path) = fixture.fs(name.path)
 
+  @Test
+  def absolute_path_should_be_rooted_at_a_root = {
+    val absolute = fspath("xx").toAbsolute
+    assertTrue (fixture.fs.roots exists { root => absolute.segments(0) startsWith root.name})
+  }
+
+  @Test
+  def convert_to_uri = {
+    assertEquals(fspath("xx").toURL, fspath("xx").toURI.toURL)
+  }
+
   @Test // @Ignore  
   def relativize_should_make_a_child_relative_to_parent = {
     val p = fixture.root \ "c1" \ "c2"
@@ -90,6 +101,22 @@ class PathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
   @Test //@Ignore
   def path_should_have_exists_and_notExists_methods_that_are_not_equal() : Unit = {
     check (false, existsTest _)
+  }
+  @Test //@Ignore
+  def createfile_should_fail_in_known_manner_when_parent_dir_is_not_available() : Unit = {
+    val dir = fixture.path.createDirectory()
+    dir.access = READ :: Nil
+    def testFailure() = {
+      intercept[IOException] {  // TODO should be specific exception but maybe for next version?
+        (dir \ "child").createFile()      
+      }
+    }
+    testFailure()
+    dir.access = WRITE :: Nil
+    testFailure()
+    dir.delete().createFile()
+    testFailure()
+
   }
   @Test //@Ignore
   def path_can_move_files() : Unit = {
@@ -262,6 +289,11 @@ class PathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
     assertTrue(path.exists)
     assertTrue("expected path access to be "+access+".  Access is "+path.access, path checkAccess (access:_*))
     path.access = List(WRITE)
+    intercept[IOException] {
+      // fails since it does not specify failIfExists = false
+      path.createFile()
+    }
+    assertSame(path, path.createFile(failIfExists = false))
     path.delete()
 
     assertTrue(path.notExists)
@@ -282,6 +314,10 @@ class PathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
     import testData._
 
     val path = fspath(pathName)
+    assertEquals(Nil, path.access.toList)
+    intercept[IOException] {
+      path.access = Path.AccessModes.WRITE :: Nil
+    }
     path.createFile()
     path.ops.writeString("some test data")
     path.access = access

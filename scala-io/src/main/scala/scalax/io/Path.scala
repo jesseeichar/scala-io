@@ -692,8 +692,8 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    */
   def deleteIfExists() = {
     if (exists) {
-	delete()
-        true
+      delete()
+      true
     } else {
       false
     }
@@ -702,9 +702,10 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
   /**
    * Deletes the file or throws an IOException on failure
    *
+   * @return this
    * @throws IOException if the file could not be deleted
    */
-  def delete(): Unit
+  def delete(): Path
 
   /**
    *  Deletes the directory recursively.

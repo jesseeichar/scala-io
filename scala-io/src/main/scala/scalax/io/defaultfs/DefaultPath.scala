@@ -142,11 +142,11 @@ class DefaultPath private[io] (val jfile: JFile, override val fileSystem: Defaul
       else this
   }
   
-  def delete(): Unit = {
+  def delete(): Path = {
     if (!canWrite || !jfile.delete) {
       fail("File is not writeable so the file cannot be deleted")
     }
-    ()
+    this
   }
   def deleteRecursively(continueOnFailure:Boolean=false): (Int,Int) = deleteRecursively(jfile,continueOnFailure)
   private def deleteRecursively(f: JFile, continueOnFailure:Boolean): (Int,Int) = {

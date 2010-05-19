@@ -64,6 +64,14 @@ trait AbstractDirectoryStreamTests extends scalax.test.sugar.AssertionSugar {
     }
   }
 
+  @Test
+  def exception_when_next_called_on_empty_iterator : Unit = {
+    val (path,tree) = fixtures()
+    
+    intercept[NoSuchElementException] {
+      (path \ "testfile").createDirectory().descendants().iterator.next
+    }
+  }
 
   @Test
   def children_is_1_level_deep : Unit = {
@@ -71,6 +79,8 @@ trait AbstractDirectoryStreamTests extends scalax.test.sugar.AssertionSugar {
     
     val stream = path.children()
     assertSameStructure (stream, tree.children, 1)
+    
+    assertTrue(stream forall {p => p.relativize(path).segments.size == 1})
   }
 
  def assertSameStructure(path : Iterable[Path], tree : Seq[Node], maxDepth : Int = Int.MaxValue)

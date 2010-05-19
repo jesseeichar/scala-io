@@ -16,6 +16,8 @@ Remove parameter defaults from overridden methods
 Make ResourceTraversableView's append,filter,flatmap efficient when a drop is performed after the operation
 Make Codec immutable
 test copy and move between filesystems
+DirectoryStream to throw exceptions (NotDirectoryException perhaps)
+FileOps to throw exceptions if not file (NotFileException perhaps)
 
 == Considerations
 Add protected aliasing/imports to java classes in package to reduce number or required imports
