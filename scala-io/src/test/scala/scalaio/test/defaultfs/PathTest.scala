@@ -103,12 +103,16 @@ class PathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
     check (false, existsTest _)
   }
   @Test //@Ignore
-  def createfile_should_fail_in_known_manner_when_parent_dir_is_not_available() : Unit = {
+  def create_should_fail_in_known_manner_when_parent_dir_is_not_available() : Unit = {
     val dir = fixture.path.createDirectory()
     dir.access = READ :: Nil
     def testFailure() = {
+      val file = (dir \ "child")
       intercept[IOException] {  // TODO should be specific exception but maybe for next version?
-        (dir \ "child").createFile()      
+        file.createFile()
+      }
+      intercept[IOException] {  // TODO should be specific exception but maybe for next version?
+        file.createDirectory()
       }
     }
     testFailure()
@@ -116,7 +120,8 @@ class PathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
     testFailure()
     dir.delete().createFile()
     testFailure()
-
+    
+    dir.delete()
   }
   @Test //@Ignore
   def path_can_move_files() : Unit = {
@@ -153,7 +158,7 @@ class PathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
   }
   @Test //@Ignore
   def path_can_copy_files() : Unit = {
-    repeat {copy( fixture.path.createFile (), fixture.path, fixture.path.createFile ())}
+    repeat {copy( fixture.path.createFile (), fixture.path(3), fixture.path.createFile ())}
   }
   @Test //@Ignore
   def path_can_copy_directories() : Unit = {
@@ -288,12 +293,20 @@ class PathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
     assertFalse(path.notExists)
     assertTrue(path.exists)
     assertTrue("expected path access to be "+access+".  Access is "+path.access, path checkAccess (access:_*))
+    
+    path.access = List(READ)
+    intercept[IOException] {
+      path.delete()  // not writeable
+    }
+    
     path.access = List(WRITE)
     intercept[IOException] {
       // fails since it does not specify failIfExists = false
       path.createFile()
     }
     assertSame(path, path.createFile(failIfExists = false))
+
+    path.delete()
     path.delete()
 
     assertTrue(path.notExists)

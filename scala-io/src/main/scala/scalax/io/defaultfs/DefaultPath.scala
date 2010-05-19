@@ -143,7 +143,7 @@ class DefaultPath private[io] (val jfile: JFile, override val fileSystem: Defaul
   }
   
   def delete(): Path = {
-    if (!canWrite || !jfile.delete) {
+    if (exists && (!canWrite || !jfile.delete)) {
       fail("File is not writeable so the file cannot be deleted")
     }
     this
@@ -180,7 +180,7 @@ class DefaultPath private[io] (val jfile: JFile, override val fileSystem: Defaul
   private def copyFile(dest: Path, createParents : Boolean, 
        copyAttributes: Boolean, replaceExisting: Boolean): Path = {
     val FIFTY_MB = 1024 * 1024 * 50
-    if (!isFile) fail("Source %s is not a valid file." format name)
+    assert(isFile, "Source %s is not a valid file." format name)
 
     if (dest.parent.map {_.notExists}.getOrElse(true)) {
       if(createParents) dest.parent foreach {_ createDirectory()}
