@@ -187,15 +187,18 @@ class DefaultPath private[io] (val jfile: JFile, override val fileSystem: Defaul
     }
     
 // TODO ARM this
-    for {outOption <- ops.fileChannel()
-         out <- outOption
-         in  <- dest.ops.channel()
+    import scalax.io.OpenOption._
+    for {inResource <- ops.fileChannel()
+         in <- inResource
+         out <- dest.ops.channel(CREATE, TRUNCATE, WRITE)
     } {
       try {
         var pos, count = 0L
         while (pos < size) {
           count = (size - pos) min FIFTY_MB
-          pos += out.transferFrom(in, pos, count)
+          val prepos = pos
+          pos += in.transferTo(pos, count, out)
+          if(prepos == pos) fail("no data can be copied for unknown reason!")
         }
       }
       if (this.length != dest.length)

@@ -82,7 +82,7 @@ abstract class FileOps(path : Path) extends Seekable {
   /**
   * Obtains an OutputStreamResource for writing to the file
   *
-  * All {@link OpenOption} can be used except READ which will be ingnored if present
+  * All {@link OpenOption} can be used except READ which will be ignored if present
   *
   *  @param openOptions
   *           the options that define how the file is opened when using the stream
@@ -91,19 +91,22 @@ abstract class FileOps(path : Path) extends Seekable {
   */
   def outputStream(openOptions:OpenOption*): OutputStreamResource[OutputStream]
   /**
-   * Obtains a ByteChannel for read/write access to the file.
+   * Obtains a ByteChannel for read/write access to the file.  If no OpenOptions are 
+   * specified the underlying file will be opened with read/write/create/truncate options
    *
-  * All {@link OpenOption} can be used
-  *
-  *  @param openOptions
-  *           the options that define how the file is opened when using the stream
-  *           Default is read/write/create/truncate
-  */
+   * All {@link OpenOption} can be used
+   *
+   *  @param openOptions
+   *           the options that define how the file is opened when using the stream
+   *           Default is options only
+   */
   def channel(openOptions:OpenOption*): ByteChannelResource[ByteChannel]
   /**
    * Obtains a FileChannel for read/write access to the file.  Not all filesystems
    * can support FileChannels therefore None will be returned if the filesystem
    * does not support FileChannels.
+   * If no OpenOptions are specified the underlying file will be 
+   * opened with read/write/create/truncate options
    *
   * All {@link OpenOption} can be used
   *

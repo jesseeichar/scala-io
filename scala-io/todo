@@ -8,6 +8,7 @@ LongTraversable
 ResourceTraversable
 SeqLongTraversable
 Path
+How to implement a new filesystem (do while creating zip FS)
 
 == Misc
 Make ReadChars use LongTraversable
@@ -18,6 +19,7 @@ Make Codec immutable
 test copy and move between filesystems
 DirectoryStream to throw exceptions (NotDirectoryException perhaps)
 FileOps to throw exceptions if not file (NotFileException perhaps)
+use useful exceptions 1.  See java7 exceptions (can mix them in) 2.  search for all intercept[IOException] and see if there is a better way
 
 == Considerations
 Add protected aliasing/imports to java classes in package to reduce number or required imports

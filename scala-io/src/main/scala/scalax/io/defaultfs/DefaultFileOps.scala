@@ -74,12 +74,12 @@ private[io] class DefaultFileOps(path : DefaultPath, jfile:JFile) extends FileOp
             
           case _ => ()
       }
-      
+            
       (options contains DELETE_ON_CLOSE) match {
           case true if channel  =>
               throw new UnsupportedOperationException("DELETE_ON_CLOSE is not supported on FileChannels pre Java 7 implementations.")
           case false if channel =>
-            Right(Resource fromByteChannel randomAccessFile(openOptions))
+            Right(Resource fromByteChannel randomAccessFile(options))
           case true =>
             Left(Resource fromOutputStream new DeletingFileOutputStream(jfile, append))
           case false =>

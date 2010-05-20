@@ -26,4 +26,6 @@ trait AssertionSugar {
         fail("Expected "+m.toString+" but instead got "+e.getClass)
     }
   }
+  
+  def repeat[U] (f : => U)(implicit times : Int = 50) = 1 to times foreach {_ => f}
 }

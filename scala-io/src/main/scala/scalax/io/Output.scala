@@ -79,9 +79,7 @@ trait Output {
     protected def outputStream : OutputResource[OutputStream]
 
     /**
-    * Writes a string. The open options that can be used are dependent
-    * on the implementation and implementors should clearly document
-    * which option are permitted.
+    * Writes a string.
     * 
     * @param string
     *          the data to write

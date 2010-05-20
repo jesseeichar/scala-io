@@ -95,9 +95,14 @@ object OpenOption {
    */
   final val WRITE_TRUNCATE = List(CREATE_FULL, TRUNCATE, WRITE)
   /**
+   * Collection of options: {@link #CREATE}, {@link #TRUNCATE_EXISTING}, {@link #WRITE}
+   */
+  final val READ_WRITE = List(READ, CREATE_FULL, TRUNCATE, WRITE)
+  /**
    * Collection of options: {@link #CREATE}, {@link #APPEND}, {@link #WRITE}
    */
   final val WRITE_APPEND = List(CREATE_FULL, APPEND, WRITE)
+  
 }
 
 /**

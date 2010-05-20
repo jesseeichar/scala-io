@@ -158,11 +158,15 @@ class PathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
   }
   @Test //@Ignore
   def path_can_copy_files() : Unit = {
-    repeat {copy( fixture.path.createFile (), fixture.path(3), fixture.path.createFile ())}
+    repeat {
+      val source = fixture.path.createFile ()
+      source.ops.write(Array(1,2,3,4))
+      copy( source, fixture.path(2), fixture.path.createFile ())
+    }
   }
   @Test //@Ignore
   def path_can_copy_directories() : Unit = {
-    repeat {copy( fixture.path.createDirectory (), fixture.path, fixture.path.createDirectory ())}
+    repeat {copy( fixture.path.createDirectory (), fixture.path(2), fixture.path.createDirectory ())}
   }
   @Test //@Ignore
   def path_can_move_directory_trees() : Unit = {
@@ -175,7 +179,7 @@ class PathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
   }
   @Test //@Ignore
   def path_can_copy_directory_trees() : Unit = {
-    repeat {copy( fixture.tree()._1, fixture.path, fixture.tree()._1, canReplace=false)}
+    repeat {copy( fixture.tree()._1, fixture.path(2), fixture.tree()._1, canReplace=false)}
   }
   @Test //@Ignore
   def path_children_only_lists_directly_contained_files() : Unit = {
@@ -235,6 +239,10 @@ class PathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
   def copy(f1 :Path, f2: Path, exists: Path, canReplace: Boolean=true)={
     assertTrue(f1.exists)
     assertTrue(f2.notExists)
+    assertTrue(f2.parent.forall{_.notExists})
+    intercept[IOException] {
+      f1 copyTo (f2, createParents=false)
+    }
     f1 copyTo f2
     assertTrue(f2.exists)
     assertTrue(f1.exists)
@@ -247,6 +255,12 @@ class PathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
       f2 copyTo exists
     }
     def overwrite = {
+      val access = exists.access
+      exists.access = List(READ)
+      intercept[IOException] {
+        f2.copyTo (exists, replaceExisting=true)
+      }
+      exists.access = access
       f2.copyTo (exists, replaceExisting=true)
       assertTrue(f2.exists)
       assertTrue(exists.exists)
@@ -359,6 +373,4 @@ class PathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
 
     access foreach { a => verifyTest(access, path, is) }
   */
-  
-  def repeat[U] (f : => U) = 1 to 50 foreach {_ => f}
 }
