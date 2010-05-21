@@ -30,32 +30,42 @@ trait AbstractDirectoryStreamTests extends scalax.test.sugar.AssertionSugar {
    */
   protected def fixtures(depth:Int=4) : (Path, Node)
   
-    
-  @Test
+
+  @Test //@Ignore
   def lists_entire_tree : Unit = {
     val (path,tree) = fixtures()
 
     val stream = path.descendants()
     assertSameStructure (stream, tree.children)
   }
-  
-  @Test
-  def lists_arbitrary_depth : Unit = {
+
+  @Test //@Ignore
+  def lists_entire_tree_with_depth_very_high : Unit = {
     val (path,tree) = fixtures()
+
+    val stream = path.descendants(depth=Int.MaxValue)
+    assertSameStructure (stream, tree.children)
+  }
+
+  @Test //@Ignore
+  def lists_arbitrary_depth : Unit = {
+    val (path,tree) = fixtures(4)
     
     val stream = path.descendants(depth=2)
     assertSameStructure (stream, tree.children, 2)
   }
 
-  @Test
+  @Test //@Ignore
   def permits_filtering : Unit = {
-    val (path,tree) = fixtures()
+    repeat {
+      val (path,tree) = fixtures()
     
-    val stream = path.descendants{_.name.length < 5}
-    assertSameStructure (stream, tree.children){_.name.length < 5}
+      val stream = path.descendants{_.name.length < 5}
+      assertSameStructure (stream, tree.children){_.name.length < 5}
+    }
   }
 
-  @Test
+  @Test //@Ignore
   def exception_when_path_is_file : Unit = {
     val (path,tree) = fixtures()
     
@@ -64,7 +74,7 @@ trait AbstractDirectoryStreamTests extends scalax.test.sugar.AssertionSugar {
     }
   }
 
-  @Test
+  @Test //@Ignore
   def exception_when_next_called_on_empty_iterator : Unit = {
     val (path,tree) = fixtures()
     
@@ -73,26 +83,46 @@ trait AbstractDirectoryStreamTests extends scalax.test.sugar.AssertionSugar {
     }
   }
 
-  @Test
+  @Test //@Ignore
   def children_is_1_level_deep : Unit = {
     val (path,tree) = fixtures()
     
     val stream = path.children()
-    assertSameStructure (stream, tree.children, 1)
     
     assertTrue(stream forall {p => p.relativize(path).segments.size == 1})
+
+    assertSameStructure (stream, tree.children, 1)
+  }
+
+  @Test //@Ignore
+  def test_for_assertSameStructure {
+      val (path,tree) = fixtures()
+      
+      intercept[AssertionError] {
+        val stream = Nil
+        assertSameStructure (stream, tree.children)
+      }
   }
 
  def assertSameStructure(path : Iterable[Path], tree : Seq[Node], maxDepth : Int = Int.MaxValue)
                         (implicit filter : Node => Boolean = _ => true) {
-   def walk(tree:Seq[Node], depth : Int) = {
+   val paths = path.toList map {_.path}
+   val pathsAsString = paths mkString "\n"
+   var count = 0
+   
+   def walk(tree:Seq[Node], depth : Int) : Unit =  {
      if(depth <= maxDepth ) {
        tree.filter(filter) foreach { n =>
-         assertTrue(path exists {_.path == n.path})
+         count += 1
+         assertTrue("expected "+n.path+" to be in "+pathsAsString, paths contains {n.path})
        }
+       tree foreach {n=>walk(n.children, depth+1)}
      }
    }
+   
+   walk(tree,1)
+   
+   assertEquals(count, path.size)
  }
- 
  
 }

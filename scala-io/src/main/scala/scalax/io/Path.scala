@@ -875,9 +875,9 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    *          Default is PathMatcher.ALL
    * @param depth
    *          How deep down the tree to traverse
-   *          1 is just visit the object in the directory
-   *          >0 is visit all directories in entire tree
-   *          Default is 1
+   *          1 is just visit the objects in the directory
+   *          negative values will visit entire tree
+   *          Default is -1
    * 
    * @return
    *          A managed resource managing a DirectoryStream.

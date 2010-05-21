@@ -16,35 +16,47 @@ import scalax.io.{
 import scalax.io.attributes.FileAttribute
 
 import Path.AccessModes._
-import java.net.{
-  URL,URI
-}
+import java.io.{File => JFile}
 private[defaultfs] class DefaultDirectoryStream(parent : DefaultPath, 
-                             filter : Path => Boolean,
+                             pathFilter : Path => Boolean,
                              depth:Int) extends DirectoryStream[DefaultPath] {
                                
   assert(parent.isDirectory, "parent of a directory stream must be a Directory")
+  lazy val fs = parent.fileSystem
+
   override def iterator: Iterator[DefaultPath] = new Iterator[DefaultPath] {
     var toVisit = parent.jfile.listFiles.toList
+    var nextElem : Option[DefaultPath] = None
     
-    def hasNext = toVisit.nonEmpty
+    def hasNext() = if(nextElem.nonEmpty) true
+                    else {
+                      nextElem = loadNext()
+                      nextElem.nonEmpty
+                    }
     
-    def next = {
+    def loadNext() : Option[DefaultPath] = {
       toVisit match {
-        case Nil => throw new NoSuchElementException()
-        
-        // TODO check case where matcher does not match...
-        // path passed to matcher must be relative to parent
+        case Nil => None
         case d :: _ if d.isDirectory =>
-          val path = parent.fileSystem(d)
-          if(depth < path.relativize(parent).segments.size)
+          val path = fs(d)
+          if(depth < 0 || path.relativize(parent).segments.size < depth)
             toVisit = d.listFiles.toList ::: toVisit.tail
-          else 
+          else
             toVisit = toVisit.tail
-          path
+          Some(path).filter(pathFilter).orElse{loadNext}
         case f :: _ => 
           toVisit = toVisit.tail
-          parent.fileSystem(f)
+          Some(fs(f)).filter(pathFilter).orElse{loadNext}
+      }
+    }
+    
+    def next() = {
+      val t = nextElem
+      nextElem = None
+      
+      t match {
+        case None => throw new NoSuchElementException
+        case Some(p) => p
       }
     }
   }

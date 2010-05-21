@@ -42,11 +42,15 @@ case class TestData(fs : FileSystem, numSegments : Int, pathName : String) {
   }
 }
 
-case class Node(path : String, parent : Option[Node], children : ListBuffer[Node] = ListBuffer[Node]()) {
+case class Node(path : String, parent : Option[Node], children : ListBuffer[Node] = ListBuffer[Node]()) extends Iterable[Node]{
   self =>
   parent.foreach {_.children += self}
   
-  def name = path.split("/").takeRight(1)
+  def iterator = children.iterator
+  
+  def name = path.split("/").last
+  
+  override def toString = path
 }
 
 abstract class FileSystemFixture(val fs : FileSystem, rnd : Random) {
@@ -73,12 +77,12 @@ abstract class FileSystemFixture(val fs : FileSystem, rnd : Random) {
 
     val newRoot = path(1)
     newRoot.createDirectory(true)
-    val structure = Node(newRoot.segments mkString "/", None)
+    val structure = Node("/"+(newRoot.segments mkString "/"), None)
       for (d <- 1 until depth;
            files <- 0 until rndInt(5)) {
           val p = path(d, newRoot).createFile(failIfExists = false)
           
-          p.relativize(root).segments.foldLeft (structure){
+          p.relativize(root).segments.drop(1).foldLeft (structure){
             (parent, label) => Node(parent.path + "/"+label, Some(parent))
           }
        }

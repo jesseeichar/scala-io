@@ -151,10 +151,15 @@ class DefaultPath private[io] (val jfile: JFile, override val fileSystem: Defaul
   def deleteRecursively(continueOnFailure:Boolean=false): (Int,Int) = deleteRecursively(jfile,continueOnFailure)
   private def deleteRecursively(f: JFile, continueOnFailure:Boolean): (Int,Int) = {
     def combine(one:(Int,Int),two:(Int,Int)) = (one._1 + two._1, one._2 + two._2)
-    val (deleted:Int,remaining:Int) = if (f.isDirectory) f.listFiles match { 
-      case null => (0,0)
-      case xs   => (xs foldLeft (0,0)){case (count,path) => combine (count, path deleteRecursively continueOnFailure) }
+    val files = f match {
+      case _ if f.isDirectory => Option(f.listFiles).flatten
+      case _ => Nil
     }
+    
+    val (deleted:Int,remaining:Int) = (files foldLeft (0,0)){
+      case (count,path) => combine (count, path deleteRecursively continueOnFailure) 
+    }
+    
     (f.delete(),continueOnFailure) match {
       case (true, _) => (deleted + 1, remaining)
       case (false, true) => (deleted, remaining + 1)

@@ -15,15 +15,20 @@ import org.junit.Assert.fail
 
 trait AssertionSugar {
   def intercept[E <: Throwable](test : => Unit)(implicit m:Manifest[E]) : Unit = {
-    try {
+    val error = try {
       test
-      fail("Expected "+m.toString+" but instead no exception was raised")
+      Some("Expected "+m.toString+" but instead no exception was raised")
     }catch{
       case e:AssertionError if m.erasure != classOf[AssertionError] => throw e
-      case e if (m >:> singleType(e)) => ()
+      case e if (m >:> singleType(e)) => None
       case e => 
         e.printStackTrace
-        fail("Expected "+m.toString+" but instead got "+e.getClass)
+        Some("Expected "+m.toString+" but instead got "+e.getClass)
+    }
+    
+    error match {
+      case Some(msg) => fail(msg)
+      case None => ()
     }
   }
   

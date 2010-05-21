@@ -189,6 +189,34 @@ class PathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
     assertTrue((path.children() mkString ",")+" contains more files than just children", onlyChildren)
   }
 
+  @Test //@Ignore
+  def path_should_delete_directories_and_recursively() {
+    def assertDeleted(readOnly : Boolean) = {
+      val (root,_) = fixture.tree(5)
+    
+      val totalFiles = root.descendants().size + 1 // add root
+      
+      if(readOnly) {
+        root.descendants {p => p.isFile}.take(totalFiles/2) foreach {p => println(p);p.access = READ :: Nil}
+      } 
+      val numFiles = root.descendants().filter(_.canWrite).size + 1
+      
+      val (deleted, remaining) = root.deleteRecursively()
+      assertEquals(numFiles, deleted)
+      assertEquals(0, remaining)
+    }
+    assertDeleted(false)
+    assertDeleted(true)
+  }
+  @Test //@Ignore
+  def path_should_delete_files() {
+    val path = fixture.path
+    path.createFile()
+    assertTrue(path.exists)
+    path.deleteRecursively()
+    assertFalse(path.exists)
+  }
+  
 
   def check = fixture.check _
 
@@ -233,6 +261,8 @@ class PathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
     else intercept[IOException] {tryReplace}
     
     // TODO check access of moved file/directory
+    
+    // TODO check that attributes of moved file are the same as before move
   }
 
 
@@ -244,8 +274,18 @@ class PathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
       f1 copyTo (f2, createParents=false)
     }
     f1 copyTo f2
+    
+    assertTrue("lastModified attribute was not copied: f1="+f1.lastModified+", f2="+f2.lastModified, f1.lastModified - f2.lastModified < 0.000001)
     assertTrue(f2.exists)
     assertTrue(f1.exists)
+
+    f2.delete()
+    assertTrue("failed to delete f2", f2.notExists)
+    f1.lastModified = 10000
+    f1 copyTo (f2, copyAttributes=false)
+
+    assertTrue("lastModified attribute was copied when it should not have", f1.lastModified < f2.lastModified)
+    
 
     f2 copyTo f2 // noop
     intercept[IOException] {
@@ -265,16 +305,20 @@ class PathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
       assertTrue(f2.exists)
       assertTrue(exists.exists)
     }
+    
     if (canReplace) overwrite
     else intercept[IOException] {overwrite}
     
-    // TODO check access of copied file/directory
+    // TODO check attributes/access of copied file/directory
   }
   
   def standardPathComparisions(testData: TestData):Unit = {
     import testData._
 
     val path = fspath(pathName)
+    assertEquals(path, path)
+    assertEquals(path, fspath(pathName))
+    
     assertEquals(pathName, path.path)
     assertTrue(pathName endsWith path.name)
 
