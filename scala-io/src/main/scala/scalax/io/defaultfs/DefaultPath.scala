@@ -75,7 +75,6 @@ class DefaultPath private[io] (val jfile: JFile, override val fileSystem: Defaul
     jfile.setReadable(accessModes exists {_==READ})
     jfile.setWritable(accessModes exists {_==WRITE})
     jfile.setExecutable(accessModes exists {_==EXECUTE})
-    
   }
   def access : Set[AccessMode] = {
     AccessModes.values filter { 
@@ -131,41 +130,28 @@ class DefaultPath private[io] (val jfile: JFile, override val fileSystem: Defaul
     }
   }
   
-  def createDirectory(createParents: Boolean = true, failIfExists: Boolean = true,  
-                        accessModes:Iterable[AccessMode]=List(READ,WRITE,EXECUTE),attributes:Iterable[FileAttribute[_]]=Nil) = {
-
+  def createDirectory(createParents: Boolean, failIfExists: Boolean,
+                      accessModes:Iterable[AccessMode]=List(READ,WRITE,EXECUTE),
+                      attributes:Iterable[FileAttribute[_]]=Nil) = {
       createContainingDir (createParents)
 
       val res = jfile.mkdir()
+      
       access = accessModes
       if (!res && failIfExists && exists) fail("Directory '%s' already exists." format name)
       else this
   }
   
-  def delete(): Path = {
-    if (exists && (!canWrite || !jfile.delete)) {
-      fail("File is not writeable so the file cannot be deleted")
-    }
+  def delete(force : Boolean): Path = {
+    if(exists) {
+      if (force) access_= (access + WRITE)
+      
+      if(!canWrite) fail("File is not writeable so the file cannot be deleted")
+      if(!jfile.delete) fail("Unable to delete file for unknown reason")
+    } 
     this
   }
-  def deleteRecursively(continueOnFailure:Boolean=false): (Int,Int) = deleteRecursively(jfile,continueOnFailure)
-  private def deleteRecursively(f: JFile, continueOnFailure:Boolean): (Int,Int) = {
-    def combine(one:(Int,Int),two:(Int,Int)) = (one._1 + two._1, one._2 + two._2)
-    val files = f match {
-      case _ if f.isDirectory => Option(f.listFiles).flatten
-      case _ => Nil
-    }
-    
-    val (deleted:Int,remaining:Int) = (files foldLeft (0,0)){
-      case (count,path) => combine (count, path deleteRecursively continueOnFailure) 
-    }
-    
-    (f.delete(),continueOnFailure) match {
-      case (true, _) => (deleted + 1, remaining)
-      case (false, true) => (deleted, remaining + 1)
-      case (false, false) => fail( "Unable to delete "+f);
-    }
-  }
+
   def copyTo(target: Path, 
              createParents : Boolean = true, 
              copyAttributes:Boolean=true,

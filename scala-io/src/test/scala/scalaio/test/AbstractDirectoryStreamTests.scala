@@ -94,6 +94,18 @@ trait AbstractDirectoryStreamTests extends scalax.test.sugar.AssertionSugar {
     assertSameStructure (stream, tree.children, 1)
   }
 
+
+  @Test //@Ignore
+  def directory_stream_skips_read_protected_directories {
+    val (root,tree) = fixtures()
+    assertTrue(root.descendants() forall {_.exists})
+    
+    val totalFiles = root.descendants().size
+    root.descendants().take(totalFiles/2) foreach {p => p.access = p.access - WRITE}
+    
+    assertEquals(totalFiles, root.descendants().size)
+  }
+
   @Test //@Ignore
   def test_for_assertSameStructure {
       val (path,tree) = fixtures()

@@ -39,7 +39,7 @@ private[io] class DefaultFileSystem extends FileSystem {
                         deleteOnExit : Boolean = true
                         /*attributes:List[FileAttributes] TODO */) : Path = {
     val path = createTempFile(prefix, suffix, dir, false)
-    path.delete()
+    path.delete(force=true)
     path.createDirectory()
     if(deleteOnExit) {
       Runtime.getRuntime.addShutdownHook(new Thread{override def run:Unit = path.deleteRecursively(true) })

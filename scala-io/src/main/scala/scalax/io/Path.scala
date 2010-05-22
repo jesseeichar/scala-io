@@ -8,6 +8,7 @@
 
 package scalax.io
 
+import scala.util.control.Exception._
 import scalax.resource.ManagedResource
 import scalax.io.attributes.FileAttribute
 import java.io.{IOException, File => JFile}
@@ -581,7 +582,41 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    *          the modes to set on the file in (if possible)
    *          a single atomic update
    */
-  def access_=(accessModes:Iterable[AccessMode])
+  def access_=(accessModes:Iterable[AccessMode]) : Unit
+  
+  /**
+   * Short cut for setting the standard access modes on the underlying path.  If the 
+   * underlying object does not exist it will throw an exception.
+   * If the underlying system does not support support the mode the mode
+   * will be ignored
+   * 
+   * @param accessModes 
+   *          string representation of the modes. The standard options
+   *          include r - read, w - write, e - execute.  The options are 
+   *          filesystem dependent
+   */
+  def access_=(accessModes:String) : Unit = {
+    import Path.fail
+    
+    val (modifier, modes) = if(accessModes.headOption forall {"+-" contains _}) {
+      accessModes.toList.splitAt(1)
+    } else {
+      (Nil, accessModes.toList)
+    }
+    
+    val actualModes = modes map {
+      case 'r' => READ
+      case 'w' => WRITE
+      case 'x' => EXECUTE
+      case t => fail("access mode %s not recognized" format t)
+    }
+    
+    modifier.headOption match {
+      case Some('-') => access = (access -- actualModes)
+      case Some('+') => access = (access ++ actualModes)
+      case None => access = actualModes
+    }
+  }
   /**
    * Reads the access modes from the file and returns the Set
    * This does not lock the file so the modes could be out of date
@@ -685,12 +720,18 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    *  <p>
    *  If the file does not exist it will return false
    *  </p>
+   * @param force
+   *          if the file is write protected force will override 
+   *          the write protection and delete the file.  If not
+   *          force then an IOException will be thrown indicating
+   *          failure of deletion.
+   *          Default is false
    *  @throws IOException
    *            if the file cannot be written or if there is some other reason
    *            the file cannot be deleted. For example if the file is a non-empty
    *            directory
    */
-  def deleteIfExists() = {
+  def deleteIfExists(force : Boolean = false) = {
     if (exists) {
       delete()
       true
@@ -702,10 +743,16 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
   /**
    * Deletes the file or throws an IOException on failure
    *
+   * @param force
+   *          if the file is write protected force will override 
+   *          the write protection and delete the file.  If not
+   *          force then an IOException will be thrown indicating
+   *          failure of deletion.
+   *          Default is false
    * @return this
    * @throws IOException if the file could not be deleted
    */
-  def delete(): Path
+  def delete(force : Boolean = false): Path
 
   /**
    *  Deletes the directory recursively.
@@ -714,8 +761,14 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    *  does not promise to perform the delete in an atomic operation
    * </p>
    *  <p>Use with caution!</p>
+   * @param force
+   *          if the file is write protected force will override 
+   *          the write protection and delete the file.  If not
+   *          force then an IOException will be thrown indicating
+   *          failure of deletion.
+   *          Default is false
    *  @param continueOnFailure
-   *           If false then method will abort when encountering a
+   *           If false then method will throw an exception when encountering a
    *           file that cannot be deleted.  Otherwise it will continue
    *           to delete all the files that can be deleted.
    *           Note:  this method is not transactional, all files visited before
@@ -726,7 +779,39 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    *  @throws IOException
    *           when continueOnFailure is false and a file cannot be deleted
    */
-  def deleteRecursively(continueOnFailure:Boolean=false): (Int,Int)
+  def deleteRecursively(force : Boolean = false, continueOnFailure:Boolean=false): (Int,Int) = {
+    if (isDirectory) {
+      var successes = 0
+      var failures = 0
+      
+      def tryDelete(p:Path) = {
+        try {
+          p.delete(force)
+          successes += 1
+        } catch {
+          case e:IOException if continueOnFailure =>
+          failures += 1
+        }
+        (successes, failures)
+      }
+      
+      children{_.isFile} foreach tryDelete
+      children{_.isDirectory} foreach { path =>
+        val (deleted, remaining) = path.deleteRecursively(force,continueOnFailure)
+        successes += deleted
+        failures += remaining
+      }
+      tryDelete(this)
+    } else {
+      try {
+        delete(force)
+        (1,0)
+      } catch {
+        case e:IOException if continueOnFailure =>
+        (0,1)
+      }
+    }
+  }
 
   /**
    *  Copy the underlying object if it exists to the target location.

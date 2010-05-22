@@ -29,18 +29,18 @@ class PathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
   def fspath(name:String) = fixture.fs(name)
   def fspath(name:Path) = fixture.fs(name.path)
 
-  @Test
+  @Test //@Ignore
   def absolute_path_should_be_rooted_at_a_root = {
     val absolute = fspath("xx").toAbsolute
     assertTrue (fixture.fs.roots exists { root => absolute.segments(0) startsWith root.name})
   }
 
-  @Test
+  @Test //@Ignore
   def convert_to_uri = {
     assertEquals(fspath("xx").toURL, fspath("xx").toURI.toURL)
   }
 
-  @Test // @Ignore  
+  @Test //@Ignore
   def relativize_should_make_a_child_relative_to_parent = {
     val p = fixture.root \ "c1" \ "c2"
     assertEquals(2, (p relativize fixture.root).segments.size)
@@ -190,26 +190,112 @@ class PathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
   }
 
   @Test //@Ignore
-  def path_should_delete_directories_and_recursively() {
-    def assertDeleted(readOnly : Boolean) = {
-      val (root,_) = fixture.tree(5)
+  def access_equal_should_be_assignable_with_string() {
+    val p = fixture.path.createFile()
+
+    p.access = "r"
+    assertEquals("READ assignment failed: " + p.access, Set(READ), p.access.toSet)
+    p.access = "w"
+    assertEquals("WRITE assignment failed: " + p.access, Set(WRITE), p.access.toSet)
+    p.access = "x"
+    assertEquals("EXECUTE assignment failed: " + p.access, Set(EXECUTE), p.access.toSet)
     
-      val totalFiles = root.descendants().size + 1 // add root
-      
-      if(readOnly) {
-        root.descendants {p => p.isFile}.take(totalFiles/2) foreach {p => println(p);p.access = READ :: Nil}
-      } 
-      val numFiles = root.descendants().filter(_.canWrite).size + 1
-      
-      val (deleted, remaining) = root.deleteRecursively()
-      assertEquals(numFiles, deleted)
-      assertEquals(0, remaining)
+    p.access = ""
+    assertEquals("Empty assignment failed: " + p.access, Set.empty, p.access.toSet)
+    
+    p.access = "+r"
+    assertEquals("+r assignment failed: " + p.access, Set(READ), p.access.toSet)
+    
+    p.access = "-r"
+    assertEquals("-1 assignment failed: " + p.access, Set.empty, p.access.toSet)
+        
+    p.access = "+w"
+    assertEquals("+w assignment failed: " + p.access, Set(WRITE), p.access.toSet)
+    
+    p.access = "-w"
+    assertEquals("-w assignment failed: " + p.access, Set.empty, p.access.toSet)
+    
+    p.access = "+rxw"
+    assertEquals("+rxw assignment failed: " + p.access, Set(READ,WRITE,EXECUTE), p.access.toSet)
+    
+    p.access = "+rxw"
+    assertEquals("+rxw second assignment failed: " + p.access, Set(READ,WRITE,EXECUTE), p.access.toSet)
+    
+    p.access = "-xw"
+    assertEquals("-xw assignment failed: " + p.access, Set(READ), p.access.toSet)
+    
+    intercept[IOException] {
+      p.access = "@"
     }
-    assertDeleted(false)
-    assertDeleted(true)
   }
+
   @Test //@Ignore
-  def path_should_delete_files() {
+  def path_should_delete_respect_access_by_default() {
+    val p = fixture.path.createFile()
+    p.access = "r"
+    intercept[IOException] {
+      p.delete()
+    }
+    p.delete(force=true)
+    assertTrue(p.notExists)
+  }
+
+  @Test //@Ignore
+  def path_should_delete_directories_recursively() {
+    val (root,_) = fixture.tree(5)
+    
+    val numFiles = root.descendants().size + 1 // add root
+    
+    val (deleted, remaining) = root.deleteRecursively()
+    
+    assertEquals(numFiles, deleted)
+    assertEquals(0, remaining)
+    assertTrue(root.notExists)
+  } 
+  @Test //@Ignore
+  def delete_recursively_should_throw_exception_on_failure_by_default() {
+      val (root,_) = fixture.tree(5)
+
+      val totalFiles = root.descendants().size + 1 // add root
+      root.descendants {_.isFile}.take(totalFiles/2) foreach {p => p.access = READ :: Nil}
+      intercept[IOException] {
+        root.deleteRecursively()
+      }
+    }
+
+    @Test //@Ignore
+    def delete_recursively_should_be_able_to_continue_on_failure() {
+      val (root,_) = fixture.tree(5)
+
+      val totalPaths = root.descendants().size + 1
+      
+      val totalFiles = root.descendants{_.isFile}.size
+      root.descendants {_.isFile}.take(totalFiles/2) foreach {p => p.access = p.access - WRITE}
+      val (deleted, remaining) = root.deleteRecursively(continueOnFailure = true)
+
+      assertTrue(root.exists)
+      assertEquals(totalPaths, deleted + remaining)
+      assertTrue(deleted != remaining)
+      assertTrue(root.descendants() forall {p => (p.isDirectory && p.children().nonEmpty) || !p.canWrite})
+    }
+
+    @Test //@Ignore
+    def delete_recursively_should_be_able_to_force_delete() {
+      val (root,_) = fixture.tree(5)
+
+      val totalPaths = root.descendants().size + 1
+      val totalFiles = root.descendants{_.isFile}.size
+      root.descendants {_.isFile}.take(totalFiles/2) foreach {p => p.access = p.access - WRITE}
+
+      val (deleted, remaining) = root.deleteRecursively(force = true)
+
+      assertEquals(totalPaths, deleted)
+      assertEquals(0, remaining)
+      assertTrue(root.notExists)
+    }
+
+  @Test //@Ignore
+  def delete_recursively_should_delete_files() {
     val path = fixture.path
     path.createFile()
     assertTrue(path.exists)
@@ -219,7 +305,7 @@ class PathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
   
 
   def check = fixture.check _
-
+  
   def move(f1 :Path, f2: Path, exists: Path, canReplace: Boolean=true)={
     assertTrue("expected 'exists' to exist before test", exists.exists)
     assertTrue("expected f1 to exist before move", f1.exists)
@@ -275,7 +361,8 @@ class PathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
     }
     f1 copyTo f2
     
-    assertTrue("lastModified attribute was not copied: f1="+f1.lastModified+", f2="+f2.lastModified, f1.lastModified - f2.lastModified < 0.000001)
+    assertTrue("lastModified attribute was not copied: f1="+f1.lastModified+", f2="+f2.lastModified, 
+               f1.lastModified - f2.lastModified < 0.000001)
     assertTrue(f2.exists)
     assertTrue(f1.exists)
 
@@ -356,8 +443,14 @@ class PathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
     intercept[IOException] {
       path.delete()  // not writeable
     }
+    assertTrue(path.exists)
     
-    path.access = List(WRITE)
+    path.delete(force=true)    
+    assertTrue(path.notExists)
+
+    path.createFile()
+    assertTrue(path.exists)
+    
     intercept[IOException] {
       // fails since it does not specify failIfExists = false
       path.createFile()
