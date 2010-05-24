@@ -173,9 +173,7 @@ class DefaultPath private[io] (val jfile: JFile, override val fileSystem: Defaul
     val FIFTY_MB = 1024 * 1024 * 50
     assert(isFile, "Source %s is not a valid file." format name)
 
-    if (dest.parent.map {_.notExists}.getOrElse(true)) {
-      if(createParents) dest.parent foreach {_ createDirectory()}
-    }
+    if(createParents) dest.parent foreach {_ createDirectory(createParents=true, failIfExists=false)}
     
 // TODO ARM this
     import scalax.io.OpenOption._

@@ -60,7 +60,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
   }
   
   
-  @Test @Ignore
+  @Test //@Ignore
   def default_simple_write_will_not_truncate {
     repeat {
       val before = ops.channel().bytesAsInts.size
