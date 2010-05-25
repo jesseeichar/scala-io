@@ -48,9 +48,9 @@ trait WriteChars {
     *          the data to write
     */
     def writeString(string : String) : Unit = {
-        for (out <- writer) {
-            out write string
-        }
+      for (out <- writer) {
+        out write string
+      }
     }
 
     /**
