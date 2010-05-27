@@ -54,7 +54,6 @@ private[io] class DefaultFileOps(path : DefaultPath, jfile:JFile) extends FileOp
   def fileChannel(openOptions: OpenOption*) = Some(openOutput(openOptions, true).right.get)
   
   private def openOutput(openOptions: Seq[OpenOption], channel : Boolean) : Either[OutputStreamResource[FileOutputStream], ByteChannelResource[FileChannel]] = {
-
       val options = if(openOptions.isEmpty) OpenOption.WRITE_TRUNCATE
                     else openOptions
 

@@ -19,12 +19,12 @@ import java.io.IOException
 
 class FileOpsTest extends AbstractFileOpsTests with DefaultFixture {
 
-  def ops(implicit data : Array[Byte]) = {
+  def path(implicit data : Array[Byte]) = {
     val path = fixture.path
     path.createFile()
     val ops = path.ops
     ops write data
-    ops
+    path
   }
 
 }
