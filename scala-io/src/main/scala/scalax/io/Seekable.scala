@@ -1,6 +1,6 @@
 /*                     __                                               *\
 **     ________ ___   / /  ___     Scala API                            **
-**    / __/ __// _ | / /  / _ |    (c) 2003-2009, LAMP/EPFL             **
+**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar             **
 **  __\ \/ /__/ __ |/ /__/ __ |    http://scala-lang.org/               **
 ** /____/\___/_/ |_/____/_/ | |                                         **
 **                          |/                                          **
@@ -13,7 +13,7 @@ import java.io.{
 }
 import java.nio.{ByteBuffer, CharBuffer}
 import java.nio.channels.{
-    ByteChannel, FileChannel, WritableByteChannel
+    ByteChannel, WritableByteChannel
 }
 import scalax.io.resource._
 import scala.collection.Traversable
@@ -38,7 +38,7 @@ trait Seekable extends Input with Output {
      * The underlying channel to write to.  The open options indicate the preferred way
      * to interact with the underlying channel.
      */
-    protected def seekableChannel(openOptions:OpenOption*) : OutputResource[FileChannel] with InputResource[FileChannel]
+    protected def channel(openOptions:OpenOption*) : OutputResource[SeekableByteChannel] with InputResource[SeekableByteChannel]
 
   /**
    * Update a portion of the file content with string at
@@ -156,7 +156,7 @@ trait Seekable extends Input with Output {
   }
 
   private def insertDataInMemory[T <% Traversable[Byte]](position : Long, bytes : T) = {
-      for(channel <- seekableChannel(WRITE) ) {
+      for(channel <- channel(WRITE) ) {
             channel position position
             var buffers = (ByteBuffer allocateDirect MaxPermittedInMemory, ByteBuffer allocateDirect MaxPermittedInMemory)
             
@@ -196,7 +196,7 @@ trait Seekable extends Input with Output {
       
       tmp.ops writeInts (bytesAsInts.asInstanceOf[LongTraversable[Int]] ldrop position)
       
-      for(channel <- seekableChannel(WRITE) ) {
+      for(channel <- channel(WRITE) ) {
            channel position  position
            writeTo(channel, bytes, -1)
            writeTo(channel, tmp.ops.bytes, tmp.size)
@@ -204,7 +204,7 @@ trait Seekable extends Input with Output {
   }
   
   private def overwriteFileData[T <% Traversable[Byte]](position : Long, bytes : T, replaced : Long) = {
-      for(channel <- seekableChannel(WRITE) ) {
+      for(channel <- channel(WRITE) ) {
           channel.position(position)
 //            println("byte size,replaced",bytes.size,replaced)
           val (wrote, earlyTermination) = writeTo(channel,bytes, replaced)
@@ -213,7 +213,7 @@ trait Seekable extends Input with Output {
 
           if(replaced > channel.size // need this in the case where replaced == Long.MaxValue
              || position + replaced > channel.size) {
-              channel.truncate(channel.position())
+              channel.truncate(channel.position)
           } else if (replaced > wrote) {
               val length = channel.size - position - replaced
               val srcIndex = position + replaced
@@ -230,7 +230,7 @@ trait Seekable extends Input with Output {
       }
   }
 
-  private def copySlice(channel : FileChannel, srcIndex : Long, destIndex : Long, length : Int) : Unit = {
+  private def copySlice(channel : SeekableByteChannel, srcIndex : Long, destIndex : Long, length : Int) : Unit = {
       val buf = ByteBuffer.allocate(BufferSize.min(length))
       
       def write(done : Int) = {
@@ -260,7 +260,7 @@ trait Seekable extends Input with Output {
   *          default is to append all
   */
   def append[T <% Traversable[Byte]](bytes: T, take : Long = -1): Unit = {
-      for (c <- seekableChannel(APPEND)) writeTo(c, bytes, take)
+      for (c <- channel(APPEND)) writeTo(c, bytes, take)
   }
 
   // returns (wrote,earlyTermination)
@@ -343,7 +343,7 @@ trait Seekable extends Input with Output {
   */  
   def appendStrings(strings: Traversable[String], separator:String = "")(implicit codec: Codec): Unit = {
     val sepBytes = codec encode separator
-    for (c <- seekableChannel(APPEND)) (strings foldLeft false){ 
+    for (c <- channel(APPEND)) (strings foldLeft false){ 
       (addSep, string) =>
         if(addSep) writeTo(c, sepBytes, Long.MaxValue)
         writeTo(c, codec encode string, Long.MaxValue)
@@ -353,20 +353,20 @@ trait Seekable extends Input with Output {
   }
   
   def chop(position : Long) : Unit = {
-       seekableChannel(APPEND) foreach {_.truncate(position)}
+       channel(APPEND) foreach {_.truncate(position)}
   }
   
   def chopString(position : Long)(implicit codec:Codec) : Unit = {
     val posInBytes = charCountToByteCount(0,position)
-    seekableChannel(APPEND) foreach {_.truncate(posInBytes)}
+    channel(APPEND) foreach {_.truncate(posInBytes)}
   }
   
   // required methods for Input trait
-  def chars(implicit codec: Codec): ResourceView[Char] = (seekableChannel(READ).reader(codec).chars).asInstanceOf[ResourceView[Char]]  // TODO this is broke
-  def bytesAsInts:ResourceView[Int] = seekableChannel(READ).bytesAsInts
+  def chars(implicit codec: Codec): ResourceView[Char] = (channel(READ).reader(codec).chars).asInstanceOf[ResourceView[Char]]  // TODO this is broke
+  def bytesAsInts:ResourceView[Int] = channel(READ).bytesAsInts
   
   // required method for Output trait
-  protected def outputStream = seekableChannel(WRITE_TRUNCATE:_*).outputStream
+  protected def outputStream = channel(WRITE_TRUNCATE:_*).outputStream
 
 
 
@@ -396,10 +396,9 @@ trait Seekable extends Input with Output {
       */
     }
 
-    val segment = seekableChannel(READ).chars.lslice(start, end)
+    val segment = channel(READ).chars.lslice(start, end)
     (0L /: segment ) { (replacedInBytes, nextChar) => 
       replacedInBytes + sizeInBytes(nextChar)
     }    
   }
-  
 }

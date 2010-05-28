@@ -15,14 +15,15 @@ import scalax.io.{
 }
 import scalax.io.resource._
 import scalax.io.OpenOption._
+import scalax.resource.ManagedResource
+import scalax.io.nio.SeekableFileChannel
+
+
 import java.io.{ 
   FileInputStream, FileOutputStream, File => JFile, RandomAccessFile
 }
 import java.nio.channels.FileChannel
 import java.net.{ URI, URL }
-
-
-import scalax.resource.ManagedResource
 
 import collection.{Traversable }
 import PartialFunction._
@@ -42,19 +43,22 @@ private[io] class DefaultFileOps(path : DefaultPath, jfile:JFile) extends FileOp
   def outputStream(openOptions: OpenOption*) = {
       openOptions match {
           case Seq() => 
-              openOutput(openOptions, false).left.get
+              openOutputStream(openOptions)
           case opts if opts forall {opt => opt != WRITE && opt != APPEND} => 
-              openOutput(openOptions :+ WRITE, false).left.get
+              openOutputStream(openOptions :+ WRITE)
           case _ =>
-            openOutput(openOptions, false).left.get
+            openOutputStream(openOptions)
       }
   }
 
-  def channel(openOptions: OpenOption*) = openOutput(openOptions,true).right.get
-  def fileChannel(openOptions: OpenOption*) = Some(openOutput(openOptions, true).right.get)
+  def channel(openOptions: OpenOption*) = {
+    val channel = new SeekableFileChannel(openChannel(openOptions))
+    Resource fromByteChannel channel
+  }
+  def fileChannel(openOptions: OpenOption*) = Some(Resource fromByteChannel openChannel(openOptions))
   
-  private def openOutput(openOptions: Seq[OpenOption], channel : Boolean) : Either[OutputStreamResource[FileOutputStream], ByteChannelResource[FileChannel]] = {
-      val options = if(openOptions.isEmpty) OpenOption.WRITE_TRUNCATE
+  private def preOpen(openOptions: Seq[OpenOption]) : (Boolean, Seq[OpenOption]) = {
+     val options = if(openOptions.isEmpty) OpenOption.WRITE_TRUNCATE
                     else openOptions
 
       var append = false
@@ -73,17 +77,26 @@ private[io] class DefaultFileOps(path : DefaultPath, jfile:JFile) extends FileOp
             
           case _ => ()
       }
-            
-      (options contains DELETE_ON_CLOSE) match {
-          case true if channel  =>
-              throw new UnsupportedOperationException("DELETE_ON_CLOSE is not supported on FileChannels pre Java 7 implementations.")
-          case false if channel =>
-            Right(Resource fromByteChannel randomAccessFile(options))
-          case true =>
-            Left(Resource fromOutputStream new DeletingFileOutputStream(jfile, append))
-          case false =>
-            Left(Resource fromOutputStream new FileOutputStream(jfile,append))
-      }
+      
+      (append,options)
+  }
+  
+  private def openOutputStream(openOptions: Seq[OpenOption]) = {
+    val (append, options) = preOpen(openOptions)
+    if (options contains DELETE_ON_CLOSE) {
+        Resource fromOutputStream new DeletingFileOutputStream(jfile, append)
+    } else {
+        Resource fromOutputStream new FileOutputStream(jfile,append)
+    }
+  }
+
+  private def openChannel(openOptions: Seq[OpenOption]) = {
+    val (_, options) = preOpen(openOptions)
+    if (options contains DELETE_ON_CLOSE) {
+       throw new UnsupportedOperationException("DELETE_ON_CLOSE is not supported on FileChannels pre Java 7 implementations.")
+    } else {
+        randomAccessFile(options)
+    }
   }
 
   private def randomAccessFile(openOptions: Seq[OpenOption]) = {
@@ -109,17 +122,16 @@ private[io] class DefaultFileOps(path : DefaultPath, jfile:JFile) extends FileOp
       
       val chars = if(sortedChars.mkString endsWith "sd") sortedChars.takeWhile(_ != 's') 
                   else sortedChars
-      
+
       val file = if(chars contains 'r') {
           new RandomAccessFile(jfile, chars mkString)
       } else {
-          new RandomAccessFile(jfile, 'r' + chars.mkString)          
+          new RandomAccessFile(jfile, 'r' + chars.mkString)
       }
-      
+
       if(openOptions contains APPEND) file.seek(file.length)
-      
+
       file.getChannel
-      
   }
   
 

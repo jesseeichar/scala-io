@@ -1,6 +1,6 @@
 /*                     __                                               *\
 **     ________ ___   / /  ___     Scala API                            **
-**    / __/ __// _ | / /  / _ |    (c) 2003-2009, LAMP/EPFL             **
+**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar             **
 **  __\ \/ /__/ __ |/ /__/ __ |    http://scala-lang.org/               **
 ** /____/\___/_/ |_/____/_/ | |                                         **
 **                          |/                                          **
@@ -100,7 +100,7 @@ abstract class FileOps(path : Path) extends Seekable {
    *           the options that define how the file is opened when using the stream
    *           Default is options only
    */
-  def channel(openOptions:OpenOption*): ByteChannelResource[ByteChannel]
+  def channel(openOptions:OpenOption*): ByteChannelResource[SeekableByteChannel]
   /**
    * Obtains a FileChannel for read/write access to the file.  Not all filesystems
    * can support FileChannels therefore None will be returned if the filesystem

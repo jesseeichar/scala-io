@@ -1,6 +1,6 @@
 /*                     __                                               *\
 **     ________ ___   / /  ___     Scala API                            **
-**    / __/ __// _ | / /  / _ |    (c) 2003-2009, LAMP/EPFL             **
+**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar             **
 **  __\ \/ /__/ __ |/ /__/ __ |    http://scala-lang.org/               **
 ** /____/\___/_/ |_/____/_/ | |                                         **
 **                          |/                                          **
@@ -34,7 +34,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
 
   @Test //@Ignore
   def outputStream_adds_default_write {
-    repeat {      
+    repeat {
       val ops = path.ops
       // no exception? good!
       ops.outputStream().writeString("hi")
@@ -132,7 +132,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
     }
   }
   
-  @Test //@Ignore
+  @Test //@Ignore  // Dead locks
   def default_simple_write_will_not_truncate {
     repeat {
       val ops = path.ops
