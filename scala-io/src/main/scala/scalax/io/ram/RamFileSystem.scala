@@ -8,7 +8,7 @@
 
 package scalax.io.ram
 
-import scalax.resource.ManagedResource
+import scala.resource.ManagedResource
 import scalax.io.{
   FileSystem, Path, FileOps,Codec,PathMatcher,DirectoryStream
 }

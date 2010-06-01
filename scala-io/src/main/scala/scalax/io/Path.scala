@@ -9,7 +9,7 @@
 package scalax.io
 
 import scala.util.control.Exception._
-import scalax.resource.ManagedResource
+import scala.resource.ManagedResource
 import scalax.io.attributes.FileAttribute
 import java.io.{IOException, File => JFile}
 import java.nio.channels.ByteChannel

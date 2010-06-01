@@ -162,7 +162,7 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
     }
 
     @Test  //@Ignore
-    def charChop : Unit = {
+    def chopString : Unit = {
       val seekable = open()
       val expected = TEXT_VALUE take 2
       seekable.chopString(2)

@@ -8,7 +8,7 @@
 
 package scalax.io.defaultfs
 
-import scalax.resource.ManagedResource
+import scala.resource.ManagedResource
 import scalax.io.attributes.FileAttribute
 import scalax.io.{
   Path, FileOps, PathMatcher, DirectoryStream, LinkOption
