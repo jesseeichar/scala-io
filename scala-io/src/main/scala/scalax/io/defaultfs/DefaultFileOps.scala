@@ -1,6 +1,6 @@
 /*                     __                                               *\
 **     ________ ___   / /  ___     Scala API                            **
-**    / __/ __// _ | / /  / _ |    (c) 2003-2009, LAMP/EPFL             **
+**    / __/ __// _ | / /  / _ |    (c) 20010-2011, Jesse Eichar             **
 **  __\ \/ /__/ __ |/ /__/ __ |    http://scala-lang.org/               **
 ** /____/\___/_/ |_/____/_/ | |                                         **
 **                          |/                                          **
@@ -15,7 +15,7 @@ import scalax.io.{
 }
 import scalax.io.resource._
 import scalax.io.OpenOption._
-import scalax.resource.ManagedResource
+import scala.resource.ManagedResource
 import scalax.io.nio.SeekableFileChannel
 
 
@@ -56,7 +56,44 @@ private[io] class DefaultFileOps(path : DefaultPath, jfile:JFile) extends FileOp
     Resource fromByteChannel channel
   }
   def fileChannel(openOptions: OpenOption*) = Some(Resource fromByteChannel openChannel(openOptions))
-  
+
+  def open[R](openOptions: Seq[OpenOption] = List(READ,WRITE))(action: Seekable => R): R = {
+    val c = openChannel(openOptions)
+    val seekable = new Seekable {
+      protected def channel(openOptions:OpenOption*) = {
+        val seekable2 = new SeekableFileChannel(c) {
+            override def close = () // will close after all operations
+          }
+        Resource fromByteChannel seekable2
+      }
+    }
+    
+    try {
+      action(this)
+    } finally {
+      c.close()
+    }
+  }
+
+  def withLock[R](start: Long = 0, size: Long = -1, shared: Boolean = false)(block: Seekable => R): Option[R] = {
+    val result =
+      for {fc <- fileChannel().get
+         lock <- Option(fc.tryLock(start,size,shared)) } yield {
+//           val stream = block.lslice(start,start+size)  // TODO
+           block(this)
+         }
+    result.opt.flatten.headOption
+  }
+
+  def execute(args:String*)(implicit configuration:ProcessBuilder=>Unit = p =>()):Option[Process] = {
+    import Path.fail
+
+    if(!jfile.exists) fail(jfile+" can not be executed as it does not exist")
+    if(!jfile.canExecute) fail(jfile+" can not be executed as the execution access option is not set")
+
+    null // TODO
+  }
+
   private def preOpen(openOptions: Seq[OpenOption]) : (Boolean, Seq[OpenOption]) = {
      val options = if(openOptions.isEmpty) OpenOption.WRITE_TRUNCATE
                     else openOptions
@@ -133,24 +170,4 @@ private[io] class DefaultFileOps(path : DefaultPath, jfile:JFile) extends FileOp
 
       file.getChannel
   }
-  
-
-  def open[R](openOptions: Seq[OpenOption] = List(WRITE))(action: Seekable => R): R =  {
-      null.asInstanceOf[R]
-  }
-
-  def withLock[R](start: Long = 0, size: Long = -1, shared: Boolean = false)(block: => R): Option[R] = {
-    None
-  }
-    
-  def execute(args:String*)(implicit configuration:ProcessBuilder=>Unit = p =>()):Option[Process] = {
-    import Path.fail
-    
-    if(!jfile.exists) fail(jfile+" can not be executed as it does not exist")
-    if(!jfile.canExecute) fail(jfile+" can not be executed as the execution access option is not set")
-    
-    null // TODO
-  }
-
-  protected def seekableChannel(openOptions:OpenOption*) = fileChannel(openOptions:_*).get
 }

@@ -33,6 +33,28 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
   // TODO append with channel/fileChannel?
 
   @Test //@Ignore
+  def open_can_perform_several_ops {
+    path.ops.open() {stream =>
+      assertEquals("initial read works", demoData take 2, stream.chars take 2 mkString)
+      stream.chop(2)
+      assertEquals("chop works", demoData take 2, stream.slurpString)
+      stream.appendString(demoData drop 2)
+      assertEquals("append works",demoData, stream.slurpString)
+    }
+  }
+  
+  @Test //@Ignore
+  def lock_provides_normal_functionality {
+    path.ops.open() {stream =>
+      assertEquals("initial read works", demoData take 2, stream.chars take 2 mkString)
+      stream.chop(2)
+      assertEquals("chop works", demoData take 2, stream.slurpString)
+      stream.appendString(demoData drop 2)
+      assertEquals("append works",demoData, stream.slurpString)
+    }
+  }
+
+  @Test @Ignore
   def outputStream_adds_default_write {
     repeat {
       val ops = path.ops
@@ -41,7 +63,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
     }
   }
 
-  @Test //@Ignore
+  @Test @Ignore
   def outputStream_can_be_append {
     repeat {
       val ops = path.ops
@@ -50,7 +72,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
     }
   }
   
-  @Test //@Ignore
+  @Test @Ignore
   def outputStream_with_read_will_add_write {
     repeat {
       val ops = path.ops
@@ -59,7 +81,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
     }
   }
   
-  @Test //@Ignore
+  @Test @Ignore
   def truncate_deletes_previous_file {
     repeat {
       val ops = path.ops
@@ -68,7 +90,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
     }
   }
   
-  @Test //@Ignore
+  @Test @Ignore
   def create_new_fails_when_file_exists {
     repeat {
       val ops = path.ops
@@ -79,7 +101,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
     }
   }
   
-  @Test //@Ignore
+  @Test @Ignore
   def delete_on_close_deletes_after_operation {
     implicit val times = 1
     repeat {
@@ -92,7 +114,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
     }
   }
 
-  @Test //@Ignore
+  @Test @Ignore
   def default_channel_open_options_are_read_write {
     repeat {
       val ops = path.ops
@@ -102,7 +124,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
     }
   }
 
-  @Test //@Ignore
+  @Test @Ignore
   def openning_channel_supports_several_openOptions {
     repeat {
       val ops = path.ops
@@ -111,7 +133,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
       // wish there was a way to test channel...
     }
   }
-  @Test //@Ignore
+  @Test @Ignore
   def default_filechannel_open_options_are_read_write {
     repeat {
       val ops = path.ops
@@ -123,7 +145,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
     }
   }
   
-  @Test //@Ignore
+  @Test @Ignore
   def default_simple_write_also_has_read {
     repeat {
       val ops = path.ops
@@ -132,7 +154,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
     }
   }
   
-  @Test //@Ignore  // Dead locks
+  @Test @Ignore  // Dead locks
   def default_simple_write_will_not_truncate {
     repeat {
       val ops = path.ops
@@ -142,7 +164,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
     }
   }
   
-  @Test //@Ignore
+  @Test @Ignore
   def execute_throws_exception_on_non_existant_file {
     val p = path("echo hi".getBytes)
     p.delete()
@@ -151,7 +173,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
     }
   }
   
-  @Test //@Ignore
+  @Test @Ignore
   def execute_throws_exception_on_non_executable_file {
     val p = path("echo hi".getBytes)
     p.access = "-x"

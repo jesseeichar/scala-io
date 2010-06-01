@@ -664,8 +664,8 @@ object Samples {
     implicit val codec = scalax.io.Codec.UTF8
 
     // By default the entire file is locked with exclusive access
-    val result: Option[String] = file.withLock() {
-      file.slurpString
+    val result: Option[String] = file.withLock() { s => 
+      s.slurpString
     }
 
     // if the filesystem does not support locking then None will be returned
@@ -677,8 +677,8 @@ object Samples {
     def fail: Nothing = throw new AssertionError("Uh oh")
 
     // or perhaps we only lock part of the file
-    val result2: Traversable[Byte] = file.withLock(10, 20) {
-      file.bytes slice (10,20)
+    val result2: Traversable[Byte] = file.withLock(10, 20) { s =>
+      s.bytes slice (10,20)
     } getOrElse {fail}
 
 
@@ -794,7 +794,7 @@ object Samples {
   { // Examples of non-file IO
     import scalax.io._
     import scalax.io.resource.Resource
-    import scalax.resource.ManagedResource
+    import scala.resource.ManagedResource
     import java.net.URL
     import java.io.{
       ObjectInputStream, InputStreamReader, ByteArrayOutputStream,

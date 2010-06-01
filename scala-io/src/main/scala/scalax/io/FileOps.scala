@@ -162,7 +162,7 @@ abstract class FileOps(path : Path) extends Seekable {
    * @return the result
    *          the result from the block or None if the filesystem does not support locking
    */
-  def withLock[R](start: Long = 0, size: Long = -1, shared: Boolean = false)(block: => R): Option[R]
+  def withLock[R](start: Long = 0, size: Long = -1, shared: Boolean = false)(block: Seekable => R): Option[R]
 
   // API ends here.
   // required for path
