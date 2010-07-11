@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>src/main/scala/io/Seekable.scala</string>
+	<string>src/test/scala/scalaio/samples.scala</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -21,19 +21,19 @@
 	<integer>358</integer>
 	<key>metaData</key>
 	<dict>
-		<key>src/main/scala/io/Seekable.scala</key>
+		<key>src/test/scala/scalaio/samples.scala</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>0</integer>
+				<integer>41</integer>
 				<key>line</key>
-				<integer>360</integer>
+				<integer>238</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>332</integer>
+			<integer>212</integer>
 		</dict>
 		<key>src/test/scala/scalaio/test/AbstractSeekableTests.scala</key>
 		<dict>
@@ -69,11 +69,11 @@
 	<key>openDocuments</key>
 	<array>
 		<string>src/test/scala/scalaio/test/AbstractSeekableTests.scala</string>
-		<string>src/main/scala/io/Seekable.scala</string>
+		<string>src/test/scala/scalaio/samples.scala</string>
 	</array>
 	<key>showFileHierarchyDrawer</key>
 	<true/>
 	<key>windowFrame</key>
-	<string>{{70, 88}, {949, 690}}</string>
+	<string>{{71, 88}, {848, 690}}</string>
 </dict>
 </plist>

@@ -23,21 +23,4 @@ class DefaultFileSystemFixture(val folder : TemporaryFolder, rnd : Random = new 
 
     override val root = Path(folder.getRoot)
     override def after = folder.delete()
-
-    /**
-     * Copy resource from test resources to filesystem
-     */
-    def copyResource(source : InputStreamResource[InputStream]) : Path = {
-        val dest = path
-        dest.ops write (source.bytes)
-        dest
-    }
-    override def text(sep:String) = {
-        val resource = Resource.fromInputStream {
-            val bytes = Constants.TEXT_VALUE.replaceAll("""\n""", sep).getBytes(Codec.UTF8.name)
-            new java.io.ByteArrayInputStream(bytes)
-        }
-        copyResource(resource)
-    }
-    override def image = copyResource(Resource.fromInputStream(Constants.IMAGE.openStream))
 }

@@ -20,6 +20,7 @@ test copy and move between filesystems
 DirectoryStream to throw exceptions (NotDirectoryException perhaps)
 FileOps to throw exceptions if not file (NotFileException perhaps)
 use useful exceptions 1.  See java7 exceptions (can mix them in) 2.  search for all intercept[IOException] and see if there is a better way
+Add default ExceptionHandlers and allow them to be set on a FileOps
 deleteRecursively should not return tuple.  It should be a case class
 Implement an mutable seekable that always reuses the same fileChannel
 Make DefaultFileSystem.open not close the resource

@@ -6,12 +6,20 @@
 **                          |/                                          **
 \*                                                                      */
 
-package scalaio.test
+package scalaio.test.ramfs
 
-import scalax.io.FileSystem
-import scalax.io.ramfs.RamFileSystem
-import scalax.test.sugar.MockitoSugarSupport.mock
+import scalax.io._
+import scalaio.test.AbstractFileOpsTests
+import org.junit.Assert._
+import org.junit.{
+  Test, Ignore
+}
 
-object ScalaIoMocks {
-  def fileSystemMock:FileSystem = new RamFileSystem
+import java.io.IOException
+
+class FileOpsTest extends AbstractFileOpsTests {
+
+  def path(implicit data : Array[Byte]) = { null // todo
+  }
+
 }

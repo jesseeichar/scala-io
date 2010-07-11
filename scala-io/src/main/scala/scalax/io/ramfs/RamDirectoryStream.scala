@@ -6,12 +6,10 @@
 **                          |/                                          **
 \*                                                                      */
 
-package scalaio.test
+package scalax.io.ramfs
 
-import scalax.io.FileSystem
-import scalax.io.ramfs.RamFileSystem
-import scalax.test.sugar.MockitoSugarSupport.mock
+import scalax.io.DirectoryStream
 
-object ScalaIoMocks {
-  def fileSystemMock:FileSystem = new RamFileSystem
+class RamDirectoryStream extends DirectoryStream[RamPath] {
+    override def iterator: Iterator[RamPath] = null // TODO
 }

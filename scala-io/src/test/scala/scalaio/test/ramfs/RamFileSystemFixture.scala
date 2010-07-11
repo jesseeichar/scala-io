@@ -6,10 +6,19 @@
 **                          |/                                          **
 \*                                                                      */
 
-package scalax.io.ram
+package scalaio.test.ramfs
 
-import scalax.io.DirectoryStream
+import util.Random
 
-class RamDirectoryStream extends DirectoryStream[RamPath] {
-    override def iterator: Iterator[RamPath] = null // TODO
+import scalax.io._
+import scalax.io.resource._
+import scalax.io.ramfs._
+
+import org.junit.rules.TemporaryFolder
+import java.io.InputStream
+import scalaio.test._
+
+class RamFileSystemFixture(rnd : Random = new Random())
+      extends FileSystemFixture(new RamFileSystem(), rnd) {
+  override val root = fs.roots.head
 }

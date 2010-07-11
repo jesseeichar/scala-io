@@ -9,7 +9,7 @@
 package scalaio.test.defaultfs
 
 import scalax.io._
-import scalax.io.ram._
+import scalax.io.ramfs._
 import Path.AccessModes._
 
 import org.junit.Assert._

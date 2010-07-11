@@ -114,18 +114,32 @@ abstract class FileSystemFixture(val fs : FileSystem, rnd : Random) {
           if(data!=null) try{data.delete()}catch{case _ =>}
         }
   }
-  
   /**
-   * returns a path to a binary image file of size 6315.  It is a copy of the file 
-   * in the test resources directory 'image.png'
+   * Copy resource from test resources to filesystem
    */
-  def image : Path
+  def copyResource(source : InputStreamResource[InputStream]) : Path = {
+      val dest = path
+      dest.ops write (source.bytes)
+      dest
+  }
   
   /**
    * returns a path to a text file.  It is a copy of the file 
    * in the test resources directory 'text'
    */
-  def text(sep:String) : Path
+  def text(sep:String) = {
+      val resource = Resource.fromInputStream {
+          val bytes = Constants.TEXT_VALUE.replaceAll("""\n""", sep).getBytes(Codec.UTF8.name)
+          new java.io.ByteArrayInputStream(bytes)
+      }
+      copyResource(resource)
+  }
+
+  /**
+   * returns a path to a binary image file of size 6315.  It is a copy of the file 
+   * in the test resources directory 'image.png'
+   */
+  def image = copyResource(Resource.fromInputStream(Constants.IMAGE.openStream))
 
   def after() : Unit = root.deleteRecursively()
 }

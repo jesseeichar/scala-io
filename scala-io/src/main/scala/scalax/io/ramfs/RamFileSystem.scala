@@ -6,7 +6,7 @@
 **                          |/                                          **
 \*                                                                      */
 
-package scalax.io.ram
+package scalax.io.ramfs
 
 import scala.resource.ManagedResource
 import scalax.io.{
