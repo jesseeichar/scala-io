@@ -40,19 +40,19 @@ object OpenOption {
    * Append to an existing file.
    * A file will not be created if the file does not exist
    */
-   case object APPEND extends OpenOption
+   case object Append extends OpenOption
   /**
    * Creating a file if it does not exist, but parent directories will not be created
    */
-  case object CREATE extends OpenOption
+  case object Create extends OpenOption
   /**
    * Creating a new file and fail if the file already exists
    */
-  case object CREATE_NEW extends OpenOption
+  case object CreateNew extends OpenOption
   /**
    * Creating a new file and all parent directories
    */
-  case object CREATE_FULL extends OpenOption
+  case object CreateFull extends OpenOption
   /**
    * Delete file on close.
    * <p>
@@ -61,47 +61,47 @@ object OpenOption {
    * then the file will be deleted on VM termination (if possible)
    * </p>
    */
-  case object DELETE_ON_CLOSE extends OpenOption
+  case object DeleteOnClose extends OpenOption
   /**
    * Requires that every update to the file's content (but not metadata)
    * be written synchronously to the underlying storage device
    */
-  case object DSYNC extends OpenOption
+  case object DSync extends OpenOption
   /**
    * Open a file for read access
    */
   case object Read extends OpenOption
   /**
-   * A hint to create a sparse file if used with {@link #CREATE_NEW}
+   * A hint to create a sparse file if used with {@link #CreateNew}
    */
-  case object SPARSE extends OpenOption
+  case object Sparse extends OpenOption
   /**
    * Requires that every update to the file's content or metadata be
    * written synchronously to the underlying storage device
    */
-  case object SYNC extends OpenOption
+  case object Sync extends OpenOption
   /**
    * If file exists and is opened for Write access then truncate the file to
    * 0 bytes.  Ignored if opened for Read access
    */
-  case object TRUNCATE extends OpenOption
+  case object Truncate extends OpenOption
   /**
    * Open file for write access
    */
   case object Write extends OpenOption
 
   /**
-   * Collection of options: {@link #CREATE}, {@link #TRUNCATE_EXISTING}, {@link #Write}
+   * Collection of options: {@link #Create}, {@link #Truncate}, {@link #Write}
    */
-  final val Write_TRUNCATE = List(CREATE_FULL, TRUNCATE, Write)
+  final val WriteTruncate = List(CreateFull, Truncate, Write)
   /**
-   * Collection of options: {@link #CREATE}, {@link #TRUNCATE_EXISTING}, {@link #Write}
+   * Collection of options: {@link #Create}, {@link #Truncate}, {@link #Write}
    */
-  final val Read_Write = List(Read, CREATE_FULL, TRUNCATE, Write)
+  final val ReadWrite = List(Read, CreateFull, Truncate, Write)
   /**
-   * Collection of options: {@link #CREATE}, {@link #APPEND}, {@link #Write}
+   * Collection of options: {@link #Create}, {@link #Append}, {@link #Write}
    */
-  final val Write_APPEND = List(CREATE_FULL, APPEND, Write)
+  final val WriteAppend = List(CreateFull, Append, Write)
   
 }
 
@@ -123,7 +123,7 @@ trait LinkOption
  * @since   1.0
  */
 object LinkOption {
-  case object NOFOLLOW_LINKS extends LinkOption() with OpenOption with CopyOption {}
+  case object NoFollowLinks extends LinkOption() with OpenOption with CopyOption {}
 }
 
 /**

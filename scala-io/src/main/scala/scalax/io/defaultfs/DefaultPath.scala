@@ -180,7 +180,7 @@ class DefaultPath private[io] (val jfile: JFile, override val fileSystem: Defaul
     import scalax.io.OpenOption._
     for {inResource <- ops.fileChannel()
          in <- inResource
-         out <- dest.ops.channel(CREATE, TRUNCATE, Write)
+         out <- dest.ops.channel(Create, Truncate, Write)
     } {
       try {
         var pos, count = 0L

@@ -552,7 +552,7 @@ object Samples {
     // which are filesystem specific in general but the standard options
     // are defined in the OpenOption object
     // in addition to the definition common collections are also defined
-    // Write_APPEND for example is a List(CREATE, APPEND, Write)
+    // WriteAppend for example is a List(Create, Append, Write)
     file.write (List (1,2,3) map (_.toByte))
 
     // write a string to the file
@@ -657,7 +657,7 @@ object Samples {
     // default will create fileif it does not exist and overwrite if it does
     var out: OutputStreamResource[OutputStream] = file.outputStream()
     // create a appending stream
-    var out2: OutputStreamResource[OutputStream] = file.outputStream (Write_APPEND:_*)
+    var out2: OutputStreamResource[OutputStream] = file.outputStream (WriteAppend:_*)
     val bufferedOut: OutputStreamResource[BufferedOutputStream] = out.buffered
     val writableChannel: Resource[WritableByteChannel] = out.writableByteChannel
     val writer: WriterResource[Writer] = out.writer
@@ -667,7 +667,7 @@ object Samples {
     // examples getting ByteChannels
     // default is a read/write/create channel
     val channel: ByteChannelResource[ByteChannel] = file.channel()
-    val channel2: ByteChannelResource[ByteChannel] = file.channel(Read,Write,APPEND)
+    val channel2: ByteChannelResource[ByteChannel] = file.channel(Read,Write,Append)
 
     // Not all filesystems can support FileChannels so the fileChannel method returns an option
     file.fileChannel() foreach { fc => println("got a file channel") }

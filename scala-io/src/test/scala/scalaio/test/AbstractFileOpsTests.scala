@@ -67,7 +67,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
   def outputStream_can_be_append {
     repeat {
       val ops = path.ops
-      ops.outputStream(APPEND).writeString("more")
+      ops.outputStream(Append).writeString("more")
       assertEquals(demoData+"more", ops.slurpString)
     }
   }
@@ -85,7 +85,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
   def truncate_deletes_previous_file {
     repeat {
       val ops = path.ops
-      ops.outputStream(TRUNCATE,Write)
+      ops.outputStream(Truncate,Write)
       assertEquals("", ops.slurpString)
     }
   }
@@ -95,7 +95,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
     repeat {
       val ops = path.ops
       intercept[IOException] {
-        ops.outputStream(CREATE_NEW)
+        ops.outputStream(CreateNew)
       }
       assertEquals(demoData, ops.slurpString)
     }
@@ -106,7 +106,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
     implicit val times = 1
     repeat {
       val ops = path.ops
-      ops.outputStream(DELETE_ON_CLOSE).writeString("hello")
+      ops.outputStream(DeleteOnClose).writeString("hello")
       intercept[IOException] {
         // file should have been deleted so this should throw exception
         ops.slurpString
@@ -129,7 +129,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
     repeat {
       val ops = path.ops
       // Need to have mixed orders so that we can be sure the sorting takes place 
-      ops.channel(DSYNC,Write,Write,TRUNCATE,SYNC,CREATE,Read,Read).bytesAsInts.take(2).force
+      ops.channel(DSync,Write,Write,Truncate,Sync,Create,Read,Read).bytesAsInts.take(2).force
       // wish there was a way to test channel...
     }
   }
@@ -163,7 +163,6 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
       assertEquals(before, ops.channel().bytesAsInts.size)
     }
   }
-  
   
   /*  Removed from API since it may be difficult or even impossible on
       non-native file systems

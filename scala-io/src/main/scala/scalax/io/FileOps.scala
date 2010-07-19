@@ -131,11 +131,11 @@ abstract class FileOps(path : Path) extends Seekable {
    * @param openOptions
    *          The options that define how the file is opened for the duration of the
    *          operation
-   *          Default is Write/CREATE/TRUNCATE
+   *          Default is Write/Create/Truncate
    * @param action
    *          The function that will be executed within the block
    */
-  def open[R](openOptions: Seq[OpenOption] = Write_TRUNCATE)(action: Seekable => R): R
+  def open[R](openOptions: Seq[OpenOption] = WriteTruncate)(action: Seekable => R): R
                     
   /**
    * Performs an operation on the file with a FileLock

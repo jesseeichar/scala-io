@@ -260,7 +260,7 @@ trait Seekable extends Input with Output {
   *          default is to append all
   */
   def append[T <% Traversable[Byte]](bytes: T, take : Long = -1): Unit = {
-      for (c <- channel(APPEND)) writeTo(c, bytes, take)
+      for (c <- channel(Append)) writeTo(c, bytes, take)
   }
 
   // returns (wrote,earlyTermination)
@@ -343,7 +343,7 @@ trait Seekable extends Input with Output {
   */  
   def appendStrings(strings: Traversable[String], separator:String = "")(implicit codec: Codec): Unit = {
     val sepBytes = codec encode separator
-    for (c <- channel(APPEND)) (strings foldLeft false){ 
+    for (c <- channel(Append)) (strings foldLeft false){ 
       (addSep, string) =>
         if(addSep) writeTo(c, sepBytes, Long.MaxValue)
         writeTo(c, codec encode string, Long.MaxValue)
@@ -353,12 +353,12 @@ trait Seekable extends Input with Output {
   }
   
   def chop(position : Long) : Unit = {
-       channel(APPEND) foreach {_.truncate(position)}
+       channel(Append) foreach {_.truncate(position)}
   }
   
   def chopString(position : Long)(implicit codec:Codec) : Unit = {
     val posInBytes = charCountToByteCount(0,position)
-    channel(APPEND) foreach {_.truncate(posInBytes)}
+    channel(Append) foreach {_.truncate(posInBytes)}
   }
   
   // required methods for Input trait
@@ -366,7 +366,7 @@ trait Seekable extends Input with Output {
   def bytesAsInts:ResourceView[Int] = channel(Read).bytesAsInts
   
   // required method for Output trait
-  protected def outputStream = channel(Write_TRUNCATE:_*).outputStream
+  protected def outputStream = channel(WriteTruncate:_*).outputStream
 
 
 

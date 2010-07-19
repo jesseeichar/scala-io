@@ -44,7 +44,7 @@ private[io] class DefaultFileOps(path : DefaultPath, jfile:JFile) extends FileOp
       openOptions match {
           case Seq() => 
               openOutputStream(openOptions)
-          case opts if opts forall {opt => opt != Write && opt != APPEND} => 
+          case opts if opts forall {opt => opt != Write && opt != Append} => 
               openOutputStream(openOptions :+ Write)
           case _ =>
             openOutputStream(openOptions)
@@ -86,21 +86,21 @@ private[io] class DefaultFileOps(path : DefaultPath, jfile:JFile) extends FileOp
   }
 
   private def preOpen(openOptions: Seq[OpenOption]) : (Boolean, Seq[OpenOption]) = {
-     val options = if(openOptions.isEmpty) OpenOption.Write_TRUNCATE
+     val options = if(openOptions.isEmpty) OpenOption.WriteTruncate
                     else openOptions
 
       var append = false
       options foreach {
-          case APPEND => 
+          case Append => 
               append = true
-          case CREATE if !jfile.exists =>
+          case Create if !jfile.exists =>
             jfile.createNewFile()
-          case CREATE_FULL if !jfile.exists =>
+          case CreateFull if !jfile.exists =>
             jfile.getParentFile.mkdirs()
             jfile.createNewFile()
-          case CREATE_NEW =>
-            if (jfile.exists) Path.fail(jfile+" already exists, openOption "+CREATE_NEW+" cannot be used with an existing file")
-          case TRUNCATE if (openOptions contains Write) && (jfile.length > 0)=>
+          case CreateNew =>
+            if (jfile.exists) Path.fail(jfile+" already exists, openOption "+CreateNew+" cannot be used with an existing file")
+          case Truncate if (openOptions contains Write) && (jfile.length > 0)=>
             new FileOutputStream(jfile).close()  // truncate file
             
           case _ => ()
@@ -111,7 +111,7 @@ private[io] class DefaultFileOps(path : DefaultPath, jfile:JFile) extends FileOp
   
   private def openOutputStream(openOptions: Seq[OpenOption]) = {
     val (append, options) = preOpen(openOptions)
-    if (options contains DELETE_ON_CLOSE) {
+    if (options contains DeleteOnClose) {
         Resource fromOutputStream new DeletingFileOutputStream(jfile, append)
     } else {
         Resource fromOutputStream new FileOutputStream(jfile,append)
@@ -120,8 +120,8 @@ private[io] class DefaultFileOps(path : DefaultPath, jfile:JFile) extends FileOp
 
   private def openChannel(openOptions: Seq[OpenOption]) = {
     val (_, options) = preOpen(openOptions)
-    if (options contains DELETE_ON_CLOSE) {
-       throw new UnsupportedOperationException("DELETE_ON_CLOSE is not supported on FileChannels pre Java 7 implementations.")
+    if (options contains DeleteOnClose) {
+       throw new UnsupportedOperationException("DeleteOnClose is not supported on FileChannels pre Java 7 implementations.")
     } else {
         randomAccessFile(options)
     }
@@ -129,10 +129,10 @@ private[io] class DefaultFileOps(path : DefaultPath, jfile:JFile) extends FileOp
 
   private def randomAccessFile(openOptions: Seq[OpenOption]) = {
       val unsortedChars = openOptions collect {
-          case Write | APPEND => 'w'
+          case Write | Append => 'w'
           case Read => 'r'
-          case SYNC => 's'
-          case DSYNC => 'd'
+          case Sync => 's'
+          case DSync => 'd'
       }
       
       
@@ -157,7 +157,7 @@ private[io] class DefaultFileOps(path : DefaultPath, jfile:JFile) extends FileOp
           new RandomAccessFile(jfile, 'r' + chars.mkString)
       }
 
-      if(openOptions contains APPEND) file.seek(file.length)
+      if(openOptions contains Append) file.seek(file.length)
 
       file.getChannel
   }
