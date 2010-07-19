@@ -101,7 +101,7 @@ trait AbstractDirectoryStreamTests extends scalax.test.sugar.AssertionSugar {
     assertTrue(root.descendants() forall {_.exists})
     
     val totalFiles = root.descendants().size
-    root.descendants().take(totalFiles/2) foreach {p => p.access = p.access - WRITE}
+    root.descendants().take(totalFiles/2) foreach {p => p.access = p.access - Write}
     
     assertEquals(totalFiles, root.descendants().size)
   }

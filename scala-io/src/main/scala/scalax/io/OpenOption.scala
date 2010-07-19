@@ -70,7 +70,7 @@ object OpenOption {
   /**
    * Open a file for read access
    */
-  case object READ extends OpenOption
+  case object Read extends OpenOption
   /**
    * A hint to create a sparse file if used with {@link #CREATE_NEW}
    */
@@ -81,27 +81,27 @@ object OpenOption {
    */
   case object SYNC extends OpenOption
   /**
-   * If file exists and is opened for WRITE access then truncate the file to
-   * 0 bytes.  Ignored if opened for READ access
+   * If file exists and is opened for Write access then truncate the file to
+   * 0 bytes.  Ignored if opened for Read access
    */
   case object TRUNCATE extends OpenOption
   /**
    * Open file for write access
    */
-  case object WRITE extends OpenOption
+  case object Write extends OpenOption
 
   /**
-   * Collection of options: {@link #CREATE}, {@link #TRUNCATE_EXISTING}, {@link #WRITE}
+   * Collection of options: {@link #CREATE}, {@link #TRUNCATE_EXISTING}, {@link #Write}
    */
-  final val WRITE_TRUNCATE = List(CREATE_FULL, TRUNCATE, WRITE)
+  final val Write_TRUNCATE = List(CREATE_FULL, TRUNCATE, Write)
   /**
-   * Collection of options: {@link #CREATE}, {@link #TRUNCATE_EXISTING}, {@link #WRITE}
+   * Collection of options: {@link #CREATE}, {@link #TRUNCATE_EXISTING}, {@link #Write}
    */
-  final val READ_WRITE = List(READ, CREATE_FULL, TRUNCATE, WRITE)
+  final val Read_Write = List(Read, CREATE_FULL, TRUNCATE, Write)
   /**
-   * Collection of options: {@link #CREATE}, {@link #APPEND}, {@link #WRITE}
+   * Collection of options: {@link #CREATE}, {@link #APPEND}, {@link #Write}
    */
-  final val WRITE_APPEND = List(CREATE_FULL, APPEND, WRITE)
+  final val Write_APPEND = List(CREATE_FULL, APPEND, Write)
   
 }
 

@@ -50,9 +50,9 @@ class DefaultPath private[io] (val jfile: JFile, override val fileSystem: Defaul
   def parent: Option[DefaultPath] = Option(jfile.getParent()) map fileSystem.apply
   def checkAccess(modes: AccessMode*): Boolean = {
     modes forall {
-      case EXECUTE  => jfile.canExecute() 
-      case READ     => jfile.canRead()
-      case WRITE    => jfile.canWrite()
+      case Execute  => jfile.canExecute() 
+      case Read     => jfile.canRead()
+      case Write    => jfile.canWrite()
       case m => fail("Access mode "+m+" is not recognized as a access mode for DefaultPath")
     }
   }
@@ -72,15 +72,16 @@ class DefaultPath private[io] (val jfile: JFile, override val fileSystem: Defaul
   def access_=(accessModes:Iterable[AccessMode]) = {
     if (notExists) fail("Path %s does not exist".format(path))
 
-    jfile.setReadable(accessModes exists {_==READ})
-    jfile.setWritable(accessModes exists {_==WRITE})
-    jfile.setExecutable(accessModes exists {_==EXECUTE})
+    jfile.setReadable(accessModes exists {_==Read})
+    jfile.setWritable(accessModes exists {_==Write})
+    jfile.setExecutable(accessModes exists {_==Execute})
   }
   def access : Set[AccessMode] = {
     AccessModes.values filter { 
-      case READ => canRead
-      case WRITE => canWrite
-      case EXECUTE => canExecute
+      case Read => canRead
+      case Write => canWrite
+      case Execute => canExecute
+      case e => throw new Error(AccessModes.values.mkString)
     }
   }
   
@@ -109,7 +110,7 @@ class DefaultPath private[io] (val jfile: JFile, override val fileSystem: Defaul
     }
   }
   def createFile(createParents: Boolean = true, failIfExists: Boolean = true, 
-                 accessModes:Iterable[AccessMode]=List(READ,WRITE), attributes:Iterable[FileAttribute[_]]=Nil): Path = {
+                 accessModes:Iterable[AccessMode]=List(Read,Write), attributes:Iterable[FileAttribute[_]]=Nil): Path = {
                    
     if(exists && failIfExists) {
        fail("File '%s' already exists." format name)
@@ -131,7 +132,7 @@ class DefaultPath private[io] (val jfile: JFile, override val fileSystem: Defaul
   }
   
   def createDirectory(createParents: Boolean, failIfExists: Boolean,
-                      accessModes:Iterable[AccessMode]=List(READ,WRITE,EXECUTE),
+                      accessModes:Iterable[AccessMode]=List(Read,Write,Execute),
                       attributes:Iterable[FileAttribute[_]]=Nil) = {
       createContainingDir (createParents)
 
@@ -144,7 +145,7 @@ class DefaultPath private[io] (val jfile: JFile, override val fileSystem: Defaul
   
   def delete(force : Boolean): Path = {
     if(exists) {
-      if (force) access_= (access + WRITE)
+      if (force) access_= (access + Write)
       
       if(!canWrite) fail("File is not writeable so the file cannot be deleted")
       if(!jfile.delete) fail("Unable to delete file for unknown reason")
@@ -161,7 +162,7 @@ class DefaultPath private[io] (val jfile: JFile, override val fileSystem: Defaul
   	
     if (!createParents && target.parent.map(_.notExists).getOrElse(true)) fail("Parent directory of destination file does not exist.")
     if (target.exists && !replaceExisting) fail("Destination file already exists, force creation or choose another file.")
-    if (target.exists && !target.checkAccess(WRITE)) fail("Destination exists but is not writable.")
+    if (target.exists && !target.checkAccess(Write)) fail("Destination exists but is not writable.")
     if (target.isDirectory && target.children().nonEmpty) fail("Destination exists but is a non-empty directory.")
 
     if (isDirectory) target.createDirectory(createParents, false, access, attributes)
@@ -179,7 +180,7 @@ class DefaultPath private[io] (val jfile: JFile, override val fileSystem: Defaul
     import scalax.io.OpenOption._
     for {inResource <- ops.fileChannel()
          in <- inResource
-         out <- dest.ops.channel(CREATE, TRUNCATE, WRITE)
+         out <- dest.ops.channel(CREATE, TRUNCATE, Write)
     } {
       try {
         var pos, count = 0L

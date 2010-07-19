@@ -1,6 +1,6 @@
 /*                     __                                               *\
 **     ________ ___   / /  ___     Scala API                            **
-**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar             **
+**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar          **
 **  __\ \/ /__/ __ |/ /__/ __ |    http://scala-lang.org/               **
 ** /____/\___/_/ |_/____/_/ | |                                         **
 **                          |/                                          **
@@ -19,14 +19,20 @@ import java.net.{
   URL,URI
 }
 
-class RamPath(name:String, fileSystem:FileSystem) extends Path(fileSystem) {
-    def toAbsolute: Path = null // TODO
-    def toURI: URI = null // TODO
-    def \(child: String): Path = null // TODO
-    def name: String = null //TODO
-    def path: String = null //TODO
-    def normalize: Path = null //TODO
-    def parent: Option[Path] = null //TODO
+class RamPath(relativeTo:String, val path:String, override val fileSystem:RamFileSystem) extends Path(fileSystem) {
+    lazy val toAbsolute: Path = fileSystem.apply("",relativeTo + fileSystem.separator + path)
+    lazy val toURI: URI = fileSystem.uri(this)
+    def \(child: String): RamPath = fileSystem.apply(this.toAbsolute.path,child)
+    lazy val name: String = segments.last
+    lazy val normalize: RamPath = null //TODO
+    lazy val parent: Option[RamPath] = {
+      val path = toAbsolute.path.dropRight(toAbsolute.name.length)
+      if(path.length == 0 || path == fileSystem.separator.toString) {
+        None
+      } else {
+        Some(fileSystem.apply("",path))
+      }
+    }
     def checkAccess(modes: AccessMode*): Boolean = false //TODO
     def canWrite = false // TODO
     def canRead = false // TODO
@@ -42,10 +48,10 @@ class RamPath(name:String, fileSystem:FileSystem) extends Path(fileSystem) {
     def access_=(accessModes:Iterable[AccessMode]) = () // TODO
     def access : Set[AccessMode] = null
     def createFile(createParents: Boolean = true, failIfExists: Boolean = true,
-                   accessModes:Iterable[AccessMode]=List(READ,WRITE), 
+                   accessModes:Iterable[AccessMode]=List(Read,Write), 
                    attributes:Iterable[FileAttribute[_]]=Nil): Path = null //TODO
     def createDirectory(createParents: Boolean = true, failIfExists: Boolean = true,
-                        accessModes:Iterable[AccessMode]=List(READ,WRITE), 
+                        accessModes:Iterable[AccessMode]=List(Read,Write), 
                         attributes:Iterable[FileAttribute[_]]=Nil) = null //TODO
     def delete(force:Boolean): Path = this //TODO
     def copyTo(target: Path, 
@@ -65,5 +71,5 @@ class RamPath(name:String, fileSystem:FileSystem) extends Path(fileSystem) {
 
     def descendants(filter:Path => Boolean, depth:Int, options:Traversable[LinkOption]):DirectoryStream[Path] = null //TODO
 
-    def ops:FileOps = null //TODO
+    def ops:FileOps = new RamFileOps(this)
 }

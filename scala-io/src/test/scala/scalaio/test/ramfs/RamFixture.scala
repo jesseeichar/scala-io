@@ -8,27 +8,24 @@
 
 package scalaio.test.ramfs
 
-import scalax.io._
-import scalaio.test.AbstractFileOpsTests
-import org.junit.Assert._
 import org.junit.{
-  Test, Ignore
+  Test, Before, After, Rule, Ignore
 }
+import org.junit.rules.TemporaryFolder
 
-import java.io.IOException
+import scalaio.test.FileSystemFixture
 
-class FileOpsTest extends AbstractFileOpsTests with RamFixture {
+trait RamFixture {
 
-  def path(implicit data : Array[Byte]) = { 
-    val p = fixture.path
-    val ops = p.ops
-    ops.write(data)
-    
-    assertArrayEquals(data, ops.byteArray)
-    
-    p
-    
-    
+  var fixture : FileSystemFixture = _
+
+  @Before
+  def before() : Unit = {
+    fixture = new RamFileSystemFixture()
+    assert(fixture != null)
   }
+
+  @After
+  def after() : Unit = fixture.after()
 
 }

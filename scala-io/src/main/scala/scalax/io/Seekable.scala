@@ -156,7 +156,7 @@ trait Seekable extends Input with Output {
   }
 
   private def insertDataInMemory[T <% Traversable[Byte]](position : Long, bytes : T) = {
-      for(channel <- channel(WRITE) ) {
+      for(channel <- channel(Write) ) {
             channel position position
             var buffers = (ByteBuffer allocateDirect MaxPermittedInMemory, ByteBuffer allocateDirect MaxPermittedInMemory)
             
@@ -196,7 +196,7 @@ trait Seekable extends Input with Output {
       
       tmp.ops writeInts (bytesAsInts.asInstanceOf[LongTraversable[Int]] ldrop position)
       
-      for(channel <- channel(WRITE) ) {
+      for(channel <- channel(Write) ) {
            channel position  position
            writeTo(channel, bytes, -1)
            writeTo(channel, tmp.ops.bytes, tmp.size)
@@ -204,7 +204,7 @@ trait Seekable extends Input with Output {
   }
   
   private def overwriteFileData[T <% Traversable[Byte]](position : Long, bytes : T, replaced : Long) = {
-      for(channel <- channel(WRITE) ) {
+      for(channel <- channel(Write) ) {
           channel.position(position)
 //            println("byte size,replaced",bytes.size,replaced)
           val (wrote, earlyTermination) = writeTo(channel,bytes, replaced)
@@ -362,11 +362,11 @@ trait Seekable extends Input with Output {
   }
   
   // required methods for Input trait
-  def chars(implicit codec: Codec): ResourceView[Char] = (channel(READ).reader(codec).chars).asInstanceOf[ResourceView[Char]]  // TODO this is broke
-  def bytesAsInts:ResourceView[Int] = channel(READ).bytesAsInts
+  def chars(implicit codec: Codec): ResourceView[Char] = (channel(Read).reader(codec).chars).asInstanceOf[ResourceView[Char]]  // TODO this is broke
+  def bytesAsInts:ResourceView[Int] = channel(Read).bytesAsInts
   
   // required method for Output trait
-  protected def outputStream = channel(WRITE_TRUNCATE:_*).outputStream
+  protected def outputStream = channel(Write_TRUNCATE:_*).outputStream
 
 
 
@@ -396,7 +396,7 @@ trait Seekable extends Input with Output {
       */
     }
 
-    val segment = channel(READ).chars.lslice(start, end)
+    val segment = channel(Read).chars.lslice(start, end)
     (0L /: segment ) { (replacedInBytes, nextChar) => 
       replacedInBytes + sizeInBytes(nextChar)
     }    

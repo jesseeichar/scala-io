@@ -82,11 +82,11 @@ abstract class FileOps(path : Path) extends Seekable {
   /**
   * Obtains an OutputStreamResource for writing to the file
   *
-  * All {@link OpenOption} can be used except READ which will be ignored if present
+  * All {@link OpenOption} can be used except Read which will be ignored if present
   *
   *  @param openOptions
   *           the options that define how the file is opened when using the stream
-  *           The WRITE option is implicitly added to the set of options
+  *           The Write option is implicitly added to the set of options
   *           Default is write/create/truncate
   */
   def outputStream(openOptions:OpenOption*): OutputStreamResource[OutputStream]
@@ -131,11 +131,11 @@ abstract class FileOps(path : Path) extends Seekable {
    * @param openOptions
    *          The options that define how the file is opened for the duration of the
    *          operation
-   *          Default is WRITE/CREATE/TRUNCATE
+   *          Default is Write/CREATE/TRUNCATE
    * @param action
    *          The function that will be executed within the block
    */
-  def open[R](openOptions: Seq[OpenOption] = WRITE_TRUNCATE)(action: Seekable => R): R
+  def open[R](openOptions: Seq[OpenOption] = Write_TRUNCATE)(action: Seekable => R): R
                     
   /**
    * Performs an operation on the file with a FileLock
@@ -166,7 +166,6 @@ abstract class FileOps(path : Path) extends Seekable {
 
   // API ends here.
   // required for path
-  def execute(args:String*)(implicit configuration:ProcessBuilder=>Unit = p=>()):Option[Process]
   
   // required methods for Input trait
   override def chars(implicit codec: Codec): ResourceView[Char] = inputStream.reader(codec).chars

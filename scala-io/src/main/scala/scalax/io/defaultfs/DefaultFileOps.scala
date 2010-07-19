@@ -44,8 +44,8 @@ private[io] class DefaultFileOps(path : DefaultPath, jfile:JFile) extends FileOp
       openOptions match {
           case Seq() => 
               openOutputStream(openOptions)
-          case opts if opts forall {opt => opt != WRITE && opt != APPEND} => 
-              openOutputStream(openOptions :+ WRITE)
+          case opts if opts forall {opt => opt != Write && opt != APPEND} => 
+              openOutputStream(openOptions :+ Write)
           case _ =>
             openOutputStream(openOptions)
       }
@@ -57,7 +57,7 @@ private[io] class DefaultFileOps(path : DefaultPath, jfile:JFile) extends FileOp
   }
   def fileChannel(openOptions: OpenOption*) = Some(Resource fromByteChannel openChannel(openOptions))
 
-  def open[R](openOptions: Seq[OpenOption] = List(READ,WRITE))(action: Seekable => R): R = {
+  def open[R](openOptions: Seq[OpenOption] = List(Read,Write))(action: Seekable => R): R = {
     val c = openChannel(openOptions)
     val seekable = new Seekable {
       protected def channel(openOptions:OpenOption*) = {
@@ -85,17 +85,8 @@ private[io] class DefaultFileOps(path : DefaultPath, jfile:JFile) extends FileOp
     result.opt.flatten.headOption
   }
 
-  def execute(args:String*)(implicit configuration:ProcessBuilder=>Unit = p =>()):Option[Process] = {
-    import Path.fail
-
-    if(!jfile.exists) fail(jfile+" can not be executed as it does not exist")
-    if(!jfile.canExecute) fail(jfile+" can not be executed as the execution access option is not set")
-
-    null // TODO
-  }
-
   private def preOpen(openOptions: Seq[OpenOption]) : (Boolean, Seq[OpenOption]) = {
-     val options = if(openOptions.isEmpty) OpenOption.WRITE_TRUNCATE
+     val options = if(openOptions.isEmpty) OpenOption.Write_TRUNCATE
                     else openOptions
 
       var append = false
@@ -109,7 +100,7 @@ private[io] class DefaultFileOps(path : DefaultPath, jfile:JFile) extends FileOp
             jfile.createNewFile()
           case CREATE_NEW =>
             if (jfile.exists) Path.fail(jfile+" already exists, openOption "+CREATE_NEW+" cannot be used with an existing file")
-          case TRUNCATE if (openOptions contains WRITE) && (jfile.length > 0)=>
+          case TRUNCATE if (openOptions contains Write) && (jfile.length > 0)=>
             new FileOutputStream(jfile).close()  // truncate file
             
           case _ => ()
@@ -138,8 +129,8 @@ private[io] class DefaultFileOps(path : DefaultPath, jfile:JFile) extends FileOp
 
   private def randomAccessFile(openOptions: Seq[OpenOption]) = {
       val unsortedChars = openOptions collect {
-          case WRITE | APPEND => 'w'
-          case READ => 'r'
+          case Write | APPEND => 'w'
+          case Read => 'r'
           case SYNC => 's'
           case DSYNC => 'd'
       }

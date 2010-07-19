@@ -231,7 +231,7 @@ object Resource {
    * @return
    *          an InputResource
    */
-  def fromInputStream[A <: InputStream](opener: => A) : InputStreamResource[A] = new InputStreamResource[A](opener)
+  def fromInputStream[A <: InputStream](opener: => A)(implicit closeActions:List[A => Unit] = Nil) : InputStreamResource[A] = new InputStreamResource[A](opener)
   /**
    * Create an Input Resource instance from a BufferedInputStream
    * <p>

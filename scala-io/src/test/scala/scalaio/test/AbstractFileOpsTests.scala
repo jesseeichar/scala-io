@@ -24,7 +24,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
   val demoData = "hello this is demo data"
 
   /**
-   * create a file ops object on a path that is an existing file.  File must be at minimum 5 characters long
+   * create a path object to an existing file.  File must be at minimum 5 characters long
    */
   def path(implicit data : Array[Byte] = demoData.getBytes(codec.name)) : Path
 
@@ -76,7 +76,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
   def outputStream_with_read_will_add_write {
     repeat {
       val ops = path.ops
-      ops.outputStream(READ).writeString("more")
+      ops.outputStream(Read).writeString("more")
       assertEquals("more", ops.slurpString)
     }
   }
@@ -85,7 +85,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
   def truncate_deletes_previous_file {
     repeat {
       val ops = path.ops
-      ops.outputStream(TRUNCATE,WRITE)
+      ops.outputStream(TRUNCATE,Write)
       assertEquals("", ops.slurpString)
     }
   }
@@ -129,7 +129,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
     repeat {
       val ops = path.ops
       // Need to have mixed orders so that we can be sure the sorting takes place 
-      ops.channel(DSYNC,WRITE,WRITE,TRUNCATE,SYNC,CREATE,READ,READ).bytesAsInts.take(2).force
+      ops.channel(DSYNC,Write,Write,TRUNCATE,SYNC,CREATE,Read,Read).bytesAsInts.take(2).force
       // wish there was a way to test channel...
     }
   }
@@ -164,6 +164,9 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
     }
   }
   
+  
+  /*  Removed from API since it may be difficult or even impossible on
+      non-native file systems
   @Test //@Ignore
   def execute_throws_exception_on_non_existant_file {
     val p = path("echo hi".getBytes)
@@ -182,5 +185,6 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
     }
   }
 
-  // TODO EXECUTE
+  // TODO Execute
+  */
 }

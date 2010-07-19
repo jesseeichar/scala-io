@@ -42,11 +42,13 @@ object Path
   /**
    * Enumeration of the Access modes possible for accessing files
    */
-  object AccessModes extends Enumeration {
-    type AccessMode = Value
-    val EXECUTE, READ, WRITE = Value : AccessMode
+  object AccessModes {
+    sealed trait AccessMode 
+    case object Execute extends AccessMode
+    case object Read extends AccessMode
+    case object Write extends AccessMode
+    def values:Set[AccessMode] = Set(Execute, Read, Write)
   }
-
   /**
    * Lists the roots of the default filesystem
    */
@@ -187,7 +189,7 @@ object Path
    * Example:
    * <pre><code>
    * val Apple = path.matcher (pattern="[aA]pple", syntax="glob")
-   * val ReadWrite = new AccessMatcher (READ, WRITE)
+   * val ReadWrite = new AccessMatcher (Read, Write)
    * path match {
    *   case File(f) => println("A file was found")
    *   case Directory(d) => println("A directory was found")
@@ -605,9 +607,9 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
     }
     
     val actualModes = modes map {
-      case 'r' => READ
-      case 'w' => WRITE
-      case 'x' => EXECUTE
+      case 'r' => Read
+      case 'w' => Write
+      case 'x' => Execute
       case t => fail("access mode %s not recognized" format t)
     }
     
@@ -667,7 +669,7 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    *           If parent directory does not exist
    */
   def createFile(createParents:Boolean = true, failIfExists: Boolean = true, 
-                 accessModes:Iterable[AccessMode]=List(READ,WRITE), attributes:Iterable[FileAttribute[_]]=Nil): Path
+                 accessModes:Iterable[AccessMode]=List(Read,Write), attributes:Iterable[FileAttribute[_]]=Nil): Path
 
   /**
    * Create the directory referenced by this path.
@@ -707,7 +709,7 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    *
    */
   def createDirectory(createParents: Boolean = true, failIfExists: Boolean = true, 
-                      accessModes:Iterable[AccessMode]=List(READ,WRITE), attributes:Iterable[FileAttribute[_]]=Nil): Path
+                      accessModes:Iterable[AccessMode]=List(Read,Write), attributes:Iterable[FileAttribute[_]]=Nil): Path
 
   // deletions
   /**

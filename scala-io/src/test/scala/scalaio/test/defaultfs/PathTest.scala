@@ -105,7 +105,7 @@ class PathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
   @Test //@Ignore
   def create_should_fail_in_known_manner_when_parent_dir_is_not_available() : Unit = {
     val dir = fixture.path.createDirectory()
-    dir.access = READ :: Nil
+    dir.access = Read :: Nil
     def testFailure() = {
       val file = (dir \ "child")
       intercept[IOException] {  // TODO should be specific exception but maybe for next version?
@@ -116,7 +116,7 @@ class PathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
       }
     }
     testFailure()
-    dir.access = WRITE :: Nil
+    dir.access = Write :: Nil
     testFailure()
     dir.delete().createFile()
     testFailure()
@@ -194,35 +194,35 @@ class PathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
     val p = fixture.path.createFile()
 
     p.access = "r"
-    assertEquals("READ assignment failed: " + p.access, Set(READ), p.access.toSet)
+    assertEquals("Read assignment failed: " + p.access, Set(Read), p.access.toSet)
     p.access = "w"
-    assertEquals("WRITE assignment failed: " + p.access, Set(WRITE), p.access.toSet)
+    assertEquals("Write assignment failed: " + p.access, Set(Write), p.access.toSet)
     p.access = "x"
-    assertEquals("EXECUTE assignment failed: " + p.access, Set(EXECUTE), p.access.toSet)
+    assertEquals("Execute assignment failed: " + p.access, Set(Execute), p.access.toSet)
     
     p.access = ""
     assertEquals("Empty assignment failed: " + p.access, Set.empty, p.access.toSet)
     
     p.access = "+r"
-    assertEquals("+r assignment failed: " + p.access, Set(READ), p.access.toSet)
+    assertEquals("+r assignment failed: " + p.access, Set(Read), p.access.toSet)
     
     p.access = "-r"
     assertEquals("-1 assignment failed: " + p.access, Set.empty, p.access.toSet)
         
     p.access = "+w"
-    assertEquals("+w assignment failed: " + p.access, Set(WRITE), p.access.toSet)
+    assertEquals("+w assignment failed: " + p.access, Set(Write), p.access.toSet)
     
     p.access = "-w"
     assertEquals("-w assignment failed: " + p.access, Set.empty, p.access.toSet)
     
     p.access = "+rxw"
-    assertEquals("+rxw assignment failed: " + p.access, Set(READ,WRITE,EXECUTE), p.access.toSet)
+    assertEquals("+rxw assignment failed: " + p.access, Set(Read,Write,Execute), p.access.toSet)
     
     p.access = "+rxw"
-    assertEquals("+rxw second assignment failed: " + p.access, Set(READ,WRITE,EXECUTE), p.access.toSet)
+    assertEquals("+rxw second assignment failed: " + p.access, Set(Read,Write,Execute), p.access.toSet)
     
     p.access = "-xw"
-    assertEquals("-xw assignment failed: " + p.access, Set(READ), p.access.toSet)
+    assertEquals("-xw assignment failed: " + p.access, Set(Read), p.access.toSet)
     
     intercept[IOException] {
       p.access = "@"
@@ -257,7 +257,7 @@ class PathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
       val (root,_) = fixture.tree(5)
 
       val totalFiles = root.descendants().size + 1 // add root
-      root.descendants {_.isFile}.take(totalFiles/2) foreach {p => p.access = READ :: Nil}
+      root.descendants {_.isFile}.take(totalFiles/2) foreach {p => p.access = Read :: Nil}
       intercept[IOException] {
         root.deleteRecursively()
       }
@@ -270,7 +270,7 @@ class PathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
       val totalPaths = root.descendants().size + 1
       
       val totalFiles = root.descendants{_.isFile}.size
-      root.descendants {_.isFile}.take(totalFiles/2) foreach {p => p.access = p.access - WRITE}
+      root.descendants {_.isFile}.take(totalFiles/2) foreach {p => p.access = p.access - Write}
       val (deleted, remaining) = root.deleteRecursively(continueOnFailure = true)
 
       assertTrue(root.exists)
@@ -285,7 +285,7 @@ class PathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
 
       val totalPaths = root.descendants().size + 1
       val totalFiles = root.descendants{_.isFile}.size
-      root.descendants {_.isFile}.take(totalFiles/2) foreach {p => p.access = p.access - WRITE}
+      root.descendants {_.isFile}.take(totalFiles/2) foreach {p => p.access = p.access - Write}
 
       val (deleted, remaining) = root.deleteRecursively(force = true)
 
@@ -383,7 +383,7 @@ class PathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
     }
     def overwrite = {
       val access = exists.access
-      exists.access = List(READ)
+      exists.access = List(Read)
       intercept[IOException] {
         f2.copyTo (exists, replaceExisting=true)
       }
@@ -439,7 +439,7 @@ class PathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
     assertTrue(path.exists)
     assertTrue("expected path access to be "+access+".  Access is "+path.access, path checkAccess (access:_*))
     
-    path.access = List(READ)
+    path.access = List(Read)
     intercept[IOException] {
       path.delete()  // not writeable
     }
@@ -480,7 +480,7 @@ class PathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
     val path = fspath(pathName)
     assertEquals(Nil, path.access.toList)
     intercept[IOException] {
-      path.access = Path.AccessModes.WRITE :: Nil
+      path.access = Path.AccessModes.Write :: Nil
     }
     path.createFile()
     path.ops.writeString("some test data")
@@ -498,12 +498,12 @@ class PathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
 
   def writeTest(path: Path) = path.ops.writeString("abc")
 
-  def execTest(path: Path) = path.ops.execute()
+  def execTest(path: Path) = if(!path.canExecute) throw new IOException()
 
   def matchAccess(access: AccessMode, path: Path, is: Boolean) = access match {
-    case EXECUTE => verifyAccess (execTest(path))(is)
-    case WRITE => verifyAccess (writeTest(path))(is)
-    case READ => verifyAccess (readTest(path))(is)
+    case Execute => verifyAccess (execTest(path))(is)
+    case Write => verifyAccess (writeTest(path))(is)
+    case Read => verifyAccess (readTest(path))(is)
   }
   /*  
     AccessModes.values intersect (access) foreach { a => verifyTest(access, path, is) }

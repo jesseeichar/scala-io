@@ -22,79 +22,6 @@
 import java.lang.{ Process => JProcess }
 
 object Samples {
-  { // implicitly convert strings to paths
-    import scalax.io.Path
-    import Path.string2path
-
-    val filePath: Path = "/tmp/file"
-  }
-
-  { // implicitly convert files to paths
-    import java.io.File
-    import scalax.io.Path
-    import Path.jfile2path
-
-    val filePath: Path = new File ("/tmp/file")
-  }
-
-  { // list roots of defaultFileSystem
-    import scalax.io.{Path, FileSystem}
-    val roots1: List[Path] = Path.roots
-    // This method delegates to the defaultFileSystem as follows
-    val roots2: List[Path] = FileSystem.default.roots
-  }
-
-  { // Create a Path in the default filesystem explicitly
-    import scalax.io.{Path, FileSystem}
-    // first use default param to indicate defaultFileSystem
-    val path1: Path = Path ("/tmp/file1")
-
-    // include windows examples for completeness
-    val path2: Path = Path ("file://c:/tmp/file2")
-    val path3: Path = Path ("file://c:\\tmp\\file3")
-
-    //now explicitly state the filesystem
-    val path4: Path = Path ("/tmp/file4")(FileSystem.default)
-
-    // or declare an implicit val so it can be reused (this is bot really
-    // required since the default paramter is the default filesystem but
-    // it illustrates how another filesystem can be used
-    implicit val fs = FileSystem.default
-    // fs will now be used to create the path
-    val path5: Path = Path ("/tmp/file5")
-
-    // a filesystem can also be used to create Paths
-    val path6: Path = fs ("/tmp/file6")
-  }
-
-  { // Create Path from URI
-    import scalax.io.{Path}
-    import java.net.URI
-    // the URI type indicates which filesystem to use
-    // file:// indicates the default filesystem
-    val path1: Path = Path (new URI ("file:///tmp/file1"))
-
-    // include windows examples for completeness
-    val path2: Path = Path (new URI ("file://c:/tmp/file2"))
-    val path3: Path = Path (new URI ("file://c:\\tmp\\file3"))
-
-    // For opening a zip filesystem
-    val zipPath: Path = Path (new URI ("zip:///tmp/zipfile.zip!/file"))
-  }
-
-  // TODO demonstrate the GenericPath usage
-
-  { // Create path from java.io.File.
-    import java.io.File
-    import scalax.io.Path
-    // java.io.File are always on the default filesystem
-    // so filesystem is not declared
-    val path1: Path = Path (new File ("/tmp/file1"))
-    // include windows examples for completeness
-    val path2: Path = Path (new File ("file://c:/tmp/file2"))
-    val path3: Path = Path (new File ("file://c:\\tmp\\file3"))
-  }
-
   { // create temporary files
     import scalax.io.{Path,FileSystem}
 
@@ -180,9 +107,9 @@ object Samples {
     // Now match based on the permissions of the path
     // Set up matchers we want to use
     import Path.AccessModes._
-    val RWE = new AccessMatcher (READ, WRITE, EXECUTE)
-    val RW = new AccessMatcher (READ, WRITE)
-    val R = new AccessMatcher (READ)
+    val RWE = new AccessMatcher (Read, Write, Execute)
+    val RW = new AccessMatcher (Read, Write)
+    val R = new AccessMatcher (Read)
     Path ("/tmp/file") match {
       case RWE (path) => println ("path is rwe"+path)
       case RW (path) => println ("path is rw"+path)
@@ -266,7 +193,7 @@ object Samples {
 
     // next check if file is read and write
     import Path.AccessModes._
-    val readWrite: Boolean = path.checkAccess (READ, WRITE)
+    val readWrite: Boolean = path.checkAccess (Read, Write)
 
     // the following are fairly boring queries
     val root: Option[Path] = path.root
@@ -386,19 +313,6 @@ object Samples {
                  atomicMove=true)
   }
 
-  { // execute a file if it is executeable
-    import scalax.io.Path
-    import scalax.io.Process
-
-    val path: Path = Path ("/tmp/file")
-
-    // attempt to execute the file.  If it is possible then the process will be
-    // returned
-    implicit val codec = scalax.io.Codec.UTF8
-    val process:Option[Process] = path.ops.execute("arg1", "arg2")
-
-
-  }
 
   { // search the contents of a directory and perform operations on the objects encountered
 
@@ -551,7 +465,7 @@ object Samples {
     implicit val codec = scalax.io.Codec.UTF8
 
     val file:FileOps = Path("file").ops
-    val consonants = file.slurpString.filter (c => !("aeiou" contains c))
+    val consonants = file.slurpString.filterNot (c => "aeiou" contains c)
 
     // ok now as bytes
     val (small, large) = file.byteArray partition (_ < 128)
@@ -638,7 +552,7 @@ object Samples {
     // which are filesystem specific in general but the standard options
     // are defined in the OpenOption object
     // in addition to the definition common collections are also defined
-    // WRITE_APPEND for example is a List(CREATE, APPEND, WRITE)
+    // Write_APPEND for example is a List(CREATE, APPEND, Write)
     file.write (List (1,2,3) map (_.toByte))
 
     // write a string to the file
@@ -743,7 +657,7 @@ object Samples {
     // default will create fileif it does not exist and overwrite if it does
     var out: OutputStreamResource[OutputStream] = file.outputStream()
     // create a appending stream
-    var out2: OutputStreamResource[OutputStream] = file.outputStream (WRITE_APPEND:_*)
+    var out2: OutputStreamResource[OutputStream] = file.outputStream (Write_APPEND:_*)
     val bufferedOut: OutputStreamResource[BufferedOutputStream] = out.buffered
     val writableChannel: Resource[WritableByteChannel] = out.writableByteChannel
     val writer: WriterResource[Writer] = out.writer
@@ -753,7 +667,7 @@ object Samples {
     // examples getting ByteChannels
     // default is a read/write/create channel
     val channel: ByteChannelResource[ByteChannel] = file.channel()
-    val channel2: ByteChannelResource[ByteChannel] = file.channel(READ,WRITE,APPEND)
+    val channel2: ByteChannelResource[ByteChannel] = file.channel(Read,Write,APPEND)
 
     // Not all filesystems can support FileChannels so the fileChannel method returns an option
     file.fileChannel() foreach { fc => println("got a file channel") }
