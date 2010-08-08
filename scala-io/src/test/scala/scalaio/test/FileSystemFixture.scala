@@ -66,7 +66,7 @@ abstract class FileSystemFixture(val fs : FileSystem, rnd : Random) {
     file(seg)
   }
   
-  def path(segments : Int, root : Path = root) : Path = root \ fs(file(segments))  
+  def path(segments : Int, root : Path = root) : Path = root \ fs(file(segments))
   def path : Path = root \ fs(file)
   
   /* Returns a Path and a Node.  Both the Node and the Path
@@ -77,13 +77,15 @@ abstract class FileSystemFixture(val fs : FileSystem, rnd : Random) {
 
     val newRoot = path(1)
     newRoot.createDirectory(true)
-    val structure = Node("/"+(newRoot.segments mkString "/"), None)
+    
+    val structure = Node(("/"+(newRoot.segments mkString "/")).replaceAll("/+","/"), None)
       for (d <- 1 until depth;
            files <- 0 until rndInt(5)) {
           val p = path(d, newRoot).createFile(failIfExists = false)
-          
+
           p.relativize(root).segments.drop(1).foldLeft (structure){
-            (parent, label) => Node(parent.path + "/"+label, Some(parent))
+            (parent, label) => 
+              Node(parent.path + "/"+ label, Some(parent))
           }
        }
     (newRoot, structure)
@@ -141,5 +143,5 @@ abstract class FileSystemFixture(val fs : FileSystem, rnd : Random) {
    */
   def image = copyResource(Resource.fromInputStream(Constants.IMAGE.openStream))
 
-  def after() : Unit = root.deleteRecursively()
+  def after() : Unit = root.deleteRecursively(force=true)
 }

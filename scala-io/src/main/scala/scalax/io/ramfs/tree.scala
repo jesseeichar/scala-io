@@ -18,6 +18,7 @@ import scala.collection.mutable.ArrayBuffer
 import java.io.{
   OutputStream, InputStream, ByteArrayOutputStream, ByteArrayInputStream, IOException
 }
+import OpenOption._
 
 private[ramfs] trait NodeFac {
   def create(name:String):Node
@@ -38,20 +39,44 @@ private[ramfs] object DirNode extends NodeFac {
 private[ramfs] trait Node {
   def name:String
   def lastModified:Long
+  var canRead = true;
+  var canWrite = true;
+  var canExecute = true;
+  override def toString = getClass.getSimpleName+": "+name
 }
+
 private[ramfs] class FileNode(val name:String) extends Node {
     var data = ArrayBuffer[Byte]()
     var lastModified = System.currentTimeMillis
     def inputResource : InputStreamResource[InputStream] = 
       Resource.fromInputStream(new ByteArrayInputStream(data.toArray))
       
-    def outputResource(openOptions: OpenOption*) : OutputStreamResource[OutputStream] = {
-      Resource.fromOutputStream(new ByteArrayOutputStream(){
-        override def close() {
-          super.close()
-          data = ArrayBuffer(this.toByteArray:_*)
+    def outputResource(owner:RamPath, openOptions: OpenOption*) : OutputStreamResource[OutputStream] = {
+      require (owner.node exists {_ == this})
+      
+      def newResource = {
+        val out = new ByteArrayOutputStream(){
+          override def close() {
+            super.close()
+            if(openOptions contains DeleteOnClose) {
+              owner.delete(force=true);  
+            } else {
+              data = ArrayBuffer(this.toByteArray:_*)
+            }
+          }
         }
-      })
+        
+        if(openOptions contains Append) {
+          out.write(data.toArray,0,data.size);
+        }
+        out
+      }
+      
+      if(openOptions contains Truncate) {
+        data.clear()
+      }
+      
+      Resource.fromOutputStream(newResource)
     }
     
     def channel() = Resource.fromByteChannel(new SeekableFileNodeChannel(this))
@@ -62,14 +87,21 @@ private[ramfs] class DirNode(val name:String) extends Node {
   var lastModified = System.currentTimeMillis
   val self = this;
   
-  def lookup(path:Seq[String]) : Option[Node]= path match {
+  def lookup(path:Seq[String]) : Option[Node]= {
+//    println("lookup",name,children,path)
+    path match {
       case Seq(s) if s == name => 
         Some(self)
+      case Seq(s) => 
+        children.find {_.name == s}
+      case Seq(s, rest @ _*) if s == name => 
+        self.lookup(rest)
       case Seq(s, rest @ _*) => 
         children.find {_.name == s} match {
           case Some(x:DirNode) => x.lookup(rest) 
           case _ => None
         }
+      }
   }
   
   def create(path:Seq[String], fac:NodeFac) : Node = path match {

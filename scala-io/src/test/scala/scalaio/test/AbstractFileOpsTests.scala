@@ -91,6 +91,15 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
   }
   
   @Test //@Ignore
+  def truncate_takes_precedence_over_Append {
+    repeat {
+      val ops = path.ops
+      ops.outputStream(Truncate,Write,Append)
+      assertEquals("", ops.slurpString)
+    }
+  }
+  
+  @Test //@Ignore
   def create_new_fails_when_file_exists {
     repeat {
       val ops = path.ops
@@ -105,8 +114,10 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
   def delete_on_close_deletes_after_operation {
     implicit val times = 1
     repeat {
-      val ops = path.ops
+      val p = path
+      val ops = p.ops
       ops.outputStream(DeleteOnClose).writeString("hello")
+      assertFalse(p.exists)
       intercept[IOException] {
         // file should have been deleted so this should throw exception
         ops.slurpString
@@ -154,7 +165,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
     }
   }
   
-  @Test //@Ignore  // Dead locks
+  @Test //@Ignore
   def default_simple_write_will_not_truncate {
     repeat {
       val ops = path.ops

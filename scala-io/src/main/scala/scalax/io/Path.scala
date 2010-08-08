@@ -245,6 +245,7 @@ object Path
 }
 
 import Path.AccessModes._
+import Path.fail
 
 /**
  *  A file reference that locates a file using a system independent path.
@@ -450,9 +451,9 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    * @return true if all modes are available on the file
    */
   def checkAccess(modes: AccessMode*): Boolean
-  def canWrite : Boolean
-  def canRead : Boolean
-  def canExecute : Boolean
+  def canWrite : Boolean = checkAccess(Write)
+  def canRead : Boolean = checkAccess(Read)
+  def canExecute : Boolean = checkAccess(Execute)
   /**
    * True if the path exists in the file system
    *
@@ -627,11 +628,54 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    *
    * @return the access modes set on the file
    */
-  def access : Set[AccessMode]
+  def access : Set[AccessMode] = Path.AccessModes.values filter { 
+    case Read => canRead
+    case Write => canWrite
+    case Execute => canExecute
+  }
   
-  def attributes : Iterable[FileAttribute[_]] = Nil // TODO for Java 1.7
+  def attributes : Iterable[FileAttribute[_]] = Nil // TODO for Java 1.7?
   
   // creations
+  private def createContainingDir(createParents: Boolean) = {
+    def testWrite(parent:Option[Path]) = {
+      parent match {
+        case Some(p) if(!p.canWrite) => fail("Cannot write parent directory: "+p+" of "+ path)
+        case Some(p) if(!p.isDirectory) => fail("parent path is not a directory")
+        case Some(p) if(!p.canExecute) => fail("Cannot execute in parent directory: "+p+" of "+ path)
+        case Some(p) => ()
+        case None => fail("Parent directory cannot be created: '"+path+"'")
+      }
+    }
+
+    (createParents, parent) match {
+      case (_, Some(p)) if(p.exists) => 
+        testWrite(parent)
+      case (true, Some(_)) => 
+        doCreateParents()
+        testWrite(parent)
+      case (true, None) => 
+        doCreateParents()
+        testWrite(toAbsolute.parent)
+      case (false, _) => fail("Parent directory does not exist")
+    }
+  }
+  
+  /**
+   * NOT PUBLIC API: Create all parent directories of the current Path
+   */
+  protected def doCreateParents():Unit
+  
+  /**
+   * NOT PUBLIC API: Create a directory for the current path without considering if the parents 
+   * has been previously created.   This method should fail if the parent does not exist
+   */
+  protected def doCreateDirectory():Boolean
+  /**
+   * NOT PUBLIC API: Create a file for the current path without considering if the parents 
+   * has been previously created.   This method should fail if the parent does not exist
+   */
+  protected def doCreateFile():Boolean  
   /**
    * Create the file referenced by this path.
    *
@@ -668,8 +712,27 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    *           If the process does not have write permission to the parent directory
    *           If parent directory does not exist
    */
-  def createFile(createParents:Boolean = true, failIfExists: Boolean = true, 
-                 accessModes:Iterable[AccessMode]=List(Read,Write), attributes:Iterable[FileAttribute[_]]=Nil): Path
+  def createFile( createParents:Boolean = true, failIfExists: Boolean = true, 
+                 accessModes:Iterable[AccessMode]=List(Read,Write), attributes:Iterable[FileAttribute[_]]=Nil): Path = {
+
+    if(exists && failIfExists) {
+       fail("File '%s' already exists." format name)
+    } else if (exists) {
+      this
+    } else {
+      createContainingDir (createParents)
+      // next assertions should be satisfied by createContainingDir or have already thrown an exception
+      assert(parent.forall{p => p.exists}, "parent must exist for a file to be created within it")
+      assert(parent.forall{p => p.canWrite}, "parent must be writeable")
+      assert(parent.forall{p => p.isDirectory}, "parent must be executable")
+      assert(parent.forall{p => p.canExecute}, "parent must be executable")
+
+      val res = doCreateFile()
+      access = accessModes
+      if (!res) fail("unable to create file")
+      else this
+    }
+  }
 
   /**
    * Create the directory referenced by this path.
@@ -708,8 +771,16 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    *           If parent directory does not exist
    *
    */
-  def createDirectory(createParents: Boolean = true, failIfExists: Boolean = true, 
-                      accessModes:Iterable[AccessMode]=List(Read,Write), attributes:Iterable[FileAttribute[_]]=Nil): Path
+  def createDirectory( createParents: Boolean = true, failIfExists: Boolean = true, 
+                      accessModes:Iterable[AccessMode]=List(Read,Write,Execute), attributes:Iterable[FileAttribute[_]]=Nil) =  {
+      createContainingDir (createParents)
+
+      val res = doCreateDirectory()
+
+      access = accessModes
+      if (!res && failIfExists && exists) fail("Directory '%s' already exists." format name)
+      else this
+  }
 
   // deletions
   /**

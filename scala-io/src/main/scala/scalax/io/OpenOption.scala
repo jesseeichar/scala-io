@@ -27,8 +27,7 @@ trait OpenOption {
 }
 
 /**
- * Several options that are supported by most
- * filesystems.
+ * Several options that are supported by most filesystems.
  * 
  * @author  Jesse Eichar
  * @since   1.0
@@ -82,7 +81,8 @@ object OpenOption {
   case object Sync extends OpenOption
   /**
    * If file exists and is opened for Write access then truncate the file to
-   * 0 bytes.  Ignored if opened for Read access
+   * 0 bytes.  Ignored if opened for Read access.  Truncate takes precedence over 
+   * Append.
    */
   case object Truncate extends OpenOption
   /**

@@ -19,7 +19,7 @@ private[ramfs] class SeekableFileNodeChannel(node:FileNode) extends SeekableByte
     
     val traversable = new Traversable[Byte]() {
       def foreach[U](f: Byte => U): Unit = {
-        (src.position to src.limit) foreach {i => f(src get i)}
+        (src.position until src.limit) foreach {i => f(src get i)}
       }
       
       override lazy val size = super.size
@@ -44,6 +44,8 @@ private[ramfs] class SeekableFileNodeChannel(node:FileNode) extends SeekableByte
     
     toRead foreach {b => dst.put(b)}
     
+    position += toRead.size
+        
     toRead.size
   }
   def position (newPosition: Long) = {

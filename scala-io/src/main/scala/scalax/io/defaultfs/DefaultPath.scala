@@ -53,12 +53,11 @@ class DefaultPath private[io] (val jfile: JFile, override val fileSystem: Defaul
       case Execute  => jfile.canExecute() 
       case Read     => jfile.canRead()
       case Write    => jfile.canWrite()
-      case m => fail("Access mode "+m+" is not recognized as a access mode for DefaultPath")
     }
   }
-  def canWrite  = jfile.canWrite
-  def canRead = jfile.canRead
-  def canExecute = jfile.canExecute
+  override def canWrite  = jfile.canWrite
+  override def canRead = jfile.canRead
+  override def canExecute = jfile.canExecute
   def exists = jfile.exists()
   override def notExists = try !jfile.exists() catch { case ex: SecurityException => false }
   def isFile = jfile.isFile()
@@ -76,72 +75,10 @@ class DefaultPath private[io] (val jfile: JFile, override val fileSystem: Defaul
     jfile.setWritable(accessModes exists {_==Write})
     jfile.setExecutable(accessModes exists {_==Execute})
   }
-  def access : Set[AccessMode] = {
-    AccessModes.values filter { 
-      case Read => canRead
-      case Write => canWrite
-      case Execute => canExecute
-      case e => throw new Error(AccessModes.values.mkString)
-    }
-  }
-  
-  
-  private def createContainingDir(createParents: Boolean) = {
-    def testWrite(parent:Option[Path]) = {
-      parent match {
-        case Some(p) if(!p.canWrite) => fail("Cannot write parent directory: "+p+" of "+ path)
-        case Some(p) if(!p.isDirectory) => fail("parent path is not a directory")
-        case Some(p) if(!p.canExecute) => fail("Cannot execute in parent directory: "+p+" of "+ path)
-        case Some(p) => ()
-        case None => fail("Parent directory cannot be created: '"+path+"'")
-      }
-    }
 
-    (createParents, parent) match {
-      case (_, Some(p)) if(p.exists) => 
-        testWrite(parent)
-      case (true, Some(p)) => 
-        p.jfile.getAbsoluteFile.mkdirs()
-        testWrite(parent)
-      case (true, None) => 
-        jfile.getAbsoluteFile.getParentFile.mkdirs()
-        testWrite(toAbsolute.parent)
-      case (false, _) => fail("Parent directory does not exist")
-    }
-  }
-  def createFile(createParents: Boolean = true, failIfExists: Boolean = true, 
-                 accessModes:Iterable[AccessMode]=List(Read,Write), attributes:Iterable[FileAttribute[_]]=Nil): Path = {
-                   
-    if(exists && failIfExists) {
-       fail("File '%s' already exists." format name)
-    } else if (exists) {
-      this
-    } else {
-      createContainingDir (createParents)
-      // next assertions should be satisfied by createContainingDir or have already thrown an exception
-      assert(parent.forall{p => p.exists}, "parent must exist for a file to be created within it")
-      assert(parent.forall{p => p.canWrite}, "parent must be writeable")
-      assert(parent.forall{p => p.isDirectory}, "parent must be executable")
-      assert(parent.forall{p => p.canExecute}, "parent must be executable")
-    
-      val res = jfile.createNewFile()
-      access = accessModes
-      if (!res) fail("unable to create file")
-      else this
-    }
-  }
-  
-  def createDirectory(createParents: Boolean, failIfExists: Boolean,
-                      accessModes:Iterable[AccessMode]=List(Read,Write,Execute),
-                      attributes:Iterable[FileAttribute[_]]=Nil) = {
-      createContainingDir (createParents)
-
-      val res = jfile.mkdir()
-      
-      access = accessModes
-      if (!res && failIfExists && exists) fail("Directory '%s' already exists." format name)
-      else this
-  }
+  def doCreateParents() = jfile.getAbsoluteFile.getParentFile.mkdirs()
+  def doCreateDirectory() = jfile.getAbsoluteFile.mkdir()
+  def doCreateFile() = jfile.createNewFile()
   
   def delete(force : Boolean): Path = {
     if(exists) {
@@ -233,7 +170,9 @@ class DefaultPath private[io] (val jfile: JFile, override val fileSystem: Defaul
   }  
   override def hashCode() = path.hashCode()
 
-  def descendants(filter:Path => Boolean, depth:Int, options:Traversable[LinkOption]) = new DefaultDirectoryStream(this, filter, depth) // TODO options (not supported until Java 7)
+  def descendants(filter:Path => Boolean, 
+                  depth:Int, 
+                  options:Traversable[LinkOption]) = new DefaultDirectoryStream(this, filter, depth) 
 
   def ops:FileOps = new DefaultFileOps(this, jfile)
 

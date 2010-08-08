@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>src/test/scala/scalaio/samples.scala</string>
+	<string>src/test/scala/scalaio/test/ramfs/RamFixture.scala</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -18,62 +18,106 @@
 		</dict>
 	</array>
 	<key>fileHierarchyDrawerWidth</key>
-	<integer>358</integer>
+	<integer>319</integer>
 	<key>metaData</key>
 	<dict>
-		<key>src/test/scala/scalaio/samples.scala</key>
+		<key>src/main/scala/scalax/io/Path.scala</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>41</integer>
+				<integer>0</integer>
 				<key>line</key>
-				<integer>238</integer>
+				<integer>658</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>212</integer>
+			<integer>639</integer>
 		</dict>
-		<key>src/test/scala/scalaio/test/AbstractSeekableTests.scala</key>
+		<key>src/main/scala/scalax/io/ramfs/RamFileSystem.scala</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>0</integer>
-				<key>line</key>
-				<integer>71</integer>
-			</dict>
-			<key>columnSelection</key>
-			<false/>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>15</integer>
-			<key>selectFrom</key>
-			<dict>
-				<key>column</key>
-				<integer>0</integer>
+				<integer>28</integer>
 				<key>line</key>
 				<integer>67</integer>
 			</dict>
-			<key>selectTo</key>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>45</integer>
+		</dict>
+		<key>src/main/scala/scalax/io/ramfs/RamPath.scala</key>
+		<dict>
+			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>0</integer>
+				<integer>37</integer>
 				<key>line</key>
-				<integer>71</integer>
+				<integer>26</integer>
 			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>14</integer>
+		</dict>
+		<key>src/main/scala/scalax/io/ramfs/tree.scala</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>35</integer>
+				<key>line</key>
+				<integer>43</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>20</integer>
+		</dict>
+		<key>src/test/scala/scalaio/test/ramfs/FileOpsTest.scala</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>44</integer>
+				<key>line</key>
+				<integer>21</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
+		<key>src/test/scala/scalaio/test/ramfs/RamFixture.scala</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>35</integer>
+				<key>line</key>
+				<integer>11</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
 		</dict>
 	</dict>
 	<key>openDocuments</key>
 	<array>
-		<string>src/test/scala/scalaio/test/AbstractSeekableTests.scala</string>
-		<string>src/test/scala/scalaio/samples.scala</string>
+		<string>src/test/scala/scalaio/test/ramfs/FileOpsTest.scala</string>
+		<string>src/test/scala/scalaio/test/ramfs/RamFixture.scala</string>
+		<string>src/main/scala/scalax/io/ramfs/RamPath.scala</string>
+		<string>src/main/scala/scalax/io/ramfs/RamFileSystem.scala</string>
+		<string>src/main/scala/scalax/io/ramfs/tree.scala</string>
+		<string>src/main/scala/scalax/io/Path.scala</string>
 	</array>
 	<key>showFileHierarchyDrawer</key>
 	<true/>
 	<key>windowFrame</key>
-	<string>{{71, 88}, {848, 690}}</string>
+	<string>{{14, 47}, {944, 731}}</string>
 </dict>
 </plist>

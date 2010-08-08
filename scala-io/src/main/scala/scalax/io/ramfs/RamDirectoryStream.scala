@@ -8,8 +8,24 @@
 
 package scalax.io.ramfs
 
-import scalax.io.DirectoryStream
-
-class RamDirectoryStream extends DirectoryStream[RamPath] {
-    override def iterator: Iterator[RamPath] = null // TODO
+import scalax.io.{
+  AbstractPathDirectoryStream,Path
 }
+
+class RamDirectoryStream(
+    path:RamPath, 
+    pathFilter : Path => Boolean,
+    depth:Int) 
+  extends AbstractPathDirectoryStream[RamPath](
+    path,
+    pathFilter,
+    depth,
+    parent => {
+      parent.node.collect {
+        case d:DirNode => 
+          d.children.map(n => parent \ n.name)
+        case _ => 
+          throw new AssertionError("This method should only be called on directories")
+      }.flatten.toList
+    }
+  )

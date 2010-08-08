@@ -28,7 +28,68 @@ import java.nio.channels.ByteChannel
  * @author  Jesse Eichar
  * @since   1.0
  */
-abstract class DirectoryStream[+T] extends Iterable[T]
+abstract class DirectoryStream[+T] extends Iterable[T] 
+
+/**
+ * Directory stream implementation to assist in implementing 
+ * DirectoryStreams that are based on Paths.
+ * 
+ * @parent 
+ *          the path from where the DirectoryStream is derived.  The first entry
+ *          of the DirectoryStream is the first child of the parent path
+ * @pathFilter
+ *          A filter to restrict the contents of the DirectoryStream
+ * @depth
+ *          The depth that the stream should traverse
+ * @children
+ *          A function to use for retrieving the children of a particular path
+ *          This method is used to retrieve the children of each directory
+ */
+abstract class AbstractPathDirectoryStream[+T <: Path](parent : T, 
+                             pathFilter : Path => Boolean,
+                             depth:Int,
+                             children : T => List[T]) extends DirectoryStream[T] {
+                               
+  assert(parent.isDirectory, "parent of a directory stream must be a Directory")
+  
+  def iterator: Iterator[T] = new Iterator[T] {
+    var toVisit = children(parent)
+    var nextElem : Option[T] = None
+    
+    def hasNext() = if(nextElem.nonEmpty) true
+                    else {
+                      nextElem = loadNext()
+                      nextElem.nonEmpty
+                    }
+    
+    def loadNext() : Option[T] = {
+      toVisit match {
+        case Nil => None
+        case path :: _ if path.isDirectory =>
+          if(depth < 0 || path.relativize(parent).segments.size < depth)
+            toVisit = children(path) ::: toVisit.tail
+          else
+            toVisit = toVisit.tail
+          Some(path).filter(pathFilter).orElse{loadNext}
+        case file :: _ => 
+          toVisit = toVisit.tail
+          Some(file).filter(pathFilter).orElse{loadNext}
+      }
+    }
+    
+    def next() = {
+      def error() = throw new NoSuchElementException("There are no more children in this stream")
+      if(!hasNext) error()
+      val t = nextElem
+      nextElem = None
+      
+      t match {
+        case None => error()
+        case Some(p) => p
+      }
+    }
+  }
+}
 
 /*
  * Will uncomment this for the jdk7 version

@@ -40,6 +40,7 @@ trait ResourceTraversable[A] extends LongTraversable[A]
 
   def foreach[U](f: (A) => U) : Unit = doForeach(f)
   def doForeach[U](f: A => U) : Unit = {
+    
     for(stream <- source.resource) {
       if(start > 0) source.skip(stream,start)
 

@@ -16,25 +16,30 @@ import scalax.io.resource.{
 }
 import java.nio.channels.FileChannel
 import java.io.{
-  InputStream, OutputStream, FileNotFoundException, ByteArrayInputStream, ByteArrayOutputStream
+  InputStream, OutputStream, FileNotFoundException, ByteArrayInputStream, 
+  ByteArrayOutputStream, IOException
 }
 
 class RamFileOps(path:RamPath) extends FileOps(path) {
-  private def fileResource[A](toResource:FileNode => A) = {
+  private def fileResource[A](toResource:FileNode => A, openOptions: OpenOption*) = {
+    if((openOptions contains OpenOption.CreateNew) && path.exists) {
+      throw new IOException(path+" exists and therefore cannot be created new");
+    }
+    
     path.fileSystem.lookup(path) match {
       case Some(file:FileNode) => 
         toResource(file)
       case Some(_) => 
         throw new NotFileException()
       case None => 
-        throw new FileNotFoundException()
+        throw new FileNotFoundException("No file found and will not create when open options are: " + openOptions.size)
     }
     
   }
   def inputStream = fileResource(_.inputResource)
-  def outputStream(openOptions: OpenOption*) = fileResource(_.outputResource(openOptions:_*))
+  def outputStream(openOptions: OpenOption*) = fileResource( _.outputResource(path, openOptions:_*), openOptions:_*)
   def fileChannel(openOptions: OpenOption*) : Option[ByteChannelResource[FileChannel]] = None // not supported
-  def channel(openOptions: OpenOption*) = fileResource(_.channel)
+  def channel(openOptions: OpenOption*) = fileResource(_.channel, openOptions:_*)
 
   def withLock[R](start: Long,size: Long,shared: Boolean)(block: (Seekable) => R):Option[R] = None // TODO
   def open[R](openOptions: Seq[OpenOption])(action: (Seekable) => R):R = null.asInstanceOf[R] // TODO
