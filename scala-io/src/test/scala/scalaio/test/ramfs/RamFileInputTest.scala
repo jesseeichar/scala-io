@@ -6,14 +6,14 @@
 **                          |/                                          **
 \*                                                                      */
 
-package scalaio.test.defaultfs
+package scalaio.test.ramfs
 
 import scalax.io._
 import Line.Terminators._
 
 import scalaio.test._
 
-class InputTest extends AbstractInputTests with DefaultFixture {
+class RamFileInputTest extends AbstractInputTests with RamFixture {
     protected def input(t:Type) = t match {
         case t @ TextNewLine => fixture.text(t.sep).ops
         case t @ TextPair => fixture.text(t.sep).ops

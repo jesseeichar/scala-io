@@ -6,7 +6,7 @@
 **                          |/                                          **
 \*                                                                      */
 
-package scalaio.test.defaultfs
+package scalaio.test
 
 import org.junit.Assert._
 import org.junit.{Test,Ignore}

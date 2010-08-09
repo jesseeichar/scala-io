@@ -6,30 +6,31 @@
 **                          |/                                          **
 \*                                                                      */
 
-package scalaio.test.ramfs
+package scalaio.test.defaultfs
 
 import scalax.io._
-import scalaio.test.AbstractFileOpsTests
+import scalax.io.resource._
+
+import Path.AccessModes._
+import OpenOption._
+
 import org.junit.Assert._
 import org.junit.{
   Test, Ignore
 }
+import scalaio.test.AbstractSeekableTests
 
-import java.io.IOException
+import java.io.{
+    IOException, DataInputStream, DataOutputStream
+}
 
-class FileOpsTest extends AbstractFileOpsTests with RamFixture {
-
-  def path(implicit data : Array[Byte]) = { 
-    val p = fixture.path
-    p.createFile()
-    val ops = p.ops
-    ops.write(data)
-    
-    assertArrayEquals(data, ops.byteArray)
-    
-    p
-    
-    
-  }
-
+class DefaultSeekableFileTest extends AbstractSeekableTests with DefaultFixture {
+    def open(data : Option[String] = None) : Seekable = data match {
+      case None => 
+        fixture.text("\n").ops
+      case Some(text) => 
+        val path = fixture.path
+        path.ops writeString text
+        path.ops
+    }
 }

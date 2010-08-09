@@ -9,28 +9,22 @@
 package scalaio.test.defaultfs
 
 import scalax.io._
-import scalax.io.resource._
-
-import Path.AccessModes._
-import OpenOption._
-
+import scalaio.test.AbstractFileOpsTests
 import org.junit.Assert._
 import org.junit.{
   Test, Ignore
 }
-import scalaio.test.AbstractSeekableTests
 
-import java.io.{
-    IOException, DataInputStream, DataOutputStream
-}
+import java.io.IOException
 
-class SeekableFileTest extends AbstractSeekableTests with DefaultFixture {
-    def open(data : Option[String] = None) : Seekable = data match {
-      case None => 
-        fixture.text("\n").ops
-      case Some(text) => 
-        val path = fixture.path
-        path.ops writeString text
-        path.ops
-    }
+class DefaultFileOpsTest extends AbstractFileOpsTests with DefaultFixture {
+
+  def path(implicit data : Array[Byte]) = {
+    val path = fixture.path
+    path.createFile()
+    val ops = path.ops
+    ops write data
+    path
+  }
+
 }

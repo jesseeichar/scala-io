@@ -22,15 +22,26 @@ import java.io.{
 
 class RamFileOps(path:RamPath) extends FileOps(path) {
   private def fileResource[A](toResource:FileNode => A, openOptions: OpenOption*) = {
-    if((openOptions contains OpenOption.CreateNew) && path.exists) {
+    val options = if(openOptions.isEmpty) OpenOption.WriteTruncate
+                    else openOptions
+                    
+    import OpenOption._
+    if((options contains CreateNew) && path.exists) {
       throw new IOException(path+" exists and therefore cannot be created new");
     }
+    
     
     path.fileSystem.lookup(path) match {
       case Some(file:FileNode) => 
         toResource(file)
       case Some(_) => 
         throw new NotFileException()
+      case None if options exists {e => List(CreateNew, Create) contains e} =>
+        path.createFile(false)
+        path.fileSystem.lookup(path).collect {case f:FileNode => toResource(f)}.getOrElse {error("file should have been created")}
+      case None if options contains CreateFull =>
+        path.createFile()
+        path.fileSystem.lookup(path).collect {case f:FileNode => toResource(f)}.getOrElse {error("file should have been created because of open option createFull")}
       case None => 
         throw new FileNotFoundException("No file found and will not create when open options are: " + openOptions.size)
     }
@@ -38,8 +49,8 @@ class RamFileOps(path:RamPath) extends FileOps(path) {
   }
   def inputStream = fileResource(_.inputResource)
   def outputStream(openOptions: OpenOption*) = fileResource( _.outputResource(path, openOptions:_*), openOptions:_*)
-  def fileChannel(openOptions: OpenOption*) : Option[ByteChannelResource[FileChannel]] = None // not supported
   def channel(openOptions: OpenOption*) = fileResource(_.channel, openOptions:_*)
+  def fileChannel(openOptions: OpenOption*) : Option[ByteChannelResource[FileChannel]] = None // not supported
 
   def withLock[R](start: Long,size: Long,shared: Boolean)(block: (Seekable) => R):Option[R] = None // TODO
   def open[R](openOptions: Seq[OpenOption])(action: (Seekable) => R):R = null.asInstanceOf[R] // TODO

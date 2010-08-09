@@ -25,7 +25,7 @@ import java.io.{
     IOException, DataInputStream, DataOutputStream
 }
 
-class FileOutputTest extends AbstractOutputTests with RamFixture {
+class RamFileOutputTest extends AbstractOutputTests with RamFixture {
 
     final val DEFAULT_DATA = "to be overwritten"
 
@@ -39,11 +39,11 @@ class FileOutputTest extends AbstractOutputTests with RamFixture {
         val path = fixture.path
         val ops = path.ops
 
-        ops write DEFAULT_DATA.getBytes
+        val bytes = DEFAULT_DATA.getBytes
+        ops write bytes
         
         assertTrue(path.exists)
 
-        val bytes = DEFAULT_DATA.getBytes
         assertEquals(bytes.size, path.size)
         assertArrayEquals(bytes, ops.byteArray)
     }

@@ -25,7 +25,7 @@ import java.io.{
     IOException, DataInputStream, DataOutputStream
 }
 
-class FileOutputTest extends AbstractOutputTests with DefaultFixture {
+class DefaultFileOutputTest extends AbstractOutputTests with DefaultFixture {
 
     final val DEFAULT_DATA = "to be overwritten"
 

@@ -6,7 +6,7 @@
 **                          |/                                          **
 \*                                                                      */
 
-package scalaio.test.defaultfs
+package scalaio.test.ramfs
 
 import scalax.io._
 import scalaio.test.AbstractFileOpsTests
@@ -17,14 +17,19 @@ import org.junit.{
 
 import java.io.IOException
 
-class FileOpsTest extends AbstractFileOpsTests with DefaultFixture {
+class RamFileOpsTest extends AbstractFileOpsTests with RamFixture {
 
-  def path(implicit data : Array[Byte]) = {
-    val path = fixture.path
-    path.createFile()
-    val ops = path.ops
-    ops write data
-    path
+  def path(implicit data : Array[Byte]) = { 
+    val p = fixture.path
+    p.createFile()
+    val ops = p.ops
+    ops.write(data)
+    
+    assertArrayEquals(data, ops.byteArray)
+    
+    p
+    
+    
   }
 
 }

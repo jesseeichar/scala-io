@@ -23,8 +23,10 @@ import scalaio.test.{
 
 import java.io.IOException
 
-class PathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
+class DefaultPathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
   implicit val codec = Codec.UTF8
+  
+  // test lastmodified
   
   def fspath(name:String) = fixture.fs(name)
   def fspath(name:Path) = fixture.fs(name.path)

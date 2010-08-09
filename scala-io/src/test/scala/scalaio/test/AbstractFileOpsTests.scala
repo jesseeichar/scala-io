@@ -175,6 +175,11 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
     }
   }
   
+    def createFull_open_option_creates_parents {
+      fail("not implemented");
+    }
+  
+  
   /*  Removed from API since it may be difficult or even impossible on
       non-native file systems
   @Test //@Ignore

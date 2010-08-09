@@ -89,7 +89,7 @@ abstract class FileOps(path : Path) extends Seekable {
   *           The Write option is implicitly added to the set of options
   *           Default is write/create/truncate
   */
-  def outputStream(openOptions:OpenOption*): OutputStreamResource[OutputStream]
+  def outputStream(openOptions:OpenOption*) : OutputStreamResource[OutputStream]
   /**
    * Obtains a ByteChannel for read/write access to the file.  If no OpenOptions are 
    * specified the underlying file will be opened with read/write/create/truncate options

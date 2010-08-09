@@ -51,9 +51,12 @@ class RamPath(relativeTo:String, val path:String, override val fileSystem:RamFil
   def isDirectory = node.forall(DirNode.accepts)
   def isAbsolute = relativeTo == ""
   def isHidden = false //TODO
-  def lastModified = 0 //TODO
-  def lastModified_=(time: Long) = 0 //TODO
-  def size = 0 //TODO
+  def lastModified = node map {_.lastModified} getOrElse 0
+  def lastModified_=(time: Long) = {
+    node foreach {_.lastModified = time}
+    time
+  }
+  def size = node collect {case f:FileNode => f.data.size.toLong} getOrElse -1
   def access_=(accessModes:Iterable[AccessMode]) = node match {
     case None => fail("Path %s does not exist".format(path))
     case Some(node) =>  

@@ -37,15 +37,15 @@ private[ramfs] object DirNode extends NodeFac {
 }
 
 private[ramfs] trait Node {
-  def name:String
-  def lastModified:Long
+  var name:String
+  var lastModified:Long
   var canRead = true;
   var canWrite = true;
   var canExecute = true;
   override def toString = getClass.getSimpleName+": "+name
 }
 
-private[ramfs] class FileNode(val name:String) extends Node {
+private[ramfs] class FileNode(var name:String) extends Node {
     var data = ArrayBuffer[Byte]()
     var lastModified = System.currentTimeMillis
     def inputResource : InputStreamResource[InputStream] = 
@@ -82,7 +82,7 @@ private[ramfs] class FileNode(val name:String) extends Node {
     def channel() = Resource.fromByteChannel(new SeekableFileNodeChannel(this))
   }
 
-private[ramfs] class DirNode(val name:String) extends Node {
+private[ramfs] class DirNode(var name:String) extends Node {
   val children = ArrayBuffer[Node]()
   var lastModified = System.currentTimeMillis
   val self = this;
