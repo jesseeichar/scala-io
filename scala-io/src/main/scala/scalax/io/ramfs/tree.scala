@@ -66,20 +66,23 @@ private[ramfs] class FileNode(var name:String) extends Node {
           }
         }
         
-        if(openOptions contains Append) {
-          out.write(data.toArray,0,data.size);
-        }
+        if(openOptions contains Append) out.write(data.toArray,0,data.size);
+
         out
       }
       
-      if(openOptions contains Truncate) {
-        data.clear()
-      }
+      if(openOptions contains Truncate) data.clear()
       
       Resource.fromOutputStream(newResource)
     }
     
-    def channel() = Resource.fromByteChannel(new SeekableFileNodeChannel(this))
+    def channel(owner:RamPath, openOptions: OpenOption*) = {
+      def newchannel = new SeekableFileNodeChannel(this,owner,openOptions:_*)
+      
+      
+      
+      Resource.fromByteChannel(newchannel)
+    }
   }
 
 private[ramfs] class DirNode(var name:String) extends Node {

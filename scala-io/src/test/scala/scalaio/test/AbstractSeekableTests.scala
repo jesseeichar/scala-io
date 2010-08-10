@@ -44,6 +44,7 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
 
     @Test //@Ignore
     def patchString() : Unit = {
+
         val testFunction = Function tupled testPatchString _
         patchParams foreach testFunction
 
@@ -63,7 +64,8 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
 
     private def testPatchString(msg:String, from:Int, data:String, length : Option[Int]) = {
         val seekable = open()
-        
+
+              
         val expected = length match {
           case Some(length) => TEXT_VALUE.toList.patch (from.min(Int.MaxValue).toInt, data, length).mkString
           case None => TEXT_VALUE.toList.patch (from.min(Int.MaxValue).toInt, data, length.size).mkString
@@ -73,11 +75,11 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
           case Some(length) => seekable.patchString(from,data,length)
           case None => seekable.patchString(from,data)
         }
-        // println("before:   "+(TEXT_VALUE mkString ",").replaceAll("\n","\\\\n"))
-        // println("patch:    "+(data mkString ",").replaceAll("\n","\\\\n"))
-        // println("actual:   "+(seekable.slurpString mkString ",").replaceAll("\n","\\\\n"))
-        // println("expected: "+(expected mkString ",").replaceAll("\n","\\\\n"))
-        
+/*        println("before:   "+(TEXT_VALUE mkString ",").replaceAll("\n","\\\\n"))
+        println("patch:    "+(data mkString ",").replaceAll("\n","\\\\n"))
+        println("actual:   "+(seekable.slurpString mkString ",").replaceAll("\n","\\\\n"))
+        println("expected: "+(expected mkString ",").replaceAll("\n","\\\\n"))
+*/        
         assertEquals(msg, expected, seekable.slurpString)
     }
 
@@ -132,7 +134,7 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
         
     }
 
-    @Test  //@Ignore
+    @Test //@Ignore
     def appendString : Unit = {
         val data = "ア"
         val seekable = open()
@@ -161,7 +163,7 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
       test(",")
     }
 
-    @Test  //@Ignore
+    @Test //@Ignore
     def chopString : Unit = {
       val seekable = open()
       val expected = TEXT_VALUE take 2
@@ -169,7 +171,7 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
       assertEquals(expected, seekable.slurpString)
     }
 
-    @Test  // @Ignore
+    @Test //@Ignore
     def chop : Unit = {
       val seekable = open()
       val expected = TEXT_VALUE take 2

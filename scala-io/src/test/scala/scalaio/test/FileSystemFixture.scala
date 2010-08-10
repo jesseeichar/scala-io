@@ -110,7 +110,7 @@ abstract class FileSystemFixture(val fs : FileSystem, rnd : Random) {
            test(data)
         } catch {
           case e => 
-            println(count+" tests passed before a failure case was encountered: \n"+data)
+//            println(count+" tests passed before a failure case was encountered: \n"+data)
             throw e
         } finally {
           if(data!=null) try{data.delete()}catch{case _ =>}

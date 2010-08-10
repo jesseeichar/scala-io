@@ -49,7 +49,7 @@ class RamFileOps(path:RamPath) extends FileOps(path) {
   }
   def inputStream = fileResource(_.inputResource)
   def outputStream(openOptions: OpenOption*) = fileResource( _.outputResource(path, openOptions:_*), openOptions:_*)
-  def channel(openOptions: OpenOption*) = fileResource(_.channel, openOptions:_*)
+  def channel(openOptions: OpenOption*) = fileResource(_.channel(path, openOptions:_*), openOptions:_*)
   def fileChannel(openOptions: OpenOption*) : Option[ByteChannelResource[FileChannel]] = None // not supported
 
   def withLock[R](start: Long,size: Long,shared: Boolean)(block: (Seekable) => R):Option[R] = None // TODO

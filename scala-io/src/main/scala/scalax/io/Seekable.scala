@@ -76,7 +76,6 @@ trait Seekable extends Input with Output {
 
     if(size.forall{position > _}){
       // special case where there is no alternative but to be append
-      
       append(string getBytes codec.name)
     } else if (codec.hasConstantSize) {
       // special case where the codec is constant in size (like ASCII or latin1)
@@ -92,9 +91,8 @@ trait Seekable extends Input with Output {
 
       // this is very inefficient.  The file is opened 3 times.
       val posInBytes = charCountToByteCount(0, position)
-
       val replacedInBytes = charCountToByteCount(position, position+replaced)
-
+//      println("replacedInBytes",replacedInBytes)
       patch(posInBytes, string.getBytes(codec.name), replaced max replacedInBytes)
     }
   }
@@ -138,12 +136,12 @@ trait Seekable extends Input with Output {
     val insertData = replaced <= 0 && replaced != Overwrite
         
     if(appendData) {
-        append(bytes, replaced)
+      append(bytes, replaced)
     } else if(insertData) {
       insert(position : Long, bytes : T)
     } else {
-        // overwrite data
-        overwriteFileData(position, bytes, replaced)
+      // overwrite data
+      overwriteFileData(position, bytes, replaced)
     }
   }
   
@@ -231,15 +229,18 @@ trait Seekable extends Input with Output {
   }
 
   private def copySlice(channel : SeekableByteChannel, srcIndex : Long, destIndex : Long, length : Int) : Unit = {
-      val buf = ByteBuffer.allocate(BufferSize.min(length))
-      
-      def write(done : Int) = {
-          if(length < done + BufferSize) buf.limit((length - done).toInt)
 
-          buf.clear()
-          val read = channel.read(buf, srcIndex + done)
-          buf.flip()
-          val written = channel.write(buf, destIndex + done)
+//      println("copySlice(srcIndex, destIndex, length)", srcIndex, destIndex, length)
+
+      val buf = ByteBuffer.allocate(BufferSize.min(length))
+      def write(done : Int) = {
+//        println("copySlice:write(done)", done)
+        if(length < done + BufferSize) buf.limit((length - done).toInt)
+
+        buf.clear()
+        val read = channel.read(buf, srcIndex + done)
+        buf.flip()
+        val written = channel.write(buf, destIndex + done)
       }
       
       (0 to length by BufferSize) foreach write
@@ -265,6 +266,7 @@ trait Seekable extends Input with Output {
 
   // returns (wrote,earlyTermination)
   private def writeTo[T <% Traversable[Byte]](c : WritableByteChannel, bytes : T, length : Long) : (Long,Boolean) = {
+//    println("start write",length)
       bytes match {
           case array : Array[Byte] =>
             // for performance try to write Arrays directly
@@ -368,8 +370,6 @@ trait Seekable extends Input with Output {
   // required method for Output trait
   protected def outputStream = channel(WriteTruncate:_*).outputStream
 
-
-
   private def charCountToByteCount(start:Long, end:Long)(implicit codec:Codec) = {
     val encoder = codec.encoder
     val byteBuffer = ByteBuffer.allocateDirect(encoder.maxBytesPerChar.toInt)
@@ -397,8 +397,9 @@ trait Seekable extends Input with Output {
     }
 
     val segment = channel(Read).chars.lslice(start, end)
+    
     (0L /: segment ) { (replacedInBytes, nextChar) => 
-      replacedInBytes + sizeInBytes(nextChar)
+          replacedInBytes + sizeInBytes(nextChar)
     }    
   }
 }
