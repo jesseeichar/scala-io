@@ -47,7 +47,7 @@ class RamFileOps(path:RamPath) extends FileOps(path) {
     }
     
   }
-  def inputStream = fileResource(_.inputResource)
+  def inputStream = fileResource(_.inputResource,OpenOption.Read)
   def outputStream(openOptions: OpenOption*) = fileResource( _.outputResource(path, openOptions:_*), openOptions:_*)
   def channel(openOptions: OpenOption*) = fileResource(_.channel(path, openOptions:_*), openOptions:_*)
   def fileChannel(openOptions: OpenOption*) : Option[ByteChannelResource[FileChannel]] = None // not supported
