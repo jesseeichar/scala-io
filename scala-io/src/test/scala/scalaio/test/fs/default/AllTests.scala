@@ -6,9 +6,9 @@
 **                          |/                                          **
 \*                                                                      */
 
-package scalaio.test.defaultfs
+package scalaio.test.fs.default
 
-class MatchingTest extends scalaio.test.fs.FsMatchingTests with DefaultFixture
+class DefaultFsMatchingTest extends scalaio.test.fs.FsMatchingTests with DefaultFixture
 class DefaultFsDirectoryStreamTest extends scalaio.test.fs.FsDirectoryStreamTests with DefaultFixture
 class DefaultFsInputTest extends scalaio.test.fs.FsInputTests with DefaultFixture
 class DefaultFsOutputTest extends scalaio.test.fs.FsOutputTests with DefaultFixture

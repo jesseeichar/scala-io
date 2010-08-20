@@ -6,7 +6,7 @@
 **                          |/                                          **
 \*                                                                      */
 
-package scalaio.test.defaultfs
+package scalaio.test.fs.default
 
 import scalax.io._
 import scalax.io.ramfs._

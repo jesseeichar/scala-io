@@ -6,30 +6,32 @@
 **                          |/                                          **
 \*                                                                      */
 
-package scalaio.test.ramfs
+package scalaio.test.fs.default
 
-import scalax.io._
-import scalaio.test.AbstractFileOpsTests
-import org.junit.Assert._
+
+import util.Random
+import scalax.io.{
+  Path, FileSystem
+}
 import org.junit.{
-  Test, Ignore
+  Test, Before, After, Rule, Ignore
+}
+import org.junit.rules.TemporaryFolder
+
+import scalaio.test.fs.{
+  FileSystemFixture, Fixture
 }
 
-import java.io.IOException
+trait DefaultFixture extends Fixture{
+  val rnd : Random = new Random()
+   
+  def createFixture() = {
+    val folder = new TemporaryFolder()
+    new FileSystemFixture(FileSystem.default, rnd) {
+      folder.create()
 
-class RamFileOpsTest extends AbstractFileOpsTests with RamFixture {
-
-  def path(implicit data : Array[Byte]) = { 
-    val p = fixture.path
-    p.createFile()
-    val ops = p.ops
-    ops.write(data)
-    
-    assertArrayEquals(data, ops.byteArray)
-    
-    p
-    
-    
+      override val root = Path(folder.getRoot)
+      override def after = folder.delete()
+    }
   }
-
 }

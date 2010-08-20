@@ -6,32 +6,23 @@
 **                          |/                                          **
 \*                                                                      */
 
-package scalaio.test.defaultfs
-
+package scalaio.test.fs.ram
 
 import util.Random
-import scalax.io.{
-  Path, FileSystem
-}
+
 import org.junit.{
   Test, Before, After, Rule, Ignore
 }
 import org.junit.rules.TemporaryFolder
-
+import scalax.io.ramfs.RamFileSystem
 import scalaio.test.fs.{
   FileSystemFixture, Fixture
 }
 
-trait DefaultFixture extends Fixture{
-  val rnd : Random = new Random()
-   
-  def createFixture() = {
-    val folder = new TemporaryFolder()
-    new FileSystemFixture(FileSystem.default, rnd) {
-      folder.create()
-
-      override val root = Path(folder.getRoot)
-      override def after = folder.delete()
-    }
+trait RamFixture extends Fixture{
+  val rnd = new Random()
+  
+  def createFixture() = new FileSystemFixture(new RamFileSystem(), rnd) {
+    override val root = fs.roots.head
   }
 }
