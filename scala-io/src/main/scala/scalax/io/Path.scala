@@ -207,19 +207,19 @@ object Path
   object Matching {
     /** matches a path if it is a file (and exists)*/
     object File {
-      def unapply(path:Path):Option[Path] = None // TODO
+      def unapply(path:Path):Option[Path] = Some(path).filter {_.isFile}
     }
     /** matches a path if it is a Directory (and exists)*/
     object Directory {
-      def unapply(path:Path):Option[Path] = None // TODO
+      def unapply(path:Path):Option[Path] = Some(path).filter {_.isDirectory}
     }
     /** matches a path if it is Exists */
     object Exists {
-      def unapply(path:Path):Option[Path] = None // TODO
+      def unapply(path:Path):Option[Path] = Some(path).filter {_.exists}
     }
     /** matches a path if it does not Exist */
     object NonExistent {
-      def unapply(path:Path):Option[Path] = None // TODO
+      def unapply(path:Path):Option[Path] = Some(path).filter {_.notExists}
     }
     /**
      * Matches a path if the access modes are applicable

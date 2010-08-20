@@ -6,25 +6,19 @@
 **                          |/                                          **
 \*                                                                      */
 
-package scalaio.test.defaultfs
+package scalaio.test.fs
 
 import scalax.io._
-import scalaio.test.AbstractFileOpsTests
-import org.junit.Assert._
-import org.junit.{
-  Test, Ignore
-}
+import Line.Terminators._
 
-import java.io.IOException
+import scalaio.test._
 
-class DefaultFileOpsTest extends AbstractFileOpsTests with DefaultFixture {
-
-  def path(implicit data : Array[Byte]) = {
-    val path = fixture.path
-    path.createFile()
-    val ops = path.ops
-    ops write data
-    path
-  }
-
+abstract class FsInputTests extends AbstractInputTests with Fixture {
+    protected def input(t:Type) = t match {
+        case t @ TextNewLine => fixture.text(t.sep).ops
+        case t @ TextPair => fixture.text(t.sep).ops
+        case t @ TextCarriageReturn => fixture.text(t.sep).ops
+        case TextCustom(sep) => fixture.text(sep).ops
+        case Image => fixture.image.ops
+    }
 }

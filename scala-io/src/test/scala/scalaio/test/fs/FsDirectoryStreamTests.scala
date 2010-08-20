@@ -6,7 +6,14 @@
 **                          |/                                          **
 \*                                                                      */
 
-package scalaio.test.defaultfs
+package scalaio.test.fs
+
+import scala.collection.immutable.Vector
+
+import scalax.test.sugar.AssertionSugar
+import scalaio.test.{
+  AbstractDirectoryStreamTests, Node
+}
 
 import scalax.io._
 import Path.AccessModes._
@@ -20,21 +27,6 @@ import util.Random
 
 import java.io.IOException
 
-class DefaultFileSystemTest extends scalax.test.sugar.AssertionSugar {
-    implicit val codec = Codec.UTF8
-
-    var fixture : DefaultFileSystemFixture = _
-
-    @Before
-    def before() : Unit = fixture = new DefaultFileSystemFixture(new TemporaryFolder())
-
-    @After
-    def after() : Unit = fixture.after()
-
-    @Test
-    def fileSystem_apply_creates_a_path() : Unit = {
-        val path = FileSystem.default(getClass.getClassLoader.getResource("resources/text").getFile)
-        assertTrue(path.exists)
-        assertTrue(path.canRead)
-    }
+abstract class FsDirectoryStreamTests extends AbstractDirectoryStreamTests with Fixture {
+  protected def fixtures(depth:Int=4) : (Path, Node) = fixture.tree(depth)
 }

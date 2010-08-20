@@ -6,15 +6,17 @@
 **                          |/                                          **
 \*                                                                      */
 
-package scalaio.test.defaultfs
+package scalaio.test
 
-import org.junit.Assert._
-import org.junit.{Test,Ignore}
-import scalax.io._
-import scalaio.test.{
-  AbstractDirectoryStreamTests, Node
-}
+import collection.mutable.ListBuffer
 
-class DefaultDirectoryStreamTest extends AbstractDirectoryStreamTests with DefaultFixture{
-  protected def fixtures(depth:Int) : (Path, Node) = fixture.tree(depth)
+case class Node(path : String, parent : Option[Node], children : ListBuffer[Node] = ListBuffer[Node]()) extends Iterable[Node]{
+  self =>
+  parent.foreach {_.children += self}
+  
+  def iterator = children.iterator
+  
+  def name = path.split("/").last
+  
+  override def toString = path
 }

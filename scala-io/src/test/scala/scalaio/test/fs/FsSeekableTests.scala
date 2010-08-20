@@ -6,18 +6,32 @@
 **                          |/                                          **
 \*                                                                      */
 
-package scalaio.test.ramfs
-
-import util.Random
+package scalaio.test.fs
 
 import scalax.io._
 import scalax.io.resource._
-import scalax.io.ramfs._
 
-import org.junit.rules.TemporaryFolder
-import java.io.InputStream
-import scalaio.test.fs.FileSystemFixture
+import Path.AccessModes._
+import OpenOption._
 
-class RamFileSystemFixture(rnd : Random = new Random()) extends FileSystemFixture(new RamFileSystem(), rnd) {
-  override val root = fs.roots.head
+import org.junit.Assert._
+import org.junit.{
+  Test, Ignore
+}
+import scalaio.test.AbstractSeekableTests
+
+
+import java.io.{
+    IOException, DataInputStream, DataOutputStream
+}
+
+abstract class FsSeekableTests extends AbstractSeekableTests with Fixture {
+    def open(data : Option[String] = None) : Seekable = data match {
+      case None => 
+        fixture.text("\n").ops
+      case Some(text) => 
+        val path = fixture.path
+        path.ops writeString text
+        path.ops
+    }
 }

@@ -6,21 +6,25 @@
 **                          |/                                          **
 \*                                                                      */
 
-package scalaio.test.defaultfs
-
-import util.Random
+package scalaio.test.fs
 
 import scalax.io._
-import scalax.io.resource._
+import scalaio.test.AbstractFileOpsTests
+import org.junit.Assert._
+import org.junit.{
+  Test, Ignore
+}
 
-import org.junit.rules.TemporaryFolder
-import java.io.InputStream
-import scalaio.test._
+import java.io.IOException
 
-class DefaultFileSystemFixture(val folder : TemporaryFolder, rnd : Random = new Random())
-  extends FileSystemFixture(FileSystem.default, rnd) {
-    folder.create()
+abstract class FsFileOpsTests extends AbstractFileOpsTests with Fixture {
 
-    override val root = Path(folder.getRoot)
-    override def after = folder.delete()
+  def path(implicit data : Array[Byte]) = {
+    val path = fixture.path
+    path.createFile()
+    val ops = path.ops
+    ops write data
+    path
+  }
+
 }

@@ -6,19 +6,27 @@
 **                          |/                                          **
 \*                                                                      */
 
-package scalaio.test.defaultfs
+package scalaio.test.fs
 
-import scalax.io._
-import Line.Terminators._
+import org.junit.{
+  Test, Before, After, Rule, Ignore
+}
+import org.junit.rules.TemporaryFolder
 
-import scalaio.test._
 
-class DefaultFileInputTest extends AbstractInputTests with DefaultFixture {
-    protected def input(t:Type) = t match {
-        case t @ TextNewLine => fixture.text(t.sep).ops
-        case t @ TextPair => fixture.text(t.sep).ops
-        case t @ TextCarriageReturn => fixture.text(t.sep).ops
-        case TextCustom(sep) => fixture.text(sep).ops
-        case Image => fixture.image.ops
-    }
+trait Fixture {
+
+  def createFixture() : FileSystemFixture
+
+  var fixture : FileSystemFixture = _
+
+  @Before
+  def before() : Unit = {
+    fixture = createFixture()
+    assert(fixture != null)
+  }
+
+  @After
+  def after() : Unit = fixture.after()
+
 }

@@ -13,19 +13,10 @@ import org.junit.{
 }
 import org.junit.rules.TemporaryFolder
 
-import scalaio.test.FileSystemFixture
+import scalaio.test.fs.{
+  FileSystemFixture, Fixture
+}
 
-trait RamFixture {
-
-  var fixture : FileSystemFixture = _
-
-  @Before
-  def before() : Unit = {
-    fixture = new RamFileSystemFixture()
-    assert(fixture != null)
-  }
-
-  @After
-  def after() : Unit = fixture.after()
-
+trait RamFixture extends Fixture{
+  def createFixture() = new RamFileSystemFixture()
 }

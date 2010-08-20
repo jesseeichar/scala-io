@@ -11,6 +11,9 @@ Path
 How to implement a new filesystem (do while creating zip FS)
 
 == Misc
+Path.Matcher tests
+Path.Matcher should be in PathMatcher and extent PathMatcher
+Path.notExists => Path.nonExistant
 Make ReadChars use LongTraversable
 Make LineTraversable a LongTraversable
 Remove parameter defaults from overridden methods 

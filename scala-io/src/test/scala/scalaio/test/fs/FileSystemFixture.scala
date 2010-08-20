@@ -6,10 +6,13 @@
 **                          |/                                          **
 \*                                                                      */
 
-package scalaio.test
+package scalaio.test.fs
 
-import collection.mutable.ListBuffer
 import util.Random
+
+import scalaio.test.{
+  Constants, Node
+}
 
 import scalax.io._
 import scalax.io.resource._
@@ -40,17 +43,6 @@ case class TestData(fs : FileSystem, numSegments : Int, pathName : String) {
   override def toString() = {
     "TestData( fs = %s, numSegments = %s, pathName = %s, exists = %s, access = %s)".format(fs, numSegments, pathName, path.exists, access)
   }
-}
-
-case class Node(path : String, parent : Option[Node], children : ListBuffer[Node] = ListBuffer[Node]()) extends Iterable[Node]{
-  self =>
-  parent.foreach {_.children += self}
-  
-  def iterator = children.iterator
-  
-  def name = path.split("/").last
-  
-  override def toString = path
 }
 
 abstract class FileSystemFixture(val fs : FileSystem, rnd : Random) {

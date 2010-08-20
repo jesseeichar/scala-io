@@ -6,31 +6,27 @@
 **                          |/                                          **
 \*                                                                      */
 
-package scalaio.test.defaultfs
+package scalaio.test.fs
 
 import scalax.io._
-import scalax.io.resource._
-
 import Path.AccessModes._
-import OpenOption._
 
 import org.junit.Assert._
 import org.junit.{
-  Test, Ignore
+  Test, Before, After, Rule, Ignore
 }
-import scalaio.test.AbstractSeekableTests
+import org.junit.rules.TemporaryFolder
+import util.Random
 
-import java.io.{
-    IOException, DataInputStream, DataOutputStream
-}
+import java.io.IOException
 
-class DefaultSeekableFileTest extends AbstractSeekableTests with DefaultFixture {
-    def open(data : Option[String] = None) : Seekable = data match {
-      case None => 
-        fixture.text("\n").ops
-      case Some(text) => 
-        val path = fixture.path
-        path.ops writeString text
-        path.ops
+abstract class FsFileSystemTests extends scalax.test.sugar.AssertionSugar with Fixture{
+    implicit val codec = Codec.UTF8
+
+    @Test
+    def fileSystem_apply_creates_a_path() : Unit = {
+        val path = FileSystem.default(getClass.getClassLoader.getResource("resources/text").getFile)
+        assertTrue(path.exists)
+        assertTrue(path.canRead)
     }
 }

@@ -8,24 +8,30 @@
 
 package scalaio.test.defaultfs
 
+
+import util.Random
+import scalax.io.{
+  Path, FileSystem
+}
 import org.junit.{
   Test, Before, After, Rule, Ignore
 }
 import org.junit.rules.TemporaryFolder
 
-import scalaio.test.FileSystemFixture
+import scalaio.test.fs.{
+  FileSystemFixture, Fixture
+}
 
-trait DefaultFixture {
+trait DefaultFixture extends Fixture{
+  val rnd : Random = new Random()
+   
+  def createFixture() = {
+    val folder = new TemporaryFolder()
+    new FileSystemFixture(FileSystem.default, rnd) {
+      folder.create()
 
-  var fixture : FileSystemFixture = _
-
-  @Before
-  def before() : Unit = {
-    fixture = new DefaultFileSystemFixture(new TemporaryFolder())
-    assert(fixture != null)
+      override val root = Path(folder.getRoot)
+      override def after = folder.delete()
+    }
   }
-
-  @After
-  def after() : Unit = fixture.after()
-
 }

@@ -6,7 +6,7 @@
 **                          |/                                          **
 \*                                                                      */
 
-package scalaio.test.defaultfs
+package scalaio.test.fs
 
 import scalax.io._
 import scalax.io.resource._
@@ -25,7 +25,7 @@ import java.io.{
     IOException, DataInputStream, DataOutputStream
 }
 
-class DefaultFileOutputTest extends AbstractOutputTests with DefaultFixture {
+abstract class FsOutputTests extends AbstractOutputTests with Fixture {
 
     final val DEFAULT_DATA = "to be overwritten"
 

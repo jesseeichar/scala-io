@@ -17,9 +17,8 @@ import org.junit.{
   Test, Ignore
 }
 import util.Random
-import scalaio.test.{
-  TestData
-}
+import scalaio.test.fs.TestData
+
 
 import java.io.IOException
 
