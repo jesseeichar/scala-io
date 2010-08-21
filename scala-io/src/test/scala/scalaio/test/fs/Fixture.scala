@@ -27,6 +27,6 @@ trait Fixture {
   }
 
   @After
-  def after() : Unit = fixture.after()
+  def after() : Unit = try {fixture.after()} catch {case  e => println("error in after:"+e)}
 
 }

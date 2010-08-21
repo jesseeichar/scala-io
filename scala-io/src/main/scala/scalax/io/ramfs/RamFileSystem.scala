@@ -35,7 +35,10 @@ class RamFileSystem extends FileSystem {
   }
   def apply(relativeTo:String , path: String): RamPath = {
     def process(path:String) = {
-      val p = path.replaceAll(separator+"+", separator)
+//      println("regex",java.util.regex.Pattern.quote(separator))
+      import java.util.regex.Pattern.quote
+      val quotedSep = quote(separator)
+      val p = path.replaceAll(quotedSep+"+", separator)
       if((p endsWith separator) && (p.length > 1)) p.drop(1)
       else p
     }
@@ -60,7 +63,7 @@ class RamFileSystem extends FileSystem {
   override def toString = "Ram File System"
   
   private[ramfs] def lookup(path:RamPath) = {
-    val absolutePath = "/" :: path.toAbsolute.segments
+    val absolutePath = path.toAbsolute.segments
     fsTree.lookup(absolutePath)
   }
   private[ramfs] def create(path:RamPath, fac:NodeFac, createParents:Boolean = true) : Boolean = {
@@ -71,7 +74,8 @@ class RamFileSystem extends FileSystem {
       case _ => ()
     }
 
-    val x = fsTree.create(absolute.segments,fac)
+    val x = fsTree.create(absolute.segments drop 1,fac)
+    
     true
   }
   private[ramfs] def delete(path:RamPath, force:Boolean) : Boolean = {

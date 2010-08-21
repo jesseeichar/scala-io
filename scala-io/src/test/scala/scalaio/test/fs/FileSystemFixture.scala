@@ -70,14 +70,14 @@ abstract class FileSystemFixture(val fs : FileSystem, rnd : Random) {
     val newRoot = path(1)
     newRoot.createDirectory(true)
     
-    val structure = Node(("/"+(newRoot.segments mkString "/")).replaceAll("/+","/"), None)
+    val structure = Node((Node.Sep+(newRoot.segments mkString Node.Sep)).replaceAll(Node.Sep+"+",Node.Sep), None)
       for (d <- 1 until depth;
            files <- 0 until rndInt(5)) {
           val p = path(d, newRoot).createFile(failIfExists = false)
 
           p.relativize(root).segments.drop(1).foldLeft (structure){
             (parent, label) => 
-              Node(parent.path + "/"+ label, Some(parent))
+              Node(parent.path + Node.Sep+ label, Some(parent))
           }
        }
     (newRoot, structure)

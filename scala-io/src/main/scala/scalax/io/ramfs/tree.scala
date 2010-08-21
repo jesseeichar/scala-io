@@ -137,5 +137,12 @@ private[ramfs] class DirNode(var name:String) extends Node {
           newNode.create(rest,fac)
       }
   }
+      
+  def mkString() : String = {
+    name + children.map{
+      case f:FileNode => name
+      case d:DirNode => d.mkString()
+    }.mkString("{",",","}")
+  }
   
 }

@@ -14,7 +14,6 @@ class RamFsDirectoryStreamTest extends scalaio.test.fs.FsDirectoryStreamTests wi
 class RamFsInputTest extends scalaio.test.fs.FsInputTests with RamFixture
 class RamFsOutputTest extends scalaio.test.fs.FsOutputTests with RamFixture 
 class RamFsFileOpsTest extends scalaio.test.fs.FsFileOpsTests with RamFixture
-/*
 class RamFileSystemTest extends scalaio.test.fs.FsFileSystemTests with RamFixture
-*/
 class RamSeekableTest extends scalaio.test.fs.FsSeekableTests with RamFixture
+class RamBasicPathTest extends scalaio.test.fs.FsBasicPathTests with RamFixture

@@ -15,3 +15,4 @@ class DefaultFsOutputTest extends scalaio.test.fs.FsOutputTests with DefaultFixt
 class DefaultFsFileOpsTest extends scalaio.test.fs.FsFileOpsTests with DefaultFixture
 class DefaultFileSystemTest extends scalaio.test.fs.FsFileSystemTests with DefaultFixture
 class DefaultSeekableTest extends scalaio.test.fs.FsSeekableTests with DefaultFixture
+class DefaultBasicPathTest extends scalaio.test.fs.FsBasicPathTests with DefaultFixture

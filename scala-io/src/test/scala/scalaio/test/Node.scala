@@ -10,13 +10,16 @@ package scalaio.test
 
 import collection.mutable.ListBuffer
 
+object Node {
+  val Sep = "/"  
+}
 case class Node(path : String, parent : Option[Node], children : ListBuffer[Node] = ListBuffer[Node]()) extends Iterable[Node]{
   self =>
   parent.foreach {_.children += self}
   
   def iterator = children.iterator
   
-  def name = path.split("/").last
+  def name = path.split(Node.Sep).last
   
   override def toString = path
 }

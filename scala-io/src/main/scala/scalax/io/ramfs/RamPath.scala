@@ -29,10 +29,10 @@ class RamPath(relativeTo:String, val path:String, override val fileSystem:RamFil
   lazy val name: String = segments.last
   lazy val normalize: RamPath = null //TODO
   lazy val parent: Option[RamPath] = {
-    if(toAbsolute.segments.isEmpty) {
+    if(toAbsolute.path == fileSystem.root.path) {
       None
     } else {
-      val parentPath = fileSystem(toAbsolute.segments.dropRight(1).mkString("/","/",""))
+      val parentPath = fileSystem(toAbsolute.segments.dropRight(1).mkString(fileSystem.separator))
       Some(parentPath)
     }
   }
@@ -98,4 +98,10 @@ class RamPath(relativeTo:String, val path:String, override val fileSystem:RamFil
   def descendants(filter:Path => Boolean, depth:Int, options:Traversable[LinkOption]):DirectoryStream[Path] = new RamDirectoryStream(this,filter,depth)
 
   def ops:FileOps = new RamFileOps(this)
+  
+  override def segments = {
+   if(isAbsolute) fileSystem.separator :: super.segments
+   else           super.segments
+ }
+  
 }

@@ -6,7 +6,7 @@
 **                          |/                                          **
 \*                                                                      */
 
-package scalaio.test.fs.default
+package scalaio.test.fs
 
 import scalax.io._
 import scalax.io.ramfs._
@@ -17,12 +17,10 @@ import org.junit.{
   Test, Ignore
 }
 import util.Random
-import scalaio.test.fs.TestData
-
 
 import java.io.IOException
 
-class DefaultPathTest extends scalax.test.sugar.AssertionSugar with DefaultFixture {
+abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fixture {
   implicit val codec = Codec.UTF8
   
   // test lastmodified

@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>src/test/scala/scalaio/test/FileSystemFixture.scala</string>
+	<string>integration-tests</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -21,6 +21,20 @@
 	<integer>319</integer>
 	<key>metaData</key>
 	<dict>
+		<key>integration-tests</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>115</integer>
+				<key>line</key>
+				<integer>5</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
 		<key>src/main/scala/scalax/io/Seekable.scala</key>
 		<dict>
 			<key>caret</key>
@@ -121,20 +135,6 @@
 			<key>firstVisibleLine</key>
 			<integer>58</integer>
 		</dict>
-		<key>src/test/scala/scalaio/test/FileSystemFixture.scala</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>19</integer>
-				<key>line</key>
-				<integer>114</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>93</integer>
-		</dict>
 	</dict>
 	<key>openDocuments</key>
 	<array>
@@ -142,13 +142,13 @@
 		<string>src/main/scala/scalax/io/ramfs/RamPath.scala</string>
 		<string>src/main/scala/scalax/io/ramfs/RamFileOps.scala</string>
 		<string>src/test/scala/scalaio/test/AbstractSeekableTests.scala</string>
-		<string>src/test/scala/scalaio/test/FileSystemFixture.scala</string>
 		<string>src/main/scala/scalax/io/ramfs/tree.scala</string>
 		<string>src/main/scala/scalax/io/ramfs/SeekableFileNodeChannel.scala</string>
+		<string>integration-tests</string>
 	</array>
 	<key>showFileHierarchyDrawer</key>
 	<true/>
 	<key>windowFrame</key>
-	<string>{{14, 47}, {944, 731}}</string>
+	<string>{{188, -149}, {944, 731}}</string>
 </dict>
 </plist>
