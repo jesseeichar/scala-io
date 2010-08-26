@@ -72,7 +72,7 @@ class RamPath(relativeTo:String, val path:String, override val fileSystem:RamFil
   def doCreateParents ():Unit = fileSystem.create(this.parent.get, DirNode, true)
   def delete(force:Boolean): Path = {
     if(node.collect{case d:DirNode => d.children.isEmpty}.forall{p=>p}) {
-      if(!fileSystem.delete(this, force)) {
+      if(exists && !fileSystem.delete(this, force)) {
         fail("Could not delete "+path)
       }
     } else {

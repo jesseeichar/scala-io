@@ -9,6 +9,7 @@
 package scalax.io
 
 import java.io.{File=>JFile}
+import java.net.URLStreamHandler
 import util.Random.nextInt
 
 /**
@@ -38,6 +39,7 @@ object FileSystem {
  * @since   1.0
  */
 abstract class FileSystem {
+   
   protected val legalChars = ('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9') ++ List('_','-','+','.') toList
   def randomPrefix = 1 to (nextInt(5)+3) map {_=> legalChars(nextInt(legalChars.size))} mkString ""
   
@@ -166,5 +168,12 @@ abstract class FileSystem {
                         dir: String = null,
                         deleteOnExit : Boolean = true
                         /*attributes:List[FileAttributes] TODO */) : Path
+
+  /**
+   * Returns a URLStreamHandler if the protocol in the URI is not supported by default JAVA.
+   * This handler is used to construct URLs for the Paths as well as by scalax.io.PathURLStreamHandlerFactory
+   * The default behavoir is to return None this assumes that the default protocol handlers can handle the protocol
+   */
+  def urlStreamHandler : Option[URLStreamHandler] = None
 
 }

@@ -14,6 +14,15 @@ import ClassManifest.singleType
 import org.junit.Assert.fail
 
 trait AssertionSugar {
+  def ignoring[E <: Throwable](test : => Unit)(implicit m:Manifest[E]) : Unit = {
+    val error = try {
+      test
+      Some("Expected "+m.toString+" but instead no exception was raised")
+    }catch{
+      case e if (m >:> singleType(e)) => None
+      case e => throw e;
+    }
+  }
   def intercept[E <: Throwable](test : => Unit)(implicit m:Manifest[E]) : Unit = {
     val error = try {
       test

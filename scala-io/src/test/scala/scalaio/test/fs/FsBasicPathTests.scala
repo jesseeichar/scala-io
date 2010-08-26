@@ -11,14 +11,15 @@ package scalaio.test.fs
 import scalax.io._
 import scalax.io.ramfs._
 import Path.AccessModes._
-
+import scalax.io.resource.Resource
 import org.junit.Assert._
 import org.junit.{
   Test, Ignore
 }
 import util.Random
 
-import java.io.IOException
+import java.net.UnknownServiceException
+import java.io.{OutputStream, IOException}
 
 abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fixture {
   implicit val codec = Codec.UTF8
@@ -36,7 +37,35 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
 
   @Test //@Ignore
   def convert_to_uri = {
-    assertEquals(fspath("xx").toURL, fspath("xx").toURI.toURL)
+    assertEquals(fspath("xx").toURL.toString, fspath("xx").toURI.toString)
+  }
+  
+  @Test //@Ignore
+  def open_stream_on_url = {
+    import Resource._
+    val xx = fspath("xx/child")
+    xx.createFile(true, false)
+    xx.ops.writeString("hello")
+
+    def assertContents(s:String) {
+      val read = Resource.fromInputStream(xx.toURL.openStream).slurpString
+      assertEquals(s, read)
+    }
+
+    assertContents("hello")
+
+    val conn = xx.toURL.openConnection()
+
+    val outputStream = util.control.Exception.catching[OutputStream](classOf[Exception]) opt {conn.getOutputStream}
+    if(outputStream.isDefined) {
+      outputStream.foreach {_.close}
+      intercept[IllegalArgumentException] {
+        conn.getOutputStream
+      }
+      conn setDoOutput true
+      Resource.fromOutputStream(conn.getOutputStream).writeString("write")
+      assertContents("write")
+      }
   }
 
   @Test //@Ignore

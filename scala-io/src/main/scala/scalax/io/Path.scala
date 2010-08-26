@@ -285,7 +285,7 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    * and can be used directly.
    * @see java.io.File#toURI
    */
-  def toURL: URL = toURI.toURL()
+  def toURL: URL = new URL(null,toURI.toString(), fileSystem.urlStreamHandler.orNull);
 
   /**
    * If child is relative, creates a new Path based on the current path with the

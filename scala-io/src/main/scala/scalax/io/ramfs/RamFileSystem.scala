@@ -17,17 +17,30 @@ import scalax.io.attributes.FileAttribute
 import Path.AccessModes._
 import java.io.FileNotFoundException
 import java.net.{
-  URL,URI
+  URL,URI, URLStreamHandler
 }
 import java.util.UUID
 
-class RamFileSystem extends FileSystem {
+object RamFileSystem {
+  val protocol = "ramfs"
+  private val fileSystems = scala.collection.mutable.WeakHashMap[String,RamFileSystem]()
+  def apply(fsId:String) : RamFileSystem = synchronized {
+    fileSystems.get(fsId).getOrElse(new RamFileSystem(fsId))
+  }
+  private def register(fsId:String, fs:RamFileSystem) = synchronized {
+    fileSystems(fsId) = fs
+  }
+}
+
+class RamFileSystem(val id : String = UUID.randomUUID.toString) extends FileSystem {
   private var fsTree = new DirNode(separator)
-  
-  val id = UUID.randomUUID
+
+  RamFileSystem.register(id,this)
+
   val root = new RamPath("",fsTree.name, this)
   var pwd = root
   
+  override val urlStreamHandler : Option[URLStreamHandler] = Some(Handler)
   def separator: String = "/"
   def apply(path: String): RamPath = {
     if(path startsWith separator) apply("",path)
@@ -59,7 +72,7 @@ class RamFileSystem extends FileSystem {
                         
   def matcher(pattern:String, syntax:String = PathMatcher.StandardSyntax.GLOB): PathMatcher = null // TODO
 
-  def uri(path:RamPath = root):URI = new URI("ramfs://"+id+path)
+  def uri(path:RamPath = root):URI = new URI(RamFileSystem.protocol+"://"+id+"!"+path.path)
   override def toString = "Ram File System"
   
   private[ramfs] def lookup(path:RamPath) = {
@@ -104,5 +117,4 @@ class RamFileSystem extends FileSystem {
     }
   }
   
-
 }

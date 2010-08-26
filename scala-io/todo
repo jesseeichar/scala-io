@@ -35,3 +35,20 @@ Add protected aliasing/imports to java classes in package to reduce number or re
 Consider adding Path implicits to a package object
 Should BufferSize be a global variable? (I think probably settable.  Maybe like a logger so different situations/objects can have different sizes)
 How should singly traversable streams be handled
+Decide if I want to add to java.protocol.handler.packages:
+      val PKGS_KEY = "java.protocol.handler.pkgs"
+    
+      def initProtocolHandler = {
+        val pkg = getClass.getPackage.getName
+  
+        val prop = Option(System getProperty PKGS_KEY).map {_ split "\\|"}.orElse(Some(Array[String]()))
+        prop foreach { p => 
+          val newProp = (p :+ pkg ).distinct mkString "|"
+          System.setProperty(PKGS_KEY, newProp)
+        }
+      }
+
+
+== Plugin
+Use Java 7 fileSystem plugin architecture
+Update all TODO: plugin tags

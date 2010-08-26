@@ -9,15 +9,12 @@
 package scalax.io.ramfs
 
 import scalax.io.{
-  Path, FileOps, OpenOption, Seekable, SeekableByteChannel, NotFileException
+  FileOps, OpenOption, Seekable, NotFileException
 }
-import scalax.io.resource.{
-  ByteChannelResource, OutputStreamResource, InputStreamResource, Resource
-}
+import scalax.io.resource.ByteChannelResource
 import java.nio.channels.FileChannel
 import java.io.{
-  InputStream, OutputStream, FileNotFoundException, ByteArrayInputStream, 
-  ByteArrayOutputStream, IOException
+  FileNotFoundException, IOException
 }
 
 class RamFileOps(path:RamPath) extends FileOps(path) {
