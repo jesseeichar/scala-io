@@ -63,92 +63,10 @@
   <component name="FileColors" enabled="true" enabledForTabs="true" />
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="Handler.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/Handler.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="36" column="0" selection-start="1188" selection-end="1188" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="FsBasicPathTests.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/fs/FsBasicPathTests.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="526" column="42" selection-start="16618" selection-end="16618" vertical-scroll-proportion="0.0">
-              <folding>
-                <marker date="1282765218000" expanded="false" signature="0:527" placeholder="/.../" />
-                <marker date="1282765218000" expanded="true" signature="561:767" placeholder="..." />
-                <marker date="1282765218000" expanded="true" signature="855:16787" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="1081:1223" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="1266:1346" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="1395:1928" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="1541:1651" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="2006:2158" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="2235:2338" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="2418:2550" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="2638:2802" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="2875:2966" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="3031:3138" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="3202:3330" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="3405:3456" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="3529:3577" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="3656:3697" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="3796:3833" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="3935:4482" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="4035:4342" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="4536:4730" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="4794:4905" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="4982:5326" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="5386:5489" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="5543:5717" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="5777:5884" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="5948:6129" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="6193:6290" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="6374:6590" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="6662:7980" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="8051:8218" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="8287:8555" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="8645:8916" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="9003:9568" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="9648:10073" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="10138:10279" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="10388:12095" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="11697:11875" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="12169:13445" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="12999:13296" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="13507:14232" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="14289:15339" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="15388:15617" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="15667:16089" placeholder="{...}" />
-                <marker date="1282765218000" expanded="true" signature="16139:16200" placeholder="{...}" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="FileSystemFixture.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/fs/FileSystemFixture.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="101" column="0" selection-start="3315" selection-end="3315" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="AssertionSugar.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scala-io/src/test/scala/scalax/test/sugar/AssertionSugar.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="16" column="14" selection-start="697" selection-end="705" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="ReflectiveCallable.class" pinned="false" current="false" current-in-tab="false">
         <entry file="jar://$PROJECT_DIR$/scala-io/lib_managed/scala_2.8.0/test/junit-4.7.jar!/org/junit/internal/runners/model/ReflectiveCallable.class">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="11" column="40" selection-start="404" selection-end="404" vertical-scroll-proportion="-5.0">
+            <state line="11" column="40" selection-start="404" selection-end="404" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -163,10 +81,28 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Path.scala" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="Path.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/Path.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="243" column="0" selection-start="9133" selection-end="9133" vertical-scroll-proportion="0.0">
+            <state line="350" column="78" selection-start="12165" selection-end="12165" vertical-scroll-proportion="0.91366905">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="FsBasicPathTests.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/fs/FsBasicPathTests.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="43" column="59" selection-start="1536" selection-end="1536" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="FileSystemFixture.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/fs/FileSystemFixture.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="47" column="37" selection-start="1543" selection-end="1543" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -181,10 +117,37 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="RamFileOps.scala" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="RamFileOps.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/RamFileOps.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="47" column="51" selection-start="2118" selection-end="2118" vertical-scroll-proportion="0.676259">
+            <state line="47" column="74" selection-start="2141" selection-end="2141" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Output.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/Output.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="59" column="71" selection-start="1858" selection-end="1858" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="tree.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/tree.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="53" column="75" selection-start="1825" selection-end="1825" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="resource.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/resource/resource.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="445" column="26" selection-start="15702" selection-end="15722" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -210,9 +173,10 @@
         <option value="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/Handler.scala" />
         <option value="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/RamFileSystem.scala" />
         <option value="$PROJECT_DIR$/scala-io/src/test/scala/scalax/test/sugar/AssertionSugar.scala" />
-        <option value="$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/fs/FsBasicPathTests.scala" />
         <option value="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/RamPath.scala" />
         <option value="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/RamFileOps.scala" />
+        <option value="$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/fs/FsBasicPathTests.scala" />
+        <option value="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/Path.scala" />
       </list>
     </option>
   </component>
@@ -236,7 +200,7 @@
     <ConfirmationsSetting value="0" id="Remove" />
   </component>
   <component name="ProjectReloadState">
-    <option name="STATE" value="2" />
+    <option name="STATE" value="0" />
   </component>
   <component name="ProjectView">
     <navigator currentView="ProjectPane" proportions="" version="1" splitterProportion="0.5">
@@ -1076,10 +1040,10 @@
       </method>
     </configuration>
     <list size="4">
-      <item index="0" class="java.lang.String" itemvalue="JUnit.Ram BasicPathTest" />
-      <item index="1" class="java.lang.String" itemvalue="JUnit.scalaio in Core IO project" />
-      <item index="2" class="java.lang.String" itemvalue="JUnit.all" />
-      <item index="3" class="java.lang.String" itemvalue="JUnit.Default BasicPathTest" />
+      <item index="0" class="java.lang.String" itemvalue="JUnit.scalaio in Core IO project" />
+      <item index="1" class="java.lang.String" itemvalue="JUnit.Default BasicPathTest" />
+      <item index="2" class="java.lang.String" itemvalue="JUnit.Ram BasicPathTest" />
+      <item index="3" class="java.lang.String" itemvalue="JUnit.all" />
     </list>
     <configuration name="&lt;template&gt;" type="WebApp" default="true" selected="false">
       <Host>localhost</Host>
@@ -1105,12 +1069,11 @@
     <supportedVersion>125</supportedVersion>
   </component>
   <component name="ToolWindowManager">
-    <frame x="35" y="22" width="1245" height="778" extended-state="0" />
-    <editor active="false" />
+    <frame x="35" y="22" width="1245" height="778" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32977587" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="JavaRebel Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39817628" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -1118,7 +1081,7 @@
       <window_info id="FindBugs-IDEA" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="JavaRebel" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32674772" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32522798" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -1129,6 +1092,7 @@
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.46960485" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32977587" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout>
@@ -1168,160 +1132,90 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="jar:///System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK/Home/src.jar!/src/java/net/URLConnection.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="530" column="16" selection-start="19968" selection-end="19968" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$PROJECT_DIR$/project/boot/scala-2.8.0/lib/scala-library.jar!/scala/collection/mutable/StringBuilder.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="40" column="0" selection-start="3467" selection-end="3467" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/RamFileSystem.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="74" column="90" selection-start="3029" selection-end="3029" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/Handler.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="36" column="0" selection-start="1188" selection-end="1188" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/fs/default/AllTests.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="18" column="0" selection-start="1209" selection-end="1209" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
+        <state line="74" column="90" selection-start="3029" selection-end="3029" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="jar://$PROJECT_DIR$/scala-io/lib_managed/scala_2.8.0/test/junit-4.7.jar!/org/junit/runners/model/FrameworkMethod.class">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="12" column="38" selection-start="528" selection-end="528" vertical-scroll-proportion="0.3322785">
-          <folding />
-        </state>
+        <state line="12" column="38" selection-start="528" selection-end="528" vertical-scroll-proportion="0.3322785" />
       </provider>
     </entry>
     <entry file="jar://$PROJECT_DIR$/scala-io/lib_managed/scala_2.8.0/test/junit-4.7.jar!/org/junit/internal/runners/statements/RunAfters.class">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="12" column="16" selection-start="622" selection-end="622" vertical-scroll-proportion="0.4385382">
-          <folding />
-        </state>
+        <state line="12" column="16" selection-start="622" selection-end="622" vertical-scroll-proportion="0.4385382" />
       </provider>
     </entry>
-    <entry file="jar://$PROJECT_DIR$/scala-io/lib_managed/scala_2.8.0/test/junit-4.7.jar!/org/junit/internal/runners/model/ReflectiveCallable.class">
+    <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/Handler.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="11" column="40" selection-start="404" selection-end="404" vertical-scroll-proportion="-5.0">
-          <folding />
-        </state>
+        <state line="36" column="0" selection-start="1188" selection-end="1188" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="jar://$PROJECT_DIR$/scala-arm/target/scala_2.8.0/arm-project_2.8.0-0.1.0.jar!/scala/resource/ManagedResourceOperations.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="7" column="22" selection-start="752" selection-end="759" vertical-scroll-proportion="0.09251101" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/scala-io/src/test/scala/scalax/test/sugar/AssertionSugar.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="16" column="14" selection-start="697" selection-end="705" vertical-scroll-proportion="0.0">
+        <state line="16" column="14" selection-start="697" selection-end="705" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="jar://$PROJECT_DIR$/scala-io/lib_managed/scala_2.8.0/test/junit-4.7.jar!/org/junit/internal/runners/model/ReflectiveCallable.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="11" column="40" selection-start="404" selection-end="404" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/fs/default/AllTests.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="18" column="0" selection-start="1209" selection-end="1209" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/tree.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="53" column="75" selection-start="1825" selection-end="1825" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/resource/resource.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="445" column="26" selection-start="15702" selection-end="15722" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/Output.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="59" column="71" selection-start="1858" selection-end="1858" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/fs/FileSystemFixture.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="101" column="0" selection-start="3315" selection-end="3315" vertical-scroll-proportion="0.0">
+        <state line="47" column="37" selection-start="1543" selection-end="1543" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/RamPath.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="99" column="31" selection-start="4004" selection-end="4004" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/RamFileOps.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="47" column="74" selection-start="2141" selection-end="2141" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/fs/FsBasicPathTests.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="43" column="59" selection-start="1536" selection-end="1536" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/Path.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="243" column="0" selection-start="9133" selection-end="9133" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/resource/resource.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="174" column="6" selection-start="4834" selection-end="4834" vertical-scroll-proportion="0.33093524">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/Output.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="91" column="23" selection-start="2756" selection-end="2756" vertical-scroll-proportion="0.37201366">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/fs/FsBasicPathTests.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="526" column="42" selection-start="16618" selection-end="16618" vertical-scroll-proportion="0.0">
-          <folding>
-            <marker date="1282765218000" expanded="false" signature="0:527" placeholder="/.../" />
-            <marker date="1282765218000" expanded="true" signature="561:767" placeholder="..." />
-            <marker date="1282765218000" expanded="true" signature="855:16787" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="1081:1223" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="1266:1346" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="1395:1928" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="1541:1651" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="2006:2158" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="2235:2338" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="2418:2550" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="2638:2802" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="2875:2966" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="3031:3138" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="3202:3330" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="3405:3456" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="3529:3577" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="3656:3697" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="3796:3833" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="3935:4482" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="4035:4342" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="4536:4730" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="4794:4905" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="4982:5326" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="5386:5489" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="5543:5717" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="5777:5884" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="5948:6129" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="6193:6290" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="6374:6590" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="6662:7980" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="8051:8218" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="8287:8555" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="8645:8916" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="9003:9568" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="9648:10073" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="10138:10279" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="10388:12095" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="11697:11875" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="12169:13445" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="12999:13296" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="13507:14232" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="14289:15339" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="15388:15617" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="15667:16089" placeholder="{...}" />
-            <marker date="1282765218000" expanded="true" signature="16139:16200" placeholder="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/RamPath.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="99" column="31" selection-start="4004" selection-end="4004" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/RamFileOps.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="47" column="51" selection-start="2118" selection-end="2118" vertical-scroll-proportion="0.676259">
+        <state line="350" column="78" selection-start="12165" selection-end="12165" vertical-scroll-proportion="0.91366905">
           <folding />
         </state>
       </provider>

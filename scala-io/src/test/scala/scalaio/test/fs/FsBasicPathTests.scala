@@ -29,6 +29,20 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
   def fspath(name:String) = fixture.fs(name)
   def fspath(name:Path) = fixture.fs(name.path)
 
+  @Test
+  def name_simpleName_extension = {
+    val simpleName = "image"
+    val ext = "png"
+    val fullname = simpleName + "." + ext
+    val path = fspath(fullname)
+    
+    assertEquals(simpleName, path.simpleName)
+    assertEquals(fullname, path.name)
+    assertEquals(Some(ext), path.extension)
+    assertEquals(None, fspath(simpleName).extension)
+    assertEquals(simpleName, fspath(simpleName).name)
+    assertEquals(simpleName, fspath(simpleName).simpleName)
+  }
   @Test //@Ignore
   def absolute_path_should_be_rooted_at_a_root = {
     val absolute = fspath("xx").toAbsolute
@@ -43,7 +57,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
   @Test //@Ignore
   def open_stream_on_url = {
     import Resource._
-    val xx = fspath("xx/child")
+    val xx = fixture.path
     xx.createFile(true, false)
     xx.ops.writeString("hello")
 

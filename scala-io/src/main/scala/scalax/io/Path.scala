@@ -345,6 +345,11 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    */
   def name: String
   /**
+   * The name of the file excluding of the file
+   * @return name of the file excluding of the file
+   */
+  def simpleName: String = name dropRight extension.map{1 + _.size}.getOrElse(0)
+  /**
    * The path of the file.  It may or may not be relative
    *
    * @return the path of the file
