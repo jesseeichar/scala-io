@@ -11,6 +11,7 @@ Path
 How to implement a new filesystem (do while creating zip FS)
 
 == Misc
+Add openOptions: Seq[OpenOption] to FileOps.withLock
 Path.Matcher tests
 Path.Matcher should be in PathMatcher and extent PathMatcher
 Path.notExists => Path.nonExistant

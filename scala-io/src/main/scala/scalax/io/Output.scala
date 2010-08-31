@@ -9,7 +9,7 @@
 package scalax.io
 
 import scalax.io.resource._
-import scala.resource._
+import resource._
 import scala.collection.Traversable
 import OpenOption._
 import Line._

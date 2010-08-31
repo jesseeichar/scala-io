@@ -608,7 +608,7 @@ object Samples {
     val file: FileOps =  Path ("file").ops
 
     // some APIs require a stream or channel. Using one of the io resources you can safely call the method and be guaranteed that the stream will be correctly closed and exceptions handled
-    // see the documentation in scala.resource.ManagedResource for details on all the options available
+    // see the documentation in resource.ManagedResource for details on all the options available
     def javaApiEntryPoint(stream: InputStream) = {
       // do something interesting
       stream.read()
@@ -708,7 +708,7 @@ object Samples {
   { // Examples of non-file IO
     import scalax.io._
     import scalax.io.resource.Resource
-    import scala.resource.ManagedResource
+    import resource.ManagedResource
     import java.net.URL
     import java.io.{
       ObjectInputStream, InputStreamReader, ByteArrayOutputStream,

@@ -15,7 +15,7 @@ import scalax.io.{
 }
 import scalax.io.resource._
 import scalax.io.OpenOption._
-import scala.resource.ManagedResource
+import resource.ManagedResource
 import scalax.io.nio.SeekableFileChannel
 
 
@@ -76,13 +76,10 @@ private[io] class DefaultFileOps(path : DefaultPath, jfile:JFile) extends FileOp
   }
 
   def withLock[R](start: Long = 0, size: Long = -1, shared: Boolean = false)(block: Seekable => R): Option[R] = {
-    val result =
-      for {fc <- fileChannel().get
-         lock <- Option(fc.tryLock(start,size,shared)) } yield {
-//           val stream = block.lslice(start,start+size)  // TODO
-           block(this)
-         }
-    result.opt.flatten.headOption
+    val self = this
+    fileChannel().get.acquireAndGet{ fc =>
+      Option(fc.tryLock(start,size,shared)).map{_ => block(self)}
+    }
   }
 
   private def preOpen(openOptions: Seq[OpenOption]) : (Boolean, Seq[OpenOption]) = {

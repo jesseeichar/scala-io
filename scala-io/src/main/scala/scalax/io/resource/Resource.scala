@@ -8,10 +8,8 @@
 
 package scalax.io.resource
 
+import _root_.resource.{ManagedResourceOperations}
 import scalax.io._
-import scala.resource.{
-  ManagedResource, ManagedResourceOperations
-}
 import java.io.{
   BufferedReader, BufferedWriter, InputStream, OutputStream,
   BufferedInputStream, BufferedOutputStream, Reader, Writer,
