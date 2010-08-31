@@ -4,12 +4,10 @@ cobertura.ser
 project/boot/
 target/
 lib_managed/
-build/
 *.class
 .project
 .classpath
 .scala_dependencies
-
 /ws/
 /.gradle/
 /lib/
