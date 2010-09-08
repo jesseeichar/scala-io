@@ -8,15 +8,10 @@
 
 package scalax.io
 
-import scala.util.control.Exception._
-import _root_.resource.ManagedResource
 import scalax.io.attributes.FileAttribute
 import java.io.{IOException, File => JFile}
-import java.nio.channels.ByteChannel
 import java.net.{ URI, URL }
 import collection.{ Traversable }
-import PartialFunction._
-import java.lang.{ProcessBuilder}
 
 /**
  * The object for constructing Path objects and for containing implicits from strings and
@@ -258,6 +253,7 @@ import Path.fail
  */
 abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
 {
+  self =>
   /**
    * The path segment separator string for
    * the filesystem
@@ -285,7 +281,7 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    * and can be used directly.
    * @see java.io.File#toURI
    */
-  def toURL: URL = new URL(null,toURI.toString(), fileSystem.urlStreamHandler.orNull);
+  def toURL: URL = new URL(null,toURI.toString(), fileSystem.urlStreamHandler.orNull)
 
   /**
    * If child is relative, creates a new Path based on the current path with the
@@ -363,7 +359,18 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    * @see #toAbsolute
    * @see java.io.File#toCanonical
    */
-  def normalize: Path
+   def normalize: Path = {
+     val Empty = Vector.empty
+     val reversedNormalizedPath = (Vector[String]() /: segments) { 
+       case (path,".") => path
+       case (Empty,"..") => Empty
+       case (path,"..") => path dropRight 1
+       case (path,seg) => path :+ seg
+     }
+     val prefix = if(isAbsolute) root.map{_.path}.getOrElse("")
+                  else ""
+     fileSystem(prefix + (reversedNormalizedPath mkString separator))
+   }
   /**
    * Resolve this path with other.  In the simplest case
    * that means appending other to this.
@@ -386,17 +393,16 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
 
   /**
    * Make the current path relative to the other path.  If the two paths
-   * are on different drives then the other path is returned
-   * <p>
-   * @NOTE do we want to relativize:  /home/jesse and /home/jones to /home/jesse/../jones?
-   *       or do we call that out of scope and simply return other?
-   * </p>
+   * are on different drives then the other path is returned. If the two
+   * paths have different roots the other path is returned.  If the two paths
+   * reference the same path then the other path is returned
    * @return relative path from the current path to the other path
    */
   def relativize(other: Path): Path = {
-    if(other.fileSystem != fileSystem) other
-    else if(other.root != root) other
-    else if(segments startsWith other.segments){
+    
+    if(other.fileSystem != fileSystem || other.root != root) {
+      other
+    }else if(segments startsWith other.segments){
       fileSystem(segments.drop(other.segments.size) mkString fileSystem.separator)
     } else {
       null // TODO do we want to relativize this?
@@ -900,6 +906,9 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    *  @param copyAttributes
    *           if true then copy the File attributes of the object
    *           as well as the data.  True by default
+   *  @param depth
+   *           The depth of the copy if the path is a Directory.
+   *           default is entire tree
    *  @param replaceExisting
    *           if true then replace any existing target object
    *           unless it is a non-empty directory in which case
@@ -931,9 +940,6 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    *           unless it is a non-empty directory in which case
    *           an IOException is thrown.
    *           False by default
-   *  @param depth
-   *           The depth of the copy if the path is a Directory. 
-   *           default is entire tree
    *  @param atomicMove
    *           it will guarantee atomicity of the move
    *           False by default
@@ -945,32 +951,47 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    *           not be written to or if this path cannot be moved
    */
   def moveTo(target: Path, replace:Boolean=false,
-             depth : Int = -1,
-             atomicMove:Boolean=false): Path = {
-   def fail(msg:String) = throw new IOException(msg)
-
+             atomicMove:Boolean=false) : Path = {
    if( target.exists && replace) {
 	   target match {
 		   case _ if target.isDirectory && target.children().nonEmpty => fail("can not replace a non-empty directory: "+target)
 	     case _ => target.delete()
 	   }
    }
-   
+
    target match {
        case _ if this.notExists => fail("attempted to move "+path+" but it does not exist")
        case _ if target.normalize == normalize => ()
        case _ if !replace && target.exists => fail(target+" exists but replace parameter is false")
        case _ if this.isFile && target.isDirectory => fail("cannot overwrite a directory with a file")
        case _ if this.isDirectory && target.isFile => fail("cannot overwrite a file with a directory")
-       case _ if (target.notExists || target.isFile) && this.isFile => moveFile(target,atomicMove)
-       case _ if target.notExists && this.isDirectory => moveDirectory(target,depth,atomicMove)
+       // TODO move between two fileSystems
+       case _ if target.fileSystem != fileSystem && this.isFile =>
+         target.ops writeInts this.ops.bytesAsInts
+         delete()
+       case _ if target.fileSystem != fileSystem && this.isDirectory =>
+         val x = target.exists
+         target.createDirectory()
+         val z = descendants() forall {_.exists}
+         children() foreach { path =>
+             path moveTo (target \ path.relativize(self))
+         }
+         delete()
+       case _ if target.notExists || target.isFile && this.isFile => moveFile(target,atomicMove)
+       case _ if target.notExists && this.isDirectory => moveDirectory(target,atomicMove)
        case _ => throw new Error("not yet handled "+target+","+this)
      }
      target
   }
-  
+
+  /**
+   * Called to move the current file to another location <strong>on the same filesystem</strong>
+   */
   protected def moveFile(target:Path, atomicMove : Boolean) : Unit
-  protected def moveDirectory(target:Path, depth:Int, atomicMove : Boolean) : Unit
+  /**
+   * Called to move the current directory to another location <strong>on the same filesystem</strong>
+   */
+  protected def moveDirectory(target:Path, atomicMove : Boolean) : Unit
 
   override def toString() = "Path(%s)".format(path)
   override def equals(other: Any) = other match {
@@ -981,7 +1002,7 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
 
   /**
    * Create a matcher from this path's filesystem
-   * @see FileSystem#matcher(String,String)
+   * @see FileSystem # matcher ( String, String )
    */
   def matcher(pattern:String, syntax:String = PathMatcher.StandardSyntax.GLOB) = fileSystem.matcher(pattern, syntax)
 

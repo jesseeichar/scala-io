@@ -8,10 +8,11 @@ object Constants {
     final val TEXT_FILE_SIZE = 21
     final val IMAGE_FILE_SIZE = 6315
     
-    final val IMAGE = resource("resources/image.png")
-    final val TEXT = resource("resources/text")
+    final lazy val IMAGE = resource("resources/image.png")
+    final lazy val TEXT = resource("resources/text")
     
-    final val TEXT_VALUE = {
+    final lazy val TEXT_VALUE = {
+        println(TEXT.getFile)
         val reader = new BufferedReader(new InputStreamReader(TEXT.openStream, "UTF-8"))
         try {
             var line = reader.readLine()

@@ -23,8 +23,8 @@ object Handler extends Handler
 
 class RamURLConnection(url:URL) extends URLConnection(url) {
   lazy val path = {
-    val Array(id,path) = url.getHost.split("!")
-    RamFileSystem(id)(path+"/"+url.getPath)
+    val Array(id,path) = url.toString.drop(RamFileSystem.protocol+"://" size).split("!")
+    RamFileSystem(id)(path)
   }
   def connect = {}
 

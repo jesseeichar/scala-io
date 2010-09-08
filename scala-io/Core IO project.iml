@@ -43,7 +43,16 @@
     <orderEntry type="module-library" exported="" scope="TEST">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.0/test/test-interface-0.5.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.0/test/junit-interface-0.4.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="" scope="TEST">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.0/test/junit-4.8.1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -61,29 +70,19 @@
     <orderEntry type="module-library" exported="" scope="TEST">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.0/test/junit-4.7.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="" scope="TEST">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.0/test/junit-interface-0.4.0.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.0/test/test-interface-0.5.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
-      <library name="arm">
+      <library>
         <CLASSES>
-          <root url="file://$MODULE_DIR$/../scala-arm/target/scala_2.8.0" />
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.0/compile/scala-arm_2.8.0-0.2.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
-        <jarDirectory url="file://$MODULE_DIR$/../scala-arm/target/scala_2.8.0" recursive="false" />
       </library>
     </orderEntry>
   </component>
@@ -91,10 +90,7 @@
     <option name="_basePreferences">
       <map>
         <entry key="property.analysisEffortLevel" value="default" />
-        <entry key="property.analyzeAfterCompile" value="false" />
-        <entry key="property.minPriorityToReport" value="Medium" />
-        <entry key="property.runAnalysisInBackground" value="false" />
-        <entry key="property.showHiddenDetectors" value="false" />
+        <entry key="property.minPriorityToReport" value="High" />
         <entry key="property.toolWindowToFront" value="true" />
       </map>
     </option>
@@ -254,20 +250,6 @@
         <entry key="WaitInLoop" value="true" />
         <entry key="WrongMapIterator" value="true" />
         <entry key="XMLFactoryBypass" value="true" />
-      </map>
-    </option>
-    <option name="_reportCategories">
-      <map>
-        <entry key="BAD_PRACTICE" value="true" />
-        <entry key="CORRECTNESS" value="true" />
-        <entry key="EXPERIMENTAL" value="true" />
-        <entry key="I18N" value="true" />
-        <entry key="MALICIOUS_CODE" value="true" />
-        <entry key="MT_CORRECTNESS" value="true" />
-        <entry key="NOISE" value="false" />
-        <entry key="PERFORMANCE" value="true" />
-        <entry key="SECURITY" value="true" />
-        <entry key="STYLE" value="true" />
       </map>
     </option>
   </component>

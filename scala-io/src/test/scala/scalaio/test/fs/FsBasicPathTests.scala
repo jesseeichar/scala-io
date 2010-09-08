@@ -23,13 +23,15 @@ import java.io.{OutputStream, IOException}
 
 abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fixture {
   implicit val codec = Codec.UTF8
-  
+
+  Path("/tmp/out").ops.writeString(Path(getClass().getResource(".").getFile()).toAbsolute.toString)
+
   // test lastmodified
   
   def fspath(name:String) = fixture.fs(name)
   def fspath(name:Path) = fixture.fs(name.path)
 
-  @Test
+  @Test //@Ignore
   def name_simpleName_extension = {
     val simpleName = "image"
     val ext = "png"
@@ -53,7 +55,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
   def convert_to_uri = {
     assertEquals(fspath("xx").toURL.toString, fspath("xx").toURI.toString)
   }
-  
+
   @Test //@Ignore
   def open_stream_on_url = {
     import Resource._
@@ -89,7 +91,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
     assertFalse(fixture.root.path == p.path)
   }
 
-  @Test //@Ignore  
+  @Test //@Ignore
   def relativize_return_other_when_not_same_fileSystem = {
     val other = new RamFileSystem()("other")
     assertSame(other, fixture.root relativize other)
@@ -97,9 +99,9 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
   @Test //@Ignore
   def createFile_should_fail_to_overwrite_exiting_by_default = {
     val p = (fixture.root \ "c1")
-    
+
     p.createFile()
-    
+
     intercept[java.io.IOException] {
       p.createFile()
     }
@@ -118,7 +120,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
     val p = (fixture.root \ "c1" \ "c2" \ "c3").createFile()
     assertTrue(p.exists)
   }
-  @Test //@Ignore  
+  @Test //@Ignore
   def slash_method_should_create_child_path = {
     val p = fixture.root \ "c1" \ "c2"
     assertEquals(2, (p relativize fixture.root).segments.size)
@@ -162,17 +164,27 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
     testFailure()
     dir.delete().createFile()
     testFailure()
-    
+
     dir.delete()
   }
+
+  @Test //@Ignore
+  def non_existant_file_should_not_be_file_or_directory : Unit = {
+    val f1 = fixture.path
+    assertFalse(f1.exists)
+    assertTrue(f1.notExists)
+    assertFalse(f1.isDirectory)
+    assertFalse(f1.isFile)
+  }
+  
   @Test //@Ignore
   def path_can_move_files() : Unit = {
     val f1 = fixture.path
     f1.ops.writeString("file to move")
-    
+
     val exists = fixture.path
     exists.ops.writeString("pre existing file")
-    
+
     move( f1, fixture.path, exists)
   }
   @Test //@Ignore
@@ -226,7 +238,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
   @Test //@Ignore
   def path_children_only_lists_directly_contained_files() : Unit = {
     val path = fixture.tree(5)._1
-    
+
     val onlyChildren = path.children() forall {_.parent.get == path}
     assertTrue((path.children() mkString ",")+" contains more files than just children", onlyChildren)
   }
@@ -241,31 +253,31 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
     assertEquals("Write assignment failed: " + p.access, Set(Write), p.access.toSet)
     p.access = "x"
     assertEquals("Execute assignment failed: " + p.access, Set(Execute), p.access.toSet)
-    
+
     p.access = ""
     assertEquals("Empty assignment failed: " + p.access, Set.empty, p.access.toSet)
-    
+
     p.access = "+r"
     assertEquals("+r assignment failed: " + p.access, Set(Read), p.access.toSet)
-    
+
     p.access = "-r"
     assertEquals("-1 assignment failed: " + p.access, Set.empty, p.access.toSet)
-        
+
     p.access = "+w"
     assertEquals("+w assignment failed: " + p.access, Set(Write), p.access.toSet)
-    
+
     p.access = "-w"
     assertEquals("-w assignment failed: " + p.access, Set.empty, p.access.toSet)
-    
+
     p.access = "+rxw"
     assertEquals("+rxw assignment failed: " + p.access, Set(Read,Write,Execute), p.access.toSet)
-    
+
     p.access = "+rxw"
     assertEquals("+rxw second assignment failed: " + p.access, Set(Read,Write,Execute), p.access.toSet)
-    
+
     p.access = "-xw"
     assertEquals("-xw assignment failed: " + p.access, Set(Read), p.access.toSet)
-    
+
     intercept[IOException] {
       p.access = "@"
     }
@@ -285,15 +297,15 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
   @Test //@Ignore
   def path_should_delete_directories_recursively() {
     val (root,_) = fixture.tree(5)
-    
+
     val numFiles = root.descendants().size + 1 // add root
-    
+
     val (deleted, remaining) = root.deleteRecursively()
-    
+
     assertEquals(numFiles, deleted)
     assertEquals(0, remaining)
     assertTrue(root.notExists)
-  } 
+  }
   @Test //@Ignore
   def delete_recursively_should_throw_exception_on_failure_by_default() {
       val (root,_) = fixture.tree(5)
@@ -310,7 +322,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
       val (root,_) = fixture.tree(5)
 
       val totalPaths = root.descendants().size + 1
-      
+
       val totalFiles = root.descendants{_.isFile}.size
       root.descendants {_.isFile}.take(totalFiles/2) foreach {p => p.access = p.access - Write}
       val (deleted, remaining) = root.deleteRecursively(continueOnFailure = true)
@@ -345,6 +357,27 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
     assertFalse(path.exists)
   }
   
+  @Test //@Ignore
+  def normalize_should_change_a_path_to_be_minimized() {
+    assertEquals(fspath("/a/d"), fspath("/a/d").normalize)
+    assertEquals(fspath("/a/d"), fspath("/a//d").normalize)
+    assertEquals(fspath("a/d"), fspath("a//d").normalize)
+    assertEquals(fspath("/d"), fspath("/a/../d").normalize)
+    assertEquals(fspath("d"), fspath("a/../d").normalize)
+    assertEquals(fspath("/a/d"), fspath("/a/./d").normalize)
+    assertEquals(fspath("/a/d"), fspath("/a/b/.//c/../../d").normalize)
+  }
+
+  @Test //@Ignore
+  def parent() {
+    assertEquals(Some(fspath("/a/b/c")), fspath("/a/b/c/d").parent)
+  }
+
+  
+  @Test //@Ignore
+  def segments_should_return_parts_of_path() {
+    assertEquals(List("a","b","c",".","..","d"), fspath("a/b//c/./../d").segments.toList)
+  }
 
   def check = fixture.check _
   
@@ -388,6 +421,12 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
     if (canReplace) tryReplace
     else intercept[IOException] {tryReplace}
     
+
+    intercept[IOException] {
+      fixture.fs.roots(0) moveTo fixture.path
+    }
+
+    // TODO test moving between filesystems
     // TODO check access of moved file/directory
     
     // TODO check that attributes of moved file are the same as before move

@@ -46,7 +46,7 @@ class DefaultPath private[io] (val jfile: JFile, override val fileSystem: Defaul
   def \(child: String): DefaultPath = fileSystem(new JFile(jfile, child)) // TODO check if directory is absolute
   def name: String = jfile.getName()
   def path: String = jfile.getPath()
-  def normalize: DefaultPath = fileSystem(jfile.getCanonicalPath())
+  override lazy val normalize = super.normalize.asInstanceOf[DefaultPath]  
   def parent: Option[DefaultPath] = Option(jfile.getParent()) map fileSystem.apply
   def checkAccess(modes: AccessMode*): Boolean = {
     modes forall {
@@ -147,7 +147,7 @@ class DefaultPath private[io] (val jfile: JFile, override val fileSystem: Defaul
     }
   }
   
-  protected def moveDirectory(target:Path, depth:Int, atomicMove : Boolean) : Unit = {
+  protected def moveDirectory(target:Path, atomicMove : Boolean) : Unit = {
     val y = target.exists
     target match {
       case target : DefaultPath if (jfile renameTo target.jfile) => 

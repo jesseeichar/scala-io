@@ -21,18 +21,18 @@ import java.net.{
   URL,URI
 }
 
-class RamPath(relativeTo:String, val path:String, override val fileSystem:RamFileSystem) extends Path(fileSystem) {
+class RamPath(relativeTo:String, val path:String, override val fileSystem:RamFileSystem) extends Path(fileSystem) {  
   def node = fileSystem.lookup(this)
-  lazy val toAbsolute: Path = fileSystem("",relativeTo + fileSystem.separator + path)
+  lazy val toAbsolute: Path = fileSystem("",relativeTo + separator + path)
   lazy val toURI: URI = fileSystem.uri(this)
-  def \(child: String): RamPath = fileSystem(relativeTo,path + fileSystem.separator + child)
+  def \(child: String): RamPath = fileSystem(relativeTo,path + separator + child)
   lazy val name: String = segments.last
-  lazy val normalize: RamPath = null //TODO
+  override lazy val normalize = super.normalize.asInstanceOf[RamPath]
   lazy val parent: Option[RamPath] = {
     if(toAbsolute.path == fileSystem.root.path) {
       None
     } else {
-      val parentPath = fileSystem(toAbsolute.segments.dropRight(1).mkString(fileSystem.separator))
+      val parentPath = fileSystem(toAbsolute.segments.dropRight(1).mkString(separator,separator,""))
       Some(parentPath)
     }
   }
@@ -47,8 +47,8 @@ class RamPath(relativeTo:String, val path:String, override val fileSystem:RamFil
       }      
   }
   def exists = node.isDefined
-  def isFile = node.forall(FileNode.accepts)
-  def isDirectory = node.forall(DirNode.accepts)
+  def isFile = node.map(FileNode.accepts).getOrElse(false)
+  def isDirectory = node.map(DirNode.accepts).getOrElse(false)
   def isAbsolute = relativeTo == ""
   def isHidden = false //TODO
   def lastModified = node map {_.lastModified} getOrElse 0
@@ -84,10 +84,9 @@ class RamPath(relativeTo:String, val path:String, override val fileSystem:RamFil
              createParents : Boolean = true,
              copyAttributes:Boolean=true, 
              replaceExisting:Boolean=false): Path = null //TODO
-   protected def moveFile(target: Path, atomicMove:Boolean): Unit = null // TODO
-   protected def moveDirectory(target: Path, depth:Int, atomicMove:Boolean): Unit = null // TODO
-  def execute(args:String*)(implicit configuration:ProcessBuilder=>Unit = p =>()):Option[scalax.io.Process] = null // TODO
-
+   protected def moveFile(target: Path, atomicMove:Boolean): Unit = fileSystem.move(this, target.asInstanceOf[RamPath])
+   protected def moveDirectory(target: Path, atomicMove:Boolean): Unit = fileSystem.move(this, target.asInstanceOf[RamPath])
+  
   override def toString() = "RamPath(%s)".format(path)
   override def equals(other: Any) = other match {
     case x: Path  => path == x.path
@@ -98,10 +97,5 @@ class RamPath(relativeTo:String, val path:String, override val fileSystem:RamFil
   def descendants(filter:Path => Boolean, depth:Int, options:Traversable[LinkOption]):DirectoryStream[Path] = new RamDirectoryStream(this,filter,depth)
 
   def ops:FileOps = new RamFileOps(this)
-  
-  override def segments = {
-   if(isAbsolute) fileSystem.separator :: super.segments
-   else           super.segments
- }
-  
+   
 }

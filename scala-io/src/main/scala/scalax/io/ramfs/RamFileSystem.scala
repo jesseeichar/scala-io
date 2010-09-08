@@ -15,11 +15,11 @@ import scalax.io.{
 import scalax.io.attributes.FileAttribute
 
 import Path.AccessModes._
-import java.io.FileNotFoundException
 import java.net.{
   URL,URI, URLStreamHandler
 }
 import java.util.UUID
+import java.io.{IOException, FileNotFoundException}
 
 object RamFileSystem {
   val protocol = "ramfs"
@@ -76,7 +76,7 @@ class RamFileSystem(val id : String = UUID.randomUUID.toString) extends FileSyst
   override def toString = "Ram File System"
   
   private[ramfs] def lookup(path:RamPath) = {
-    val absolutePath = path.toAbsolute.segments
+    val absolutePath = separator :: path.toAbsolute.segments
     fsTree.lookup(absolutePath)
   }
   private[ramfs] def create(path:RamPath, fac:NodeFac, createParents:Boolean = true) : Boolean = {
@@ -87,7 +87,7 @@ class RamFileSystem(val id : String = UUID.randomUUID.toString) extends FileSyst
       case _ => ()
     }
 
-    val x = fsTree.create(absolute.segments drop 1,fac)
+    val x = fsTree.create(absolute.segments,fac)
     
     true
   }
@@ -108,13 +108,32 @@ class RamFileSystem(val id : String = UUID.randomUUID.toString) extends FileSyst
         fsTree = new DirNode(separator)
         true
       } else {
-        println("1-cannot delete "+path+" force: "+force)
         false
       }
     } else {
-      println("2-cannot delete "+path)
       false
     }
+  }
+
+  private[ramfs] def move(src:RamPath, dest:RamPath) = {
+    if(src == root) {
+      throw new IOException("Root cannot be moved")
+    }
+    val parentNode =
+      dest.parent match {
+        case Some(parent) =>
+          create(parent, DirNode, true) // TODO paramaterize NodeFactory
+          parent.node.get.asInstanceOf[DirNode]
+        case None =>
+          fsTree
+      }
+
+    src.node foreach { node =>
+      node.name = dest.name
+      parentNode.children += node
+    }
+
+    delete(src,true)
   }
   
 }
