@@ -70,6 +70,6 @@ private[ramfs] class SeekableFileNodeChannel(node:FileNode, owner:RamPath, openO
     closed = true
     if(openOptions contains DeleteOnClose) owner.delete(force=true)
   }
-  def isOpen() = closed
+  def isOpen() = !closed
   
 }

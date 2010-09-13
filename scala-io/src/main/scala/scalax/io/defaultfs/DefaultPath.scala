@@ -91,7 +91,7 @@ class DefaultPath private[io] (val jfile: JFile, override val fileSystem: Defaul
   }
 
   protected def copyFile(dest: Path): Path = {
-    val FIFTY_MB = 1024 * 1024 * 50
+    val FIFTY_MB = 1024 * 1024 * 50   // TODO extract this out into a constants file for easy adjustment
     assert(isFile, "Source %s is not a valid file." format name)
 
 // TODO ARM this
@@ -100,14 +100,12 @@ class DefaultPath private[io] (val jfile: JFile, override val fileSystem: Defaul
          in <- inResource
          out <- dest.ops.channel(Create, Truncate, Write)
     } {
-      try {
-        var pos, count = 0L
-        while (pos < size) {
-          count = (size - pos) min FIFTY_MB
-          val prepos = pos
-          pos += in.transferTo(pos, count, out)
-          if(prepos == pos) fail("no data can be copied for unknown reason!")
-        }
+      var pos, count = 0L
+      while (pos < size) {
+        count = (size - pos) min FIFTY_MB
+        val prepos = pos
+        pos += in.transferTo(pos, count, out)
+        if(prepos == pos) fail("no data can be copied for unknown reason!")
       }
       if (this.length != dest.length)
         fail("Failed to completely copy %s to %s".format(name, dest.name))

@@ -14,7 +14,6 @@ How to implement a new filesystem (do while creating zip FS)
 == Tests
 moveTo between 2 different file systems
 setting current directory (Supported by RAM and ZIP)
-test root of root == root
 
 == Misc
 Should I merge access and FileAttributes into one?

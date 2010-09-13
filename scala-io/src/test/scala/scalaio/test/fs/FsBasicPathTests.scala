@@ -218,6 +218,103 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
   }
 
   @Test //@Ignore
+  def path_can_move_files_between_file_systems() : Unit = {
+    val data = "file to move"
+    val f1 = fixture.path
+    f1.ops.writeString(data)
+
+    val otherfs = new RamFileSystem()
+    val otherpath = otherfs("/a")
+
+    f1.moveTo(otherpath)
+
+    assertTrue(f1.notExists)
+    assertTrue(otherpath.exists)
+    assertEquals(data, otherpath.ops.slurpString)
+  }
+
+
+  @Test //@Ignore
+  def path_can_copy_files_between_file_systems() : Unit = {
+    val data = "file to move"
+    val f1 = fixture.path
+    f1.ops.writeString(data)
+
+    val otherfs = new RamFileSystem()
+    val otherpath = otherfs("/a")
+
+    f1.copyTo(otherpath)
+
+    assertTrue(f1.exists)
+    assertTrue(otherpath.exists)
+    assertEquals(data, otherpath.ops.slurpString)
+    assertEquals(data, f1.ops.slurpString)
+  }
+
+  @Test //@Ignore
+  def path_can_move_directories_between_file_systems() : Unit = {
+    val f1 = fixture.path.createDirectory()
+
+
+    val otherfs = new RamFileSystem()
+    val otherpath = otherfs("/a")
+
+    f1.moveTo(otherpath)
+
+    assertTrue(f1.notExists)
+    assertTrue(otherpath.exists)
+  }
+  @Test //@Ignore
+  def path_can_move_directory_trees_between_file_systems() : Unit = {
+    val f1 = fixture.path.createDirectory()
+    f1 \ "b" createFile()
+
+    val otherfs = new RamFileSystem()
+    val otherpath = otherfs("/a")
+
+    f1.moveTo(otherpath)
+
+    assertTrue(f1.notExists)
+    assertTrue(otherpath.exists)
+
+    assertTrue(otherpath \ "b" exists)
+  }
+
+  @Test //@Ignore
+  def path_will_rename_when_moved_to_non_existant_path() : Unit = {
+    val parent = fixture.path.createDirectory()
+    val f1 = parent \ "a"
+
+    f1.ops.writeString("data")
+    
+    val otherpath = f1.parent.get \ "b"
+
+    f1.moveTo(otherpath)
+
+    assertTrue(otherpath.exists)
+
+    otherpath.copyTo(f1)
+
+    assertTrue(f1.exists)
+  }
+
+
+    @Test //@Ignore
+    def path_will_fail_when_copyTo_existing_path() : Unit = {
+      val parent = fixture.path.createDirectory()
+      val f1 = parent \ "a"
+
+      f1.ops.writeString("data")
+
+      val otherpath = f1.parent.get \ "b"
+      otherpath.ops.writeString("data2")
+      
+      intercept[IOException] {f1.moveTo(otherpath)}
+    }
+
+
+
+  @Test //@Ignore
   def path_can_move_files() : Unit = {
     val f1 = fixture.path
     f1.ops.writeString("file to move")
