@@ -739,11 +739,16 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
   def createFile( createParents:Boolean = true, failIfExists: Boolean = true, 
                  accessModes:Iterable[AccessMode]=List(Read,Write), attributes:Iterable[FileAttribute[_]]=Nil): Path = {
 
-    if(exists && failIfExists) {
-       fail("File '%s' already exists." format name)
-    } else if (exists) {
-      this
-    } else {
+    import Path.Matching._
+    exists match {
+      case true if failIfExists =>
+        fail("File '%s' already exists." format name)
+      case true if isDirectory =>
+        fail("Path "+this+" is a directory and thus cannot be created as a file")
+      case true =>
+        this.attributes = attributes
+        access = accessModes
+      case _ =>
       createContainingDir (createParents)
       // next assertions should be satisfied by createContainingDir or have already thrown an exception
       assert(parent.forall{p => p.exists}, "parent must exist for a file to be created within it")
@@ -754,8 +759,8 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
       val res = doCreateFile()
       access = accessModes
       if (!res) fail("unable to create file")
-      else this
     }
+    this
   }
 
   /**
@@ -798,13 +803,15 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
   def createDirectory(createParents: Boolean = true, failIfExists: Boolean = true,
                       accessModes:Iterable[AccessMode]=List(Read,Write,Execute), attributes:Iterable[FileAttribute[_]]=Nil) =  {
     if (failIfExists && exists) fail("Directory '%s' already exists." format name)
-
-    if(root != Some(this)) {
+    if (exists && isFile) fail("Path "+this+" is a fileand thus cannot be created as a directory")
+    
+    if(root != Some(this) && notExists) {
       createContainingDir (createParents)
 
       val res = doCreateDirectory()
-      access = accessModes
     }
+    this.attributes = attributes
+    access = accessModes
     this
   }
 

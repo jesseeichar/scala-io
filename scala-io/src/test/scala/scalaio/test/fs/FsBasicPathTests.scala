@@ -31,6 +31,45 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
   def fspath(name:String) = fixture.fs(name)
   def fspath(name:Path) = fixture.fs(name.path)
 
+
+  @Test //@Ignore
+  def root_of_root_is_same_object : Unit = {
+    val rpath = fixture.path.root.get
+    assertEquals(rpath.root, Some(rpath))
+  }
+  @Test //@Ignore
+  def create_should_fail_if_existing_is_wrong_type : Unit = {
+    val path = fixture.path.createFile()
+    intercept[IOException] { path.createDirectory(failIfExists = false) }
+    path.delete()
+    path.createDirectory()
+    intercept[IOException] { path.createFile(failIfExists = false) }
+  }
+  @Test //@Ignore
+  def create_should_be_a_noop_if_exists : Unit = {
+    val path = fixture.path.createFile()
+    path.createFile(failIfExists = false)
+    path.delete()
+    path.createDirectory()
+    path.createDirectory(failIfExists = false)
+  }
+  @Test //@Ignore
+  def create_should_set_attributes_and_access_if_exists : Unit = {
+    val path = fixture.path.createFile(accessModes = List(Read,Write))
+    assertEquals(List(Read,Write), path.access.toList)
+
+    path.createFile(failIfExists = false,accessModes = List(Write))
+    assertFalse(path.canRead)
+    assertEquals(List(Write), path.access.toList)
+  }
+
+  @Test //@Ignore
+  def create_root_dir : Unit = {
+    val r = fixture.path.root.get
+    intercept[IOException] { r.createDirectory() }
+    intercept[IOException] { r.createFile(failIfExists = false) }
+    r.createDirectory(failIfExists = false) // should be noop
+  }
   @Test //@Ignore
   def name_simpleName_extension = {
     val simpleName = "image"

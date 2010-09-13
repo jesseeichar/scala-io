@@ -26,7 +26,7 @@ class RamPath(relativeTo:String, val path:String, override val fileSystem:RamFil
   lazy val toAbsolute: Path = fileSystem("",relativeTo + separator + path)
   lazy val toURI: URI = fileSystem.uri(this)
   def \(child: String): RamPath = fileSystem(relativeTo,path + separator + child)
-  lazy val name: String = segments.last
+  lazy val name: String = segments.lastOption.getOrElse("/")
   override lazy val normalize = super.normalize.asInstanceOf[RamPath]
   lazy val parent: Option[RamPath] = {
     if(toAbsolute.path == fileSystem.root.path) {
