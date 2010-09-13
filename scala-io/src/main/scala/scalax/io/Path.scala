@@ -426,8 +426,8 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    */
   def segments: List[String] = (path split separator).toList filterNot (_.isEmpty)
   /**
-   * The parent path segment if it exists
-   * @return the parent path segment if it exists
+   * The parent path segment if it is possible (for example a root will not have a parent)
+   * @return the parent path segment if it possible
    * @see parents
    */
   def parent: Option[Path]
@@ -662,24 +662,26 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
   private def createContainingDir(createParents: Boolean) = {
     def testWrite(parent:Option[Path]) = {
       parent match {
-        case Some(p) if(!p.canWrite) => fail("Cannot write parent directory: "+p+" of "+ path)
-        case Some(p) if(!p.isDirectory) => fail("parent path is not a directory")
-        case Some(p) if(!p.canExecute) => fail("Cannot execute in parent directory: "+p+" of "+ path)
+        case Some(p) if !p.canWrite => fail("Cannot write parent directory: "+p+" of "+ path)
+        case Some(p) if !p.isDirectory => fail("parent path is not a directory")
+        case Some(p) if !p.canExecute => fail("Cannot execute in parent directory: "+p+" of "+ path)
         case Some(p) => ()
         case None => fail("Parent directory cannot be created: '"+path+"'")
       }
     }
 
+
     (createParents, parent) match {
-      case (_, Some(p)) if(p.exists) => 
+      case (_, Some(p)) if p.exists =>
         testWrite(parent)
       case (true, Some(_)) => 
         doCreateParents()
         testWrite(parent)
-      case (true, None) => 
+      case (true, None) =>
         doCreateParents()
         testWrite(toAbsolute.parent)
-      case (false, _) => fail("Parent directory does not exist")
+      case (false, _) =>
+        fail("Parent directory of "+this+" does not exist and cannot be created")      
     }
   }
   
@@ -793,15 +795,17 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    *           If parent directory does not exist
    *
    */
-  def createDirectory( createParents: Boolean = true, failIfExists: Boolean = true, 
+  def createDirectory(createParents: Boolean = true, failIfExists: Boolean = true,
                       accessModes:Iterable[AccessMode]=List(Read,Write,Execute), attributes:Iterable[FileAttribute[_]]=Nil) =  {
+    if (failIfExists && exists) fail("Directory '%s' already exists." format name)
+
+    if(root != Some(this)) {
       createContainingDir (createParents)
 
       val res = doCreateDirectory()
-
       access = accessModes
-      if (!res && failIfExists && exists) fail("Directory '%s' already exists." format name)
-      else this
+    }
+    this
   }
 
   // deletions

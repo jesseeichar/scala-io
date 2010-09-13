@@ -39,9 +39,8 @@ private[ramfs] object DirNode extends NodeFac {
 private[ramfs] trait Node {
   var name:String
   var lastModified:Long
-  var canRead = true;
-  var canWrite = true;
-  var canExecute = true;
+  var (canRead, canWrite, canExecute) = initAccess;
+  protected def initAccess = (true, true, false)
   override def toString = getClass.getSimpleName+": "+name
 }
 
@@ -86,6 +85,8 @@ private[ramfs] class FileNode(var name:String) extends Node {
   }
 
 private[ramfs] class DirNode(var name:String) extends Node {
+  override protected def initAccess = (true, true, true) 
+
   val children = ArrayBuffer[Node]()
   var lastModified = System.currentTimeMillis
   val self = this;
