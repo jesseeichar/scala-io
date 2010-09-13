@@ -8,6 +8,8 @@
 
 package scalax.io
 
+import Path.AccessModes
+
 /**
  * A flag interface for indicating that the object
  * represents a filesystem dependent option for opening
@@ -23,7 +25,8 @@ package scalax.io
  * @since   1.0
  */
 trait OpenOption {
-    OpenOption.definedValues = this :: OpenOption.values
+  OpenOption.definedValues = this :: OpenOption.values
+  def toAccessModes : List[Path.AccessModes.AccessMode] = Nil
 }
 
 /**
@@ -33,25 +36,35 @@ trait OpenOption {
  * @since   1.0
  */
 object OpenOption {
+  trait Writer extends OpenOption {
+    override def toAccessModes = AccessModes.Write :: super.toAccessModes
+  }
+  trait Reader extends OpenOption {
+    override def toAccessModes = AccessModes.Read :: super.toAccessModes
+  }
+  trait Executer extends OpenOption {
+    override def toAccessModes = AccessModes.Execute :: super.toAccessModes
+  }
+
   private var definedValues = List[OpenOption]()
   def values = definedValues
   /**
    * Append to an existing file.
    * A file will not be created if the file does not exist
    */
-   case object Append extends OpenOption
+   case object Append extends OpenOption with Writer
   /**
    * Creating a file if it does not exist, but parent directories will not be created
    */
-  case object Create extends OpenOption
+  case object Create extends OpenOption with Writer
   /**
    * Creating a new file and fail if the file already exists
    */
-  case object CreateNew extends OpenOption
+  case object CreateNew extends OpenOption with Writer
   /**
    * Creating a new file and all parent directories
    */
-  case object CreateFull extends OpenOption
+  case object CreateFull extends OpenOption with Writer
   /**
    * Delete file on close.
    * <p>
@@ -60,35 +73,35 @@ object OpenOption {
    * then the file will be deleted on VM termination (if possible)
    * </p>
    */
-  case object DeleteOnClose extends OpenOption
+  case object DeleteOnClose extends OpenOption with Writer
   /**
    * Requires that every update to the file's content (but not metadata)
    * be written synchronously to the underlying storage device
    */
-  case object DSync extends OpenOption
+  case object DSync extends OpenOption with Writer
   /**
    * Open a file for read access
    */
-  case object Read extends OpenOption
+  case object Read extends OpenOption with Reader
   /**
    * A hint to create a sparse file if used with {@link #CreateNew}
    */
-  case object Sparse extends OpenOption
+  case object Sparse extends OpenOption with Writer
   /**
    * Requires that every update to the file's content or metadata be
    * written synchronously to the underlying storage device
    */
-  case object Sync extends OpenOption
+  case object Sync extends OpenOption with Writer
   /**
    * If file exists and is opened for Write access then truncate the file to
    * 0 bytes.  Ignored if opened for Read access.  Truncate takes precedence over 
    * Append.
    */
-  case object Truncate extends OpenOption
+  case object Truncate extends OpenOption with Writer
   /**
    * Open file for write access
    */
-  case object Write extends OpenOption
+  case object Write extends OpenOption with Writer
 
   /**
    * Collection of options: {@link #Create}, {@link #Truncate}, {@link #Write}

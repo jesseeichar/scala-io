@@ -80,12 +80,16 @@ class RamPath(relativeTo:String, val path:String, override val fileSystem:RamFil
     }
     this
   }
-  def copyTo(target: Path, 
-             createParents : Boolean = true,
-             copyAttributes:Boolean=true, 
-             replaceExisting:Boolean=false): Path = null //TODO
-   protected def moveFile(target: Path, atomicMove:Boolean): Unit = fileSystem.move(this, target.asInstanceOf[RamPath])
-   protected def moveDirectory(target: Path, atomicMove:Boolean): Unit = fileSystem.move(this, target.asInstanceOf[RamPath])
+  protected def copyFile(dest: Path): Path = {
+    dest match {
+      case dest:RamPath => node.foreach{case node:FileNode => fileSystem.copyFile(this, node, dest)}
+      case dest =>
+        dest.ops.writeInts(ops.bytesAsInts)
+    }
+    dest
+  }
+  protected def moveFile(target: Path, atomicMove:Boolean): Unit = fileSystem.move(this, target.asInstanceOf[RamPath])
+  protected def moveDirectory(target: Path, atomicMove:Boolean): Unit = fileSystem.move(this, target.asInstanceOf[RamPath])
   
   override def toString() = "RamPath(%s)".format(path)
   override def equals(other: Any) = other match {

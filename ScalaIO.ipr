@@ -190,6 +190,9 @@
     <option name="SERVER_PORT" value="33221" />
     <option name="SERVER_RESET" value="true" />
   </component>
+  <component name="SvnBranchConfigurationManager">
+    <option name="mySupportsUserInfoFilter" value="true" />
+  </component>
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
   </component>

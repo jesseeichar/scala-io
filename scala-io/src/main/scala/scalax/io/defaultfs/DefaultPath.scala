@@ -90,29 +90,10 @@ class DefaultPath private[io] (val jfile: JFile, override val fileSystem: Defaul
     this
   }
 
-  def copyTo(target: Path, 
-             createParents : Boolean = true, 
-             copyAttributes:Boolean=true,
-             replaceExisting:Boolean=false): Path = {
-
-  	if (this.normalize == target.normalize) return target
-  	
-    if (!createParents && target.parent.map(_.notExists).getOrElse(true)) fail("Parent directory of destination file does not exist.")
-    if (target.exists && !replaceExisting) fail("Destination file already exists, force creation or choose another file.")
-    if (target.exists && !target.checkAccess(Write)) fail("Destination exists but is not writable.")
-    if (target.isDirectory && target.children().nonEmpty) fail("Destination exists but is a non-empty directory.")
-
-    if (isDirectory) target.createDirectory(createParents, false, access, attributes)
-    else copyFile(target, createParents, copyAttributes, replaceExisting)
-  }
-
-  private def copyFile(dest: Path, createParents : Boolean, 
-       copyAttributes: Boolean, replaceExisting: Boolean): Path = {
+  protected def copyFile(dest: Path): Path = {
     val FIFTY_MB = 1024 * 1024 * 50
     assert(isFile, "Source %s is not a valid file." format name)
 
-    if(createParents) dest.parent foreach {_ createDirectory(createParents=true, failIfExists=false)}
-    
 // TODO ARM this
     import scalax.io.OpenOption._
     for {inResource <- ops.fileChannel()
@@ -131,8 +112,6 @@ class DefaultPath private[io] (val jfile: JFile, override val fileSystem: Defaul
       if (this.length != dest.length)
         fail("Failed to completely copy %s to %s".format(name, dest.name))
 
-      if (copyAttributes)
-        dest.lastModified = this.lastModified
     }
     dest
   }

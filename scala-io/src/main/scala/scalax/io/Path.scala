@@ -8,7 +8,7 @@
 
 package scalax.io
 
-import scalax.io.attributes.FileAttribute
+import attributes._
 import java.io.{IOException, File => JFile}
 import java.net.{ URI, URL }
 import collection.{ Traversable }
@@ -639,14 +639,25 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    *
    * @return the access modes set on the file
    */
-  def access : Set[AccessMode] = Path.AccessModes.values filter { 
-    case Read => canRead
-    case Write => canWrite
-    case Execute => canExecute
+  def access : AccessSet = new AccessSet(this)
+  
+  def attributes : Iterable[FileAttribute[_]] = {
+    List(LastModifiedAttribute(lastModified),
+         ReadAccessAttribute(canRead),
+         WriteAccessAttribute(canWrite),
+         ExecuteAccessAttribute(canExecute))
+
   }
-  
-  def attributes : Iterable[FileAttribute[_]] = Nil // TODO for Java 1.7?
-  
+  def attributes_= (attrs:Iterable[FileAttribute[_]]) = {
+    attrs.foreach {
+      case LastModifiedAttribute(newLastModified) => lastModified = newLastModified
+      case ReadAccessAttribute(newRead) => access(Read) = newRead
+      case WriteAccessAttribute(newWrite) => access(Write) = newWrite
+      case ExecuteAccessAttribute(newExecute) => access(Execute) = newExecute
+      case _ => ()
+    }
+  }
+
   // creations
   private def createContainingDir(createParents: Boolean) = {
     def testWrite(parent:Option[Path]) = {
@@ -924,7 +935,39 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
   def copyTo(target: Path, 
              createParents : Boolean=true,
              copyAttributes : Boolean=true,
-             replaceExisting : Boolean=false): Path
+             replaceExisting : Boolean=false): Path = {
+
+  	if (this.normalize == target.normalize) return target
+
+    if (!createParents && target.parent.map(_.notExists).getOrElse(true)) fail("Parent directory of destination file does not exist.")
+    if (target.exists && !replaceExisting) fail("Destination file already exists, force creation or choose another file.")
+    if (target.exists && !target.checkAccess(Write)) fail("Destination exists but is not writable.")
+    if (target.isDirectory && target.children().nonEmpty) fail("Destination exists but is a non-empty directory.")
+    if (replaceExisting) target.deleteIfExists()
+
+
+    if (isDirectory) target.createDirectory(createParents, false)
+    else {
+      if(createParents) {
+        target.parent.foreach{_.createDirectory(true,false)}
+      }
+      copyFile(target)
+    }
+
+    if(copyAttributes) {
+      target.attributes = attributes
+    }
+    target
+  }
+
+  /**
+   * Copy a the contents of a Path representing a file to a new destination
+   * a check has been performed that the file exists, so barring a race condition with
+   * another thread or process this path does exist and is a file.
+   * Dest will not exist at the time of this call.
+   */
+  protected def copyFile(dest: Path): Path
+
   /**
    *  Move the underlying object if it exists to the target location.
    *  <p>
@@ -952,21 +995,28 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    */
   def moveTo(target: Path, replace:Boolean=false,
              atomicMove:Boolean=false) : Path = {
-   if( target.exists && replace) {
-	   target match {
-		   case _ if target.isDirectory && target.children().nonEmpty => fail("can not replace a non-empty directory: "+target)
-	     case _ => target.delete()
-	   }
-   }
 
-   target match {
-       case _ if this.notExists => fail("attempted to move "+path+" but it does not exist")
+    if(fileSystem.roots.contains(this)) {
+       throw new IOException("cannot move a root path")
+    }
+
+    if( target.exists && replace) {
+      target match {
+        case _ if target.isDirectory && target.children().nonEmpty => fail("can not replace a non-empty directory: "+target)
+        case _ => target.delete()
+      }
+    }
+
+    import Path.Matching._
+
+   this match {
+       case NonExistent(_) => fail("attempted to move "+path+" but it does not exist")
        case _ if target.normalize == normalize => ()
        case _ if !replace && target.exists => fail(target+" exists but replace parameter is false")
-       case _ if this.isFile && target.isDirectory => fail("cannot overwrite a directory with a file")
-       case _ if this.isDirectory && target.isFile => fail("cannot overwrite a file with a directory")
+       case File(_) if target.isDirectory => fail("cannot overwrite a directory with a file")
+       case Directory(_) if target.isFile => fail("cannot overwrite a file with a directory")
        // TODO move between two fileSystems
-       case _ if target.fileSystem != fileSystem && this.isFile =>
+       case File(_) if target.fileSystem != fileSystem =>
          target.ops writeInts this.ops.bytesAsInts
          delete()
        case _ if target.fileSystem != fileSystem && this.isDirectory =>
@@ -977,8 +1027,8 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
              path moveTo (target \ path.relativize(self))
          }
          delete()
-       case _ if target.notExists || target.isFile && this.isFile => moveFile(target,atomicMove)
-       case _ if target.notExists && this.isDirectory => moveDirectory(target,atomicMove)
+       case File(_) if target.notExists || target.isFile => moveFile(target,atomicMove)
+       case Directory(_) if target.notExists => moveDirectory(target,atomicMove)
        case _ => throw new Error("not yet handled "+target+","+this)
      }
      target

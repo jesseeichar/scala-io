@@ -15,4 +15,11 @@ package scalax.io.attributes
  * @author  Jesse Eichar
  * @since   1.0 
  */
-case class FileAttribute[T] (name:String, value:T)
+abstract class FileAttribute[T] (name:String, value:T)
+case class GenericFileAttribute[T](name:String, value:T) extends FileAttribute[T](name,value)
+case class LastModifiedAttribute(value:Long) extends FileAttribute[Long]("lastModified", value)
+case class ReadAccessAttribute(readable:Boolean) extends FileAttribute[Boolean]("read", readable)
+case class WriteAccessAttribute(writable:Boolean) extends FileAttribute[Boolean]("write", writable)
+case class ExecuteAccessAttribute(executable:Boolean) extends FileAttribute[Boolean]("execute", executable)
+
+

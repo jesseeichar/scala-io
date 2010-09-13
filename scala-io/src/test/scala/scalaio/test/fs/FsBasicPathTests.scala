@@ -37,7 +37,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
     val ext = "png"
     val fullname = simpleName + "." + ext
     val path = fspath(fullname)
-    
+
     assertEquals(simpleName, path.simpleName)
     assertEquals(fullname, path.name)
     assertEquals(Some(ext), path.extension)
@@ -47,8 +47,9 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
   }
   @Test //@Ignore
   def absolute_path_should_be_rooted_at_a_root = {
-    val absolute = fspath("xx").toAbsolute
-    assertTrue (fixture.fs.roots exists { root => absolute.segments(0) startsWith root.name})
+    val absolute = fspath("xx/yy/aa/bb").toAbsolute
+    val parents = absolute.parents
+    assertTrue (fixture.fs.roots exists { parents.last == _})
   }
 
   @Test //@Ignore
@@ -176,7 +177,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
     assertFalse(f1.isDirectory)
     assertFalse(f1.isFile)
   }
-  
+
   @Test //@Ignore
   def path_can_move_files() : Unit = {
     val f1 = fixture.path
@@ -356,7 +357,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
     path.deleteRecursively()
     assertFalse(path.exists)
   }
-  
+
   @Test //@Ignore
   def normalize_should_change_a_path_to_be_minimized() {
     assertEquals(fspath("/a/d"), fspath("/a/d").normalize)
@@ -373,7 +374,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
     assertEquals(Some(fspath("/a/b/c")), fspath("/a/b/c/d").parent)
   }
 
-  
+
   @Test //@Ignore
   def segments_should_return_parts_of_path() {
     assertEquals(List("a","b","c",".","..","d"), fspath("a/b//c/./../d").segments.toList)
@@ -440,20 +441,24 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
     intercept[IOException] {
       f1 copyTo (f2, createParents=false)
     }
+    f1.access(Path.AccessModes.Execute) = true
     f1 copyTo f2
     
     assertTrue("lastModified attribute was not copied: f1="+f1.lastModified+", f2="+f2.lastModified, 
                f1.lastModified - f2.lastModified < 0.000001)
     assertTrue(f2.exists)
     assertTrue(f1.exists)
+    assertTrue("canExecute was not copied when it should not have", f2.canExecute)
 
     f2.delete()
     assertTrue("failed to delete f2", f2.notExists)
     f1.lastModified = 10000
+    f1.access(Path.AccessModes.Execute) = true
     f1 copyTo (f2, copyAttributes=false)
 
     assertTrue("lastModified attribute was copied when it should not have", f1.lastModified < f2.lastModified)
-    
+    if(f2.isFile) assertFalse("canExecute was copied when it should not have", f2.canExecute)
+
 
     f2 copyTo f2 // noop
     intercept[IOException] {
@@ -463,12 +468,13 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
       f2 copyTo exists
     }
     def overwrite = {
-      val access = exists.access
+      val access = exists.access.toList
       exists.access = List(Read)
       intercept[IOException] {
         f2.copyTo (exists, replaceExisting=true)
       }
       exists.access = access
+      
       f2.copyTo (exists, replaceExisting=true)
       assertTrue(f2.exists)
       assertTrue(exists.exists)

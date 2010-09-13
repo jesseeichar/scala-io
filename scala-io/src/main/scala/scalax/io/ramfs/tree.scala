@@ -136,6 +136,8 @@ private[ramfs] class DirNode(var name:String) extends Node {
           children += newNode
           newNode.create(rest,fac)
       }
+    case _ => 
+      throw new Error("uh oh what's going on?")
   }
       
   def mkString() : String = {

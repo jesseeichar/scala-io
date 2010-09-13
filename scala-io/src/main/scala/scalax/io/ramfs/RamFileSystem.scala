@@ -1,4 +1,4 @@
-/*                     __                                               *\
+/*                      __                                               *\
 **     ________ ___   / /  ___     Scala API                            **
 **    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar             **
 **  __\ \/ /__/ __ |/ /__/ __ |    http://scala-lang.org/               **
@@ -121,11 +121,11 @@ class RamFileSystem(val id : String = UUID.randomUUID.toString) extends FileSyst
     }
     val parentNode =
       dest.parent match {
+        case Some(`root`) | None =>
+          fsTree
         case Some(parent) =>
           create(parent, DirNode, true) // TODO paramaterize NodeFactory
           parent.node.get.asInstanceOf[DirNode]
-        case None =>
-          fsTree
       }
 
     src.node foreach { node =>
@@ -135,5 +135,16 @@ class RamFileSystem(val id : String = UUID.randomUUID.toString) extends FileSyst
 
     delete(src,true)
   }
-  
+
+  /**
+   * creates and copies the data of the src node to the destination.
+   * Assumption is the destination does not exist
+   */
+   private[ramfs] def copyFile(src:RamPath, srcNode:FileNode, dest:RamPath) = {
+
+     dest.fileSystem.create(dest, FileNode, true)
+     val newNode = dest.node.collect{case newNode:FileNode =>
+       newNode.data = srcNode.data
+     }
+   }
 }
