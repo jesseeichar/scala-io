@@ -1022,7 +1022,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with Ordered[Pa
        case Directory(_) if target.isFile => fail("cannot overwrite a file with a directory")
        // TODO move between two fileSystems
        case File(_) if target.fileSystem != fileSystem =>
-         target writeInts this.bytesAsInts
+         target write bytesAsInts
          delete()
        case _ if target.fileSystem != fileSystem && this.isDirectory =>
          val x = target.exists

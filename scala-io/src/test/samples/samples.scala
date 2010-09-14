@@ -556,13 +556,13 @@ object Samples {
     file.write (List (1,2,3) map (_.toByte))
 
     // write a string to the file
-    file.writeString("Hello my dear file")
+    file.write("Hello my dear file")
 
     // with all options (these are the default options explicitely declared)
-    file.writeString("Hello my dear file")(codec = Codec.UTF8)
+    file.write("Hello my dear file")(codec = Codec.UTF8)
 
     // Convert several strings to the file
-    // same options apply as for writeString
+    // same options apply as for write
     file.writeStrings( "It costs" :: "one" :: "dollar" :: Nil)
 
     // Now all options
@@ -701,7 +701,7 @@ object Samples {
 
     file.open()( f => {
       val s = f.slurpString
-      file.writeString(s.replaceAll("l", "L"))
+      file.write(s.replaceAll("l", "L"))
     })
   }
 

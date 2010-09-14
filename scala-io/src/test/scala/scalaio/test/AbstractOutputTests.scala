@@ -23,42 +23,69 @@ import java.io.IOException
 import Constants.TEXT_VALUE
 
 abstract class AbstractOutputTests extends scalax.test.sugar.AssertionSugar {
-    implicit val codec = Codec.UTF8
-    private final val DEFAULT_DATA = "default data"
+  private final val DEFAULT_DATA = "default data"
 
-    def open() : (Input, Output)
+  def open() : (Input, Output)
 
-    @Test
-    def write_bytes() : Unit = {
-        val (input,output) = open()
-        val bytes = DEFAULT_DATA.getBytes
+  @Test
+  def write_bytes() : Unit = {
+      val (input,output) = open()
+      val bytes = DEFAULT_DATA.getBytes
 
-        output write bytes
+      output write bytes
 
-        assertArrayEquals(bytes, input.byteArray)
-    }
+      assertArrayEquals(bytes, input.byteArray)
+  }
 
     @Test
     def write_string() : Unit = {
-        val (input,output) = open()
+      implicit val codec = Codec.UTF8
 
-        output writeString DEFAULT_DATA
+      val (input,output) = open()
+
+      output write DEFAULT_DATA
+
+      assertEquals(DEFAULT_DATA, input.slurpString)
+    }
+
+      @Test
+      def write_charseq() : Unit = {
+        implicit val codec = Codec.UTF8
+
+        val (input,output) = open()
+        val charSeq = new StringBuilder(DEFAULT_DATA)
+
+        output writeChars charSeq
 
         assertEquals(DEFAULT_DATA, input.slurpString)
-    }
-    
+      }
 
-    @Test
-    def write_many_strings() : Unit = {
+      @Test
+      def write_traversable_char() : Unit = {
+        implicit val codec = Codec.UTF8
+
         val (input,output) = open()
 
-        output writeStrings (DEFAULT_DATA :: DEFAULT_DATA :: DEFAULT_DATA :: Nil)
-        assertEquals(DEFAULT_DATA+DEFAULT_DATA+DEFAULT_DATA, input.slurpString)
 
-        val (input2,output2) = open()
+        output writeChars DEFAULT_DATA.toList
 
-        output2 writeStrings (DEFAULT_DATA :: DEFAULT_DATA :: DEFAULT_DATA :: Nil, "-")
-        assertEquals(DEFAULT_DATA+"-"+DEFAULT_DATA+"-"+DEFAULT_DATA, input2.slurpString)
-    }
+        assertEquals(DEFAULT_DATA, input.slurpString)
+      }
+
+
+  @Test
+  def write_many_strings() : Unit = {
+    implicit val codec = Codec.UTF8
+
+    val (input,output) = open()
+
+    output writeStrings (DEFAULT_DATA :: DEFAULT_DATA :: DEFAULT_DATA :: Nil)
+    assertEquals(DEFAULT_DATA+DEFAULT_DATA+DEFAULT_DATA, input.slurpString)
+
+    val (input2,output2) = open()
+
+    output2 writeStrings (DEFAULT_DATA :: DEFAULT_DATA :: DEFAULT_DATA :: Nil, "-")
+    assertEquals(DEFAULT_DATA+"-"+DEFAULT_DATA+"-"+DEFAULT_DATA, input2.slurpString)
+  }
 
 }

@@ -25,7 +25,7 @@ import Path.fail
  * OutputStream and File can be an Output object (or be converted to one).
  * <p>
  * Note: Each invocation of a method will typically open a new stream or
- * channel.  That behaviour can be overrided by the implementation but
+ * channel.  That behaviour can be overridden by the implementation but
  * it is the default behaviour.
  * </p>
  *
@@ -38,6 +38,12 @@ import Path.fail
 trait WriteChars {
 
     protected def writer : WriteCharsResource[Writer]
+
+  def write(characters : TraversableOnce[Char]) : Unit = {
+    for (out <- writer) {
+      characters foreach out.append
+    }
+  }
 
     /**
     * Writes a string. The open options that can be used are dependent

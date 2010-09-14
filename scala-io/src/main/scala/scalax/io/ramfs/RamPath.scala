@@ -84,7 +84,7 @@ class RamPath(relativeTo:String, val path:String, override val fileSystem:RamFil
     dest match {
       case dest:RamPath => node.foreach{case node:FileNode => fileSystem.copyFile(this, node, dest)}
       case dest =>
-        dest.writeInts(bytesAsInts)
+        dest.write(bytesAsInts)
     }
     dest
   }

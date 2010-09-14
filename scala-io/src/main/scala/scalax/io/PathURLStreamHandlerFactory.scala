@@ -37,7 +37,6 @@ object PathURLStreamHandlerFactory extends URLStreamHandlerFactory {
   val supported = List(RamFileSystem.protocol)
   
   def createURLStreamHandler(protocol:String) = {
-    println("scalax.io."+protocol+".Handler")
     if(supported contains protocol) Class.forName("scalax.io."+protocol+".Handler").newInstance.asInstanceOf[URLStreamHandler]
     else null
   }

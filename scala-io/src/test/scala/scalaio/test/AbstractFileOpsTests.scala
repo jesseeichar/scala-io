@@ -58,7 +58,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
   def outputStream_adds_default_write {
     repeat {
       // no exception? good!
-      path.outputStream().writeString("hi")
+      path.outputStream().write("hi")
     }
   }
 
@@ -66,7 +66,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
   def outputStream_can_be_append {
     repeat {
       val p = path
-      p.outputStream(Append).writeString("more")
+      p.outputStream(Append).write("more")
       assertEquals(demoData+"more", p.slurpString)
     }
   }
@@ -75,7 +75,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
   def outputStream_with_read_will_add_write {
     repeat {
       val p = path
-      p.outputStream(Read).writeString("more")
+      p.outputStream(Read).write("more")
       assertEquals("more", p.slurpString)
     }
   }
@@ -114,7 +114,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
     implicit val times = 1
     repeat {
       val p = path
-      p.outputStream(DeleteOnClose).writeString("hello")
+      p.outputStream(DeleteOnClose).write("hello")
       assertFalse(p.exists)
       intercept[IOException] {
         // file should have been deleted so this should throw exception
@@ -129,7 +129,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
       val p = path
       // no exception? good!
       p.channel().bytesAsInts.take(2).force
-      p.channel().writeString("hi")
+      p.channel().write("hi")
     }
   }
 
@@ -148,7 +148,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
       for {resource <- p.fileChannel() } {
         // no exception? good!
         resource.bytesAsInts.take(2).force
-        resource.writeString("hi")
+        resource.write("hi")
       }
     }
   }
@@ -158,7 +158,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
     repeat {
       val p = path
       p. channel().bytesAsInts.take(2).force
-      p.channel().writeString("hi")
+      p.channel().write("hi")
     }
   }
   
@@ -176,7 +176,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
   def createFull_open_option_creates_parents {
     repeat {
       val p = path
-      p.outputStream(OpenOption.CreateFull, OpenOption.Write).writeString("data")
+      p.outputStream(OpenOption.CreateFull, OpenOption.Write).write("data")
       assertTrue(p.exists)
       assertTrue(p.parent.forall{_.exists})
     }
@@ -187,7 +187,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
     repeat {
       val p = path \ "child"
       assert (p.notExists)
-      intercept[IOException] { p.outputStream(OpenOption.Create, OpenOption.Write).writeString("data") }
+      intercept[IOException] { p.outputStream(OpenOption.Create, OpenOption.Write).write("data") }
     }
   }
 

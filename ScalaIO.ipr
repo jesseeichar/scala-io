@@ -176,6 +176,13 @@
   <component name="ProjectDetails">
     <option value="ScalaIO" name="projectName" />
   </component>
+  <component name="ProjectDictionaryState">
+    <dictionary name="jeichar">
+      <words>
+        <w>implementors</w>
+      </words>
+    </dictionary>
+  </component>
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/scala-io/Core IO project.iml" filepath="$PROJECT_DIR$/scala-io/Core IO project.iml" />

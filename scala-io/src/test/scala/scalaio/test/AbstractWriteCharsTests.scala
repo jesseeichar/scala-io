@@ -30,7 +30,7 @@ abstract class AbstractWriteCharsTests extends scalax.test.sugar.AssertionSugar 
     @Test(timeout = 3000)
     def write_string() : Unit = {
         val (input,output) = open()
-        output writeString DEFAULT_DATA
+        output write DEFAULT_DATA
 
         assertEquals(DEFAULT_DATA, input.slurpString)
     }

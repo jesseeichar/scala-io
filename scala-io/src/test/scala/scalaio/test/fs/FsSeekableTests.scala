@@ -31,7 +31,7 @@ abstract class FsSeekableTests extends AbstractSeekableTests with Fixture {
         fixture.text("\n")
       case Some(text) => 
         val path = fixture.path
-        path writeString text
+        path write text
         path
     }
 }

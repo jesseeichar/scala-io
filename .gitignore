@@ -11,3 +11,6 @@ lib_managed/
 /ws/
 /.gradle/
 /lib/
+project/plugins/src_managed/
+*.iws
+derby.log
