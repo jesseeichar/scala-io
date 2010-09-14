@@ -96,9 +96,9 @@ class DefaultPath private[io] (val jfile: JFile, override val fileSystem: Defaul
 
 // TODO ARM this
     import scalax.io.OpenOption._
-    for {inResource <- ops.fileChannel()
+    for {inResource <- fileChannel()
          in <- inResource
-         out <- dest.ops.channel(Create, Truncate, Write)
+         out <- dest.channel(Create, Truncate, Write)
     } {
       var pos, count = 0L
       while (size exists {pos < _}) {
@@ -119,7 +119,7 @@ class DefaultPath private[io] (val jfile: JFile, override val fileSystem: Defaul
       case target : DefaultPath if jfile renameTo target.jfile => 
         () // moved worked as part of guard
       case _ =>
-        target.ops writeInts this.ops.bytesAsInts
+        target writeInts this.bytesAsInts
         delete()
     }
   }

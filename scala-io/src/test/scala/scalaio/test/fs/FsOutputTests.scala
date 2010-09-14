@@ -31,36 +31,36 @@ abstract class FsOutputTests extends AbstractOutputTests with Fixture {
 
     def open() : (Input, Output) = {
         val path = fixture.path
-        (path.ops, path.ops)
+        (path, path)
     }
 
     @Test
     def create_file_with_write() : Unit = {
         val path = fixture.path
-        val ops = path.ops
+        val concretePath = path
 
-        ops write DEFAULT_DATA.getBytes
-        
+        concretePath write DEFAULT_DATA.getBytes
+
         assertTrue(path.exists)
 
         val bytes = DEFAULT_DATA.getBytes
-        assertEquals(bytes.size, path.size)
-        assertArrayEquals(bytes, ops.byteArray)
+        assertEquals(Some(bytes.size), path.size)
+        assertArrayEquals(bytes, concretePath.byteArray)
     }
-    
+
     @Test
     def allow_use_of_data_input_stream : Unit = {
         val path = fixture.path
-        val ops = path.ops
+        val concretePath = path
         
-        ops.outputStream() foreach {o => 
+        concretePath.outputStream() foreach {o =>
                 val data = new DataOutputStream(o)
                 data.writeShort(1)
                 data.writeDouble(3.3)
                 data.writeBoolean(false)
             }
             
-        ops.inputStream() foreach {i=> 
+        concretePath.inputStream() foreach {i=>
                 val data = new DataInputStream(i)
                 assertEquals(1, data.readShort)
                 assertEquals(3.3, data.readDouble, 0.0000001)

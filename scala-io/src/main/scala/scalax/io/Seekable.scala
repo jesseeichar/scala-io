@@ -192,12 +192,12 @@ trait Seekable extends Input with Output {
       
       var i = -1
       
-      tmp.ops writeInts (bytesAsInts.asInstanceOf[LongTraversable[Int]] ldrop position)
+      tmp writeInts (bytesAsInts.asInstanceOf[LongTraversable[Int]] ldrop position)
       
       for(channel <- channel(Write) ) {
            channel position  position
            writeTo(channel, bytes, -1)
-           writeTo(channel, tmp.ops.bytes, tmp.size.get)
+           writeTo(channel, tmp.bytes, tmp.size.get)
       }
   }
   

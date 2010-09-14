@@ -24,7 +24,7 @@ import java.io.{OutputStream, IOException}
 abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fixture {
   implicit val codec = Codec.UTF8
 
-  Path("/tmp/out").ops.writeString(Path(getClass().getResource(".").getFile()).toAbsolute.toString)
+  Path("/tmp/out").writeString(Path(getClass().getResource(".").getFile()).toAbsolute.toString)
 
   // test lastmodified
   
@@ -101,7 +101,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
     import Resource._
     val xx = fixture.path
     xx.createFile(true, false)
-    xx.ops.writeString("hello")
+    xx.writeString("hello")
 
     def assertContents(s:String) {
       val read = Resource.fromInputStream(xx.toURL.openStream).slurpString
@@ -221,7 +221,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
   def path_can_move_files_between_file_systems() : Unit = {
     val data = "file to move"
     val f1 = fixture.path
-    f1.ops.writeString(data)
+    f1.writeString(data)
 
     val otherfs = new RamFileSystem()
     val otherpath = otherfs("/a")
@@ -230,7 +230,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
 
     assertTrue(f1.notExists)
     assertTrue(otherpath.exists)
-    assertEquals(data, otherpath.ops.slurpString)
+    assertEquals(data, otherpath.slurpString)
   }
 
 
@@ -238,7 +238,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
   def path_can_copy_files_between_file_systems() : Unit = {
     val data = "file to move"
     val f1 = fixture.path
-    f1.ops.writeString(data)
+    f1.writeString(data)
 
     val otherfs = new RamFileSystem()
     val otherpath = otherfs("/a")
@@ -247,8 +247,8 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
 
     assertTrue(f1.exists)
     assertTrue(otherpath.exists)
-    assertEquals(data, otherpath.ops.slurpString)
-    assertEquals(data, f1.ops.slurpString)
+    assertEquals(data, otherpath.slurpString)
+    assertEquals(data, f1.slurpString)
   }
 
   @Test //@Ignore
@@ -285,7 +285,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
     val parent = fixture.path.createDirectory()
     val f1 = parent \ "a"
 
-    f1.ops.writeString("data")
+    f1.writeString("data")
     
     val otherpath = f1.parent.get \ "b"
 
@@ -304,10 +304,10 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
       val parent = fixture.path.createDirectory()
       val f1 = parent \ "a"
 
-      f1.ops.writeString("data")
+      f1.writeString("data")
 
       val otherpath = f1.parent.get \ "b"
-      otherpath.ops.writeString("data2")
+      otherpath.writeString("data2")
       
       intercept[IOException] {f1.moveTo(otherpath)}
     }
@@ -317,10 +317,10 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
   @Test //@Ignore
   def path_can_move_files() : Unit = {
     val f1 = fixture.path
-    f1.ops.writeString("file to move")
+    f1.writeString("file to move")
 
     val exists = fixture.path
-    exists.ops.writeString("pre existing file")
+    exists.writeString("pre existing file")
 
     move( f1, fixture.path, exists)
   }
@@ -351,7 +351,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
   def path_can_copy_files() : Unit = {
     repeat {
       val source = fixture.path.createFile ()
-      source.ops.write(Array(1,2,3,4))
+      source.write(Array(1,2,3,4))
       copy( source, fixture.path(2), fixture.path.createFile ())
     }
   }
@@ -534,8 +534,8 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
     assertTrue("expected f2 to exist after attempting to move a nonexisting f1 to f2", f2.exists)
     
     val existsBeforeMove = if(exists.isFile) {
-        val content = exists.ops.chars mkString ""
-        assertFalse("contents of exists should not equal f2", content == (f2.ops.chars mkString ""))
+        val content = exists.chars mkString ""
+        assertFalse("contents of exists should not equal f2", content == (f2.chars mkString ""))
         content
       } else {
         ""
@@ -546,7 +546,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
     assertTrue("expected f2 to exist after attempting a non-overwrite move to an existing file", f2.exists)
     assertTrue("expected exists to exist after attempting a non-overwrite", exists.exists)
     if(exists.isFile) {
-      assertTrue("expected exists to have the same contents after an illegal replace", existsBeforeMove == (exists.ops.chars mkString ""))
+      assertTrue("expected exists to have the same contents after an illegal replace", existsBeforeMove == (exists.chars mkString ""))
     }
     def tryReplace = {
       assertTrue("expected f2 to exist before replace", f2.exists)
@@ -706,7 +706,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
       path.access = Path.AccessModes.Write :: Nil
     }
     path.createFile()
-    path.ops.writeString("some test data")
+    path.writeString("some test data")
     path.access = access
     (Path.AccessModes.values -- access) foreach { a => matchAccess(a, path, false) }
     
@@ -717,9 +717,9 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
     else intercept[IOException] {test}
   }
 
-  def readTest(path: Path) = path.ops.chars.head
+  def readTest(path: Path) = path.chars.head
 
-  def writeTest(path: Path) = path.ops.writeString("abc")
+  def writeTest(path: Path) = path.writeString("abc")
 
   def execTest(path: Path) = if(!path.canExecute) throw new IOException()
 

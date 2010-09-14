@@ -22,7 +22,7 @@ abstract class FsFileOpsTests extends AbstractFileOpsTests with Fixture {
   def path(implicit data : Array[Byte]) = {
     val path = fixture.path
     path.createFile()
-    val ops = path.ops
+    val ops = path
     ops write data
     path
   }

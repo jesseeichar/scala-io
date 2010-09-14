@@ -1022,7 +1022,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with Ordered[Pa
        case Directory(_) if target.isFile => fail("cannot overwrite a file with a directory")
        // TODO move between two fileSystems
        case File(_) if target.fileSystem != fileSystem =>
-         target.ops writeInts this.ops.bytesAsInts
+         target writeInts this.bytesAsInts
          delete()
        case _ if target.fileSystem != fileSystem && this.isDirectory =>
          val x = target.exists
@@ -1127,16 +1127,6 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with Ordered[Pa
    */
   def descendants(filter:Path => Boolean = PathMatcher.ALL, 
            depth:Int = -1, options:Traversable[LinkOption]=Nil): DirectoryStream[Path]
-
-  /**
-   * Obtains an object for performing reads and writes to files
-   *
-   * @param codec
-   *          The codec representing the encoding of the file
-   *          This codec will be the default used for reading and
-   *          writing to the file
-   */
-  def ops:FileOps = this
 
 
 /* ****************** The following require jdk7's nio.file ************************** */

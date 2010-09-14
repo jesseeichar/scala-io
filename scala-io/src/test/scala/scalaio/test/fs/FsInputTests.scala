@@ -15,10 +15,10 @@ import scalaio.test._
 
 abstract class FsInputTests extends AbstractInputTests with Fixture {
     protected def input(t:Type) = t match {
-        case t @ TextNewLine => fixture.text(t.sep).ops
-        case t @ TextPair => fixture.text(t.sep).ops
-        case t @ TextCarriageReturn => fixture.text(t.sep).ops
-        case TextCustom(sep) => fixture.text(sep).ops
-        case Image => fixture.image.ops
+        case t @ TextNewLine => fixture.text(t.sep)
+        case t @ TextPair => fixture.text(t.sep)
+        case t @ TextCarriageReturn => fixture.text(t.sep)
+        case TextCustom(sep) => fixture.text(sep)
+        case Image => fixture.image
     }
 }

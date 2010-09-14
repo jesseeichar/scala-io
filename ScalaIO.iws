@@ -2,17 +2,21 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" readonly="true" id="75bc69a2-d8de-4cee-ba4c-bcb78c70f888" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/resource/Resource.scala" afterPath="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/resource/Resource.scala" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/Path.scala" afterPath="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/Path.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/defaultfs/DefaultFileOps.scala" afterPath="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/defaultfs/DefaultFileOps.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ScalaIO.iws" afterPath="$PROJECT_DIR$/ScalaIO.iws" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/FileOps.scala" afterPath="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/FileOps.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/Input.scala" afterPath="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/Input.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scala-io/src/test/samples/execute.scala" afterPath="$PROJECT_DIR$/scala-io/src/test/samples/execute.scala" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/defaultfs/DefaultPath.scala" afterPath="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/defaultfs/DefaultPath.scala" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/Handler.scala" afterPath="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/Handler.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/RamFileOps.scala" afterPath="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/RamFileOps.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/RamPath.scala" afterPath="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/RamPath.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/fs/FileSystemFixture.scala" afterPath="$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/fs/FileSystemFixture.scala" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/Seekable.scala" afterPath="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/Seekable.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/fs/FsInputTests.scala" afterPath="$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/fs/FsInputTests.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scala-io/src/test/samples/samples.scala" afterPath="$PROJECT_DIR$/scala-io/src/test/samples/samples.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ScalaIO.iws" afterPath="$PROJECT_DIR$/ScalaIO.iws" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/AbstractFileOpsTests.scala" afterPath="$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/AbstractFileOpsTests.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/fs/FsFileOpsTests.scala" afterPath="$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/fs/FsFileOpsTests.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/fs/FsSeekableTests.scala" afterPath="$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/fs/FsSeekableTests.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/fs/FsOutputTests.scala" afterPath="$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/fs/FsOutputTests.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/fs/FsBasicPathTests.scala" afterPath="$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/fs/FsBasicPathTests.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/RamPath.scala" afterPath="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/RamPath.scala" />
     </list>
     <ignored path="ScalaIO.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -243,37 +247,10 @@
   <component name="FileColors" enabled="true" enabledForTabs="true" />
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="Path.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/Path.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="547" column="0" selection-start="18325" selection-end="18325" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Input.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/Input.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="55" column="26" selection-start="1827" selection-end="1827" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="Seekable.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/Seekable.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="199" column="55" selection-start="7741" selection-end="7741" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="FileOps.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/FileOps.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="173" column="0" selection-start="6876" selection-end="6876" vertical-scroll-proportion="0.0">
+            <state line="194" column="10" selection-start="7484" selection-end="7484" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -282,16 +259,16 @@
       <file leaf-file-name="DefaultPath.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/defaultfs/DefaultPath.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="68" column="0" selection-start="2688" selection-end="2688" vertical-scroll-proportion="0.0">
+            <state line="127" column="101" selection-start="4674" selection-end="4674" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="RamFileOps.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/RamFileOps.scala">
+      <file leaf-file-name="Handler.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/Handler.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="64" column="69" selection-start="2720" selection-end="2720" vertical-scroll-proportion="0.0">
+            <state line="37" column="9" selection-start="1271" selection-end="1271" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -300,34 +277,52 @@
       <file leaf-file-name="RamPath.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/RamPath.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="23" column="122" selection-start="918" selection-end="918" vertical-scroll-proportion="0.0">
+            <state line="86" column="23" selection-start="3387" selection-end="3387" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="DefaultFileOps.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/defaultfs/DefaultFileOps.scala">
+      <file leaf-file-name="execute.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/scala-io/src/test/samples/execute.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="64" column="22" selection-start="2124" selection-end="2124" vertical-scroll-proportion="0.0">
+            <state line="12" column="37" selection-start="425" selection-end="425" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Resource.scala" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/resource/Resource.scala">
+      <file leaf-file-name="samples.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/scala-io/src/test/samples/samples.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="136" column="34" selection-start="3945" selection-end="3945" vertical-scroll-proportion="0.75757575">
+            <state line="664" column="113" selection-start="26395" selection-end="26395" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="FsBasicPathTests.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/fs/FsBasicPathTests.scala">
+      <file leaf-file-name="FsOutputTests.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/fs/FsOutputTests.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="37" column="44" selection-start="1312" selection-end="1312" vertical-scroll-proportion="0.0">
+            <state line="46" column="37" selection-start="1307" selection-end="1307" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="AbstractFileOpsTests.scala" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/AbstractFileOpsTests.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="178" column="73" selection-start="4858" selection-end="4858" vertical-scroll-proportion="0.47012988">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="FsInputTests.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/fs/FsInputTests.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="21" column="94" selection-start="982" selection-end="982" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -347,22 +342,22 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/fs/FsAccesSetTests.scala" />
-        <option value="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/tree.scala" />
-        <option value="$PROJECT_DIR$/scala-io/todo" />
-        <option value="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/nio/SeekableFileChannel.scala" />
-        <option value="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/SeekableFileNodeChannel.scala" />
-        <option value="$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/fs/FsBasicPathTests.scala" />
-        <option value="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/FileOps.scala" />
-        <option value="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/Seekable.scala" />
-        <option value="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/Handler.scala" />
-        <option value="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/Path.scala" />
-        <option value="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/defaultfs/DefaultPath.scala" />
-        <option value="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/RamPath.scala" />
         <option value="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/RamFileOps.scala" />
         <option value="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/Input.scala" />
         <option value="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/defaultfs/DefaultFileOps.scala" />
         <option value="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/resource/Resource.scala" />
+        <option value="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/Handler.scala" />
+        <option value="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/RamPath.scala" />
+        <option value="$PROJECT_DIR$/scala-io/src/test/samples/execute.scala" />
+        <option value="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/Path.scala" />
+        <option value="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/Seekable.scala" />
+        <option value="$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/defaultfs/DefaultPath.scala" />
+        <option value="$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/fs/FsInputTests.scala" />
+        <option value="$PROJECT_DIR$/scala-io/src/test/samples/samples.scala" />
+        <option value="$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/fs/FileSystemFixture.scala" />
+        <option value="$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/fs/FsSeekableTests.scala" />
+        <option value="$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/fs/FsOutputTests.scala" />
+        <option value="$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/AbstractFileOpsTests.scala" />
       </list>
     </option>
   </component>
@@ -1041,6 +1036,7 @@
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32978722" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="JavaRebel Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39817628" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -1060,7 +1056,6 @@
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32826748" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
@@ -1099,93 +1094,9 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="jar:///System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK/Home/src.jar!/src/java/nio/channels/FileChannel.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="426" column="25" selection-start="19112" selection-end="19112" vertical-scroll-proportion="0.33125">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar:///System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK/Home/src.jar!/src/java/nio/channels/Channel.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="64" column="16" selection-start="2063" selection-end="2068" vertical-scroll-proportion="0.8226601">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/nio/SeekableFileChannel.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="22" column="8" selection-start="1111" selection-end="1111" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/SeekableFileNodeChannel.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="72" column="18" selection-start="2434" selection-end="2434" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/fs/FsBasicPathTests.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="37" column="44" selection-start="1312" selection-end="1312" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar:///System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK/Home/src.jar!/src/java/net/URLConnection.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="472" column="15" selection-start="17835" selection-end="17835" vertical-scroll-proportion="0.33333334">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/Handler.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="23" column="47" selection-start="881" selection-end="881" vertical-scroll-proportion="0.33497536">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/FileOps.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="173" column="0" selection-start="6876" selection-end="6876" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/RamPath.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="23" column="122" selection-start="918" selection-end="918" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/RamFileOps.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state line="64" column="69" selection-start="2720" selection-end="2720" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/Seekable.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="199" column="55" selection-start="7741" selection-end="7741" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/defaultfs/DefaultPath.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="68" column="0" selection-start="2688" selection-end="2688" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/Path.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="547" column="0" selection-start="18325" selection-end="18325" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
@@ -1206,7 +1117,91 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/resource/Resource.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="136" column="34" selection-start="3945" selection-end="3945" vertical-scroll-proportion="0.75757575">
+        <state line="115" column="49" selection-start="3274" selection-end="3274" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/Path.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="1024" column="15" selection-start="36157" selection-end="36157" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/Handler.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="37" column="9" selection-start="1271" selection-end="1271" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/ramfs/RamPath.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="86" column="23" selection-start="3387" selection-end="3387" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scala-io/src/test/samples/execute.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="12" column="37" selection-start="425" selection-end="425" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/Seekable.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="194" column="10" selection-start="7484" selection-end="7484" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scala-io/src/main/scala/scalax/io/defaultfs/DefaultPath.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="127" column="101" selection-start="4674" selection-end="4674" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/fs/FsInputTests.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="21" column="94" selection-start="982" selection-end="982" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/fs/FsSeekableTests.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="29" column="66" selection-start="990" selection-end="990" vertical-scroll-proportion="0.5948052">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/fs/FileSystemFixture.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="95" column="55" selection-start="3113" selection-end="3113" vertical-scroll-proportion="0.36363637">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scala-io/src/test/samples/samples.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="664" column="113" selection-start="26395" selection-end="26395" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/fs/FsOutputTests.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="46" column="37" selection-start="1307" selection-end="1307" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scala-io/src/test/scala/scalaio/test/AbstractFileOpsTests.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="178" column="73" selection-start="4858" selection-end="4858" vertical-scroll-proportion="0.47012988">
           <folding />
         </state>
       </provider>

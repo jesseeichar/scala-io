@@ -113,7 +113,7 @@ abstract class FileSystemFixture(val fs : FileSystem, rnd : Random) {
    */
   def copyResource(source : InputStreamResource[InputStream]) : Path = {
       val dest = path
-      dest.ops write (source.bytes)
+      dest write (source.bytes)
       dest
   }
   

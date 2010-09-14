@@ -28,10 +28,10 @@ import java.io.{
 abstract class FsSeekableTests extends AbstractSeekableTests with Fixture {
     def open(data : Option[String] = None) : Seekable = data match {
       case None => 
-        fixture.text("\n").ops
+        fixture.text("\n")
       case Some(text) => 
         val path = fixture.path
-        path.ops writeString text
-        path.ops
+        path writeString text
+        path
     }
 }

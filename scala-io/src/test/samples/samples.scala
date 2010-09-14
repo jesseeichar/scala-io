@@ -428,13 +428,13 @@ object Samples {
     implicit val codec = scalax.io.Codec.UTF8
 
     // not necessarily the most efficient way to copy but demonstrates use of reading/writing bytes
-    Path("to").ops.write(
-      Path("from").ops.bytes
+    Path("to").write(
+      Path("from").bytes
     )
 
     // we could also append to file
-    Path("to").ops.write(
-      Path("from").ops.bytes)
+    Path("to").write(
+      Path("from").bytes)
   }
 
   { // read comma seperated file
@@ -443,7 +443,7 @@ object Samples {
     // the codec must be defined either as a parameter of ops methods or as an implicit
     implicit val codec = scalax.io.Codec.UTF8
 
-    val records: Traversable[Array[String]] = Path ("csv").ops.lines().map (_ split 'x')
+    val records: Traversable[Array[String]] = Path ("csv").lines().map (_ split 'x')
   }
 
   { // add all bytes in file together
@@ -452,7 +452,7 @@ object Samples {
     // the codec must be defined either as a parameter of ops methods or as an implicit
     implicit val codec = scalax.io.Codec.UTF8
 
-    val file:FileOps = Path("file").ops
+    val file:FileOps = Path("file")
     val sum: Int = file.bytesAsInts.reduceLeft (_ + _)
   }
 
@@ -464,7 +464,7 @@ object Samples {
     // the codec must be defined either as a parameter of ops methods or as an implicit
     implicit val codec = scalax.io.Codec.UTF8
 
-    val file:FileOps = Path("file").ops
+    val file:FileOps = Path("file")
     val consonants = file.slurpString.filterNot (c => "aeiou" contains c)
 
     // ok now as bytes
@@ -476,7 +476,7 @@ object Samples {
     // the codec must be defined either as a parameter of ops methods or as an implicit
     implicit val codec = scalax.io.Codec.UTF8
 
-    val file: FileOps =  Path("file").ops
+    val file: FileOps =  Path("file")
     val doubled: Traversable[String] = for ( c <- file.chars ) yield "" + c + c
   }
 
@@ -485,7 +485,7 @@ object Samples {
     // the codec must be defined either as a parameter of ops methods or as an implicit
     implicit val codec = scalax.io.Codec.UTF8
 
-    val file: FileOps =  Path("file").ops
+    val file: FileOps =  Path("file")
 
     // by default the line terminator is stripped and is
     // auto detected
@@ -501,7 +501,7 @@ object Samples {
 
   { // explicitly declare the codecs to use
     import scalax.io.{FileOps, Path, Codec}
-    val file: FileOps =  Path("file").ops
+    val file: FileOps =  Path("file")
 
     // All methods for reading and writing characters/strings
     // have a codec parameter that used to explicitly declare the
@@ -521,7 +521,7 @@ object Samples {
     // the codec must be defined either as a parameter of ops methods or as an implicit
     implicit val codec = scalax.io.Codec.UTF8
 
-    val file: FileOps =  Path("file").ops
+    val file: FileOps =  Path("file")
     val result:Option[String] = catching (classOf[NotFileException],
                                           classOf[FileNotFoundException]) opt { file.slurpString}
 
@@ -539,7 +539,7 @@ object Samples {
     implicit val codec = scalax.io.Codec.UTF8
 
 
-    val file: FileOps =  Path ("file").ops
+    val file: FileOps =  Path ("file")
 
     // write bytes
     // By default the file write will replace
@@ -573,7 +573,7 @@ object Samples {
   { // perform an actions within a file lock
     import scalax.io.{FileOps, Path}
 
-    val file: FileOps =  Path ("file").ops
+    val file: FileOps =  Path ("file")
 
     implicit val codec = scalax.io.Codec.UTF8
 
@@ -605,7 +605,7 @@ object Samples {
     // the codec must be defined either as a parameter of ops methods or as an implicit
     implicit val codec = scalax.io.Codec.UTF8
 
-    val file: FileOps =  Path ("file").ops
+    val file: FileOps =  Path ("file")
 
     // some APIs require a stream or channel. Using one of the io resources you can safely call the method and be guaranteed that the stream will be correctly closed and exceptions handled
     // see the documentation in resource.ManagedResource for details on all the options available
@@ -643,7 +643,7 @@ object Samples {
     // the codec must be defined either as a parameter of ops methods or as an implicit
     implicit val codec = scalax.io.Codec.UTF8
 
-    val file: FileOps =  Path ("file").ops
+    val file: FileOps =  Path ("file")
 
     // get various input streams, readers an channels
     val in: InputStreamResource[InputStream] = file.inputStream
@@ -678,7 +678,7 @@ object Samples {
     // the codec must be defined either as a parameter of ops methods or as an implicit
     implicit val codec = scalax.io.Codec.UTF8
 
-    val file: FileOps =  Path ("file").ops
+    val file: FileOps =  Path ("file")
 
     // write "people" at byte 6
     // if the file is < 6 bytes an underflow exception is thrown
@@ -697,7 +697,7 @@ object Samples {
     // the codec must be defined either as a parameter of ops methods or as an implicit
     implicit val codec = scalax.io.Codec.UTF8
 
-    val file: FileOps =  Path ("file").ops
+    val file: FileOps =  Path ("file")
 
     file.open()( f => {
       val s = f.slurpString
@@ -726,7 +726,7 @@ object Samples {
     Resource.fromReader(new InputStreamReader(url.openStream())).lines() foreach println _
     // ReadBytes can also be constructed
     val bytes: Traversable[Byte] = Resource.fromInputStream(url.openStream()).bytes
-    Path("scala.html").ops write bytes
+    Path("scala.html") write bytes
 
     // WriteChars and WriteBytes can be used to simplify writing to OutputStreams
     Resource.fromOutputStream(new ByteArrayOutputStream()).writer.writeString("howdy")

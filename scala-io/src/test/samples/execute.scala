@@ -10,6 +10,6 @@ object ExecuteFile {
   // attempt to execute the file.  If it is possible then the process will be
   // returned
   implicit val codec = scalax.io.Codec.UTF8
-  val process:Option[Process] = path.ops.execute("arg1", "arg2")
+  val process:Option[Process] = path.execute("arg1", "arg2")
 */
 }

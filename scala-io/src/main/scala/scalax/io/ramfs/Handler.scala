@@ -30,12 +30,12 @@ class RamURLConnection(url:URL) extends URLConnection(url) {
 
   override def getInputStream = {
     require(getDoInput, "getDoInput must be true")
-    path.ops.inputStream.open()
+    path.inputStream.open()
   }
 
   override def getOutputStream = {
     require(getDoOutput, "getDoOutput must be true")
-    path.ops.outputStream().open()
+    path.outputStream().open()
   }
 
   override def getLastModified = path.lastModified
