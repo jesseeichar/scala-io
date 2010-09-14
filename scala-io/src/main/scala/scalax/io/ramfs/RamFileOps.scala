@@ -18,23 +18,24 @@ import java.io.{
   FileNotFoundException, IOException
 }
 
-class RamFileOps(path:RamPath) extends FileOps(path) {
+private[io] trait RamFileOps {
+  self : RamPath =>
   private def fileResource[A](toResource:FileNode => A, openOptions: OpenOption*) = {
     val options = if(openOptions.isEmpty) List(Read,Write) else openOptions
                     
     import OpenOption._
-    if((options contains CreateNew) && path.exists) {
-      throw new IOException(path+" exists and therefore cannot be created new");
+    if((options contains CreateNew) && exists) {
+      throw new IOException(this+" exists and therefore cannot be created new");
     }
     
 
-    val nodeOption = path.fileSystem.lookup(path)
+    val nodeOption = fileSystem.lookup(this)
 
     if(nodeOption.isDefined) {
-      val errors = options.flatMap(_.toAccessModes).distinct.flatMap(mode => if(path.checkAccess(mode)) Nil else List(mode))
+      val errors = options.flatMap(_.toAccessModes).distinct.flatMap(mode => if(checkAccess(mode)) Nil else List(mode))
 
       if(errors.nonEmpty)
-        throw new IOException(errors.mkString(", ") +" is not permitted for "+path )
+        throw new IOException(errors.mkString(", ") +" is not permitted for "+this)
     }
     nodeOption match {
       case Some(file:FileNode) => 
@@ -42,11 +43,11 @@ class RamFileOps(path:RamPath) extends FileOps(path) {
       case Some(_) => 
         throw new NotFileException()
       case None if options exists {e => List(CreateNew, Create) contains e} =>
-        path.createFile(false)
-        path.fileSystem.lookup(path).collect {case f:FileNode => toResource(f)}.getOrElse {error("file should have been created")}
+        createFile(false)
+        fileSystem.lookup(this).collect {case f:FileNode => toResource(f)}.getOrElse {error("file should have been created")}
       case None if options contains CreateFull =>
-        path.createFile()
-        path.fileSystem.lookup(path).collect {case f:FileNode => toResource(f)}.getOrElse {error("file should have been created because of open option createFull")}
+        createFile()
+        fileSystem.lookup(this).collect {case f:FileNode => toResource(f)}.getOrElse {error("file should have been created because of open option createFull")}
       case None => 
         throw new FileNotFoundException("No file found and will not create when open options are: " + openOptions)
     }
@@ -59,9 +60,9 @@ class RamFileOps(path:RamPath) extends FileOps(path) {
           case opts if opts forall {opt => opt != Write && opt != Append} => openOptions :+ Write
           case _ => openOptions
       }
-    fileResource( _.outputResource(path, updatedOpts:_*), updatedOpts:_*)
+    fileResource( _.outputResource(this, updatedOpts:_*), updatedOpts:_*)
   }
-  def channel(openOptions: OpenOption*) = fileResource(_.channel(path, openOptions:_*), openOptions:_*)
+  def channel(openOptions: OpenOption*) = fileResource(_.channel(this, openOptions:_*), openOptions:_*)
   def fileChannel(openOptions: OpenOption*) : Option[ByteChannelResource[FileChannel]] = None // not supported
 
   def withLock[R](start: Long,size: Long,shared: Boolean)(block: (Seekable) => R):Option[R] = None // TODO

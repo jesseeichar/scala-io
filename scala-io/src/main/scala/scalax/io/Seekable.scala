@@ -197,7 +197,7 @@ trait Seekable extends Input with Output {
       for(channel <- channel(Write) ) {
            channel position  position
            writeTo(channel, bytes, -1)
-           writeTo(channel, tmp.ops.bytes, tmp.size)
+           writeTo(channel, tmp.ops.bytes, tmp.size.get)
       }
   }
   

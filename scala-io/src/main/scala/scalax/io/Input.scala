@@ -53,7 +53,7 @@ trait Input {
     * number of bytes in advance.
     * </p>
     */
-    def size: Option[Long] = None
+    def size: Option[Long]
 
     /**
     * Obtains a Traversable for conveniently processing the resource as bytes.

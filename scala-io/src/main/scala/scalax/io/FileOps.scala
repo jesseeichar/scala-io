@@ -71,10 +71,8 @@ import Resource._
  * @author Jesse Eichar
  * @since 1.0
  */
-abstract class FileOps(path : Path) extends Seekable {
-  
-    override def size = Some(path.size)
-  
+abstract class FileOps extends Seekable {
+
   /**
    * Obtains an input stream resource for reading from the file
    */
@@ -173,8 +171,5 @@ abstract class FileOps(path : Path) extends Seekable {
   
   // required method for Output trait
   override protected def outputStream = outputStream()
-  
-  // Optimization for Seekable
-  override protected def tempFile() : Path = path.fileSystem.createTempFile()
 }
 

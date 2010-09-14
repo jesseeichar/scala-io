@@ -37,7 +37,7 @@ import Path.AccessModes._
  *  @since   1.0
  */
 //private[io] 
-class DefaultPath private[io] (val jfile: JFile, override val fileSystem: DefaultFileSystem) extends Path(fileSystem)
+class DefaultPath private[io] (val jfile: JFile, override val fileSystem: DefaultFileSystem) extends Path(fileSystem) with DefaultFileOps
 {
   self =>
   
@@ -66,7 +66,7 @@ class DefaultPath private[io] (val jfile: JFile, override val fileSystem: Defaul
   def isHidden = jfile.isHidden()
   def lastModified = jfile.lastModified()
   def lastModified_=(time: Long) = {jfile setLastModified time; time}
-  def size = jfile.length()
+  def size = if(jfile.exists) Some(jfile.length()) else None
   
   def access_=(accessModes:Iterable[AccessMode]) = {
     if (notExists) fail("Path %s does not exist".format(path))
@@ -101,13 +101,13 @@ class DefaultPath private[io] (val jfile: JFile, override val fileSystem: Defaul
          out <- dest.ops.channel(Create, Truncate, Write)
     } {
       var pos, count = 0L
-      while (pos < size) {
-        count = (size - pos) min FIFTY_MB
+      while (size exists {pos < _}) {
+        count = (size.get - pos) min FIFTY_MB
         val prepos = pos
         pos += in.transferTo(pos, count, out)
         if(prepos == pos) fail("no data can be copied for unknown reason!")
       }
-      if (this.length != dest.length)
+      if (this.size != dest.size)
         fail("Failed to completely copy %s to %s".format(name, dest.name))
 
     }
@@ -149,8 +149,7 @@ class DefaultPath private[io] (val jfile: JFile, override val fileSystem: Defaul
 
   def descendants(filter:Path => Boolean, 
                   depth:Int, 
-                  options:Traversable[LinkOption]) = new DefaultDirectoryStream(this, filter, depth) 
+                  options:Traversable[LinkOption]) = new DefaultDirectoryStream(this, filter, depth)
 
-  def ops:FileOps = new DefaultFileOps(this, jfile)
 
 }

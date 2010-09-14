@@ -40,5 +40,5 @@ class RamURLConnection(url:URL) extends URLConnection(url) {
 
   override def getLastModified = path.lastModified
 
-  override def getContentLength = path.length.toInt
+  override def getContentLength = path.size.map{_.toInt}.getOrElse(-1)
 }

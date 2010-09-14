@@ -36,8 +36,9 @@ import java.lang.{ProcessBuilder}
  * @author  Jesse Eichar
  * @since   1.0
  */
-private[io] class DefaultFileOps(path : DefaultPath, jfile:JFile) extends FileOps(path) {
-
+private[io] trait DefaultFileOps {
+  self : DefaultPath =>
+  
   def inputStream = Resource.fromInputStream(new FileInputStream(jfile))
 
   def outputStream(openOptions: OpenOption*) = {
@@ -59,7 +60,9 @@ private[io] class DefaultFileOps(path : DefaultPath, jfile:JFile) extends FileOp
 
   def open[R](openOptions: Seq[OpenOption] = List(Read,Write))(action: Seekable => R): R = {
     val c = openChannel(openOptions)
+    val path = this
     val seekable = new Seekable {
+      def size = path.size
       protected def channel(openOptions:OpenOption*) = {
         val seekable2 = new SeekableFileChannel(c) {
             override def close = () // will close after all operations

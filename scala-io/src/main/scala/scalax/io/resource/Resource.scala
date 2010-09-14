@@ -134,6 +134,7 @@ trait InputResource[+R <: Closeable] extends Resource[R] with Input {
      * @return the Reader Resource version of this object.
      */
     def readableByteChannel: InputResource[ReadableByteChannel]
+    def size : Option[Long] = None
 }
 
 /**

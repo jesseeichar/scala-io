@@ -251,7 +251,7 @@ import Path.fail
  *  @since   0.1
  *
  */
-abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
+abstract class Path (val fileSystem: FileSystem) extends FileOps with Ordered[Path]
 {
   self =>
   /**
@@ -540,18 +540,12 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    */
   def lastModified_=(time: Long): Long
   /**
-   * The size of the file/directory in bytes or 0 if file does not exist
+   * The size of the file/directory in bytes
    *
-   * @return The size of the file/directory in bytes or 0 if file does not exist
+   * @return The size of the file/directory in bytes
    * @see java.io.File#length()
    */
-  def size: Long
-  /**
-   * The size of a file
-   * @see size
-   */
-  def length = size
-  
+  def size: Option[Long]  
   // Boolean path comparisons
   /**
    * True if this path ends with the other path
@@ -1142,7 +1136,7 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
    *          This codec will be the default used for reading and
    *          writing to the file
    */
-  def ops:FileOps
+  def ops:FileOps = this
 
 
 /* ****************** The following require jdk7's nio.file ************************** */
@@ -1222,4 +1216,8 @@ abstract class Path (val fileSystem: FileSystem) extends Ordered[Path]
   def secureDirectoryStream(filter:Option[PathMatcher] = None
                             :LinkOption*): Option[DirectoryStream[SecuredPath[Path]]]
 */
+
+  // Optimization for Seekable
+  override protected def tempFile() : Path = fileSystem.createTempFile()
+  
 }

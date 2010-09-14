@@ -21,7 +21,7 @@ import java.net.{
   URL,URI
 }
 
-class RamPath(relativeTo:String, val path:String, override val fileSystem:RamFileSystem) extends Path(fileSystem) {  
+class RamPath(relativeTo:String, val path:String, override val fileSystem:RamFileSystem) extends Path(fileSystem) with RamFileOps{  
   def node = fileSystem.lookup(this)
   lazy val toAbsolute: Path = fileSystem("",relativeTo + separator + path)
   lazy val toURI: URI = fileSystem.uri(this)
@@ -56,7 +56,7 @@ class RamPath(relativeTo:String, val path:String, override val fileSystem:RamFil
     node foreach {_.lastModified = time}
     time
   }
-  def size = node collect {case f:FileNode => f.data.size.toLong} getOrElse -1
+  def size = node collect {case f:FileNode => f.data.size.toLong}
   def access_=(accessModes:Iterable[AccessMode]) = node match {
     case None => fail("Path %s does not exist".format(path))
     case Some(node) =>  
@@ -100,6 +100,4 @@ class RamPath(relativeTo:String, val path:String, override val fileSystem:RamFil
 
   def descendants(filter:Path => Boolean, depth:Int, options:Traversable[LinkOption]):DirectoryStream[Path] = new RamDirectoryStream(this,filter,depth)
 
-  def ops:FileOps = new RamFileOps(this)
-   
 }
