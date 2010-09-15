@@ -38,7 +38,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
       assertEquals("initial read works", demoData take 2, stream.chars take 2 mkString)
       stream.chop(2)
       assertEquals("chop works", demoData take 2, stream.slurpString)
-      stream.appendString(demoData drop 2)
+      stream.append(demoData drop 2)
       assertEquals("append works",demoData, stream.slurpString)
     }
   }
@@ -49,7 +49,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
       assertEquals("initial read works", demoData take 2, stream.chars take 2 mkString)
       stream.chop(2)
       assertEquals("chop works", demoData take 2, stream.slurpString)
-      stream.appendString(demoData drop 2)
+      stream.append(demoData drop 2)
       assertEquals("append works",demoData, stream.slurpString)
     }
   }

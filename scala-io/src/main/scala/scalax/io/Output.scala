@@ -21,36 +21,6 @@ import java.net.{ URI, URL }
 import collection.immutable.{StringLike, StringOps, WrappedString}
 import java.io.{OutputStreamWriter, InputStream, PrintStream, File => JFile, InputStreamReader, OutputStream, Writer, Reader}
 
-trait OutputWriteFunction[T] extends Function2[OutputStream,TraversableOnce[T],Unit]
-
-object OutputWriteFunction {
-  implicit object ByteFunction extends OutputWriteFunction[Byte] {
-    def apply(out: OutputStream, bytes:TraversableOnce[Byte]) = {
-      bytes foreach {i => out write i.toInt}
-    }
-  }
-  implicit object IntFunction extends OutputWriteFunction[Int] {
-    def apply(out: OutputStream, integers:TraversableOnce[Int]) = {
-      integers foreach out.write
-    }
-  }
-  private class CharFunction(implicit codec : Codec) extends OutputWriteFunction[Char] {
-    def apply(out: OutputStream, characters:TraversableOnce[Char]) = {
-      val writer = new OutputStreamWriter(out)
-      try {
-        characters match {
-          case string : StringOps => writer write string
-          case string : WrappedString => writer write string
-          case _ => characters foreach writer.append
-        }
-      }finally {
-        writer.flush();
-      }
-    }
-  }
-
-  implicit def charsToOutputFunction[T](implicit codec:Codec):OutputWriteFunction[Char] = new CharFunction
-}
 /**
  * A trait for objects that can have data written to them. For example an
  * OutputStream and File can be an Output object (or be converted to one).
@@ -88,7 +58,7 @@ trait Output {
    *          The strategy used to write the data to the underlying object.  Many standard data-types are implicitly
    *          resolved and do not need to be supplied
    */
-  def write[T](data: TraversableOnce[T])(implicit writer:OutputWriteFunction[T]) : Unit = {
+  def write[T](data: TraversableOnce[T])(implicit writer:OutputConverter[T]) : Unit = {
     outputStream.foreach {writer(_,data)}
   }
   /**
@@ -112,7 +82,7 @@ trait Output {
    * @param codec the codec to use for encoding the characters
    */
   def writeChars(characters: TraversableOnce[Char])(implicit codec: Codec) : Unit = {
-    write(characters)(OutputWriteFunction.charsToOutputFunction)
+    write(characters)(OutputConverter.charsToOutputFunction)
   }
 
   /**

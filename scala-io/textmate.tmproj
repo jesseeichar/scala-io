@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>src/main/scala/scalax/io/Path.scala</string>
+	<string>src/main/scala/scalax/io/OutputFunction.scala</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -39,6 +39,20 @@
 	<integer>319</integer>
 	<key>metaData</key>
 	<dict>
+		<key>src/main/scala/scalax/io/OutputFunction.scala</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>22</integer>
+				<key>line</key>
+				<integer>29</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
 		<key>src/main/scala/scalax/io/Path.scala</key>
 		<dict>
 			<key>caret</key>
@@ -203,12 +217,13 @@
 		<string>src/main/scala/scalax/io/ramfs/RamPath.scala</string>
 		<string>src/main/scala/scalax/io/defaultfs/DefaultPath.scala</string>
 		<string>src/main/scala/scalax/io/Path.scala</string>
+		<string>src/main/scala/scalax/io/OutputFunction.scala</string>
 		<string>src/test/scala/scalaio/test/fs/ram/AllTests.scala</string>
 		<string>src/test/scala/scalaio/test/fs/FsBasicPathTests.scala</string>
 	</array>
 	<key>showFileHierarchyDrawer</key>
 	<true/>
 	<key>windowFrame</key>
-	<string>{{357, 0}, {913, 778}}</string>
+	<string>{{980, 280}, {913, 778}}</string>
 </dict>
 </plist>

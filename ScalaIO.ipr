@@ -29,6 +29,13 @@
     <annotationProcessing enabled="false" useClasspath="true" />
   </component>
   <component name="CopyrightManager" default="">
+    <copyright>
+      <option name="notice" value="/*                     __                                               *\&#10;**     ________ ___   / /  ___     Scala API                            **&#10;**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar          **&#10;**  __\ \/ /__/ __ |/ /__/ __ |    http://scala-lang.org/               **&#10;** /____/\___/_/ |_/____/_/ | |                                         **&#10;**                          |/                                          **&#10;\*                                                                      */" />
+      <option name="keyword" value="Copyright" />
+      <option name="allowReplaceKeyword" value="" />
+      <option name="myName" value="Scala" />
+      <option name="myLocal" value="true" />
+    </copyright>
     <module2copyright />
   </component>
   <component name="DependencyValidationManager">

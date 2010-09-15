@@ -51,26 +51,26 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
         intercept[IllegalArgumentException] {
             open().patchString(-1, "@", 3)
         }
-    // test UTF16?        
+    // test UTF16?
     }
     @Test //@Ignore
     def patchStringASCII() : Unit = {
         val seekable = open(Some("abc"))
-        
+
         seekable.patchString(1,"x",1)(Codec.ISO8859)
-        
+
         assertEquals("axc", seekable.slurpString)
     }
 
     private def testPatchString(msg:String, from:Int, data:String, length : Option[Int]) = {
         val seekable = open()
 
-              
+
         val expected = length match {
           case Some(length) => TEXT_VALUE.toList.patch (from.min(Int.MaxValue).toInt, data, length).mkString
           case None => TEXT_VALUE.toList.patch (from.min(Int.MaxValue).toInt, data, length.size).mkString
         }
-        
+
         length match {
           case Some(length) => seekable.patchString(from,data,length)
           case None => seekable.patchString(from,data)
@@ -79,21 +79,21 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
         println("patch:    "+(data mkString ",").replaceAll("\n","\\\\n"))
         println("actual:   "+(seekable.slurpString mkString ",").replaceAll("\n","\\\\n"))
         println("expected: "+(expected mkString ",").replaceAll("\n","\\\\n"))
-*/        
+*/
         assertEquals(msg, expected, seekable.slurpString)
     }
 
     @Test //@Ignore
     def patch() : Unit = {
         val testFunction = Function tupled testPatch _
-        patchParams foreach testFunction 
+        patchParams foreach testFunction
 
         intercept[IllegalArgumentException] {
             open().patch(-1, "@".getBytes(UTF8.name), 3)
         }
     }
-    
-    
+
+
     private def testPatch(msg:String, fromInChars:Int, dataString:String, lengthInChars : Option[Int]) = {
 
         val MAX_VALUE = Int.MaxValue
@@ -117,21 +117,21 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
                 case Some(lengthInChars) if(lengthInChars == MAX_VALUE) => TEXT_VALUE.getBytes(UTF8.name)  patch (from, data, MAX_VALUE)
                 case Some(lengthInChars) => TEXT_VALUE.getBytes(UTF8.name)  patch (from, data, length.get.toInt)
             }
-            
+
             val bytes = dataTransform(data)
             length match {
               case Some(length) => seekable.patch(from,bytes,length)
               case None => seekable.patch(from,bytes)
             }
-            
-                
+
+
             assertEquals(datatype+" - patch: '"+msg+"'", expected mkString ",", seekable.byteArray mkString ",")
         }
-        
+
         test("array", a => a)
         test("list", a => a.toList)
         test("stream", a => a.toStream)
-        
+
     }
 
     @Test //@Ignore
@@ -139,10 +139,10 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
         val data = "ア"
         val seekable = open()
         val expected = TEXT_VALUE + data
-        seekable.appendString(data)
+        seekable.append(data)
         assertEquals(expected, seekable.slurpString)
     }
-    
+
     @Test //@Ignore
     def appendStrings : Unit = {
       val data = "ア" :: "%" :: "~µ" :: Nil
@@ -153,12 +153,12 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
         seekable.appendStrings(data, sep)
         assertEquals(expected, seekable.slurpString)
       }
-      
+
       val seekable = open()
       val expected = TEXT_VALUE + (data mkString "")
       seekable.appendStrings(data)
       assertEquals(expected, seekable.slurpString)
-      
+
       test("123")
       test(",")
     }

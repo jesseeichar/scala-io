@@ -20,6 +20,8 @@ import scala.collection.Traversable
 import OpenOption._
 import Resource._
 import scala.annotation._
+import collection.mutable.WrappedArray
+
 /**
  * An object for reading and writing to Random Access IO objects such as Files.
  *
@@ -127,25 +129,26 @@ trait Seekable extends Input with Output {
    *          The stream will be grown as needed.
    *          Default will use all bytes in patch
    */
-  def patch[T <% Traversable[Byte]](position: Long,
-            bytes: T,
-            replaced : Long = Overwrite): Unit = {
+  def patch[T](position: Long,
+            data: TraversableOnce[T],
+            replaced : Long = Overwrite)(implicit converter:OutputConverter[T]): Unit = {
     require(position >= 0, "The patch starting position must be greater than or equal 0")
 
+    val bytes = converter.toBytes(data) 
     val appendData = size.forall{position == _}
     val insertData = replaced <= 0 && replaced != Overwrite
         
     if(appendData) {
       append(bytes, replaced)
     } else if(insertData) {
-      insert(position : Long, bytes : T)
+      insert(position, bytes)
     } else {
       // overwrite data
       overwriteFileData(position, bytes, replaced)
     }
   }
   
-  private def insert[T <% Traversable[Byte]](position : Long, bytes : T) = {
+  private def insert(position : Long, bytes : TraversableOnce[Byte]) = {
     if (bytes.hasDefiniteSize && bytes.size <= MaxPermittedInMemory) {
         insertDataInMemory(position, bytes)
     } else {
@@ -153,7 +156,7 @@ trait Seekable extends Input with Output {
     }
   }
 
-  private def insertDataInMemory[T <% Traversable[Byte]](position : Long, bytes : T) = {
+  private def insertDataInMemory(position : Long, bytes : TraversableOnce[Byte]) = {
       for(channel <- channel(Write) ) {
             channel position position
             var buffers = (ByteBuffer allocateDirect MaxPermittedInMemory, ByteBuffer allocateDirect MaxPermittedInMemory)
@@ -166,8 +169,6 @@ trait Seekable extends Input with Output {
             writeTo(channel, bytes, bytes.size)
             
             while(channel.position < channel.size - buffers._2.remaining) {
-                
-//                System.out.println("inserting at "+channel.position+" remaining: "+(channel.size - buffers._2.remaining))
                 channel read buffers._1
                 buffers._1.flip
 
@@ -187,7 +188,7 @@ trait Seekable extends Input with Output {
    */
   protected def tempFile() : Path = Path.createTempFile()
 
-  private def insertDataTmpFile[T <% Traversable[Byte]](position : Long, bytes : T) = {
+  private def insertDataTmpFile(position : Long, bytes : TraversableOnce[Byte]) = {
       val tmp = tempFile()
       
       var i = -1
@@ -201,7 +202,7 @@ trait Seekable extends Input with Output {
       }
   }
   
-  private def overwriteFileData[T <% Traversable[Byte]](position : Long, bytes : T, replaced : Long) = {
+  private def overwriteFileData(position : Long, bytes : TraversableOnce[Byte], replaced : Long) = {
       for(channel <- channel(Write) ) {
           channel.position(position)
 //            println("byte size,replaced",bytes.size,replaced)
@@ -222,7 +223,8 @@ trait Seekable extends Input with Output {
             val adjustedPosition = position +  replaced
             bytes match {
               case b : LongTraversable[_] => insert(adjustedPosition,b.asInstanceOf[LongTraversable[Byte]] ldrop wrote)
-              case _ => insert(adjustedPosition,bytes drop wrote.toInt)
+              case b : Traversable[_] => insert(adjustedPosition,b.asInstanceOf[Traversable[Byte]] drop wrote.toInt)
+              case _ => insert(adjustedPosition,bytes.toIterator drop wrote.toInt)
             }
           }
       }
@@ -260,54 +262,53 @@ trait Seekable extends Input with Output {
   *          The number of bytes to append negative number to take all
   *          default is to append all
   */
-  def append[T <% Traversable[Byte]](bytes: T, take : Long = -1): Unit = {
-      for (c <- channel(Append)) writeTo(c, bytes, take)
+  def append[T](data: TraversableOnce[T], take : Long = -1)(implicit converter:OutputConverter[T]): Unit = {
+    val bytes = converter.toBytes(data)
+    for (c <- channel(Append)) writeTo(c, bytes, take)
   }
 
   // returns (wrote,earlyTermination)
-  private def writeTo[T <% Traversable[Byte]](c : WritableByteChannel, bytes : T, length : Long) : (Long,Boolean) = {
-//    println("start write",length)
-      bytes match {
-          case array : Array[Byte] =>
-            // for performance try to write Arrays directly
-              val count = if(length < 0) bytes.size else length.min(bytes.size)
-              val wrote = c.write(ByteBuffer.wrap(array, 0, count.toInt))
+  private def writeTo(c : WritableByteChannel, bytes : TraversableOnce[Byte], length : Long) : (Long,Boolean) = {
+      def writeArray(array:Array[Byte]) = {
+        // for performance try to write Arrays directly
+        val count = if(length < 0) bytes.size else length.min(bytes.size)
+        val wrote = c.write(ByteBuffer.wrap(array, 0, count.toInt))
 
-//              println("count,bytes.size,wrote,length",count,bytes.size,wrote,length)
-              
-              val isWriteAll = length > 0
-              (wrote, isWriteAll && length < bytes.size)
-          case _ =>
-            // TODO user hasDefinitateSize to improve performance
-            // if the size is small enough we can probably open a memory mapped buffer
-            // or at least copy to a buffer in one go.
-              val buf = ByteBuffer.allocateDirect(BufferSize)
-              var earlyTermination = false
-              
-// TODO add this back when I can get tailrec working              
-//              @tailrec
-              def write[T <% Traversable[Byte]](written : Long, data:T) : Long = {
-                  val numBytes = length match {
-                      case -1 | Overwrite => BufferSize
-                      case _ => (length - written).min(BufferSize).toInt
-                  }
-                  
-//                  println("writing bytes: "+numBytes)
-                  
-                  val (toWrite, remaining) = data.splitAt(numBytes)
-                  
-                  assert(numBytes > 0 || remaining.nonEmpty)                  
-                  
-                  toWrite foreach buf.put
-                  buf.flip
-                  val currentWrite : Long = c write buf
-                  earlyTermination = length <= written + numBytes && remaining.nonEmpty
-                  
-                  if (earlyTermination || remaining.isEmpty) currentWrite
-                  else currentWrite + write (written + numBytes, remaining)
-              }
-              
-             (write(0, bytes), earlyTermination)
+        val isWriteAll = length > 0
+        (wrote.toLong, isWriteAll && length < bytes.size)
+      }
+
+      bytes match {
+        case wrappedArray : WrappedArray[Byte] =>
+          writeArray(wrappedArray.array)
+        case _ =>
+          // TODO user hasDefinitateSize to improve performance
+          // if the size is small enough we can probably open a memory mapped buffer
+          // or at least copy to a buffer in one go.
+            val buf = ByteBuffer.allocateDirect(BufferSize)
+            var earlyTermination = false
+
+            @tailrec
+            def write(written : Long, data:TraversableOnce[Byte], acc:Long) : Long = {
+                val numBytes = length match {
+                    case -1 | Overwrite => BufferSize
+                    case _ => (length - written).min(BufferSize).toInt
+                }
+
+                val (toWrite, remaining) = TraversableOnceOps.splitAt(data, numBytes)
+
+                assert(numBytes > 0 || remaining.nonEmpty)
+
+                toWrite foreach buf.put
+                buf.flip
+                val currentWrite : Long = c write buf
+                earlyTermination = length <= written + numBytes && remaining.nonEmpty
+
+                if (earlyTermination || remaining.isEmpty) currentWrite + acc
+                else write (written + numBytes, remaining, currentWrite + acc )
+            }
+
+           (write(0, bytes, 0), earlyTermination)
       }
   }
 
@@ -323,7 +324,7 @@ trait Seekable extends Input with Output {
   *          be converted to the encoding of {@link sourceCodec}
   *          Default is sourceCodec
   */
-  def appendString(string: String)(implicit codec: Codec): Unit = {
+  def append(string: String)(implicit codec: Codec): Unit = {
       append(codec encode string)
   }
 
@@ -364,7 +365,7 @@ trait Seekable extends Input with Output {
   }
   
   // required methods for Input trait
-  def chars(implicit codec: Codec): ResourceView[Char] = (channel(Read).reader(codec).chars).asInstanceOf[ResourceView[Char]]  // TODO this is broke
+  def chars(implicit codec: Codec): ResourceView[Char] = (channel(Read).reader(codec).chars).asInstanceOf[ResourceView[Char]]  // TODO this is broken
   def bytesAsInts:ResourceView[Int] = channel(Read).bytesAsInts
   
   // required method for Output trait
