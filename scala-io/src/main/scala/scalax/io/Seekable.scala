@@ -20,7 +20,26 @@ import scala.collection.Traversable
 import OpenOption._
 import Resource._
 import scala.annotation._
-import collection.mutable.WrappedArray
+import collection.mutable.{ArrayOps, WrappedArray}
+
+sealed trait Overwrite {
+  def getOrElse(opt: => Long):Long
+  def map(f:Long => Long):Overwrite
+  def foreach[U](f:Long => U):Unit
+  def exists(p:Long => Boolean):Boolean
+}
+case object OverwriteAll extends Overwrite {
+  def getOrElse(opt: => Long) = opt
+  def map(f:Long => Long) = this
+  def foreach[U](f:Long => U) = ()
+  def exists(p:Long => Boolean) = false
+}
+case class OverwriteSome(replacementLength:Long) extends Overwrite {
+  def getOrElse(opt: => Long) = replacementLength
+  def map(f:Long => Long) = new OverwriteSome(f(replacementLength))
+  def foreach[U](f:Long => U) : Unit = f(replacementLength)
+  def exists(p:Long => Boolean) = p(replacementLength)
+}
 
 /**
  * An object for reading and writing to Random Access IO objects such as Files.
@@ -29,10 +48,10 @@ import collection.mutable.WrappedArray
  * @since 1.0
  */
 trait Seekable extends Input with Output {
-    private final val BufferSize=8192
-    private final val MaxPermittedInMemory=8192
+    private final val BufferSize= 1024 * 1024
+    private final val MaxPermittedInMemory=50 * BufferSize
     
-    private final val Overwrite = Long.MinValue
+    private final val OVERWRITE_CODE = Long.MinValue
     
 
     // for Java 7 change this to a Seekable Channel
@@ -73,8 +92,13 @@ trait Seekable extends Input with Output {
    */
   def patchString(position: Long, 
                   string: String,
-                  replaced : Long = Overwrite)(implicit codec: Codec): Unit = {
+                  overwrite : Overwrite = OverwriteAll)(implicit codec: Codec): Unit = {
     require(position >= 0, "The patch starting position must be greater than or equal 0")
+
+    val replaced = overwrite match {
+      case OverwriteAll => OVERWRITE_CODE
+      case OverwriteSome(r) => r
+    }
 
     if(size.forall{position > _}){
       // special case where there is no alternative but to be append
@@ -84,18 +108,23 @@ trait Seekable extends Input with Output {
       val bytesPerChar = codec.encoder.maxBytesPerChar.toLong
       val posInBytes = if(position > 0) position * bytesPerChar else position
       val replacedInBytes = if(replaced > 0) replaced * bytesPerChar else replaced
-      
-      patch(posInBytes, string.getBytes(codec.name), replacedInBytes)
+
+      patch(posInBytes, string.getBytes(codec.name), OverwriteSome(replacedInBytes))
     } else {
       // when a charset is not constant (like UTF-8 or UTF-16) the only
       // way is to find position is to iterate to the position counting characters
       // Same with figuring out what replaced is in bytes
 
+      val bytes = string.getBytes(codec.name)
       // this is very inefficient.  The file is opened 3 times.
       val posInBytes = charCountToByteCount(0, position)
-      val replacedInBytes = charCountToByteCount(position, position+replaced)
-//      println("replacedInBytes",replacedInBytes)
-      patch(posInBytes, string.getBytes(codec.name), replaced max replacedInBytes)
+      if(overwrite.exists{_ < 0}) {
+        insert(posInBytes, bytes)
+      } else {
+        val replacedInBytes = charCountToByteCount(position, position+(if(overwrite == OverwriteAll) string.size else replaced))
+
+        patch(posInBytes, bytes, OverwriteSome(replaced max replacedInBytes))
+      }
     }
   }
   
@@ -131,12 +160,18 @@ trait Seekable extends Input with Output {
    */
   def patch[T](position: Long,
             data: TraversableOnce[T],
-            replaced : Long = Overwrite)(implicit converter:OutputConverter[T]): Unit = {
+            overwrite : Overwrite = OverwriteAll)(implicit converter:OutputConverter[T]): Unit = {
     require(position >= 0, "The patch starting position must be greater than or equal 0")
+
+    // replaced is the old param.  I am migrating to the Overwrite options
+    val replaced = overwrite match {
+      case OverwriteAll => OVERWRITE_CODE
+      case OverwriteSome(r) => r
+    }
 
     val bytes = converter.toBytes(data) 
     val appendData = size.forall{position == _}
-    val insertData = replaced <= 0 && replaced != Overwrite
+    val insertData = replaced <= 0 && replaced != OVERWRITE_CODE
         
     if(appendData) {
       append(bytes, replaced)
@@ -148,36 +183,38 @@ trait Seekable extends Input with Output {
     }
   }
   
-  private def insert(position : Long, bytes : TraversableOnce[Byte]) = {
-    if (bytes.hasDefiniteSize && bytes.size <= MaxPermittedInMemory) {
-        insertDataInMemory(position, bytes)
+  def insert(position : Long, bytes : TraversableOnce[Byte]) = {
+    if(size.forall(_ <= position)) {
+      append(bytes)
+    } else if (bytes.hasDefiniteSize && bytes.size <= MaxPermittedInMemory) {
+        insertDataInMemory(position max 0, bytes)
     } else {
-        insertDataTmpFile(position, bytes)
+        insertDataTmpFile(position max 0, bytes)
     }
   }
 
   private def insertDataInMemory(position : Long, bytes : TraversableOnce[Byte]) = {
-      for(channel <- channel(Write) ) {
-            channel position position
-            var buffers = (ByteBuffer allocateDirect MaxPermittedInMemory, ByteBuffer allocateDirect MaxPermittedInMemory)
-            
-            channel read buffers._1
-            buffers._1.flip
-            buffers = buffers.swap
-            
-            channel position position
-            writeTo(channel, bytes, bytes.size)
-            
-            while(channel.position < channel.size - buffers._2.remaining) {
-                channel read buffers._1
-                buffers._1.flip
+    for(channel <- channel(Write) ) {
+      channel position position
+      var buffers = (ByteBuffer allocateDirect MaxPermittedInMemory, ByteBuffer allocateDirect MaxPermittedInMemory)
 
-                channel.write(buffers._2, channel.position - bytes.size)
+      channel read buffers._1
+      buffers._1.flip
+      buffers = buffers.swap
 
-                buffers = buffers.swap
-            }
-            
-            channel.write(buffers._2)
+      channel position position
+      writeTo(channel, bytes, bytes.size)
+
+      while(channel.position < channel.size - buffers._2.remaining) {
+          channel read buffers._1
+          buffers._1.flip
+
+          channel.write(buffers._2, channel.position - bytes.size)
+
+          buffers = buffers.swap
+      }
+
+      channel.write(buffers._2)
       }
   }
 
@@ -281,6 +318,8 @@ trait Seekable extends Input with Output {
       bytes match {
         case wrappedArray : WrappedArray[Byte] =>
           writeArray(wrappedArray.array)
+        case ops:ArrayOps[Byte] =>
+          writeArray(ops.toArray)
         case _ =>
           // TODO user hasDefinitateSize to improve performance
           // if the size is small enough we can probably open a memory mapped buffer
@@ -291,13 +330,15 @@ trait Seekable extends Input with Output {
             @tailrec
             def write(written : Long, data:TraversableOnce[Byte], acc:Long) : Long = {
                 val numBytes = length match {
-                    case -1 | Overwrite => BufferSize
+                    case -1 | OVERWRITE_CODE => BufferSize
                     case _ => (length - written).min(BufferSize).toInt
                 }
 
                 val (toWrite, remaining) = TraversableOnceOps.splitAt(data, numBytes)
 
+              if(!(numBytes > 0 || remaining.nonEmpty)) {
                 assert(numBytes > 0 || remaining.nonEmpty)
+            }
 
                 toWrite foreach buf.put
                 buf.flip

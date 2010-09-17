@@ -30,16 +30,16 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
      */
     def open(data : Option[String] = None) : Seekable
 
-    val patchParams = 
+    val patchParams =/* 
         ("replaced is MaxValue", 2,"ア",Some(Int.MaxValue)) ::
         ("too large max", 2,"ア",Some(8)) ::
         ("basic", 2,"ア",None) ::
         ("insert", 2,"ア",Some(-1)) ::
         ("start at 0", 0,"ア",None) ::
         ("to large position", 199,"ア",None) ::
-        ("very large patch", 2,(1 to 100 mkString ""),None) ::
+       */ ("very large patch", 2,(1 to 100 mkString ""),None) ::         /*
         ("0 length", 2,"ア",Some(0)) ::
-        ("partial overwite",  2,"its a long one!",Some(3)) ::
+        ("partial overwite",  2,"its a long one!",Some(3)) ::              */
         Nil
 
     @Test //@Ignore
@@ -49,7 +49,7 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
         patchParams foreach testFunction
 
         intercept[IllegalArgumentException] {
-            open().patchString(-1, "@", 3)
+            open().patchString(-1, "@", OverwriteSome(3))
         }
     // test UTF16?
     }
@@ -57,7 +57,7 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
     def patchStringASCII() : Unit = {
         val seekable = open(Some("abc"))
 
-        seekable.patchString(1,"x",1)(Codec.ISO8859)
+        seekable.patchString(1,"x",OverwriteSome(1))(Codec.ISO8859)
 
         assertEquals("axc", seekable.slurpString)
     }
@@ -65,15 +65,15 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
     private def testPatchString(msg:String, from:Int, data:String, length : Option[Int]) = {
         val seekable = open()
 
-
+                                         val p = (TEXT_VALUE.replaceAll("\n","\\n"), from.min(Int.MaxValue).toInt, data, data.size)
         val expected = length match {
           case Some(length) => TEXT_VALUE.toList.patch (from.min(Int.MaxValue).toInt, data, length).mkString
-          case None => TEXT_VALUE.toList.patch (from.min(Int.MaxValue).toInt, data, length.size).mkString
+          case None => TEXT_VALUE.toList.patch (from.min(Int.MaxValue).toInt, data, data.size).mkString
         }
 
         length match {
-          case Some(length) => seekable.patchString(from,data,length)
-          case None => seekable.patchString(from,data)
+          case Some(length) => seekable.patchString(from,data,OverwriteSome(length))
+          case None => seekable.patchString(from,data,OverwriteAll)
         }
 /*        println("before:   "+(TEXT_VALUE mkString ",").replaceAll("\n","\\\\n"))
         println("patch:    "+(data mkString ",").replaceAll("\n","\\\\n"))
@@ -82,6 +82,45 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
 */
         assertEquals(msg, expected, seekable.slurpString)
     }
+    @Test //@Ignore
+  def patchWithIterator() : Unit = {
+      val seekable = open(Some("abc"))
+
+      seekable.patch(1,"x".getBytes(UTF8.name).toIterator,OverwriteAll)
+
+      assertEquals("axc", seekable.slurpString)
+  }
+  
+  @Test //@Ignore
+  def insert() : Unit = {
+    val inputData =
+    ("pos less than 0", -1, "x") ::
+            ("pos == 0", 0, "x") ::
+            ("pos 1",1, "x") ::
+            ("pos to large", 10, "x") ::
+            Nil
+
+    def test(iter:Boolean)(msg:String, pos:Int, data:String) = {
+      val seekable = open(Some("abc"))
+      val bytes = data.getBytes(UTF8.name)
+      //seekable.insert(pos,bytes.toIterator)
+      try {
+        seekable.insert(pos,bytes)
+      } catch {
+        case e =>
+          val error = new Error(msg+" failed due to: "+e)
+          error.setStackTrace(e.getStackTrace)
+          throw error
+      }
+      assertEquals(msg, "abc".getBytes(UTF8.name).toList.patch(pos,bytes, -1), seekable.bytes.toList)
+    }
+    def run(iter:Boolean) {
+      val func = Function tupled (test(iter) _)
+      inputData foreach func
+    }
+    run(true)
+    run(false)
+  }
 
     @Test //@Ignore
     def patch() : Unit = {
@@ -89,7 +128,7 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
         patchParams foreach testFunction
 
         intercept[IllegalArgumentException] {
-            open().patch(-1, "@".getBytes(UTF8.name), 3)
+            open().patch(-1, "@".getBytes(UTF8.name), OverwriteSome(3))
         }
     }
 
@@ -120,7 +159,7 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
 
             val bytes = dataTransform(data)
             length match {
-              case Some(length) => seekable.patch(from,bytes,length)
+              case Some(length) => seekable.patch(from,bytes,OverwriteSome(length))
               case None => seekable.patch(from,bytes)
             }
 
