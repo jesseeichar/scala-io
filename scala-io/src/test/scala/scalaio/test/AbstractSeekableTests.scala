@@ -49,7 +49,7 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
         patchParams foreach testFunction
 
         intercept[IllegalArgumentException] {
-            open().patchString(-1, "@", OverwriteSome(3))
+            open().patch(-1, "@", OverwriteSome(3))
         }
     // test UTF16?
     }
@@ -57,7 +57,7 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
     def patchStringASCII() : Unit = {
         val seekable = open(Some("abc"))
 
-        seekable.patchString(1,"x",OverwriteSome(1))(Codec.ISO8859)
+        seekable.patch(1,"x",OverwriteSome(1))(Codec.ISO8859)
 
         assertEquals("axc", seekable.slurpString)
     }
@@ -65,21 +65,16 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
     private def testPatchString(msg:String, from:Int, data:String, length : Option[Int]) = {
         val seekable = open()
 
-                                         val p = (TEXT_VALUE.replaceAll("\n","\\n"), from.min(Int.MaxValue).toInt, data, data.size)
+        val p = (TEXT_VALUE.replaceAll("\n","\\n"), from.min(Int.MaxValue).toInt, data, data.size)
         val expected = length match {
           case Some(length) => TEXT_VALUE.toList.patch (from.min(Int.MaxValue).toInt, data, length).mkString
           case None => TEXT_VALUE.toList.patch (from.min(Int.MaxValue).toInt, data, data.size).mkString
         }
 
         length match {
-          case Some(length) => seekable.patchString(from,data,OverwriteSome(length))
-          case None => seekable.patchString(from,data,OverwriteAll)
+          case Some(length) => seekable.patch(from,data,OverwriteSome(length))
+          case None => seekable.patch(from,data,OverwriteAll)
         }
-/*        println("before:   "+(TEXT_VALUE mkString ",").replaceAll("\n","\\\\n"))
-        println("patch:    "+(data mkString ",").replaceAll("\n","\\\\n"))
-        println("actual:   "+(seekable.slurpString mkString ",").replaceAll("\n","\\\\n"))
-        println("expected: "+(expected mkString ",").replaceAll("\n","\\\\n"))
-*/
         assertEquals(msg, expected, seekable.slurpString)
     }
     @Test //@Ignore
@@ -100,26 +95,29 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
             ("pos to large", 10, "x") ::
             Nil
 
-    def test(iter:Boolean)(msg:String, pos:Int, data:String) = {
+
+    def test[T](msg:String, f: Seekable => T, pos:Int, bytes:Array[Byte]) = {
       val seekable = open(Some("abc"))
-      val bytes = data.getBytes(UTF8.name)
-      //seekable.insert(pos,bytes.toIterator)
       try {
-        seekable.insert(pos,bytes)
+        f(seekable)
       } catch {
         case e =>
           val error = new Error(msg+" failed due to: "+e)
           error.setStackTrace(e.getStackTrace)
           throw error
       }
-      assertEquals(msg, "abc".getBytes(UTF8.name).toList.patch(pos,bytes, -1), seekable.bytes.toList)
+      assertEquals(msg, "abc".getBytes(UTF8.name).toList.patch(pos,bytes.toSeq, -1), seekable.bytes.toList)
     }
-    def run(iter:Boolean) {
-      val func = Function tupled (test(iter) _)
-      inputData foreach func
+    def run[T](msg:String, pos:Int, data:String) {
+      val bytes = data.getBytes(UTF8.name)
+      test("Array: "+msg, _.insert(pos,bytes), pos, bytes)
+      test("Iterator: "+msg, _.insert(pos,bytes.toIterator), pos, bytes)
+      test("List: "+msg,_.insert(pos,bytes.toList), pos, bytes)
+      test("String: "+msg,_.insert(pos,data), pos, bytes)
     }
-    run(true)
-    run(false)
+
+    val func = Function tupled (run _)
+    inputData foreach func
   }
 
     @Test //@Ignore
@@ -147,7 +145,7 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
 
         val data = dataString.getBytes(UTF8.name)
 
-        def test[T <% Traversable[Byte]](datatype: String, dataTransform : Array[Byte] => T) = {
+        def test[T](datatype: String, f : (Seekable,Long,Array[Byte],Overwrite) => T) = {
             val seekable = open()
             assertEquals(TEXT_VALUE, seekable.slurpString)
 
@@ -157,19 +155,19 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
                 case Some(lengthInChars) => TEXT_VALUE.getBytes(UTF8.name)  patch (from, data, length.get.toInt)
             }
 
-            val bytes = dataTransform(data)
             length match {
-              case Some(length) => seekable.patch(from,bytes,OverwriteSome(length))
-              case None => seekable.patch(from,bytes)
+              case Some(length) => f(seekable,from,data,OverwriteSome(length))
+              case None => f(seekable,from,data,OverwriteAll)
             }
 
 
             assertEquals(datatype+" - patch: '"+msg+"'", expected mkString ",", seekable.byteArray mkString ",")
         }
 
-        test("array", a => a)
-        test("list", a => a.toList)
-        test("stream", a => a.toStream)
+        test("array", (s,a,b,c) => s.patch(a,b,c))
+        test("list", (s,a,b,c) => s.patch(a,b.toList,c))
+        test("stream", (s,a,b,c) => s.patch(a,b.toStream,c))
+        test("iterator", (s,a,b,c) => s.patch(a,b.toIterator,c))
 
     }
 
@@ -220,20 +218,18 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
 
     @Test //@Ignore
     def append : Unit = {
-        def test(list : Boolean) = {
-            val data : String = "ア"
-            val seekable = open()
-            val expected = TEXT_VALUE + data
-            if(list) {
-                val bytes = data.getBytes(UTF8.name).toList
-                seekable.append(bytes,bytes.size)
-            } else {
-                val bytes = data.getBytes(UTF8.name)
-                seekable.append(bytes,bytes.size)
-            }
-            assertEquals("append "+(if(list)"list" else "array"), expected, seekable.slurpString)
+      def test(_type : Int) = {
+        val data : String = "ア"
+        val seekable = open()
+        val expected = TEXT_VALUE + data
+        val bytes = data.getBytes(UTF8.name)
+        _type match {
+          case 0 => seekable.append(bytes)
+          case 1 => seekable.append(bytes.toList)
+          case 2 => seekable.append(bytes.toIterator)
         }
-        test(false)
-        test(true)
+        assertEquals("append "+_type, expected, seekable.slurpString)
+      }
+      0 to 2 foreach test
     }
 }

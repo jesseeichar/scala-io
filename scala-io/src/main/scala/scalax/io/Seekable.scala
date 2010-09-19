@@ -90,9 +90,9 @@ trait Seekable extends Input with Output {
    *          Default will use all bytes in patch
    * @see patch(Long,Traversable[Byte],Iterable[OpenOption])
    */
-  def patchString(position: Long, 
-                  string: String,
-                  overwrite : Overwrite = OverwriteAll)(implicit codec: Codec): Unit = {
+  def patch(position: Long,
+            string: String,
+            overwrite : Overwrite)(implicit codec: Codec): Unit = {
     require(position >= 0, "The patch starting position must be greater than or equal 0")
 
     val replaced = overwrite match {
@@ -100,22 +100,23 @@ trait Seekable extends Input with Output {
       case OverwriteSome(r) => r
     }
 
+    val bytes = string.getBytes(codec.name)
+
     if(size.forall{position > _}){
       // special case where there is no alternative but to be append
-      append(string getBytes codec.name)
+      append(bytes)
     } else if (codec.hasConstantSize) {
       // special case where the codec is constant in size (like ASCII or latin1)
       val bytesPerChar = codec.encoder.maxBytesPerChar.toLong
       val posInBytes = if(position > 0) position * bytesPerChar else position
       val replacedInBytes = if(replaced > 0) replaced * bytesPerChar else replaced
 
-      patch(posInBytes, string.getBytes(codec.name), OverwriteSome(replacedInBytes))
+      patch(posInBytes, bytes, OverwriteSome(replacedInBytes))
     } else {
       // when a charset is not constant (like UTF-8 or UTF-16) the only
       // way is to find position is to iterate to the position counting characters
       // Same with figuring out what replaced is in bytes
 
-      val bytes = string.getBytes(codec.name)
       // this is very inefficient.  The file is opened 3 times.
       val posInBytes = charCountToByteCount(0, position)
       if(overwrite.exists{_ < 0}) {
@@ -158,32 +159,50 @@ trait Seekable extends Input with Output {
    *          The stream will be grown as needed.
    *          Default will use all bytes in patch
    */
+  def patch(position: Long,
+            data: Array[Byte],
+            overwrite : Overwrite): Unit = {
+    doPatch(position, data, overwrite)
+  }
   def patch[T](position: Long,
             data: TraversableOnce[T],
-            overwrite : Overwrite = OverwriteAll)(implicit converter:OutputConverter[T]): Unit = {
+            overwrite : Overwrite)(implicit converter:OutputConverter[T]): Unit = {
+    val bytes = converter.toBytes(data)
+    doPatch(position, bytes, overwrite.map{converter.sizeInBytes * _})
+  }
+
+  private def doPatch[T <% TraversableOnce[Byte]](position: Long, bytes:T, overwrite : Overwrite) = {
     require(position >= 0, "The patch starting position must be greater than or equal 0")
 
     // replaced is the old param.  I am migrating to the Overwrite options
-    val replaced = overwrite match {
-      case OverwriteAll => OVERWRITE_CODE
-      case OverwriteSome(r) => r
-    }
+    val replaced = overwrite.getOrElse(OVERWRITE_CODE)
 
-    val bytes = converter.toBytes(data) 
     val appendData = size.forall{position == _}
     val insertData = replaced <= 0 && replaced != OVERWRITE_CODE
-        
+
     if(appendData) {
-      append(bytes, replaced)
+      bytes match {
+        case bytes:Array[Byte] => append(bytes)
+        case _ => append(bytes)(OutputConverter.ByteFunction)
+      }
     } else if(insertData) {
-      insert(position, bytes)
+      bytes match {
+        case bytes:Array[Byte] => insert(position, bytes)
+        case _ => insert(position, bytes)(OutputConverter.ByteFunction)
+      }
+
     } else {
       // overwrite data
       overwriteFileData(position, bytes, replaced)
     }
   }
-  
-  def insert(position : Long, bytes : TraversableOnce[Byte]) = {
+
+  def insert(position : Long, string: String)(implicit codec: Codec): Unit = {
+      insert(position, codec encode string)
+  }
+
+  def insert[T](position : Long, data : TraversableOnce[T])(implicit converter:OutputConverter[T]) = {
+    val bytes = converter.toBytes(data)
     if(size.forall(_ <= position)) {
       append(bytes)
     } else if (bytes.hasDefiniteSize && bytes.size <= MaxPermittedInMemory) {
@@ -261,7 +280,7 @@ trait Seekable extends Input with Output {
             bytes match {
               case b : LongTraversable[_] => insert(adjustedPosition,b.asInstanceOf[LongTraversable[Byte]] ldrop wrote)
               case b : Traversable[_] => insert(adjustedPosition,b.asInstanceOf[Traversable[Byte]] drop wrote.toInt)
-              case _ => insert(adjustedPosition,bytes.toIterator drop wrote.toInt)
+              case _ => insert(adjustedPosition,TraversableOnceOps.drop(bytes, wrote.toInt))
             }
           }
       }
@@ -299,9 +318,13 @@ trait Seekable extends Input with Output {
   *          The number of bytes to append negative number to take all
   *          default is to append all
   */
-  def append[T](data: TraversableOnce[T], take : Long = -1)(implicit converter:OutputConverter[T]): Unit = {
+  def append[T](data: TraversableOnce[T])(implicit converter:OutputConverter[T]): Unit = {
     val bytes = converter.toBytes(data)
-    for (c <- channel(Append)) writeTo(c, bytes, take)
+    for (c <- channel(Append)) writeTo(c, bytes, -1)
+  }
+
+  def append(bytes: Array[Byte]) = {
+    for (c <- channel(Append)) writeTo(c, bytes, -1)
   }
 
   // returns (wrote,earlyTermination)

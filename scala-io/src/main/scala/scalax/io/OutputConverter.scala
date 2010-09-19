@@ -25,6 +25,7 @@ trait OutputConverter[T] extends Function2[OutputStream,TraversableOnce[T],Unit]
    * Convert to bytes.
    */
   def toBytes(data:TraversableOnce[T]):TraversableOnce[Byte]
+  def sizeInBytes : Int
 }
 
 object OutputConverter {
@@ -33,6 +34,7 @@ object OutputConverter {
       bytes foreach {i => out write i.toInt}
     }
     def toBytes(data: scala.TraversableOnce[Byte]) = data
+    def sizeInBytes = 1
   }
   implicit object IntFunction extends OutputConverter[Int] {
     def apply(out: OutputStream, integers:TraversableOnce[Int]) = {
@@ -40,6 +42,7 @@ object OutputConverter {
     }
     // TODO is this what I want? or do I want to encode as 2 bytes?
     def toBytes(data: scala.TraversableOnce[Int]) = data.toIterator.map{_.toByte}
+    def sizeInBytes = 1
   }
   private class CharFunction(implicit codec : Codec) extends OutputConverter[Char] {
     def apply(out: OutputStream, characters:TraversableOnce[Char]) = {
@@ -56,6 +59,7 @@ object OutputConverter {
     }
 
     def toBytes(data: scala.TraversableOnce[Char]) = data.toIterator.flatMap{c => codec.encode(c.toString).toIterator}
+    def sizeInBytes = codec.encoder.maxBytesPerChar.toInt
   }
 
   implicit def charsToOutputFunction[T](implicit codec:Codec):OutputConverter[Char] = new CharFunction

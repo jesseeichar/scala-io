@@ -24,4 +24,10 @@ private[io] object TraversableOnceOps {
         (iter.take(index).toList,iter)
     }
   }
+  def drop[T](data:TraversableOnce[T], length:Int) = {
+    data match {
+      case t:Traversable[_] => t.asInstanceOf[Traversable[T]] drop length
+      case _ => data.toIterator drop length
+    }
+  }
 }
