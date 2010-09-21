@@ -95,27 +95,20 @@ trait Seekable extends Input with Output {
             overwrite : Overwrite)(implicit codec: Codec): Unit = {
     require(position >= 0, "The patch starting position must be greater than or equal 0")
 
-    val replaced = overwrite match {
-      case OverwriteAll => OVERWRITE_CODE
-      case OverwriteSome(r) => r
-    }
-
-    val bytes = string.getBytes(codec.name)
-
-    if(size.forall{position > _}){
-      // special case where there is no alternative but to be append
-      append(bytes)
-    } else if (codec.hasConstantSize) {
-      // special case where the codec is constant in size (like ASCII or latin1)
-      val bytesPerChar = codec.encoder.maxBytesPerChar.toLong
-      val posInBytes = if(position > 0) position * bytesPerChar else position
-      val replacedInBytes = if(replaced > 0) replaced * bytesPerChar else replaced
-
-      patch(posInBytes, bytes, OverwriteSome(replacedInBytes))
+    if (size.forall{position >= _} || codec.hasConstantSize) {
+      patch(position, string:Traversable[Char], overwrite)(OutputConverter.charsToOutputFunction(codec))
     } else {
       // when a charset is not constant (like UTF-8 or UTF-16) the only
       // way is to find position is to iterate to the position counting characters
       // Same with figuring out what replaced is in bytes
+
+
+      val replaced = overwrite match {
+        case OverwriteAll => OVERWRITE_CODE
+        case OverwriteSome(r) => r
+      }
+
+      val bytes = string.getBytes(codec.name)
 
       // this is very inefficient.  The file is opened 3 times.
       val posInBytes = charCountToByteCount(0, position)
@@ -163,21 +156,22 @@ trait Seekable extends Input with Output {
             data: TraversableOnce[T],
             overwrite : Overwrite)(implicit converter:OutputConverter[T]): Unit = {
     val bytes = converter.toBytes(data)
-    require(position >= 0, "The patch starting position must be greater than or equal 0")
+    val actualPosition = converter.sizeInBytes * position
+    require(actualPosition >= 0, "The patch starting position must be greater than or equal 0")
 
     // replaced is the old param.  I am migrating to the Overwrite options
     val replaced = overwrite.getOrElse(OVERWRITE_CODE)
 
-    val appendData = size.forall{position == _}
+    val appendData = size.forall{actualPosition >= _}
     val insertData = replaced <= 0 && replaced != OVERWRITE_CODE
 
     if(appendData) {
-      append(bytes)(OutputConverter.ByteFunction)
+      append(bytes)(OutputConverter.ByteConverter)
     } else if(insertData) {
-      insert(position, bytes)(OutputConverter.ByteFunction)
+      insert(actualPosition, bytes)(OutputConverter.ByteConverter)
     } else {
       // overwrite data
-      overwriteFileData(position, bytes, replaced)
+      overwriteFileData(actualPosition, bytes, replaced)
     }
   }
 

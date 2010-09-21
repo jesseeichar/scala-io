@@ -85,7 +85,7 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
 
       assertEquals("axc", seekable.slurpString)
   }
-  
+
   @Test //@Ignore
   def insert() : Unit = {
     val inputData =

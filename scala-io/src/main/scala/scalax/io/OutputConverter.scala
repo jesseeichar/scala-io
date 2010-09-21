@@ -29,14 +29,14 @@ trait OutputConverter[T] extends Function2[OutputStream,TraversableOnce[T],Unit]
 }
 
 object OutputConverter {
-  implicit object ByteFunction extends OutputConverter[Byte] {
+  implicit object ByteConverter extends OutputConverter[Byte] {
     def apply(out: OutputStream, bytes:TraversableOnce[Byte]) = {
       bytes foreach {i => out write i.toInt}
     }
     def toBytes(data: scala.TraversableOnce[Byte]) = data
     def sizeInBytes = 1
   }
-  implicit object IntFunction extends OutputConverter[Int] {
+  implicit object IntConverter extends OutputConverter[Int] {
     def apply(out: OutputStream, integers:TraversableOnce[Int]) = {
       integers foreach out.write
     }
@@ -44,7 +44,7 @@ object OutputConverter {
     def toBytes(data: scala.TraversableOnce[Int]) = data.toIterator.map{_.toByte}
     def sizeInBytes = 1
   }
-  private class CharFunction(implicit codec : Codec) extends OutputConverter[Char] {
+  private class CharConverter(implicit codec : Codec) extends OutputConverter[Char] {
     def apply(out: OutputStream, characters:TraversableOnce[Char]) = {
       val writer = new OutputStreamWriter(out)
       try {
@@ -62,5 +62,5 @@ object OutputConverter {
     def sizeInBytes = codec.encoder.maxBytesPerChar.toInt
   }
 
-  implicit def charsToOutputFunction[T](implicit codec:Codec):OutputConverter[Char] = new CharFunction
+  implicit def charsToOutputFunction[T](implicit codec:Codec):OutputConverter[Char] = new CharConverter
 }
