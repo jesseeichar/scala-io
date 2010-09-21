@@ -30,16 +30,16 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
      */
     def open(data : Option[String] = None) : Seekable
 
-    val patchParams =/* 
+    val patchParams =
         ("replaced is MaxValue", 2,"ア",Some(Int.MaxValue)) ::
         ("too large max", 2,"ア",Some(8)) ::
         ("basic", 2,"ア",None) ::
         ("insert", 2,"ア",Some(-1)) ::
         ("start at 0", 0,"ア",None) ::
         ("to large position", 199,"ア",None) ::
-       */ ("very large patch", 2,(1 to 100 mkString ""),None) ::         /*
+        ("very large patch", 2,(1 to 100 mkString ""),None) ::
         ("0 length", 2,"ア",Some(0)) ::
-        ("partial overwite",  2,"its a long one!",Some(3)) ::              */
+        ("partial overwite",  2,"its a long one!",Some(3)) ::
         Nil
 
     @Test //@Ignore

@@ -159,19 +159,10 @@ trait Seekable extends Input with Output {
    *          The stream will be grown as needed.
    *          Default will use all bytes in patch
    */
-  def patch(position: Long,
-            data: Array[Byte],
-            overwrite : Overwrite): Unit = {
-    doPatch(position, data, overwrite)
-  }
   def patch[T](position: Long,
             data: TraversableOnce[T],
             overwrite : Overwrite)(implicit converter:OutputConverter[T]): Unit = {
     val bytes = converter.toBytes(data)
-    doPatch(position, bytes, overwrite.map{converter.sizeInBytes * _})
-  }
-
-  private def doPatch[T <% TraversableOnce[Byte]](position: Long, bytes:T, overwrite : Overwrite) = {
     require(position >= 0, "The patch starting position must be greater than or equal 0")
 
     // replaced is the old param.  I am migrating to the Overwrite options
@@ -181,16 +172,9 @@ trait Seekable extends Input with Output {
     val insertData = replaced <= 0 && replaced != OVERWRITE_CODE
 
     if(appendData) {
-      bytes match {
-        case bytes:Array[Byte] => append(bytes)
-        case _ => append(bytes)(OutputConverter.ByteFunction)
-      }
+      append(bytes)(OutputConverter.ByteFunction)
     } else if(insertData) {
-      bytes match {
-        case bytes:Array[Byte] => insert(position, bytes)
-        case _ => insert(position, bytes)(OutputConverter.ByteFunction)
-      }
-
+      insert(position, bytes)(OutputConverter.ByteFunction)
     } else {
       // overwrite data
       overwriteFileData(position, bytes, replaced)
@@ -198,7 +182,7 @@ trait Seekable extends Input with Output {
   }
 
   def insert(position : Long, string: String)(implicit codec: Codec): Unit = {
-      insert(position, codec encode string)
+    insert(position, codec encode string)
   }
 
   def insert[T](position : Long, data : TraversableOnce[T])(implicit converter:OutputConverter[T]) = {
@@ -280,6 +264,7 @@ trait Seekable extends Input with Output {
             bytes match {
               case b : LongTraversable[_] => insert(adjustedPosition,b.asInstanceOf[LongTraversable[Byte]] ldrop wrote)
               case b : Traversable[_] => insert(adjustedPosition,b.asInstanceOf[Traversable[Byte]] drop wrote.toInt)
+              case i:Iterator[_] => insert(adjustedPosition, bytes)
               case _ => insert(adjustedPosition,TraversableOnceOps.drop(bytes, wrote.toInt))
             }
           }
@@ -323,10 +308,6 @@ trait Seekable extends Input with Output {
     for (c <- channel(Append)) writeTo(c, bytes, -1)
   }
 
-  def append(bytes: Array[Byte]) = {
-    for (c <- channel(Append)) writeTo(c, bytes, -1)
-  }
-
   // returns (wrote,earlyTermination)
   private def writeTo(c : WritableByteChannel, bytes : TraversableOnce[Byte], length : Long) : (Long,Boolean) = {
       def writeArray(array:Array[Byte]) = {
@@ -347,7 +328,7 @@ trait Seekable extends Input with Output {
           // TODO user hasDefinitateSize to improve performance
           // if the size is small enough we can probably open a memory mapped buffer
           // or at least copy to a buffer in one go.
-            val buf = ByteBuffer.allocateDirect(BufferSize)
+            val buf = ByteBuffer.allocateDirect(if(length > 0) length min BufferSize toInt else BufferSize)
             var earlyTermination = false
 
             @tailrec

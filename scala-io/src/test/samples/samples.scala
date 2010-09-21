@@ -216,7 +216,7 @@ object Samples {
     val lastModified: Long = path.lastModified
     path.lastModified = System.currentTimeMillis
 
-    val length = path.length
+    val length = path.size
 
     // A way to test if path is a file/directory without using the matchers
     val isFile: Boolean = path.isFile
@@ -428,13 +428,10 @@ object Samples {
     implicit val codec = scalax.io.Codec.UTF8
 
     // not necessarily the most efficient way to copy but demonstrates use of reading/writing bytes
-    Path("to").write(
-      Path("from").bytes
-    )
+    Path("to").write(Path("from").bytes)
 
     // we could also append to file
-    Path("to").write(
-      Path("from").bytes)
+    Path("to").write(Path("from").bytes)
   }
 
   { // read comma seperated file
@@ -683,11 +680,11 @@ object Samples {
     // write "people" at byte 6
     // if the file is < 6 bytes an underflow exception is thrown
     // if the patch extends past the end of the file then the file is extended
-    file.patch(6, "people")
-    file.patch(6, "people")(Codec.UTF8)
+    file.patch(6, "people",OverwriteAll)
+    file.patch(6, "people",OverwriteAll)(Codec.UTF8)
 
     // patch the file with a traversable of bytes
-    file.patch(6, "people".getBytes)
+    file.patch(6, "people".getBytes,OverwriteAll)
   }
 
   { // when several operation need to be performed on a file it is often more performant to perform them within an function passed to the open method
