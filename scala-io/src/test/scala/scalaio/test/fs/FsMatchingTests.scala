@@ -9,7 +9,9 @@
 package scalaio.test.fs
 
 import scalax.io._
-import scalax.io.Path.Matching._
+import Matching._
+import Path.AccessModes
+import Path.AccessModes._
 
 import org.junit.Assert._
 import org.junit.{
@@ -46,6 +48,20 @@ abstract class FsMatchingTests extends scalax.test.sugar.AssertionSugar with Fix
     
     val Exists(p2) = path // will throw MatchError is not a file
     intercept[MatchError] {val NonExistent(x) = path}
-    
+  }
+
+
+  @Test //@Ignore
+  def accessMatcher = {
+    val path = fixture.path
+    path.createFile()
+    def test (enabled:Iterable[AccessMode], disabled:Iterable[AccessMode]) = {
+      path.access = enabled
+      enabled.foreach{p => assert(AccessMatcher(p).unapply(path).isDefined, "Expected '"+p+"' but was not found with matcher")}
+      disabled.foreach{p => assert(AccessMatcher(p).unapply(path).isEmpty, "Did not expect '"+p+"' but was found by matcher")}
+    }
+    import Path.AccessModes.{values => modes}
+    modes foreach {p => test(List(p),modes - p)}
+    modes zip util.Random.shuffle(modes) map {case (x,y) => List(x,y)} foreach {m => test(m,modes -- m)}
   }
 }

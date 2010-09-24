@@ -19,8 +19,6 @@
  *       sample code.  It is not required to work (with the exception of the forcing *
  *       the implicits to work in the first two examples                             *
  *************************************************************************************/
-import java.lang.{ Process => JProcess }
-
 object Samples {
   { // create temporary files
     import scalax.io.{Path,FileSystem}
@@ -93,7 +91,7 @@ object Samples {
 
   { // demonstrate matching using the matchers that are provided in Path.Matching
     import scalax.io.Path
-    import Path.Matching._
+    import scalax.io.Matching._
 
     // This example tests if the path is a file, directory, exists or does not exist
     Path ("/tmp/file") match {
@@ -319,8 +317,8 @@ object Samples {
     // This set of examples use the contents method with the partial function parameter
     // there is another way of inspecting directory contents I another example
 
-    import scalax.io.{Path, PathMatcher, DirectoryStream}
-    import scalax.io.Path.Matching._
+    import scalax.io.{Path, PathMatcher}
+    import scalax.io.Matching._
 
     val path:Path = Path("/tmp/")
 
@@ -364,7 +362,7 @@ object Samples {
 
   { // Walk the directory tree
 
-    import scalax.io.{Path, PathMatcher, DirectoryStream}
+    import scalax.io.{Path}
 
     val path:Path = Path("/tmp/")
 
@@ -402,7 +400,7 @@ object Samples {
 
   { // since the underlying filesystem could change to safely use the DirectoryStream API it is recommended to handle the
     // NotDirectoryException
-    import scalax.io.{Path, NotDirectoryException, DirectoryStream}
+    import scalax.io.{Path, NotDirectoryException}
     import scala.util.control.Exception._
 
     catching (classOf[NotDirectoryException]) opt {
@@ -422,7 +420,6 @@ object Samples {
 
   { // implement custom copy method
     import scalax.io.Path
-    import scalax.io.OpenOption._
 
     // the codec must be defined either as a parameter of ops methods or as an implicit
     implicit val codec = scalax.io.Codec.UTF8
@@ -530,8 +527,7 @@ object Samples {
 
   { // several examples of writing data
     import scalax.io.{
-      FileOps, Path, Codec, OpenOption, Line}
-    import OpenOption._
+      FileOps, Path, Codec, OpenOption}
     // the codec must be defined either as a parameter of ops methods or as an implicit
     implicit val codec = scalax.io.Codec.UTF8
 
@@ -626,12 +622,11 @@ object Samples {
     import OpenOption._
     import java.nio.channels._
     import scalax.io.resource.{
-      Resource, Bufferable, InputStreamResource,
+      Resource, InputStreamResource,
       OutputStreamResource, ByteChannelResource,
       ReaderResource, WriterResource
     }
     import java.io.{
-        FileInputStream,
         InputStream, BufferedInputStream,
         OutputStream, BufferedOutputStream,
         Reader, BufferedReader,
@@ -671,7 +666,7 @@ object Samples {
   }
 
   { // examples of patching a file
-    import scalax.io.{FileOps, Path, Codec}
+    import scalax.io.{FileOps, Path, Codec, OverwriteAll}
     // the codec must be defined either as a parameter of ops methods or as an implicit
     implicit val codec = scalax.io.Codec.UTF8
 
@@ -690,7 +685,7 @@ object Samples {
   { // when several operation need to be performed on a file it is often more performant to perform them within an function passed to the open method
     // this is because the underlying filesystem has options for optimizing the use of the file channels
     // for example a file could be mapped into memory for the duration of the function and all operations could be performed using the same channel object
-    import scalax.io.{FileOps, Path, Codec}
+    import scalax.io.{FileOps, Path}
     // the codec must be defined either as a parameter of ops methods or as an implicit
     implicit val codec = scalax.io.Codec.UTF8
 
@@ -705,10 +700,9 @@ object Samples {
   { // Examples of non-file IO
     import scalax.io._
     import scalax.io.resource.Resource
-    import resource.ManagedResource
     import java.net.URL
     import java.io.{
-      ObjectInputStream, InputStreamReader, ByteArrayOutputStream,
+      InputStreamReader, ByteArrayOutputStream,
       PrintStream, OutputStreamWriter, BufferedReader
     }
     

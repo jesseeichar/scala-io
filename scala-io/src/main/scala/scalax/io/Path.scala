@@ -177,60 +177,6 @@ object Path
    */
   def unapply(pathExpr:Path): Option[String] = None //TODO
 
-  /**
-   * Object containing several objects that make matching
-   * certain types of Paths much easier.
-   * <p>
-   * Example:
-   * <pre><code>
-   * val Apple = path.matcher (pattern="[aA]pple", syntax="glob")
-   * val ReadWrite = new AccessMatcher (Read, Write)
-   * path match {
-   *   case File(f) => println("A file was found")
-   *   case Directory(d) => println("A directory was found")
-   *   case NonExistent(e) => println("Path does not Exist")
-   *   case Apple(apple) => println("A path named apple was found")
-   *   case ReadWrite(apply) => println("Path is readable and writeable")
-   *   case Path("c:/dir/file") => println("Found a path that is c:/dir/file or
-                                            c:\\dir\\file")
-   * }
-   * </code></pre>
-   * Note: The Apple portion of the example is not part of Matching but
-   *       a critical part of matching Paths and thus is included in
-   *       this example
-   */
-  object Matching {
-    /** matches a path if it is a file (and exists)*/
-    object File {
-      def unapply(path:Path):Option[Path] = Some(path).filter {_.isFile}
-    }
-    /** matches a path if it is a Directory (and exists)*/
-    object Directory {
-      def unapply(path:Path):Option[Path] = Some(path).filter {_.isDirectory}
-    }
-    /** matches a path if it is Exists */
-    object Exists {
-      def unapply(path:Path):Option[Path] = Some(path).filter {_.exists}
-    }
-    /** matches a path if it does not Exist */
-    object NonExistent {
-      def unapply(path:Path):Option[Path] = Some(path).filter {_.notExists}
-    }
-    /**
-     * Matches a path if the access modes are applicable
-     * for the file.
-     * <p>
-     * If the file does not exist this matcher will not match
-     * </p>
-     *
-     * @param accessModes
-     *          the access modes that must be applicable
-     *          on the path object.
-     */
-    class AccessMatcher (accessModes: AccessModes.AccessMode*) {
-	def unapply(path: Path): Option[Path] = None // TODO
-    }
-  }
   type Closeable = { def close(): Unit }
   private[io] def closeQuietly(target: Closeable) {
     try target.close() catch { case e: IOException => }
@@ -733,7 +679,6 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with Ordered[Pa
   def createFile( createParents:Boolean = true, failIfExists: Boolean = true, 
                  accessModes:Iterable[AccessMode]=List(Read,Write), attributes:Iterable[FileAttribute[_]]=Nil): Path = {
 
-    import Path.Matching._
     exists match {
       case true if failIfExists =>
         fail("File '%s' already exists." format name)
@@ -1012,7 +957,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with Ordered[Pa
       }
     }
 
-    import Path.Matching._
+    import Matching._
 
    this match {
        case NonExistent(_) => fail("attempted to move "+path+" but it does not exist")
