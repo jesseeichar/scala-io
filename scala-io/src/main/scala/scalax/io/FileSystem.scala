@@ -8,9 +8,9 @@
 
 package scalax.io
 
-import java.io.{File=>JFile}
 import java.net.URLStreamHandler
 import util.Random.nextInt
+import java.io.{IOException, File => JFile}
 
 /**
  * Factory object for obtaining filesystem objects
@@ -42,7 +42,9 @@ abstract class FileSystem {
    
   protected val legalChars = ('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9') ++ List('_','-','+','.') toList
   def randomPrefix = 1 to (nextInt(5)+3) map {_=> legalChars(nextInt(legalChars.size))} mkString ""
-  
+
+  /** A name identifying the filesystem */
+  def name : String
   /** The path segment separator string for the filesystem */
   def separator: String
   /**
@@ -102,7 +104,13 @@ abstract class FileSystem {
    *
    * @see Path#contents 
    */
-  def matcher(pattern:String, syntax:String = PathMatcher.StandardSyntax.GLOB): PathMatcher
+  def matcher(pattern:String, syntax:String = PathMatcher.StandardSyntax.GLOB): PathMatcher = {
+    syntax match {
+      case PathMatcher.StandardSyntax.GLOB => new FsIndependentGlobMatcher(this,pattern)
+      case PathMatcher.StandardSyntax.REGEX => new FsIndependentRegexMatcher(pattern)
+      case _ => throw new IOException(syntax+" is not a recognized syntax for the "+name+" filesystem")
+    }
+  }
   /**
    * Creates an empty file in the provided directory with the provided prefix and suffixes, 
    * if the filesystem supports it.  If not then a UnsupportedOperationException is thrown.

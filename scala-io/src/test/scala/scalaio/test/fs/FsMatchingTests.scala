@@ -10,13 +10,9 @@ package scalaio.test.fs
 
 import scalax.io._
 import Matching._
-import Path.AccessModes
 import Path.AccessModes._
 
-import org.junit.Assert._
-import org.junit.{
-  Test,Ignore
-}
+import org.junit.Test
 
 abstract class FsMatchingTests extends scalax.test.sugar.AssertionSugar with Fixture {
   implicit val codec = Codec.UTF8
@@ -64,4 +60,61 @@ abstract class FsMatchingTests extends scalax.test.sugar.AssertionSugar with Fix
     modes foreach {p => test(List(p),modes - p)}
     modes zip util.Random.shuffle(modes) map {case (x,y) => List(x,y)} foreach {m => test(m,modes -- m)}
   }
+
+
+  def assertMatch(exp:String)(implicit path:Path, syntax:String) = {
+    assert(fixture.fs.matcher(exp,syntax)(path), "expected "+exp+" to match "+path+" when using "+syntax+" syntax")
+  }
+  def assertMisMatch(exp:String)(implicit path:Path, syntax:String) = {
+    assert(!fixture.fs.matcher(exp,syntax)(path), "expected "+exp+" to *not* match "+path+" when using "+syntax+" syntax")
+  }
+  @Test //@Ignore
+  def globPathMatcher = {
+    implicit var path = fixture.fs("a/b/c/d.x")
+    implicit val syntax = PathMatcher.StandardSyntax.GLOB
+    assertMatch("**/d.x")
+    assertMatch("a/**/d.x")
+    assertMatch("a/b/*/d.x")
+    assertMatch("a/b/**")
+    assertMatch("a/b/c/*")
+    assertMatch("a/b/c/**")
+    assertMatch("a/b/c/d.x")
+    assertMatch("a/b/c/?.x")
+    assertMatch("a/b/?/?.x")
+    assertMatch("a/b/?/{d,e}.x")
+    assertMatch("a/b/?/d?x")
+    assertMatch("a/b/c/d.{x,y}")
+    assertMatch("a/b/[a-z]/d.{x,y}")
+    assertMatch("a/b/[!abd-z]/d.x")
+
+    assertMisMatch("aa/**")
+    assertMisMatch("A/**")
+    assertMisMatch("??/**")
+    assertMisMatch("a/*/d.x")
+    assertMisMatch("[b-z]/**")
+    assertMisMatch("[A-Z]/**")
+    assertMisMatch("{b,c,d}/**")
+    assertMisMatch("{A,b,c,d}/**")
+
+    var path2 = fixture.fs("a-/b?/c/d.x")
+
+    assertMatch("a[-abc]/**")
+    assertMatch("*/b\\?/**")
+    assertMatch("**/*.*")
+    assertMatch("*/**")
+    assertMatch("??/**")
+
+    assertMisMatch("a/**")
+    assertMisMatch("?/**")
+  }
+
+
+    @Test //@Ignore
+    def regexPathMatcher = {
+      implicit var path = fixture.fs("a/b/c/d.x")
+      implicit val syntax = PathMatcher.StandardSyntax.REGEX
+      assertMatch(".*/d.x")
+      assertMatch("""(\w/)*d.x""")
+    }
+
 }

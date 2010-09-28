@@ -18,6 +18,7 @@ import java.io.{File=>JFile}
  * @since   1.0
  */
 private[io] class DefaultFileSystem extends FileSystem {
+  val name = "Default"
   def separator: String = JFile.separator
   def apply(path: String): DefaultPath = apply (new JFile (path))
   def apply(path: JFile): DefaultPath = new DefaultPath (path, this)
@@ -46,7 +47,6 @@ private[io] class DefaultFileSystem extends FileSystem {
     }
     path
   }
-  def matcher(pattern:String, syntax:String = PathMatcher.StandardSyntax.GLOB): PathMatcher = null // TODO
 
   override def toString = "Default File System"
 }

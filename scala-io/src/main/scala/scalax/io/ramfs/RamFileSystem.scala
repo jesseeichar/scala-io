@@ -39,7 +39,8 @@ class RamFileSystem(val id : String = UUID.randomUUID.toString) extends FileSyst
 
   val root = new RamPath("",fsTree.name, this)
   var pwd = root
-  
+
+  val name = "Ram ("+id+")"
   override val urlStreamHandler : Option[URLStreamHandler] = Some(Handler)
   def separator: String = "/"
   def apply(path: String): RamPath = {
@@ -70,8 +71,6 @@ class RamFileSystem(val id : String = UUID.randomUUID.toString) extends FileSyst
                         deleteOnExit : Boolean = true
                         /*attributes:List[FileAttributes] TODO */) : Path  = new RamPath("temp",UUID.randomUUID.toString,this)
                         
-  def matcher(pattern:String, syntax:String = PathMatcher.StandardSyntax.GLOB): PathMatcher = null // TODO
-
   def uri(path:RamPath = root):URI = new URI(RamFileSystem.protocol+"://"+id+"!"+path.path)
   override def toString = "Ram File System"
   
