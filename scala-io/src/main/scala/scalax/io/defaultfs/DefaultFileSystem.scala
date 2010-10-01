@@ -9,7 +9,7 @@
 package scalax.io.defaultfs
 
 import scalax.io.{
-  FileSystem, Path, FileOps,Codec,PathMatcher,DirectoryStream
+  FileSystem, Path, FileOps,Codec,PathMatcher,PathSet
 }
 import java.io.{File=>JFile}
 

@@ -10,7 +10,7 @@ package scalax.io.ramfs
 
 import resource.ManagedResource
 import scalax.io.{
-  FileSystem, Path, FileOps,Codec,PathMatcher,DirectoryStream, LinkOption
+  FileSystem, Path, FileOps,Codec,PathMatcher,PathSet, LinkOption
 }
 import scalax.io.attributes.FileAttribute
 
@@ -25,7 +25,7 @@ class RamPath(relativeTo:String, val path:String, override val fileSystem:RamFil
   def node = fileSystem.lookup(this)
   lazy val toAbsolute: Path = fileSystem("",relativeTo + separator + path)
   lazy val toURI: URI = fileSystem.uri(this)
-  def \(child: String): RamPath = fileSystem(relativeTo,path + separator + child)
+  def /(child: String): RamPath = fileSystem(relativeTo,path + separator + child)
   lazy val name: String = segments.lastOption.getOrElse("/")
   override lazy val normalize = super.normalize.asInstanceOf[RamPath]
   lazy val parent: Option[RamPath] = {
@@ -98,6 +98,6 @@ class RamPath(relativeTo:String, val path:String, override val fileSystem:RamFil
   }  
   override def hashCode() = path.hashCode()
 
-  def descendants(filter:Path => Boolean, depth:Int, options:Traversable[LinkOption]):DirectoryStream[Path] = new RamDirectoryStream(this,filter,depth)
+  def descendants(filter:Path => Boolean, depth:Int, options:Traversable[LinkOption]):PathSet[Path] = new RamPathSet(this,filter,depth)
 
 }

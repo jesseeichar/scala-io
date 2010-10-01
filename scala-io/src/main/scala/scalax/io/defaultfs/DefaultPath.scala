@@ -11,7 +11,7 @@ package scalax.io.defaultfs
 import resource.ManagedResource
 import scalax.io.attributes.FileAttribute
 import scalax.io.{
-  Path, FileOps, PathMatcher, DirectoryStream, LinkOption
+  Path, FileOps, PathMatcher, PathSet, LinkOption
 }
 
 import java.io.{ 
@@ -43,7 +43,7 @@ class DefaultPath private[io] (val jfile: JFile, override val fileSystem: Defaul
   
   def toAbsolute: Path = if (isAbsolute) this else Path(jfile.getAbsolutePath())(fileSystem)
   def toURI: URI = jfile.toURI()
-  def \(child: String): DefaultPath = fileSystem(new JFile(jfile, child)) // TODO check if directory is absolute
+  def /(child: String): DefaultPath = fileSystem(new JFile(jfile, child)) // TODO check if directory is absolute
   def name: String = jfile.getName()
   def path: String = jfile.getPath()
   override lazy val normalize = super.normalize.asInstanceOf[DefaultPath]  
@@ -149,7 +149,7 @@ class DefaultPath private[io] (val jfile: JFile, override val fileSystem: Defaul
 
   def descendants(filter:Path => Boolean, 
                   depth:Int, 
-                  options:Traversable[LinkOption]) = new DefaultDirectoryStream(this, filter, depth)
+                  options:Traversable[LinkOption]) = new DefaultPathSet(this, filter, depth)
 
 
 }

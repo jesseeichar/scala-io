@@ -9,14 +9,14 @@
 package scalax.io.ramfs
 
 import scalax.io.{
-  AbstractPathDirectoryStream,Path
+  AbstractPathPathSet,Path
 }
 
-class RamDirectoryStream(
+class RamPathSet(
     path:RamPath, 
     pathFilter : Path => Boolean,
     depth:Int) 
-  extends AbstractPathDirectoryStream[RamPath](
+  extends AbstractPathPathSet[RamPath](
     path,
     pathFilter,
     depth,

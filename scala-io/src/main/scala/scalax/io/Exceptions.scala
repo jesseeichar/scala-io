@@ -38,7 +38,7 @@ case class NotFileException() extends IOException with ControlThrowable
 /**
  * This is a control exception that indicates the underlying filesystem object either does not exist or is not a Directory
  * <p>
- * To safely use {@link DirectoryStream} one should use the following code:
+ * To safely use {@link PathSet} one should use the following code:
  * <pre>
  * <code>
  * import scala.util.control.Exception._

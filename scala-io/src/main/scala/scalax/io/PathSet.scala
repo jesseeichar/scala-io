@@ -11,9 +11,34 @@ import scala.collection.IterableView
 
 import java.io.Closeable
 import java.nio.channels.ByteChannel
+
+trait PathFinder[T,S  <: PathFinder[T,_]] {
+  /** The union of the paths found by this <code>PathSet</code> with the paths found by 'paths'.*/
+	def +++(paths: PathSet[T]): S = null.asInstanceOf[S]
+	/** Excludes all paths from <code>excludePaths</code> from the paths selected by this <code>PathSet</code>.*/
+	def ---(excludePaths: PathSet[T]): S = null.asInstanceOf[S]
+	/** Constructs a new finder that selects all paths with a name that matches <code>filter</code> and are
+	* descendents of paths selected by this finder.*/
+	def **(filter: Path => Boolean): S = null.asInstanceOf[S]
+	def *** : S = null.asInstanceOf[S] //**(AllPassFilter)
+	/** Constructs a new finder that selects all paths with a name that matches <code>filter</code> and are
+	* immediate children of paths selected by this finder.*/
+	def *(filter: Path => Boolean): S = null.asInstanceOf[S]
+	/** Constructs a new finder that selects all paths with name <code>literal</code> that are immediate children
+	* of paths selected by this finder.*/
+	def / (literal: String): this.type = null.asInstanceOf[S]
+	/** Constructs a new finder that selects all paths with name <code>literal</code> that are immediate children
+	* of paths selected by this finder.*/
+	final def \ (literal: String): this.type = /(literal)
+
+	/** Makes the paths selected by this finder into base directories.
+	* @see Path.##
+	*/
+	def asBase : S = null.asInstanceOf[S]
+}
 /**
  * An iterable that permits iterating over a directory tree starting at a root Path.  The
- * DirectoryStream is an example of a non-strict collection. 
+ * PathSet is an example of a non-strict collection.
  * 
  * <p>
  * When a method is called the root Path is checked to determine if it is a Directory.  If not
@@ -28,27 +53,29 @@ import java.nio.channels.ByteChannel
  * @author  Jesse Eichar
  * @since   1.0
  */
-abstract class DirectoryStream[+T] extends Iterable[T] 
+trait PathSet[+T] extends Iterable[T] with PathFinder[T, PathSet[T]] {
+
+}
 
 /**
  * Directory stream implementation to assist in implementing 
  * DirectoryStreams that are based on Paths.
  * 
  * @parent 
- *          the path from where the DirectoryStream is derived.  The first entry
- *          of the DirectoryStream is the first child of the parent path
+ *          the path from where the PathSet is derived.  The first entry
+ *          of the PathSet is the first child of the parent path
  * @pathFilter
- *          A filter to restrict the contents of the DirectoryStream
+ *          A filter to restrict the contents of the PathSet
  * @depth
  *          The depth that the stream should traverse
  * @children
  *          A function to use for retrieving the children of a particular path
  *          This method is used to retrieve the children of each directory
  */
-abstract class AbstractPathDirectoryStream[+T <: Path](parent : T, 
+abstract class AbstractPathPathSet[+T <: Path](parent : T,
                              pathFilter : Path => Boolean,
                              depth:Int,
-                             children : T => List[T]) extends DirectoryStream[T] {
+                             children : T => List[T]) extends PathSet[T] {
                                
   assert(parent.isDirectory, "parent of a directory stream must be a Directory")
   
@@ -116,9 +143,9 @@ trait SecuredPath[T] {
   def newByteChannel(path:T, options:Set[OpenOption] /*FileAttribute<?>... attrs*/): ByteChannel 
      
   /**
-   * Opens the directory identified by the given path, returning a DirectoryStream[SecuredPath] to iterate over the entries in the directory.
+   * Opens the directory identified by the given path, returning a PathSet[SecuredPath] to iterate over the entries in the directory.
    */
-  def newDirectoryStream(path:T /*LinkOption... options*/): DirectoryStream[T] 
+  def newDirectoryStream(path:T /*LinkOption... options*/): PathSet[T]
           
 }
 */

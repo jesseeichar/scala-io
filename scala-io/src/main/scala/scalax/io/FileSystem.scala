@@ -106,7 +106,7 @@ abstract class FileSystem {
    */
   def matcher(pattern:String, syntax:String = PathMatcher.StandardSyntax.GLOB): PathMatcher = {
     syntax match {
-      case PathMatcher.StandardSyntax.GLOB => new FsIndependentGlobMatcher(this,pattern)
+      case PathMatcher.StandardSyntax.GLOB => new FsIndependentGlobMatcher(pattern, this)
       case PathMatcher.StandardSyntax.REGEX => new FsIndependentRegexMatcher(pattern)
       case _ => throw new IOException(syntax+" is not a recognized syntax for the "+name+" filesystem")
     }

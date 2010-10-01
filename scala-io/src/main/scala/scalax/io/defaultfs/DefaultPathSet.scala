@@ -10,18 +10,18 @@ package scalax.io.defaultfs
 
 import resource.ManagedResource
 import scalax.io.{
-  FileSystem, Path, FileOps,Codec,PathMatcher,AbstractPathDirectoryStream
+  FileSystem, Path, FileOps,Codec,PathMatcher,AbstractPathPathSet
 }
 
 import scalax.io.attributes.FileAttribute
 
 import Path.AccessModes._
 import java.io.{File => JFile}
-private[defaultfs] class DefaultDirectoryStream(
+private[defaultfs] class DefaultPathSet(
                     parent : DefaultPath, 
                     pathFilter : Path => Boolean,
                     depth:Int) 
-                  extends AbstractPathDirectoryStream[DefaultPath](
+                  extends AbstractPathPathSet[DefaultPath](
                     parent, 
                     pathFilter, 
                     depth,

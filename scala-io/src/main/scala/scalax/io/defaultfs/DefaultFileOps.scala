@@ -10,7 +10,7 @@ package scalax.io.defaultfs
 
 import scalax.io.{
   FileSystem, Path, FileOps,Codec,
-  PathMatcher,DirectoryStream,OpenOption,
+  PathMatcher,PathSet,OpenOption,
   Seekable, Process
 }
 import scalax.io.resource._

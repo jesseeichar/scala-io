@@ -1,13 +1,13 @@
-package scalax.io
+package scalax.io.matcher
 
 import collection.mutable.HashSet
 import java.net.URL
-
+import scalax.io.{Path, DirectoryStream}
 
 /** A path finder constructs a set of paths.  The set is evaluated by a call to the <code>get</code>
 * method.  The set will be different for different calls to <code>get</code> if the underlying filesystem
 * has changed.*/
-sealed abstract class PathFinder extends PathMatcher
+sealed abstract class PathFinder extends DirectoryStream
 {
   type FileFilter = Path => Boolean 
 	/** The union of the paths found by this <code>PathFinder</code> with the paths found by 'paths'.*/
@@ -16,11 +16,11 @@ sealed abstract class PathFinder extends PathMatcher
 	def ---(excludePaths: PathFinder): PathFinder = new ExcludePaths(this, excludePaths)
 	/** Constructs a new finder that selects all paths with a name that matches <code>filter</code> and are
 	* descendents of paths selected by this finder.*/
-	def **(filter: FileFilter): PathFinder = new DescendentOrSelfPathFinder(this, filter)
+	def **(filter: Path => Boolean): PathFinder = new DescendentOrSelfPathFinder(this, filter)
 	def *** : PathFinder = **(AllPassFilter)
 	/** Constructs a new finder that selects all paths with a name that matches <code>filter</code> and are
 	* immediate children of paths selected by this finder.*/
-	def *(filter: FileFilter): PathFinder = new ChildPathFinder(this, filter)
+	def *(filter: Path => Boolean): PathFinder = new ChildPathFinder(this, filter)
 	/** Constructs a new finder that selects all paths with name <code>literal</code> that are immediate children
 	* of paths selected by this finder.*/
 	def / (literal: String): PathFinder = new ChildPathFinder(this, new ExactFilter(literal))
@@ -37,7 +37,7 @@ sealed abstract class PathFinder extends PathMatcher
 	* path with a name that matches <code>intermediateExclude</code>.  Typical usage is:
 	*
 	* <code>descendentsExcept("*.jar", ".svn")</code>*/
-	def descendentsExcept(include: FileFilter, intermediateExclude: FileFilter): PathFinder =
+	def descendentsExcept(include: Path => Boolean, intermediateExclude: Path => Boolean): PathFinder =
 		(this ** include) --- (this ** intermediateExclude ** include)
 
 	/** Evaluates this finder.  The set returned by this method will reflect the underlying filesystem at the
@@ -80,19 +80,8 @@ private class BasePathFinder(base: PathFinder) extends PathFinder
 			pathSet += (path ##)
 	}
 }
-private abstract class FilterPath extends PathFinder with FileFilter
-{
-	def parent: PathFinder
-	def filter: FileFilter
-	final def accept(file: File) = filter.accept(file)
 
-	protected def handlePath(path: Path, pathSet: Set[Path])
-	{
-		for(matchedFile <- wrapNull(path.asFile.listFiles(this)))
-			pathSet += path / matchedFile.getName
-	}
-}
-private class DescendentOrSelfPathFinder(val parent: PathFinder, val filter: FileFilter) extends FilterPath
+private class DescendentOrSelfPathFinder(val parent: PathFinder, val filter: Path => Boolean) extends FilterPath
 {
 	private[sbt] def addTo(pathSet: Set[Path])
 	{
@@ -110,7 +99,7 @@ private class DescendentOrSelfPathFinder(val parent: PathFinder, val filter: Fil
 			handlePathDescendent(path / childDirectory.getName, pathSet)
 	}
 }
-private class ChildPathFinder(val parent: PathFinder, val filter: FileFilter) extends FilterPath
+private class ChildPathFinder(val parent: PathFinder, val filter: Path => Boolean) extends FilterPath
 {
 	private[sbt] def addTo(pathSet: Set[Path])
 	{

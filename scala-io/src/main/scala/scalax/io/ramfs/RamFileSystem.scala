@@ -10,7 +10,7 @@ package scalax.io.ramfs
 
 import resource.ManagedResource
 import scalax.io.{
-  FileSystem, Path, FileOps,Codec,PathMatcher,DirectoryStream
+  FileSystem, Path, FileOps,Codec,PathMatcher,PathSet
 }
 import scalax.io.attributes.FileAttribute
 

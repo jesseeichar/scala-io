@@ -197,7 +197,7 @@ import Path.fail
  *  @since   0.1
  *
  */
-abstract class Path (val fileSystem: FileSystem) extends FileOps with Ordered[Path]
+abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder[Path, PathSet[Path]] with Ordered[Path]
 {
   self =>
   /**
@@ -255,7 +255,13 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with Ordered[Pa
    *
    * @see Path#/(String)
    */
-  def \(child: String): Path
+  def /(child: String): this.type
+  
+  /**
+   * Alias for /(String)
+   * @see Path#/(String)
+   */
+  def \(child: String) : this.type = /(child)
 
   /**
    * If child is relative, creates a new Path based on the current path with the
@@ -278,7 +284,13 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with Ordered[Pa
    * @return A new path with the specified path appended
    * @see #/(String)
    */
-  def \(child: Path): Path = \(child.path)
+  def /(child: Path): this.type = /(child.path)
+
+  /**
+   * Alias for /(Path)
+   * @see Path#/(Path)
+   */
+  def \(child: Path) : this.type = /(child)
 
   // identity
   /**
@@ -1010,31 +1022,31 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with Ordered[Pa
   /**
    * An iterable over the contents of the directory.  This is simply walkTree with depth=1.
    * <p>
-   * The filter parameter restricts what paths are available through the DirectoryStream.  This is
-   * different from using the filter, filterFold or filterEach methods in DirectoryStream because PathMatchers can be used by
+   * The filter parameter restricts what paths are available through the PathSet.  This is
+   * different from using the filter, filterFold or filterEach methods in PathSet because PathMatchers can be used by
    * the underlying filesystem natively and can potentially provide dramatically improved performance for
    * very large directories.
    * </p>
    * 
    * @param filter
-   *          A filter that restricts what paths are available in the DirectoryStream
+   *          A filter that restricts what paths are available in the PathSet
    *          If the filter is a PathMatcher and the underlying filesystem supports the PatchMatcher
    *          implementation then the maximum performance will be achieved.
    *          All Paths that are passed to matcher is relative to this Path
    *          Default is PathMatcher.ALL
    * @return
-   *          A managed resource managing a DirectoryStream.
+   *          A managed resource managing a PathSet.
    *
    * @see Path#walkTree
    * @see Path.Matching
    * @see FileSystem#matcher(String,String)
    */
-   def children(filter:Path => Boolean = PathMatcher.ALL, options:Traversable[LinkOption]=Nil) : DirectoryStream[Path] = descendants(filter, depth=1, options)
+   def children(filter:Path => Boolean = PathMatcher.ALL, options:Traversable[LinkOption]=Nil) : PathSet[Path] = descendants(filter, depth=1, options)
 
   /**
    * An iterable that traverses all the elements in the directory tree down to the specified depth
    * <p>
-   * The filter parameter is a function because the DirectoryStream can return files from many directories.
+   * The filter parameter is a function because the PathSet can return files from many directories.
    * The function provides the mechanism for declaring which PathMatcher to use at each level.  The two
    * parameters are original path and the path to be visited relative to the original path.  By default the
    * function always returns None.
@@ -1048,11 +1060,11 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with Ordered[Pa
    * The traversal order is pre-order.
    * </p>
    * <p>
-   * No exceptions will be thrown by this method if it is called and the Path is a File or does not exist.  Instead the {@link DirectoryStream}
+   * No exceptions will be thrown by this method if it is called and the Path is a File or does not exist.  Instead the {@link PathSet}
    * will throw a NotDirectoryException when a method is called and the underlying object is not a Directory.  
    * </p>
    * @param filter
-   *          A filter that restricts what paths are available in the DirectoryStream
+   *          A filter that restricts what paths are available in the PathSet
    *          If the filter is a PathMatcher and the underlying filesystem supports the PatchMatcher
    *          implementation then the maximum performance will be achieved.
    *          All Paths that are passed to matcher is relative to this Path
@@ -1064,14 +1076,14 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with Ordered[Pa
    *          Default is -1
    * 
    * @return
-   *          A managed resource managing a DirectoryStream.
+   *          A managed resource managing a PathSet.
    *
    * @see Path#directoryStream(Option,Boolean)
    * @see Path.Matching
    * @see FileSystem#matcher(String,String)
    */
   def descendants(filter:Path => Boolean = PathMatcher.ALL, 
-           depth:Int = -1, options:Traversable[LinkOption]=Nil): DirectoryStream[Path]
+           depth:Int = -1, options:Traversable[LinkOption]=Nil): PathSet[Path]
 
 
 /* ****************** The following require jdk7's nio.file ************************** */
@@ -1081,7 +1093,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with Ordered[Pa
    * both secureDirectoryStream and tree for details.
    * 
    * @param filter
-   *          A filter that restricts what paths are available in the DirectoryStream
+   *          A filter that restricts what paths are available in the PathSet
    *          The directoryStream methods explains why this is often the efficient method
    *          for filtering directories
    *          Default is None
@@ -1092,7 +1104,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with Ordered[Pa
    *          Default is 1
    * 
    * @return
-   *          A managed resource managing a DirectoryStream.
+   *          A managed resource managing a PathSet.
    *
    * @see Path#secureDirectoryStream(Option)
    * @see Path#tree(Function2, Int)
@@ -1101,23 +1113,23 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with Ordered[Pa
    */
 /*
   def secureTree(filter:(Path,Path)=>Option[PathMatcher] = (origin,relativePath) => None, 
-                 depth:Int = -1,options:LinkOption*): Option[DirectoryStream[SecuredPath[Path]]]
+                 depth:Int = -1,options:LinkOption*): Option[PathSet[SecuredPath[Path]]]
 */
 
 
   /**
-   * Attempts to obtain a secured DirectoryStream.  This method and the associated secureTree are intended
+   * Attempts to obtain a secured PathSet.  This method and the associated secureTree are intended
    * to be used for security sensitive operations that need to access and/or traverse directory structures
    * in a race free manner.
    * <p>
    * Not all filesystems can support this,  if not then None will be returned.  Using this method will ensure that
-   * during the duration of an operation on the {@link DirectoryStream} no external processes
+   * during the duration of an operation on the {@link PathSet} no external processes
    * are able to modify the directory.
    * </p><p>
    * The stream can also be used as a "virtual" working directory
    * </p>
    * <p>
-   * No exceptions will be thrown by this method if it is called and the Path is a File or does not exist.  Instead the {@link DirectoryStream}
+   * No exceptions will be thrown by this method if it is called and the Path is a File or does not exist.  Instead the {@link PathSet}
    * will throw a NotDirectoryException when a method is called and the underlying object is not a Directory.  
    * </p>
    * <p>
@@ -1137,19 +1149,19 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with Ordered[Pa
    * </code>
    * <p>
    * @param filter
-   *          A filter that restricts what paths are available in the DirectoryStream.
+   *          A filter that restricts what paths are available in the PathSet.
    *          The directoryStream methods explains why this is often the efficient method
    *          for filtering directories
    *          Default is None
    * @return
-   *          A managed resource managing a DirectoryStream.
+   *          A managed resource managing a PathSet.
    *
    * @see Path#directoryStream(Option)
    * @see Path#secureTree(Function2,Int)
    */
 /*
   def secureDirectoryStream(filter:Option[PathMatcher] = None
-                            :LinkOption*): Option[DirectoryStream[SecuredPath[Path]]]
+                            :LinkOption*): Option[PathSet[SecuredPath[Path]]]
 */
 
   // Optimization for Seekable
