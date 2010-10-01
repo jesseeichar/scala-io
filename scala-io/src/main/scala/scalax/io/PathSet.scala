@@ -46,7 +46,7 @@ trait PathFinder[+T,S[B] <: PathFinder[B,S]] {
   /**
    * Makes the paths selected by this finder into base directories.
    */
-  def asBase: thisType = null.asInstanceOf[thisType]
+  def toBase: thisType = null.asInstanceOf[thisType]
 }
 
 /**

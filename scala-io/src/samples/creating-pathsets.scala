@@ -19,8 +19,8 @@ object PathSetSamples {
 
 
   // select all files in src/main, lib and in target/classes excluding everything ending in .txt
-//  val multiPath:PathSet[Path] = ("src" \ "main") +++ "lib" +++ ("target" \ "classes") --- "**/*.txt"
-  /*
+  val multiPath:PathSet[Path] = ("src" \ "main") +++ "lib" +++ ("target" \ "classes") --- "**/*.txt"
+
   // select all jar files in both lib and target
   val jars:PathSet[Path] = ("lib" +++ "target") * "*.jar"
 
@@ -28,15 +28,15 @@ object PathSetSamples {
   // For example, the package action in sbt packages compiled classes and all files under resources.
   // The full path name should not be used in the jar, however. This is where the ## operator comes
   // in. The paths for this situation would look like:
-  val allClasses:PathSet[Path] = ("target" / "classes" ##) ** "*.class"
-  val allResources:PathSet[Path] = ("src" / "main" / "resources" ##) ** "*"
+  val allClasses:PathSet[Path] = ("target" / "classes" toBase) ** "*.class"
+  val allResources:PathSet[Path] = ("src" / "main" / "resources" toBase) ** "*"
   val toPackage:PathSet[Path] = allClasses +++ allResources
 
   // A common problem is excluding version control directories. This can be accomplished as follows:
   val sources:PathSet[Path] = ("src" ** "*.scala") --- ("src" ** ".svn" ** "*.scala")
 
-  val altsources = "src" ** ("*.scala" | "*.java")
-  def imageResources = "src"/"main"/"resources" * ("*.png" - "logo.png")
-  */
+  val altsources = "src" ** "*.scala|*.java"
+  def imageResources = "src"/"main"/"resources" * "*.png" filterNot { _.name == "logo.png"}
+
   
 }
