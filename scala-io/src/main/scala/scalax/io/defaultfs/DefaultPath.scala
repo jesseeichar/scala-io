@@ -41,6 +41,8 @@ class DefaultPath private[io] (val jfile: JFile, override val fileSystem: Defaul
 {
   self =>
   
+  override type thisType = DefaultPath
+
   def toAbsolute: Path = if (isAbsolute) this else Path(jfile.getAbsolutePath())(fileSystem)
   def toURI: URI = jfile.toURI()
   def /(child: String): DefaultPath = fileSystem(new JFile(jfile, child)) // TODO check if directory is absolute

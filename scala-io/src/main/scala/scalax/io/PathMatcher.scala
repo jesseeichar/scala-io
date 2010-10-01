@@ -38,6 +38,7 @@ object PathMatcher {
   val ALL = new PathMatcher{
     def apply(path: Path) = true
   }
+  
   /**
    * Contains the constants for the different
    * PathMatcher syntaxes that are supported by all

@@ -15,9 +15,12 @@ object PathSetSamples {
   // find all .scala files in src/sbt but not in subdirectories
   val childScalaFiles:PathSet[Path] = "src" \ "sbt" * "*.scala"
 
-  // select all files in src/main, lib and in target/classes excluding everything ending in .txt
-  val multiPath:PathSet[Path] = ("src" \ "main") +++ "lib" +++ ("target" \ "classes") --- "**/*.txt"
+  val mainAndLib = ("src" \ "main") +++ "lib"
 
+
+  // select all files in src/main, lib and in target/classes excluding everything ending in .txt
+//  val multiPath:PathSet[Path] = ("src" \ "main") +++ "lib" +++ ("target" \ "classes") --- "**/*.txt"
+  /*
   // select all jar files in both lib and target
   val jars:PathSet[Path] = ("lib" +++ "target") * "*.jar"
 
@@ -29,10 +32,11 @@ object PathSetSamples {
   val allResources:PathSet[Path] = ("src" / "main" / "resources" ##) ** "*"
   val toPackage:PathSet[Path] = allClasses +++ allResources
 
-  //A common problem is excluding version control directories. This can be accomplished as follows:
+  // A common problem is excluding version control directories. This can be accomplished as follows:
   val sources:PathSet[Path] = ("src" ** "*.scala") --- ("src" ** ".svn" ** "*.scala")
 
-  def sources = "src" ** ("*.scala" | "*.java")
+  val altsources = "src" ** ("*.scala" | "*.java")
   def imageResources = "src"/"main"/"resources" * ("*.png" - "logo.png")
+  */
   
 }

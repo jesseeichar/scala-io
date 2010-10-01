@@ -9,6 +9,7 @@
 package scalax.io
 
 import java.net.URLStreamHandler
+import matcher.{GlobMatcher, RegexMatcher}
 import util.Random.nextInt
 import java.io.{IOException, File => JFile}
 
@@ -106,8 +107,8 @@ abstract class FileSystem {
    */
   def matcher(pattern:String, syntax:String = PathMatcher.StandardSyntax.GLOB): PathMatcher = {
     syntax match {
-      case PathMatcher.StandardSyntax.GLOB => new FsIndependentGlobMatcher(pattern, this)
-      case PathMatcher.StandardSyntax.REGEX => new FsIndependentRegexMatcher(pattern)
+      case PathMatcher.StandardSyntax.GLOB => new GlobMatcher(pattern)
+      case PathMatcher.StandardSyntax.REGEX => new RegexMatcher(pattern)
       case _ => throw new IOException(syntax+" is not a recognized syntax for the "+name+" filesystem")
     }
   }

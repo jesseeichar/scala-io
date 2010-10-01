@@ -1,6 +1,6 @@
 /*                     __                                               *\
 **     ________ ___   / /  ___     Scala API                            **
-**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar             **
+**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar          **
 **  __\ \/ /__/ __ |/ /__/ __ |    http://scala-lang.org/               **
 ** /____/\___/_/ |_/____/_/ | |                                         **
 **                          |/                                          **
@@ -12,30 +12,43 @@ import scala.collection.IterableView
 import java.io.Closeable
 import java.nio.channels.ByteChannel
 
-trait PathFinder[T,S  <: PathFinder[T,_]] {
-  /** The union of the paths found by this <code>PathSet</code> with the paths found by 'paths'.*/
-	def +++(paths: PathSet[T]): S = null.asInstanceOf[S]
-	/** Excludes all paths from <code>excludePaths</code> from the paths selected by this <code>PathSet</code>.*/
-	def ---(excludePaths: PathSet[T]): S = null.asInstanceOf[S]
-	/** Constructs a new finder that selects all paths with a name that matches <code>filter</code> and are
-	* descendents of paths selected by this finder.*/
-	def **(filter: Path => Boolean): S = null.asInstanceOf[S]
-	def *** : S = null.asInstanceOf[S] //**(AllPassFilter)
-	/** Constructs a new finder that selects all paths with a name that matches <code>filter</code> and are
-	* immediate children of paths selected by this finder.*/
-	def *(filter: Path => Boolean): S = null.asInstanceOf[S]
-	/** Constructs a new finder that selects all paths with name <code>literal</code> that are immediate children
-	* of paths selected by this finder.*/
-	def / (literal: String): this.type = null.asInstanceOf[S]
-	/** Constructs a new finder that selects all paths with name <code>literal</code> that are immediate children
-	* of paths selected by this finder.*/
-	final def \ (literal: String): this.type = /(literal)
+trait PathFinder[+T,S[B] <: PathFinder[B,S]] {
+  type thisType <: PathFinder[T,S]
 
-	/** Makes the paths selected by this finder into base directories.
-	* @see Path.##
-	*/
-	def asBase : S = null.asInstanceOf[S]
+  /**The union of the paths found by this <code>PathSet</code> with the paths found by 'paths'.*/
+  def +++[T2 >: T](paths: PathFinder[T2,S]): S[T2] = null.asInstanceOf[S[T2]]
+
+  /**Excludes all paths from <code>excludePaths</code> from the paths selected by this <code>PathSet</code>.*/
+  def ---[U >: T](excludePaths: PathFinder[U,S]): S[U] = null.asInstanceOf[S[U]]
+
+  /**Constructs a new finder that selects all paths with a name that matches <code>filter</code> and are
+   * descendants of paths selected by this finder.
+   */
+  def **[U >: T, PM:PathMatcherFactory](filter: PM): S[U] = null.asInstanceOf[S[U]]
+
+  def ***[U >: T] : S[U] = null.asInstanceOf[S[U]] //**(AllPassFilter)
+
+  /**Constructs a new finder that selects all paths with a name that matches <code>filter</code> and are
+   * immediate children of paths selected by this finder.
+   */
+  def *[U >: T, PM : PathMatcherFactory](filter: PM): S[U] = null.asInstanceOf[S[U]]
+
+  /**Constructs a new finder that selects all paths with name <code>literal</code> that are immediate children
+   * of paths selected by this finder.
+   */
+  def /(literal: String): thisType
+
+  /**Constructs a new finder that selects all paths with name <code>literal</code> that are immediate children
+   * of paths selected by this finder.
+   */
+  final def \(literal: String): thisType = /(literal)
+
+  /**
+   * Makes the paths selected by this finder into base directories.
+   */
+  def asBase: thisType = null.asInstanceOf[thisType]
 }
+
 /**
  * An iterable that permits iterating over a directory tree starting at a root Path.  The
  * PathSet is an example of a non-strict collection.
@@ -53,8 +66,10 @@ trait PathFinder[T,S  <: PathFinder[T,_]] {
  * @author  Jesse Eichar
  * @since   1.0
  */
-trait PathSet[+T] extends Iterable[T] with PathFinder[T, PathSet[T]] {
+trait PathSet[+T] extends Iterable[T] with PathFinder[T, PathSet] {
+  type thisType <: PathSet[T]
 
+  def / (literal: String): thisType = null.asInstanceOf[thisType]  
 }
 
 /**

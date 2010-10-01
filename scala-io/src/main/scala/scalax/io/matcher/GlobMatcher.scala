@@ -1,7 +1,8 @@
-package scalax.io
-  
-  import util.parsing.combinator.RegexParsers
+package scalax.io.matcher
+
+import util.parsing.combinator.RegexParsers
   import java.util.regex.Pattern
+import scalax.io.{Path, PathMatcher, FileSystem}
 
 /**
  * 
@@ -9,9 +10,8 @@ package scalax.io
  * Date: Sep 24, 2010
  * Time: 9:39:25 PM
  */
-
-final class FsIndependentGlobMatcher(query:String,fileSystem:FileSystem) extends PathMatcher {
-  class GlobParser extends RegexParsers {
+final class GlobMatcher(query:String) extends PathMatcher {
+  class GlobParser(fileSystem:FileSystem) extends RegexParsers {
     import Pattern.quote
     val doubleStar: Parser[Any] = "**"
     val star: Parser[Any] = "*"
@@ -22,8 +22,10 @@ final class FsIndependentGlobMatcher(query:String,fileSystem:FileSystem) extends
     val root: Parser[Any] = fileSystem.roots map {r => quote(r.path)} mkString ("|") r
     val path: Parser[Any] = opt(root) ~ repsep(segment,separator)
   }
-  val parsedQuery = ""
-  val regex = new FsIndependentRegexMatcher(parsedQuery)
 
-  def apply(v1: Path): Boolean = regex(v1)
+  def apply(path: Path): Boolean = {
+    new GlobParser(path.fileSystem)
+    val parsedQuery = ""
+    new RegexMatcher(parsedQuery)(path)
+  }
 }

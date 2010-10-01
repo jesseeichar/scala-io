@@ -21,7 +21,9 @@ import java.net.{
   URL,URI
 }
 
-class RamPath(relativeTo:String, val path:String, override val fileSystem:RamFileSystem) extends Path(fileSystem) with RamFileOps{  
+class RamPath(relativeTo:String, val path:String, override val fileSystem:RamFileSystem) extends Path(fileSystem) with RamFileOps{
+  override type thisType = RamPath
+  
   def node = fileSystem.lookup(this)
   lazy val toAbsolute: Path = fileSystem("",relativeTo + separator + path)
   lazy val toURI: URI = fileSystem.uri(this)

@@ -197,9 +197,11 @@ import Path.fail
  *  @since   0.1
  *
  */
-abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder[Path, PathSet[Path]] with Ordered[Path]
+abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder[Path, PathSet] with Ordered[Path]
 {
   self =>
+
+  type thisType <: Path 
   /**
    * The path segment separator string for
    * the filesystem
@@ -253,44 +255,23 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    * </p>
    * @return A new path with the specified path appended
    *
-   * @see Path#/(String)
+   * @see #/(String)
    */
-  def /(child: String): this.type
-  
-  /**
-   * Alias for /(String)
-   * @see Path#/(String)
-   */
-  def \(child: String) : this.type = /(child)
+  def /(child: String): thisType
 
   /**
-   * If child is relative, creates a new Path based on the current path with the
-   * child appended. If child is absolute the child is returned
-   *
-   * <ul>
-   * <li>if other is null return this</li>
-   * <li>if other is absolute return other</li>
-   * <li>if other is not absolute the return this append other</li>
-   * </ul>
-   *
-   * <p>Examples include:
-   * <pre><code>
-   * path / Path("child") / Path("grandchild")
-   * path / Path("child/grandchild")
-   * path / Path("..") / Path("sibling")
-   * path / Path("../sibling")
-   * </code></pre></p>
+   * Alias for /(child.name)
    *
    * @return A new path with the specified path appended
    * @see #/(String)
    */
-  def /(child: Path): this.type = /(child.path)
+  final def /(child: Path): thisType = /(child.path)
 
   /**
    * Alias for /(Path)
-   * @see Path#/(Path)
+   * @see #/(Path)
    */
-  def \(child: Path) : this.type = /(child)
+  final def \(child: Path) : thisType = /(child)
 
   // identity
   /**
