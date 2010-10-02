@@ -27,6 +27,14 @@ object RamFileSystem {
   def apply(fsId:String) : RamFileSystem = synchronized {
     fileSystems.get(fsId).getOrElse(new RamFileSystem(fsId))
   }
+  def apply(uri:URI) : RamPath = {
+    require(uri.toString contains '!', "Ramfile system URIs must be of form: ramfs://fsId!path, was: "+uri+" (did not contain a !)")
+    require(uri.getScheme equalsIgnoreCase "ramfs", "Ramfile system URIs must start with ramfs, was: "+uri)
+    
+    val id = uri.getAuthority.takeWhile{_ != '!'}
+    val path = uri.getRawPath
+    apply(id)(path)
+  }
   private def register(fsId:String, fs:RamFileSystem) = synchronized {
     fileSystems(fsId) = fs
   }

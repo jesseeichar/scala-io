@@ -18,3 +18,5 @@ class FileSystemTest extends scalaio.test.fs.FsFileSystemTests with RamFixture
 class SeekableTest extends scalaio.test.fs.FsSeekableTests with RamFixture
 class BasicPathTest extends scalaio.test.fs.FsBasicPathTests with RamFixture
 class AccessSetTest extends scalaio.test.fs.FsAccessSetTests with RamFixture
+class PathObjectTest extends scalaio.test.fs.FsPathObjectTests with RamFixture
+

@@ -17,3 +17,4 @@ class FileSystemTest extends scalaio.test.fs.FsFileSystemTests with DefaultFixtu
 class SeekableTest extends scalaio.test.fs.FsSeekableTests with DefaultFixture
 class BasicPathTest extends scalaio.test.fs.FsBasicPathTests with DefaultFixture
 class AccessSetTest extends scalaio.test.fs.FsAccessSetTests with DefaultFixture
+class PathObjectTest extends scalaio.test.fs.FsPathObjectTests with DefaultFixture

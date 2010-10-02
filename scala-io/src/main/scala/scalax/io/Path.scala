@@ -32,7 +32,7 @@ object Path
    * Method to implicitly convert a {@link java.io.File} to a Path
    * object 
    */
-  implicit def jfile2path(jfile: JFile)(implicit fileSystem: FileSystem = FileSystem.default): Path = apply(jfile.getPath)(fileSystem)
+  implicit def jfile2path(jfile: JFile): Path = apply(jfile.getPath)(FileSystem.default)
 
   /**
    * Enumeration of the Access modes possible for accessing files
@@ -81,7 +81,7 @@ object Path
    *          if the filesystem cannot be loaded or if the
    *          path cannot be created with that filesystem
    */
-  def apply (uri: URI): Path = null // TODO
+  def apply (uri: URI): Option[Path] = FileSystemPlugins.lookup(uri)
 
   /**
    * Create a Path on the default files system from a {@link java.io.File}

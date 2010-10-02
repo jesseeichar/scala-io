@@ -38,7 +38,7 @@ Implement an mutable seekable that always reuses the same fileChannel
 Make DefaultFileSystem.open not close the resource
 Make a ChannelBased LongTraversable
 Lock should provide a seekable that is restricted to lock area
-Seekable's methods are ResourceView but should be parameterized to get rid of casts
+Seekable's methods are ResourceView but should be parametrized to get rid of casts
 
 == Considerations
 Add protected aliasing/imports to java classes in package to reduce number or required imports
