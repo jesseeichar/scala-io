@@ -96,7 +96,7 @@ abstract class FsMatchingTests extends scalax.test.sugar.AssertionSugar with Fix
     assertMisMatch("{b,c,d}/**")
     assertMisMatch("{A,b,c,d}/**")
 
-    var path2 = fixture.fs("a-/b?/c/d.x")
+    path = fixture.fs("a-/b?/c/d.x")
 
     assertMatch("a[-abc]/**")
     assertMatch("*/b\\?/**")
@@ -108,13 +108,12 @@ abstract class FsMatchingTests extends scalax.test.sugar.AssertionSugar with Fix
     assertMisMatch("?/**")
   }
 
-
-    @Test //@Ignore
-    def regexPathMatcher = {
-      implicit var path = fixture.fs("a/b/c/d.x")
-      implicit val syntax = PathMatcher.StandardSyntax.REGEX
-      assertMatch(".*/d.x")
-      assertMatch("""(\w/)*d.x""")
-    }
+  @Test //@Ignore
+  def regexPathMatcher = {
+    implicit var path = fixture.fs("a/b/c/d.x")
+    implicit val syntax = PathMatcher.StandardSyntax.REGEX
+    assertMatch(".*/d.x")
+    assertMatch("""(\w/)*d.x""")
+  }
 
 }

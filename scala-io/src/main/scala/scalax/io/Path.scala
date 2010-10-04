@@ -1066,7 +1066,9 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
   def descendants(filter:Path => Boolean = PathMatcher.ALL, 
            depth:Int = -1, options:Traversable[LinkOption]=Nil): PathSet[Path]
 
-
+  def **[U >: Path, F](filter: F)(implicit factory:PathMatcherFactory[F]): PathSet[U] = {
+    descendants(factory(filter))
+  }
 /* ****************** The following require jdk7's nio.file ************************** */
 
   /*

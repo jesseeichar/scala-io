@@ -19,10 +19,19 @@ import scalaio.test.fs.{
   FileSystemFixture, Fixture
 }
 
-trait RamFixture extends Fixture{
+trait BasicRamFixture extends Fixture{
   val rnd = new Random()
-  
-  def createFixture() = new FileSystemFixture(new RamFileSystem(), rnd) {
+
+  val sep:String
+  def createFixture() = new FileSystemFixture(new RamFileSystem(separator=sep), rnd) {
     override val root = fs.roots.head
   }
+}
+
+trait ForwardSlashRamFixture extends BasicRamFixture {
+  val sep = "/"
+}
+
+trait BackSlashRamFixture extends BasicRamFixture {
+  val sep = "\\" 
 }

@@ -24,7 +24,7 @@ trait PathFinder[+T,S[B] <: PathFinder[B,S]] {
   /**Constructs a new finder that selects all paths with a name that matches <code>filter</code> and are
    * descendants of paths selected by this finder.
    */
-  def **[U >: T, PM:PathMatcherFactory](filter: PM): S[U] = null.asInstanceOf[S[U]]
+  def **[U >: Path, F](filter: F)(implicit factory:PathMatcherFactory[F]): S[U]
 
   def ***[U >: T] : S[U] = null.asInstanceOf[S[U]] //**(AllPassFilter)
 
@@ -68,8 +68,6 @@ trait PathFinder[+T,S[B] <: PathFinder[B,S]] {
  */
 trait PathSet[+T] extends Iterable[T] with PathFinder[T, PathSet] {
   type thisType <: PathSet[T]
-
-  def / (literal: String): thisType = null.asInstanceOf[thisType]  
 }
 
 /**
@@ -93,7 +91,12 @@ abstract class AbstractPathPathSet[+T <: Path](parent : T,
                              children : T => List[T]) extends PathSet[T] {
                                
   assert(parent.isDirectory, "parent of a directory stream must be a Directory")
-  
+  def **[U >: T, F](filter: F)(implicit factory:PathMatcherFactory[F]): PathSet[U] = {
+    null.asInstanceOf[PathSet[U]]
+  }
+
+  def / (literal: String): thisType = null.asInstanceOf[thisType]  
+
   def iterator: Iterator[T] = new Iterator[T] {
     var toVisit = children(parent)
     var nextElem : Option[T] = None

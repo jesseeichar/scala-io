@@ -18,7 +18,7 @@ case class Node(path : String, parent : Option[Node], children : ListBuffer[Node
   parent.foreach {_.children += self}
   
   def iterator = children.iterator
-  
+  def all = (List[Node]() /: this) {case (acc,next) => acc ++ next}
   def name = path.split(Node.Sep).last
   
   override def toString = path

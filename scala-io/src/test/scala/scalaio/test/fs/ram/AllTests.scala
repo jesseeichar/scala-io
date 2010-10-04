@@ -9,14 +9,14 @@
 package scalaio.test.fs.ram
 
 
-class FsMatchingTest extends scalaio.test.fs.FsMatchingTests with RamFixture
-class FsDirectoryStreamTest extends scalaio.test.fs.FsDirectoryStreamTests with RamFixture 
-class FsInputTest extends scalaio.test.fs.FsInputTests with RamFixture
-class FsOutputTest extends scalaio.test.fs.FsOutputTests with RamFixture 
-class FsFileOpsTest extends scalaio.test.fs.FsFileOpsTests with RamFixture
-class FileSystemTest extends scalaio.test.fs.FsFileSystemTests with RamFixture
-class SeekableTest extends scalaio.test.fs.FsSeekableTests with RamFixture
-class BasicPathTest extends scalaio.test.fs.FsBasicPathTests with RamFixture
-class AccessSetTest extends scalaio.test.fs.FsAccessSetTests with RamFixture
-class PathObjectTest extends scalaio.test.fs.FsPathObjectTests with RamFixture
+class FsMatchingTest extends scalaio.test.fs.FsMatchingTests with ForwardSlashRamFixture
+class FsDirectoryStreamTest extends scalaio.test.fs.FsDirectoryStreamTests with ForwardSlashRamFixture 
+class FsInputTest extends scalaio.test.fs.FsInputTests with ForwardSlashRamFixture
+class FsOutputTest extends scalaio.test.fs.FsOutputTests with ForwardSlashRamFixture 
+class FsFileOpsTest extends scalaio.test.fs.FsFileOpsTests with ForwardSlashRamFixture
+class FileSystemTest extends scalaio.test.fs.FsFileSystemTests with ForwardSlashRamFixture
+class SeekableTest extends scalaio.test.fs.FsSeekableTests with ForwardSlashRamFixture
+class BasicPathTest extends scalaio.test.fs.FsBasicPathTests with ForwardSlashRamFixture
+class AccessSetTest extends scalaio.test.fs.FsAccessSetTests with ForwardSlashRamFixture
+class PathObjectTest extends scalaio.test.fs.FsPathObjectTests with ForwardSlashRamFixture
 

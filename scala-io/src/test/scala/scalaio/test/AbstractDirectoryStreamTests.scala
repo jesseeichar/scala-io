@@ -116,25 +116,5 @@ trait AbstractDirectoryStreamTests extends scalax.test.sugar.AssertionSugar {
       }
   }
 
- def assertSameStructure(path : Iterable[Path], tree : Seq[Node], maxDepth : Int = Int.MaxValue)
-                        (implicit filter : Node => Boolean = _ => true) {
-   val paths = path.toList map {_.path}
-   val pathsAsString = paths mkString "\n"
-   var count = 0
-   
-   def walk(tree:Seq[Node], depth : Int) : Unit =  {
-     if(depth <= maxDepth ) {
-       tree.filter(filter) foreach { n =>
-         count += 1
-         assertTrue("expected "+n.path+" to be in "+pathsAsString, paths contains {n.path})
-       }
-       tree foreach {n=>walk(n.children, depth+1)}
-     }
-   }
-   
-   walk(tree,1)
-   
-   assertEquals(count, path.size)
- }
- 
+
 }

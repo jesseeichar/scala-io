@@ -40,7 +40,7 @@ object RamFileSystem {
   }
 }
 
-class RamFileSystem(val id : String = UUID.randomUUID.toString) extends FileSystem {
+class RamFileSystem(val id : String = UUID.randomUUID.toString, val separator:String = "/") extends FileSystem {
   private var fsTree = new DirNode(separator)
 
   RamFileSystem.register(id,this)
@@ -50,7 +50,6 @@ class RamFileSystem(val id : String = UUID.randomUUID.toString) extends FileSyst
 
   val name = "Ram ("+id+")"
   override val urlStreamHandler : Option[URLStreamHandler] = Some(Handler)
-  def separator: String = "/"
   def apply(path: String): RamPath = {
     if(path startsWith separator) apply("",path)
     else apply(pwd.toAbsolute.path, path)

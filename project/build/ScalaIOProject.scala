@@ -10,6 +10,11 @@ class ScalaIOProject(info: ProjectInfo)
 
   lazy val io = project("scala-io", "Core IO project", new ScalaIoCore(_))
  
+  val s = task {
+    println("s")
+    println("lib" ** "*" get)
+    None
+  }
 
   /* ------   Sub projects ------ */
   class ScalaIoCore(info: ProjectInfo)
