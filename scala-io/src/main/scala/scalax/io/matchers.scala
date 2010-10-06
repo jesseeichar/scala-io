@@ -13,8 +13,14 @@ import java.util.regex.Pattern
 class FunctionMatcher(f:Path => Boolean) extends PathMatcher {
   def apply(path: Path) = f(path)
 }
-final class RegexMatcher(pattern:Pattern) extends PathMatcher {
+final class RegexPathMatcher(pattern:Pattern) extends PathMatcher {
   def this(regex:Regex) = this(regex.pattern)
   def this(query:String) = this(query.r.pattern)
   def apply(path: Path): Boolean = pattern.matcher(path.path).matches
+}
+
+final class RegexNameMatcher(pattern:Pattern) extends PathMatcher {
+  def this(regex:Regex) = this(regex.pattern)
+  def this(query:String) = this(query.r.pattern)
+  def apply(path: Path): Boolean = pattern.matcher(path.name).matches
 }

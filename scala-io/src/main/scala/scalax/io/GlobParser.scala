@@ -1,22 +1,10 @@
-package scalax.io.matcher
+package scalax.io
 
 import util.parsing.combinator.RegexParsers
-  import java.util.regex.Pattern
+import java.util.regex.Pattern
 import scalax.io.{Path, PathMatcher, FileSystem}
+import scalax.io.matcher.Matching.RegexPathMatcher
 
-/**
- * 
- * User: jeichar
- * Date: Sep 24, 2010
- * Time: 9:39:25 PM
- */
-final class GlobMatcher(query:String) extends PathMatcher {
-  def apply(path: Path): Boolean = {
-
-    val parsedQuery = new GlobParser(path.fileSystem)(query)
-    new RegexMatcher(parsedQuery)(path)
-  }
-}
 
 class GlobParser(fileSystem:FileSystem) extends RegexParsers {
   import Pattern.quote
