@@ -30,14 +30,14 @@ object CreatePath {
     import java.net.URI
     // the URI type indicates which filesystem to use
     // file:// indicates the default filesystem
-    val path1: Path = Path (new URI ("file:///tmp/file1"))
+    val path1: Option[Path] = Path (new URI ("file:///tmp/file1"))
 
     // include windows examples for completeness
-    val path2: Path = Path (new URI ("file://c:/tmp/file2"))
-    val path3: Path = Path (new URI ("file://c:\\tmp\\file3"))
+    val path2: Option[Path]= Path (new URI ("file://c:/tmp/file2"))
+    val path3: Option[Path]= Path (new URI ("file://c:\\tmp\\file3"))
 
     // For opening a zip filesystem
-    val zipPath: Path = Path (new URI ("zip:///tmp/zipfile.zip!/file"))
+    val zipPath: Option[Path] = Path (new URI ("zip:///tmp/zipfile.zip!/file"))
   }
 
   // TODO demonstrate the GenericPath usage

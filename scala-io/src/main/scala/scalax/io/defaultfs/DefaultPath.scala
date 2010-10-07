@@ -8,13 +8,9 @@
 
 package scalax.io.defaultfs
 
-import resource.ManagedResource
+import _root_.resource.ManagedResource
 import scalax.io.attributes.FileAttribute
-import scalax.io.{
-  Path, FileOps, PathMatcher, PathSet, LinkOption
-}
-
-import java.io.{ 
+import java.io.{
   FileInputStream, FileOutputStream, BufferedReader, BufferedWriter, InputStreamReader, OutputStreamWriter, 
   BufferedInputStream, BufferedOutputStream, IOException, File => JFile}
 import java.net.{ URI, URL }
@@ -23,8 +19,10 @@ import PartialFunction._
 import util.Random.nextPrintableChar
 import java.lang.{ProcessBuilder}
 
+import scalax.io._
 import Path._
 import Path.AccessModes._
+
 
 /** 
  * <b>Not Part of API</b>
@@ -61,7 +59,7 @@ class DefaultPath private[io] (val jfile: JFile, override val fileSystem: Defaul
   override def canRead = jfile.canRead
   override def canExecute = jfile.canExecute
   def exists = jfile.exists()
-  override def notExists = try !jfile.exists() catch { case ex: SecurityException => false }
+  override def nonExistent = try !jfile.exists() catch { case ex: SecurityException => false }
   def isFile = jfile.isFile()
   def isDirectory = jfile.isDirectory()
   def isAbsolute = jfile.isAbsolute()
@@ -71,7 +69,7 @@ class DefaultPath private[io] (val jfile: JFile, override val fileSystem: Defaul
   def size = if(jfile.exists) Some(jfile.length()) else None
   
   def access_=(accessModes:Iterable[AccessMode]) = {
-    if (notExists) fail("Path %s does not exist".format(path))
+    if (nonExistent) fail("Path %s does not exist".format(path))
 
     jfile.setReadable(accessModes exists {_==Read})
     jfile.setWritable(accessModes exists {_==Write})
@@ -149,9 +147,10 @@ class DefaultPath private[io] (val jfile: JFile, override val fileSystem: Defaul
   }  
   override def hashCode() = path.hashCode()
 
-  def descendants(filter:Path => Boolean, 
-                  depth:Int, 
-                  options:Traversable[LinkOption]) = new DefaultPathSet(this, filter, depth)
+  def descendants[U >: Path, F](filter:F = PathMatcher.ALL,
+           depth:Int = -1, options:Traversable[LinkOption]=Nil)(implicit factory:PathMatcherFactory[F]) = {
+    new BasicPathSet[DefaultPath](this, filter, depth, false, (_:DefaultPath).jfile.listFiles.view.map (fileSystem.apply).toList)
+  }
 
 
 }

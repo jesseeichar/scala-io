@@ -1,7 +1,8 @@
 package scalax.io.matcher
 
-import java.io.File
 import java.util.regex.Pattern
+import java.io.{FileFilter, File}
+import sun.jvm.hotspot.tools.jcore.NameFilter
 
 trait FileFilter extends java.io.FileFilter with NotNull
 {

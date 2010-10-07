@@ -60,17 +60,8 @@ trait AbstractDirectoryStreamTests extends scalax.test.sugar.AssertionSugar {
     repeat {
       val (path,tree) = fixtures()
     
-      val stream = path.descendants{_.name.length < 5}
+      val stream = path.descendants{(_:Path).name.length < 5}
       assertSameStructure (stream, tree.children){_.name.length < 5}
-    }
-  }
-
-  @Test //@Ignore
-  def exception_when_path_is_file : Unit = {
-    val (path,tree) = fixtures()
-    
-    intercept[AssertionError] {
-      (path \ "testfile").createFile().descendants()
     }
   }
 

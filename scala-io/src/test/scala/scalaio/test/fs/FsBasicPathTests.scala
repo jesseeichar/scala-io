@@ -11,6 +11,7 @@ package scalaio.test.fs
 import scalax.io._
 import scalax.io.ramfs._
 import Path.AccessModes._
+import Matching._
 import scalax.io.resource.Resource
 import org.junit.Assert._
 import org.junit.{
@@ -153,7 +154,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
     intercept[java.io.IOException] {
       p.createFile(createParents=false)
     }
-    assertTrue(p.notExists)
+    assertTrue(p.nonExistent)
   }
   @Test //@Ignore
   def createFile_should_create_parent_file_by_default = {
@@ -212,7 +213,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
   def non_existant_file_should_not_be_file_or_directory : Unit = {
     val f1 = fixture.path
     assertFalse(f1.exists)
-    assertTrue(f1.notExists)
+    assertTrue(f1.nonExistent)
     assertFalse(f1.isDirectory)
     assertFalse(f1.isFile)
   }
@@ -228,7 +229,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
 
     f1.moveTo(otherpath)
 
-    assertTrue(f1.notExists)
+    assertTrue(f1.nonExistent)
     assertTrue(otherpath.exists)
     assertEquals(data, otherpath.slurpString)
   }
@@ -261,7 +262,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
 
     f1.moveTo(otherpath)
 
-    assertTrue(f1.notExists)
+    assertTrue(f1.nonExistent)
     assertTrue(otherpath.exists)
   }
   @Test //@Ignore
@@ -274,7 +275,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
 
     f1.moveTo(otherpath)
 
-    assertTrue(f1.notExists)
+    assertTrue(f1.nonExistent)
     assertTrue(otherpath.exists)
 
     assertTrue(otherpath \ "b" exists)
@@ -428,7 +429,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
       p.delete()
     }
     p.delete(force=true)
-    assertTrue(p.notExists)
+    assertTrue(p.nonExistent)
   }
 
   @Test //@Ignore
@@ -441,14 +442,14 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
 
     assertEquals(numFiles, deleted)
     assertEquals(0, remaining)
-    assertTrue(root.notExists)
+    assertTrue(root.nonExistent)
   }
   @Test //@Ignore
   def delete_recursively_should_throw_exception_on_failure_by_default() {
       val (root,_) = fixture.tree(5)
 
       val totalFiles = root.descendants().size + 1 // add root
-      root.descendants {_.isFile}.take(totalFiles/2) foreach {p => p.access = Read :: Nil}
+      root.descendants (IsFile).take(totalFiles/2) foreach {p => p.access = Read :: Nil}
       intercept[IOException] {
         root.deleteRecursively()
       }
@@ -460,8 +461,8 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
 
       val totalPaths = root.descendants().size + 1
 
-      val totalFiles = root.descendants{_.isFile}.size
-      root.descendants {_.isFile}.take(totalFiles/2) foreach {p => p.access = p.access - Write}
+      val totalFiles = root.descendants (IsFile).size
+      root.descendants (IsFile).take(totalFiles/2) foreach {p => p.access = p.access - Write}
       val (deleted, remaining) = root.deleteRecursively(continueOnFailure = true)
 
       assertTrue(root.exists)
@@ -475,14 +476,14 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
       val (root,_) = fixture.tree(5)
 
       val totalPaths = root.descendants().size + 1
-      val totalFiles = root.descendants{_.isFile}.size
-      root.descendants {_.isFile}.take(totalFiles/2) foreach {p => p.access = p.access - Write}
+      val totalFiles = root.descendants(IsFile).size
+      root.descendants (IsFile).take(totalFiles/2) foreach {p => p.access = p.access - Write}
 
       val (deleted, remaining) = root.deleteRecursively(force = true)
 
       assertEquals(totalPaths, deleted)
       assertEquals(0, remaining)
-      assertTrue(root.notExists)
+      assertTrue(root.nonExistent)
     }
 
   @Test //@Ignore
@@ -521,10 +522,10 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
   def move(f1 :Path, f2: Path, exists: Path, canReplace: Boolean=true)={
     assertTrue("expected 'exists' to exist before test", exists.exists)
     assertTrue("expected f1 to exist before move", f1.exists)
-    assertTrue("expected f2 to NOT exist before move", f2.notExists)
+    assertTrue("expected f2 to NOT exist before move", f2.nonExistent)
     assertEquals(f2, f1 moveTo f2)
     assertTrue("expected f2 to exist after move", f2.exists)
-    assertTrue("expected f1 to NOT exist after move", f1.notExists)
+    assertTrue("expected f1 to NOT exist after move", f1.nonExistent)
 
     f2 moveTo f2
     assertTrue("expected f2 to exist after move to self", f2.exists)
@@ -551,7 +552,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
     def tryReplace = {
       assertTrue("expected f2 to exist before replace", f2.exists)
       f2.moveTo (exists, replace=true)
-      assertTrue (f2.notExists)
+      assertTrue (f2.nonExistent)
       assertTrue (exists.exists)
     }
     
@@ -572,8 +573,8 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
 
   def copy(f1 :Path, f2: Path, exists: Path, canReplace: Boolean=true)={
     assertTrue(f1.exists)
-    assertTrue(f2.notExists)
-    assertTrue(f2.parent.forall{_.notExists})
+    assertTrue(f2.nonExistent)
+    assertTrue(f2.parent.forall{_.nonExistent})
     intercept[IOException] {
       f1 copyTo (f2, createParents=false)
     }
@@ -587,7 +588,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
     assertTrue("canExecute was not copied when it should not have", f2.canExecute)
 
     f2.delete()
-    assertTrue("failed to delete f2", f2.notExists)
+    assertTrue("failed to delete f2", f2.nonExistent)
     f1.lastModified = 10000
     f1.access(Path.AccessModes.Execute) = true
     f1 copyTo (f2, copyAttributes=false)
@@ -653,12 +654,12 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
 
     val path = fspath(pathName)
 
-    assertTrue(path.notExists)
+    assertTrue(path.nonExistent)
     assertFalse(path.exists)
     assertFalse("expected path access to NOT be "+access, !access.isEmpty && (path checkAccess (access:_*)))
     path.createFile (accessModes = access)
 
-    assertFalse(path.notExists)
+    assertFalse(path.nonExistent)
     assertTrue(path.exists)
     assertTrue("expected path access to be "+access+".  Access is "+path.access, path checkAccess (access:_*))
     
@@ -669,7 +670,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
     assertTrue(path.exists)
     
     path.delete(force=true)    
-    assertTrue(path.notExists)
+    assertTrue(path.nonExistent)
 
     path.createFile()
     assertTrue(path.exists)
@@ -683,18 +684,18 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
     path.delete()
     path.delete()
 
-    assertTrue(path.notExists)
+    assertTrue(path.nonExistent)
     assertFalse(path.exists)
     assertFalse(!access.isEmpty && (path checkAccess (access:_*)))
   }
 
   def existsTest(testData : TestData) : Unit = {
       val path = fspath(testData.pathName)
-      assertTrue(path.exists != path.notExists)
+      assertTrue(path.exists != path.nonExistent)
       assertFalse(path.exists)
       path.createFile()
       assertTrue(path.exists)
-      assertTrue(path.exists != path.notExists)
+      assertTrue(path.exists != path.nonExistent)
   }
 
   def respectsAccess(testData: TestData):Unit = {

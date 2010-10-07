@@ -35,7 +35,7 @@ object PathSetSamples {
   // A common problem is excluding version control directories. This can be accomplished as follows:
   val sources:PathSet[Path] = ("src" ** "*.scala") --- ("src" ** ".svn" ** "*.scala")
 
-  val altsources = "src" ** "*.scala|*.java"
+  val altsources = "src" ** "*.{scala,java}"
   def imageResources = "src"/"main"/"resources" * "*.png" filterNot { _.name == "logo.png"}
 
   

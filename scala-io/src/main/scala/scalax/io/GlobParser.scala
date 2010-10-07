@@ -2,9 +2,6 @@ package scalax.io
 
 import util.parsing.combinator.RegexParsers
 import java.util.regex.Pattern
-import scalax.io.{Path, PathMatcher, FileSystem}
-import scalax.io.matcher.Matching.RegexPathMatcher
-
 
 class GlobParser(fileSystem:FileSystem) extends RegexParsers {
   import Pattern.quote

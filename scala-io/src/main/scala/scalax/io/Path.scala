@@ -416,7 +416,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    *
    * @return false if the path does not exist in the file system
    */
-  def notExists = try !exists catch { case ex: SecurityException => false }
+  def nonExistent = try !exists catch { case ex: SecurityException => false }
   /**
    * True if the path exists and is a file
    *
@@ -737,7 +737,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
     if (failIfExists && exists) fail("Directory '%s' already exists." format name)
     if (exists && isFile) fail("Path "+this+" is a fileand thus cannot be created as a directory")
     
-    if(root != Some(this) && notExists) {
+    if(root != Some(this) && nonExistent) {
       createContainingDir (createParents)
 
       val res = doCreateDirectory()
@@ -833,8 +833,8 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
         (successes, failures)
       }
       
-      children{_.isFile} foreach tryDelete
-      children{_.isDirectory} foreach { path =>
+      children{(_:Path).isFile} foreach tryDelete
+      children{(_:Path).isDirectory} foreach { path =>
         val (deleted, remaining) = path.deleteRecursively(force,continueOnFailure)
         successes += deleted
         failures += remaining
@@ -882,7 +882,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
 
   	if (this.normalize == target.normalize) return target
 
-    if (!createParents && target.parent.map(_.notExists).getOrElse(true)) fail("Parent directory of destination file does not exist.")
+    if (!createParents && target.parent.map(_.nonExistent).getOrElse(true)) fail("Parent directory of destination file does not exist.")
     if (target.exists && !replaceExisting) fail("Destination file already exists, force creation or choose another file.")
     if (target.exists && !target.checkAccess(Write)) fail("Destination exists but is not writable.")
     if (target.isDirectory && target.children().nonEmpty) fail("Destination exists but is a non-empty directory.")
@@ -956,10 +956,10 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
        case NonExistent(_) => fail("attempted to move "+path+" but it does not exist")
        case _ if target.normalize == normalize => ()
        case _ if !replace && target.exists => fail(target+" exists but replace parameter is false")
-       case File(_) if target.isDirectory => fail("cannot overwrite a directory with a file")
-       case Directory(_) if target.isFile => fail("cannot overwrite a file with a directory")
+       case IsFile(_) if target.isDirectory => fail("cannot overwrite a directory with a file")
+       case IsDirectory(_) if target.isFile => fail("cannot overwrite a file with a directory")
        // TODO move between two fileSystems
-       case File(_) if target.fileSystem != fileSystem =>
+       case IsFile(_) if target.fileSystem != fileSystem =>
          target write bytesAsInts
          delete()
        case _ if target.fileSystem != fileSystem && this.isDirectory =>
@@ -970,8 +970,8 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
              path moveTo (target \ path.relativize(self))
          }
          delete()
-       case File(_) if target.notExists || target.isFile => moveFile(target,atomicMove)
-       case Directory(_) if target.notExists => moveDirectory(target,atomicMove)
+       case IsFile(_) if target.nonExistent || target.isFile => moveFile(target,atomicMove)
+       case IsDirectory(_) if target.nonExistent => moveDirectory(target,atomicMove)
        case _ => throw new Error("not yet handled "+target+","+this)
      }
      target
@@ -1022,7 +1022,12 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    * @see Path.Matching
    * @see FileSystem#matcher(String,String)
    */
-   def children(filter:Path => Boolean = PathMatcher.ALL, options:Traversable[LinkOption]=Nil) : PathSet[Path] = descendants(filter, depth=1, options)
+   def children[U >: Path, F](filter:F = PathMatcher.ALL, options:Traversable[LinkOption]=Nil)(implicit factory:PathMatcherFactory[F]) : PathSet[Path] = 
+          descendants(filter, depth=1, options)
+
+   def *[U >: Path, F](filter: F)(implicit factory:PathMatcherFactory[F]): PathSet[U] = {
+     children(factory(filter))
+   }
 
   /**
    * An iterable that traverses all the elements in the directory tree down to the specified depth
@@ -1063,12 +1068,13 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    * @see Path.Matching
    * @see FileSystem#matcher(String,String)
    */
-  def descendants(filter:Path => Boolean = PathMatcher.ALL, 
-           depth:Int = -1, options:Traversable[LinkOption]=Nil): PathSet[Path]
+  def descendants[U >: Path, F](filter:F = PathMatcher.ALL,
+           depth:Int = -1, options:Traversable[LinkOption]=Nil)(implicit factory:PathMatcherFactory[F]): PathSet[Path]
 
   def **[U >: Path, F](filter: F)(implicit factory:PathMatcherFactory[F]): PathSet[U] = {
     descendants(factory(filter))
   }
+  def ***[U >: Path] : PathSet[U] = descendants()
 /* ****************** The following require jdk7's nio.file ************************** */
 
   /*

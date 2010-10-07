@@ -24,14 +24,14 @@ trait PathFinder[+T,S[B] <: PathFinder[B,S]] {
   /**Constructs a new finder that selects all paths with a name that matches <code>filter</code> and are
    * descendants of paths selected by this finder.
    */
-  def **[U >: Path, F](filter: F)(implicit factory:PathMatcherFactory[F]): S[U]
+  def **[U >: T, F](filter: F)(implicit factory:PathMatcherFactory[F]): S[U]
 
-  def ***[U >: T] : S[U] = null.asInstanceOf[S[U]] //**(AllPassFilter)
+  def ***[U >: T] : S[U]
 
   /**Constructs a new finder that selects all paths with a name that matches <code>filter</code> and are
    * immediate children of paths selected by this finder.
    */
-  def *[U >: T, PM : PathMatcherFactory](filter: PM): S[U] = null.asInstanceOf[S[U]]
+  def *[U >: Path, F](filter: F)(implicit factory:PathMatcherFactory[F]): S[U]
 
   /**Constructs a new finder that selects all paths with name <code>literal</code> that are immediate children
    * of paths selected by this finder.
@@ -85,22 +85,45 @@ trait PathSet[+T] extends Iterable[T] with PathFinder[T, PathSet] {
  *          A function to use for retrieving the children of a particular path
  *          This method is used to retrieve the children of each directory
  */
-abstract class AbstractPathPathSet[+T <: Path](parent : T,
-                             pathFilter : Path => Boolean,
-                             depth:Int,
-                             children : T => List[T]) extends PathSet[T] {
-                               
-  assert(parent.isDirectory, "parent of a directory stream must be a Directory")
+final class BasicPathSet[+T <: Path](srcFiles: Iterable[T],
+                               pathFilter : PathMatcher,
+                               depth:Int,
+                               self:Boolean,
+                               children : T => List[T]) extends PathSet[T] {
+
+  type thisType <: BasicPathSet[T]
+
+  def this (parent : T,
+            pathFilter : PathMatcher,
+            depth:Int,
+            self:Boolean,
+            children : T => List[T]) = this(List(parent), pathFilter, depth, self, children)
+                    
   def **[U >: T, F](filter: F)(implicit factory:PathMatcherFactory[F]): PathSet[U] = {
-    null.asInstanceOf[PathSet[U]]
+    val nextFilter = factory(filter)
+    new BasicPathSet(this, nextFilter, -1, self, children)
   }
 
-  def / (literal: String): thisType = null.asInstanceOf[thisType]  
+  def *[U >: T, F](filter: F)(implicit factory:PathMatcherFactory[F]): PathSet[U] = {
+    val nextFilter = factory(filter)
+    new BasicPathSet(this, nextFilter, 1, self, children)
+  }
+  def ***[U >: T] : PathSet[U] = ** (Matching.All)
+  
+  def / (literal: String): thisType = null.asInstanceOf[thisType]///new BasicPathSet(this, new Matching.NameIs(literal), 1, self, children) 
 
   def iterator: Iterator[T] = new Iterator[T] {
-    var toVisit = children(parent)
+    val roots = srcFiles.toSet
+    var toVisit = if(self) roots.toList else {roots.toList flatMap children}
     var nextElem : Option[T] = None
+
+    def root(p:Path) = p.parents.foldRight (None:Option[Path]){
+      case (_, found @ Some(_)) => found
+      case (prevParent, _) => roots.find{_ == prevParent}
+    }
     
+    def currentDepth(p:Path, root:Option[Path]) = {root.map {r => p.relativize(r).segments.size} getOrElse Int.MaxValue}
+
     def hasNext() = if(nextElem.nonEmpty) true
                     else {
                       nextElem = loadNext()
@@ -111,7 +134,7 @@ abstract class AbstractPathPathSet[+T <: Path](parent : T,
       toVisit match {
         case Nil => None
         case path :: _ if path.isDirectory =>
-          if(depth < 0 || path.relativize(parent).segments.size < depth)
+          if(depth < 0 || depth > currentDepth(path, root(path)))
             toVisit = children(path) ::: toVisit.tail
           else
             toVisit = toVisit.tail
@@ -135,6 +158,7 @@ abstract class AbstractPathPathSet[+T <: Path](parent : T,
     }
   }
 }
+
 
 /*
  * Will uncomment this for the jdk7 version

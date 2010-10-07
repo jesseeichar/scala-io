@@ -12,7 +12,7 @@ import org.junit.Assert._
 import org.junit.Test
 import scalax.io.ramfs.RamFileSystem
 import scalax.io.FileSystem
-import scalax.io.matcher.GlobParser
+import scalax.io.GlobParser
 import java.util.regex.Pattern
 
 class GlobParserTest {

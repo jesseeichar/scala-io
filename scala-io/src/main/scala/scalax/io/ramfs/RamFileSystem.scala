@@ -88,7 +88,7 @@ class RamFileSystem(val id : String = UUID.randomUUID.toString, val separator:St
   private[ramfs] def create(path:RamPath, fac:NodeFac, createParents:Boolean = true) : Boolean = {
     val absolute = path.toAbsolute
     absolute.parent match {
-      case Some(p) if p.notExists && !createParents => 
+      case Some(p) if p.nonExistent && !createParents =>
         throw new FileNotFoundException("Parent directory "+p+" does not exist")
       case _ => ()
     }

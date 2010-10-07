@@ -15,7 +15,7 @@ object Children {
       path.children ().collect {case path => println (path.name)}
 
       // Now print names of each directory
-      path.children ().collect {case File(file) => println (file.name)}
+      path.children ().collect {case IsFile(file) => println (file.name)}
     }
 
     /**
@@ -34,7 +34,7 @@ object Children {
      * Count the number of directories
      */
     def `count directories` {
-      val fileCount: Int = path.children ().collect{case File (f)=> f}.foldLeft (0){(count, _) => count+1}
+      val fileCount: Int = path.children ().collect{case IsFile (f)=> f}.foldLeft (0){(count, _) => count+1}
     }
     
     /*
@@ -50,7 +50,7 @@ object Children {
       val matcher: PathMatcher = path.matcher("S*")
       path.children (matcher).foreach (println _)
 
-      path.children({_.isFile}).foreach (println _)
+      path.children(IsFile).foreach (println _)
     }
 
 /*

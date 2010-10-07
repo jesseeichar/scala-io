@@ -8,12 +8,10 @@
 
 package scalax.io.ramfs
 
-import resource.ManagedResource
-import scalax.io.{
-  FileSystem, Path, FileOps,Codec,PathMatcher,PathSet, LinkOption
-}
+import _root_.resource.ManagedResource
 import scalax.io.attributes.FileAttribute
 
+import scalax.io._
 import Path.AccessModes._
 import Path.fail
 
@@ -62,7 +60,7 @@ class RamPath(relativeTo:String, val path:String, override val fileSystem:RamFil
   def access_=(accessModes:Iterable[AccessMode]) = node match {
     case None => fail("Path %s does not exist".format(path))
     case Some(node) =>  
-        if (notExists) fail("Path %s does not exist".format(path))
+        if (nonExistent) fail("Path %s does not exist".format(path))
 
         node.canRead = accessModes exists {_==Read}
         node.canWrite = accessModes exists {_==Write}
@@ -100,6 +98,16 @@ class RamPath(relativeTo:String, val path:String, override val fileSystem:RamFil
   }  
   override def hashCode() = path.hashCode()
 
-  def descendants(filter:Path => Boolean, depth:Int, options:Traversable[LinkOption]):PathSet[Path] = new RamPathSet(this,filter,depth)
+  def descendants[U >: Path, F](filter:F = PathMatcher.ALL,
+                  depth:Int = -1, options:Traversable[LinkOption]=Nil)(implicit factory:PathMatcherFactory[F]) = {
+    new BasicPathSet(this,filter,depth,false,(parent:RamPath) => {
+      parent.node.collect {
+        case d:DirNode =>
+          d.children.map(n => parent \ n.name)
+        case _ =>
+          throw new AssertionError("This method should only be called on directories")
+      }.flatten.toList
+    })
+  }
 
 }

@@ -8,6 +8,8 @@
 
 package scalax.io
 
+import scalax.io.Matching.FunctionMatcher
+
 /**
  * A function that returns true if the Path parameter
  * matches.
@@ -32,6 +34,11 @@ package scalax.io
  */
 abstract class PathMatcher extends Function[Path,Boolean] {
   def unapply(path: Path) = if(apply(path)) Some(path) else None
+  
+  def || (filter: PathMatcher): PathMatcher = new FunctionMatcher( path => apply(path) || filter(path) )
+  def && (filter: PathMatcher): PathMatcher = new FunctionMatcher( path => apply(path) && filter(path) )
+  def -- (filter: PathMatcher): PathMatcher = new FunctionMatcher( path => apply(path) && !filter(path) )
+  def unary_- : PathMatcher = new FunctionMatcher( path => !apply(path) )
 }
 
 object PathMatcher {

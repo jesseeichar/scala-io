@@ -186,7 +186,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
   def create_open_option_will_not {
     repeat {
       val p = path \ "child"
-      assert (p.notExists)
+      assert (p.nonExistent)
       intercept[IOException] { p.outputStream(OpenOption.Create, OpenOption.Write).write("data") }
     }
   }

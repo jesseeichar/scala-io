@@ -21,16 +21,16 @@ abstract class FsMatchingTests extends scalax.test.sugar.AssertionSugar with Fix
   def file = {
     val path = fixture.path
     path.createFile()
-    val File(f) = path // will throw MatchError is not a file
-    intercept[MatchError] {val Directory(x) = path}
+    val IsFile(f) = path // will throw MatchError is not a file
+    intercept[MatchError] {val IsDirectory(x) = path}
   }
   
   @Test //@Ignore
   def dir = {
     val path = fixture.path
     path.createDirectory()
-    val Directory(d) = path // will throw MatchError is not a file
-    intercept[MatchError] {val File(x) = path}
+    val IsDirectory(d) = path // will throw MatchError is not a file
+    intercept[MatchError] {val IsFile(x) = path}
   }
   
   @Test //@Ignore

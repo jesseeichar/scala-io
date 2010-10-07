@@ -95,8 +95,8 @@ object Samples {
 
     // This example tests if the path is a file, directory, exists or does not exist
     Path ("/tmp/file") match {
-      case File (file) => println ("it's a file!"+file)
-      case Directory (dir) => println ("it's a directory!"+dir)
+      case IsFile (file) => println ("it's a file!"+file)
+      case IsDirectory (dir) => println ("it's a directory!"+dir)
       case Exists (path) => println ("It exists... but what is it?"+path)
       case NonExistent (path) => println ("It does not exist!"+path)
       case _ => println ("I give up")
@@ -205,7 +205,7 @@ object Samples {
     val url: URL = path.toURL
 
     val exists: Boolean = path.exists
-    val notExists: Boolean = path.notExists
+    val notExists: Boolean = path.nonExistent
 
     val hidden: Boolean = path.isHidden
     val isSymLink: Boolean = path.isSymlink
