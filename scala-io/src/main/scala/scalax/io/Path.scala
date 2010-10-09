@@ -197,11 +197,10 @@ import Path.fail
  *  @since   0.1
  *
  */
-abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder[Path, PathSet] with Ordered[Path]
+abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder[Path, PathSet, Path] with Ordered[Path]
 {
   self =>
 
-  type thisType <: Path 
   /**
    * The path segment separator string for
    * the filesystem
@@ -257,7 +256,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    *
    * @see #/(String)
    */
-  def /(child: String): thisType
+  def /(child: String): Path
 
   /**
    * Alias for /(child.name)
@@ -265,13 +264,13 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    * @return A new path with the specified path appended
    * @see #/(String)
    */
-  final def /(child: Path): thisType = /(child.path)
+  final def /(child: Path): Path = /(child.path)
 
   /**
    * Alias for /(Path)
    * @see #/(Path)
    */
-  final def \(child: Path) : thisType = /(child)
+  final def \(child: Path) : Path = /(child)
 
   // identity
   /**
@@ -1075,6 +1074,13 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
     descendants(factory(filter))
   }
   def ***[U >: Path] : PathSet[U] = descendants()
+
+  def +++[T2 >: Path, V >: Path](paths: PathFinder[T2,PathSet,V]): PathSet[T2] = null.asInstanceOf[PathSet[T2]]
+  def ---[T2 >: Path, V >: Path](excludePaths: PathFinder[T2,PathSet,V]): PathSet[T2] = null.asInstanceOf[PathSet[T2]]
+
+  def toSet[B >: Path]: Set[B] = Set(this)
+
+
 /* ****************** The following require jdk7's nio.file ************************** */
 
   /*
@@ -1154,6 +1160,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
 */
 
   // Optimization for Seekable
+
   override protected def tempFile() : Path = fileSystem.createTempFile()
   
 }

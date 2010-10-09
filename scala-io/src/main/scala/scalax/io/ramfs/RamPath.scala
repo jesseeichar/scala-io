@@ -20,8 +20,6 @@ import java.net.{
 }
 
 class RamPath(relativeTo:String, val path:String, override val fileSystem:RamFileSystem) extends Path(fileSystem) with RamFileOps{
-  override type thisType = RamPath
-  
   def node = fileSystem.lookup(this)
   lazy val toAbsolute: Path = fileSystem("",relativeTo + separator + path)
   lazy val toURI: URI = fileSystem.uri(this)
@@ -100,10 +98,10 @@ class RamPath(relativeTo:String, val path:String, override val fileSystem:RamFil
 
   def descendants[U >: Path, F](filter:F = PathMatcher.ALL,
                   depth:Int = -1, options:Traversable[LinkOption]=Nil)(implicit factory:PathMatcherFactory[F]) = {
-    new BasicPathSet(this,filter,depth,false,(parent:RamPath) => {
+    new BasicPathSet[RamPath](this,factory(filter),depth,false,(parent:RamPath) => {
       parent.node.collect {
         case d:DirNode =>
-          d.children.map(n => parent \ n.name)
+          d.children.map(n => parent / n.name)
         case _ =>
           throw new AssertionError("This method should only be called on directories")
       }.flatten.toList

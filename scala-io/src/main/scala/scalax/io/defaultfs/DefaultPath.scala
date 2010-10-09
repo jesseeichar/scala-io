@@ -38,8 +38,6 @@ import Path.AccessModes._
 class DefaultPath private[io] (val jfile: JFile, override val fileSystem: DefaultFileSystem) extends Path(fileSystem) with DefaultFileOps
 {
   self =>
-  
-  override type thisType = DefaultPath
 
   def toAbsolute: Path = if (isAbsolute) this else Path(jfile.getAbsolutePath())(fileSystem)
   def toURI: URI = jfile.toURI()

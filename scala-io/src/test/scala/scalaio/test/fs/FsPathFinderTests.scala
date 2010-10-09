@@ -81,11 +81,23 @@ abstract class FsPathFinderTests extends scalax.test.sugar.AssertionSugar with F
     val root = mkTree
 
     assertSameContents(List(root ** "*.scala", root * "a").flatten, (root * "a") +++ (root ** "*.scala"))
+    assertSameContents(List(root / "a", root / "z"), (root / "a") +++ (root / "z"))
+
+    // TODO add some from RamFS
+    // TODO +++ 2 paths
   }
   @Test //@Ignore 
   def `pathfinders can be combined using ---` {
     val root = mkTree
 
     assertSameContents(root.descendants{!(_:Path).endsWith(".xss")} toList, (root ***) --- (root ** "*.css"))
+    assertSameContents(Nil, (root / "a") +++ (root / "a"))
+
+    // TODO remove some RamFs paths
+    // TODO --- 2 paths
+  }
+  @Test //@Ignore
+  def`asBase allows relative copying of path sets`{
+    fail("not implemented")
   }
 }
