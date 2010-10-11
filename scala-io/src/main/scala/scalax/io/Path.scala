@@ -197,7 +197,7 @@ import Path.fail
  *  @since   0.1
  *
  */
-abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder[Path, PathSet, Path] with Ordered[Path]
+abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder[Path] with Ordered[Path]
 {
   self =>
 
@@ -254,10 +254,16 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    * </p>
    * @return A new path with the specified path appended
    *
-   * @see #/(String)
+   * @see #\(String)
    */
   def /(child: String): Path
 
+  /**
+   * Alias for #/(String)
+   *
+   * @see #/(String)
+   */
+  def \(child: String): Path = /(child)
   /**
    * Alias for /(child.name)
    *
@@ -1074,11 +1080,12 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
     descendants(factory(filter))
   }
   def ***[U >: Path] : PathSet[U] = descendants()
+  
+  def +++[U >: Path](includes: PathFinder[U]): PathSet[U] = new AdditivePathSet(this,includes)
+  def ---[U >: Path](excludes: PathFinder[U]): PathSet[U] = new SubtractivePathSet(this,excludes)
 
-  def +++[T2 >: Path, V >: Path](paths: PathFinder[T2,PathSet,V]): PathSet[T2] = null.asInstanceOf[PathSet[T2]]
-  def ---[T2 >: Path, V >: Path](excludePaths: PathFinder[T2,PathSet,V]): PathSet[T2] = null.asInstanceOf[PathSet[T2]]
-
-  def toSet[B >: Path]: Set[B] = Set(this)
+  def iterator : Iterator[Path] = Iterator(this) 
+  def toBase: Path = null.asInstanceOf[Path]
 
 
 /* ****************** The following require jdk7's nio.file ************************** */

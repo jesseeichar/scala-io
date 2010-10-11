@@ -9,7 +9,7 @@
 package scalaio.test.fs.default
 
 class FsMatchingTest extends scalaio.test.fs.FsMatchingTests with DefaultFixture
-class FsDirectoryStreamTest extends scalaio.test.fs.FsDirectoryStreamTests with DefaultFixture
+class FsDirectoryStreamTest extends scalaio.test.fs.FsPathSetTests with DefaultFixture
 class FsInputTest extends scalaio.test.fs.FsInputTests with DefaultFixture
 class FsOutputTest extends scalaio.test.fs.FsOutputTests with DefaultFixture
 class FsFileOpsTest extends scalaio.test.fs.FsFileOpsTests with DefaultFixture

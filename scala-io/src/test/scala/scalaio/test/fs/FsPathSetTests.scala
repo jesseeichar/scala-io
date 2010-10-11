@@ -12,7 +12,7 @@ import scala.collection.immutable.Vector
 
 import scalax.test.sugar.AssertionSugar
 import scalaio.test.{
-  AbstractDirectoryStreamTests, Node
+  AbstractPathSetTests, Node
 }
 
 import scalax.io._
@@ -27,7 +27,7 @@ import util.Random
 
 import java.io.IOException
 
-abstract class FsDirectoryStreamTests extends AbstractDirectoryStreamTests with Fixture {
+abstract class FsPathSetTests extends AbstractPathSetTests with Fixture {
   protected def fixtures(depth:Int=4) : (Path, Node) = fixture.tree(depth)
   
   // TODO what happens when a directory stream is requested for a non-existant directory or file

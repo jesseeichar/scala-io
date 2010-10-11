@@ -69,7 +69,7 @@ object Matching {
   class FunctionMatcher(f:Path => Boolean) extends PathMatcher {
     def apply(path: Path) = f(path)
   }
-  final class NameIs(name:String) extends FunctionMatcher(_.name == name)
+  final case class NameIs(name:String) extends FunctionMatcher(_.name == name)
 
   final class RegexPathMatcher(pattern:Pattern) extends PathMatcher {
     def this(regex:Regex) = this(regex.pattern)

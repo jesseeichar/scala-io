@@ -21,8 +21,9 @@ import org.junit.rules.TemporaryFolder
 import util.Random
 
 import java.io.IOException
+import scalax.io.Matching.NameIs
 
-trait AbstractDirectoryStreamTests extends scalax.test.sugar.AssertionSugar {
+trait AbstractPathSetTests extends scalax.test.sugar.AssertionSugar {
   /**
    * Node is a xml tree that represents the filesystem tree rooted at Path
    * The XML tree must have the same names as the filesystem tree.
@@ -53,15 +54,18 @@ trait AbstractDirectoryStreamTests extends scalax.test.sugar.AssertionSugar {
     
     val stream = path.descendants(depth=2)
     assertSameStructure (stream, tree.children, 2)
-  }
+  }  
 
   @Test //@Ignore
   def permits_filtering : Unit = {
     repeat {
       val (path,tree) = fixtures()
-    
+
       val stream = path.descendants{(_:Path).name.length < 5}
       assertSameStructure (stream, tree.children){_.name.length < 5}
+
+      val name = tree.children.head.name
+      assertEquals(1,path.descendants(NameIs(name)).size)
     }
   }
 

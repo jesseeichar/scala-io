@@ -29,7 +29,7 @@ abstract class FsMatchingTests extends scalax.test.sugar.AssertionSugar with Fix
   def dir = {
     val path = fixture.path
     path.createDirectory()
-    val IsDirectory(d) = path // will throw MatchError is not a file
+    val IsDirectory(d) = path // will throw MatchError is not a dir
     intercept[MatchError] {val IsFile(x) = path}
   }
   
@@ -37,14 +37,23 @@ abstract class FsMatchingTests extends scalax.test.sugar.AssertionSugar with Fix
   def existance = {
     val path = fixture.path
 
-    val NonExistent(p) = path // will throw MatchError is not a file
+    val NonExistent(p) = path // will throw MatchError file exists
     intercept[MatchError] {val Exists(x) = path}
     
     path.createFile()
     
-    val Exists(p2) = path // will throw MatchError is not a file
+    val Exists(p2) = path // will throw MatchError if does not exist
     intercept[MatchError] {val NonExistent(x) = path}
   }
+
+
+   @Test //@Ignore
+   def name = {
+     val path = fixture.path
+     path.createDirectory()
+     val NameIsXXX = NameIs(path.name)
+     val NameIsXXX(d) = path
+   }
 
 
   @Test //@Ignore
@@ -116,4 +125,40 @@ abstract class FsMatchingTests extends scalax.test.sugar.AssertionSugar with Fix
     assertMatch("""(\w/)*d.x""")
   }
 
+  @Test //@Ignore
+  def && = {
+    val path = fixture.root / "a"
+    path.createDirectory()
+
+    assert((IsDirectory && NameIs("a"))(path))
+    assert(!(IsDirectory && NameIs("B"))(path))
+  }
+
+  @Test //@Ignore
+  def || = {
+    val path = fixture.root / "a"
+    path.createDirectory()
+
+    assert((IsDirectory || NameIs("x"))(path))
+    assert(!(IsFile || NameIs("x"))(path))
+    assert((IsFile || NameIs("a"))(path))
+  }
+
+  @Test //@Ignore
+  def - = {
+    val path = fixture.root / "a"
+    path.createDirectory()
+
+    assert(!(-IsDirectory)(path))
+    assert((-IsFile)(path))
+  }
+
+  @Test //@Ignore
+  def -- = {
+    val path = fixture.root / "a"
+    path.createDirectory()
+
+    assert((IsDirectory -- NameIs("x"))(path))
+    assert(!(IsDirectory -- NameIs("a"))(path))
+  }
 }

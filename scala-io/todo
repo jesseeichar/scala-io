@@ -41,6 +41,7 @@ Lock should provide a seekable that is restricted to lock area
 Seekable's methods are ResourceView but should be parametrized to get rid of casts
 
 == Considerations
+I allow path / "abc/abc" but what if the actual file name is: "abc/abc" do I look for escapes like: "abc\\/abc" or do I not allow multiple depth paths like "abc/abc"
 Add protected aliasing/imports to java classes in package to reduce number or required imports
 Consider adding Path implicits to a package object
 Should BufferSize be a global variable? (I think probably settable.  Maybe like a logger so different situations/objects can have different sizes)
