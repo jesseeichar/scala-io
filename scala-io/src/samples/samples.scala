@@ -91,7 +91,7 @@ object Samples {
 
   { // demonstrate matching using the matchers that are provided in Path.Matching
     import scalax.io.Path
-    import scalax.io.Matching._
+    import scalax.io.PathMatcher._
 
     // This example tests if the path is a file, directory, exists or does not exist
     Path ("/tmp/file") match {

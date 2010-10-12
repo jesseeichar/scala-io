@@ -955,7 +955,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
       }
     }
 
-    import Matching._
+    import PathMatcher._
 
    this match {
        case NonExistent(_) => fail("attempted to move "+path+" but it does not exist")
@@ -1019,7 +1019,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    *          If the filter is a PathMatcher and the underlying filesystem supports the PatchMatcher
    *          implementation then the maximum performance will be achieved.
    *          All Paths that are passed to matcher is relative to this Path
-   *          Default is PathMatcher.ALL
+   *          Default is PathMatcher.All
    * @return
    *          A managed resource managing a PathSet.
    *
@@ -1027,7 +1027,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    * @see Path.Matching
    * @see FileSystem#matcher(String,String)
    */
-   def children[U >: Path, F](filter:F = PathMatcher.ALL, options:Traversable[LinkOption]=Nil)(implicit factory:PathMatcherFactory[F]) : PathSet[Path] = 
+   def children[U >: Path, F](filter:F = PathMatcher.All, options:Traversable[LinkOption]=Nil)(implicit factory:PathMatcherFactory[F]) : PathSet[Path] =
           descendants(filter, depth=1, options)
 
    def *[U >: Path, F](filter: F)(implicit factory:PathMatcherFactory[F]): PathSet[U] = {
@@ -1059,7 +1059,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    *          If the filter is a PathMatcher and the underlying filesystem supports the PatchMatcher
    *          implementation then the maximum performance will be achieved.
    *          All Paths that are passed to matcher is relative to this Path
-   *          Default is PathMatcher.ALL
+   *          Default is PathMatcher.All
    * @param depth
    *          How deep down the tree to traverse
    *          1 is just visit the objects in the directory
@@ -1073,7 +1073,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    * @see Path.Matching
    * @see FileSystem#matcher(String,String)
    */
-  def descendants[U >: Path, F](filter:F = PathMatcher.ALL,
+  def descendants[U >: Path, F](filter:F = PathMatcher.All,
            depth:Int = -1, options:Traversable[LinkOption]=Nil)(implicit factory:PathMatcherFactory[F]): PathSet[Path]
 
   def **[U >: Path, F](filter: F)(implicit factory:PathMatcherFactory[F]): PathSet[U] = {

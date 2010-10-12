@@ -19,4 +19,5 @@ class SeekableTest extends scalaio.test.fs.FsSeekableTests with ForwardSlashRamF
 class BasicPathTest extends scalaio.test.fs.FsBasicPathTests with ForwardSlashRamFixture
 class AccessSetTest extends scalaio.test.fs.FsAccessSetTests with ForwardSlashRamFixture
 class PathObjectTest extends scalaio.test.fs.FsPathObjectTests with ForwardSlashRamFixture
+class PathFinderTest extends scalaio.test.fs.FsPathFinderTests with ForwardSlashRamFixture
 

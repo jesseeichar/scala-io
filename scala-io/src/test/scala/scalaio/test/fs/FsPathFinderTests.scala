@@ -10,6 +10,8 @@ package scalaio.test.fs
 
 import org.junit.Assert._
 import scalax.io.Path
+import scalax.io.PathMatcher._
+
 import org.junit.{Ignore, Test}
 
 abstract class FsPathFinderTests extends scalax.test.sugar.AssertionSugar with Fixture {
@@ -119,13 +121,13 @@ abstract class FsPathFinderTests extends scalax.test.sugar.AssertionSugar with F
   @Test //@Ignore
   def `pathfinders can be combined using ---` {
     val root = mkTree
-    import scalax.io.Matching.NameIs
-    assertSameContents(root.descendants{- NameIs(".css")} toList, (root ***) --- (root ** "*.css"))
+    import scalax.io.PathMatcher.NameIs
+    assertSameContents(root.descendants{- NameIs("d2.css")} toList, (root ***) --- (root ** "*.css"))
     assertSameContents(Nil, (root / "a") --- (root / "a"))
 
     // check that multiple deep calls works
     assertSameContents(root / "a" ** "*.css" toList, ((root * "*") --- (root * "z")) ** "*.css")
-    assertSameContents((root * "{a,z}" ***) toList, ((root * "*") --- (root * "z")) ***)
+    assertSameContents((root * "a" ***) toList, ((root * "*") --- (root * "z")) ***)
     assertSameContents(List(root / "a/b/c"), ((root * "*") --- (root * "z")) * "b" * "c")
     assertSameContents(List(root / "a/b" ), ((root * "*") --- (root * "z")) / "b")
     assertSameContents(List(root / "a/b" ), ((root * "*") --- (root * "z")) \ "b")

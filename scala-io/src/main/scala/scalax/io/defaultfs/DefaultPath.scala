@@ -145,9 +145,8 @@ class DefaultPath private[io] (val jfile: JFile, override val fileSystem: Defaul
   }  
   override def hashCode() = path.hashCode()
 
-  def descendants[U >: Path, F](filter:F = PathMatcher.ALL,
-           depth:Int = -1, options:Traversable[LinkOption]=Nil)(implicit factory:PathMatcherFactory[F]) = {
-    new BasicPathSet[DefaultPath](this, filter, depth, false, (_:DefaultPath).jfile.listFiles.view.map (fileSystem.apply).toList)
+  def descendants[U >: Path, F](filter:F, depth:Int, options:Traversable[LinkOption])(implicit factory:PathMatcherFactory[F]) = {
+    new BasicPathSet[DefaultPath](this, factory(filter), depth, false, (_:DefaultPath).jfile.listFiles.view.map (fileSystem.apply).toList)
   }
 
 

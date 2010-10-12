@@ -1,5 +1,5 @@
 import scalax.io.{Path, PathMatcher}
-import scalax.io.Matching._
+import scalax.io.PathMatcher._
 
 /**
  * search the contents of a directory and perform operations on the objects encountered

@@ -96,8 +96,7 @@ class RamPath(relativeTo:String, val path:String, override val fileSystem:RamFil
   }  
   override def hashCode() = path.hashCode()
 
-  def descendants[U >: Path, F](filter:F = PathMatcher.ALL,
-                  depth:Int = -1, options:Traversable[LinkOption]=Nil)(implicit factory:PathMatcherFactory[F]) = {
+  def descendants[U >: Path, F](filter:F, depth:Int, options:Traversable[LinkOption])(implicit factory:PathMatcherFactory[F]) = {
     new BasicPathSet[RamPath](this,factory(filter),depth,false,(parent:RamPath) => {
       parent.node.collect {
         case d:DirNode =>

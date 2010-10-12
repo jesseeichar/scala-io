@@ -11,7 +11,7 @@ package scalaio.test.fs
 import scalax.io._
 import scalax.io.ramfs._
 import Path.AccessModes._
-import Matching._
+import PathMatcher._
 import scalax.io.resource.Resource
 import org.junit.Assert._
 import org.junit.{

@@ -137,9 +137,9 @@ final class BasicPathSet[+T <: Path](srcFiles: Iterable[T],
       val nextFilter = factory(filter)
       new BasicPathSet(this, nextFilter, 1, false, children)
     }
-    def ***[U >: T] : PathSet[U] = ** (Matching.All)
+    def ***[U >: T] : PathSet[U] = ** (PathMatcher.All)
 
-    def / (literal: String): PathSet[T] = new BasicPathSet(this, new Matching.NameIs(literal), 1, false, children)
+    def / (literal: String): PathSet[T] = new BasicPathSet(this, new PathMatcher.NameIs(literal), 1, false, children)
 
     /**The union of the paths found by this <code>PathSet</code> with the paths found by 'paths'.*/
     def +++[U >: T](includes: PathFinder[U]): PathSet[U] = new AdditivePathSet[U](this, includes)

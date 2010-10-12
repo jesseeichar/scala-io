@@ -12,16 +12,13 @@ import scala.collection.immutable.Vector
 
 import scalax.io._
 import Path.AccessModes._
+import PathMatcher.GlobPathMatcher
 
 import org.junit.Assert._
 import org.junit.{
-  Test, Before, After, Rule, Ignore
+Test, Ignore
 }
-import org.junit.rules.TemporaryFolder
-import util.Random
 
-import java.io.IOException
-import scalax.io.Matching.NameIs
 
 trait AbstractPathSetTests extends scalax.test.sugar.AssertionSugar {
   /**
@@ -65,7 +62,9 @@ trait AbstractPathSetTests extends scalax.test.sugar.AssertionSugar {
       assertSameStructure (stream, tree.children){_.name.length < 5}
 
       val name = tree.children.head.name
-      assertEquals(1,path.descendants(NameIs(name)).size)
+      val matcher = GlobPathMatcher("**/"+name)
+      assertEquals(1,path.descendants(matcher).size)
+      assertEquals(path.descendants().size - 1,path.descendants(- matcher).size)
     }
   }
 

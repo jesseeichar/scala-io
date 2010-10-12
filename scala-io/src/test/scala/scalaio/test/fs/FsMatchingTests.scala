@@ -9,7 +9,7 @@
 package scalaio.test.fs
 
 import scalax.io._
-import Matching._
+import PathMatcher._
 import Path.AccessModes._
 
 import org.junit.Test
@@ -151,6 +151,9 @@ abstract class FsMatchingTests extends scalax.test.sugar.AssertionSugar with Fix
 
     assert(!(-IsDirectory)(path))
     assert((-IsFile)(path))
+
+    assert(!(new FunctionMatcher(-IsDirectory))(path))
+    assert((new FunctionMatcher(-IsFile))(path))
   }
 
   @Test //@Ignore
