@@ -90,11 +90,6 @@ class RamPath(relativeTo:String, val path:String, override val fileSystem:RamFil
   protected def moveDirectory(target: Path, atomicMove:Boolean): Unit = fileSystem.move(this, target.asInstanceOf[RamPath])
   
   override def toString() = "RamPath(%s)".format(path)
-  override def equals(other: Any) = other match {
-    case x: Path  => path == x.path
-    case _        => false
-  }  
-  override def hashCode() = path.hashCode()
 
   def descendants[U >: Path, F](filter:F, depth:Int, options:Traversable[LinkOption])(implicit factory:PathMatcherFactory[F]) = {
     new BasicPathSet[RamPath](this,factory(filter),depth,false,(parent:RamPath) => {

@@ -13,6 +13,7 @@ import scalax.io.Path
 import scalax.io.PathMatcher._
 
 import org.junit.{Ignore, Test}
+import scalax.io.ramfs.RamFileSystem
 
 abstract class FsPathFinderTests extends scalax.test.sugar.AssertionSugar with Fixture {
   def mkTree = {
@@ -116,7 +117,9 @@ abstract class FsPathFinderTests extends scalax.test.sugar.AssertionSugar with F
     assertSameContents(Nil, ((root * "a") +++ (root * "z")) / "*")
     // TODO asBase
 
-    // TODO add some from RamFS
+    val ramfs = new RamFileSystem()
+    ramfs.root / "g/h/i.xml" createFile()
+    assertSameContents(List(root / "a/b/c/d.scala", ramfs.root / "g/h/i.xml"), (root ** "*.scala") +++ (ramfs.root ** "*.xml"))
   }
   @Test //@Ignore
   def `pathfinders can be combined using ---` {
@@ -134,10 +137,19 @@ abstract class FsPathFinderTests extends scalax.test.sugar.AssertionSugar with F
     assertSameContents(Nil, ((root * "*") --- (root * "z")) / "*")
     // TODO asBase
 
-    // TODO remove some RamFs paths
+    val ramfs = new RamFileSystem()
+    ramfs.root / "a/b/c/d.scala" createFile()
+    assertSameContents(List(root / "a/b/c/d.scala"), (root ** "*.scala") --- (ramfs.root ***))
+
   }
+
+  /*
   @Test //@Ignore
   def`asBase allows relative copying of path sets`{
-    fail("not implemented")
+    val root = mkTree
+
+    assertEquals("b/c/d.scala",((root / "a/b" asBase) ** "*.scala").head.path)
+    assertEquals("b/c/d.scala",((root ** "b" asBase) ** "*.scala").head.path)
   }
+  */
 }

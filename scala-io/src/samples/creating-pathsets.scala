@@ -28,8 +28,8 @@ object PathSetSamples {
   // For example, the package action in sbt packages compiled classes and all files under resources.
   // The full path name should not be used in the jar, however. This is where the ## operator comes
   // in. The paths for this situation would look like:
-  val allClasses:PathSet[Path] = ("target" / "classes" toBase) ** "*.class"
-  val allResources:PathSet[Path] = ("src" / "main" / "resources" toBase) ** "*"
+  val allClasses:PathSet[Path] = ("target" / "classes" asBase) ** "*.class"
+  val allResources:PathSet[Path] = ("src" / "main" / "resources" asBase) ** "*"
   val toPackage:PathSet[Path] = allClasses +++ allResources
 
   // A common problem is excluding version control directories. This can be accomplished as follows:

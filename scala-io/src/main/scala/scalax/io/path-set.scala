@@ -40,10 +40,10 @@ trait PathFinder[+T] {
    */
   def \(literal: String) : PathFinder[T]
 
-  /**
+  /*
    * Makes the paths selected by this finder into base directories.
    */
-  def toBase: PathFinder[T]
+//  def asBase: PathFinder[T]
 
   def iterator : Iterator[T]
 }
@@ -93,11 +93,6 @@ trait PathSet[+T] extends Iterable[T] with PathFinder[T] {
    * of paths selected by this finder.
    */
   def \(literal: String) = /(literal)
-
-  /**
-   * Makes the paths selected by this finder into base directories.
-   */
-  def toBase: PathSet[T] = null.asInstanceOf[PathSet[T]]
 }
 
 

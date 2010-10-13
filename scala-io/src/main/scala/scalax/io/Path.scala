@@ -993,10 +993,10 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
 
   override def toString() = "Path(%s)".format(path)
   override def equals(other: Any) = other match {
-    case x: Path  => path == x.path
+    case x : Path => toURI == x.toURI
     case _        => false
   }
-  override def hashCode() = path.hashCode()
+  override def hashCode() = toURI.hashCode()
 
   /**
    * Create a matcher from this path's filesystem
@@ -1085,7 +1085,6 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
   def ---[U >: Path](excludes: PathFinder[U]): PathSet[U] = new SubtractivePathSet(this,excludes)
 
   def iterator : Iterator[Path] = Iterator(this) 
-  def toBase: Path = null.asInstanceOf[Path]
 
 
 /* ****************** The following require jdk7's nio.file ************************** */

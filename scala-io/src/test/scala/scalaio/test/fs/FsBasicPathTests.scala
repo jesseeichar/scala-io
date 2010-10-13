@@ -33,6 +33,31 @@ abstract class FsBasicPathTests extends scalax.test.sugar.AssertionSugar with Fi
   def fspath(name:Path) = fixture.fs(name.path)
 
 
+
+  @Test //@Ignore
+  def two_paths_are_equal_if_from_same_filesystem : Unit = {
+    val path = fixture.path
+    val path2 = fixture.fs(path.path)
+
+    assertEquals(path, path2)
+
+    val fs = new RamFileSystem()
+    val rampath = fs(path.path)
+    val equals = rampath == path
+    assertFalse(equals)
+  }
+
+  def adding_similar_path_from_two_fs_should_have_different_hashcodes {
+    val pathName = "a/b/c/d/e"
+    val fs = new RamFileSystem()
+
+
+    val set = Set(fs(pathName),fixture.fs(pathName))
+
+    assertEquals(2, set.size)
+  }
+
+
   @Test //@Ignore
   def root_of_root_is_same_object : Unit = {
     val rpath = fixture.path.root.get
