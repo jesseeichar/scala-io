@@ -46,8 +46,8 @@ class PathSpec extends FileSystemFixture with Checkers with MustMatchers {
     "have exists and notExists methods that are not be equal" in { fixture: Context =>
       check (fixture.property (existsTest _))
     }
-    
-    
+
+
     "Path" can {
     "move files" in {
     move( context.file, context.path, context.file)
@@ -178,7 +178,7 @@ class PathSpec extends FileSystemFixture with Checkers with MustMatchers {
 
     val path = Path(pathString)
     (Path.AccessModes.values -- access) foreach { a => matchAccess(a, path, false) }
-    
+
     access foreach { a => matchAccess(a, path, true) }
   }
 
@@ -195,13 +195,13 @@ class PathSpec extends FileSystemFixture with Checkers with MustMatchers {
     if (is) test
     else intercept[IOException] {test}
   }
-  
+
   def readTest(path: Path) = path.fileOps.chars().head
-  
+
   def writeTest(path: Path) = path.fileOps.writeString("abc")
-  
+
   def execTest(path: Path) = path.execute()
-  
+
   def matchAccess(access: AccessMode, path: Path, is: Boolean) = access match {
     case EXECUTE => verifyAccess (execTest(path))(is)
     case WRITE => verifyAccess (writeTest(path))(is)

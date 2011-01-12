@@ -60,7 +60,7 @@ class CopyMovePathSpec extends TestCase{
       f2 must be ('notExists)
       exists must be ('exists)
     }
-    
+
     if (canReplace) replace
     else intercept[IOException] {replace}
 }
@@ -85,9 +85,9 @@ class CopyMovePathSpec extends TestCase{
       f2 must be ('exists)
       exists must be ('exists)
     }
-    
+
     if (canReplace) overwrite
     else intercept[IOException] {overwrite}
   }
-  
+
 }

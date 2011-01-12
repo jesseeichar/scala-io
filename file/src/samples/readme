@@ -1,0 +1,21 @@
+The following copyright and warning apply to all code in the samples directory
+
+                     __
+     ________ ___   / /  ___     Scala API
+    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar
+  __\ \/ /__/ __ |/ /__/ __ |    http://scala-lang.org/
+ /____/\___/_/ |_/____/_/ | |
+                          |/
+
+
+
+*************************************************************************************
+ This file contains code samples illustrating how to use the Scala IO API.  It is
+ not a test file, other than it is compiled.
+
+
+ These examples will be the bases for the tests created for the IO project
+
+ Note: In order to be more useful all variable have the expected type explicitly
+       declared so that the compiler can detect if there is a problem with the
+       sample code.  It is not required to work

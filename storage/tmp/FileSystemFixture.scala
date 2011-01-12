@@ -20,14 +20,14 @@ import Path.AccessModes._
 trait FileSystemFixture extends FixtureWordSpec {
   implicit val codec = Codec.UTF8
   case class TestData (pathString: String, numSegments:Int, access: AccessMode*)
-  
+
   abstract class Context {
     private val all = ListBuffer[Path]()
     protected val defaultGen : Generator = {
       val fileNameGen = for {
        numSegments <- Gen.choose(1,10)
        filename <- genName(numSegments)
-       access <- 
+       access <-
       }
       null
     }
@@ -60,9 +60,9 @@ trait FileSystemFixture extends FixtureWordSpec {
   }
 
   type FixtureParam = Context
-  
+
   def createContext: Context
-  
+
   def withFixture(test: OneArgTest) {
     val context = createContext
     context.setUp
@@ -72,7 +72,7 @@ trait FileSystemFixture extends FixtureWordSpec {
       try {
         context.cleanUp
       } catch {
-        case e => 
+        case e =>
           System.err.println("Error while cleaning up filesystem context object")
           e.printStackTrace
       }

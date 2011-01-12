@@ -1,0 +1,82 @@
+== Document
+ReadChars
+WriteChars
+Input
+Output
+Streamable (need details on how patching works)
+LongTraversable
+ResourceTraversable
+SeqLongTraversable
+Path
+AccessSet
+How to implement a new filesystem (do while creating zip FS)
+
+== Tests
+moveTo between 2 different file systems
+setting current directory (Supported by RAM and ZIP)
+add escapes in random path generation
+
+== Misc
+Add Implicits from streams and channels to resources
+ZipFileSystem needs to close ZipFile
+Add pwd on all filesystems that is a val but set when constructing FS
+    this means default filesystem can be created with a custom pwd
+change / so that it divides path in a well defined way before passing to implementation
+Add base to file constructors
+Change design from template pattern to composition.  Create a strategy for each path
+    Consideration, how to optimize?  One can implement the Path class for optimizations or maybe supply
+    a second strategy containing optimizations
+Should I merge access and FileAttributes into one?
+Remove casts with typeclasses and generics
+Path.AccessModes should be put top level
+Add openOptions: Seq[OpenOption] to FileOps.withLock
+Path.Matcher tests
+Path.Matcher should be in PathMatcher and extent PathMatcher
+Path.notExists => Path.nonExistant
+Make ReadChars use LongTraversable
+Make LineTraversable a LongTraversable
+Remove parameter defaults from overridden methods
+Make ResourceTraversableView's append,filter,flatmap efficient when a drop is performed after the operation
+Make Codec immutable
+test copy and move between filesystems
+DirectoryStream to throw exceptions (NotDirectoryException perhaps)
+FileOps to throw exceptions if not file (NotFileException perhaps)
+use useful exceptions 1.  See java7 exceptions (can mix them in) 2.  search for all intercept[IOException] and see if there is a better way
+Add default ExceptionHandlers and allow them to be set on a FileOps
+deleteRecursively should not return tuple.  It should be a case class
+Implement an mutable seekable that always reuses the same fileChannel
+Make DefaultFileSystem.open not close the resource
+Make a ChannelBased LongTraversable
+Lock should provide a seekable that is restricted to lock area
+Seekable's methods are ResourceView but should be parametrized to get rid of casts
+add asBase to PathFinder
+Add checking groups and user of files in zipFS
+Add checking group and other permissions in zipFS
+Change Resource Closer so that it is invariant
+
+
+== Considerations
+I allow path / "abc/abc" but what if the actual file name is: "abc/abc" do I look for escapes like: "abc\\/abc" or do I not allow multiple depth paths like "abc/abc"
+How to do java 6 vs 7 APIs?  It works for most FSs but not default FS.  Perhaps I need a FileSystem parameter that declares
+        which type of path is returned by FS?  Or perphaps just throw unsupported exceptions?
+Add protected aliasing/imports to java classes in package to reduce number or required imports
+Consider adding Path implicits to a package object
+Should BufferSize be a global variable? (I think probably settable.  Maybe like a logger so different situations/objects can have different sizes)
+How should singly traversable streams be handled
+Decide if I want to add to java.protocol.handler.packages:
+      val PKGS_KEY = "java.protocol.handler.pkgs"
+
+      def initProtocolHandler = {
+        val pkg = getClass.getPackage.getName
+
+        val prop = Option(System getProperty PKGS_KEY).map {_ split "\\|"}.orElse(Some(Array[String]()))
+        prop foreach { p =>
+          val newProp = (p :+ pkg ).distinct mkString "|"
+          System.setProperty(PKGS_KEY, newProp)
+        }
+      }
+
+
+== Plugin
+Use Java 7 fileSystem plugin architecture
+Update all TODO: plugin tags

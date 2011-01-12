@@ -17,12 +17,12 @@ object Tests {
       Tests.tests += this
     }
   }
-  
+
   /**
    * Run tests
    */
   def main(args:Array[String]) : Unit = {
-    val results = 
+    val results =
       for(test <- tests) yield {
         test.test(fixture)
       }
@@ -30,6 +30,6 @@ object Tests {
 }
 
 import Tests.{Fixture, TestCase}
-trait Test[Fixture] {  
+trait Test[Fixture] {
   implicit string2Test(name:String) = TestCase[F <: Fixture](name)
 }

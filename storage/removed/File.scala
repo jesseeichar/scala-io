@@ -10,32 +10,32 @@
 
 package scalax.io
 
-import java.io.{ 
-  FileInputStream, FileOutputStream, BufferedReader, BufferedWriter, InputStreamReader, OutputStreamWriter, 
+import java.io.{
+  FileInputStream, FileOutputStream, BufferedReader, BufferedWriter, InputStreamReader, OutputStreamWriter,
   BufferedInputStream, BufferedOutputStream, IOException, File => JFile }
 import java.nio.channels.FileChannel
 import collection.Traversable
 
 object File
 {
-  def apply(path: Path)(implicit codec: Codec = null):File = 
+  def apply(path: Path)(implicit codec: Codec = null):File =
     if (codec != null) new File(path.jfile)(codec)
     else path.toFile
 
   // Create a temporary file
   def makeTemp(prefix: String = Path.randomPrefix, suffix: String = null, dir: JFile = null) =
     apply(JFile.createTempFile(prefix, suffix, dir))
-    
+
   import java.nio.channels.Channel
   type Closeable = { def close(): Unit }
   def closeQuietly(target: Closeable) {
     try target.close() catch { case e: IOException => }
-  }  
+  }
 }
 import File._
 import Path._
 
-/** 
+/**
  *  An abstraction for files.  For character data, a Codec
  *  can be supplied at either creation time or when a method
  *  involving character data is called (with the latter taking
@@ -50,17 +50,17 @@ import Path._
 class File(jfile: JFile)(implicit val creationCodec: Codec = null)
 extends Path(jfile)
 with Streamable.Chars
-{  
+{
   def withCodec(codec: Codec): File = new File(jfile)(codec)
   override def toDirectory: Directory = new Directory(jfile)
   override def toFile: File = this
-  
+
   override def isValid = jfile.isFile() || !jfile.exists()
   override def length = super[Path].length
 
   /** Obtains an InputStream. */
   def inputStream() = new FileInputStream(jfile)
-  
+
   /** Obtains a OutputStream. */
   def outputStream(append: Boolean = false) = new FileOutputStream(jfile, append)
   def bufferedOutput(append: Boolean = false) = new BufferedOutputStream(outputStream(append))
@@ -71,19 +71,19 @@ with Streamable.Chars
    */
   def writer(append: Boolean = false, codec: Codec = getCodec()) =
     new OutputStreamWriter(outputStream(append), codec.charSet)
-  
+
   /** Wraps a BufferedWriter around the result of writer().
    */
   def bufferedWriter(append: Boolean = false, codec: Codec = getCodec()) =
     new BufferedWriter(writer(append, codec))
-  
+
   /** Writes all the Strings in the given iterator to the file. */
   def writeAll(xs: Traversable[String], append: Boolean = false, codec: Codec = getCodec()): Unit = {
     val out = bufferedWriter(append, codec)
     try xs foreach (out write _)
     finally out close
   }
-  
+
 
 def copyFile(destPath: Path, preserveFileDate: Boolean = false) = {
     val FIFTY_MB = 1024 * 1024 * 50
@@ -99,7 +99,7 @@ def copyFile(destPath: Path, preserveFileDate: Boolean = false) = {
     lazy val in = in_s.getChannel()
     lazy val out = out_s.getChannel()
 
-    try {      
+    try {
       val size = in.size()
       var pos, count = 0L
       while (pos < size) {
@@ -108,15 +108,15 @@ def copyFile(destPath: Path, preserveFileDate: Boolean = false) = {
       }
     }
     finally List[Closeable](out, out_s, in, in_s) foreach closeQuietly
-    
+
     if (this.length != dest.length)
       fail("Failed to completely copy %s to %s".format(name, dest.name))
-    
+
     if (preserveFileDate)
       dest.lastModified = this.lastModified
-    
+
     ()
   }
-  
+
   override def toString() = "File(%s)".format(path)
 }
