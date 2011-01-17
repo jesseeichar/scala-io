@@ -6,26 +6,17 @@
 **                          |/                                          **
 \*                                                                      */
 
-package scalaio.test.stream
+package scalax.io
 
-import scalax.io.{
-ReadChars, WriteChars, Codec, Resource
-}
-import scalaio.test._
 
-import java.io.{
-PipedInputStream, PipedOutputStream
-}
+class ReaderResourceTraversableViewTest extends ResourceTraversableViewTest {
 
-class WriteCharsTest extends AbstractWriteCharsTests {
-  def open(): (ReadChars, WriteChars) = {
+  protected override def expectedData : Traversable[Int] = super.expectedData mkString "" map {_.toInt}
 
-    val in = new PipedInputStream()
-    val out = new PipedOutputStream(in)
+    override def newResource[A](conv:Int=>A) = {
+      val data = super.expectedData mkString ""
+      def resource = Resource.fromReader(new java.io.StringReader(data))
+      ResourceTraversable.readerBased(resource, _conv = (c:Char) => conv(c.toInt)).view
+    }
 
-    val inResource = Resource.fromInputStream(in).reader(Codec.UTF8)
-    val outResource = Resource.fromOutputStream(out).writer(Codec.UTF8)
-
-    (inResource, outResource)
-  }
 }

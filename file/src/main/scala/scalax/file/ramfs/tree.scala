@@ -9,7 +9,7 @@
 package scalax.file
 package ramfs
 
-import scalax.io.resource.{
+import scalax.io.{
   Resource, InputStreamResource, OutputStreamResource
 }
 import scala.collection.mutable.ArrayBuffer

@@ -8,10 +8,9 @@
 
 package scalaio.test.stream
 
-import scalax.io.resource._
-import scalax.io.Codec
 import scalaio.test._
 import java.io.ByteArrayInputStream
+import scalax.io.{Codec, Resource}
 
 class InputTest extends AbstractInputTests {
   private def text(sep: String) = {

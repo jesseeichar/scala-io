@@ -14,7 +14,7 @@ import java.io.{
 import java.nio.channels.{
     ByteChannel, FileChannel
 }
-import scalax.io.resource._
+import scalax.io._
 import scala.collection.Traversable
 import scalax.io.StandardOpenOption._
 import Resource._

@@ -30,7 +30,7 @@ import java.io.{File => JFile, OutputStream}
  */
 trait Output {
 
-  protected def outputStream : OutputResource[OutputStream]
+  protected def underlyingOutput : OutputResource[OutputStream]
 
   /**
    * Write data to the underlying object.  In the case of writing ints and bytes it is often
@@ -50,7 +50,7 @@ trait Output {
    *          resolved and do not need to be supplied
    */
   def write[T](data: TraversableOnce[T])(implicit writer:OutputConverter[T]) : Unit = {
-    outputStream.foreach {writer(_,data)}
+    underlyingOutput.foreach {writer(_,data)}
   }
   /**
   * Writes a string.
@@ -63,7 +63,7 @@ trait Output {
   *          Default is sourceCodec
   */
   def write(string: String)(implicit codec: Codec): Unit = {
-      outputStream.writer writeString string
+      underlyingOutput.writer writeString string
   }
 
   /*
@@ -90,6 +90,6 @@ trait Output {
   *          be converted to the encoding of {@link sourceCodec}
   */
   def writeStrings(strings: Traversable[String], separator:String = "")(implicit codec: Codec): Unit = {
-      outputStream.writer.writeStrings(strings,separator)
+      underlyingOutput.writer.writeStrings(strings,separator)
   }
 }

@@ -3,7 +3,7 @@ package scalaio.test
 import java.io.{
 InputStreamReader, BufferedReader
 }
-import scalax.io.resource.Resource
+import scalax.io.Resource
 
 object Constants {
   final lazy val IMAGE = resource("resources/image.png", getClass())

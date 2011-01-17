@@ -10,7 +10,7 @@ package scalax.file
 package ramfs
 
 import scalax.io.StandardOpenOption.{Create,CreateFull,Read,Write,Truncate,DeleteOnClose,WriteTruncate,Append,CreateNew}
-import scalax.io.resource.ByteChannelResource
+import scalax.io.ByteChannelResource
 import java.nio.channels.FileChannel
 import java.io.{
   FileNotFoundException, IOException

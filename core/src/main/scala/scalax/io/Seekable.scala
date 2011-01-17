@@ -12,7 +12,7 @@ import java.nio.{ByteBuffer, CharBuffer}
 import java.nio.channels.{
     ByteChannel, WritableByteChannel
 }
-import scalax.io.resource._
+import scalax.io._
 import Constants.BufferSize
 import scala.collection.Traversable
 import Resource._
@@ -410,7 +410,7 @@ trait Seekable extends Input with Output {
   def bytesAsInts:ResourceView[Int] = channel(Read).bytesAsInts
 
   // required method for Output trait
-  protected def outputStream = channel(WriteTruncate:_*).outputStream
+  protected def underlyingOutput = channel(WriteTruncate:_*).outputStream
 
   private def charCountToByteCount(start:Long, end:Long)(implicit codec:Codec) = {
     val encoder = codec.encoder

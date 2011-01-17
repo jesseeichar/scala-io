@@ -2,7 +2,7 @@ object CreatePath {
 
   // Create a Path in the default filesystem explicitly
   def explicitCreation = {
-    import scalax.io.{Path, FileSystem}
+    import scalax.file.{Path, FileSystem}
     // first use default param to indicate defaultFileSystem
     val path1: Path = Path ("/tmp/file1")
 
@@ -26,7 +26,7 @@ object CreatePath {
 
   // Create Path from URI
   def fromURI = {
-    import scalax.io.{Path}
+    import scalax.file.{Path}
     import java.net.URI
     // the URI type indicates which filesystem to use
     // file:// indicates the default filesystem
@@ -45,7 +45,7 @@ object CreatePath {
   // Create path from java.file.File.
   def fromJFile = {
     import java.io.File
-    import scalax.io.Path
+    import scalax.file.Path
     // java.file.File are always on the default filesystem
     // so filesystem is not declared
     val path1: Path = Path (new File ("/tmp/file1"))

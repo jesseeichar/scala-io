@@ -8,9 +8,8 @@
 
 package scalaio.test.stream
 
-import scalax.io.resource.Resource
 import scalax.io.{
-Input, Output
+Input, Output, Resource
 }
 import scalaio.test._
 

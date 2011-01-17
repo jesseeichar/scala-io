@@ -1,4 +1,4 @@
-import scalax.io.{Path}
+import scalax.file.{Path}
 
 object Descendants {
 

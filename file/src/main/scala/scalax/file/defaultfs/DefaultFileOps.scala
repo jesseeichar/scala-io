@@ -9,8 +9,6 @@
 package scalax.file
 package defaultfs
 
-import scalax.io.{OpenOption, Seekable}
-import scalax.io.resource._
 import scalax.io.StandardOpenOption
 import StandardOpenOption._
 import StandardOpenOption.{name => _}
@@ -20,6 +18,8 @@ import scalax.io.nio.SeekableFileChannel
 import java.io.{
   FileInputStream, FileOutputStream, File => JFile, RandomAccessFile
 }
+import scalax.io.{DeletingFileOutputStream, OpenOption, Seekable, Resource}
+
 /**
  * <b>Not part of API.</b>
  *

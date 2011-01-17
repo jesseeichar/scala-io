@@ -8,8 +8,7 @@
 
 package scalaio.test.stream
 
-import scalax.io.resource._
-import scalax.io.Codec
+import scalax.io.{Codec, Resource}
 import scalaio.test._
 
 class ReadCharsTest extends AbstractReadCharsTests {

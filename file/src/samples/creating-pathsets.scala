@@ -1,6 +1,6 @@
-import scalax.io.Path
+import scalax.file.Path
 import Path._
-import scalax.io.PathSet
+import scalax.file.PathSet
 
 object PathSetSamples {
 

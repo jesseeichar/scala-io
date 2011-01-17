@@ -13,7 +13,7 @@ import scalax.file._
 import scalax.file.ramfs._
 import Path.AccessModes._
 import PathMatcher._
-import scalax.io.resource.Resource
+import scalax.io.Resource
 import org.junit.Assert._
 import org.junit.Test
 import java.io.{OutputStream, IOException}
@@ -51,6 +51,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
   def parent_of_single_segment_path_is_none {
      assertEquals(None, fixture.fs("a").parent)
   }
+
   @Test //@Ignore
   def adding_similar_path_from_two_fs_should_have_different_hashcodes {
     val path = List("a","b","c","d","e")
