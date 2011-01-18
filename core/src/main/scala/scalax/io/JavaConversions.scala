@@ -13,14 +13,5 @@ import java.net.URL
 import java.io.{InputStream, Closeable, RandomAccessFile, File}
 
 object JavaConversions {
-  class AsResource[R <: Resource[_]](op: => R) {
-    def asResource = op
-  }
-  implicit def asResource(url:URL): AsResource[InputStreamResource[InputStream]] =
-    new AsResource(Resource.fromInputStream(url.openStream))
-  implicit def asResource(file:File):AsResource[SeekableByteChannelResource[SeekableByteChannel]] =
-    asResource(new RandomAccessFile(file,"rw"))
-  implicit def asResource(randomAccessFile:RandomAccessFile):AsResource[SeekableByteChannelResource[SeekableByteChannel]] =
-    new AsResource(Resource.fromRandomAccessFile(randomAccessFile))
   implicit def byteBufferToTraversable(b:java.nio.ByteBuffer): ByteBuffer = new ByteBuffer(b)
 }

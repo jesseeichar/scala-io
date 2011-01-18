@@ -54,7 +54,7 @@ object Samples {
     // this is because the underlying filesystem has options for optimizing the use of the file channels
     // for example a file could be mapped into memory for the duration of the function and all operations could be performed using the same channel object
     import scalax.file.{FileOps, Path}
-    // the codec must be defined either as a parameter of ops methods or as an implicit
+    // see codec examples in scala io core for details on why there is an implicit codec here
     implicit val codec = scalax.io.Codec.UTF8
 
     val file: FileOps =  Path ("file")

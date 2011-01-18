@@ -4,8 +4,10 @@
  */
 object ReadWriteFiles {
 
+
   def basicReadWrite {
     import scalax.file.Path
+    implicit val codec = scalax.io.Codec.UTF8
 
     // Take the first set of non-empty lines, keeping the terminator for each line
     val nonEmptySpan = Path("file").lines(includeTerminator = true).
@@ -13,7 +15,7 @@ object ReadWriteFiles {
       takeWhile{_.nonEmpty}
 
     // Write result from previous read to a new file
-    Path("nonEmpty").write(nonEmptySpan)
+    Path("nonEmpty").writeStrings(nonEmptySpan)
   }
   /**
    * Safe way to read and write a file
@@ -23,7 +25,7 @@ object ReadWriteFiles {
       FileOps, Path, NotFileException}
     import java.io.FileNotFoundException
     import scala.util.control.Exception._
-    // the codec must be defined either as a parameter of ops methods or as an implicit
+    // see codec examples in scala io core for details on why there is an implicit codec here
     implicit val codec = scalax.io.Codec.UTF8
 
     val file: FileOps =  Path("file")

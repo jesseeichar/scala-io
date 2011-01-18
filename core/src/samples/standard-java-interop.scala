@@ -1,11 +1,13 @@
 object JavaInterop {
 
-  { // demonstrate several ways to interoperate existing java APIs
+  /**
+   * demonstrate several ways to interoperate existing java APIs
+   */
+  def basicInteropExamples {
     import scalax.io._
-    import JavaConversions.asResource
     import java.io._
 
-    val file: SeekableByteChannelResource[SeekableByteChannel] =  new File("file").asResource
+    val file: SeekableByteChannelResource[SeekableByteChannel] =  Resource.fromFile(new File("file"))
 
     // some APIs require a stream or channel. Using one of the file resources you can safely call the method and be guaranteed that the stream will be correctly closed and exceptions handled
     // see the documentation in resource.ManagedResource for details on all the options available

@@ -171,6 +171,6 @@ abstract class FileOps extends Seekable {
   override def bytesAsInts:ResourceView[Int] = inputStream.bytesAsInts
 
   // required method for Output trait
-  override protected def outputStream = outputStream()
+  override protected def underlyingOutput = outputStream()
 }
 

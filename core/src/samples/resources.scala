@@ -7,7 +7,7 @@ object Resources {
     import java.nio.channels._
     import java.net.URL
 
-    // the codec must be defined either as a parameter of ops methods or as an implicit
+    // see codec examples in scala io core for details on why there is an implicit codec here
     implicit val codec = scalax.io.Codec.UTF8
 
     // get various input streams, readers an channels
@@ -27,7 +27,7 @@ object Resources {
 
     // examples getting ByteChannels
     // default is a read/write/create channel
-    val channel: SeekableByteChannelResource[SeekableByteChannel] = JavaConversions.asResource(new RandomAccessFile("file","rw")).asResource
+    val channel: SeekableByteChannelResource[SeekableByteChannel] = Resource.fromFile("file")
     val channel2: SeekableByteChannelResource[SeekableByteChannel] = Resource.fromRandomAccessFile(new RandomAccessFile("file","rw"))
     val seekable: Seekable = channel2
     val inOut: Input with Output = channel

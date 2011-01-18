@@ -16,6 +16,7 @@ import java.nio.channels.{
 import Closer.Noop
 import java.io._
 import nio.SeekableFileChannel
+import java.net.URL
 
 /**
  * A Resource that can be used to do IO.  It wraps objects from the java.io package
@@ -452,6 +453,11 @@ object Resource {
     def open = new SeekableFileChannel(opener.getChannel)
     new SeekableByteChannelResource[SeekableFileChannel](open,extraCloser)
   }
+
+  def fromURL(url:URL): InputStreamResource[InputStream] = fromInputStream(url.openStream)
+  def fromURL(url:String): InputStreamResource[InputStream] = fromURL(new URL(url))
+  def fromFile(file:File): SeekableByteChannelResource[SeekableByteChannel] = fromRandomAccessFile(new RandomAccessFile(file,"rw"))
+  def fromFile(file:String): SeekableByteChannelResource[SeekableByteChannel] = fromRandomAccessFile(new RandomAccessFile(file,"rw"))
 }
 
 /***************************** InputStreamResource ************************************/

@@ -1,4 +1,4 @@
-object PathMatcher {
+object PathMatcherSamples {
   /**
    * Match a Path against the full path as a string
    */

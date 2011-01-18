@@ -152,7 +152,7 @@ trait Seekable extends Input with Output {
    *          Default will use all bytes in patch
    */
   def patch[T](position: Long,
-            data: TraversableOnce[T],
+            data: T,
             overwrite : Overwrite)(implicit converter:OutputConverter[T]): Unit = {
     val bytes = converter.toBytes(data)
     val actualPosition = converter.sizeInBytes * position
@@ -165,20 +165,24 @@ trait Seekable extends Input with Output {
     val insertData = replaced <= 0 && replaced != OVERWRITE_CODE
 
     if(appendData) {
-      append(bytes)(OutputConverter.ByteConverter)
+      append(bytes)(OutputConverter.TraversableByteConverter)
     } else if(insertData) {
-      insert(actualPosition, bytes)(OutputConverter.ByteConverter)
+      insert(actualPosition, bytes)(OutputConverter.TraversableByteConverter)
     } else {
       // overwrite data
       overwriteFileData(actualPosition, bytes, replaced)
     }
   }
 
+  def patchIntsAsBytes(position:Long,
+                       data:TraversableOnce[Int],
+                        overwrite : Overwrite) = patch(position,data,overwrite)(OutputConverter.TraversableIntAsByteConverter)
+
   def insert(position : Long, string: String)(implicit codec: Codec): Unit = {
     insert(position, codec encode string)
   }
 
-  def insert[T](position : Long, data : TraversableOnce[T])(implicit converter:OutputConverter[T]) = {
+  def insert[T](position : Long, data : T)(implicit converter:OutputConverter[T]) = {
     val bytes = converter.toBytes(data)
     if(size.forall(_ <= position)) {
       append(bytes)
@@ -188,6 +192,8 @@ trait Seekable extends Input with Output {
         insertDataTmpFile(position max 0, bytes)
     }
   }
+
+  def insertIntsAsBytes(position : Long, data : TraversableOnce[Int]) = insert(position, data)(OutputConverter.TraversableIntAsByteConverter)
 
   private def insertDataInMemory(position : Long, bytes : TraversableOnce[Byte]) = {
     for(channel <- channel(Write) ) {
@@ -229,7 +235,7 @@ trait Seekable extends Input with Output {
   private def insertDataTmpFile(position : Long, bytes : TraversableOnce[Byte]) = {
       val tmp = tempFile()
 
-      tmp write (bytesAsInts.asInstanceOf[LongTraversable[Int]] ldrop position)
+      tmp writeIntsAsBytes (bytesAsInts.asInstanceOf[LongTraversable[Int]] ldrop position)
 
       for(channel <- channel(Write) ) {
            channel position  position
@@ -299,9 +305,13 @@ trait Seekable extends Input with Output {
   *          The number of bytes to append negative number to take all
   *          default is to append all
   */
-  def append[T](data: TraversableOnce[T])(implicit converter:OutputConverter[T]): Unit = {
+  def append[T](data: T)(implicit converter:OutputConverter[T]): Unit = {
     val bytes = converter.toBytes(data)
     for (c <- channel(Append)) writeTo(c, bytes, -1)
+  }
+
+  def appendIntsAsBytes[T <: TraversableOnce[Int]](data:T) {
+    append(data)(OutputConverter.TraversableIntAsByteConverter)
   }
 
   // returns (wrote,earlyTermination)

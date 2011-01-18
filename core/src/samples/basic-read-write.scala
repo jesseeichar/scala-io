@@ -98,11 +98,11 @@ object BasicIO {
     import scalax.io.Resource
     import java.io.{
       ByteArrayOutputStream,FileOutputStream,
-      PrintStream, OutputStreamWriter, BufferedReader
+      PrintStream, OutputStreamWriter
     }
 
     // Note: The file API is nearly finished allowing one to write directly to files without the
-    // cumbersome new FileOutputStream shown below.  This is the "pure" scala IO solution
+    // cumbersome new FileOutputStream shown below.  This is the "pure" Scala IO solution
     Resource.fromOutputStream(new FileOutputStream("scala.html")) write "data".getBytes()
     Resource.fromOutputStream(new FileOutputStream("scala.html")) write Array[Byte](1,2,3)
 
@@ -172,25 +172,12 @@ object BasicIO {
   }
 
   /**
-   * To simplify certain tasks several objects have a conversion to a AsResource object to make converting the
-   * object to a Resource easier
-   */
-  def javaConversions {
-    import scalax.io._
-    import JavaConversions._
-    import java.io._
-    import java.net._
-
-    val seekableResource: SeekableByteChannelResource[SeekableByteChannel] = new File("file").asResource
-    val input = new URL("http://www.scala-lang.org")
-  }
-  /**
    * read comma separated file
    */
   def readCsvFile {
     import scalax.io.Resource
 
-    // the codec must be defined either as a parameter of ops methods or as an implicit
+    // see codec examples in scala io core for details on why there is an implicit codec here
     implicit val codec = scalax.io.Codec.UTF8
 
     val resource = Resource.fromBufferedReader(new BufferedReader(new FileReader("csv")))
@@ -199,36 +186,41 @@ object BasicIO {
     // after this it is normal scala collection type operations
   }
 
-  { // add all bytes in file together
-    import scalax.io.{Input,InputStreamResource}
+  /**
+   * add all bytes in stream together
+   */
+  def addAllBytes{
+    import scalax.io._
     import java.io.InputStream
-    import scalax.io.JavaConversions._
     import java.net.URL
 
-    // the codec must be defined either as a parameter of ops methods or as an implicit
+    // see codec examples in scala io core for details on why there is an implicit codec here
     implicit val codec = scalax.io.Codec.UTF8
 
     // you can use the implicit conversions of JavaConversions to add the asResource method to certain classes like URL
-    val someFile:Input = new URL("file://someFile").asResource
+    val someFile:Input = Resource.fromURL("file://someFile")
 
     // Actual type is InputStreamResource[InputStream] but that is only needed if you want to convert to a reader
-    val someFile2: InputStreamResource[InputStream] = new URL("file://someFile").asResource
+    val someFile2: InputStreamResource[InputStream] = Resource.fromURL("file://someFile")
     val sum: Int = someFile.bytesAsInts.reduceLeft (_ + _)
   }
 
-  { // quickly (and unsafely) load file into memory
+  /**
+   * quickly (and unsafely) load all data into memory
+   */
+  def loadIntoMemory {
 
     // first load as strings and remove vowels
-    import scalax.io.{InputStreamResource,ReadChars,Codec}
-    import scalax.io.JavaConversions._
+    import scalax.io._
+    import Resource._
     import java.net.URL
     import java.io.InputStream
 
-    // the codec must be defined either as a parameter of ops methods or as an implicit
+    // see codec examples in scala io core for details on why there is an implicit codec here
     implicit val codec = scalax.io.Codec.UTF8
 
     // you can use the implicit conversions of JavaConversions to add the asResource method to certain classes like URL
-    val someFile: InputStreamResource[InputStream] = new URL("file://someFile").asResource
+    val someFile: InputStreamResource[InputStream] = fromURL("http://www.scala-lang.org")
     // You can convert an InputStreamResource to a _ReadChars_ type if desired.  That means that the codec needs to be
     // defined just once.
     val someReader: ReadChars = someFile.reader(Codec.UTF8)
@@ -238,29 +230,34 @@ object BasicIO {
     val (small, large) = someFile.byteArray partition (_ < 128)
   }
 
-  { // iterate over all character in file
-    import scalax.io.{Input, JavaConversions, Line}
-    import JavaConversions._
-    import java.net.URL
+  /**
+   * iterate over all character in file
+   */
+  def allChars{
+    import scalax.io._
+    import Resource._
 
-    // the codec must be defined either as a parameter of ops methods or as an implicit
+    // see codec examples in scala io core for details on why there is an implicit codec here
     implicit val codec = scalax.io.Codec.UTF8
 
     // you can use the implicit conversions of JavaConversions to add the asResource method to certain classes like URL
-    val someFile:Input = new URL("file://someFile").asResource
+    val someFile:Input = fromURL("file://someFile")
     val doubled: Traversable[String] = for ( c <- someFile.chars ) yield "" + c + c
   }
 
-  { // read and print out all lines in a file
-    import scalax.io.{Input, Codec,Line}
-    import scalax.io.JavaConversions._
+  /**
+   * read and print out all lines from a URL
+   */
+  def printLines{
+    import scalax.io._
+    import Resource._
     import java.net.URL
 
     // see codec example for why codec is required
     implicit val codec = Codec.UTF8
 
     // you can use the implicit conversions of JavaConversions to add the asResource method to certain classes like URL
-    val someFile:Input = new URL("file://someFile").asResource
+    val someFile:Input = fromURL("file://someFile")
 
     // by default the line terminator is stripped and is
     // auto detected
@@ -274,33 +271,18 @@ object BasicIO {
     someFile.lines (terminator = Line.Terminators.NewLine) foreach println _
   }
 
-  { // explicitly declare the codecs to use
-    import scalax.io.{Input,Codec,SeekableByteChannelResource,SeekableByteChannel}
-    import scalax.io.JavaConversions._
-    import java.net.URL
-
-    // you can use the implicit conversions of JavaConversions to add the asResource method to certain classes like URL
-    val someFile:Input = new URL("file://someFile").asResource
-
-    // All methods for reading and writing characters/strings
-    // have a codec parameter that used to explicitly declare the
-    // codec to use
-    someFile.chars(codec = Codec.ISO8859)
-
-    // If there is not a constant for the desired codec
-    // one can easily be created
-    someFile.lines()(codec = Codec("UTF-16"))
-  }
-
-  { // several examples of writing data
-    import scalax.io.JavaConversions._
+  /**
+   * several examples of writing data
+   */
+  def moreOnWriting{
+    import scalax.io.Resource._
     import java.io.File
     import scalax.io.{Seekable,Codec}
     // see codec example for why codec is required
     implicit val codec = Codec.UTF8
 
     // you can use the implicit conversions of JavaConversions to add the asResource method to certain classes like URL
-    val someFile: Seekable = new File("someFile").asResource
+    val someFile: Seekable = fromFile("someFile")
 
     // write bytes
     // By default the file write will replace
@@ -330,19 +312,4 @@ object BasicIO {
     someFile.writeStrings("It costs" :: "one" :: "dollar" :: Nil,
                     separator="||\n||")(codec = Codec.UTF8)
   }
-
-  def randomAccess =   { // several examples of writing data
-    import scalax.io.{Seekable,Codec,Line}
-    import scalax.io.JavaConversions._
-    import java.io.File
-
-    // see codec example for why codec is required
-    implicit val codec = Codec.UTF8
-
-    // you can use the implicit conversions of JavaConversions to add the asResource method to certain classes like URL
-    val someFile: Seekable = new File("someFile").asResource
-    someFile.append("append this string")
-    someFile.appendStrings(List("s one", "s two"),Line.Terminators.Pair.sep)
-  }
-
 }

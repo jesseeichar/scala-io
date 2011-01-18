@@ -49,9 +49,9 @@ trait Output {
    *          The strategy used to write the data to the underlying object.  Many standard data-types are implicitly
    *          resolved and do not need to be supplied
    */
-  def write[T](data: TraversableOnce[T])(implicit writer:OutputConverter[T]) : Unit = {
-    underlyingOutput.foreach {writer(_,data)}
-  }
+  def write[T](data:T)(implicit writer:OutputConverter[T]):Unit = underlyingOutput.foreach {writer(_,data)}
+
+  def writeIntsAsBytes(data: TraversableOnce[Int]) = write(data)(OutputConverter.TraversableIntAsByteConverter)
   /**
   * Writes a string.
   *
