@@ -1,3 +1,11 @@
+/*                     __                                               *\
+**     ________ ___   / /  ___     Scala API                            **
+**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar             **
+**  __\ \/ /__/ __ |/ /__/ __ |    http://scala-lang.org/               **
+** /____/\___/_/ |_/____/_/ | |                                         **
+**                          |/                                          **
+\*                                                                      */
+
 /**
  * Common/simple Path operations
  * Nothing too fancy here. Coolest is the resolving child
@@ -7,6 +15,7 @@ object StdPathOps {
 
   import scalax.file.Path
   import java.net.{URI, URL}
+
 
   val path: Path = Path("file")
 

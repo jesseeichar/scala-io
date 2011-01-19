@@ -1,0 +1,131 @@
+body,
+html {
+    margin:0;
+    padding:0;
+    color:#000;
+    background:#a7a09a;
+}
+#wrap {
+    width:90%;
+    margin:0 auto;
+    background:#99c;
+}
+#header {
+    padding:5px 10px;
+    background:#ddd;
+}
+h1 {
+    margin:0;
+}
+#nav {
+    padding:5px 10px;
+    background:#c99;
+}
+#nav ul {
+    margin:0;
+    padding:0;
+    list-style:none;
+}
+#nav li {
+    display:inline;
+    margin:0;
+    padding:0;
+}
+#navcontainer {
+    float:left;
+    width:150px;
+    padding:10px;
+    background:#9c9;
+    font-size: 12px;
+    font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+
+}
+h2 {
+    margin:0 0 1em;
+}
+#main {
+    float:right;
+    width: 560px;
+    padding:10px;
+    background:#99c;
+}
+/*
+#navcontainer {
+    width: 150px;
+    font-size: 12px;
+    font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+    margin-left: 30px;
+}*/
+
+#navcontainer ul
+{
+list-style-type: none;
+margin-left: 0;
+padding-left: 0;
+}
+
+#navlist a
+{
+display: block;
+color: #8592BB;
+padding: 1px 0 1px 8px;
+}
+
+/*boxmodel hack. http://css-discuss.incutio.com/?page=BoxModelHack SBMH*/
+#navlist a { width: 114px; }
+
+#navlist a
+{
+\width: 130px;
+w\idth: 114px;
+}
+
+#subnavlist a
+{
+display: block;
+color: #9C9C9C;
+padding: 1px 0 1px 8px;
+margin-left: 8px;
+}
+
+/*boxmodel hack. http://css-discuss.incutio.com/?page=BoxModelHack SBMH*/
+#subnavlist a { width: 106px; }
+
+#subnavlist a
+{
+\width: 122px;
+w\idth: 106px;
+}
+
+#navlist a, #navlist a:visited,#subnavlist a, #subnavlist a:visited
+{
+border-left: 8px solid #eee;
+background: #eee;
+color: #9C9C9C;
+text-decoration: none;
+}
+
+#navlist a:hover, #navlist a#current:hover
+{
+border-left: 8px solid #CCCCCC;
+text-decoration: underline;
+}
+
+#subnavlist a:hover, #subnavlist a#subcurrent:hover
+{
+border-left: 8px solid #CCCCCC;
+text-decoration: underline;
+}
+/*
+a#current, a:visited#current, a#subcurrent , a:visited#subcurrent
+{
+border-left: 8px solid #283D82;
+background: #F3F5FC;
+color: #283D82;
+text-decoration: none;
+}
+*/
+a#active{
+color: #000000;
+text-decoration: underline;
+}

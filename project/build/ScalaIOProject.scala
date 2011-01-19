@@ -6,11 +6,12 @@ class ScalaIOProject(info: ProjectInfo)
   val scalatoolsSnapshot = "Scala Tools Snapshot" at "http://scala-tools.org/repo-snapshots/"
   val scalatoolsRelease = "Scala Tools Snapshot" at "http://scala-tools.org/repo-releases/"
 
-  lazy val core = project("core", "core", new Core(_))
-  lazy val coreTest = project("core-test", "core-test", new TestProject(_),core)
-  lazy val file = project("file", "file", new File(_),core)
-  lazy val fileTest = project("file-test", "file-test", new TestProject(_),core,coreTest,file)
-  lazy val archive = project("archive", "archive", new Archive(_),core, file)
+  lazy val core:Core = project("core", "core", new Core(_))
+  lazy val coreTest:TestProject = project("core-test", "core-test", new TestProject(_),core)
+  lazy val file:File = project("file", "file", new File(_),core)
+  lazy val fileTest:TestProject = project("file-test", "file-test", new TestProject(_),core,coreTest,file)
+  lazy val archive:Archive = project("archive", "archive", new Archive(_),core, file)
+  lazy val webSite:WebSite = project("web-site", "web-site", new WebSite(_),core, file)
 
 
   /* ------   Sub projects ------ */
@@ -38,6 +39,25 @@ class ScalaIOProject(info: ProjectInfo)
   class Archive(info: ProjectInfo)
           extends DefaultProject(info)
                   with IoProject
+
+  class WebSite(info:ProjectInfo)
+          extends DefaultProject(info) {
+
+    val siteOutput = outputPath / "site"
+
+    def siteTask = task {
+      val projectSites = dependencies flatMap {
+        case project:IoProject => List(new ProjectSite(project,log))
+        case _ => Nil
+      }
+      FileUtilities.copy(mainResources.get, siteOutput, log)
+
+      val site = new WebsiteModel(projectSites.toList,siteOutput,log)
+      site.buildSite
+      None
+    }
+    lazy val site = siteTask
+  }
 }
 
 trait IoProject extends AutoCompilerPlugins {

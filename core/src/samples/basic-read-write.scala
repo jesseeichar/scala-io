@@ -1,5 +1,8 @@
 import java.io.{BufferedReader, FileReader, FileOutputStream, StringReader}
 
+/**
+ * These examples are a quick introduction to performing basic IO using the Scala IO API
+ */
 object BasicIO {
 
   /**
@@ -44,7 +47,7 @@ object BasicIO {
   }
 
   /**
-   * Examples of basic IO 
+   * Examples of basic IO
    */
   def basicInput {
     import scalax.io._
