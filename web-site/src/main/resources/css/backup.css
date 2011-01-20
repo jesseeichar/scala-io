@@ -1,21 +1,79 @@
-body,
-html {
-    margin:0;
-    padding:0;
-    color:#000;
-    background:#a7a09a;
+body {
+	margin:0px 0px 10px 0px;
+	margin-right:10px;
+	padding:0px;
+	font-family:verdana, arial, helvetica, sans-serif;
+	color:#333;
+	background-color:white;
 }
-#wrap {
-    width:750px;
-    margin:0 auto;
-    background:#99c;
+h1 {
+	margin:0px 0px 15px 0px;
+	padding:0px;
+	font-size:18px;
+	line-height:18px;
+	font-weight:900;
 }
+h2 {
+	margin:0px 0px 15px 0px;
+	padding:0px;
+	font-size:18px;
+	line-height:18px;
+	font-weight:900;
+	color:#ccc;
+}
+h3 {
+	margin:0px 0px 15px 0px;
+	padding:0px;
+	font-size:14px;
+	line-height:14px;
+	/*font-weight:900;
+	color:#ccc;*/
+    font-style: italic;
+}
+p {
+	font:12px/20px verdana, arial, helvetica, sans-serif;
+	margin:0px 0px 16px 0px;
+	padding:0px;
+}
+
+#header {
+    margin:50px 0px 10px 0px;
+    padding:17px 0px 0px 20px;
+    /* For IE5/Win's benefit height = [correct height] + [top padding] + [top and bottom border widths] */
+    height:33px; /* 14px + 17px + 2px = 33px */
+    border-style:solid;
+    border-color:black;
+    border-width:1px 0px; /* top and bottom borders: 1px; left and right borders: 0px */
+    line-height:11px;
+    background-color:#eee;
+    voice-family: "\"}\"";
+    voice-family:inherit;
+    height:14px; /* the correct height */
+}
+body>#header {height:14px;}
+
+#main>p {margin:0px;}
+#main>p+p {text-indent:30px;}
+
+#main {
+	margin:0px 50px 50px 220px;
+	padding:30px;
+	}
 
 #navcontainer {
     width: 150px;
     font-size: 12px;
     font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
     margin-left: 30px;
+	position:absolute;
+	top:100px;
+	left:20px;
+	width:172px;
+	padding:10px;
+	border:1px dashed #999;
+	line-height:17px;
+	voice-family: "\"}\"";
+	voice-family:inherit;
 }
 /* Again, "be nice to Opera 5". */
 body>#navcontainer {width:150px;}

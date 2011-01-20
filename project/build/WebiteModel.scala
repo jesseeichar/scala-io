@@ -78,7 +78,7 @@ class WebsiteModel(projectSites:List[ProjectSite],outputDir:Path,log:Logger) {
         <li>{project.name}
           <ul>{for(page <- project.pages) yield {
                 if(currPage == page ){
-                  <li id="active">
+                  <li>
                     <a id="active" href={"../"+project.pagePath(page)}>{page.name}</a>
                     {pageNavList(page)}
                   </li>
@@ -105,7 +105,7 @@ class WebsiteModel(projectSites:List[ProjectSite],outputDir:Path,log:Logger) {
           <div id="topsection">
             <div class="innertube">
               <h1>{page.name}</h1>
-              {page.summary.map{s => <h3>{s}</h3>} getOrElse ""}
+              {page.summary.map{s => <p class="summary">{s}</p>} getOrElse ""}
             </div>
           </div>
 
@@ -114,9 +114,11 @@ class WebsiteModel(projectSites:List[ProjectSite],outputDir:Path,log:Logger) {
               <div class="innertube">
                 {for(ex <- page.examples) yield {
                   <div class="example">
-                    <a name={ex.href}></a><h2>{ex.name}</h2>
+                    <a name={ex.href}><h3>{ex.name}</h3></a>
                     <p class="example_summary">{ex.summary}</p>
-                    <pre class='brush: scala'>{ex.code.replace("<","&lt;")}</pre>
+                    <div class="example_code">
+                      <pre class='brush: scala'>{ex.code.replace("<","&lt;")}</pre>
+                    </div>
                   </div>}
                 }
               </div>
@@ -124,7 +126,7 @@ class WebsiteModel(projectSites:List[ProjectSite],outputDir:Path,log:Logger) {
           </div>
 
           <div id="leftcolumn">
-            <div class="innertube">
+            <div class="innertube"  id="navcontainer">
               {navbar(page)}
             </div>
           </div>
