@@ -19,7 +19,7 @@ class ScalaIOProject(info: ProjectInfo)
           extends DefaultProject(info)
                   with IoProject {
 
-    val scalaArm = "com.github.jsuereth.scala-arm" %% "scala-arm" % "0.2" withSources() withJavadoc()
+    val scalaArm = "com.github.jsuereth.scala-arm" %% "scala-arm" % "0.3-SNAPSHOT" withSources() withJavadoc()
   }
 
   class TestProject(info: ProjectInfo)

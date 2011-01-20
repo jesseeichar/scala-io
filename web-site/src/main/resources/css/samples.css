@@ -52,11 +52,42 @@ em{color: red;}
 }
 
 #footer a{
-color: #FFFF80;
+	color: #FFFF80;
 }
 
 .innertube {
     margin: 10px; /*Margins for inner DIV inside each column (to provide padding)*/
+}
+
+.page_examples {
+	margin: 0 25px 0 25px;
+	line-height: 1em;
+}
+.example_excerpt {
+	padding:0 5px 0 10px;
+    background-color: #eee !important;
+    -moz-border-radius: 15px;
+    border-radius: 15px;
+}
+.page a {
+	text-decoration: none;
+	color: black;
+    background-color: #eee !important;
+}
+.page h3 {
+	margin: 5px 0px;
+}
+.page p {
+	margin: 0px 0px;
+}
+.example_excerpt h3 {
+    font-weight: bold;
+	margin: 5px 0px;
+	font-size: 1em;
+}
+.example_excerpt_summary {
+    font-style: italic;
+	font-size: 1em;
 }
 
 .example {
@@ -151,4 +182,3 @@ margin-left: 8px;
     border-left: 8px solid #CCCCCC;
     text-decoration: underline;
 }
-

@@ -69,11 +69,11 @@ class ExamplesPage(val path:Path,logger:Logger, project:ProjectSite) {
     <html>
       <head>
         <title>{name}</title>
-        <script type="text/javascript" src="../js/shCore.js"></script>
-        <script type="text/javascript" src="../js/shBrushScala.js"></script>
-        <link href="../css/shCore.css" rel="stylesheet" type="text/css"></link>
-        <link href="../css/shThemeDefault.css" rel="stylesheet" type="text/css" ></link>
-        <link href="../css/samples.css" rel="stylesheet" type="text/css" ></link>
+        <script type="text/javascript" src="../../js/shCore.js"></script>
+        <script type="text/javascript" src="../../js/shBrushScala.js"></script>
+        <link href="../../css/shCore.css" rel="stylesheet" type="text/css"></link>
+        <link href="../../css/shThemeDefault.css" rel="stylesheet" type="text/css" ></link>
+        <link href="../../css/samples.css" rel="stylesheet" type="text/css" ></link>
       </head>
       <body>
         <div id="maincontainer">
@@ -94,7 +94,7 @@ class ExamplesPage(val path:Path,logger:Logger, project:ProjectSite) {
 
           <div id="leftcolumn">
             <div class="innertube">
-              {project.navbar(site, self)}
+              {project.navbar(site, self, "../../")}
             </div>
           </div>
 
