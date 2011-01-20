@@ -103,11 +103,16 @@ color: #FFFF80;
 
 #navlist a
 {
-display: block;
-color: #8592BB;
-padding: 1px 0 1px 8px;
+    display: block;
+    color: #8592BB;
+    padding: 1px 0 1px 8px;
+    line-height: 1em;
 }
-
+.active {
+    font-weight: bold !important;
+    border-left: 8px solid #CCCCCC !important;
+/*    text-decoration: underline !important;*/
+}
 /*boxmodel hack. http://css-discuss.incutio.com/?page=BoxModelHack SBMH*/
 #navlist a { width: 184px; }
 
@@ -134,35 +139,15 @@ margin-left: 8px;
     w\idth: 174px;
 }
 
-#navlist a, #navlist a:visited,#subnavlist a, #subnavlist a:visited
+#projectnavlist a, #projectnavlist a:visited, #navlist a, #navlist a:visited,#subnavlist a, #subnavlist a:visited
 {
     border-left: 8px solid #ffffff;
     color: #9C9C9C;
     text-decoration: none;
 }
 
-#navlist a:hover, #navlist a#current:hover
+#projectnavlist a:hover, #projectnavlist a#current:hover, #navlist a:hover, #navlist a#current:hover,#subnavlist a:hover, #subnavlist a#subcurrent:hover
 {
-    border-left: 8px solid #CCCCCC;
-    text-decoration: underline;
-}
-
-#subnavlist a:hover, #subnavlist a#subcurrent:hover
-{
-    border-left: 8px solid #CCCCCC;
-    text-decoration: underline;
-}
-/*
-a#current, a:visited#current, a#subcurrent , a:visited#subcurrent
-{
-border-left: 8px solid #283D82;
-background: #F3F5FC;
-color: #283D82;
-text-decoration: none;
-}
-*/
-a#active{
-    color: #000000;
     border-left: 8px solid #CCCCCC;
     text-decoration: underline;
 }
