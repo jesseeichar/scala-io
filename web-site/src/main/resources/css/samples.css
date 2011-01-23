@@ -1,78 +1,87 @@
 body{
-margin:0;
-padding:0;
-line-height: 1.5em;
+	margin:	0;
+	padding:0;
+	line-height: 1.5em;
+	background: #EAEAEA;
 }
 
 b{font-size: 110%;}
 em{color: red;}
-
 .summary {
     font-style: italic;
     font-weight: bold;
 }
+.explanation {
+	padding: 5px;
+	background-color: white;
+    border-color: black;
+    border-style: solid;
+    border-width: 1px;
+    -moz-border-radius: 15px;
+    border-radius: 15px;
+	line-height: 1em;
+}
 #topsection{
-    background: #EAEAEA;
+    background: white;
     border-style:solid;
     border-color:black;
     border-width:1px 0px; /* top and bottom borders: 1px; left and right borders: 0px */
-    line-height:11px;
-    height: 90px; /*Height of top section*/
+    line-height: 1em;
+/*    height: 90px; *//*Height of top section*/
     margin: 15px 10px 0 10px;
 }
-
 #topsection h1{
     margin: 0;
     padding-top: 5px;
     margin-top: 15px;
 }
-
 #contentwrapper{
     float: left;
     width: 100%;
 }
-
 #contentcolumn{
     margin-left: 200px; /*Set left margin to LeftColumnWidth*/
 }
-
 #leftcolumn{
     float: left;
     width: 200px; /*Width of left column*/
     margin-left: -100%;
 }
-
 #footer{
-    clear: left;
-    width: 100%;
     background: black;
-    color: #FFF;
+    clear: left;
+    color: white;
+    line-height: 1.2em;
+    font-size: 0.9em;
+    margin: 15px 10px 0 10px;
+    padding: 5px 0 5px 0;
     text-align: center;
-    padding: 4px 0;
+    width: 100%;
 }
-
-#footer a{
+#footer a {
 	color: #FFFF80;
 }
-
 .innertube {
     margin: 10px; /*Margins for inner DIV inside each column (to provide padding)*/
 }
-
 .page_examples {
 	margin: 0 25px 0 25px;
 	line-height: 1em;
 }
 .example_excerpt {
 	padding:0 5px 0 10px;
-    background-color: #eee !important;
+	margin: 10px 0 10px 0;
+    background-color: white !important;
     -moz-border-radius: 15px;
     border-radius: 15px;
+    border-color: black;
+    border-style: solid;
+    border-width: 1px;
 }
 .page a {
 	text-decoration: none;
 	color: black;
-    background-color: #eee !important;
+    background-color: white !important;
 }
 .page h3 {
 	margin: 5px 0px;
@@ -98,9 +107,9 @@ em{color: red;}
     -moz-border-radius: 15px;
     border-radius: 15px;
     margin-top: 10px;
-
 }
 .example_code {
+	font-size: 0.8em;
     padding: 0 5px 0 5px;
 }
 .example h3{
@@ -108,12 +117,12 @@ em{color: red;}
     border-top-left-radius: 15px;
     -moz-border-top-right-radius: 15px;
     border-top-right-radius: 15px;
-    background-color: #EEE;
+    background-color: white;
     padding: 10px 5px 5px 20px;
     margin: 0;
 }
 .example_summary {
-    background-color: #EEE;
+    background-color: white;
     margin: 0;
     font-style: italic;
     padding-left: 20px;
@@ -135,14 +144,13 @@ em{color: red;}
 #navlist a
 {
     display: block;
-    color: #8592BB;
+    color: black;
     padding: 1px 0 1px 8px;
     line-height: 1em;
 }
 .active {
     font-weight: bold !important;
     border-left: 8px solid #CCCCCC !important;
-/*    text-decoration: underline !important;*/
 }
 /*boxmodel hack. http://css-discuss.incutio.com/?page=BoxModelHack SBMH*/
 #navlist a { width: 184px; }
@@ -156,7 +164,7 @@ w\idth: 184px;
 #subnavlist a
 {
 display: block;
-color: #9C9C9C;
+color: black;
 padding: 1px 0 1px 8px;
 margin-left: 8px;
 }
@@ -172,8 +180,8 @@ margin-left: 8px;
 
 #projectnavlist a, #projectnavlist a:visited, #navlist a, #navlist a:visited,#subnavlist a, #subnavlist a:visited
 {
-    border-left: 8px solid #ffffff;
-    color: #9C9C9C;
+    border-left: 8px solid #EAEAEA;
+    color: black;
     text-decoration: none;
 }
 

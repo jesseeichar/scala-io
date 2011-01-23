@@ -1,6 +1,6 @@
 import sbt.{Logger, Path}
 import util.matching.Regex
-import xml.{NodeSeq, Elem, Node}
+import xml.{XML, NodeSeq, Elem, Node}
 import xsbt.FileUtilities._
 
 class ExamplesPage(val path:Path,logger:Logger, project:ProjectSite) {
@@ -14,17 +14,18 @@ class ExamplesPage(val path:Path,logger:Logger, project:ProjectSite) {
     case s if s.size > 100 => s.take(100).mkString+"..."
     case s => s.mkString
   }
-  val summary = {
+  lazy val rawDesc = {
     val regex:Regex = """(?s)/\*\*(.+?)\*/\s*object""".r
     val firstMatch = regex.findFirstMatchIn(text)
-    firstMatch.flatMap{
-      case matcher:Regex.Match if !matcher.before.toString.contains("object") =>
-        val summaryText = cleanSummary(matcher.group(1))
-        Some(summaryText)
-      case _ => None
+    firstMatch match {
+      case Some(matcher) if !matcher.before.toString.contains("object") =>
+        cleanSummary(matcher.group(1))
+      case _ => ""
     }
   }
-  val uberSummaryText:String = uberSummary(summary getOrElse "")
+  lazy val summary = rawDesc.takeWhile{_ != '.'} mkString
+  lazy val description:Node = <span>{if(rawDesc == summary) "" else rawDesc }</span>
+  lazy val uberSummaryText:String = uberSummary(summary)
   val examples = {
     val objText = text.drop(text.indexOf("object"))
     val regex:Regex = """(?s)/\*\*(.+?)\*/\s*def\s+(\S+)\s*=?\s*\{""".r
@@ -58,59 +59,20 @@ class ExamplesPage(val path:Path,logger:Logger, project:ProjectSite) {
     }
   }
 
-  def pageNavList = {
+  def pageNavList(currEx:Option[Example]) = {
     <ul id="subnavlist">{for(ex <- examples) yield {
-      <li><a title={ex.uberSummary} href={ex.htmlName}>{ex.name}</a></li>
+      <li>
+        <a class={if(currEx == Some(ex)) "active" else ""}
+           title={ex.uberSummary}
+           href={ex.htmlName}>{ex.name}</a>
+      </li>
     }}</ul>
 
   }
 
-  def template(site:WebsiteModel)(exampleHtml:NodeSeq) = {
-    <html>
-      <head>
-        <title>{name}</title>
-        <script type="text/javascript" src="../../js/shCore.js"></script>
-        <script type="text/javascript" src="../../js/shBrushScala.js"></script>
-        <link href="../../css/shCore.css" rel="stylesheet" type="text/css"></link>
-        <link href="../../css/shThemeDefault.css" rel="stylesheet" type="text/css" ></link>
-        <link href="../../css/samples.css" rel="stylesheet" type="text/css" ></link>
-      </head>
-      <body>
-        <div id="maincontainer">
-          <div id="topsection">
-            <div class="innertube">
-              <h1>{name}</h1>
-              {summary.map{s => <p class="summary">{s}</p>} getOrElse ""}
-            </div>
-          </div>
 
-          <div id="contentwrapper">
-            <div id="contentcolumn">
-              <div class="innertube">
-                {exampleHtml}
-              </div>
-            </div>
-          </div>
-
-          <div id="leftcolumn">
-            <div class="innertube">
-              {project.navbar(site, self, "../../")}
-            </div>
-          </div>
-
-          <div id="footer">
-            <a href="http://www.dynamicdrive.com/style/">Dynamic Drive CSS Library</a>
-          </div>
-        </div>
-
-        <script type="text/javascript">
-          SyntaxHighlighter.all()
-        </script>
-      </body>
-    </html>
-  }
   def html(site:WebsiteModel) = {
-    template(site){
+    Template.examplesTemplate(self,true,site,{project.navbar(site, self, "../../",None,false)}){
       val html:NodeSeq = for(ex <- examples) yield {
         ex.html
       }

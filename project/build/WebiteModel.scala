@@ -13,118 +13,6 @@ object Printer {
     }
 }
 
-class ProjectSite(project:IoProject,log:Logger) {
-  val self = this;
-  val name = project.name
-  val description = "description TODO"
-  val path = project.info.projectPath.name
-  def pagePath(page:ExamplesPage) = path+"/"+page.base+"/index.html"
-
-  val pages = project.samplesSources.get map {path => new ExamplesPage(path,log,self)}
-
-
-  def navbar(site:WebsiteModel, currPage:ExamplesPage, relativeToBase:String):Node = navbar(site,currPage,relativeToBase,false)
-  def navbar(site:WebsiteModel, currPage:ExamplesPage, relativeToBase:String, showAllProjects:Boolean):Node = {
-    <div id="navcontainer">
-      <ul id="projectnavlist">{for(project <- site.projectSites) yield {
-        <li><a href={relativeToBase+project.name+"/index.html"} title={project.description} class={if(project == self)"active" else ""}>{project.name.capitalize}</a>
-          { if(project == self || showAllProjects) {
-            <ul id="navlist">{for(page <- project.pages) yield {
-                  if(currPage == page ){
-                    <li>
-                      <a title={page.uberSummaryText} class="active" href={relativeToBase+project.pagePath(page)}>{page.name}</a>
-                      {page.pageNavList}
-                    </li>
-                  } else {
-                      <li><a title={page.uberSummaryText} href={relativeToBase+project.pagePath(page)}>{page.name}</a></li>
-                  }
-              }}</ul>
-            } else {
-              Nil
-            }
-          }
-        </li>
-      }}</ul>
-    </div>
-  }
-
-
-  def html(site:WebsiteModel) = {
-    <html>
-      <head>
-        <title>{name.capitalize}</title>
-        <link href="../css/samples.css" rel="stylesheet" type="text/css" ></link>
-      </head>
-      <body>
-        <div id="maincontainer">
-          <div id="topsection">
-            <div class="innertube">
-              <h1>{name.capitalize}</h1>
-              <p class="summary">{description}</p>
-            </div>
-          </div>
-
-          <div id="contentwrapper">
-            <div id="contentcolumn">
-              <div class="innertube">
-                { pages.map {
-                    page =>
-                      <div class="page">
-                        <a href={"../"+pagePath(page)}>
-                          <h3>{page.name}</h3>
-                          <p class="page_summary">{page.summary getOrElse ""}</p>
-                        </a>
-                        <div class="page_examples">
-                        { page.examples.map {
-                            ex =>
-                              <div class="example_excerpt">
-                                <a href={"../"+name+"/"+page.base+"/"+ex.htmlName}>
-                                  <h3>{ex.name}</h3>
-                                  <p class="example_excerpt_summary">{ex.summary}</p>
-                                </a>
-                              </div>
-                        }}</div>
-                      </div>
-                  }}
-              </div>
-            </div>
-          </div>
-
-          <div id="leftcolumn">
-            <div class="innertube">
-              {navbar(site, null, "../",true)}
-            </div>
-          </div>
-
-          <div id="footer">
-            <a href="http://www.dynamicdrive.com/style/">Dynamic Drive CSS Library</a>
-          </div>
-        </div>
-
-        <script type="text/javascript">
-          SyntaxHighlighter.all()
-        </script>
-      </body>
-    </html>
-  }
-
-  def buildSite(site:WebsiteModel) = {
-    val projDir = site.outputDir / path
-    projDir.asFile.mkdirs
-    Printer.printPage(projDir / "index.html",html(site),log)
-    pages foreach{
-      p =>
-        val html = p.html(site)
-        val pageDir = projDir / p.base
-        Printer.printPage(pageDir / ("index.html"),html,log)
-        p.examples foreach {
-          ex =>
-            val exHtml = p.template(site)(ex.html)
-            Printer.printPage(pageDir / (ex.htmlName),exHtml,log)
-        }
-    }
-  }
-}
 
 case class Example(htmlName:String, name:String, summary:String, uberSummary:String, code:String) {
   override def toString = "Example("+name+", "+summary.substring(0,10)+"..., "+code.substring(0,10)+"...)"
@@ -142,10 +30,52 @@ case class Example(htmlName:String, name:String, summary:String, uberSummary:Str
 class WebsiteModel(val projectSites:List[ProjectSite],val outputDir:Path,log:Logger) {
   val self = this;
   def buildSite = {
+    Printer.printPage(outputDir / "index.html",indexHtml,log)
     projectSites.foreach {
       project=>
         project.buildSite(self);
     }
+  }
+
+  def indexHtml = {
+    val content =
+      <div class="explanation">
+        <p>
+        The Scala IO umbrella project consists of a few sub projects for different aspects and
+        extensions of IO.  The core project deals with raw input and output, primarily through
+        streams and channels (at least the Java implementation).
+        </p><p>
+        <strong>Warning #1: </strong>The current API is a very early version and is likely to change.
+        That said barring a massive outcry the core components should remain fairly consistent. Both the core and file projects will be changing but file is even more likely to change.
+        Especially with regard to FileAttributes and the API for implementing custom filesystems.
+        </p><p>
+        <strong>Warning #2: </strong>I have spend no time on optimization so there are a large number of
+        known inefficiencies.  Patches and suggestions are welcome but please keep flaming to a minimum.
+        </p><p>
+        If you have any suggestions please open a ticket at
+        <a href="https://github.com/scala-incubator/scala-io/issues">https://github.com/scala-incubator/scala-io/issues</a>
+
+        I will monitor the tickets and reply on the tickets.
+        </p>
+      </div>
+
+    Template(false, "Scala IO API Documentation")(
+        <link href={"css/samples.css"} rel="stylesheet" type="text/css" ></link>)(
+        <h1>Scala IO API Documentation</h1>)(
+        content)(
+        <div id="navcontainer">
+        <ul id="projectnavlist">{for(project <- projectSites) yield {
+          <li><a href={project.name+"/index.html"}
+                 title={project.summary}>{project.name.capitalize}</a>
+            <ul id="navlist">{
+              for(page <- project.pages) yield {
+                <li><a title={page.uberSummaryText} href={project.pagePath(page)}>{page.name}</a></li>
+              }
+            }</ul>
+          </li>
+        }}</ul>
+      </div>)
+
   }
 
 }

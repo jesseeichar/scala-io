@@ -1,4 +1,5 @@
 import sbt._
+import xml.Node
 
 class ScalaIOProject(info: ProjectInfo)
         extends ParentProject(info) {
@@ -20,6 +21,36 @@ class ScalaIOProject(info: ProjectInfo)
                   with IoProject {
 
     val scalaArm = "com.github.jsuereth.scala-arm" %% "scala-arm" % "0.3-SNAPSHOT" withSources() withJavadoc()
+    def descSummary = "An idiomatic IO library for Scala"
+    def description =
+      <span>
+        <p>The main goals of Scala IO is to provide a scalable solution to IO for Scala.  In more
+        concrete terms, the desire is to be able to both easily and quickly access the data from a
+        data source like a file or URL as well as provide the options to micro manage how the data is
+        accessed when performance is of the utmost importance.</p>
+        <p>The first aspect is to provide an ARM (Automatic Resource Management) solution so resources
+        are automatically closed after use.  The design for ARM is essentially the loaner pattern where
+        the framework opens a resource and passes the resource to a codeblock/function allowing the
+        function to only concern itself with the data access logic and the ARM implementation will guarantee
+        that the resource is closed after the access, irregardless of whether an error occurred or not.</p>
+        <p>The second aspect is to provide lazy collection style access to an underlying resource allowing
+        the skills obtained using the Scala collections library to be used to quickly implement solutions
+        as if the resource is simply a collection.  The underlying implementation will ensure the resource
+        is closed and will ensure that only the necessary data is loaded.  For example calls to drop will
+        skip bytes when possible and take will close the connection after the requested data is obtained</p>
+        <p>The third aspect is, as of 0.1 not yet implemented, is asynchronous data access in a simple manner.
+        The first solution that is provided has been popularized by node js and is essentially the ability
+        to register callbacks with a resource and they can, when possible, be executed in a single thread with
+        a single connection.</p>
+        <p>The fourth aspect (also not implemented for 0.1) is an iteree pattern for IO.  This design will
+        will be the basis of the async aspect and will have two levels of complexity.  The first will be
+        a simple function callback to obtain all data and the second will be the ability to return a Done
+        event to short-circuit the data loading.</p>
+        <p>The final piece of the puzzle is the provide a consistent manner for handling exceptions.  The
+        initial implementation simply throws exceptions as they occur but it will be possible to register an
+        exception handle with your ARM resource to control how to handle exceptions.
+        </p>
+      </span>
   }
 
   class TestProject(info: ProjectInfo)
@@ -34,11 +65,28 @@ class ScalaIOProject(info: ProjectInfo)
 
   class File(info: ProjectInfo)
           extends DefaultProject(info)
-                  with IoProject
+                  with IoProject {
+    def descSummary = "An adaptation of the Java NIO2 Filesystem to Scala"
+    def description =
+      <span>
+        The Scala IO File subproject is an adaptation of the Java NIO2 Filesystem to Scala.
+        While the main inspiration was NIO2 because of its flexibility and design considerations
+        for cross platform filesystem, the actual APIs have diverged in order to be more idiomatic
+        Scala.
+        <br/>
+        The primary consideration
+      </span>
+  }
 
   class Archive(info: ProjectInfo)
           extends DefaultProject(info)
-                  with IoProject
+                  with IoProject {
+    def descSummary = "An adaptation of the Java NIO2 Filesystem to Scala"
+    def description =
+      <span>
+
+      </span>
+  }
 
   class WebSite(info:ProjectInfo)
           extends DefaultProject(info) {
@@ -65,6 +113,10 @@ trait IoProject extends AutoCompilerPlugins {
 
   val cont = compilerPlugin("org.scala-lang.plugins" % "continuations" % buildScalaVersion)
   // val sxr = compilerPlugin("org.scala-tools.sxr" %% "sxr" % "0.2.6")
+
+
+  def description:Iterable[Node]
+  def descSummary:String
 
   override def compileOptions = super.compileOptions ++ List(
     CompileOption("-P:continuations:enable"),
