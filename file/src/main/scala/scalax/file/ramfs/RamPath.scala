@@ -120,7 +120,7 @@ class RamPath(relativeTo: String, val path: String, override val fileSystem: Ram
         case node: FileNode => fileSystem.copyFile(this, node, dest)
       }
       case dest =>
-        dest.write(bytesAsInts)
+        dest.write(bytes)
     }
     dest
   }

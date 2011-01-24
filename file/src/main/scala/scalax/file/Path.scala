@@ -993,7 +993,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
        case IsDirectory(_) if target.isFile => fail("cannot overwrite a file with a directory")
        // TODO move between two fileSystems
        case IsFile(_) if target.fileSystem != fileSystem =>
-         target write bytesAsInts
+         target write bytes
          delete()
        case _ if target.fileSystem != fileSystem && this.isDirectory =>
          val x = target.exists

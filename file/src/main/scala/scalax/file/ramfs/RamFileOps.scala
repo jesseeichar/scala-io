@@ -31,8 +31,8 @@ private[file] trait RamFileOps {
 
     if(nodeOption.isDefined) {
       val errors = options.distinct.flatMap{
-        case Write | WriteTruncate | Append | Create | CreateNew | CreateFull | Truncate | DeleteOnClose  if checkAccess(Path.AccessModes.Write)=> List(Path.AccessModes.Write)
-        case Read if checkAccess(Path.AccessModes.Read) => List(Path.AccessModes.Read)
+        case Write | WriteTruncate | Append | Create | CreateNew | CreateFull | Truncate | DeleteOnClose  if !nodeOption.get.canWrite => List(Path.AccessModes.Write)
+        case Read if !nodeOption.get.canRead => List(Path.AccessModes.Read)
         case _ => Nil
       }
 

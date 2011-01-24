@@ -31,24 +31,25 @@ trait OpenOption
  * @since   1.0
  */
 object StandardOpenOption extends Enumeration {
+  def OpenOption = new Val(nextId,null) with OpenOption
 
   /**
    * Append to an existing file.
    * A file will not be created if the file does not exist
    */
-   val Append = new Val(nextId) with OpenOption
+   val Append = OpenOption
   /**
    * Creating a file if it does not exist, but parent directories will not be created
    */
-  val Create = new Val(nextId) with OpenOption
+  val Create = OpenOption
   /**
    * Creating a new file and fail if the file already exists
    */
-  val CreateNew = new Val(nextId) with OpenOption
+  val CreateNew = OpenOption
   /**
    * Creating a new file and all parent directories
    */
-  val CreateFull = new Val(nextId) with OpenOption
+  val CreateFull = OpenOption
   /**
    * Delete file on close.
    * <p>
@@ -57,35 +58,35 @@ object StandardOpenOption extends Enumeration {
    * then the file will be deleted on VM termination (if possible)
    * </p>
    */
-  val DeleteOnClose = new Val(nextId) with OpenOption
+  val DeleteOnClose = OpenOption
   /**
    * Requires that every update to the file's content (but not metadata)
    * be written synchronously to the underlying storage device
    */
-  val DSync = new Val(nextId) with OpenOption
+  val DSync = OpenOption
   /**
    * Open a file for read access
    */
-  val Read = new Val(nextId) with OpenOption
+  val Read = OpenOption
   /**
    * A hint to create a sparse file if used with {@link #CreateNew}
    */
-  val Sparse = new Val(nextId) with OpenOption
+  val Sparse = OpenOption
   /**
    * Requires that every update to the file's content or metadata be
    * written synchronously to the underlying storage device
    */
-  val Sync = new Val(nextId) with OpenOption
+  val Sync = OpenOption
   /**
    * If file exists and is opened for Write access then truncate the file to
    * 0 bytes.  Ignored if opened for Read access.  Truncate takes precedence over
    * Append.
    */
-  val Truncate = new Val(nextId) with OpenOption
+  val Truncate = OpenOption
   /**
    * Open file for write access
    */
-  val Write = new Val(nextId) with OpenOption
+  val Write = OpenOption
 
   /**
    * Collection of options: {@link #Create}, {@link #Truncate}, {@link #Write}

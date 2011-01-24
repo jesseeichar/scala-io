@@ -270,6 +270,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
 
     assertTrue(f1.nonExistent)
     assertTrue(otherpath.exists)
+    assertArrayEquals(data.getBytes(codec.charSet), otherpath.byteArray)
     assertEquals(data, otherpath.slurpString)
   }
 
