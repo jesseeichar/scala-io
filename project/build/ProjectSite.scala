@@ -51,7 +51,7 @@ class ProjectSite(project:IoProject,log:Logger) {
                               <div class="example_excerpt">
                                 <a href={"../"+name+"/"+page.base+"/"+ex.htmlName}>
                                   <h3>{ex.name}</h3>
-                                  <p class="example_excerpt_summary">{ex.summary}</p>
+                                  <div class="example_excerpt_summary">{ex.summary}</div>
                                 </a>
                               </div>
                         }}</div>

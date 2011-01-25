@@ -44,9 +44,9 @@ object OutputAndTypeClasses {
   /**
    * In Java when you write an Integer to an OuputStream that integer is
    * treated as a byte and only the lowest value byte of the int is written.
-   * <div/>Scala IO differs in that an integer is written as 4 bytes and
+   * <p>Scala IO differs in that an integer is written as 4 bytes and
    * one must explicitely coerce an Int to a byte. The following examples
-   * demostrate how one might do that.
+   * demostrate how one might do that.</p>
    */
   def intsAsBytes {
     import scalax.io._
@@ -79,10 +79,10 @@ object OutputAndTypeClasses {
    * the Scala collections methods are needed.  However the implicit resolution
    * will not choose a Traversable*Converter.  Fortunately Scala IO
    * provides several Converters for converting Arrays to bytes.
-   * <div/>
+   * <p>
    * The point of this example is explain that if one is creating a custom
    * converter he will have to consider creating both a
-   * OutputConverter[Traversable[_]] as well as a OutputConverter[Array[_]]
+   * OutputConverter[Traversable[_]] as well as a OutputConverter[Array[_]]</p>
    */
   def writingArrays {
     import scalax.io._
@@ -100,10 +100,10 @@ object OutputAndTypeClasses {
    * be used to implicitely write characters and strings to the Output.
    * Because of this write,patch,insert,etc... are overloaded with a typeclass
    * version as well as a version that takes a string.
-   * <div/>
+   * <p>
    * The result is that writing strings is a simple exercise but writing characters
    * or Traversables of characters is less trivial.  The examples below show how
-   * to write strings and characters.
+   * to write strings and characters. </p>
    */
   def stringsAndCharacters {
     import scalax.io._
@@ -131,11 +131,11 @@ object OutputAndTypeClasses {
 
   /**
    * Declaring custom converters.
-   * <div/>Naturally being able to write objects other than those defined
+   * <p>Naturally being able to write objects other than those defined
    * by Scala IO can be beneficial and it is a simple process.  All that is
    * needed is a new implementation of a OutputConverter which is imported into
    * scopoe.
-   * <div/>The examples below show two design patterns.
+   * </p><p>The examples below show two design patterns.</p>
    */
   def customDataTypes {
     import scalax.io._
@@ -157,13 +157,19 @@ object OutputAndTypeClasses {
     // that contains the converters that you want to use and then they can be
     // reused through out the code base.
     object CustomConverters {
-      case class User(name:String)
+      case class User(name:String,id:Int)
       // first you need converter for a collection of your type
       implicit object UserTraversableConverter extends OutputConverter[TraversableOnce[User]] {
-        def sizeInBytes = 1
+        def sizeInBytes = 2
 
-        def toBytes(users: TraversableOnce[User]):TraversableOnce[Byte] =
-          users.toIterator.flatMap{_.name.getBytes("ASCII").toIterator}
+        def toBytes(users: TraversableOnce[User]):TraversableOnce[Byte] = {
+          // Create a single instance of a buffer for encoding the id value.
+          val idBuffer = new OutputConverter.Buffer[Int](4,(byteBuffer,data) => {byteBuffer.putInt(data)})
+          users.toIterator.flatMap{
+            user =>
+              user.name.getBytes("ASCII").toIterator ++ idBuffer.put(user.id)
+          }
+        }
       }
       // next you need converters for the basic type and arrays
       implicit object UserConverter extends NonTraversableAdapter(UserTraversableConverter)
@@ -173,7 +179,7 @@ object OutputAndTypeClasses {
     // finally you can import the definitions into scope and write away
     import CustomConverters._
 
-    out.write(User("Jesse Eichar"))
-    out.insert(2,User("Jesse"))
+    out.write(User("Jesse Eichar",888888))
+    out.insert(2,User("Jesse",23421))
   }
 }

@@ -1,3 +1,7 @@
+/**
+ * Examples of using path matchers, such as IsFile, to select/match
+ * files and directories
+ */
 object PathMatcherSamples {
   /**
    * Match a Path against the full path as a string
@@ -15,7 +19,7 @@ object PathMatcherSamples {
   }
 
   /**
-   * demonstrate matching using the matchers that are provided in Path.Matching
+   * Demonstrate matching using the matchers that are provided in Path.Matching
    */
   def defaultMatchers {
     import scalax.file.Path
@@ -43,6 +47,23 @@ object PathMatcherSamples {
     }
   }
 
+  /**
+   * Examples use the Filesystem's built-in matcher syntax to create a path matcher.
+   * <p>
+   * Some filesystems have support for native searching and matching of files.  Normally
+   * using the PathSet API ({creating-pathsets} such as / and * will use the native
+   * support, however in some cases there may be multiple supported syntax or the PathSet
+   * API does not support all the features of the native API.  For example there could be an
+   * SQL like query language for a filesystem.  To take advantage of these features paths
+   * and filesystems have a <em>matcher</em> method which takes a string as a query and another
+   * string as a syntax identifier.
+   * </p><p>
+   * There are two syntaxes that are supported by all filesystems and they are GLOB and REGEX
+   * which are typically used by the PathSets etc...
+   * </p><p>
+   * By default the GLOB syntax is used.
+   * </p>
+   */
   def fileSystemSupportedMatchers {
 
     import scalax.file.{Path, PathMatcher, FileSystem}

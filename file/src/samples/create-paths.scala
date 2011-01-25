@@ -1,3 +1,6 @@
+/**
+ * Demonstrate various ways of creating Path objects
+ */
 object CreatePath {
 
   // Create a Path in the default filesystem explicitly

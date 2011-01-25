@@ -14,12 +14,12 @@ object Printer {
 }
 
 
-case class Example(htmlName:String, name:String, summary:String, uberSummary:String, code:String) {
-  override def toString = "Example("+name+", "+summary.substring(0,10)+"..., "+code.substring(0,10)+"...)"
+case class Example(htmlName:String, name:String, summary:Node, uberSummary:String, code:String) {
+  override def toString = "Example("+name+", "+uberSummary+"\n"+code.substring(0,10)+"...)"
   def html = {
     <div class="example">
       <a name={htmlName}><h3>{name}</h3></a>
-      <p class="example_summary">{summary}</p>
+      <div class="example_summary">{summary}</div>
       <div class="example_code">
         <pre class='brush: scala'>{code.replace("<","&lt;")}</pre>
       </div>

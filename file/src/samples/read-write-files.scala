@@ -4,7 +4,10 @@
  */
 object ReadWriteFiles {
 
-
+  /**
+   * Basic read and write options.  Not all options are demonstrated so review
+   * the {/core} operations for Input,Output,Seekable etc....
+   */
   def basicReadWrite {
     import scalax.file.Path
     implicit val codec = scalax.io.Codec.UTF8
@@ -18,7 +21,9 @@ object ReadWriteFiles {
     Path("nonEmpty").writeStrings(nonEmptySpan)
   }
   /**
-   * Safe way to read and write a file
+   * Safe way to read and write a file.  Normal try-catch will also work,
+   * scala.util.control.Exception is nice when used with an API that takes Either or
+   * Option.
    */
   def safeReadWrite{
     import scalax.file.{

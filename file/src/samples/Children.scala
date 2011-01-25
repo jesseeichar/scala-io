@@ -1,16 +1,16 @@
-import scalax.file.{Path, PathMatcher}
-import scalax.file.PathMatcher._
-
 /**
- * search the contents of a directory and perform operations on the objects encountered
+ * Search the contents of a directory and perform operations on the objects encountered
  */
 object Children {
-    val path:Path = Path("/tmp/")
 
     /**
      * Operate on all children
      */
     def children {
+      import scalax.file.{Path, PathMatcher}
+      import scalax.file.PathMatcher._
+
+      val path:Path = Path("/tmp/")
       // print the name of each object in the directory
       path.children ().collect {case path => println (path.name)}
 
@@ -25,7 +25,11 @@ object Children {
      * and the renamed file could also be processed resulting
      * in a infinite loop
      */
-    def `remove spaces` {
+    def removeSpaces {
+      import scalax.file.{Path, PathMatcher}
+      import scalax.file.PathMatcher._
+
+      val path:Path = Path("/tmp/")
       val ContainsSpace:PathMatcher = path.matcher ("* *")
       path.children ().collect {case ContainsSpace (path) => path.moveTo (Path (path.name.filter (_ != ' ')))}
     }
@@ -33,7 +37,11 @@ object Children {
     /*
      * Count the number of directories
      */
-    def `count directories` {
+    def countDirectories {
+      import scalax.file.{Path, PathMatcher}
+      import scalax.file.PathMatcher._
+
+      val path:Path = Path("/tmp/")
       val fileCount: Int = path.children ().collect{case IsFile (f)=> f}.foldLeft (0){(count, _) => count+1}
     }
 
@@ -46,12 +54,53 @@ object Children {
      * directoryStream that traverses many levels of the filesystem tree and the filter
      * function allows a new Matcher to be defined at each level of the tree
      */
-    def `filter contents` {
+    def filterContents {
+      import scalax.file.{Path, PathMatcher}
+      import scalax.file.PathMatcher._
+
+      val path:Path = Path("/tmp/")
       val matcher: PathMatcher = path.matcher("S*")
       path.children (matcher).foreach (println _)
 
       path.children(IsFile).foreach (println _)
     }
+
+  /**
+   * All operations/filters that can be also performed on all descendants
+   * of a path.  Calling the descendants method instead of children will
+   * visit all descendants of the Path rather than just the children.
+   */
+  def descendantProcessing {
+    import scalax.file.Path
+
+    val path:Path = Path("/tmp/")
+
+    // by default only the files contained in the current path are returned but if depth
+    // is set (<0 will traverse entire tree) then the stream will visit subdirectories in
+    // pre-order traversal
+
+    // search for a .gitignore file down to a depth of 4
+    val gitIgnoreRestrictedTree: Option[Path] = path.descendants (depth=4).find (_.name == ".gitignore")
+
+    // search for a .gitignore in the entire subtree
+    val gitIgnoreFullTree: Option[Path] = path.descendants ().find (_.name == ".gitignore")
+  }
+
+  /**
+   * See {creating-pathsets} for more details on creating PathSets.
+   * <p>
+   * This examples selects all descendants of src/main that
+   * are scala files and starts with an s.
+   * </p>
+   */
+  def descendantsUsingPathSets {
+    import scalax.file.Path
+
+    val path:Path = Path("/tmp/")
+
+    path / "src" / "main" **  "s*.scala" foreach (println)
+
+  }
 
 /*
  * Disabled until Java 7 version because implementation is impossible until then

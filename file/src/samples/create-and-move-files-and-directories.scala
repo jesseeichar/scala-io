@@ -1,4 +1,10 @@
-object CreateMoveFilesDirectories {
+import scalax.file.ramfs.RamFileSystem
+
+/**
+ * Demonstrate creating simple paths and moving them withing the filesystem and
+ * to other filesystems.
+ */
+object CreateAndMoveFilesAndDirectories {
   /**
    * copy and move/rename files
    */
@@ -47,5 +53,16 @@ object CreateMoveFilesDirectories {
       case None => println ("Not a direcory")
       case Some(names) => println ("files names = "+names)
     }
+  }
+
+  /**
+   * Move a file from one filesystem to another
+   */
+  def moveBetweenFileSystems {
+    val ramfs = RamFileSystem()
+    val ramPath = ramfs("/","tmp")
+    val path = Path("file")  // default filesystem
+
+    path.moveTo(ramPath)
   }
 }

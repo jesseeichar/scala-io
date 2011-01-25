@@ -22,6 +22,7 @@ import java.io.{IOException, FileNotFoundException}
 object RamFileSystem {
   val protocol = "ramfs"
   private val fileSystems = scala.collection.mutable.WeakHashMap[String,RamFileSystem]()
+  def apply(val separator:String = "/") : RamFileSystem = new RamFileSystem(separator = separator)
   def apply(fsId:String) : RamFileSystem = synchronized {
     fileSystems.get(fsId).getOrElse(new RamFileSystem(fsId))
   }
@@ -38,7 +39,7 @@ object RamFileSystem {
   }
 }
 
-class RamFileSystem(val id : String = UUID.randomUUID.toString, val separator:String = "/") extends FileSystem {
+private class RamFileSystem(val id : String = UUID.randomUUID.toString, val separator:String = "/") extends FileSystem {
   private var fsTree = new DirNode(separator)
 
   RamFileSystem.register(id,this)

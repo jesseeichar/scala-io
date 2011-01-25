@@ -5,6 +5,13 @@ import xsbt.FileUtilities._
 
 class ExamplesPage(val path:Path,logger:Logger, project:ProjectSite) {
   val self = this;
+  private def parseXML(name:String,xml:String)= {
+      try {
+        XML.loadString("<span>"+xml+"</span>")
+      } catch {
+        case _ => throw new RuntimeException(name+" has invalid XML found in "+ xml)
+      }
+  }
   private val text = read(path.asFile)
   val base = path.name.take(path.name.size - ".scala".size)
   val name = base.mkString.split("-").map{_.capitalize} mkString " "
@@ -24,26 +31,21 @@ class ExamplesPage(val path:Path,logger:Logger, project:ProjectSite) {
     }
   }
   lazy val summary = rawDesc.takeWhile{_ != '.'} mkString
-  lazy val description:Node = {
-    val xml = "<span>"+(if(rawDesc == summary) "" else rawDesc.dropWhile{_ != '.'}.drop(1).mkString)+"</span>"
-    try {
-      XML.loadString(xml)
-    } catch {
-      case _ => throw new RuntimeException(base+" has invalid XML found in "+ xml)
-    }
-  }
+  lazy val description:Node = parseXML(base,if(rawDesc == summary) "" else rawDesc.dropWhile{_ != '.'}.drop(1).mkString)
   lazy val uberSummaryText:String = uberSummary(summary)
 
   val examples = {
     val objText = text.drop(text.indexOf("object"))
-    val regex:Regex = """(?s)/\*\*(.+?)\*/\s*def\s+(\S+)\s*=?\s*\{""".r
+    val regex:Regex = """(?s)(/\*\*(.+?)\*/\s*)?def\s+(\S+)\s*=?\s*\{""".r
     regex.findAllIn(objText).matchData.toList map {m =>
-      val name = m.group(2).flatMap {
+      val rawName = m.group(3)
+      val name = rawName.flatMap {
         case c if c.isUpperCase => " "+c
         case c => c.toString
       }.mkString.capitalize.trim
 
-      val summary = cleanSummary(m.group(1))
+      val summary = if(m.group(2) == null) "" else cleanSummary(m.group(2))
+      val summaryXml = parseXML(base+"#"+name, summary)
 
       val (_,code:String) = ((1,"") /: m.after.toString) {
         case ((0,text),_) => (0,text)
@@ -64,7 +66,7 @@ class ExamplesPage(val path:Path,logger:Logger, project:ProjectSite) {
         }
         lines mkString
       }
-      Example(m.group(2)+".html",name,summary,uberSummary(summary), trimmedCode)
+      Example(rawName+".html",name,summaryXml,uberSummary(summary), trimmedCode)
     }
   }
 

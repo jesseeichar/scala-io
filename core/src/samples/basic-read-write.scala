@@ -4,7 +4,7 @@ import java.io.{BufferedReader, FileReader, FileOutputStream, StringReader}
  * These examples are a quick introduction to performing basic IO using the Scala IO API.
  * <div>The basic IO object that will be used in most cases are Input,Output,ReadChars and WriteChars.
  * These objects are used in the examples below.</div>
- * <div>  Another common object is the [Seekable] object.</div>
+ * <div>  Another common object is the {Seekable} object.</div>
  */
 object BasicIO {
 

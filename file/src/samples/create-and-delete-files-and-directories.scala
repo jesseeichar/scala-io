@@ -1,6 +1,10 @@
-object CreateDeleteFilesDirectories {
+/**
+ * Demonstrate how to create files or directories from a
+ * path object.
+ */
+object CreateAndDeleteFilesAndDirectoriesFromPaths {
   /**
-   * create files and directories
+   * Create files and directories
    */
   def create{
     import scalax.file.Path
@@ -23,7 +27,7 @@ object CreateDeleteFilesDirectories {
   }
 
   /**
-   * delete files and directories
+   * Delete files and directories
    */
   def delete {
     import scalax.file.Path
@@ -49,4 +53,4 @@ object CreateDeleteFilesDirectories {
     // or
     path.deleteRecursively(continueOnFailure=true)
   }
-  }
+}

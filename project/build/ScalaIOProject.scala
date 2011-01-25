@@ -99,6 +99,7 @@ class ScalaIOProject(info: ProjectInfo)
         case project:IoProject => List(new ProjectSite(project,log))
         case _ => Nil
       }
+      siteOutput.asFile.mkdirs
       FileUtilities.copy(mainResources.get, siteOutput, log)
 
       val site = new WebsiteModel(projectSites.toList,siteOutput,log)
