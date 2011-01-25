@@ -1,7 +1,10 @@
 import java.io.{BufferedReader, FileReader, FileOutputStream, StringReader}
 
 /**
- * These examples are a quick introduction to performing basic IO using the Scala IO API
+ * These examples are a quick introduction to performing basic IO using the Scala IO API.
+ * <div>The basic IO object that will be used in most cases are Input,Output,ReadChars and WriteChars.
+ * These objects are used in the examples below.</div>
+ * <div>  Another common object is the [Seekable] object.</div>
  */
 object BasicIO {
 
@@ -148,7 +151,7 @@ object BasicIO {
    * Scala IO does not have a default it requires that the Codec be declared.  However, to simplify the declaration
    * most methods have implicit codec parameters so the Codec only needs to be declared once.
    *
-   * The following examples show reading characters from input streams.  Writing is follows the same patter
+   * The following examples show reading characters from input streams.  Writing is follows the same pattern
    */
   def usingCodecs {
     import scalax.io._

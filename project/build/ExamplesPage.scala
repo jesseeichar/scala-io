@@ -9,7 +9,7 @@ class ExamplesPage(val path:Path,logger:Logger, project:ProjectSite) {
   val base = path.name.take(path.name.size - ".scala".size)
   val name = base.mkString.split("-").map{_.capitalize} mkString " "
   val htmlName = base+".html"
-  private def cleanSummary(summary:String) = summary.replaceAll("(?m)^\\s*\\*\\s*","").replace("\n|\r"," ").trim
+  private def cleanSummary(summary:String) = summary.lines.map { _.trim.replaceAll("\\*\\s*","")}.mkString(" ").replaceAll("\\s\\s"," ").replace(". ",".  ")
   private def uberSummary(summary:String):String = summary.takeWhile(_ != '.') match {
     case s if s.size > 100 => s.take(100).mkString+"..."
     case s => s.mkString
@@ -24,8 +24,16 @@ class ExamplesPage(val path:Path,logger:Logger, project:ProjectSite) {
     }
   }
   lazy val summary = rawDesc.takeWhile{_ != '.'} mkString
-  lazy val description:Node = <span>{if(rawDesc == summary) "" else rawDesc }</span>
+  lazy val description:Node = {
+    val xml = "<span>"+(if(rawDesc == summary) "" else rawDesc.dropWhile{_ != '.'}.drop(1).mkString)+"</span>"
+    try {
+      XML.loadString(xml)
+    } catch {
+      case _ => throw new RuntimeException(base+" has invalid XML found in "+ xml)
+    }
+  }
   lazy val uberSummaryText:String = uberSummary(summary)
+
   val examples = {
     val objText = text.drop(text.indexOf("object"))
     val regex:Regex = """(?s)/\*\*(.+?)\*/\s*def\s+(\S+)\s*=?\s*\{""".r
@@ -36,6 +44,7 @@ class ExamplesPage(val path:Path,logger:Logger, project:ProjectSite) {
       }.mkString.capitalize.trim
 
       val summary = cleanSummary(m.group(1))
+
       val (_,code:String) = ((1,"") /: m.after.toString) {
         case ((0,text),_) => (0,text)
         case ((1,text),'}') => (0,text)

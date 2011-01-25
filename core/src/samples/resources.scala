@@ -1,7 +1,17 @@
+/**
+ * Examples of using the Resource API to wrap existing Java IO objects.
+ * <p>
+ * The Resource API can be used to adapt Java IO objects such as InputStreams and Channels.  The Resource object
+ * provides several methods for wrapping common Java objects.  In the .Net implementation the Resource API would wrap
+ * .Net IO objects.
+ * </p>
+ */
 object Resources {
 
-  def createResources { // several examples of obtaining Resources
-    import java.nio.channels._
+  /**
+   * several examples of creating Resources
+   */
+  def createResources {
     import scalax.io._
     import java.io._
     import java.nio.channels._

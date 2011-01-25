@@ -2,45 +2,148 @@ import java.io.OutputStream
 import java.util.Date
 import scalax.io.OutputConverter.{LongConverter, TraversableLongConverter, TraversableByteConverter}
 
+/**
+ * Details on how output is converted to bytes and how the design can be extended and used.
+ * <div>
+ * Many common types of objects can be written to an Output object or seekable object
+ * and is converted to bytes by the implicitly selected OutputConverter object
+ * </div>
+ */
 object OutputAndTypeClasses {
   /**
-   * Many common types of objects can be written to an Output object or seekable object and is converted to bytes
-   * by the implicitly selected OutputConverter object
+   * The write method of Output and Seekable objects accepts several types of
+   * inputs with no effort required on the part of a developer.  Several
+   * of the default types including integers, longs, doubles, etc... are
+   * have converter implementations.
    */
-  def implicitTypeClassUse {
+  def theCommonCases {
     import scalax.io._
     import Resource._
 
     val out = fromFile("out")
-    out.write(3)  // Selected Converter is OutputConverter.IntConverter
-    out.write(3L) // Selected Converter is OutputConverter.LongConverter
-    out.write(3.toByte) // Selected Converter is OutputConverter.ByteConverter
-    out.write(3.0) // Selected Converter is OutputConverter.DoubleConverter
-    out.write(List(1,2,3,4)) // Selected Converter is OutputConverter.TraversableIntConverter
+    // Selected Converter is OutputConverter.IntConverter
+    out.write(3)
+    // Selected Converter is OutputConverter.LongConverter
+    out.write(3L)
+    // Selected Converter is OutputConverter.ByteConverter
+    out.write(3.toByte)
+    // Selected Converter is OutputConverter.DoubleConverter
+    out.write(3.0)
+    // Selected Converter is OutputConverter.IntConverter
+    out.write(List[Byte](3))
+    // Selected Converter is OutputConverter.LongConverter
+    out.write(3L)
+    // Selected Converter is OutputConverter.ByteConverter
+    out.write(3.toByte)
+    // Selected Converter is OutputConverter.DoubleConverter
+    out.write(3.0)
+    // Selected Converter is OutputConverter.TraversableIntConverter
+    out.write(List(1,2,3,4))
+  }
 
-    // *IMPORTANT* by default integers are written as 4 bytes no downgraded to a byte
-    out.writeIntsAsBytes(List(1,2,3,4))  // This method is used for the writing that you see in Java OutputStreams
-    // other option is to pass in the (OutputConverter.IntAsByteConverter) objects to the write method:
+  /**
+   * In Java when you write an Integer to an OuputStream that integer is
+   * treated as a byte and only the lowest value byte of the int is written.
+   * <div/>Scala IO differs in that an integer is written as 4 bytes and
+   * one must explicitely coerce an Int to a byte. The following examples
+   * demostrate how one might do that.
+   */
+  def intsAsBytes {
+    import scalax.io._
+    import Resource._
+
+    val out = fromFile("out")
+    // One of the easiest ways is to coerce the
+    // ints into bytes before passing them to a
+    // write method
+    out.write(List[Byte](1,2,3,4))
+    out.write(1.toByte)
+
+    // writeIntsAsBytes (or patchIntsAsBytes) is
+    // another good solution
+    out.writeIntsAsBytes(List(1,2,3,4))
+    out.insertIntsAsBytes(4,List(1,2,3))
+    out.patchIntsAsBytes(3,List(1,2,3),OverwriteAll)
+    out.appendIntsAsBytes(List(1,2,3))
+
+    // The final option is to pass in the
+    //(OutputConverter.IntAsByteConverter) object to the write method:
     out.write(3)(OutputConverter.IntAsByteConverter)
     out.write(List(1,2,3,4))(OutputConverter.TraversableIntAsByteConverter)
+  }
 
-    // This next issue is a slightly odd one.  Since Arrays are pure java objects they are not
-    // in fact Traversable objects so (OutputConverter.IntAsByteArrayConverter) needs to be passed
-    // as the parameter instead of TraversableIntAsByteConverter.
+  /**
+   * Writing Arrays is a special situation because of how
+   * Java and Scala use arrays.  For performance Scala uses the
+   * Java Array object and coerces them into Traversable objects when
+   * the Scala collections methods are needed.  However the implicit resolution
+   * will not choose a Traversable*Converter.  Fortunately Scala IO
+   * provides several Converters for converting Arrays to bytes.
+   * <div/>
+   * The point of this example is explain that if one is creating a custom
+   * converter he will have to consider creating both a
+   * OutputConverter[Traversable[_]] as well as a OutputConverter[Array[_]]
+   */
+  def writingArrays {
+    import scalax.io._
+    import Resource._
+
+    val out = fromFile("out")
     out.write(Array(1,2,3,4))(OutputConverter.IntAsByteArrayConverter)
+    out.write(Array(1,2,3,4))
 
-    // Certain types cannot be written like Char because it needs a codec parameter to write
-    // the characters for writing characters normal operating overloading is used
-    out.write("A string")(Codec.UTF8)  // the codec can be passed in implicitly as demonstrated below
+  }
 
-    // out.write('c') will not compile since a converter cannot be looked up by default Use one of the following solutions
-    implicit val codec = Codec.UTF8 // naturally both solutions require a codec either implicitly declared or implicitly
+  /**
+   * Writing Strings and characters require that codec object is passed
+   * to the Output object so that means the "normal" typeclass design cannot
+   * be used to implicitely write characters and strings to the Output.
+   * Because of this write,patch,insert,etc... are overloaded with a typeclass
+   * version as well as a version that takes a string.
+   * <div/>
+   * The result is that writing strings is a simple exercise but writing characters
+   * or Traversables of characters is less trivial.  The examples below show how
+   * to write strings and characters.
+   */
+  def stringsAndCharacters {
+    import scalax.io._
+    import Resource._
+
+    val out = fromFile("out")
+
+    // codec can be passed implicitely or explicitly
+    out.write("A string")(Codec.UTF8)
+    implicit val codec = Codec.UTF8
     out.write("c")
-    out.write('c')(OutputConverter.charToOutputFunction)
 
-    // Only the basic datatypes have OutputConverter implementations but nothing prevents one from implementing their own
+    // out.write('c') will not compile since a converter cannot
+    // be resolved by the implicit resolution mechanism because
+    // character converters require a codec and only concrete
+    // objects are resolved.
+    out.write('c')(OutputConverter.charToOutputFunction)
+    out.write(Set('a','e','i','o','u'))(OutputConverter.charsToOutputFunction)
+
+    // converters can be passed implicitly
+      implicit val traversableCharCoverter = OutputConverter.charsToOutputFunction
+      out.write(Set('a','e','i','o','u') )
+      out.write('a' to 'z')
+  }
+
+  /**
+   * Declaring custom converters.
+   * <div/>Naturally being able to write objects other than those defined
+   * by Scala IO can be beneficial and it is a simple process.  All that is
+   * needed is a new implementation of a OutputConverter which is imported into
+   * scopoe.
+   * <div/>The examples below show two design patterns.
+   */
+  def customDataTypes {
+    import scalax.io._
+    import Resource._
+    import OutputConverter._
+    val out = fromFile("out")
+    // Simplest design pattern is to create a new implicit object in scope
     implicit object DateConverter extends OutputConverter[Date] {
-      def apply(out: OutputStream, date: Date) = TraversableByteConverter(out,toBytes(date))
       def sizeInBytes = 8
       def toBytes(data: Date) = LongConverter.toBytes(data.getTime)
     }
@@ -49,5 +152,28 @@ object OutputAndTypeClasses {
 
     // write, append, patch and insert all follow the same pattern
     out.append(3)
+
+    // The second (an more reusable design pattern) is to create an object
+    // that contains the converters that you want to use and then they can be
+    // reused through out the code base.
+    object CustomConverters {
+      case class User(name:String)
+      // first you need converter for a collection of your type
+      implicit object UserTraversableConverter extends OutputConverter[TraversableOnce[User]] {
+        def sizeInBytes = 1
+
+        def toBytes(users: TraversableOnce[User]):TraversableOnce[Byte] =
+          users.toIterator.flatMap{_.name.getBytes("ASCII").toIterator}
+      }
+      // next you need converters for the basic type and arrays
+      implicit object UserConverter extends NonTraversableAdapter(UserTraversableConverter)
+      implicit object UserArrayConverter extends ArrayAdapter(UserTraversableConverter)
+    }
+
+    // finally you can import the definitions into scope and write away
+    import CustomConverters._
+
+    out.write(User("Jesse Eichar"))
+    out.insert(2,User("Jesse"))
   }
 }

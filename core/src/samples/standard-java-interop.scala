@@ -1,7 +1,12 @@
+/**
+ * Examples demonstrating how to interoperate with Existing Java libraries.  The primary focus
+ * is given a Java library that requires a InputStream, Reader, Writer, etc... what are some of
+ * the strategies that can be used to obtain the underlying Java resource for the Java library.
+ */
 object JavaInterop {
 
   /**
-   * demonstrate several ways to interoperate existing java APIs
+   * demonstrate a few ways to interoperate existing java APIs
    */
   def basicInteropExamples {
     import scalax.io._
