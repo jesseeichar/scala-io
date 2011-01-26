@@ -20,7 +20,7 @@ object OutputAndTypeClasses {
     import scalax.io._
     import Resource._
 
-    val out = fromFile("out")
+    val out = fromFileString("out")
     // Selected Converter is OutputConverter.IntConverter
     out.write(3)
     // Selected Converter is OutputConverter.LongConverter
@@ -52,7 +52,7 @@ object OutputAndTypeClasses {
     import scalax.io._
     import Resource._
 
-    val out = fromFile("out")
+    val out = fromFileString("out")
     // One of the easiest ways is to coerce the
     // ints into bytes before passing them to a
     // write method
@@ -88,7 +88,7 @@ object OutputAndTypeClasses {
     import scalax.io._
     import Resource._
 
-    val out = fromFile("out")
+    val out = fromFileString("out")
     out.write(Array(1,2,3,4))(OutputConverter.IntAsByteArrayConverter)
     out.write(Array(1,2,3,4))
 
@@ -109,7 +109,7 @@ object OutputAndTypeClasses {
     import scalax.io._
     import Resource._
 
-    val out = fromFile("out")
+    val out = fromFileString("out")
 
     // codec can be passed implicitely or explicitly
     out.write("A string")(Codec.UTF8)
@@ -141,7 +141,7 @@ object OutputAndTypeClasses {
     import scalax.io._
     import Resource._
     import OutputConverter._
-    val out = fromFile("out")
+    val out = fromFileString("out")
     // Simplest design pattern is to create a new implicit object in scope
     implicit object DateConverter extends OutputConverter[Date] {
       def sizeInBytes = 8

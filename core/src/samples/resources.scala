@@ -39,7 +39,7 @@ object Resources {
 
     // examples getting ByteChannels
     // default is a read/write/create channel
-    val channel: SeekableByteChannelResource[SeekableByteChannel] = Resource.fromFile("file")
+    val channel: SeekableByteChannelResource[SeekableByteChannel] = Resource.fromFileString("file")
     val channel2: SeekableByteChannelResource[SeekableByteChannel] =
         Resource.fromRandomAccessFile(new RandomAccessFile("file","rw"))
     val seekable: Seekable = channel2
@@ -98,4 +98,36 @@ object Resources {
     }
   }
 
+  /**
+   * Perform additional actions when a resource is closed. One of the important features of the Scala IO is that resources are cleaned up
+   * automatically.  However occasionally one would like to perform an action on close in addition to
+   * the default closing/flushing of the resource.  When a resource is created additional close actions can be added
+   * and they will be executed just before the resource is closed.
+   */
+  def performAdditionalActionOnClose {
+    import scalax.io._
+    import nio.SeekableFileChannel
+
+    // a close action can be created by passing a function to execute
+    // to the Closer object's apply method
+    val closer = CloseAction{(channel:SeekableFileChannel) =>
+      println("About to close "+channel)
+    }
+
+    // another option is the extend/implement the CloseAction trait
+    val closer2 = new CloseAction[SeekableFileChannel]{
+      def closeImpl[U >: SeekableFileChannel](a: U) =
+        println("Message from second closer")
+    }
+
+    // closers can naturally be combined
+    val closerThenCloser2 = closer :: closer2
+    val closer2ThenCloser = closer ++ closer2
+
+    // we can then create a resource and pass it to the closer parameter
+    // now each time resource is used (and closed) the closer will also be executed
+    // just before the actual closing.
+    val resource = Resource.fromFileString("file")(closer)
+
+  }
 }

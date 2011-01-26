@@ -13,7 +13,7 @@ import java.nio.channels.{
   ByteChannel, ReadableByteChannel, WritableByteChannel,
   Channels
 }
-import Closer.Noop
+import CloseAction.Noop
 import java.io._
 import nio.SeekableFileChannel
 import java.net.URL
@@ -29,7 +29,7 @@ import java.net.URL
  */
 trait Resource[+R <: Closeable] extends ManagedResourceOperations[R] {
 
-    protected def closer:Closer[R] = Noop
+    protected def closer:CloseAction[R] = Noop
     /**
     * Creates a new InputStream (provided the code block used to create the resource is
     * re-usable).  This method should only be used with care in cases when Automatic
@@ -64,7 +64,7 @@ trait Resource[+R <: Closeable] extends ManagedResourceOperations[R] {
                 exceptions ::= e
                 None
         } finally {
-            exceptions ++= (Closer(resource.close()) ++ closer)(resource)
+            exceptions ++= (CloseAction(resource.close()) ++ closer)(resource)
         }
 
         result match {
@@ -233,7 +233,7 @@ object Resource {
    * @return
    *          an InputResource
    */
-  def fromInputStream[A <: InputStream](opener: => A)(implicit extraCloser:Closer[A]=Noop) : InputStreamResource[A] = new InputStreamResource[A](opener, extraCloser)
+  def fromInputStream[A <: InputStream](opener: => A)(implicit extraCloser:CloseAction[A]=Noop) : InputStreamResource[A] = new InputStreamResource[A](opener, extraCloser)
   /**
    * Create an Input Resource instance from a BufferedInputStream
    * <p>
@@ -249,7 +249,7 @@ object Resource {
    * @return
    *          a InputStreamResource that is backed by a BufferedInputStream
    */
-  def fromBufferedInputStream[A <: BufferedInputStream](opener: => A)(implicit extraCloser:Closer[A]=Noop) : InputStreamResource[A]  = new InputStreamResource[A](opener, extraCloser){
+  def fromBufferedInputStream[A <: BufferedInputStream](opener: => A)(implicit extraCloser:CloseAction[A]=Noop) : InputStreamResource[A]  = new InputStreamResource[A](opener, extraCloser){
       override def buffered = this;
   }
 
@@ -269,7 +269,7 @@ object Resource {
    * @return
    *          an OutputStreamResource
    */
-  def fromOutputStream[A <: OutputStream](opener: => A)(implicit extraCloser:Closer[A]=Noop) : OutputStreamResource[A] = new OutputStreamResource[A](opener,extraCloser)
+  def fromOutputStream[A <: OutputStream](opener: => A)(implicit extraCloser:CloseAction[A]=Noop) : OutputStreamResource[A] = new OutputStreamResource[A](opener,extraCloser)
   /**
    * Create an Output Resource instance from a BufferedOutputStream
    * <p>
@@ -285,7 +285,7 @@ object Resource {
    * @return
    *          a OutputStreamResource that is backed by a BufferedOutputStream
    */
-  def fromBufferedOutputStream[A <: BufferedOutputStream](opener: => A)(implicit extraCloser:Closer[A]=Noop) : OutputStreamResource[A] = new OutputStreamResource[A](opener,extraCloser) {
+  def fromBufferedOutputStream[A <: BufferedOutputStream](opener: => A)(implicit extraCloser:CloseAction[A]=Noop) : OutputStreamResource[A] = new OutputStreamResource[A](opener,extraCloser) {
     override def buffered = this
   }
 
@@ -308,7 +308,7 @@ object Resource {
    * @return
    *          an ReaderResource
    */
-  def fromReader[A <: Reader](opener: => A)(implicit extraCloser:Closer[A]=Noop) : ReaderResource[A] = new ReaderResource[A](opener, extraCloser)
+  def fromReader[A <: Reader](opener: => A)(implicit extraCloser:CloseAction[A]=Noop) : ReaderResource[A] = new ReaderResource[A](opener, extraCloser)
   /**
    * Create an Input Resource instance with conversion traits from an BufferedReader.
    * <p>
@@ -326,7 +326,7 @@ object Resource {
    * @return
    *          a ReaderResource that is backed by a BufferedReader
    */
-  def fromBufferedReader[A <: BufferedReader](opener: => A)(implicit extraCloser:Closer[A]=Noop): ReaderResource[A] = new ReaderResource[A](opener,extraCloser) {
+  def fromBufferedReader[A <: BufferedReader](opener: => A)(implicit extraCloser:CloseAction[A]=Noop): ReaderResource[A] = new ReaderResource[A](opener,extraCloser) {
       override def buffered = this
   }
 
@@ -348,7 +348,7 @@ object Resource {
    * @return
    *          an WriterResource
    */
-  def fromWriter[A <: Writer](opener: => A)(implicit extraCloser:Closer[A]=Noop) : WriterResource[A] = new WriterResource[A](opener,extraCloser)
+  def fromWriter[A <: Writer](opener: => A)(implicit extraCloser:CloseAction[A]=Noop) : WriterResource[A] = new WriterResource[A](opener,extraCloser)
   /**
    * Create an Output Resource instance with conversion traits from an BufferedWriter.
    * <p>
@@ -365,7 +365,7 @@ object Resource {
    * @return
    *          a WriterResource that is backed by a BufferedWriter
    */
-  def fromBufferedWriter[A <: BufferedWriter](opener: => A)(implicit extraCloser:Closer[A]=Noop): WriterResource[A] = new WriterResource[A](opener, extraCloser) {
+  def fromBufferedWriter[A <: BufferedWriter](opener: => A)(implicit extraCloser:CloseAction[A]=Noop): WriterResource[A] = new WriterResource[A](opener, extraCloser) {
       override def buffered = this
   }
 
@@ -385,7 +385,7 @@ object Resource {
    * @return
    *          an ReadableByteChannelResource
    */
-  def fromReadableByteChannel[A <: ReadableByteChannel](opener: => A)(implicit extraCloser:Closer[A]=Noop) : ReadableByteChannelResource[A] = new ReadableByteChannelResource[A](opener, extraCloser)
+  def fromReadableByteChannel[A <: ReadableByteChannel](opener: => A)(implicit extraCloser:CloseAction[A]=Noop) : ReadableByteChannelResource[A] = new ReadableByteChannelResource[A](opener, extraCloser)
   /**
    * Create an Output Resource instance with several conversion traits from an WritableByteChannel.
    * <p>
@@ -401,7 +401,7 @@ object Resource {
    * @return
    *          an WritableByteChannelResource
    */
-  def fromWritableByteChannel[A <: WritableByteChannel](opener: => A)(implicit extraCloser:Closer[A]=Noop) : WritableByteChannelResource[A] = new WritableByteChannelResource[A](opener,extraCloser)
+  def fromWritableByteChannel[A <: WritableByteChannel](opener: => A)(implicit extraCloser:CloseAction[A]=Noop) : WritableByteChannelResource[A] = new WritableByteChannelResource[A](opener,extraCloser)
   /**
    * Create an Input/Output Resource instance with several conversion traits from an ByteChannel.
    * <p>
@@ -417,7 +417,7 @@ object Resource {
    * @return
    *          an ByteChannelResource
    */
-  def fromByteChannel[A <: ByteChannel](opener: => A)(implicit extraCloser:Closer[A]=Noop) : ByteChannelResource[A] = new ByteChannelResource[A](opener,extraCloser)
+  def fromByteChannel[A <: ByteChannel](opener: => A)(implicit extraCloser:CloseAction[A]=Noop) : ByteChannelResource[A] = new ByteChannelResource[A](opener,extraCloser)
   /**
    * Create an Input/Output/Seekable Resource instance with several conversion traits from an SeekableByteChannel.
    * <p>
@@ -433,7 +433,7 @@ object Resource {
    * @return
    *          an ByteChannelResource
    */
-  def fromSeekableByteChannel[A <: SeekableByteChannel](opener: => A)(implicit extraCloser:Closer[A]=Noop) : SeekableByteChannelResource[A] = new SeekableByteChannelResource[A](opener,extraCloser)
+  def fromSeekableByteChannel[A <: SeekableByteChannel](opener: => A)(implicit extraCloser:CloseAction[A]=Noop) : SeekableByteChannelResource[A] = new SeekableByteChannelResource[A](opener,extraCloser)
   /**
    * Create an Input/Output/Seekable Resource instance with several conversion traits from an RandomAccess file.
    * <p>
@@ -449,15 +449,15 @@ object Resource {
    * @return
    *          an ByteChannelResource
    */
-  def fromRandomAccessFile(opener: => RandomAccessFile)(implicit extraCloser:Closer[SeekableFileChannel]=Noop) : SeekableByteChannelResource[SeekableFileChannel] = {
+  def fromRandomAccessFile(opener: => RandomAccessFile)(implicit extraCloser:CloseAction[SeekableFileChannel]=Noop) : SeekableByteChannelResource[SeekableFileChannel] = {
     def open = new SeekableFileChannel(opener.getChannel)
     new SeekableByteChannelResource[SeekableFileChannel](open,extraCloser)
   }
 
-  def fromURL(url:URL): InputStreamResource[InputStream] = fromInputStream(url.openStream)
-  def fromURL(url:String): InputStreamResource[InputStream] = fromURL(new URL(url))
-  def fromFile(file:File): SeekableByteChannelResource[SeekableByteChannel] = fromRandomAccessFile(new RandomAccessFile(file,"rw"))
-  def fromFile(file:String): SeekableByteChannelResource[SeekableByteChannel] = fromRandomAccessFile(new RandomAccessFile(file,"rw"))
+  def fromURL(url:URL)(implicit extraCloser:CloseAction[InputStream]=Noop): InputStreamResource[InputStream] = fromInputStream(url.openStream)(extraCloser)
+  def fromURLString(url:String)(implicit extraCloser:CloseAction[InputStream]=Noop): InputStreamResource[InputStream] = fromURL(new URL(url))(extraCloser)
+  def fromFile(file:File)(implicit extraCloser:CloseAction[SeekableFileChannel]=Noop): SeekableByteChannelResource[SeekableByteChannel] = fromRandomAccessFile(new RandomAccessFile(file,"rw"))(extraCloser)
+  def fromFileString(file:String)(implicit extraCloser:CloseAction[SeekableFileChannel]=Noop): SeekableByteChannelResource[SeekableByteChannel] = fromRandomAccessFile(new RandomAccessFile(file,"rw"))(extraCloser)
 }
 
 /***************************** InputStreamResource ************************************/
@@ -466,7 +466,7 @@ object Resource {
  *
  * @see ManagedResource
  */
-class InputStreamResource[+A <: InputStream](opener: => A, override protected val closer:Closer[A]) extends BufferableInputResource[A, BufferedInputStream] {
+class InputStreamResource[+A <: InputStream](opener: => A, override protected val closer:CloseAction[A]) extends BufferableInputResource[A, BufferedInputStream] {
     def open() = opener
 
     def inputStream = this
@@ -485,7 +485,7 @@ class InputStreamResource[+A <: InputStream](opener: => A, override protected va
  *
  * @see ManagedResource
  */
-class OutputStreamResource[+A <: OutputStream](opener: => A, override protected val closer:Closer[A]) extends BufferableOutputResource[A, BufferedOutputStream] {
+class OutputStreamResource[+A <: OutputStream](opener: => A, override protected val closer:CloseAction[A]) extends BufferableOutputResource[A, BufferedOutputStream] {
     def open() = opener
 
     def outputStream = this
@@ -502,7 +502,7 @@ class OutputStreamResource[+A <: OutputStream](opener: => A, override protected 
  *
  * @see ManagedResource
  */
-class ReaderResource[+A <: Reader](opener: => A, override protected val closer:Closer[A]) extends BufferableReadCharsResource[A, BufferedReader] {
+class ReaderResource[+A <: Reader](opener: => A, override protected val closer:CloseAction[A]) extends BufferableReadCharsResource[A, BufferedReader] {
     def open() = opener
 
     def buffered = Resource.fromBufferedReader(new BufferedReader(opener))
@@ -516,7 +516,7 @@ class ReaderResource[+A <: Reader](opener: => A, override protected val closer:C
  *
  * @see ManagedResource
  */
-class WriterResource[+A <: Writer](opener: => A, override protected val closer:Closer[A]) extends BufferableWriteCharsResource[A, BufferedWriter] {
+class WriterResource[+A <: Writer](opener: => A, override protected val closer:CloseAction[A]) extends BufferableWriteCharsResource[A, BufferedWriter] {
     def open() = opener
 
     def buffered = Resource.fromBufferedWriter(new BufferedWriter(opener))
@@ -530,7 +530,7 @@ class WriterResource[+A <: Writer](opener: => A, override protected val closer:C
  *
  * @see ManagedResource
  */
-class ByteChannelResource[+A <: ByteChannel](opener: => A, override protected val closer:Closer[A]) extends InputResource[A] with OutputResource[A] {
+class ByteChannelResource[+A <: ByteChannel](opener: => A, override protected val closer:CloseAction[A]) extends InputResource[A] with OutputResource[A] {
     def open() = opener
 
     def inputStream = Resource.fromInputStream(Channels.newInputStream(opener))
@@ -551,7 +551,7 @@ class ByteChannelResource[+A <: ByteChannel](opener: => A, override protected va
  *
  * @see ManagedResource
  */
-class SeekableByteChannelResource[+A <: SeekableByteChannel](opener: => A, override protected val closer:Closer[A]) extends SeekableResource[A] {
+class SeekableByteChannelResource[+A <: SeekableByteChannel](opener: => A, override protected val closer:CloseAction[A]) extends SeekableResource[A] {
     def open() = opener
 
     def inputStream = Resource.fromInputStream(Channels.newInputStream(opener))
@@ -573,7 +573,7 @@ class SeekableByteChannelResource[+A <: SeekableByteChannel](opener: => A, overr
  *
  * @see ManagedResource
  */
-class ReadableByteChannelResource[+A <: ReadableByteChannel](opener: => A, override protected val closer:Closer[A]) extends BufferableInputResource[A, BufferedInputStream] {
+class ReadableByteChannelResource[+A <: ReadableByteChannel](opener: => A, override protected val closer:CloseAction[A]) extends BufferableInputResource[A, BufferedInputStream] {
     def open() = opener
 
     def buffered = inputStream.buffered
@@ -591,7 +591,7 @@ class ReadableByteChannelResource[+A <: ReadableByteChannel](opener: => A, overr
  *
  * @see ManagedResource
  */
-class WritableByteChannelResource[+A <: WritableByteChannel](opener: => A, override protected val closer:Closer[A]) extends BufferableOutputResource[A, BufferedOutputStream] {
+class WritableByteChannelResource[+A <: WritableByteChannel](opener: => A, override protected val closer:CloseAction[A]) extends BufferableOutputResource[A, BufferedOutputStream] {
     def open() = opener
 
     def buffered = outputStream.buffered

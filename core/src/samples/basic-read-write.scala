@@ -204,10 +204,10 @@ object BasicIO {
     implicit val codec = scalax.io.Codec.UTF8
 
     // you can use the implicit conversions of JavaConversions to add the asResource method to certain classes like URL
-    val someFile:Input = Resource.fromURL("file://someFile")
+    val someFile:Input = Resource.fromURLString("file://someFile")
 
     // Actual type is InputStreamResource[InputStream] but that is only needed if you want to convert to a reader
-    val someFile2: InputStreamResource[InputStream] = Resource.fromURL("file://someFile")
+    val someFile2: InputStreamResource[InputStream] = Resource.fromURLString("file://someFile")
     val sum: Int = someFile.bytesAsInts.reduceLeft (_ + _)
   }
 
@@ -226,7 +226,7 @@ object BasicIO {
     implicit val codec = scalax.io.Codec.UTF8
 
     // you can use the implicit conversions of JavaConversions to add the asResource method to certain classes like URL
-    val someFile: InputStreamResource[InputStream] = fromURL("http://www.scala-lang.org")
+    val someFile: InputStreamResource[InputStream] = fromURLString("http://www.scala-lang.org")
     // You can convert an InputStreamResource to a _ReadChars_ type if desired.  That means that the codec needs to be
     // defined just once.
     val someReader: ReadChars = someFile.reader(Codec.UTF8)
@@ -247,7 +247,7 @@ object BasicIO {
     implicit val codec = scalax.io.Codec.UTF8
 
     // you can use the implicit conversions of JavaConversions to add the asResource method to certain classes like URL
-    val someFile:Input = fromURL("file://someFile")
+    val someFile:Input = fromURLString("file://someFile")
     val doubled: Traversable[String] = for ( c <- someFile.chars ) yield "" + c + c
   }
 
@@ -263,7 +263,7 @@ object BasicIO {
     implicit val codec = Codec.UTF8
 
     // you can use the implicit conversions of JavaConversions to add the asResource method to certain classes like URL
-    val someFile:Input = fromURL("file://someFile")
+    val someFile:Input = fromURLString("file://someFile")
 
     // by default the line terminator is stripped and is
     // auto detected
@@ -288,7 +288,7 @@ object BasicIO {
     implicit val codec = Codec.UTF8
 
     // you can use the implicit conversions of JavaConversions to add the asResource method to certain classes like URL
-    val someFile: Seekable = fromFile("someFile")
+    val someFile: Seekable = fromFileString("someFile")
 
     // write bytes
     // By default the file write will replace

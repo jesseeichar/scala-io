@@ -38,7 +38,7 @@ class ProjectSite(project:IoProject,log:Logger) {
 
 
   def html(site:WebsiteModel) = {
-    val content = { pages.map {
+    val content = <div><h3>Summary:</h3>{description}{ pages.map {
                     page =>
                       <div class="page">
                         <a href={"../"+pagePath(page)}>
@@ -56,7 +56,7 @@ class ProjectSite(project:IoProject,log:Logger) {
                               </div>
                         }}</div>
                       </div>
-                  }}
+                  }}</div>
     Template(false,name.capitalize)(
       <link href="../css/samples.css" rel="stylesheet" type="text/css" ></link>)(
       <h1>{name.capitalize}</h1>
