@@ -80,7 +80,7 @@ class ScalaIOProject(info: ProjectInfo)
           of the issues are encountered through implementation of new filesystems.  So if you wish
           to implement a filesystem I would like the feedback but be aware that it will require migration
           as the API matures.
-        <p>
+        </p><p>
           The Filesystem API consists of two APIs one for the implementer of filesystems and one for the
           user of the Filesystem API.  As described earlier the FileSystem API originated from the Java 7
           NIO2 filesystem and almost all the capability of that API are present in the scala.io.file API.
@@ -93,6 +93,7 @@ class ScalaIOProject(info: ProjectInfo)
             <li>Plugin system for discovery of FileSystems</li>
             <li>Secure PathSets which are analogous to SecureDirectoryStreams in NIO2</li>
             <li>Better support for links</li>
+          </ul>
         </p>
       </span>
   }

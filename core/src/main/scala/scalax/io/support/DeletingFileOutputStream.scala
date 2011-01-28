@@ -1,3 +1,5 @@
+package scalax.io.support
+
 /*                     __                                               *\
 **     ________ ___   / /  ___     Scala API                            **
 **    / __/ __// _ | / /  / _ |    (c) 2009-2011, Jesse Eichar          **
@@ -5,13 +7,19 @@
 ** /____/\___/_/ |_/____/_/ | |                                         **
 **                          |/                                          **
 \*                                                                      */
-package scalax.io
+import java.io.{
+    File => JFile,
+    FileOutputStream
+}
 
-/**
- * Not public API.  I don't think I like the idea of having constants
- * defined like this.  At the very least there needs to be a way to
- * override the default values.
- */
-object Constants {
-  final val BufferSize = 1024 * 1024
+class DeletingFileOutputStream(jfile:JFile, append : Boolean) extends FileOutputStream(jfile,append) {
+    override def finalize() : Unit = {
+        try      if(jfile.exists) jfile.delete()
+        finally  super.finalize()
+    }
+
+    override def close() : Unit = {
+      try super.close()
+      finally if(jfile.exists) jfile.delete()
+    }
 }

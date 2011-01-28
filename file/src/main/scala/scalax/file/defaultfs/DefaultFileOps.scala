@@ -18,7 +18,9 @@ import scalax.io.nio.SeekableFileChannel
 import java.io.{
   FileInputStream, FileOutputStream, File => JFile, RandomAccessFile
 }
-import scalax.io.{DeletingFileOutputStream, OpenOption, Seekable, Resource}
+import scalax.io.{OpenOption, Seekable, Resource}
+import scalax.io.support.DeletingFileOutputStream
+
 
 /**
  * <b>Not part of API.</b>

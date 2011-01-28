@@ -24,7 +24,7 @@ object Handler extends Handler
 class RamURLConnection(url:URL) extends URLConnection(url) {
   lazy val path = {
     val Array(id,path) = url.toString.drop(RamFileSystem.protocol+"://" size).split("!")
-    val fs = RamFileSystem(id)
+    val fs = RamFileSystem(RamFileSystem.RamFsId(id))
     val segments = if(path startsWith "/") fs.separator +: path.split("/") else path.split("/")
     fs.fromSeq(segments)
   }

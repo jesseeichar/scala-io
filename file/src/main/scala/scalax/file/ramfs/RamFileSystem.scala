@@ -9,37 +9,34 @@
 package scalax.file
 package ramfs
 
-import resource.ManagedResource
-import scalax.io.Codec
-import scalax.file.attributes.FileAttribute
-
 import java.net.{
-  URL,URI, URLStreamHandler
+  URI, URLStreamHandler
 }
 import java.util.UUID
 import java.io.{IOException, FileNotFoundException}
 
 object RamFileSystem {
+  case class RamFsId(id:String = UUID.randomUUID.toString)
   val protocol = "ramfs"
-  private val fileSystems = scala.collection.mutable.WeakHashMap[String,RamFileSystem]()
-  def apply(val separator:String = "/") : RamFileSystem = new RamFileSystem(separator = separator)
-  def apply(fsId:String) : RamFileSystem = synchronized {
+  private val fileSystems = scala.collection.mutable.WeakHashMap[RamFsId,RamFileSystem]()
+  def apply(separator:String = "/") : RamFileSystem = new RamFileSystem(separator = separator)
+  def apply(fsId:RamFsId) : RamFileSystem = synchronized {
     fileSystems.get(fsId).getOrElse(new RamFileSystem(fsId))
   }
   def apply(uri:URI) : RamPath = {
     require(uri.toString contains '!', "Ramfile system URIs must be of form: ramfs://fsId!path, was: "+uri+" (did not contain a !)")
     require(uri.getScheme equalsIgnoreCase "ramfs", "Ramfile system URIs must start with ramfs, was: "+uri)
 
-    val id = uri.getAuthority.takeWhile{_ != '!'}
+    val id = RamFsId(uri.getAuthority.takeWhile{_ != '!'})
     val path = uri.getRawPath
     apply(id).fromString(path)
   }
-  private def register(fsId:String, fs:RamFileSystem) = synchronized {
+  private def register(fsId:RamFsId, fs:RamFileSystem) = synchronized {
     fileSystems(fsId) = fs
   }
 }
 
-private class RamFileSystem(val id : String = UUID.randomUUID.toString, val separator:String = "/") extends FileSystem {
+class RamFileSystem(val id : RamFileSystem.RamFsId = RamFileSystem.RamFsId(), val separator:String = "/") extends FileSystem {
   private var fsTree = new DirNode(separator)
 
   RamFileSystem.register(id,this)
@@ -81,7 +78,7 @@ private class RamFileSystem(val id : String = UUID.randomUUID.toString, val sepa
                         deleteOnExit : Boolean = true
                         /*attributes:List[FileAttributes] TODO */) : Path  = apply(separator,"temp",UUID.randomUUID.toString)
 
-  def uri(path:RamPath = root):URI = new URI(RamFileSystem.protocol+"://"+id+"!"+path.path.replaceAll("\\\\","/"))
+  def uri(path:RamPath = root):URI = new URI(RamFileSystem.protocol+"://"+id.id+"!"+path.path.replaceAll("\\\\","/"))
   override def toString = "Ram File System"
 
   private[ramfs] def lookup(path:RamPath) = {

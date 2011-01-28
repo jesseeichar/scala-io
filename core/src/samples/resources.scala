@@ -115,19 +115,30 @@ object Resources {
     }
 
     // another option is the extend/implement the CloseAction trait
-    val closer2 = new CloseAction[SeekableFileChannel]{
-      def closeImpl[U >: SeekableFileChannel](a: U) =
+    val closer2 = new CloseAction[Any]{
+
+      protected def closeImpl(a: Any):Unit =
         println("Message from second closer")
     }
 
     // closers can naturally be combined
-    val closerThenCloser2 = closer :: closer2
-    val closer2ThenCloser = closer ++ closer2
+    val closerThenCloser2 = closer +: closer2
+    val closer2ThenCloser = closer :+ closer2
 
     // we can then create a resource and pass it to the closer parameter
     // now each time resource is used (and closed) the closer will also be executed
     // just before the actual closing.
     val resource = Resource.fromFileString("file")(closer)
 
+    // closeActions can also be added to an existing resource
+    // NOTE: Appended actions still are performed BEFORE
+    // resource is closed
+    resource.appendCloseAction(closerThenCloser2)
+    resource.prependCloseAction(closer2)
+
+    // The following are equivalent
+    Resource.fromFileString("file")(closer :+ closer2)
+    Resource.fromFileString("file")(closer).appendCloseAction(closer2)
+    Resource.fromFileString("file").appendCloseAction (closer :+ closer2)
   }
 }
