@@ -203,12 +203,11 @@ object BasicIO {
     // see codec examples in scala io core for details on why there is an implicit codec here
     implicit val codec = scalax.io.Codec.UTF8
 
-    // you can use the implicit conversions of JavaConversions to add the asResource method to certain classes like URL
-    val someFile:Input = Resource.fromURLString("file://someFile")
+    val url:Input = Resource.fromURLString("file://someFile")
 
     // Actual type is InputStreamResource[InputStream] but that is only needed if you want to convert to a reader
-    val someFile2: InputStreamResource[InputStream] = Resource.fromURLString("file://someFile")
-    val sum: Int = someFile.bytesAsInts.reduceLeft (_ + _)
+    val url2: InputStreamResource[InputStream] = Resource.fromURLString("file://someFile")
+    val sum: Int = url.bytesAsInts.reduceLeft (_ + _)
   }
 
   /**
@@ -225,15 +224,14 @@ object BasicIO {
     // see codec examples in scala io core for details on why there is an implicit codec here
     implicit val codec = scalax.io.Codec.UTF8
 
-    // you can use the implicit conversions of JavaConversions to add the asResource method to certain classes like URL
-    val someFile: InputStreamResource[InputStream] = fromURLString("http://www.scala-lang.org")
+    val url: InputStreamResource[InputStream] = fromURLString("http://www.scala-lang.org")
     // You can convert an InputStreamResource to a _ReadChars_ type if desired.  That means that the codec needs to be
     // defined just once.
-    val someReader: ReadChars = someFile.reader(Codec.UTF8)
-    val consonants = someFile.slurpString.filterNot (c => "aeiou" contains c)
+    val someReader: ReadChars = url.reader(Codec.UTF8)
+    val consonants = url.slurpString.filterNot (c => "aeiou" contains c)
 
     // ok now as bytes
-    val (small, large) = someFile.byteArray partition (_ < 128)
+    val (small, large) = url.byteArray partition (_ < 128)
   }
 
   /**
@@ -246,9 +244,8 @@ object BasicIO {
     // see codec examples in scala io core for details on why there is an implicit codec here
     implicit val codec = scalax.io.Codec.UTF8
 
-    // you can use the implicit conversions of JavaConversions to add the asResource method to certain classes like URL
-    val someFile:Input = fromURLString("file://someFile")
-    val doubled: Traversable[String] = for ( c <- someFile.chars ) yield "" + c + c
+    val url:Input = fromURLString("file://someFile")
+    val doubled: Traversable[String] = for ( c <- url.chars ) yield "" + c + c
   }
 
   /**
@@ -262,19 +259,18 @@ object BasicIO {
     // see codec example for why codec is required
     implicit val codec = Codec.UTF8
 
-    // you can use the implicit conversions of JavaConversions to add the asResource method to certain classes like URL
-    val someFile:Input = fromURLString("file://someFile")
+    val url:Input = fromURLString("file://someFile")
 
     // by default the line terminator is stripped and is
     // auto detected
-    someFile.lines() foreach println _
+    url.lines() foreach println _
 
     // now do not strip terminator
-    someFile.lines (includeTerminator = true) foreach print _
+    url.lines (includeTerminator = true) foreach print _
 
     // now declare explicitly the terminator
     // terminator is restricted to 1 or 2 characters
-    someFile.lines (terminator = Line.Terminators.NewLine) foreach println _
+    url.lines (terminator = Line.Terminators.NewLine) foreach println _
   }
 
   /**
@@ -287,7 +283,6 @@ object BasicIO {
     // see codec example for why codec is required
     implicit val codec = Codec.UTF8
 
-    // you can use the implicit conversions of JavaConversions to add the asResource method to certain classes like URL
     val someFile: Seekable = fromFileString("someFile")
 
     // write bytes

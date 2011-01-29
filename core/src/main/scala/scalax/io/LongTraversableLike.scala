@@ -11,6 +11,10 @@ package scalax.io
 import scala.collection._
 import scala.collection.generic._
 
+sealed abstract class FoldResult[+A](result:A)
+case class Continue[+A](result:A) extends FoldResult(result)
+case class End[+A](result:A) extends FoldResult(result)
+
 
 /**
  * A traversable for use on very large datasets which cannot be indexed with Ints but instead
@@ -22,6 +26,22 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
 
   override protected[this] def thisCollection: LongTraversable[A] = this.asInstanceOf[LongTraversable[A]]
   override protected[this] def toCollection(repr: Repr): LongTraversable[A] = repr.asInstanceOf[LongTraversable[A]]
+
+  def limitFold[U](init:U)(op:(U,A) => FoldResult[U]):U = {
+    case class FoldTerminator(v:U) extends RuntimeException
+
+    try {
+      foldLeft(init){ (acc,next) =>
+        op(acc,next) match {
+          case Continue(result) => result
+          case End(result) => throw new FoldTerminator(result)
+        }
+      }
+    } catch {
+      case FoldTerminator(v) => v
+    }
+  }
+
 
   def lcount(p: A => Boolean): Long = {
       var cnt = 0L

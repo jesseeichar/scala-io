@@ -12,8 +12,7 @@ import scala.collection.Traversable
 import Line._
 /**
  * An trait for objects that viewed as a sequence of bytes. For example InputStream
- * and ReadableByteChannel could be an Input object (or be converted
- * to a ReadBytes object).
+ * and ReadableByteChannel could be an Input object.
  * <p>
  * Note: All collections returned are non-strict collections and each
  * invocation of a method will typically open a new stream or channel.
@@ -24,15 +23,16 @@ import Line._
  * Default implementation is based on providing an implementation for
  * bytesAsInts and all other methods are implemented using
  * that method.
+ *
  * @author Jesse Eichar
  * @since 1.0
  *
- * @see Output
+ * @see scalax.io.Output
  */
 trait Input {
 
     /**
-    * The number of bytes available for reading
+    * The number of bytes that can be read
     * <p>
     * if length == None then it is not possible to determine the
     * number of bytes in advance.

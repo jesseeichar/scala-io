@@ -1,4 +1,4 @@
-/*                     __                                               *\
+/*                      __                                               *\
 **     ________ ___   / /  ___     Scala API                            **
 **    / __/ __// _ | / /  / _ |    (c) 2009-2011, Jesse Eichar          **
 **  __\ \/ /__/ __ |/ /__/ __ |    http://scala-lang.org/               **
@@ -48,8 +48,8 @@ object CloseAction {
  * Also related to exceptions is the fact that all CloseActions will be executed when they are combined.
  * For example if CloseAction A and B are combined and A fails with an exception B will still be executed.
  *
- * The easiest method for creating a close action is to simply call the
- * [[scalax.io.CloseAction]].apply factory method.  It takes a function and contructs
+ * The easiest method for creating a close action is to simply call
+ * the [[scalax.io.CloseAction]].apply factory method.  It takes a function and contructs
  * a CloseAction from it.
  *
  * {{{
@@ -62,18 +62,46 @@ object CloseAction {
  */
 trait CloseAction[-A] {
   import CloseAction.{Prepend,Append,Noop}
-	def +:[B <: A](o:CloseAction[B]):CloseAction[B] = o match {
+
+  /**
+   * Construct a new CloseAction consisting of ''other'' then ''this''.
+   *
+   * @param other an action to ''prepend'' to this action
+   * @return an action consisting of first executing ''other'' then ''this''
+   */
+	def +:[B <: A](other:CloseAction[B]):CloseAction[B] = other match {
     case Noop => this
-    case _ => new Prepend(o,this)
+    case _ => new Prepend(other,this)
   }
-	def :+[B <: A](o:CloseAction[B]):CloseAction[B] = o match {
+  /**
+   * Construct a new CloseAction consisting of ''this'' then ''other''.
+   *
+   * @param other an action to ''append'' to this action
+   * @return an action consisting of first executing ''this'' then ''other''
+   */
+	def :+[B <: A](other:CloseAction[B]):CloseAction[B] = other match {
     case Noop => this
-    case _ => new Append(o,this)
+    case _ => new Append(other,this)
   }
-  protected def closeImpl(a:A):Unit
-  def apply(u:A):List[Throwable] = {
+
+  /**
+   * The actual implementation of the action.  Implementers of a CloseAction
+   * must implement this method.
+   *
+   * @param resource the resource that will be closed.
+   */
+  protected def closeImpl(resource:A):Unit
+
+  /**
+   * Execute the action and return any Exceptions that may have
+   * been raised during the execution of this method.
+   *
+   * @param resource the resource being closed
+   * @return the errors that occurred while executing the message.
+   */
+  def apply(resource:A):List[Throwable] = {
     try {
-      closeImpl(u)
+      closeImpl(resource)
       Nil
     } catch {
       case e => List(e)

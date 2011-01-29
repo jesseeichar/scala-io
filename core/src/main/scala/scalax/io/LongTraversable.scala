@@ -21,7 +21,6 @@ import scala.collection.mutable.{ Builder, ListBuffer }
 trait LongTraversable[+A] extends Traversable[A]
                             with GenericTraversableTemplate[A, LongTraversable]
                             with LongTraversableLike[A, LongTraversable[A]] {
-
   override def companion : GenericCompanion[LongTraversable] = LongTraversable
 }
 
