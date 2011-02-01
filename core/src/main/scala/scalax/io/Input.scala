@@ -32,7 +32,7 @@ import Line._
 trait Input {
 
     /**
-    * The number of bytes that can be read
+    * The number of bytes that can be read from the underlying resource.
     * <p>
     * if length == None then it is not possible to determine the
     * number of bytes in advance.
@@ -43,20 +43,11 @@ trait Input {
     /**
     * Obtains a Traversable for conveniently processing the resource as bytes.
     * <p>
-    * Depending on the underlying resource this may be slower than
-    * {@link #bytesAsInts}
-    * </p>
-    * <p>
-    * Note: The iterable returned is a non-strict collection
     * </p><p>
-    * In some object the bytes of underlying iterable can be cast to an Seq
+    * In some implementations the bytes of underlying iterable can be cast to an Seq
     * and elements can be randomly accessed. Random access must be used
-    * carefully as each access will open a new stream unless that behavior
+    * carefully as each access will open the underlying unless that behavior
     * is modified by the implementation.
-    * </p><p>
-    * For example on some filesystems using random access within a
-    * {@link FileOperations#open} will perform all accesses using the same
-    * Channel improving the performance
     * </p>
     *
     * @return an non-strict iterable over all the bytes

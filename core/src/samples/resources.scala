@@ -110,7 +110,12 @@ object Resources {
 
     // a close action can be created by passing a function to execute
     // to the Closer object's apply method
-    val closer = CloseAction{(channel:SeekableFileChannel) =>
+    // '''WARNING''' When defining a CloseAction make its type as generic
+    // as possible.  IE if it can be a CloseAction[Closeable] do not
+    // make it a CloseAction[InputStream].  The reason has to do
+    // with contravariance.  If you don't know what that means
+    // don't worry just trust me ;-)
+    val closer = CloseAction{(channel:Any) =>
       println("About to close "+channel)
     }
 
@@ -140,5 +145,39 @@ object Resources {
     Resource.fromFileString("file")(closer :+ closer2)
     Resource.fromFileString("file")(closer).appendCloseAction(closer2)
     Resource.fromFileString("file").appendCloseAction (closer :+ closer2)
+
+  }
+
+  /**
+   * This example examines why a CloseAction[Any] can be assigned
+   * to a CloseAction[String] but not vice-versa.
+   * <p>
+   * Normally one think in terms of ''Covariance'' (List[String] can be assigned to a List[Any])
+   * but that cannot work for CloseActions so CloseActions have the exact opposite characteristics.
+   * </p>
+   */
+  def whyAreCloseActionsContravariant {
+    import scalax.io._
+    import java.io._
+
+    // Since CloseAction is Defined as CloseAction[-A], the following compiles
+    val action:CloseAction[String] = CloseAction[Any]{_ => ()}
+
+    //But
+    // val action:CloseAction[Any] = CloseAction[String]{_ => ()}
+    // does not.
+
+    // If you want to know why consider the following:
+    val resource:Resource[InputStream] = Resource.fromInputStream(new FileInputStream("file"))
+    val resource2:Resource[Closeable] = resource
+
+    val closeAction:CloseAction[InputStream] = CloseAction{in:InputStream => println(in.available)}
+
+    //Given the previous declarations it should be obvious that the following works
+    val updatedResource:Resource[InputStream] = resource.appendCloseAction(closeAction)
+
+    // However since resource2 is a Resource[Closeable] it should be obvious that one cannot
+    // add a closeAction that requires an InputStream.  so the following would fail to compile
+    // resource2.appendCloseAction(closeAction)
   }
 }

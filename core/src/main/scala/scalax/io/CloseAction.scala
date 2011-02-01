@@ -18,6 +18,7 @@ object CloseAction {
   def apply[A](f : A => Unit ) = new CloseAction[A]{
     protected def closeImpl(a:A) = f(a)
   }
+
   /**
    * The unit/nothing [[scalax.io.CloseAction]]
    */

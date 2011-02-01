@@ -59,8 +59,11 @@ object CreateAndMoveFilesAndDirectories {
    * Move a file from one filesystem to another
    */
   def moveBetweenFileSystems {
-    val ramfs = RamFileSystem()
-    val ramPath = ramfs("/","tmp")
+    import scalax.file._
+    import ramfs.RamFileSystem
+
+    val fs = RamFileSystem()
+    val ramPath = fs("/","tmp")
     val path = Path("file")  // default filesystem
 
     path.moveTo(ramPath)

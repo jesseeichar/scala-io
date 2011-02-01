@@ -47,6 +47,13 @@ protected[io] class CloseableResourceAcquirer[R <: Closeable,U >: R,B](open:()=>
   def close(r:R):Unit = r.close()
 }
 
+trait ResourceOps[+R, +Repr] {
+    def prependCloseAction[B >: R](newAction: CloseAction[B]):Repr
+    def appendCloseAction[B >: R](newAction: CloseAction[B]):Repr
+
+    def prependCloseAction[B >: R](newAction: B => Unit):Repr = prependCloseAction(CloseAction(newAction))
+    def appendCloseAction[B >: R](newAction: B => Unit):Repr = appendCloseAction(CloseAction(newAction))
+}
 /**
  * A Resource that can be used to do IO.  It wraps objects from the java.io package
  *
@@ -56,7 +63,7 @@ protected[io] class CloseableResourceAcquirer[R <: Closeable,U >: R,B](open:()=>
  * @author  Jesse Eichar
  * @since   1.0
  */
-trait Resource[+R <: Closeable] extends ManagedResourceOperations[R] {
+trait Resource[+R <: Closeable] extends ManagedResourceOperations[R] with ResourceOps[R, Resource[R]]{
     /**
     * Creates a new InputStream (provided the code block used to create the resource is
     * re-usable).  This method should only be used with care in cases when Automatic
@@ -79,8 +86,6 @@ trait Resource[+R <: Closeable] extends ManagedResourceOperations[R] {
     */
     def open(): R
 
-    def prependCloseAction[B >: R](newAction: CloseAction[B]):Resource[R]
-    def appendCloseAction[B >: R](newAction: CloseAction[B]):Resource[R]
 
     def acquireFor[B](f : R => B) : Either[List[Throwable], B] = new CloseableResourceAcquirer(open,f,Noop)()
 
@@ -116,7 +121,7 @@ trait Bufferable[R <: Resource[Closeable]] {
  * @author  Jesse Eichar
  * @since   1.0
  */
-trait InputResource[+R <: Closeable] extends Resource[R] with Input {
+trait InputResource[+R <: Closeable] extends Resource[R] with Input with ResourceOps[R, InputResource[R]] {
 
     /**
      * Obtain the InputStream Resource version of this object.
@@ -150,7 +155,7 @@ trait InputResource[+R <: Closeable] extends Resource[R] with Input {
  * @author  Jesse Eichar
  * @since   1.0
  */
-trait ReadCharsResource[+R <: Closeable] extends Resource[R] with ReadChars
+trait ReadCharsResource[+R <: Closeable] extends Resource[R] with ReadChars with ResourceOps[R, ReadCharsResource[R]]
 
 /**
  * An object that can be converted to an output stream. For example
@@ -162,7 +167,7 @@ trait ReadCharsResource[+R <: Closeable] extends Resource[R] with ReadChars
  * @author  Jesse Eichar
  * @since   1.0
  */
-trait OutputResource[+R <: Closeable] extends Resource[R] with Output {
+trait OutputResource[+R <: Closeable] extends Resource[R] with Output with ResourceOps[R, OutputResource[R]] {
   /**
    * Obtain the InputStream Resource version of this object.
    *
@@ -193,7 +198,7 @@ trait OutputResource[+R <: Closeable] extends Resource[R] with Output {
  * @author  Jesse Eichar
  * @since   1.0
  */
-trait SeekableResource[+R <: Closeable] extends Seekable with InputResource[R] with OutputResource[R]
+trait SeekableResource[+R <: Closeable] extends Seekable with InputResource[R] with OutputResource[R] with ResourceOps[R, SeekableResource[R]]
 
 /**
  * An object that can be converted to an input stream. For example
@@ -205,12 +210,16 @@ trait SeekableResource[+R <: Closeable] extends Seekable with InputResource[R] w
  * @author  Jesse Eichar
  * @since   1.0
  */
-trait WriteCharsResource[+R <: Closeable] extends Resource[R] with WriteChars
+trait WriteCharsResource[+R <: Closeable] extends Resource[R] with WriteChars with ResourceOps[R, WriteCharsResource[R]]
 
 trait BufferableInputResource[+C <: Closeable, B <: Closeable] extends InputResource[C] with Bufferable[InputResource[B]]
+    with ResourceOps[C, BufferableInputResource[C,B]]
 trait BufferableOutputResource[+C <: Closeable, B <: Closeable] extends OutputResource[C] with Bufferable[OutputResource[B]]
+    with ResourceOps[C, BufferableOutputResource[C,B]]
 trait BufferableReadCharsResource[+C <: Closeable, B <: Closeable] extends ReadCharsResource[C] with Bufferable[ReadCharsResource[B]]
+    with ResourceOps[C, BufferableReadCharsResource[C,B]]
 trait BufferableWriteCharsResource[+C <: Closeable, B <: Closeable] extends WriteCharsResource[C] with Bufferable[WriteCharsResource[B]]
+    with ResourceOps[C, BufferableWriteCharsResource[C,B]]
 
 /**
  * Defines several factory methods for creating instances of Resource.
@@ -477,11 +486,12 @@ object Resource {
  *
  * @see ManagedResource
  */
-class InputStreamResource[+A <: InputStream](opener: => A,closeAction:CloseAction[A]) extends BufferableInputResource[A, BufferedInputStream] {
+class InputStreamResource[+A <: InputStream](opener: => A,closeAction:CloseAction[A]) extends BufferableInputResource[A, BufferedInputStream]
+    with ResourceOps[A, InputStreamResource[A]] {
   def open() = opener
 
-  def prependCloseAction[B >: A](newAction: CloseAction[B]) = new InputStreamResource(opener,newAction :+ closeAction)
-  def appendCloseAction[B >: A](newAction: CloseAction[B]) = new InputStreamResource(opener,closeAction +: newAction)
+  def prependCloseAction[B >: A](newAction: CloseAction[B]) = new InputStreamResource[A](opener,newAction :+ closeAction)
+  def appendCloseAction[B >: A](newAction: CloseAction[B]) = new InputStreamResource[A](opener,closeAction +: newAction)
 
   override def acquireFor[B](f: (A) => B) = new CloseableResourceAcquirer(open,f,closeAction)()
 
@@ -501,7 +511,8 @@ class InputStreamResource[+A <: InputStream](opener: => A,closeAction:CloseActio
  *
  * @see ManagedResource
  */
-class OutputStreamResource[+A <: OutputStream](opener: => A, closeAction:CloseAction[A]) extends BufferableOutputResource[A, BufferedOutputStream] {
+class OutputStreamResource[+A <: OutputStream](opener: => A, closeAction:CloseAction[A]) extends BufferableOutputResource[A, BufferedOutputStream]
+    with ResourceOps[A, OutputStreamResource[A]] {
   def open() = opener
 
 
@@ -524,7 +535,8 @@ class OutputStreamResource[+A <: OutputStream](opener: => A, closeAction:CloseAc
  *
  * @see ManagedResource
  */
-class ReaderResource[+A <: Reader](opener: => A, closeAction:CloseAction[A]) extends BufferableReadCharsResource[A, BufferedReader] {
+class ReaderResource[+A <: Reader](opener: => A, closeAction:CloseAction[A]) extends BufferableReadCharsResource[A, BufferedReader]
+    with ResourceOps[A, ReaderResource[A]] {
   def open() = opener
   override def acquireFor[B](f: (A) => B) = new CloseableResourceAcquirer(open,f,closeAction)()
 
@@ -542,7 +554,8 @@ class ReaderResource[+A <: Reader](opener: => A, closeAction:CloseAction[A]) ext
  *
  * @see ManagedResource
  */
-class WriterResource[+A <: Writer](opener: => A, closeAction:CloseAction[A]) extends BufferableWriteCharsResource[A, BufferedWriter] {
+class WriterResource[+A <: Writer](opener: => A, closeAction:CloseAction[A]) extends BufferableWriteCharsResource[A, BufferedWriter]
+    with ResourceOps[A, WriterResource[A]]  {
   def open() = opener
 
   def prependCloseAction[B >: A](newAction: CloseAction[B]) = new WriterResource(opener,newAction :+ closeAction)
@@ -561,7 +574,8 @@ class WriterResource[+A <: Writer](opener: => A, closeAction:CloseAction[A]) ext
  *
  * @see ManagedResource
  */
-class ByteChannelResource[+A <: ByteChannel](opener: => A, closeAction:CloseAction[A]) extends InputResource[A] with OutputResource[A] {
+class ByteChannelResource[+A <: ByteChannel](opener: => A, closeAction:CloseAction[A]) extends InputResource[A] with OutputResource[A]
+    with ResourceOps[A, ByteChannelResource[A]] {
   def open() = opener
   override def acquireFor[B](f: (A) => B) = new CloseableResourceAcquirer(open,f,closeAction)()
 
@@ -586,7 +600,8 @@ class ByteChannelResource[+A <: ByteChannel](opener: => A, closeAction:CloseActi
  *
  * @see ManagedResource
  */
-class SeekableByteChannelResource[+A <: SeekableByteChannel](opener: => A, closeAction:CloseAction[A]) extends SeekableResource[A] {
+class SeekableByteChannelResource[+A <: SeekableByteChannel](opener: => A, closeAction:CloseAction[A]) extends SeekableResource[A]
+    with ResourceOps[A, SeekableByteChannelResource[A]]  {
   def open() = opener
   override def acquireFor[B](f: (A) => B) = new CloseableResourceAcquirer(open,f,closeAction)()
 
@@ -612,7 +627,8 @@ class SeekableByteChannelResource[+A <: SeekableByteChannel](opener: => A, close
  *
  * @see ManagedResource
  */
-class ReadableByteChannelResource[+A <: ReadableByteChannel](opener: => A, closeAction:CloseAction[A]) extends BufferableInputResource[A, BufferedInputStream] {
+class ReadableByteChannelResource[+A <: ReadableByteChannel](opener: => A, closeAction:CloseAction[A]) extends BufferableInputResource[A, BufferedInputStream]
+    with ResourceOps[A, ReadableByteChannelResource[A]] {
   def open() = opener
   override def acquireFor[B](f: (A) => B) = new CloseableResourceAcquirer(open,f,closeAction)()
 
@@ -634,7 +650,8 @@ class ReadableByteChannelResource[+A <: ReadableByteChannel](opener: => A, close
  *
  * @see ManagedResource
  */
-class WritableByteChannelResource[+A <: WritableByteChannel](opener: => A, closeAction:CloseAction[A]) extends BufferableOutputResource[A, BufferedOutputStream] {
+class WritableByteChannelResource[+A <: WritableByteChannel](opener: => A, closeAction:CloseAction[A]) extends BufferableOutputResource[A, BufferedOutputStream]
+    with ResourceOps[A, WritableByteChannelResource[A]]  {
   def open() = opener
   override def acquireFor[B](f: (A) => B) = new CloseableResourceAcquirer(open,f,closeAction)()
 

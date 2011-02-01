@@ -113,6 +113,9 @@ class ScalaIOProject(info: ProjectInfo)
 
     val siteOutput = outputPath / "site"
 
+    // Needed so that samples task for all project is executed before site
+    lazy val samples = task {None}
+
     def siteTask = task {
       val projectSites = dependencies flatMap {
         case project:IoProject => List(new ProjectSite(project,log))
@@ -124,8 +127,10 @@ class ScalaIOProject(info: ProjectInfo)
       val site = new WebsiteModel(projectSites.toList,siteOutput,log)
       site.buildSite
       None
-    }
-    lazy val site = siteTask
+    } dependsOn samples
+    lazy val site = siteTask describedAs "Generate documentation web-site"
+
+    override protected def compileAction = task{None}
   }
 }
 

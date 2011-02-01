@@ -54,12 +54,11 @@ object StdPathOps {
   def nameAndPath {
     import scalax.file.Path
 
-
     val path: Path = Path("file")
 
     val name: String = path.name
     val pathString: String = path.path
-    val segments = path.segments()
+    val segments = path.segments
     val absolute: Boolean = path.isAbsolute
     val absolutePath: Path = path.toAbsolute
 
@@ -71,6 +70,9 @@ object StdPathOps {
    */
   def queryBasicData {
     import scalax.file.Path
+    import java.net.{URI,URL}
+
+    val path: Path = Path("file")
     // There are two ways to query about the access mode of the underlying
     // path object.  One is similar to the java.file.File.  The other is based
     // a single query to test several attributes at once.
@@ -113,6 +115,7 @@ object StdPathOps {
    */
   def comparePaths {
     import scalax.file.Path
+    val path: Path = Path("file")
 
     // several simple path comparison queries
     val endsWith: Boolean = path.endsWith(Path("file"))
