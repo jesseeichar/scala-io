@@ -18,7 +18,6 @@ import java.io._
 import nio.SeekableFileChannel
 import java.net.URL
 
-
 protected[io] abstract class ResourceAcquirer[R,U >: R,B](open:()=>R,f:R=>B,closeAction:CloseAction[U]) {
   def close(r:R):Unit
   def apply():Either[List[Throwable],B] = {
@@ -103,7 +102,7 @@ trait Resource[+R <: Closeable] extends ManagedResourceOperations[R] with Resour
  * @author  Jesse Eichar
  * @since   1.0
  */
-trait Bufferable[R <: Resource[Closeable]] {
+trait Bufferable[+R <: Resource[Closeable]] {
     /**
     * Obtain the buffered version of this object.
     *
@@ -212,13 +211,13 @@ trait SeekableResource[+R <: Closeable] extends Seekable with InputResource[R] w
  */
 trait WriteCharsResource[+R <: Closeable] extends Resource[R] with WriteChars with ResourceOps[R, WriteCharsResource[R]]
 
-trait BufferableInputResource[+C <: Closeable, B <: Closeable] extends InputResource[C] with Bufferable[InputResource[B]]
+trait BufferableInputResource[+C <: Closeable, +B <: Closeable] extends InputResource[C] with Bufferable[InputResource[B]]
     with ResourceOps[C, BufferableInputResource[C,B]]
-trait BufferableOutputResource[+C <: Closeable, B <: Closeable] extends OutputResource[C] with Bufferable[OutputResource[B]]
+trait BufferableOutputResource[+C <: Closeable, +B <: Closeable] extends OutputResource[C] with Bufferable[OutputResource[B]]
     with ResourceOps[C, BufferableOutputResource[C,B]]
-trait BufferableReadCharsResource[+C <: Closeable, B <: Closeable] extends ReadCharsResource[C] with Bufferable[ReadCharsResource[B]]
+trait BufferableReadCharsResource[+C <: Closeable, +B <: Closeable] extends ReadCharsResource[C] with Bufferable[ReadCharsResource[B]]
     with ResourceOps[C, BufferableReadCharsResource[C,B]]
-trait BufferableWriteCharsResource[+C <: Closeable, B <: Closeable] extends WriteCharsResource[C] with Bufferable[WriteCharsResource[B]]
+trait BufferableWriteCharsResource[+C <: Closeable, +B <: Closeable] extends WriteCharsResource[C] with Bufferable[WriteCharsResource[B]]
     with ResourceOps[C, BufferableWriteCharsResource[C,B]]
 
 /**
@@ -237,7 +236,6 @@ trait BufferableWriteCharsResource[+C <: Closeable, B <: Closeable] extends Writ
  * @since   1.0
  */
 object Resource {
-
   // InputStream factory methods
   /**
    * Create an Input Resource instance with several conversion traits from an InputStream.
@@ -478,190 +476,5 @@ object Resource {
   def fromURLString(url:String)(implicit extraCloser:CloseAction[InputStream]=Noop): InputStreamResource[InputStream] = fromURL(new URL(url))(extraCloser)
   def fromFile(file:File)(implicit extraCloser:CloseAction[SeekableFileChannel]=Noop): SeekableByteChannelResource[SeekableByteChannel] = fromRandomAccessFile(new RandomAccessFile(file,"rw"))(extraCloser)
   def fromFileString(file:String)(implicit extraCloser:CloseAction[SeekableFileChannel]=Noop): SeekableByteChannelResource[SeekableByteChannel] = fromRandomAccessFile(new RandomAccessFile(file,"rw"))(extraCloser)
-}
-
-/***************************** InputStreamResource ************************************/
-/**
- * A ManagedResource for accessing and using InputStreams.
- *
- * @see ManagedResource
- */
-class InputStreamResource[+A <: InputStream](opener: => A,closeAction:CloseAction[A]) extends BufferableInputResource[A, BufferedInputStream]
-    with ResourceOps[A, InputStreamResource[A]] {
-  def open() = opener
-
-  def prependCloseAction[B >: A](newAction: CloseAction[B]) = new InputStreamResource[A](opener,newAction :+ closeAction)
-  def appendCloseAction[B >: A](newAction: CloseAction[B]) = new InputStreamResource[A](opener,closeAction +: newAction)
-
-  override def acquireFor[B](f: (A) => B) = new CloseableResourceAcquirer(open,f,closeAction)()
-
-  def inputStream = this
-  def buffered = Resource.fromBufferedInputStream(new BufferedInputStream(opener))
-  def reader(implicit sourceCodec: Codec): ReaderResource[Reader] = Resource.fromReader(new InputStreamReader(opener, sourceCodec.charSet))
-  def readableByteChannel = Resource.fromReadableByteChannel(Channels.newChannel(open()))
-  def chars(implicit codec: Codec) = reader(codec).chars
-
-  def bytesAsInts : ResourceView[Int] = ResourceTraversable.streamBased(this).view
-}
-
-/***************************** OutputStreamResource ************************************/
-
-/**
- * A ManagedResource for accessing and using OutputStreams.
- *
- * @see ManagedResource
- */
-class OutputStreamResource[+A <: OutputStream](opener: => A, closeAction:CloseAction[A]) extends BufferableOutputResource[A, BufferedOutputStream]
-    with ResourceOps[A, OutputStreamResource[A]] {
-  def open() = opener
-
-
-  def prependCloseAction[B >: A](newAction: CloseAction[B]) = new OutputStreamResource(opener,newAction :+ closeAction)
-  def appendCloseAction[B >: A](newAction: CloseAction[B]) = new OutputStreamResource(opener,closeAction +: newAction)
-
-  override def acquireFor[B](f: (A) => B) = new CloseableResourceAcquirer(open,f,closeAction)()
-
-  def outputStream = this
-  def underlyingOutput = this
-  def buffered = Resource.fromBufferedOutputStream(new BufferedOutputStream(opener))
-  def writer(implicit sourceCodec: Codec): WriterResource[Writer] = Resource.fromWriter(new OutputStreamWriter(opener, sourceCodec.charSet))
-  def writableByteChannel = Resource.fromWritableByteChannel(Channels.newChannel(open()))
-}
-
-/***************************** ReaderResource ************************************/
-
-/**
- * A ManagedResource for accessing and using Readers.
- *
- * @see ManagedResource
- */
-class ReaderResource[+A <: Reader](opener: => A, closeAction:CloseAction[A]) extends BufferableReadCharsResource[A, BufferedReader]
-    with ResourceOps[A, ReaderResource[A]] {
-  def open() = opener
-  override def acquireFor[B](f: (A) => B) = new CloseableResourceAcquirer(open,f,closeAction)()
-
-  def prependCloseAction[B >: A](newAction: CloseAction[B]) = new ReaderResource(opener,newAction :+ closeAction)
-  def appendCloseAction[B >: A](newAction: CloseAction[B]) = new ReaderResource(opener,closeAction +: newAction)
-
-  def buffered = Resource.fromBufferedReader(new BufferedReader(opener))
-
-  override def chars : ResourceView[Char]= ResourceTraversable.readerBased(this).view
-}
-
-/***************************** WriterResource ************************************/
-/**
- * A ManagedResource for accessing and using Writers.
- *
- * @see ManagedResource
- */
-class WriterResource[+A <: Writer](opener: => A, closeAction:CloseAction[A]) extends BufferableWriteCharsResource[A, BufferedWriter]
-    with ResourceOps[A, WriterResource[A]]  {
-  def open() = opener
-
-  def prependCloseAction[B >: A](newAction: CloseAction[B]) = new WriterResource(opener,newAction :+ closeAction)
-  def appendCloseAction[B >: A](newAction: CloseAction[B]) = new WriterResource(opener,closeAction +: newAction)
-
-  override def acquireFor[B](f: (A) => B) = new CloseableResourceAcquirer(open,f,closeAction)()
-
-  def buffered = Resource.fromBufferedWriter(new BufferedWriter(opener))
-
-  protected def writer = this
-}
-
-/***************************** ByteChannelResource ************************************/
-/**
- * A ManagedResource for accessing and using ByteChannels.
- *
- * @see ManagedResource
- */
-class ByteChannelResource[+A <: ByteChannel](opener: => A, closeAction:CloseAction[A]) extends InputResource[A] with OutputResource[A]
-    with ResourceOps[A, ByteChannelResource[A]] {
-  def open() = opener
-  override def acquireFor[B](f: (A) => B) = new CloseableResourceAcquirer(open,f,closeAction)()
-
-  def prependCloseAction[B >: A](newAction: CloseAction[B]) = new ByteChannelResource(opener,newAction :+ closeAction)
-  def appendCloseAction[B >: A](newAction: CloseAction[B]) = new ByteChannelResource(opener,closeAction +: newAction)
-
-  def inputStream = Resource.fromInputStream(Channels.newInputStream(opener))
-  def outputStream = Resource.fromOutputStream(Channels.newOutputStream(opener))
-  def underlyingOutput = outputStream
-  def reader(implicit sourceCodec: Codec) = Resource.fromReader(Channels.newReader(opener, sourceCodec.charSet.name()))
-  def writer(implicit sourceCodec: Codec) = Resource.fromWriter(Channels.newWriter(opener, sourceCodec.charSet.name()))
-  def writableByteChannel = Resource.fromWritableByteChannel(opener)
-  def readableByteChannel = Resource.fromReadableByteChannel(opener)
-
-  def bytesAsInts = inputStream.bytesAsInts // TODO optimize for byteChannel
-  def chars(implicit codec: Codec) = reader(codec).chars  // TODO optimize for byteChannel
-}
-
-/***************************** SeekableByteChannelResource ************************************/
-/**
- * A ManagedResource for accessing and using SeekableByteChannels.
- *
- * @see ManagedResource
- */
-class SeekableByteChannelResource[+A <: SeekableByteChannel](opener: => A, closeAction:CloseAction[A]) extends SeekableResource[A]
-    with ResourceOps[A, SeekableByteChannelResource[A]]  {
-  def open() = opener
-  override def acquireFor[B](f: (A) => B) = new CloseableResourceAcquirer(open,f,closeAction)()
-
-  def prependCloseAction[B >: A](newAction: CloseAction[B]) = new SeekableByteChannelResource(opener,newAction :+ closeAction)
-  def appendCloseAction[B >: A](newAction: CloseAction[B]) = new SeekableByteChannelResource(opener,closeAction +: newAction)
-
-  def inputStream = Resource.fromInputStream(Channels.newInputStream(opener))
-  def outputStream = Resource.fromOutputStream(Channels.newOutputStream(opener))
-  def reader(implicit sourceCodec: Codec) = Resource.fromReader(Channels.newReader(opener, sourceCodec.charSet.name()))
-  def writer(implicit sourceCodec: Codec) = Resource.fromWriter(Channels.newWriter(opener, sourceCodec.charSet.name()))
-  def writableByteChannel = Resource.fromWritableByteChannel(opener)
-  def readableByteChannel = Resource.fromReadableByteChannel(opener)
-  def byteChannel = Resource.fromByteChannel(opener)
-
-  protected def channel(openOptions:OpenOption*) = this
-  }
-
-
-/***************************** ReadableByteChannelResource ************************************/
-
-/**
- * A ManagedResource for accessing and using ByteChannels.
- *
- * @see ManagedResource
- */
-class ReadableByteChannelResource[+A <: ReadableByteChannel](opener: => A, closeAction:CloseAction[A]) extends BufferableInputResource[A, BufferedInputStream]
-    with ResourceOps[A, ReadableByteChannelResource[A]] {
-  def open() = opener
-  override def acquireFor[B](f: (A) => B) = new CloseableResourceAcquirer(open,f,closeAction)()
-
-  def prependCloseAction[B >: A](newAction: CloseAction[B]) = new ReadableByteChannelResource(opener,newAction :+ closeAction)
-  def appendCloseAction[B >: A](newAction: CloseAction[B]) = new ReadableByteChannelResource(opener,closeAction +: newAction)
-
-  def buffered = inputStream.buffered
-  def inputStream = Resource.fromInputStream(Channels.newInputStream(opener))
-  def reader(implicit sourceCodec: Codec) = Resource.fromReader(Channels.newReader(opener, sourceCodec.charSet.name()))
-  def readableByteChannel = this
-  def bytesAsInts = inputStream.bytesAsInts // TODO optimize for byteChannel
-  def chars(implicit codec: Codec) = reader(codec).chars  // TODO optimize for byteChannel
-}
-
-/***************************** WritableByteChannelResource ************************************/
-
-/**
- * A ManagedResource for accessing and using ByteChannels.
- *
- * @see ManagedResource
- */
-class WritableByteChannelResource[+A <: WritableByteChannel](opener: => A, closeAction:CloseAction[A]) extends BufferableOutputResource[A, BufferedOutputStream]
-    with ResourceOps[A, WritableByteChannelResource[A]]  {
-  def open() = opener
-  override def acquireFor[B](f: (A) => B) = new CloseableResourceAcquirer(open,f,closeAction)()
-
-  def prependCloseAction[B >: A](newAction: CloseAction[B]) = new WritableByteChannelResource(opener,newAction :+ closeAction)
-  def appendCloseAction[B >: A](newAction: CloseAction[B]) = new WritableByteChannelResource(opener,closeAction +: newAction)
-
-  def buffered = outputStream.buffered
-  def outputStream = Resource.fromOutputStream(Channels.newOutputStream(opener))
-  def underlyingOutput = outputStream
-  def writer(implicit sourceCodec: Codec) = Resource.fromWriter(Channels.newWriter(opener, sourceCodec.charSet.name()))
-  def writableByteChannel = this
 }
 
