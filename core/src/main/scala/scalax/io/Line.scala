@@ -13,17 +13,17 @@ package scalax.io
  */
 object Line {
   object Terminators {
-    case class LineSplit(line:Seq[Char], term:Seq[Char] = "", nextLine:Seq[Char] = "") {
+    protected[io] case class LineSplit(line:Seq[Char], term:Seq[Char] = "", nextLine:Seq[Char] = "") {
       def toString(includeTerminator:Boolean) = if(includeTerminator) line ++ term mkString "" else line mkString ""
     }
 
     /**
      * The super class for different types of line terminators/seperators
-     * @see Auto
-     * @see N
-     * @see R
-     * @see RN
-     * @see Custom
+     * @see {{scalax.io.Line.Terminators.Auto}}
+     * @see {{scalax.io.Line.Terminators.NewLine}}
+     * @see {{scalax.io.Line.Terminators.CarriageReturn}}
+     * @see {{scalax.io.Line.Terminators.RN}}
+     * @see {{scalax.io.Line.Terminators.Custom}}
      */
     sealed abstract class Terminator {
       /**
@@ -33,20 +33,20 @@ object Line {
     }
 
     /**
-     * The Auto terminator declares that the line terminator should
-     * be detected.  It can detect N,R and RN line terminators
+     * The Auto terminator detects the line terminator.
+     * It can detect N,R and RN line terminators
      */
     case class Auto() extends Terminator {
-        private var choices = Pair :: NewLine :: CarriageReturn ::  Nil
+        private var choices = RNPair :: NewLine :: CarriageReturn ::  Nil
 
         def split(chars: Seq[Char]) = synchronized {
           val splits = choices.view.map{c => (c,c split chars)}
-          //val pairDoesNotMatch = splits.get(Pair).forall{_.term isEmpty}
+          //val pairDoesNotMatch = splits.get(RNPair).forall{_.term isEmpty}
           splits.find{_._2.term.nonEmpty} match {
             case None =>
               splits.head._2
-            case Some((Pair,split)) =>
-              choices = Pair :: Nil
+            case Some((RNPair,split)) =>
+              choices = RNPair :: Nil
               split
             case Some((choice,split)) =>
               if(split.nextLine.nonEmpty)
@@ -56,7 +56,7 @@ object Line {
           }
         }
     }
-    abstract class Simple(val sep:String) extends Terminator {
+    private[Terminators] abstract class Simple(val sep:String) extends Terminator {
         private val custom = Custom(sep)
         def split(chars: Seq[Char]) = custom.split (chars)
     }
@@ -71,7 +71,7 @@ object Line {
     /**
      * The \r\n line terminator
      */
-    case object Pair extends Simple("\r\n")
+    case object RNPair extends Simple("\r\n")
     /**
      * A custom line terminator.  It can be an arbitrary string but
      * can be less performant than one of the other terminators

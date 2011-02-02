@@ -4,11 +4,9 @@ import java.io.BufferedInputStream
 import java.nio.channels.{Channels, ReadableByteChannel}
 
 /**
- * A ManagedResource for accessing and using ByteChannels.
- *
- * @see ManagedResource
+ * A ManagedResource for accessing and using ByteChannels.  Class can be created using the {{scalax.io.Resource}} object.
  */
-class ReadableByteChannelResource[+A <: ReadableByteChannel](opener: => A, closeAction:CloseAction[A]) extends BufferableInputResource[A, BufferedInputStream]
+class ReadableByteChannelResource[+A <: ReadableByteChannel] protected[io](opener: => A, closeAction:CloseAction[A]) extends BufferableInputResource[A, BufferedInputStream]
     with ResourceOps[A, ReadableByteChannelResource[A]] {
   def open() = opener
   override def acquireFor[B](f: (A) => B) = new CloseableResourceAcquirer(open,f,closeAction)()

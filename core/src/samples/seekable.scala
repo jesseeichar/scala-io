@@ -59,7 +59,7 @@ object SeekableSamples {
 
     val someFile: Seekable = Resource.fromFileString("someFile")
     someFile.append("append this string")
-    someFile.appendStrings(List("s one", "s two"),Line.Terminators.Pair.sep)
+    someFile.appendStrings(List("s one", "s two"),Line.Terminators.RNPair.sep)
   }
 
   /**

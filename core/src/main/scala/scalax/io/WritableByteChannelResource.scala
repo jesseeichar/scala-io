@@ -5,11 +5,9 @@ import java.nio.channels.{Channels, WritableByteChannel}
 
 
 /**
- * A ManagedResource for accessing and using ByteChannels.
- *
- * @see ManagedResource
+ * A ManagedResource for accessing and using ByteChannels.  Class can be created using the {{scalax.io.Resource}} object.
  */
-class WritableByteChannelResource[+A <: WritableByteChannel](opener: => A, closeAction:CloseAction[A]) extends BufferableOutputResource[A, BufferedOutputStream]
+class WritableByteChannelResource[+A <: WritableByteChannel] protected[io](opener: => A, closeAction:CloseAction[A]) extends BufferableOutputResource[A, BufferedOutputStream]
     with ResourceOps[A, WritableByteChannelResource[A]]  {
   def open() = opener
   override def acquireFor[B](f: (A) => B) = new CloseableResourceAcquirer(open,f,closeAction)()

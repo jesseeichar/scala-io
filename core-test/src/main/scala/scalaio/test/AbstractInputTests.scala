@@ -30,7 +30,7 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
 
   case object TextNewLine extends Text(NewLine.sep)
 
-  case object TextPair extends Text(Pair.sep)
+  case object TextPair extends Text(RNPair.sep)
 
   case object TextCarriageReturn extends Text(CarriageReturn.sep)
 
@@ -148,7 +148,7 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
   def read_all_lines_auto(): Unit = {
     testLines("NewLine", TextCustomData("\n", "\n"), Auto(), false)
     testLines("NewLine", TextCustomData("\n", "aa\n"), Auto(), false)
-    testLines("NewLine", TextCustomData(Pair.sep, "aa" + Pair.sep), Auto(), false)
+    testLines("NewLine", TextCustomData(RNPair.sep, "aa" + RNPair.sep), Auto(), false)
     testLines("NewLine", TextNewLine, Auto(), false)
     testLines("Pair", TextPair, Auto(), false)
     testLines("CarriageReturn", TextCarriageReturn, Auto(), false)
@@ -161,7 +161,7 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
   @Test //(timeout = 3000) //@Ignore
   def read_all_lines(): Unit = {
     testLines("NewLine", TextNewLine, NewLine, false)
-    testLines("Pair", TextPair, Pair, false)
+    testLines("Pair", TextPair, RNPair, false)
     testLines("CarriageReturn", TextCarriageReturn, CarriageReturn, false)
     testLines("Custom", TextCustom("x"), Custom("x"), false)
   }
@@ -171,7 +171,7 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
   def read_all_lines_includeTerminator(): Unit = {
     testLines("Auto", TextNewLine, Auto(), true)
     testLines("NewLine", TextNewLine, NewLine, true)
-    testLines("Pair", TextPair, Pair, true)
+    testLines("Pair", TextPair, RNPair, true)
     testLines("CarriageReturn", TextCarriageReturn, CarriageReturn, true)
     testLines("Custom", TextCustom("x"), Custom("x"), true)
   }

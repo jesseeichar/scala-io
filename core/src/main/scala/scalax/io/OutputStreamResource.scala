@@ -4,11 +4,9 @@ import java.io.{OutputStream, BufferedOutputStream, Writer, OutputStreamWriter}
 import java.nio.channels.Channels
 
 /**
- * A ManagedResource for accessing and using OutputStreams.
- *
- * @see ManagedResource
+ * A ManagedResource for accessing and using OutputStreams.  Class can be created using the {{scalax.io.Resource}} object.
  */
-class OutputStreamResource[+A <: OutputStream](opener: => A, closeAction:CloseAction[A]) extends BufferableOutputResource[A, BufferedOutputStream]
+class OutputStreamResource[+A <: OutputStream] protected[io](opener: => A, closeAction:CloseAction[A]) extends BufferableOutputResource[A, BufferedOutputStream]
     with ResourceOps[A, OutputStreamResource[A]] {
   def open() = opener
 

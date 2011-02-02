@@ -3,11 +3,9 @@ package scalax.io
 import java.io.{Reader, BufferedReader}
 
 /**
- * A ManagedResource for accessing and using Readers.
- *
- * @see ManagedResource
+ * A ManagedResource for accessing and using Readers.  Class can be created using the {{scalax.io.Resource}} object.
  */
-class ReaderResource[+A <: Reader](opener: => A, closeAction:CloseAction[A]) extends BufferableReadCharsResource[A, BufferedReader]
+class ReaderResource[+A <: Reader] protected[io](opener: => A, closeAction:CloseAction[A]) extends BufferableReadCharsResource[A, BufferedReader]
     with ResourceOps[A, ReaderResource[A]] {
   def open() = opener
   override def acquireFor[B](f: (A) => B) = new CloseableResourceAcquirer(open,f,closeAction)()

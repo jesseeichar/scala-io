@@ -3,11 +3,9 @@ package scalax.io
 import java.nio.channels.{ByteChannel, Channels}
 
 /**
- * A ManagedResource for accessing and using ByteChannels.
- *
- * @see ManagedResource
+ * A for accessing and using ByteChannels.  Class can be created using the {{scalax.io.Resource}} object.
  */
-class ByteChannelResource[+A <: ByteChannel](opener: => A, closeAction:CloseAction[A]) extends InputResource[A] with OutputResource[A]
+class ByteChannelResource[+A <: ByteChannel] protected[io](opener: => A, closeAction:CloseAction[A]) extends InputResource[A] with OutputResource[A]
     with ResourceOps[A, ByteChannelResource[A]] {
   def open() = opener
   override def acquireFor[B](f: (A) => B) = new CloseableResourceAcquirer(open,f,closeAction)()

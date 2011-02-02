@@ -4,11 +4,9 @@ import java.io.{InputStreamReader, Reader, BufferedInputStream, InputStream}
 import java.nio.channels.Channels
 
 /**
- * A ManagedResource for accessing and using InputStreams.
- *
- * @see ManagedResource
+ * A ManagedResource for accessing and using InputStreams.  Class can be created using the {{scalax.io.Resource}} object.
  */
-class InputStreamResource[+A <: InputStream](opener: => A,closeAction:CloseAction[A]) extends BufferableInputResource[A, BufferedInputStream]
+class InputStreamResource[+A <: InputStream] protected[io](opener: => A,closeAction:CloseAction[A]) extends BufferableInputResource[A, BufferedInputStream]
     with ResourceOps[A, InputStreamResource[A]] {
   def open() = opener
 

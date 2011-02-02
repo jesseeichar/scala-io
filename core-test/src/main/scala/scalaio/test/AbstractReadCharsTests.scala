@@ -24,7 +24,7 @@ abstract class AbstractReadCharsTests extends scalax.test.sugar.AssertionSugar {
 
   case object TextNewLine extends Type(NewLine.sep)
 
-  case object TextPair extends Type(Pair.sep)
+  case object TextPair extends Type(RNPair.sep)
 
   case object TextCarriageReturn extends Type(CarriageReturn.sep)
 
@@ -74,7 +74,7 @@ abstract class AbstractReadCharsTests extends scalax.test.sugar.AssertionSugar {
   @Test(timeout = 3000)
   def read_all_lines(): Unit = {
     testLines("NewLine", TextNewLine, NewLine, false)
-    testLines("Pair", TextPair, Pair, false)
+    testLines("Pair", TextPair, RNPair, false)
     testLines("CarriageReturn", TextCarriageReturn, CarriageReturn, false)
     testLines("Custom", TextCustom("x"), Custom("x"), false)
   }
@@ -84,7 +84,7 @@ abstract class AbstractReadCharsTests extends scalax.test.sugar.AssertionSugar {
   def read_all_lines_includeTerminator(): Unit = {
     testLines("Auto", TextNewLine, Auto(), true)
     testLines("NewLine", TextNewLine, NewLine, true)
-    testLines("Pair", TextPair, Pair, true)
+    testLines("Pair", TextPair, RNPair, true)
     testLines("CarriageReturn", TextCarriageReturn, CarriageReturn, true)
     testLines("Custom", TextCustom("x"), Custom("x"), true)
   }

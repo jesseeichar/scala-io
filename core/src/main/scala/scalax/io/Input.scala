@@ -13,13 +13,12 @@ import Line._
 /**
  * An trait for objects that viewed as a sequence of bytes. For example InputStream
  * and ReadableByteChannel could be an Input object.
- * <p>
+ *
  * Note: All collections returned are non-strict collections and each
  * invocation of a method will typically open a new stream or channel.
- * That behaviour can be overrided by the implementation but
+ * That behaviour can be overriden by the implementation but
  * it is the default behaviour.
- * </p>
- * <p>
+ *
  * Default implementation is based on providing an implementation for
  * bytesAsInts and all other methods are implemented using
  * that method.
@@ -27,58 +26,29 @@ import Line._
  * @author Jesse Eichar
  * @since 1.0
  *
- * @see scalax.io.Output
+ * @see {{scalax.io.Output}}
  */
 trait Input {
 
     /**
     * The number of bytes that can be read from the underlying resource.
-    * <p>
+    *
     * if length == None then it is not possible to determine the
     * number of bytes in advance.
-    * </p>
     */
     def size: Option[Long]
 
     /**
     * Obtains a Traversable for conveniently processing the resource as bytes.
-    * <p>
-    * </p><p>
-    * In some implementations the bytes of underlying iterable can be cast to an Seq
-    * and elements can be randomly accessed. Random access must be used
-    * carefully as each access will open the underlying unless that behavior
-    * is modified by the implementation.
-    * </p>
     *
-    * @return an non-strict iterable over all the bytes
+    * @return an non-strict traversable over all the bytes
     */
-    def bytes : ResourceView[Byte] = (bytesAsInts map {_.toByte}).asInstanceOf[ResourceView[Byte]]    // TODO this is broke
+    def bytes : ResourceView[Byte] = (bytesAsInts map {_.toByte}).asInstanceOf[ResourceView[Byte]]    // TODO this is broken
 
     /**
     * Obtains a Traversable for conveniently processing the file as Ints.
-    * <p>
-    * Depending on the underlying resource this may be slower than
-    * {@link #bytes}
-    * </p>
-    * <p>
-    * This is a View so remember to treat it as a view and not as a Stream or
-    * a strict collection
-    * </p>
-    * <p>
-    * In some object the bytes of underlying iterable can be cast to an Seq
-    * and elements can be randomly accessed. Random access must be used
-    * carefully as each access will open a new stream unless that behavior
-    * is modified by the implementation.
-    * </p><p>
-    * For example on some filesystems using random access within a
-    * {@link FileOperations#open} will perform all accesses using the same
-    * Channel improving the performance
-    * </p>
-    * <p>
-    * Note: The iterable returned is a non-strict collection
-    * </p>
     *
-    * @return an non-strict iterable over all the bytes with the bytes being represented as Ints
+    * @return an non-strict traversable over all the bytes with the bytes being represented as Ints
     */
     def bytesAsInts: ResourceView[Int]
 
@@ -89,45 +59,25 @@ trait Input {
     def byteArray: Array[Byte] = bytes.toArray
 
     /**
-     * The characters in the object.
-     * <p>
+     * The characters in the object.$
+     *
      * If the codec is not the same as the source codec (the codec of
      * the underlying data) then the characters will converted to the
      * desired codec.
-     * </p><p>
-     * In some object the bytes of underlying iterable can be cast to a Seq
-     * and elements can be randomly accessed. Random access must be used
-     * carefully as each access will open a new stream unless that behavior
-     * is modified by the implementation.
-     * </p><p>
-     * For example on some filesystems using random access within a
-     * {@link FileOperations#open} will perform all accesses using
-     * the same Channel improving the performance.
-     * </p>
      *
      * @param codec
      *          The codec representing the desired encoding of the characters
      * @return
-     *          an iterable of all the characters
+     *          an traversable of all the characters
      */
     def chars(implicit codec: Codec): ResourceView[Char]
 
     /**
-     * Obtain an non-strict iterable for iterating through the lines in the object
-     * <p>
+     * Obtain an non-strict traversable for iterating through the lines in the object
+     *
      * If the codec is not the same as the source codec (the codec of
      * the underlying data) then the characters will converted to the
      * desired codec.
-     * </p><p>
-     * In some object the bytes of underlying iterable can be cast to a Seq
-     * and elements can be randomly accessed. Random access must be used
-     * carefully as each access will open a new stream unless that behavior
-     * is modified by the implementation.
-     * </p><p>
-     * For example on some filesystems using random access within a
-     * {@link FileOperations#open} will perform all accesses using
-     * the same Channel improving the performance.
-     * </p>
      *
      * @param codec
      *          The codec representing the desired encoding of the characters
@@ -139,20 +89,20 @@ trait Input {
      *          Default is false
      *
      * @return
-     *          a non-strict iterable for iterating through all the lines
+     *          a non-strict traversable for iterating through all the lines
      */
     def lines(terminator: Terminators.Terminator = new Terminators.Auto(),
               includeTerminator: Boolean = false)(implicit codec: Codec): Traversable[String] = {
                   new LineTraverseable(chars(codec), terminator, includeTerminator)
-        }
+    }
     /**
      * Loads all the characters into memory. There is no protection against
      * loading very large files/amounts of data.
-     * <p>
+     *
      * If the codec is not the same as the source codec (the codec of
      * the underlying data) then the characters will converted to the
      * desired codec.
-     * </p>
+     *
      * @param codec
      *          The codec representing the desired encoding of the characters
      */

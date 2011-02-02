@@ -3,11 +3,9 @@ package scalax.io
 import java.nio.channels.Channels
 
 /**
- * A ManagedResource for accessing and using SeekableByteChannels.
- *
- * @see ManagedResource
+ * A ManagedResource for accessing and using SeekableByteChannels.  Class can be created using the {{scalax.io.Resource}} object.
  */
-class SeekableByteChannelResource[+A <: SeekableByteChannel](opener: => A, closeAction:CloseAction[A]) extends SeekableResource[A]
+class SeekableByteChannelResource[+A <: SeekableByteChannel] protected[io](opener: => A, closeAction:CloseAction[A]) extends SeekableResource[A]
     with ResourceOps[A, SeekableByteChannelResource[A]]  {
   def open() = opener
   override def acquireFor[B](f: (A) => B) = new CloseableResourceAcquirer(open,f,closeAction)()

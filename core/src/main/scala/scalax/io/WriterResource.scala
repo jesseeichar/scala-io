@@ -2,11 +2,9 @@ package scalax.io
 
 import java.io.{Writer, BufferedWriter}
 /**
- * A ManagedResource for accessing and using Writers.
- *
- * @see ManagedResource
+ * A ManagedResource for accessing and using Writers.  Class can be created using the {{scalax.io.Resource}} object.
  */
-class WriterResource[+A <: Writer](opener: => A, closeAction:CloseAction[A]) extends BufferableWriteCharsResource[A, BufferedWriter]
+class WriterResource[+A <: Writer] protected[io](opener: => A, closeAction:CloseAction[A]) extends BufferableWriteCharsResource[A, BufferedWriter]
     with ResourceOps[A, WriterResource[A]]  {
   def open() = opener
 

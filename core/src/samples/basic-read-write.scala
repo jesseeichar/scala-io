@@ -83,7 +83,7 @@ object BasicIO {
     val lines_Autodetect: Traversable[String] = input.lines(Line.Terminators.Auto())
     val lines_NewLineChar: Traversable[String] = input.lines(Line.Terminators.NewLine)
     val lines_CarriageReturn: Traversable[String] = input.lines(Line.Terminators.CarriageReturn)
-    val lines_BothCarriageAndNewLine: Traversable[String] = input.lines(Line.Terminators.Pair)
+    val lines_BothCarriageAndNewLine: Traversable[String] = input.lines(Line.Terminators.RNPair)
     val lines_CustomLineTerminator: Traversable[String] = input.lines(Line.Terminators.Custom("|"))
     val lines_KeepTerminator = input.lines(includeTerminator = true)
 

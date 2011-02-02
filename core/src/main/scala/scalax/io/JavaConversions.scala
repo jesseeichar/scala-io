@@ -9,8 +9,6 @@
 package scalax.io
 
 import scalax.io.nio.ByteBuffer
-import java.net.URL
-import java.io.{InputStream, Closeable, RandomAccessFile, File}
 
 object JavaConversions {
   implicit def byteBufferToTraversable(b:java.nio.ByteBuffer): ByteBuffer = new ByteBuffer(b)
