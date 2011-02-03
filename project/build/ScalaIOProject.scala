@@ -62,6 +62,7 @@ class ScalaIOProject(info: ProjectInfo)
     override def testScalaSourcePath = mainScalaSourcePath
     override def testResourcesPath = mainResourcesPath
 
+
   }
 
   class File(info: ProjectInfo)
@@ -137,9 +138,14 @@ class ScalaIOProject(info: ProjectInfo)
 trait IoProject extends AutoCompilerPlugins {
   self : DefaultProject =>
 
+  if(System.getProperty("file.encoding")==null || !List("utf8","utf-8").contains(System.getProperty("file.encoding").toLowerCase)) {
+    println("file.encoding must be utf8 or utf-8.  Add -Dfile.encoding=UTF8 to your SBT_OPTS")
+    exit(1)
+  }
+
+
   val cont = compilerPlugin("org.scala-lang.plugins" % "continuations" % buildScalaVersion)
   // val sxr = compilerPlugin("org.scala-tools.sxr" %% "sxr" % "0.2.6")
-
 
   def description:Iterable[Node]
   def descSummary:String
