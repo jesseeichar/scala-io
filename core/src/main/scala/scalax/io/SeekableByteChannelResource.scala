@@ -1,9 +1,10 @@
 package scalax.io
 
 import java.nio.channels.Channels
+import scalax.io.ResourceAdapting.{ChannelInputStreamAdapter, ChannelWriterAdapter, ChannelReaderAdapter, ChannelOutputStreamAdapter}
 
 /**
- * A ManagedResource for accessing and using SeekableByteChannels.  Class can be created using the {{scalax.io.Resource}} object.
+ * A ManagedResource for accessing and using SeekableByteChannels.  Class can be created using the [[scalax.io.Resource]] object.
  */
 class SeekableByteChannelResource[+A <: SeekableByteChannel] protected[io](opener: => A, closeAction:CloseAction[A]) extends SeekableResource[A]
     with ResourceOps[A, SeekableByteChannelResource[A]]  {
@@ -15,22 +16,22 @@ class SeekableByteChannelResource[+A <: SeekableByteChannel] protected[io](opene
 
   def inputStream = {
     val nResource = new ChannelInputStreamAdapter(opener)
-    val closer = ResourceAdapter.closeAction(closeAction)
+    val closer = ResourceAdapting.closeAction(closeAction)
     Resource.fromInputStream(nResource)(closer)
   }
   def outputStream = {
     val nResource = new ChannelOutputStreamAdapter(opener)
-    val closer = ResourceAdapter.closeAction(closeAction)
+    val closer = ResourceAdapting.closeAction(closeAction)
     Resource.fromOutputStream(nResource)(closer)
   }
   def reader(implicit sourceCodec: Codec) = {
     val nResource = new ChannelReaderAdapter(opener,sourceCodec)
-    val closer = ResourceAdapter.closeAction(closeAction)
+    val closer = ResourceAdapting.closeAction(closeAction)
     Resource.fromReader(nResource)(closer)
   }
   def writer(implicit sourceCodec: Codec) = {
     val nResource = new ChannelWriterAdapter(opener,sourceCodec)
-    val closer = ResourceAdapter.closeAction(closeAction)
+    val closer = ResourceAdapting.closeAction(closeAction)
     Resource.fromWriter(nResource)(closer)
   }
   def writableByteChannel = Resource.fromWritableByteChannel(opener)(closeAction)

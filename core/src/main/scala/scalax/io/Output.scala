@@ -16,17 +16,16 @@ import java.io.{File => JFile, OutputStream}
  * A trait for objects that can have data written to them. For example an
  * OutputStream and File can be an Output object (or be converted to one).
  *
- * <p>
  * Note: Each invocation of a method will typically open a new stream or
  * channel.  That behaviour can be overridden by the implementation but
  * it is the default behaviour.
- * </p>
  *
  * @author Jesse Eichar
  * @since 1.0
  *
- * @see ReadBytes
- * @see Input
+ * @see [[scalax.io.ReadChars]]
+ * @see [[scalax.io.Input]]
+ * @see [[scalax.io.WriteChars]]
  */
 trait Output {
 
@@ -36,22 +35,32 @@ trait Output {
    * Write data to the underlying object.  In the case of writing ints and bytes it is often
    * recommended to write arrays of data since normally the underlying object can write arrays
    * of bytes or integers most efficiently.
-   * <p>
+   *
    * Since Characters require a codec to write to an OutputStream characters cannot be written with this method
    * unless a OutputWriterFunction.CharFunction object is provided as the writer.
-   * </p>
+   *
    * @see #writeChars for more on writing characters
    *
-   *
    * @param data
-   *          The data to write to underlying object
+   *          The data to write to underlying object.  Any data that has a resolvable [[scalax.io.OutputConverter]] can
+   *          be written.  See the [[scalax.io.OutputConverter]] object for the defined [[scalax.io.OutputConverter]]
+   *          implementations and classes to assist implementing more.
    * @param writer
    *          The strategy used to write the data to the underlying object.  Many standard data-types are implicitly
    *          resolved and do not need to be supplied
    */
   def write[T](data:T)(implicit writer:OutputConverter[T]):Unit = underlyingOutput.foreach {writer(_,data)}
 
-  def writeIntsAsBytes(data: TraversableOnce[Int]) = write(data)(OutputConverter.TraversableIntAsByteConverter)
+  /**
+   * Since the [[scalax.io.OutputConverter]] object defined for writing Ints encodes Ints using 4 bytes this method
+   * is provided to simply write an array of Ints as if they are Bytes.  In other words just taking the first
+   * byte.  This is pretty common in Java.io style IO.  IE
+   *
+   * {{{ outputStream.write(1) }}}
+   *
+   * 1 is written as a single byte.
+   */
+  def writeIntsAsBytes(data: Int*) = write(data)(OutputConverter.TraversableIntAsByteConverter)
   /**
   * Writes a string.
   *

@@ -15,35 +15,61 @@ import java.nio.ByteBuffer
 /**
  * Functions used by Seekable and Output to either convert data to bytes for writing
  * or write directly to an output stream depending on the requirements of the caller.
- *
- * User: jeichar
- * Date: Sep 14, 2010
- * Time: 9:27:50 PM
  */
-
 trait OutputConverter[-T] extends Function2[OutputStream,T,Unit] {
-  def apply(out: OutputStream, data: T) =
+  /**
+   * Write the data to the OutputStream in the most efficient way possible
+   *
+   * @param out the output object that the converter write to
+   * @param data the data to convert for the OutputStream
+   */
+  def apply(out: OutputStream, data: T):Unit =
     OutputConverter.TraversableByteConverter(out,toBytes(data))
 
+  /**
+   * Converts the data to bytes
+   * @param data the data to convert to bytes
+   * @return The data converted to bytes
+   */
   def toBytes(data:T):TraversableOnce[Byte]
+
+  /**
+   * The number of bytes the data will be converted to.
+   */
   def sizeInBytes : Int
 }
 
+/**
+ * Contains implicit Converter objects for the compiler to resolve the converters for write operations
+ */
 object OutputConverter {
   /**
-   * Wraps a ByteBuffer to provide access to a ByteBuffer's builtin conversion
+   * Wraps a ByteBuffer to provide access to a ByteBuffer's built-in conversion
    * methods like putShort.
+   *
+   * This class is to support implementing custom converters
+   *
+   * @param size the size of the buffer to use.  Typically this is the size of one T converted to bytes
+   * @param op a function that writes T to the ByteBuffer that is passed in.
+   * @tparam T the type of object this Buffer will convert
    */
   class Buffer[T](size:Int,op:(ByteBuffer,T)=>Unit) extends Iterator[Byte] {
     val converter = ByteBuffer.allocate(size)
     var i = -1
 
+    /**
+     * Call to convert the data and place in the buffer
+     *
+     * @param value the data to convert
+     * @return the Buffer with the converted data
+     */
     def put(value:T):Buffer[T] = {
       converter.clear
       i = -1;
       op(converter,value)
       this
     }
+
     def next() = {
       i += 1
       converter.get(i)
@@ -53,6 +79,12 @@ object OutputConverter {
   /**
    * Converts a OutputConverter[Traversable[T]] to a OutputConverter[T].  This
    * class is to support implementing OutputConverters
+   *
+   * For maximum performance this class is not recommended.  But for maximum productivity
+   * it is worth considering.
+   *
+   * @param base the basis for creating this OutputConverter.  Essentially this class uses base to convert/write a
+   *             single T instead of many
    */
   abstract class NonTraversableAdapter[T](base:OutputConverter[TraversableOnce[T]]) extends OutputConverter[T] {
     override def apply(out: OutputStream, data: T) = base(out,List(data))
@@ -61,7 +93,12 @@ object OutputConverter {
   }
   /**
    * Converts a OutputConverter[Traversable[T]] to a OutputConverter[Array[T]].  This
-   * class is to support implementing OutputConverters
+   * class is to support implementing OutputConverters.
+   *
+   * For maximum performance this class is not recommended.  But for maximum productivity
+   * it is worth considering.
+   *
+   * @param base the basis for creating this OutputConverter.
    */
   abstract class ArrayAdapter[T](base:OutputConverter[TraversableOnce[T]]) extends OutputConverter[Array[T]] {
     override def apply(out: OutputStream, data: Array[T]) = base(out,data)

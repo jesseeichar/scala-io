@@ -10,10 +10,6 @@ package scalax.io
 
 /**
  * Provides some convenience methods for certain operations on TraversableOnce
- *
- * User: jeichar
- * Date: Sep 15, 2010
- * Time: 2:24:48 PM
  */
 private[io] object TraversableOnceOps {
   def splitAt[T](data:TraversableOnce[T], index:Int):(TraversableOnce[T],TraversableOnce[T]) = {

@@ -12,10 +12,14 @@ import scala.collection._
 import scala.collection.generic._
 import TraversableView.NoBuilder
 
-
+/**
+ * A LongTraversableView that is uses a Resource as its underpinnings
+ */
 private[io] trait ResourceTraversableView[A, +Coll] extends ResourceTraversableViewLike[A, Coll, ResourceTraversableView[A, Coll]]
 
-
+/**
+ * The required methods by the Scala collections design
+ */
 private[io] object ResourceTraversableView {
   type Coll = TraversableView[_, C] forSome {type C <: Traversable[_]}
   implicit def canBuildFrom[A]: CanBuildFrom[Coll, A, ResourceTraversableView[A, ResourceTraversable[_]]] =
@@ -25,6 +29,9 @@ private[io] object ResourceTraversableView {
     }
 }
 
+/**
+ * The actual implementation of the View optimized for working on Resources
+ */
 private[io] trait ResourceTraversableViewLike[A, +Coll, +This <: ResourceTraversableView[A,Coll] with ResourceTraversableViewLike[A,Coll, This]]
       extends ResourceTraversable[A] with LongTraversableView[A,Coll] with LongTraversableViewLike[A,Coll,This]{
   self =>

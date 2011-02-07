@@ -18,12 +18,9 @@ object Line {
     }
 
     /**
-     * The super class for different types of line terminators/seperators
-     * @see {{scalax.io.Line.Terminators.Auto}}
-     * @see {{scalax.io.Line.Terminators.NewLine}}
-     * @see {{scalax.io.Line.Terminators.CarriageReturn}}
-     * @see {{scalax.io.Line.Terminators.RN}}
-     * @see {{scalax.io.Line.Terminators.Custom}}
+     * The super class for different types of line terminators/separators
+     *
+     * @see [[scalax.io.LineTraversable]]
      */
     sealed abstract class Terminator {
       /**

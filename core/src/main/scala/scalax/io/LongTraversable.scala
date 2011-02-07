@@ -24,7 +24,11 @@ trait LongTraversable[+A] extends Traversable[A]
   override def companion : GenericCompanion[LongTraversable] = LongTraversable
 }
 
-
+/**
+ * This class is not interesting from an API point of view.  It is simply required by the scala collections framework.
+ *
+ * See the [[scalax.io.LongTraversable]] class for the truly interesting aspects
+ */
 object LongTraversable extends TraversableFactory[LongTraversable] {
   implicit def canBuildFrom[A]: CanBuildFrom[Coll, A, LongTraversable[A]] = new GenericCanBuildFrom[A]
 

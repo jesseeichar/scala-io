@@ -12,12 +12,11 @@ package scalax.io
  * A flag interface for indicating that the object
  * represents a filesystem dependent option for opening
  * a file. Typically several options are declared together.
- * <p>
- * The {@link OpenOption} object defines
+ *
+ * The StandardOpenOption object defines
  * several such options that are supported by most
  * filesystems.  The filesystem should define which options
  * are accepted
- * </p>
  *
  * @author  Jesse Eichar
  * @since   1.0

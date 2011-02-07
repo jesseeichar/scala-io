@@ -12,71 +12,36 @@ import scala.collection.Traversable
 import Line._
 
 /**
- * An trait for objects that viewed as a sequence of bytes. For example InputStream
- * and ReadableByteChannel could be an Input object (or be converted
- * to a ReadBytes object).
- * <p>
+ * An trait for objects that viewed as a sequence of characters. For example java.io.Reader
+ * a ReadChars object (or be converted to a ReadChars object).
+ *
  * Note: All collections returned are non-strict collections and each
  * invocation of a method will typically open a new stream or channel.
  * That behaviour can be overrided by the implementation but
  * it is the default behaviour.
- * </p>
- * <p>
- * Default implementation is based on providing an implementation for
- * bytesAsInts and all other methods are implemented using
+ *
+ * The Default implementation is based on providing an implementation for
+ * chars method and all other methods are implemented using
  * that method.
- * <p>
- * An alternate way to provide an implementation is to override chars and implement bytesAsInts
- * by calling charsToInts
- * </p>
+ *
  * @author Jesse Eichar
  * @since 1.0
  *
- * @see Output
+ * @see [[scalax.io.Output]]
+ * @see [[scalax.io.Input]]
+ * @see [[scalax.io.WriteChars]]
  */
 trait ReadChars {
   /**
    * The characters in the object.
-   * <p>
-   * If the codec is not the same as the source codec (the codec of
-   * the underlying data) then the characters will converted to the
-   * desired codec.
-   * </p><p>
-   * In some object the bytes of underlying iterable can be cast to a Seq
-   * and elements can be randomly accessed. Random access must be used
-   * carefully as each access will open a new stream unless that behavior
-   * is modified by the implementation.
-   * </p><p>
-   * For example on some filesystems using random access within a
-   * {@link FileOperations#open} will perform all accesses using
-   * the same Channel improving the performance.
-   * </p>
    *
-   * @param codec
-   *          The codec representing the desired encoding of the characters
    * @return
-   *          an iterable of all the characters
+   *          an traversable of all the characters
    */
-  def chars: Traversable[Char]
+  def chars: LongTraversable[Char]
   /**
-   * Obtain an non-strict iterable for iterating through the lines in the object
-   * <p>
-   * If the codec is not the same as the source codec (the codec of
-   * the underlying data) then the characters will converted to the
-   * desired codec.
-   * </p><p>
-   * In some object the bytes of underlying iterable can be cast to a Seq
-   * and elements can be randomly accessed. Random access must be used
-   * carefully as each access will open a new stream unless that behavior
-   * is modified by the implementation.
-   * </p><p>
-   * For example on some filesystems using random access within a
-   * {@link FileOperations#open} will perform all accesses using
-   * the same Channel improving the performance.
-   * </p>
+   * Obtain an non-strict traversable for iterating through the lines in the object
    *
-   * @param codec
-   *          The codec representing the desired encoding of the characters
    * @param terminator
    *          The strategy for determining the end of line
    *          Default is to auto-detect the EOL
@@ -85,22 +50,15 @@ trait ReadChars {
    *          Default is false
    *
    * @return
-   *          a non-strict iterable for iterating through all the lines
+   *          a non-strict traversable for iterating through all the lines
    */
   def lines(terminator: Terminators.Terminator = new Terminators.Auto(),
-            includeTerminator: Boolean = false): Traversable[String] = {
-             new LineTraverseable(chars, terminator, includeTerminator)
+            includeTerminator: Boolean = false): ResourceView[String] = {
+             new LineTraversable(chars, terminator, includeTerminator).view
         }
   /**
    * Loads all the characters into memory. There is no protection against
    * loading very large files/amounts of data.
-   * <p>
-   * If the codec is not the same as the source codec (the codec of
-   * the underlying data) then the characters will converted to the
-   * desired codec.
-   * </p>
-   * @param codec
-   *          The codec representing the desired encoding of the characters
    */
   def slurpString = chars.mkString
 

@@ -11,7 +11,15 @@ package scalax.io
 import scala.collection.mutable.Buffer
 import Line.Terminators._
 
-class LineTraverseable(source: Traversable[Char], terminator: Terminator, includeTerminator: Boolean) extends Traversable[String] {
+/**
+ * Creates a Traversable[String] from a Traversable[Char] where each String is a line as indicated by the
+ * [[scalax.io.Line.Terminators.Terminator]].
+ *
+ *
+ * @see [[scalax.io.Input]]
+ * @see [[scalax.io.ReadChars]]
+ */
+class LineTraversable(source: Traversable[Char], terminator: Terminator, includeTerminator: Boolean) extends LongTraversable[String] {
     def foreach[U](f: String => U) : Unit = {
         val buffer = source.foldLeft(Buffer[Char]()) {
             case (buffer, nextChar) =>

@@ -26,7 +26,9 @@ import Line._
  * @author Jesse Eichar
  * @since 1.0
  *
- * @see {{scalax.io.Output}}
+ * @see [[scalax.io.Output]]
+ * @see [[scalax.io.ReadChars]]
+ * @see [[scalax.io.WriteChars]]
  */
 trait Input {
 
@@ -92,8 +94,8 @@ trait Input {
      *          a non-strict traversable for iterating through all the lines
      */
     def lines(terminator: Terminators.Terminator = new Terminators.Auto(),
-              includeTerminator: Boolean = false)(implicit codec: Codec): Traversable[String] = {
-                  new LineTraverseable(chars(codec), terminator, includeTerminator)
+              includeTerminator: Boolean = false)(implicit codec: Codec): ResourceView[String] = {
+                  new LineTraversable(chars(codec), terminator, includeTerminator).view
     }
     /**
      * Loads all the characters into memory. There is no protection against
@@ -107,4 +109,19 @@ trait Input {
      *          The codec representing the desired encoding of the characters
      */
     def slurpString(implicit codec: Codec) = chars(codec).mkString
+}
+
+object Input {
+  class AsInput(op: => Input) {
+    /** Converts a Java collection to the corresponding Scala collection */
+    def asInput: Input = op
+  }
+
+  /**
+   * Wrap a Traversable as an Input.  Normally just Traversable[Int] and Traversable[Byte] are supported
+   */
+  implicit def asInputConverter[B](src:B)(implicit converter:TraversableResourceConverter[B]) =
+    new AsInput(converter.toInput(src))
+
+
 }

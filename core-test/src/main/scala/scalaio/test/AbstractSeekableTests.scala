@@ -202,7 +202,7 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
   def chopString: Unit = {
     val seekable = open()
     val expected = TEXT_VALUE take 2
-    seekable.chopString(2)
+    seekable.truncateString(2)
     assertEquals(expected, seekable.slurpString)
   }
 
@@ -210,7 +210,7 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
   def chop: Unit = {
     val seekable = open()
     val expected = TEXT_VALUE take 2
-    seekable.chop(UTF8 encode expected size)
+    seekable.truncate(UTF8 encode expected size)
     assertEquals(expected, seekable.slurpString)
   }
 

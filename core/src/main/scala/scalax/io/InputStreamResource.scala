@@ -2,9 +2,10 @@ package scalax.io
 
 import java.io.{InputStreamReader, Reader, BufferedInputStream, InputStream}
 import java.nio.channels.Channels
+import scalax.io.ResourceAdapting.ReadableChannelAdapter
 
 /**
- * A ManagedResource for accessing and using InputStreams.  Class can be created using the {{scalax.io.Resource}} object.
+ * A ManagedResource for accessing and using InputStreams.  Class can be created using the [[scalax.io.Resource]] object.
  */
 class InputStreamResource[+A <: InputStream] protected[io](opener: => A,closeAction:CloseAction[A]) extends BufferableInputResource[A, BufferedInputStream]
     with ResourceOps[A, InputStreamResource[A]] {
@@ -19,27 +20,27 @@ class InputStreamResource[+A <: InputStream] protected[io](opener: => A,closeAct
   def buffered:InputStreamResource[BufferedInputStream] = {
     def nResource = {
       val a = open()
-      new BufferedInputStream(a) with ResourceAdapter[A] {
+      new BufferedInputStream(a) with ResourceAdapting.Adapter[A] {
         def src = a
       }
     }
-    val closer = ResourceAdapter.closeAction(closeAction)
+    val closer = ResourceAdapting.closeAction(closeAction)
     Resource.fromBufferedInputStream(nResource)(closer)
   }
   def reader(implicit sourceCodec: Codec): ReaderResource[Reader] = {
     def nResource = {
       val a = open()
-      new InputStreamReader(a) with ResourceAdapter[A] {
+      new InputStreamReader(a) with ResourceAdapting.Adapter[A] {
         def src = a
       }
     }
-    val closer = ResourceAdapter.closeAction(closeAction)
+    val closer = ResourceAdapting.closeAction(closeAction)
     Resource.fromReader(nResource)(closer)
   }
 
   def readableByteChannel = {
     val nResource = new ReadableChannelAdapter(opener)
-    val closer = ResourceAdapter.closeAction(closeAction)
+    val closer = ResourceAdapting.closeAction(closeAction)
     Resource.fromReadableByteChannel(nResource)(closer)
   }
   def chars(implicit codec: Codec) = reader(codec).chars

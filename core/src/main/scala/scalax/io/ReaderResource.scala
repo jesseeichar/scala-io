@@ -3,7 +3,7 @@ package scalax.io
 import java.io.{Reader, BufferedReader}
 
 /**
- * A ManagedResource for accessing and using Readers.  Class can be created using the {{scalax.io.Resource}} object.
+ * A ManagedResource for accessing and using Readers.  Class can be created using the [[scalax.io.Resource]] object.
  */
 class ReaderResource[+A <: Reader] protected[io](opener: => A, closeAction:CloseAction[A]) extends BufferableReadCharsResource[A, BufferedReader]
     with ResourceOps[A, ReaderResource[A]] {
@@ -16,11 +16,11 @@ class ReaderResource[+A <: Reader] protected[io](opener: => A, closeAction:Close
   def buffered : ReaderResource[BufferedReader] = {
     def nResource = {
       val a = open()
-      new BufferedReader(a) with ResourceAdapter[A] {
+      new BufferedReader(a) with ResourceAdapting.Adapter[A] {
         def src = a
       }
     }
-    val closer = ResourceAdapter.closeAction(closeAction)
+    val closer = ResourceAdapting.closeAction(closeAction)
     Resource.fromBufferedReader(nResource)(closer)
   }
 

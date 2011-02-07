@@ -25,8 +25,9 @@ import java.io.Writer
  * @author Jesse Eichar
  * @since 1.0
  *
- * @see ReadBytes
- * @see Input
+ * @see [[scalax.io.Output]]
+ * @see [[scalax.io.ReadChars]]
+ * @see [[scalax.io.Input]]
  */
 trait WriteChars {
 

@@ -15,36 +15,85 @@ import java.nio.channels.{
 import scalax.io._
 import Constants.BufferSize
 import scala.collection.Traversable
-import Resource._
 import scala.annotation._
 import collection.mutable.{ArrayOps, WrappedArray}
 import StandardOpenOption._
-import java.io.{RandomAccessFile, File, InputStream, OutputStream}
+import java.io.{RandomAccessFile, File}
 
+/**
+ * A strategy trait used with the Seekable.patch to control how data is
+ * written to the object.
+ *
+ * Note: Methods are not part of API.
+ */
 sealed trait Overwrite {
-  def getOrElse(opt: => Long):Long
-  def map(f:Long => Long):Overwrite
-  def foreach[U](f:Long => U):Unit
-  def exists(p:Long => Boolean):Boolean
+  private[io] def getOrElse(opt: => Long):Long
+  private[io] def map(f:Long => Long):Overwrite
+  private[io] def foreach[U](f:Long => U):Unit
+  private[io] def exists(p:Long => Boolean):Boolean
 }
+
+/**
+ * Strategy to overwrite as much data as possible.
+ *
+ * IE if the data to write is 4 bytes try to overwrite 4 bytes.
+ */
 case object OverwriteAll extends Overwrite {
-  def getOrElse(opt: => Long) = opt
-  def map(f:Long => Long) = this
-  def foreach[U](f:Long => U) = ()
-  def exists(p:Long => Boolean) = false
+  private[io] def getOrElse(opt: => Long) = opt
+  private[io] def map(f:Long => Long) = this
+  private[io] def foreach[U](f:Long => U) = ()
+  private[io] def exists(p:Long => Boolean) = false
 }
+
+/**
+ * Strategy for (potentially) only overwriting a subset of the data.
+ *
+ * @param replacementLength maximum number of ''units'' to overwrite.  If ''Longs'' are written
+ * the the ''unit'' are ''Longs''.
+ */
 case class OverwriteSome(replacementLength:Long) extends Overwrite {
-  def getOrElse(opt: => Long) = replacementLength
-  def map(f:Long => Long) = new OverwriteSome(f(replacementLength))
-  def foreach[U](f:Long => U) : Unit = f(replacementLength)
-  def exists(p:Long => Boolean) = p(replacementLength)
+  private[io] def getOrElse(opt: => Long) = replacementLength
+  private[io] def map(f:Long => Long) = new OverwriteSome(f(replacementLength))
+  private[io] def foreach[U](f:Long => U) : Unit = f(replacementLength)
+  private[io] def exists(p:Long => Boolean) = p(replacementLength)
 }
 
 /**
  * An object for reading and writing to Random Access IO objects such as Files.
  *
+ * In addition to the methods contributed by [[scalax.io.Input]] and [[scalax.io.Output]] patch, insert
+ * and append are provided as more random access style operations.
+ *
+ * Note: The methods in [[scalax.io.Output]] are always fully destructive.  IE write
+ * will replace all data in the file, insert, patch or append are your friends if that is
+ * not the behaviour you want.
+ *
+ *
  * @author Jesse Eichar
  * @since 1.0
+ *
+ * @define overwriteParam @param overwrite The strategy that dictates how many characters/bytes/units are overwritten
+ * @define outputConverter [[scalax.io.OutputConverter]]
+ * @define dataParam  @param data
+ *          The data to write.  This can be any type that has a $outputConverter associated
+ *          with it.  There are predefined $outputConverters for several types.  See the
+ *          $outputConverter object for the predefined types and for objects to simplify implementing
+ *          custom $outputConverter
+ * @define intAsByteExplanation Since the [[scalax.io.OutputConverter]] object defined for writing Ints encodes Ints using 4 bytes this method
+ *  is provided to simply write an array of Ints as if they are Bytes.  In other words just taking the first
+ *  byte.  This is pretty common in Java.io style IO.  IE
+ *  {{{ outputStream.write(1) }}}
+ *  1 is written as a single byte.
+ * @define arrayRecommendation '''Important:''' The use of an Array is highly recommended
+ *  because normally arrays can be more efficiently written using
+ *  the underlying APIs
+ * @define patchDesc Update a portion of the file content at
+ *  the declared location. This is the most flexible of the
+ *  random access methods but is also (probably) the trickiest
+ *  to fully understand.  That said it behaves (almost) identical
+ *  to a scala.collection.Seq.patch method, so if you understand that
+ *  you should not have difficulty understanding this method.
+ * @define converterParamconverterParam @param converter The strategy for writing the data/converting the data to bytes
  */
 trait Seekable extends Input with Output {
 
@@ -61,20 +110,19 @@ trait Seekable extends Input with Output {
     protected def channel(openOptions:OpenOption*) : OutputResource[SeekableByteChannel] with InputResource[SeekableByteChannel]
 
   /**
-   * Update a portion of the file content with string at
-   * the declared location.
-   * <p>
+   * $patchDesc
+   *
    * If the position is beyond the end of the file a BufferUnderflow
    * Exception will be thrown
-   * </p><p>
+   *
    * If the position is within the file but the
-   * <code>position + string.getBytes(codec).length</code>
+   * `position + string.getBytes(codec).length`
    * is beyond the end of the file the file will be enlarged so
    * that the entire string can fit in the file
-   * </p><p>
+   *
    * The write begins at the position indicated.  So if position = 0
    * then the write will begin at the first byte of the file.
-   * </p>
+   *
    * @param position
    *          The start position of the update starting at 0.
    *          The position is the position'th character in the file using
@@ -83,11 +131,9 @@ trait Seekable extends Input with Output {
    * @param string
    *          The string to write to the file starting at
    *          position.
-   * @param replaced
-   *          The number of elements from bytes to replace.
-   *          The stream will be grown as needed.
-   *          Default will use all bytes in patch
-   * @see patch(Long,Traversable[Byte],Iterable[OpenOption])
+   * $overwriteParam
+   * @param codec
+   *          The codec to use for decoding the underlying data into characters
    */
   def patch(position: Long,
             string: String,
@@ -122,34 +168,26 @@ trait Seekable extends Input with Output {
   }
 
   /**
-   * Update a portion of the file content with several bytes at
-   * the declared location.
-   * <p>
-   * <strong>Important:</strong> The use of an Array is highly recommended
-   * because normally arrays can be more efficiently written using
-   * the underlying APIs
-   * </p><p>
-   * To append data the position must >= size
-   * </p><p>
+   * $patchDesc
+   *
+   * $arrayRecommendation
+   *
+   * To append data the `position must >= size`
+   *
    * If the position is within the file but the
-   * <code>position + bytes.length</code>
+   * `position + bytes.length`
    * is beyond the end of the file the file will be enlarged so
    * that the entire string can fit in the file
-   * </p><p>
+   *
    * The write begins at the position indicated.  So if position = 0
    * then the write will begin at the first byte of the file.
-   * </p>
+   *
    * @param position
    *          The start position of the update starting at 0.
    *          The position must be within the file or == size (for appending)
-   * @param bytes
-   *          The bytes to write to the file starting at
-   *          position.
-   * @param replaced
-   *          The number of elements from bytes to replace.  If
-   *          larger than bytes then all bytes will be used
-   *          The stream will be grown as needed.
-   *          Default will use all bytes in patch
+   * $dataParam
+   * $overwriteParam
+   * $converterParam
    */
   def patch[T](position: Long,
             data: T,
@@ -174,14 +212,42 @@ trait Seekable extends Input with Output {
     }
   }
 
+ /**
+   * $intAsByteExplanation
+   */
   def patchIntsAsBytes(position:Long,
-                       data:TraversableOnce[Int],
-                        overwrite : Overwrite) = patch(position,data,overwrite)(OutputConverter.TraversableIntAsByteConverter)
+                       overwrite : Overwrite,
+                       data:Int*) = patch(position,data,overwrite)(OutputConverter.TraversableIntAsByteConverter)
 
+  /**
+   * Inserts a string at a position in the Seekable. This is a potentially inefficient because of the need to
+   * count characters.  If the codec is not a fixed sized codec (for example UTF8) each character must be
+   * converted in the file up to the point of insertion.
+   *
+   * @param position The position in the file to perform the insert.  A position of 2 will insert the character after
+   *              the second character (not byte).
+   * @param string The string that will be inserted into the Seekable
+   * @param codec The codec to use for determining the location for inserting the string and for encoding the
+   *              string as bytes
+   */
   def insert(position : Long, string: String)(implicit codec: Codec): Unit = {
     insert(position, codec encode string)
   }
 
+   /**
+    * Inserts data at a position in the Seekable.  The actual position in the Seekable where the data is inserted depends on
+    * the type of data being written.  For example if Longs are being written then position calculated as position * 8
+    *
+    * $arrayRecommendation
+    *
+    * @param position  The position where the data is inserted into the Seekable.  The actual position in the Seekable
+    * where the data is inserted depends on the type of data being written.  For example if
+    * Longs are being written then position calculated as position * 8
+    *
+    * $dataParam
+    *
+    * $converterParam
+   */
   def insert[T](position : Long, data : T)(implicit converter:OutputConverter[T]) = {
     val bytes = converter.toBytes(data)
     if(size.forall(_ <= position)) {
@@ -192,8 +258,10 @@ trait Seekable extends Input with Output {
         insertDataTmpFile(position max 0, bytes)
     }
   }
-
-  def insertIntsAsBytes(position : Long, data : TraversableOnce[Int]) = insert(position, data)(OutputConverter.TraversableIntAsByteConverter)
+ /**
+   * $intAsByteExplanation
+   */
+  def insertIntsAsBytes(position : Long, data : Int*) = insert(position, data)(OutputConverter.TraversableIntAsByteConverter)
 
   private def insertDataInMemory(position : Long, bytes : TraversableOnce[Byte]) = {
     for(channel <- channel(Write) ) {
@@ -235,7 +303,7 @@ trait Seekable extends Input with Output {
   private def insertDataTmpFile(position : Long, bytes : TraversableOnce[Byte]) = {
       val tmp = tempFile()
 
-      tmp writeIntsAsBytes (bytesAsInts.asInstanceOf[LongTraversable[Int]] ldrop position)
+      tmp write (this.bytes ldrop position)
 
       for(channel <- channel(Write) ) {
            channel position  position
@@ -293,24 +361,23 @@ trait Seekable extends Input with Output {
 
 
   /**
-  * Append bytes to the end of a file
-  *
-  * <strong>Important:</strong> The use of an Array is highly recommended
-  * because normally arrays can be more efficiently written using
-  * the underlying APIs
-  *
-  * @param bytes
-  *          The bytes to write to the file
-  * @param take
-  *          The number of bytes to append negative number to take all
-  *          default is to append all
-  */
+   * Append bytes to the end of a file
+   *
+   * $arrayRecommendation
+   *
+   * $dataParam
+   *
+   * $converterParam
+   */
   def append[T](data: T)(implicit converter:OutputConverter[T]): Unit = {
     val bytes = converter.toBytes(data)
     for (c <- channel(Append)) writeTo(c, bytes, -1)
   }
 
-  def appendIntsAsBytes[T <: TraversableOnce[Int]](data:T) {
+  /**
+   * $intAsByteExplanation
+   */
+  def appendIntsAsBytes(data:Int*) = {
     append(data)(OutputConverter.TraversableIntAsByteConverter)
   }
 
@@ -364,36 +431,30 @@ trait Seekable extends Input with Output {
   }
 
   /**
-  * Writes a string. The open options that can be used are dependent
-  * on the implementation and implementors should clearly document
-  * which option are permitted.
+  * Append a string to the end of the Seekable object.
   *
   * @param string
   *          the data to write
   * @param codec
   *          the codec of the string to be written. The string will
-  *          be converted to the encoding of {@link sourceCodec}
-  *          Default is sourceCodec
+  *          be converted to the encoding of {@link codec}
   */
   def append(string: String)(implicit codec: Codec): Unit = {
       append(codec encode string)
   }
 
   /**
-  * Write several strings. The open options that can be used are dependent
-  * on the implementation and implementors should clearly document
-  * which option are permitted.
+  * Append several strings to the end of the Seekable object.
   *
   * @param strings
-  *          The data to write
+  *          The strings to write
   * @param separator
   *          A string to add between each string.
   *          It is not added to the before the first string
   *          or after the last.
   * @param codec
   *          The codec of the strings to be written. The strings will
-  *          be converted to the encoding of {@link sourceCodec}
-  *          Default is sourceCodec
+  *          be converted to the encoding of {@link codec}
   */
   def appendStrings(strings: Traversable[String], separator:String = "")(implicit codec: Codec): Unit = {
     val sepBytes = codec encode separator
@@ -406,11 +467,17 @@ trait Seekable extends Input with Output {
     }
   }
 
-  def chop(position : Long) : Unit = {
+  /**
+   * Truncate/Chop the Seekable to the number of bytes declared by the position param
+   */
+  def truncate(position : Long) : Unit = {
        channel(Append) foreach {_.truncate(position)}
   }
-
-  def chopString(position : Long)(implicit codec:Codec) : Unit = {
+   /**
+    * Truncate/Chop the Seekable to the number of bytes declared by the position param.  In this
+    * method each position is one character instead of bytes.
+    */
+  def truncateString(position : Long)(implicit codec:Codec) : Unit = {
     val posInBytes = charCountToByteCount(0,position)
     channel(Append) foreach {_.truncate(posInBytes)}
   }

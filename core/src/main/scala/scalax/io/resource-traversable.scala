@@ -12,12 +12,21 @@ import java.io.{
   InputStream, Reader, Closeable
 }
 
-protected[io] trait TraversableSource[In <: java.io.Closeable, A] {
+/**
+ * A way of abstracting over the source Resource's type
+ *
+ * @see [[ResourceTraversable]]
+ */
+protected[io] trait TraversableSource[In <: Closeable, A] {
   def resource : Resource[In]
   def skip(stream:In, count:Long) : Unit
   def read(stream:In) : Option[A]
 }
 
+/**
+ * A Resource based implementation of a TraversableLong.  Optimized to only read the
+ * required data from a stream
+ */
 private[io] trait ResourceTraversable[A] extends LongTraversable[A]
                              with LongTraversableLike[A, LongTraversable[A]] {
   self =>

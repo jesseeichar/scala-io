@@ -61,10 +61,10 @@ object OutputAndTypeClasses {
 
     // writeIntsAsBytes (or patchIntsAsBytes) is
     // another good solution
-    out.writeIntsAsBytes(List(1,2,3,4))
-    out.insertIntsAsBytes(4,List(1,2,3))
-    out.patchIntsAsBytes(3,List(1,2,3),OverwriteAll)
-    out.appendIntsAsBytes(List(1,2,3))
+    out.writeIntsAsBytes(1,2,3,4)
+    out.insertIntsAsBytes(4,1,2,3)
+    out.patchIntsAsBytes(3,OverwriteAll,1,2,3)
+    out.appendIntsAsBytes(1,2,3)
 
     // The final option is to pass in the
     //(OutputConverter.IntAsByteConverter) object to the write method:

@@ -138,6 +138,7 @@ class ScalaIOProject(info: ProjectInfo)
 trait IoProject extends AutoCompilerPlugins {
   self : DefaultProject =>
 
+  override def documentOptions = super.documentOptions //++ List(CompoundDocOption("-doc-source-url","https://github.com/scala-incubator/scala-io/raw/master/"))
   if(System.getProperty("file.encoding")==null || !List("utf8","utf-8").contains(System.getProperty("file.encoding").toLowerCase)) {
     println("file.encoding must be utf8 or utf-8.  Add -Dfile.encoding=UTF8 to your SBT_OPTS")
     exit(1)
