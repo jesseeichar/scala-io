@@ -85,6 +85,26 @@ object SeekableSamples {
   }
 
   /**
+   * In addition to Resource.fromFoo methods to create Resources (which are often Seekable objects)  
+   * There is a second option for converting certain objects directly to an Seekable object.  This example
+   * shows how to convert a File to an output object
+   */
+  def convertObjectToSeekable {
+    import scalax.io._
+    import java.io.File
+    import Seekable.asSeekableConverter
+
+    // By default files can be converted to an Seekable Object by importing
+    // Seekable.asSeekableConverter and calling asSeekable on the file
+    val seekable:Seekable = new File("aFile").asSeekable
+
+    // needed for the append and slurp calls below
+    implicit val codec = Codec.UTF8
+
+    seekable.append("data is being written to file")
+    val data:String = seekable.slurpString
+  }
+  /**
    * Multiple Random accesses from a file opened only a single time
    */
   def multipleAccesses {

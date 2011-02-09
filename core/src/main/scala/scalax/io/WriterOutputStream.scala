@@ -12,6 +12,11 @@ import java.io.{
     OutputStream, Writer
 }
 
+/**
+ * Takes a writer and allows it to be treated like a OutputStream,  The data is encoded as it is written to the Writer
+ *
+ * '''Not API''' just a support class for implementation
+ */
 protected[io] class WriterOutputStream(writer : Writer)( implicit codec : Codec) extends OutputStream {
     private val encoding = codec.name
 

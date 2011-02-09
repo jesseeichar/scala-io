@@ -1,7 +1,7 @@
-import sbt.Logger
+import sbt.{DefaultProject, Logger}
 import xml.Node
 
-class ProjectSite(project:IoProject,log:Logger) {
+class ProjectSite(val project:DefaultProject with IoProject,log:Logger) {
   val self = this;
   val name = project.name
   val summary = project.descSummary
@@ -14,8 +14,13 @@ class ProjectSite(project:IoProject,log:Logger) {
 
   def navbar(site:WebsiteModel, currPage:ExamplesPage, relativeToBase:String,currEx:Option[Example], showAllProjects:Boolean):Node = {
     <div id="navcontainer">
-      <ul id="projectnavlist">{for(project <- site.projectSites) yield {
-        <li><a href={relativeToBase+project.name+"/index.html"} title={project.summary} class={if(project == self)"active" else ""}>{project.name.capitalize}</a>
+      <ul id="projectnavlist">
+        <li><a href={relativeToBase+"/../index.html"}>Overview</a></li>
+        {for(project <- site.projectSites) yield {
+        <li><a href={relativeToBase+project.name+"/index.html"}
+               title={project.summary}
+               class={if(project == self)"active" else ""}>{project.name.capitalize}</a>
+            <a href={relativeToBase+"/"+project.name+"/scaladoc/index.html"}>(Scaladoc)</a>
           { if(project == self || showAllProjects) {
             <ul id="navlist">{for(page <- project.pages) yield {
                   if(currPage == page ){
@@ -32,7 +37,9 @@ class ProjectSite(project:IoProject,log:Logger) {
             }
           }
         </li>
-      }}</ul>
+      }}
+        <li><a href={relativeToBase+"/../roadmap.html"}>Roadmap</a></li>
+      </ul>
     </div>
   }
 

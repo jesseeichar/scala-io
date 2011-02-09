@@ -10,7 +10,7 @@ package scalax.io
 
 import resource._
 import scala.collection.Traversable
-import java.io.{File => JFile, OutputStream}
+import java.io.{File, OutputStream}
 
 /**
  * A trait for objects that can have data written to them. For example an
@@ -100,5 +100,43 @@ trait Output {
   */
   def writeStrings(strings: Traversable[String], separator:String = "")(implicit codec: Codec): Unit = {
       underlyingOutput.writer.writeStrings(strings,separator)
+  }
+}
+
+object Output {
+  class AsOutput(op: => Output) {
+    /** An object to an Output object */
+    def asOutput: Output = op
+  }
+
+  /**
+   * Wrap an arbitraty object as and AsOutput object allowing the object to be converted to an Output object.
+   *
+   * The possible types of src are the subclasses of [[scalax.io.AsOutputConverter]]
+   */
+  implicit def asOutputConverter[B](src:B)(implicit converter:AsOutputConverter[B]) =
+    new AsOutput(converter.toOutput(src))
+    
+  /**
+   * Used by the [[scalax.io.Output]] object for converting an arbitrary object to an Output Object
+   *
+   * Note: this is a classic use of the type class pattern
+   */
+  trait AsOutputConverter[-A] {
+    def toOutput(t:A) : Output
+  }
+  
+  /**
+   * contains several implementations of [[scalax.io.AsOutputConverter]].  They will be implicitely resolved allowing
+   * a user of the library to simple call A.asOutput and the converter will be found without the user needing to look up these classes
+   */
+  object AsOutputConverter {
+  
+    /**
+     * Converts a File to an Output object
+     */
+    implicit object FileConverter extends AsOutputConverter[File]{
+      def toOutput(file: File) = Resource.fromFile(file)
+    }
   }
 }

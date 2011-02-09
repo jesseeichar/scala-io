@@ -522,3 +522,42 @@ trait Seekable extends Input with Output {
     }
   }
 }
+
+object Seekable {
+  class AsSeekable(op: => Seekable) {
+    /** An object to an Seekable object */
+    def asSeekable: Seekable = op
+  }
+
+  /**
+   * Wrap an arbitraty object as and AsSeekable object allowing the object to be converted to an Seekable object.
+   *
+   * The possible types of src are the subclasses of [[scalax.io.AsSeekableConverter]]
+   */
+  implicit def asSeekableConverter[B](src:B)(implicit converter:AsSeekableConverter[B]) =
+    new AsSeekable(converter.toSeekable(src))
+
+    
+  /**
+   * Used by the [[scalax.io.Seekable]] object for converting an arbitrary object to an Seekable Object
+   *
+   * Note: this is a classic use of the type class pattern
+   */
+  trait AsSeekableConverter[-A] {
+    def toSeekable(t:A) : Seekable
+  }
+  
+  /**
+   * contains several implementations of [[scalax.io.AsSeekableConverter]].  They will be implicitely resolved allowing
+   * a user of the library to simple call A.asSeekable and the converter will be found without the user needing to look up these classes
+   */
+  object AsSeekableConverter {
+  
+    /**
+     * Converts a File to an Seekable object
+     */
+    implicit object FileConverter extends AsSeekableConverter[File]{
+      def toSeekable(file: File) = Resource.fromFile(file)
+    }
+  }
+}

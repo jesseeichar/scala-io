@@ -1,8 +1,10 @@
 import sbt._
 import xml.Node
+import java.io._
 
 class ScalaIOProject(info: ProjectInfo)
         extends ParentProject(info) {
+
   val mavenLocal = "Local Maven Repository" at "file://" + Path.userHome + "/.m2/repository"
   val scalatoolsSnapshot = "Scala Tools Snapshot" at "http://scala-tools.org/repo-snapshots/"
   val scalatoolsRelease = "Scala Tools Snapshot" at "http://scala-tools.org/repo-releases/"
@@ -11,9 +13,8 @@ class ScalaIOProject(info: ProjectInfo)
   lazy val coreTest:TestProject = project("core-test", "core-test", new TestProject(_),core)
   lazy val file:File = project("file", "file", new File(_),core)
   lazy val fileTest:TestProject = project("file-test", "file-test", new TestProject(_),core,coreTest,file)
-  lazy val archive:Archive = project("archive", "archive", new Archive(_),core, file)
+//  lazy val archive:Archive = project("archive", "archive", new Archive(_),core, file)
   lazy val webSite:WebSite = project("web-site", "web-site", new WebSite(_),core, file)
-
 
   /* ------   Sub projects ------ */
   class Core(info: ProjectInfo)
@@ -54,7 +55,7 @@ class ScalaIOProject(info: ProjectInfo)
   }
 
   class TestProject(info: ProjectInfo)
-          extends DefaultProject(info) {
+          extends DefaultProject(info)  with MavenPublishing {
 
     val mockito = "org.mockito" % "mockito-all" % "1.8.0"
     val junitInterface = "com.novocode" % "junit-interface" % "0.5"
@@ -111,31 +112,44 @@ class ScalaIOProject(info: ProjectInfo)
 
   class WebSite(info:ProjectInfo)
           extends DefaultProject(info) {
-
     val siteOutput = outputPath / "site"
+    val siteZip = outputPath / "site.zip"
 
     // Needed so that samples task for all project is executed before site
     lazy val samples = task {None}
 
     def siteTask = task {
       val projectSites = dependencies flatMap {
-        case project:IoProject => List(new ProjectSite(project,log))
+        case project:DefaultProject with IoProject => List(new ProjectSite(project,log))
         case _ => Nil
       }
       siteOutput.asFile.mkdirs
       FileUtilities.copy(mainResources.get, siteOutput, log)
+      projectSites.toList foreach { projectSite =>
+        val project = projectSite.project
+        val docs = project.mainDocPath
+
+        FileUtilities.copy((project.docPath / "main" / "api").##.***.get, siteOutput / projectSite.name / "scaladoc", log)
+      }
 
       val site = new WebsiteModel(projectSites.toList,siteOutput,log)
       site.buildSite
+
+      FileUtilities.zip(siteOutput.##.get,siteZip,true,log)
+      
       None
-    } dependsOn samples
+    } dependsOn (samples,doc)
     lazy val site = siteTask describedAs "Generate documentation web-site"
 
     override protected def compileAction = task{None}
+/*    val siteArtifact = Artifact(name+"-"+version, "zip", "zip")
+    override def artifacts = Set(siteArtifact)
+    override def packageToPublishActions =  super.packageToPublishActions ++ Seq(site)*/
+    
   }
 }
 
-trait IoProject extends AutoCompilerPlugins {
+trait IoProject extends AutoCompilerPlugins with MavenPublishing{
   self : DefaultProject =>
 
   override def documentOptions = super.documentOptions //++ List(CompoundDocOption("-doc-source-url","https://github.com/scala-incubator/scala-io/raw/master/"))
@@ -150,6 +164,8 @@ trait IoProject extends AutoCompilerPlugins {
 
   def description:Iterable[Node]
   def descSummary:String
+
+
 
   override def compileOptions = super.compileOptions ++ List(
     CompileOption("-P:continuations:enable"),
@@ -191,3 +207,125 @@ trait IoProject extends AutoCompilerPlugins {
 
   lazy val compileAll = compileSamples dependsOn (compile,testCompile)
 }
+
+trait PackageToPublishActions {
+  self: TaskManager =>
+  def packageToPublishActions:Seq[Task]
+}
+trait MavenPublishing extends BasicScalaProject {
+  self: DefaultProject =>
+
+  // Publishing rules
+  override def managedStyle = ManagedStyle.Maven
+
+  // Choose the deployment location based on -SNAPSHOT in the version number
+  lazy val publishTo = if(version.toString.endsWith("-SNAPSHOT")) {
+     "nexus.scala-tools.org" at "http://nexus.scala-tools.org/content/repositories/snapshots/"
+  } else {
+    "nexus.scala-tools.org" at "http://nexus.scala-tools.org/content/repositories/releases/"
+  }
+
+  addMavenCredentialsForServer("nexus.scala-tools.org", "Sonatype Nexus Repository Manager")
+
+  def addMavenCredentialsForServer(serverId : String, name : String)  {
+     try {
+       val user = System.getProperty(serverId+".user")
+       val password = System.getProperty(serverId+".pass")
+       if(user!=null) {
+         scala.Console.println("Registering credents on " + serverId + " for user " + user)
+         Credentials.add(name, serverId, user, password)
+       }
+     } catch {
+       case t => //Ignore errors, just log
+          scala.Console.println("Unable to load maven credentials for [" + serverId + "]")
+     }
+   }
+  override def packageDocsJar = defaultJarPath("-javadoc.jar")
+  override def packageSrcJar= defaultJarPath("-sources.jar")
+
+  lazy val sourceArtifact = Artifact.sources(artifactID)
+  lazy val docsArtifact = Artifact.javadoc(artifactID)
+  abstract override def packageToPublishActions = super.packageToPublishActions ++ Seq(packageDocs, packageSrc)
+  override def pomExtra =
+    <licenses>
+      <license>
+        <name>Scala License</name>
+        <url>http://www.scala-lang.org/node/146</url>
+        <distribution>repo</distribution>
+      </license>
+    </licenses>
+  
+}
+trait ScalaBazaar {
+  self: DefaultProject =>
+  def outputBinPath = (outputPath ##) / "bin"
+
+  def ouputLibPath = (outputPath ##) / "lib"
+
+  def sbazName = name
+
+  def versionlessJarName = sbazName + ".jar"
+
+  def versionlessJarPath = ouputLibPath / versionlessJarName
+
+  def bazaarPackageName = sbazName + "-" + version + ".sbp"
+
+  def bazaarPackagePath = (outputPath ##) / bazaarPackageName
+
+  def bazaarAdvertName = sbazName + "-" + version + ".advert"
+
+  def bazaarAdvertPath = (outputPath ##) / bazaarAdvertName
+
+  def outputMetaPath = (outputPath ##) / "meta"
+
+  def descriptionPath = outputMetaPath / "description"
+
+  def outputDocPath = (outputPath ##) / "doc"
+
+  def bazaarDepends: List[String] = Nil
+
+  def description: String
+
+  def bazaarPackageBaseURL: String
+
+  lazy val sbazPack = sbazPackTask(bazaarDepends, Some(description))
+
+  def sbazPackTask(depends: List[String], description: Option[String]) = task {
+    if (!outputMetaPath.asFile.exists)
+      outputMetaPath.asFile.mkdir
+
+    val pack = <package>
+      <name>{sbazName}</name>
+      <version>{version}</version>{if (!depends.isEmpty)
+        <depends>{for (depend <- depends)
+        yield <name>{depend}</name>}</depends>
+      else
+        Nil}{if (!description.isEmpty)
+        <description>{description.get}</description>
+      else
+        Nil}</package>
+
+    val advert = <availablePackage>
+      {pack}
+      <link>{bazaarPackageBaseURL + bazaarPackageName}</link>
+    </availablePackage>
+
+    writeFile(descriptionPath.asFile, pack.toString)
+    writeFile(bazaarAdvertPath.asFile, advert.toString)
+
+    FileUtilities.zip(List(outputBinPath, ouputLibPath, outputDocPath, outputMetaPath),
+      bazaarPackagePath, true, log)
+    None
+  }.dependsOn(compile, doc)
+
+
+  private def writeFile(file: File, content: String) =
+    if (file.exists() && !file.canWrite())
+      error("File " + file + " is not writable")
+    else {
+      val writer = new FileWriter(file, false)
+      writer.write(content)
+      writer.close()
+    }
+}
+

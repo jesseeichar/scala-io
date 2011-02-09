@@ -526,6 +526,7 @@ object Resource {
    * @return an InputStreamResource
    */
   def fromURL(url:URL)(implicit extraCloser:CloseAction[InputStream]=Noop): InputStreamResource[InputStream] = fromInputStream(url.openStream)(extraCloser)
+
   /**
    * Converts the string to a URL and creates an Input Resource from the URL
    *

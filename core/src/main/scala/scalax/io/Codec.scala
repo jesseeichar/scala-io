@@ -98,7 +98,7 @@ object Codec {
   final val ISO8859:Codec = apply(Charset forName "ISO-8859-1")
   final val UTF8:Codec    = apply(Charset forName "UTF-8")
 
-  def default                               = apply(Charset.defaultCharset)
+  def platformDefault                       = apply(Charset.defaultCharset)
   def apply(encoding: String): Codec        = new Codec(Charset forName encoding)
   def apply(charSet: Charset): Codec        = new Codec(charSet)
   def apply(decoder: CharsetDecoder): Codec = {
