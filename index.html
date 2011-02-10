@@ -3,7 +3,7 @@
 <html>
     <head>
       <title>Scala IO API Documentation</title>
-      <link href="css/samples.css" type="text/css" rel="stylesheet"></link>
+      <script type="text/javascript" src="./js/shCore.js"></script><script type="text/javascript" src="./js/shBrushScala.js"></script><link href="./css/shCore.css" type="text/css" rel="stylesheet"></link><link href="./css/shThemeDefault.css" type="text/css" rel="stylesheet"></link><link href="./css/samples.css" type="text/css" rel="stylesheet"></link>
     </head>
     <body>
       <div id="maincontainer">
@@ -16,12 +16,14 @@
         <div id="contentwrapper">
           <div id="contentcolumn">
             <div class="innertube">
-              <div class="explanation">
+              <span>
+      <div class="explanation">
         <p>
         The Scala IO umbrella project consists of a few sub projects for different aspects and
         extensions of IO.  The core project deals with raw input and output, primarily through
         streams and channels (at least the Java implementation).
-        </p><p>
+        </p>
+        <p>
         <strong>Warning #1: </strong>The current API is a very early version and is likely to change.
         That said barring a massive outcry the core components should remain fairly consistent. Both the core and file projects will be changing but file is even more likely to change.
         Especially with regard to FileAttributes and the API for implementing custom filesystems.
@@ -39,7 +41,62 @@
           If you are interested at looking at the code, you are welcome to take a look at:
           <a href="https://github.com/jesseeichar/scala-io/issues">https://github.com/jesseeichar/scala-io</a>
         </p>
-      </div>
+        As an example of what Scala IO brings to the table the following examples compare Java IO vs Scala IO performing
+        a simple task of reading data from two URLs and writing them to a file. (I found it amusing that I actually messed up
+        the Java example the first try and had to debug it).
+        </div>
+        <div class="example">
+          <p><div class="example_summary"><h3>Scala</h3></div></p>
+          <div class="example_code">
+            <pre class="brush: scala">import java.net.URL
+import scalax.io.Input.asInputConverter
+import scalax.file.Path
+
+object ScalaIOExample extends Application {
+  val scalalang = new URL(&quot;http://www.scala-lang.org&quot;).asInput.bytes
+  val scalatools = new URL(&quot;http://www.scala-tools.org&quot;).asInput.bytes
+
+  Path(&quot;/tmp/scalaout&quot;).write(scalalang ++ scalatools)
+}</pre>
+          </div>
+        </div>
+        <div class="example">
+          <p><div class="example_summary"><h3>Java</h3></div></p>
+          <div class="example_code">
+            <pre class="brush: scala">import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.net.URL;
+
+public class JavaIOExample {
+    public static void write(FileOutputStream out, String urlString) throws Exception {
+        byte[] buffer = new byte[8192];
+        URL url = new URL(urlString);
+        InputStream in1 = url.openStream();
+        try {
+            int read = in1.read(buffer);
+            while (read &gt; -1) {
+                out.write(buffer,0,read);
+                read = in1.read(buffer);
+            }
+        } finally {
+            in1.close();
+        }
+
+    }
+    public static void main(String[] args) throws Exception {
+        FileOutputStream out = new FileOutputStream(&quot;/tmp/javaout&quot;);
+        try {
+            write(out,&quot;http://www.scala-lang.org&quot;);
+            write(out,&quot;http://www.scala-tools.org&quot;);
+        } finally {
+            out.close();
+        }
+    }
+}
+</pre>
+          </div>
+        </div>
+      </span>
             </div>
           </div>
         </div>
@@ -69,6 +126,8 @@
           <div>(c) Jesse Eichar 2010-2011</div>
         </div>
       </div>
-      
+      <script type="text/javascript">
+          SyntaxHighlighter.all()
+        </script>
     </body>
   </html>
