@@ -56,12 +56,16 @@ class WebsiteModel(val rootProject:ScalaIOProject, val projectSites:List[Project
         known inefficiencies.  Patches and suggestions are welcome but please keep flaming to a minimum.
         </p><p>
         If you have any suggestions please open a ticket at
-        <a href="https://github.com/jesseeichar/scala-io/issues">https://github.com/scala-incubator/scala-io/issues</a>
-
-        I will monitor the tickets and reply on the tickets.
+        <a href="https://github.com/jesseeichar/scala-io/issues">https://github.com/jesseeichar/scala-io/issues</a>
+        </p>
+        <div>
+        I welcome patches, bug reports and suggestions for this documentation or for the libraries themselves.
+        </div>
+        <p>
+          If you are interested at looking at the code, you are welcome to take a look at:
+          <a href="https://github.com/jesseeichar/scala-io/issues">https://github.com/jesseeichar/scala-io</a>
         </p>
       </div>
-
 
     Template(false, "Scala IO API Documentation")(
         <link href={"css/samples.css"} rel="stylesheet" type="text/css" ></link>)(
