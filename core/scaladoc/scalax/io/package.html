@@ -1,0 +1,898 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>scalax.io</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../lib/template.css" rel="stylesheet" type="text/css" media="screen" />
+      <script type="text/javascript" src="../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../lib/template.js"></script>
+      <script type="text/javascript" src="../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body class="value" onload="windowTitle();">
+
+      <p id="owner"><a href="../package.html" class="extype" name="scalax">scalax</a></p>
+
+      <div id="definition">
+        <img src="../../lib/package_big.png" />
+        <h1>io</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="kind">package</span>
+      <span class="symbol">
+        <span class="name">io</span>
+        
+        
+        
+      </span>
+      </h4>
+      <div class="fullcomment" id="comment"><div class="comment cmt"><p>Scala IO core classes
+</p></div>
+            
+            
+            
+          </div>
+
+      <div id="template">
+
+        <div id="mbrsel">
+          <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+          
+          
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in">Public</li><li class="all out">All</li></ol>
+            </div>
+          <div id="impl">
+              <span class="filtertype">Impl.</span>
+              <ol><li class="concrete in">Concrete</li><li class="abstract in">Abstract</li></ol>
+            </div>
+        </div>
+
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" data-isabs="true" name="scalax.io.Bufferable">
+      <a id="Bufferable:Bufferable[R]"></a>
+      <h4 class="signature"><a href="Bufferable.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">Bufferable</span>
+        <span class="tparams">[<span name="R">+R &lt;: Resource[Closeable]</span>]</span>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">An Object that has an associated Buffered object.</p>
+    </li><li visbl="pub" data-isabs="true" name="scalax.io.BufferableInputResource">
+      <a id="BufferableInputResource:BufferableInputResource[C, B]"></a>
+      <h4 class="signature"><a href="BufferableInputResource.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">BufferableInputResource</span>
+        <span class="tparams">[<span name="C">+C &lt;: Closeable</span>, <span name="B">+B &lt;: Closeable</span>]</span>
+        
+        <span class="result"> extends InputResource[C] with Bufferable[InputResource[B]] with ResourceOps[C, BufferableInputResource[C, B]]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">A trait consisting of the Combination of <a href="InputResource.html" class="extype" name="scalax.io.InputResource">InputResource</a> and <a href="Bufferable.html" class="extype" name="scalax.io.Bufferable">Bufferable</a>.</p>
+    </li><li visbl="pub" data-isabs="true" name="scalax.io.BufferableOutputResource">
+      <a id="BufferableOutputResource:BufferableOutputResource[C, B]"></a>
+      <h4 class="signature"><a href="BufferableOutputResource.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">BufferableOutputResource</span>
+        <span class="tparams">[<span name="C">+C &lt;: Closeable</span>, <span name="B">+B &lt;: Closeable</span>]</span>
+        
+        <span class="result"> extends OutputResource[C] with Bufferable[OutputResource[B]] with ResourceOps[C, BufferableOutputResource[C, B]]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">A trait consisting of the Combination of <a href="OutputResource.html" class="extype" name="scalax.io.OutputResource">OutputResource</a> and <a href="Bufferable.html" class="extype" name="scalax.io.Bufferable">Bufferable</a>.</p>
+    </li><li visbl="pub" data-isabs="true" name="scalax.io.BufferableReadCharsResource">
+      <a id="BufferableReadCharsResource:BufferableReadCharsResource[C, B]"></a>
+      <h4 class="signature"><a href="BufferableReadCharsResource.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">BufferableReadCharsResource</span>
+        <span class="tparams">[<span name="C">+C &lt;: Closeable</span>, <span name="B">+B &lt;: Closeable</span>]</span>
+        
+        <span class="result"> extends ReadCharsResource[C] with Bufferable[ReadCharsResource[B]] with ResourceOps[C, BufferableReadCharsResource[C, B]]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">A trait consisting of the Combination of <a href="ReadCharsResource.html" class="extype" name="scalax.io.ReadCharsResource">ReadCharsResource</a> and <a href="Bufferable.html" class="extype" name="scalax.io.Bufferable">Bufferable</a>.</p>
+    </li><li visbl="pub" data-isabs="true" name="scalax.io.BufferableWriteCharsResource">
+      <a id="BufferableWriteCharsResource:BufferableWriteCharsResource[C, B]"></a>
+      <h4 class="signature"><a href="BufferableWriteCharsResource.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">BufferableWriteCharsResource</span>
+        <span class="tparams">[<span name="C">+C &lt;: Closeable</span>, <span name="B">+B &lt;: Closeable</span>]</span>
+        
+        <span class="result"> extends WriteCharsResource[C] with Bufferable[WriteCharsResource[B]] with ResourceOps[C, BufferableWriteCharsResource[C, B]]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">A trait consisting of the Combination of <a href="WriteCharsResource.html" class="extype" name="scalax.io.WriteCharsResource">WriteCharsResource</a> and <a href="Bufferable.html" class="extype" name="scalax.io.Bufferable">Bufferable</a>.</p>
+    </li><li visbl="pub" data-isabs="false" name="scalax.io.ByteChannelResource">
+      <a id="ByteChannelResource:ByteChannelResource[A]"></a>
+      <h4 class="signature"><a href="ByteChannelResource.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ByteChannelResource</span>
+        <span class="tparams">[<span name="A">+A &lt;: ByteChannel</span>]</span>
+        
+        <span class="result"> extends InputResource[A] with OutputResource[A] with ResourceOps[A, ByteChannelResource[A]]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">A for accessing and using ByteChannels.</p>
+    </li><li visbl="prt" data-isabs="false" name="scalax.io.CharInputStream">
+      <a id="CharInputStream:CharInputStream"></a>
+      <h4 class="signature"><a href="CharInputStream.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">CharInputStream</span>
+        
+        
+        <span class="result"> extends InputStream</span>
+      </span>
+      </a></h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: protected 
+        </div></div>
+          
+    </li><li visbl="pub" data-isabs="true" name="scalax.io.CloseAction">
+      <a id="CloseAction:CloseAction[A]"></a>
+      <h4 class="signature"><a href="CloseAction.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">CloseAction</span>
+        <span class="tparams">[<span name="A">-A</span>]</span>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">A strategy object representing an action to take upon closing a <a href="Resource.html" class="extype" name="scalax.io.Resource">Resource</a>.</p>
+    </li><li visbl="prt" data-isabs="false" name="scalax.io.CloseableResourceAcquirer">
+      <a id="CloseableResourceAcquirer:CloseableResourceAcquirer[R, U, B]"></a>
+      <h4 class="signature"><a href="CloseableResourceAcquirer.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">CloseableResourceAcquirer</span>
+        <span class="tparams">[<span name="R">R &lt;: Closeable</span>, <span name="U">U &gt;: R</span>, <span name="B">B</span>]</span>
+        
+        <span class="result"> extends ResourceAcquirer[R, U, B]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Implementation that only works with Closables.</p>
+    </li><li visbl="pub" data-isabs="false" name="scalax.io.Codec">
+      <a id="Codec:Codec"></a>
+      <h4 class="signature"><a href="Codec.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">Codec</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">A class for character encoding/decoding preferences.</p>
+    </li><li visbl="pub" data-isabs="false" name="scalax.io.Continue">
+      <a id="Continue:Continue[A]"></a>
+      <h4 class="signature"><a href="Continue.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">Continue</span>
+        <span class="tparams">[<span name="A">+A</span>]</span>
+        <span class="params">(<span name="result">result: A</span>)</span>
+        <span class="result"> extends FoldResult[A] with Product</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Signal indicating that the fold should continue to process another value
+</p>
+    </li><li visbl="pub" data-isabs="false" name="scalax.io.End">
+      <a id="End:End[A]"></a>
+      <h4 class="signature"><a href="End.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">End</span>
+        <span class="tparams">[<span name="A">+A</span>]</span>
+        <span class="params">(<span name="result">result: A</span>)</span>
+        <span class="result"> extends FoldResult[A] with Product</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Signal indicating that the fold should stop and return the contained result
+</p>
+    </li><li visbl="pub" data-isabs="true" name="scalax.io.FoldResult">
+      <a id="FoldResult:FoldResult[A]"></a>
+      <h4 class="signature"><a href="FoldResult.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">FoldResult</span>
+        <span class="tparams">[<span name="A">+A</span>]</span>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">The control signals for the limitFold method in <a href="LongTraversable.html" class="extype" name="scalax.io.LongTraversable">LongTraversable</a>.</p>
+    </li><li visbl="pub" data-isabs="true" name="scalax.io.Input">
+      <a id="Input:Input"></a>
+      <h4 class="signature"><a href="Input.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">Input</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">An trait for objects that viewed as a sequence of bytes.</p>
+    </li><li visbl="pub" data-isabs="true" name="scalax.io.InputResource">
+      <a id="InputResource:InputResource[R]"></a>
+      <h4 class="signature"><a href="InputResource.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">InputResource</span>
+        <span class="tparams">[<span name="R">+R &lt;: Closeable</span>]</span>
+        
+        <span class="result"> extends Resource[R] with Input with ResourceOps[R, InputResource[R]]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">An Resource object that is a also an <a href="Input.html" class="extype" name="scalax.io.Input">Input</a>.</p>
+    </li><li visbl="pub" data-isabs="false" name="scalax.io.InputStreamResource">
+      <a id="InputStreamResource:InputStreamResource[A]"></a>
+      <h4 class="signature"><a href="InputStreamResource.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">InputStreamResource</span>
+        <span class="tparams">[<span name="A">+A &lt;: InputStream</span>]</span>
+        
+        <span class="result"> extends BufferableInputResource[A, BufferedInputStream] with ResourceOps[A, InputStreamResource[A]]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">A ManagedResource for accessing and using InputStreams.</p>
+    </li><li visbl="pub" data-isabs="false" name="scalax.io.LineTraversable">
+      <a id="LineTraversable:LineTraversable"></a>
+      <h4 class="signature"><a href="LineTraversable.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">LineTraversable</span>
+        
+        
+        <span class="result"> extends LongTraversable[String]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Creates a Traversable[String] from a Traversable[Char] where each String is a line as indicated by the<a href="Line$$Terminators$$Terminator.html" class="extype" name="scalax.io.Line.Terminators.Terminator">Terminator</a>.</p>
+    </li><li visbl="pub" data-isabs="true" name="scalax.io.LongTraversable">
+      <a id="LongTraversable:LongTraversable[A]"></a>
+      <h4 class="signature"><a href="LongTraversable.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">LongTraversable</span>
+        <span class="tparams">[<span name="A">+A</span>]</span>
+        
+        <span class="result"> extends Traversable[A] with GenericTraversableTemplate[A, LongTraversable] with LongTraversableLike[A, LongTraversable[A]]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">A traversable for use on very large datasets which cannot be indexed with Ints but instead
+require Longs for indexing.</p>
+    </li><li visbl="pub" data-isabs="true" name="scalax.io.LongTraversableLike">
+      <a id="LongTraversableLike:LongTraversableLike[A, Repr]"></a>
+      <h4 class="signature"><a href="LongTraversableLike.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">LongTraversableLike</span>
+        <span class="tparams">[<span name="A">+A</span>, <span name="Repr">+Repr &lt;: LongTraversableLike[A, Repr]</span>]</span>
+        
+        <span class="result"> extends TraversableLike[A, Repr]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">A traversable for use on very large datasets which cannot be indexed with Ints but instead
+require Longs for indexing.</p>
+    </li><li visbl="pub" data-isabs="true" name="scalax.io.LongTraversableView">
+      <a id="LongTraversableView:LongTraversableView[A, Coll]"></a>
+      <h4 class="signature"><a href="LongTraversableView.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">LongTraversableView</span>
+        <span class="tparams">[<span name="A">+A</span>, <span name="Coll">+Coll</span>]</span>
+        
+        <span class="result"> extends LongTraversableViewLike[A, Coll, LongTraversableView[A, Coll]]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">The view object associated with LongTraversable.</p>
+    </li><li visbl="pub" data-isabs="true" name="scalax.io.LongTraversableViewLike">
+      <a id="LongTraversableViewLike:LongTraversableViewLike[A, Coll, This]"></a>
+      <h4 class="signature"><a href="LongTraversableViewLike.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">LongTraversableViewLike</span>
+        <span class="tparams">[<span name="A">+A</span>, <span name="Coll">+Coll</span>, <span name="This">+This &lt;: LongTraversableView[A, Coll] with LongTraversableViewLike[A, Coll, This]</span>]</span>
+        
+        <span class="result"> extends LongTraversable[A] with LongTraversableLike[A, This] with TraversableView[A, Coll] with TraversableViewLike[A, Coll, This]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">The actual <a href="LongTraversableView.html" class="extype" name="scalax.io.LongTraversableView">LongTraversableView</a> implementations.</p>
+    </li><li visbl="pub" data-isabs="true" name="scalax.io.OpenOption">
+      <a id="OpenOption:OpenOption"></a>
+      <h4 class="signature"><a href="OpenOption.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">OpenOption</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">A flag interface for indicating that the object
+represents a filesystem dependent option for opening
+a file.</p>
+    </li><li visbl="pub" data-isabs="true" name="scalax.io.Output">
+      <a id="Output:Output"></a>
+      <h4 class="signature"><a href="Output.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">Output</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">A trait for objects that can have data written to them.</p>
+    </li><li visbl="pub" data-isabs="true" name="scalax.io.OutputConverter">
+      <a id="OutputConverter:OutputConverter[T]"></a>
+      <h4 class="signature"><a href="OutputConverter.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">OutputConverter</span>
+        <span class="tparams">[<span name="T">-T</span>]</span>
+        
+        <span class="result"> extends (OutputStream, T) ⇒ Unit</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Functions used by Seekable and Output to either convert data to bytes for writing
+or write directly to an output stream depending on the requirements of the caller.</p>
+    </li><li visbl="pub" data-isabs="true" name="scalax.io.OutputResource">
+      <a id="OutputResource:OutputResource[R]"></a>
+      <h4 class="signature"><a href="OutputResource.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">OutputResource</span>
+        <span class="tparams">[<span name="R">+R &lt;: Closeable</span>]</span>
+        
+        <span class="result"> extends Resource[R] with Output with ResourceOps[R, OutputResource[R]]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">An Resource object that is a also an <a href="Output.html" class="extype" name="scalax.io.Output">Output</a>.</p>
+    </li><li visbl="pub" data-isabs="false" name="scalax.io.OutputStreamResource">
+      <a id="OutputStreamResource:OutputStreamResource[A]"></a>
+      <h4 class="signature"><a href="OutputStreamResource.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">OutputStreamResource</span>
+        <span class="tparams">[<span name="A">+A &lt;: OutputStream</span>]</span>
+        
+        <span class="result"> extends BufferableOutputResource[A, BufferedOutputStream] with ResourceOps[A, OutputStreamResource[A]]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">A ManagedResource for accessing and using OutputStreams.</p>
+    </li><li visbl="pub" data-isabs="true" name="scalax.io.Overwrite">
+      <a id="Overwrite:Overwrite"></a>
+      <h4 class="signature"><a href="Overwrite.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">Overwrite</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">A strategy trait used with the Seekable.</p>
+    </li><li visbl="pub" data-isabs="false" name="scalax.io.OverwriteSome">
+      <a id="OverwriteSome:OverwriteSome"></a>
+      <h4 class="signature"><a href="OverwriteSome.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">OverwriteSome</span>
+        
+        <span class="params">(<span name="replacementLength">replacementLength: Long</span>)</span>
+        <span class="result"> extends Overwrite with Product</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Strategy for (potentially) only overwriting a subset of the data.</p>
+    </li><li visbl="pub" data-isabs="true" name="scalax.io.ReadChars">
+      <a id="ReadChars:ReadChars"></a>
+      <h4 class="signature"><a href="ReadChars.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">ReadChars</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">An trait for objects that viewed as a sequence of characters.</p>
+    </li><li visbl="pub" data-isabs="true" name="scalax.io.ReadCharsResource">
+      <a id="ReadCharsResource:ReadCharsResource[R]"></a>
+      <h4 class="signature"><a href="ReadCharsResource.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">ReadCharsResource</span>
+        <span class="tparams">[<span name="R">+R &lt;: Closeable</span>]</span>
+        
+        <span class="result"> extends Resource[R] with ReadChars with ResourceOps[R, ReadCharsResource[R]]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">An object that in addition to being a resource is also a <a href="ReadChars.html" class="extype" name="scalax.io.ReadChars">ReadChars</a> Resource.</p>
+    </li><li visbl="pub" data-isabs="false" name="scalax.io.ReadableByteChannelResource">
+      <a id="ReadableByteChannelResource:ReadableByteChannelResource[A]"></a>
+      <h4 class="signature"><a href="ReadableByteChannelResource.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ReadableByteChannelResource</span>
+        <span class="tparams">[<span name="A">+A &lt;: ReadableByteChannel</span>]</span>
+        
+        <span class="result"> extends BufferableInputResource[A, BufferedInputStream] with ResourceOps[A, ReadableByteChannelResource[A]]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">A ManagedResource for accessing and using ByteChannels.</p>
+    </li><li visbl="pub" data-isabs="false" name="scalax.io.ReaderResource">
+      <a id="ReaderResource:ReaderResource[A]"></a>
+      <h4 class="signature"><a href="ReaderResource.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ReaderResource</span>
+        <span class="tparams">[<span name="A">+A &lt;: Reader</span>]</span>
+        
+        <span class="result"> extends BufferableReadCharsResource[A, BufferedReader] with ResourceOps[A, ReaderResource[A]]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">A ManagedResource for accessing and using Readers.</p>
+    </li><li visbl="pub" data-isabs="true" name="scalax.io.Resource">
+      <a id="Resource:Resource[R]"></a>
+      <h4 class="signature"><a href="Resource.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">Resource</span>
+        <span class="tparams">[<span name="R">+R &lt;: Closeable</span>]</span>
+        
+        <span class="result"> extends ManagedResourceOperations[R] with ResourceOps[R, Resource[R]]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">A Resource that can be used to do IO.</p>
+    </li><li visbl="prt" data-isabs="true" name="scalax.io.ResourceAcquirer">
+      <a id="ResourceAcquirer:ResourceAcquirer[R, U, B]"></a>
+      <h4 class="signature"><a href="ResourceAcquirer.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ResourceAcquirer</span>
+        <span class="tparams">[<span name="R">R</span>, <span name="U">U &gt;: R</span>, <span name="B">B</span>]</span>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Essentially the resource aquire and close functionality.</p>
+    </li><li visbl="pub" data-isabs="true" name="scalax.io.ResourceOps">
+      <a id="ResourceOps:ResourceOps[R, Repr]"></a>
+      <h4 class="signature"><a href="ResourceOps.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">ResourceOps</span>
+        <span class="tparams">[<span name="R">+R</span>, <span name="Repr">+Repr</span>]</span>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">A trait allowing adding close actions to a Resource.</p>
+    </li><li visbl="pub" data-isabs="false" name="_root_#ResourceView">
+      <a id="ResourceView:ResourceView[A]"></a>
+      <h4 class="signature">
+      <span class="kind">type</span>
+      <span class="symbol">
+        <span class="name">ResourceView</span>
+        <span class="tparams">[<span name="A">A</span>]</span>
+        
+        <span class="result"> = <a href="LongTraversableView.html" class="extype" name="scalax.io.LongTraversableView">LongTraversableView</a>[A, <a href="LongTraversable.html" class="extype" name="scalax.io.LongTraversable">LongTraversable</a>[A]]</span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">An alias from LongTraversableView[A,LongTraversable[A]].</p>
+            <div class="fullcomment"><div class="comment cmt"><p>An alias from LongTraversableView[A,LongTraversable[A]]. The only purpose
+is to make the type signatures easier to read
+</p></div><div class="block">
+          definition classes: <a href="../../package.html" class="extype" name="_root_">root</a>
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="true" name="scalax.io.Seekable">
+      <a id="Seekable:Seekable"></a>
+      <h4 class="signature"><a href="Seekable.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">Seekable</span>
+        
+        
+        <span class="result"> extends Input with Output</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">An object for reading and writing to Random Access IO objects such as Files.</p>
+    </li><li visbl="pub" data-isabs="true" name="scalax.io.SeekableByteChannel">
+      <a id="SeekableByteChannel:SeekableByteChannel"></a>
+      <h4 class="signature"><a href="SeekableByteChannel.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">SeekableByteChannel</span>
+        
+        
+        <span class="result"> extends ByteChannel with Channel with Closeable with ReadableByteChannel with WritableByteChannel</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">An object for reading and writing to Random Access IO objects such as Files.</p>
+    </li><li visbl="pub" data-isabs="false" name="scalax.io.SeekableByteChannelResource">
+      <a id="SeekableByteChannelResource:SeekableByteChannelResource[A]"></a>
+      <h4 class="signature"><a href="SeekableByteChannelResource.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">SeekableByteChannelResource</span>
+        <span class="tparams">[<span name="A">+A &lt;: SeekableByteChannel</span>]</span>
+        
+        <span class="result"> extends SeekableResource[A] with ResourceOps[A, SeekableByteChannelResource[A]]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">A ManagedResource for accessing and using SeekableByteChannels.</p>
+    </li><li visbl="pub" data-isabs="true" name="scalax.io.SeekableResource">
+      <a id="SeekableResource:SeekableResource[R]"></a>
+      <h4 class="signature"><a href="SeekableResource.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">SeekableResource</span>
+        <span class="tparams">[<span name="R">+R &lt;: Closeable</span>]</span>
+        
+        <span class="result"> extends Seekable with InputResource[R] with OutputResource[R] with ResourceOps[R, SeekableResource[R]]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">An object that can be viewed as a Seekable object.</p>
+    </li><li visbl="prt" data-isabs="false" name="scalax.io.StreamIterator">
+      <a id="StreamIterator:StreamIterator[E]"></a>
+      <h4 class="signature"><a href="StreamIterator.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">StreamIterator</span>
+        <span class="tparams">[<span name="E">E</span>]</span>
+        
+        <span class="result"> extends Iterator[E]</span>
+      </span>
+      </a></h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: protected 
+        </div></div>
+          
+    </li><li visbl="prt" data-isabs="true" name="scalax.io.TraversableSource">
+      <a id="TraversableSource:TraversableSource[In, A]"></a>
+      <h4 class="signature"><a href="TraversableSource.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">TraversableSource</span>
+        <span class="tparams">[<span name="In">In &lt;: Closeable</span>, <span name="A">A</span>]</span>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">A way of abstracting over the source Resource's type
+</p>
+    </li><li visbl="pub" data-isabs="false" name="scalax.io.WritableByteChannelResource">
+      <a id="WritableByteChannelResource:WritableByteChannelResource[A]"></a>
+      <h4 class="signature"><a href="WritableByteChannelResource.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">WritableByteChannelResource</span>
+        <span class="tparams">[<span name="A">+A &lt;: WritableByteChannel</span>]</span>
+        
+        <span class="result"> extends BufferableOutputResource[A, BufferedOutputStream] with ResourceOps[A, WritableByteChannelResource[A]]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">A ManagedResource for accessing and using ByteChannels.</p>
+    </li><li visbl="pub" data-isabs="true" name="scalax.io.WriteChars">
+      <a id="WriteChars:WriteChars"></a>
+      <h4 class="signature"><a href="WriteChars.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">WriteChars</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">A trait for objects that can have expect to have characters written to them.</p>
+    </li><li visbl="pub" data-isabs="true" name="scalax.io.WriteCharsResource">
+      <a id="WriteCharsResource:WriteCharsResource[R]"></a>
+      <h4 class="signature"><a href="WriteCharsResource.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">WriteCharsResource</span>
+        <span class="tparams">[<span name="R">+R &lt;: Closeable</span>]</span>
+        
+        <span class="result"> extends Resource[R] with WriteChars with ResourceOps[R, WriteCharsResource[R]]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">An object that in addition to being a resource is also a <a href="WriteChars.html" class="extype" name="scalax.io.WriteChars">WriteChars</a> Resource.</p>
+    </li><li visbl="prt" data-isabs="false" name="scalax.io.WriterOutputStream">
+      <a id="WriterOutputStream:WriterOutputStream"></a>
+      <h4 class="signature"><a href="WriterOutputStream.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">WriterOutputStream</span>
+        
+        
+        <span class="result"> extends OutputStream</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Takes a writer and allows it to be treated like a OutputStream,  The data is encoded as it is written to the Writer</p>
+    </li><li visbl="pub" data-isabs="false" name="scalax.io.WriterResource">
+      <a id="WriterResource:WriterResource[A]"></a>
+      <h4 class="signature"><a href="WriterResource.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">WriterResource</span>
+        <span class="tparams">[<span name="A">+A &lt;: Writer</span>]</span>
+        
+        <span class="result"> extends BufferableWriteCharsResource[A, BufferedWriter] with ResourceOps[A, WriterResource[A]]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">A ManagedResource for accessing and using Writers.</p>
+    </li></ol>
+            </div>
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" data-isabs="false" name="scalax.io.CloseAction">
+      <a id="CloseAction:CloseAction"></a>
+      <h4 class="signature"><a href="CloseAction$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">CloseAction</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Factory for <a href="CloseAction.html" class="extype" name="scalax.io.CloseAction">CloseAction</a>.</p>
+    </li><li visbl="pub" data-isabs="false" name="scalax.io.Codec">
+      <a id="Codec:Codec"></a>
+      <h4 class="signature"><a href="Codec$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">Codec</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="scalax.io.Constants">
+      <a id="Constants:Constants"></a>
+      <h4 class="signature"><a href="Constants$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">Constants</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Not public API.</p>
+    </li><li visbl="pub" data-isabs="false" name="scalax.io.Input">
+      <a id="Input:Input"></a>
+      <h4 class="signature"><a href="Input$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">Input</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="scalax.io.JavaConversions">
+      <a id="JavaConversions:JavaConversions"></a>
+      <h4 class="signature"><a href="JavaConversions$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">JavaConversions</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="scalax.io.Line">
+      <a id="Line:Line"></a>
+      <h4 class="signature"><a href="Line$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">Line</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">A modularizing object for containing objects/classes related to reading lines
+</p>
+    </li><li visbl="pub" data-isabs="false" name="scalax.io.LongTraversable">
+      <a id="LongTraversable:LongTraversable"></a>
+      <h4 class="signature"><a href="LongTraversable$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">LongTraversable</span>
+        
+        
+        <span class="result"> extends TraversableFactory[LongTraversable]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">This class is not interesting from an API point of view.</p>
+    </li><li visbl="pub" data-isabs="false" name="scalax.io.LongTraversableView">
+      <a id="LongTraversableView:LongTraversableView"></a>
+      <h4 class="signature"><a href="LongTraversableView$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">LongTraversableView</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Defines the required canBuildFrom and Type definitions.</p>
+    </li><li visbl="pub" data-isabs="false" name="scalax.io.Output">
+      <a id="Output:Output"></a>
+      <h4 class="signature"><a href="Output$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">Output</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="scalax.io.OutputConverter">
+      <a id="OutputConverter:OutputConverter"></a>
+      <h4 class="signature"><a href="OutputConverter$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">OutputConverter</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Contains implicit Converter objects for the compiler to resolve the converters for write operations
+</p>
+    </li><li visbl="pub" data-isabs="false" name="scalax.io.OverwriteAll">
+      <a id="OverwriteAll:OverwriteAll"></a>
+      <h4 class="signature"><a href="OverwriteAll$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">OverwriteAll</span>
+        
+        
+        <span class="result"> extends Overwrite with Product</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Strategy to overwrite as much data as possible.</p>
+    </li><li visbl="pub" data-isabs="false" name="scalax.io.ReadChars">
+      <a id="ReadChars:ReadChars"></a>
+      <h4 class="signature"><a href="ReadChars$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">ReadChars</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="scalax.io.Resource">
+      <a id="Resource:Resource"></a>
+      <h4 class="signature"><a href="Resource$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">Resource</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Defines several factory methods for creating instances of Resource.</p>
+    </li><li visbl="prt" data-isabs="false" name="scalax.io.ResourceAdapting">
+      <a id="ResourceAdapting:ResourceAdapting"></a>
+      <h4 class="signature"><a href="ResourceAdapting$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">ResourceAdapting</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Contains a method</p>
+    </li><li visbl="pub" data-isabs="false" name="scalax.io.Seekable">
+      <a id="Seekable:Seekable"></a>
+      <h4 class="signature"><a href="Seekable$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">Seekable</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="scalax.io.StandardOpenOption">
+      <a id="StandardOpenOption:StandardOpenOption"></a>
+      <h4 class="signature"><a href="StandardOpenOption$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">StandardOpenOption</span>
+        
+        
+        <span class="result"> extends Enumeration</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Several options that are supported by most filesystems.</p>
+    </li><li visbl="pub" data-isabs="false" name="scalax.io.WriteChars">
+      <a id="WriteChars:WriteChars"></a>
+      <h4 class="signature"><a href="WriteChars$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">WriteChars</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="scalax.io.nio">
+      <a id="nio:nio"></a>
+      <h4 class="signature"><a href="nio/package.html">
+      <span class="kind">package</span>
+      <span class="symbol">
+        <span class="name">nio</span>
+        
+        
+        
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="scalax.io.support">
+      <a id="support:support"></a>
+      <h4 class="signature"><a href="support/package.html">
+      <span class="kind">package</span>
+      <span class="symbol">
+        <span class="name">support</span>
+        
+        
+        
+      </span>
+      </a></h4>
+      
+    </li></ol>
+            </div>
+
+        
+
+      </div>
+      
+      <div id="tooltip"></div>
+      
+    </body>
+      </html>

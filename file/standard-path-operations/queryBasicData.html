@@ -1,0 +1,116 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+    <head>
+      <title>Standard Path Operations</title>
+      <script type="text/javascript" src="../../js/shCore.js"></script><script type="text/javascript" src="../../js/shBrushScala.js"></script><link href="../../css/shCore.css" type="text/css" rel="stylesheet"></link><link href="../../css/shThemeDefault.css" type="text/css" rel="stylesheet"></link><link href="../../css/samples.css" type="text/css" rel="stylesheet"></link>
+    </head>
+    <body>
+      <div id="maincontainer">
+        <div id="topsection">
+          <div class="innertube">
+            <span>
+        <h1>Standard Path Operations</h1>
+        <p class="summary"> Comparison and queryoperations as well as making new paths relative to a base path</p>
+      </span>
+          </div>
+        </div>
+
+        <div id="contentwrapper">
+          <div id="contentcolumn">
+            <div class="innertube">
+              <span>
+        
+        <div class="example">
+      <a name="queryBasicData.html"><h3>Query Basic Data</h3></a>
+      <div class="example_summary"><span> Query paths for basic information such as readable/writable, size etc...  </span></div>
+      <div class="example_code">
+        <pre class="brush: scala">
+    import scalax.file.Path
+    import java.net.{URI,URL}
+
+    val path: Path = Path(&quot;file&quot;)
+    // There are two ways to query about the access mode of the underlying
+    // path object.  One is similar to the java.file.File.  The other is based
+    // a single query to test several attributes at once.
+
+    // first the java.file.File way
+    val executable: Boolean = path.canExecute
+    val readable: Boolean = path.canRead
+    val writable: Boolean = path.canWrite
+
+    // next check if file is read and write
+
+    import Path.AccessModes._
+
+    val readWrite: Boolean = path.checkAccess(Read, Write)
+
+    val uri: URI = path.toURI
+    val url: URL = path.toURL
+
+    val exists: Boolean = path.exists
+    val notExists: Boolean = path.nonExistent
+
+    val hidden: Boolean = path.isHidden
+    val isSymLink: Boolean = path.isSymlink
+
+    // query last modified information
+    val lastModified: Long = path.lastModified
+    path.lastModified = System.currentTimeMillis
+
+    val length = path.size
+
+    // A way to test if path is a file/directory without using the matchers
+    val isFile: Boolean = path.isFile
+    val isDirectory: Boolean = path.isDirectory
+
+  
+</pre>
+      </div>
+    </div>
+      </span>
+            </div>
+          </div>
+        </div>
+
+        <div id="leftcolumn">
+          <div class="innertube">
+            <div id="navcontainer">
+      <ul id="projectnavlist">
+        <li><a href="../..//../index.html">Overview</a></li>
+        <li><a href="../..//../getting-started.html">Getting Started</a></li>
+        <li><a href="../../core/index.html" title="An idiomatic IO library for Scala" class="">Core</a>
+            <a href="../..//core/scaladoc/index.html">(Scaladoc)</a>
+          
+        </li><li><a href="../../file/index.html" title="An adaptation of the Java NIO2 Filesystem to Scala" class="active">File</a>
+            <a href="../..//file/scaladoc/index.html">(Scaladoc)</a>
+          <ul id="navlist"><li><a href="../../file/creating-pathsets/index.html" title=" PathSets is a DSL API for selecting collections of Paths to operate on">Creating Pathsets</a></li><li><a href="../../file/create-temp/index.html" title=" Creating Temporary Files and directories ">Create Temp</a></li><li><a href="../../file/path-matcher/index.html" title=" Examples of using path matchers, such as IsFile, to select/match files and directories ">Path Matcher</a></li><li><a href="../../file/create-and-delete-files-and-directories/index.html" title=" Demonstrate how to create files or directories from a path object">Create And Delete Files And Directories</a></li><li><a href="../../file/implicits/index.html" title=" Using implicit conversions to convert between strings Java Files and Scala Paths ">Implicits</a></li><li><a href="../../file/file-locking-and-block-execution/index.html" title=" Examples using file locks and executing multiple operations within the context of a single open fil...">File Locking And Block Execution</a></li><li><a href="../../file/read-write-files/index.html" title=" A Path are both Input and Output objects as well as Seekable so all read/write options available th...">Read Write Files</a></li><li><a href="../../file/create-and-move-files-and-directories/index.html" title=" Demonstrate creating simple paths and moving them withing the filesystem and to other filesystems">Create And Move Files And Directories</a></li><li><a href="../../file/Children/index.html" title=" Search the contents of a directory and perform operations on the objects encountered ">Children</a></li><li><a href="../../file/create-paths/index.html" title=" Demonstrate various ways of creating Path objects ">Create Paths</a></li><li><a href="../../file/roots/index.html" title=" Look up the rots of a path ">Roots</a></li><li>
+                      <a href="../../file/standard-path-operations/index.html" title=" Comparison and queryoperations as well as making new paths relative to a base path" class="active">Standard Path Operations</a>
+                      <ul id="subnavlist"><li>
+        <a href="relativePaths.html" title=" Create new paths relative to another path " class="">Relative Paths</a>
+      </li><li>
+        <a href="nameAndPath.html" title=" obtains name and path information " class="">Name And Path</a>
+      </li><li>
+        <a href="queryBasicData.html" title=" Query paths for basic information such as readable/writable, size etc" class="active">Query Basic Data</a>
+      </li><li>
+        <a href="comparePaths.html" title=" Compare two paths" class="">Compare Paths</a>
+      </li></ul>
+                    </li></ul>
+        </li>
+        <li><a href="../..//../roadmap.html">Roadmap</a></li>
+      </ul>
+    </div>
+          </div>
+        </div>
+
+        <div id="footer">
+          <div>Written by Jesse Eichar <a href="http://camptocamp.com">Camptocamp SA</a></div>
+          <div>Twitter: <a href="http://twitter.com/jeichar">@jeichar</a></div>
+          <div>(c) Jesse Eichar 2010-2011</div>
+        </div>
+      </div>
+      <script type="text/javascript">
+          SyntaxHighlighter.all()
+        </script>
+    </body>
+  </html>

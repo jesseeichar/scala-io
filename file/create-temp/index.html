@@ -1,0 +1,133 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+    <head>
+      <title>Create Temp</title>
+      <script type="text/javascript" src="../../js/shCore.js"></script><script type="text/javascript" src="../../js/shBrushScala.js"></script><link href="../../css/shCore.css" type="text/css" rel="stylesheet"></link><link href="../../css/shThemeDefault.css" type="text/css" rel="stylesheet"></link><link href="../../css/samples.css" type="text/css" rel="stylesheet"></link>
+    </head>
+    <body>
+      <div id="maincontainer">
+        <div id="topsection">
+          <div class="innertube">
+            <span>
+        <h1>Create Temp</h1>
+        <p class="summary"> Creating Temporary Files and directories </p>
+      </span>
+          </div>
+        </div>
+
+        <div id="contentwrapper">
+          <div id="contentcolumn">
+            <div class="innertube">
+              <span>
+        <span></span>
+        <div class="example">
+      <a name="createTempFiles.html"><h3>Create Temp Files</h3></a>
+      <div class="example_summary"><span></span></div>
+      <div class="example_code">
+        <pre class="brush: scala">
+    import scalax.file.{Path, FileSystem}
+
+    // by default the filesystem is the defaultFileSystem (surprise :-) )
+    // using the default parameters will create a randomly named file in
+    // the system temp directory which will be deleted when the JVM exists
+    val tmpFile1: Path = Path.createTempFile()
+
+    // fully declare the temporary file parameters
+    // all parameters have defaults so there are many option
+    // Note that not all filesystems support creating temporary
+    // files.
+    // The default filesystem does
+    val tmpFile2: Path = Path.createTempFile(prefix = &quot;tmpFile&quot;,
+      suffix = &quot;tmp&quot;,
+      dir = &quot;/tmp&quot;,
+      deleteOnExit = false)(FileSystem.default)
+
+    // Using the same pattern as Path you can can use implicits
+    // to declare the FileSystem that is used by make temp file
+    implicit val fs = FileSystem.default
+    // fs will now be used by createTempFile
+    val tmpFile3: Path = Path.createTempFile()
+
+    // a file system can also be used to create temporary files/directories
+    fs.createTempFile()
+  
+</pre>
+      </div>
+    </div><div class="example">
+      <a name="createTempDirectories.html"><h3>Create Temp Directories</h3></a>
+      <div class="example_summary"><span></span></div>
+      <div class="example_code">
+        <pre class="brush: scala">
+    // Note: Both createTempFile and createTempDirectory have the same parameters
+    import scalax.file.{Path, FileSystem}
+
+    // by default the filesystem is the defaultFileSystem (surprise :-) )
+    // using the default parameters will create a randomly named directory in
+    // the system temp directory which will be deleted when the JVM exists
+    val tmpFile1: Path = Path.createTempDirectory()
+
+    // fully declare the temporary directory parameters
+    // all parameters have defaults so there are many option
+    // Note that not all filesystems support creating temporary
+    // files/directories.
+    // The default filesystem does
+    val tmpFile2: Path = Path.createTempDirectory(prefix = &quot;tmpFile&quot;,
+      suffix = &quot;tmp&quot;,
+      dir = &quot;/tmp&quot;,
+      deleteOnExit = false)(FileSystem.default)
+
+    // Using the same pattern as Path you can can use implicits
+    // to declare the FileSystem that is used by make temp directory
+    implicit val fs = FileSystem.default
+    // fs will now be used by createTempDirectory
+    val tmpFile3: Path = Path.createTempDirectory()
+
+    // a file system can also be used to create temporary files/directories
+    fs.createTempFile()
+  
+</pre>
+      </div>
+    </div>
+      </span>
+            </div>
+          </div>
+        </div>
+
+        <div id="leftcolumn">
+          <div class="innertube">
+            <div id="navcontainer">
+      <ul id="projectnavlist">
+        <li><a href="../..//../index.html">Overview</a></li>
+        <li><a href="../..//../getting-started.html">Getting Started</a></li>
+        <li><a href="../../core/index.html" title="An idiomatic IO library for Scala" class="">Core</a>
+            <a href="../..//core/scaladoc/index.html">(Scaladoc)</a>
+          
+        </li><li><a href="../../file/index.html" title="An adaptation of the Java NIO2 Filesystem to Scala" class="active">File</a>
+            <a href="../..//file/scaladoc/index.html">(Scaladoc)</a>
+          <ul id="navlist"><li><a href="../../file/creating-pathsets/index.html" title=" PathSets is a DSL API for selecting collections of Paths to operate on">Creating Pathsets</a></li><li>
+                      <a href="../../file/create-temp/index.html" title=" Creating Temporary Files and directories " class="active">Create Temp</a>
+                      <ul id="subnavlist"><li>
+        <a href="createTempFiles.html" title="" class="">Create Temp Files</a>
+      </li><li>
+        <a href="createTempDirectories.html" title="" class="">Create Temp Directories</a>
+      </li></ul>
+                    </li><li><a href="../../file/path-matcher/index.html" title=" Examples of using path matchers, such as IsFile, to select/match files and directories ">Path Matcher</a></li><li><a href="../../file/create-and-delete-files-and-directories/index.html" title=" Demonstrate how to create files or directories from a path object">Create And Delete Files And Directories</a></li><li><a href="../../file/implicits/index.html" title=" Using implicit conversions to convert between strings Java Files and Scala Paths ">Implicits</a></li><li><a href="../../file/file-locking-and-block-execution/index.html" title=" Examples using file locks and executing multiple operations within the context of a single open fil...">File Locking And Block Execution</a></li><li><a href="../../file/read-write-files/index.html" title=" A Path are both Input and Output objects as well as Seekable so all read/write options available th...">Read Write Files</a></li><li><a href="../../file/create-and-move-files-and-directories/index.html" title=" Demonstrate creating simple paths and moving them withing the filesystem and to other filesystems">Create And Move Files And Directories</a></li><li><a href="../../file/Children/index.html" title=" Search the contents of a directory and perform operations on the objects encountered ">Children</a></li><li><a href="../../file/create-paths/index.html" title=" Demonstrate various ways of creating Path objects ">Create Paths</a></li><li><a href="../../file/roots/index.html" title=" Look up the rots of a path ">Roots</a></li><li><a href="../../file/standard-path-operations/index.html" title=" Comparison and queryoperations as well as making new paths relative to a base path">Standard Path Operations</a></li></ul>
+        </li>
+        <li><a href="../..//../roadmap.html">Roadmap</a></li>
+      </ul>
+    </div>
+          </div>
+        </div>
+
+        <div id="footer">
+          <div>Written by Jesse Eichar <a href="http://camptocamp.com">Camptocamp SA</a></div>
+          <div>Twitter: <a href="http://twitter.com/jeichar">@jeichar</a></div>
+          <div>(c) Jesse Eichar 2010-2011</div>
+        </div>
+      </div>
+      <script type="text/javascript">
+          SyntaxHighlighter.all()
+        </script>
+    </body>
+  </html>

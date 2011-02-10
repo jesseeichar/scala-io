@@ -1,0 +1,91 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+    <head>
+      <title>Seekable</title>
+      <script type="text/javascript" src="../../js/shCore.js"></script><script type="text/javascript" src="../../js/shBrushScala.js"></script><link href="../../css/shCore.css" type="text/css" rel="stylesheet"></link><link href="../../css/shThemeDefault.css" type="text/css" rel="stylesheet"></link><link href="../../css/samples.css" type="text/css" rel="stylesheet"></link>
+    </head>
+    <body>
+      <div id="maincontainer">
+        <div id="topsection">
+          <div class="innertube">
+            <span>
+        <h1>Seekable</h1>
+        <p class="summary"> Seekable permits random access read and write</p>
+      </span>
+          </div>
+        </div>
+
+        <div id="contentwrapper">
+          <div id="contentcolumn">
+            <div class="innertube">
+              <span>
+        
+        <div class="example">
+      <a name="multipleAccesses.html"><h3>Multiple Accesses</h3></a>
+      <div class="example_summary"><span> Multiple Random accesses from a file opened only a single time </span></div>
+      <div class="example_code">
+        <pre class="brush: scala">
+    // TODO at the moment I am not sure what the best way to perform multiple
+    // read / write operations on a single file.  The typical seek - write - seek - read
+    // does not seem very &quot;scala-like&quot;
+
+    // A potential idea is to have the access like:
+    // file.apply { file =&gt;
+    //   val name:Seekable = file.bytes.slice(5,10)  // take bytes 5 -&gt; 10
+    //   name.write(&quot;hello&quot;)(codec)  // overwrite bytes 5-10
+    // }
+  
+</pre>
+      </div>
+    </div>
+      </span>
+            </div>
+          </div>
+        </div>
+
+        <div id="leftcolumn">
+          <div class="innertube">
+            <div id="navcontainer">
+      <ul id="projectnavlist">
+        <li><a href="../..//../index.html">Overview</a></li>
+        <li><a href="../..//../getting-started.html">Getting Started</a></li>
+        <li><a href="../../core/index.html" title="An idiomatic IO library for Scala" class="active">Core</a>
+            <a href="../..//core/scaladoc/index.html">(Scaladoc)</a>
+          <ul id="navlist"><li><a href="../../core/access-segment-of-input/index.html" title=" Examples for reading sections of an Input object without reading all data in the underlying resourc...">Access Segment Of Input</a></li><li><a href="../../core/basic-read-write/index.html" title=" These examples are a quick introduction to performing basic IO using the Scala IO API">Basic Read Write</a></li><li><a href="../../core/input/index.html" title=" One of the core IO classes is called Input">Input</a></li><li><a href="../../core/output/index.html" title=" One of the core IO classes is called Input">Output</a></li><li>
+                      <a href="../../core/seekable/index.html" title=" Seekable permits random access read and write" class="active">Seekable</a>
+                      <ul id="subnavlist"><li>
+        <a href="patch.html" title=" Examples of patching a file" class="">Patch</a>
+      </li><li>
+        <a href="insert.html" title=" Inserts data anywhere in the file/seekable object " class="">Insert</a>
+      </li><li>
+        <a href="append.html" title=" examples of appending data to the end of a Seekable (In this case files) " class="">Append</a>
+      </li><li>
+        <a href="positioningExamples.html" title=" When writing, the unit of the position parameter is not always in bytes" class="">Positioning Examples</a>
+      </li><li>
+        <a href="convertObjectToSeekable.html" title=" In addition to Resource" class="">Convert Object To Seekable</a>
+      </li><li>
+        <a href="multipleAccesses.html" title=" Multiple Random accesses from a file opened only a single time " class="active">Multiple Accesses</a>
+      </li></ul>
+                    </li><li><a href="../../core/resources/index.html" title=" Examples of using the Resource API to wrap existing Java IO objects">Resources</a></li><li><a href="../../core/writing-with-typeclasses/index.html" title=" Details on how output is converted to bytes and how the design can be extended and used">Writing With Typeclasses</a></li><li><a href="../../core/asFooConverter/index.html" title=" Examples for creating Output/Input/ReadChars/WriteChars etc">AsFooConverter</a></li><li><a href="../../core/standard-java-interop/index.html" title=" Examples demonstrating how to interoperate with Existing Java libraries">Standard Java Interop</a></li></ul>
+        </li><li><a href="../../file/index.html" title="An adaptation of the Java NIO2 Filesystem to Scala" class="">File</a>
+            <a href="../..//file/scaladoc/index.html">(Scaladoc)</a>
+          
+        </li>
+        <li><a href="../..//../roadmap.html">Roadmap</a></li>
+      </ul>
+    </div>
+          </div>
+        </div>
+
+        <div id="footer">
+          <div>Written by Jesse Eichar <a href="http://camptocamp.com">Camptocamp SA</a></div>
+          <div>Twitter: <a href="http://twitter.com/jeichar">@jeichar</a></div>
+          <div>(c) Jesse Eichar 2010-2011</div>
+        </div>
+      </div>
+      <script type="text/javascript">
+          SyntaxHighlighter.all()
+        </script>
+    </body>
+  </html>

@@ -1,0 +1,382 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>scalax.file</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../lib/template.css" rel="stylesheet" type="text/css" media="screen" />
+      <script type="text/javascript" src="../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../lib/template.js"></script>
+      <script type="text/javascript" src="../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body class="value" onload="windowTitle();">
+
+      <p id="owner"><a href="../package.html" class="extype" name="scalax">scalax</a></p>
+
+      <div id="definition">
+        <img src="../../lib/package_big.png" />
+        <h1>file</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="kind">package</span>
+      <span class="symbol">
+        <span class="name">file</span>
+        
+        
+        
+      </span>
+      </h4>
+      <div class="fullcomment" id="comment"></div>
+
+      <div id="template">
+
+        <div id="mbrsel">
+          <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+          
+          
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in">Public</li><li class="all out">All</li></ol>
+            </div>
+          <div id="impl">
+              <span class="filtertype">Impl.</span>
+              <ol><li class="concrete in">Concrete</li><li class="abstract in">Abstract</li></ol>
+            </div>
+        </div>
+
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" data-isabs="false" name="scalax.file.AccessSet">
+      <a id="AccessSet:AccessSet"></a>
+      <h4 class="signature"><a href="AccessSet.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">AccessSet</span>
+        
+        
+        <span class="result"> extends Set[AccessMode]</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="scalax.file.ArrayBufferSeekableChannel">
+      <a id="ArrayBufferSeekableChannel:ArrayBufferSeekableChannel"></a>
+      <h4 class="signature"><a href="ArrayBufferSeekableChannel.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">ArrayBufferSeekableChannel</span>
+        
+        
+        <span class="result"> extends SeekableByteChannel</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="scalax.file.BasicPathSet">
+      <a id="BasicPathSet:BasicPathSet[T]"></a>
+      <h4 class="signature"><a href="BasicPathSet.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">BasicPathSet</span>
+        <span class="tparams">[<span name="T">+T &lt;: Path</span>]</span>
+        
+        <span class="result"> extends PathSet[T]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Directory stream implementation to assist in implementing
+DirectoryStreams that are based on Paths.</p>
+    </li><li visbl="pub" data-isabs="true" name="scalax.file.CopyOption">
+      <a id="CopyOption:CopyOption"></a>
+      <h4 class="signature"><a href="CopyOption.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">CopyOption</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Flags an option as an option that declares how a file should be copied
+</p>
+    </li><li visbl="pub" data-isabs="true" name="scalax.file.FileOps">
+      <a id="FileOps:FileOps"></a>
+      <h4 class="signature"><a href="FileOps.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">FileOps</span>
+        
+        
+        <span class="result"> extends Seekable</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">An object for reading and writing files.</p>
+    </li><li visbl="pub" data-isabs="true" name="scalax.file.FileSystem">
+      <a id="FileSystem:FileSystem"></a>
+      <h4 class="signature"><a href="FileSystem.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">FileSystem</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Provides an interface to a file system and is a factory for other objects
+for accessing files and directories.</p>
+    </li><li visbl="pub" data-isabs="false" name="scalax.file.GlobParser">
+      <a id="GlobParser:GlobParser"></a>
+      <h4 class="signature"><a href="GlobParser.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">GlobParser</span>
+        
+        
+        <span class="result"> extends RegexParsers</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="true" name="scalax.file.LinkOption">
+      <a id="LinkOption:LinkOption"></a>
+      <h4 class="signature"><a href="LinkOption.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">LinkOption</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Flags an option as an options that declares how to deal with links</p>
+    </li><li visbl="pub" data-isabs="false" name="scalax.file.NotDirectoryException">
+      <a id="NotDirectoryException:NotDirectoryException"></a>
+      <h4 class="signature"><a href="NotDirectoryException.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">NotDirectoryException</span>
+        
+        <span class="params">()</span>
+        <span class="result"> extends IOException with ControlThrowable with Product</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">This is a control exception that indicates the underlying filesystem object either does not exist or is not a Directory</p>
+    </li><li visbl="pub" data-isabs="false" name="scalax.file.NotFileException">
+      <a id="NotFileException:NotFileException"></a>
+      <h4 class="signature"><a href="NotFileException.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">NotFileException</span>
+        
+        <span class="params">()</span>
+        <span class="result"> extends IOException with ControlThrowable with Product</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">This is a control exception that indicates the underlying filesystem object cannot be treated as a File.</p>
+    </li><li visbl="pub" data-isabs="true" name="scalax.file.Path">
+      <a id="Path:Path"></a>
+      <h4 class="signature"><a href="Path.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">Path</span>
+        
+        
+        <span class="result"> extends FileOps with PathFinder[Path] with Ordered[Path]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt"> A file reference that locates a file using a system independent path.</p>
+    </li><li visbl="pub" data-isabs="true" name="scalax.file.PathFinder">
+      <a id="PathFinder:PathFinder[T]"></a>
+      <h4 class="signature"><a href="PathFinder.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">PathFinder</span>
+        <span class="tparams">[<span name="T">+T</span>]</span>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="true" name="scalax.file.PathMatcher">
+      <a id="PathMatcher:PathMatcher"></a>
+      <h4 class="signature"><a href="PathMatcher.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">PathMatcher</span>
+        
+        
+        <span class="result"> extends Function[Path, Boolean]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">A function that returns true if the Path parameter
+matches.</p>
+    </li><li visbl="pub" data-isabs="true" name="scalax.file.PathMatcherFactory">
+      <a id="PathMatcherFactory:PathMatcherFactory[T]"></a>
+      <h4 class="signature"><a href="PathMatcherFactory.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">PathMatcherFactory</span>
+        <span class="tparams">[<span name="T">-T</span>]</span>
+        
+        <span class="result"> extends (T) ⇒ PathMatcher</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">User: jeichar
+Date: Oct 1, 2010
+Time: 8:23:16 AM
+</p>
+    </li><li visbl="pub" data-isabs="true" name="scalax.file.PathSet">
+      <a id="PathSet:PathSet[T]"></a>
+      <h4 class="signature"><a href="PathSet.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">PathSet</span>
+        <span class="tparams">[<span name="T">+T</span>]</span>
+        
+        <span class="result"> extends Iterable[T] with PathFinder[T]</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">An iterable that permits iterating over a directory tree starting at a root Path.</p>
+    </li></ol>
+            </div>
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" data-isabs="false" name="scalax.file.FileSystem">
+      <a id="FileSystem:FileSystem"></a>
+      <h4 class="signature"><a href="FileSystem$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">FileSystem</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Factory object for obtaining filesystem objects
+</p>
+    </li><li visbl="pub" data-isabs="false" name="scalax.file.FileSystemPlugins">
+      <a id="FileSystemPlugins:FileSystemPlugins"></a>
+      <h4 class="signature"><a href="FileSystemPlugins$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">FileSystemPlugins</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">User: jeichar
+Date: Oct 2, 2010
+Time: 9:31:09 PM
+</p>
+    </li><li visbl="pub" data-isabs="false" name="scalax.file.LinkOption">
+      <a id="LinkOption:LinkOption"></a>
+      <h4 class="signature"><a href="LinkOption$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">LinkOption</span>
+        
+        
+        <span class="result"> extends Enumeration</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Contains the common Link Options
+</p>
+    </li><li visbl="pub" data-isabs="false" name="scalax.file.Path">
+      <a id="Path:Path"></a>
+      <h4 class="signature"><a href="Path$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">Path</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">The object for constructing Path objects and for containing implicits from strings and<code> java.file.File</code>s to Scala paths.</p>
+    </li><li visbl="pub" data-isabs="false" name="scalax.file.PathMatcher">
+      <a id="PathMatcher:PathMatcher"></a>
+      <h4 class="signature"><a href="PathMatcher$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">PathMatcher</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="scalax.file.PathMatcherFactory">
+      <a id="PathMatcherFactory:PathMatcherFactory"></a>
+      <h4 class="signature"><a href="PathMatcherFactory$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">PathMatcherFactory</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="scalax.file.PathURLStreamHandlerFactory">
+      <a id="PathURLStreamHandlerFactory:PathURLStreamHandlerFactory"></a>
+      <h4 class="signature"><a href="PathURLStreamHandlerFactory$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">PathURLStreamHandlerFactory</span>
+        
+        
+        <span class="result"> extends URLStreamHandlerFactory</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Adds support to for the filesystem URL protocols.</p>
+    </li><li visbl="pub" data-isabs="false" name="scalax.file.attributes">
+      <a id="attributes:attributes"></a>
+      <h4 class="signature"><a href="attributes/package.html">
+      <span class="kind">package</span>
+      <span class="symbol">
+        <span class="name">attributes</span>
+        
+        
+        
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="scalax.file.defaultfs">
+      <a id="defaultfs:defaultfs"></a>
+      <h4 class="signature"><a href="defaultfs/package.html">
+      <span class="kind">package</span>
+      <span class="symbol">
+        <span class="name">defaultfs</span>
+        
+        
+        
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="false" name="scalax.file.ramfs">
+      <a id="ramfs:ramfs"></a>
+      <h4 class="signature"><a href="ramfs/package.html">
+      <span class="kind">package</span>
+      <span class="symbol">
+        <span class="name">ramfs</span>
+        
+        
+        
+      </span>
+      </a></h4>
+      
+    </li></ol>
+            </div>
+
+        
+
+      </div>
+      
+      <div id="tooltip"></div>
+      
+    </body>
+      </html>

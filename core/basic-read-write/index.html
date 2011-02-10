@@ -1,0 +1,412 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+    <head>
+      <title>Basic Read Write</title>
+      <script type="text/javascript" src="../../js/shCore.js"></script><script type="text/javascript" src="../../js/shBrushScala.js"></script><link href="../../css/shCore.css" type="text/css" rel="stylesheet"></link><link href="../../css/shThemeDefault.css" type="text/css" rel="stylesheet"></link><link href="../../css/samples.css" type="text/css" rel="stylesheet"></link>
+    </head>
+    <body>
+      <div id="maincontainer">
+        <div id="topsection">
+          <div class="innertube">
+            <span>
+        <h1>Basic Read Write</h1>
+        <p class="summary"> These examples are a quick introduction to performing basic IO using the Scala IO API</p>
+      </span>
+          </div>
+        </div>
+
+        <div id="contentwrapper">
+          <div id="contentcolumn">
+            <div class="innertube">
+              <span>
+        <span>  <div>The basic IO object that will be used in most cases are Input,Output,ReadChars and WriteChars.  These objects are used in the examples below.</div><div> Another common object is the {Seekable} object.</div></span>
+        <div class="example">
+      <a name="javaToScalaRightWay.html"><h3>Java To Scala Right Way</h3></a>
+      <div class="example_summary"><span> The right way to convert java IO objects to Scala IO objects </span></div>
+      <div class="example_code">
+        <pre class="brush: scala">
+    import scalax.io.Resource
+    val in = Resource.fromReader(new StringReader(&quot;hello&quot;))
+
+    val numVowels = in.chars.filter(&quot;aeiou&quot; contains _).size
+
+    // resource can be reused because the *creation* of the reader is passed to fromReader
+    // the creation code is captured so Resource can instantiate a new reader for each use of the resource
+    val numNumbers = in.chars.filter('0' to '9' contains _)
+  
+</pre>
+      </div>
+    </div><div class="example">
+      <a name="javaToScalaWrongWay.html"><h3>Java To Scala Wrong Way</h3></a>
+      <div class="example_summary"><span> A discouraged method of creating Scala IO objects from java objects </span></div>
+      <div class="example_code">
+        <pre class="brush: scala">
+    import scalax.io.Resource
+
+    val reader = new StringReader(&quot;hello&quot;)
+    // the fromReader method is passed a reference to a reader
+    // this means the Resource can only be used a single time
+    // only do this if you are passed a resource from a method and have
+    // no way of constructing the resource within the fromReader method.
+    val in = Resource.fromReader(reader)
+
+    val numVowels = in.chars.filter(&quot;aeiou&quot; contains _).size
+
+    // *BOOM!* the second use will result in an exception because
+    // Resource does not have access to the construction of the reader
+    // just the reference to a previously created reader
+    val numNumbers = in.chars.filter('0' to '9' contains _)
+
+    // If you need a code block to construct the resource consider the following pattern:
+    val in2 = Resource.fromReader {
+      val string = &quot;hello&quot;
+      new StringReader(string)
+    }
+  
+</pre>
+      </div>
+    </div><div class="example">
+      <a name="basicInput.html"><h3>Basic Input</h3></a>
+      <div class="example_summary"><span> Examples of basic IO </span></div>
+      <div class="example_code">
+        <pre class="brush: scala">
+    import scalax.io._
+    import scalax.io.Resource
+    import java.net.URL
+    import java.io.{
+      InputStreamReader
+    }
+
+    // Note that in these example streams are closed automatically
+    // Also note that normally a constructed stream is not passed to factory method because most factory methods are by-name parameters (=&gt; R)
+    // this means that the objects here can be reused without worrying about the stream being previously emptied
+    val url = new URL(&quot;www.scala-lang.org&quot;)
+
+    val input:Input = Resource.fromInputStream(url.openStream())
+
+    // The simplest way to read data is to read bytes from an Input object
+    val bytes: ResourceView[Byte] = input.bytes
+
+    // you can also get the characters and strings from an Input object but you need a codec for decoding the bytes
+    val chars: ResourceView[Char] = input.chars(Codec.UTF8)
+
+    implicit val defaultCodec: Codec = Codec.UTF8
+
+    // by declaring an _implicit_ codec I do not need to declare the codec explicitly in the next examples
+    val chars2: ResourceView[Char] = input.chars
+
+    // TODO make Lines return a ResourceView[String]
+    // one can also iterate across all lines.  The line ending can be autodetected or can be explicitly declared
+    val lines_Autodetect: Traversable[String] = input.lines(Line.Terminators.Auto())
+    val lines_NewLineChar: Traversable[String] = input.lines(Line.Terminators.NewLine)
+    val lines_CarriageReturn: Traversable[String] = input.lines(Line.Terminators.CarriageReturn)
+    val lines_BothCarriageAndNewLine: Traversable[String] = input.lines(Line.Terminators.RNPair)
+    val lines_CustomLineTerminator: Traversable[String] = input.lines(Line.Terminators.Custom(&quot;|&quot;))
+    val lines_KeepTerminator = input.lines(includeTerminator = true)
+
+    // In some cases a ReadChars object is more useful.  One advantage is that the codec is already specified so the
+    // codec is not needed to read characters.  Also if you start with a Reader object only a ReadChars object can
+    // be constructed
+    Resource.fromInputStream(url.openStream()).reader(defaultCodec).lines() foreach println _
+
+    // Example of constructing a ReadChars object from a Reader
+    Resource.fromReader(new InputStreamReader(url.openStream())).lines() foreach println _
+  
+</pre>
+      </div>
+    </div><div class="example">
+      <a name="basicOutput.html"><h3>Basic Output</h3></a>
+      <div class="example_summary"><span> Basic output options </span></div>
+      <div class="example_code">
+        <pre class="brush: scala">
+    import scalax.io._
+    import scalax.io.Resource
+    import java.io.{
+      ByteArrayOutputStream,FileOutputStream,
+      PrintStream, OutputStreamWriter
+    }
+
+    // Note: The file API is nearly finished allowing one to write directly to files without the
+    // cumbersome new FileOutputStream shown below.  This is the &quot;pure&quot; Scala IO solution
+    Resource.fromOutputStream(new FileOutputStream(&quot;scala.html&quot;)) write &quot;data&quot;.getBytes()
+    Resource.fromOutputStream(new FileOutputStream(&quot;scala.html&quot;)) write Array[Byte](1,2,3)
+
+    // strings and bytes can both be written to Output objects but strings need a Codec
+    // for encoding the strings.  As usual the codec can be explicit or implicitly declared
+    Resource.fromOutputStream(new ByteArrayOutputStream()).write(&quot;howdy&quot;)(Codec.UTF8)
+
+    implicit val defaultCodec: Codec = Codec.UTF8
+
+    // An Output object cannot be created from a Writer as a writer may have an unknown codec that is
+    // used for encoding the strings and without knowing which coded is being used an Output object
+    // cannot be created so a WriteChars object is created
+    // WriteChars have the benefit of not needing to have a codec declared since the underlying writer
+    // takes care of encoding
+    Resource.fromWriter(new OutputStreamWriter(new ByteArrayOutputStream())).writeString(&quot;howdy&quot;)
+
+
+    Resource.fromOutputStream(new PrintStream(new ByteArrayOutputStream())).writer.writeString(&quot;howdy&quot;)
+
+    // Channels can also be wrapped in Resource objects and accessed as normal Input/Output objects
+    val resource = Resource.fromWritableByteChannel(new FileOutputStream(&quot;file&quot;).getChannel)
+  
+</pre>
+      </div>
+    </div><div class="example">
+      <a name="bufferedIO.html"><h3>Buffered I O</h3></a>
+      <div class="example_summary"><span> Demonstration of how to convert Input/Output to buffered counterparts </span></div>
+      <div class="example_code">
+        <pre class="brush: scala">
+    import scalax.io._
+    import java.io._
+
+    // All io.Resource objects can be converted to a buffered equivalent if the buffered method is called
+    val bufferedInput:Input = Resource.fromInputStream(new FileInputStream(&quot;file&quot;)).buffered
+    val bufferedOutput:Output = Resource.fromOutputStream(new FileOutputStream(&quot;file&quot;)).buffered
+    val bufferedRead:ReadChars = Resource.fromReader(new FileReader(&quot;file&quot;)).buffered
+    val bufferedWrite:WriteChars = Resource.fromWriter(new FileWriter(&quot;file&quot;)).buffered
+  
+</pre>
+      </div>
+    </div><div class="example">
+      <a name="usingCodecs.html"><h3>Using Codecs</h3></a>
+      <div class="example_summary"><span> When converting bytes to and from characters a Codec is needed for the encoding and decoding.  Unlike Java Scala IO does not have a default it requires that the Codec be declared.  However, to simplify the declaration most methods have implicit codec parameters so the Codec only needs to be declared once.  The following examples show reading characters from input streams.  Writing is follows the same pattern </span></div>
+      <div class="example_code">
+        <pre class="brush: scala">
+    import scalax.io._
+    import java.io._
+
+    val in: InputStreamResource[FileInputStream] = Resource.fromInputStream(new FileInputStream(&quot;file&quot;))
+
+    // declare the Codec explicitly
+    val string:String = in.slurpString(Codec.UTF8)
+    val chars: ResourceView[Char] = in.chars(Codec(&quot;UTF8&quot;))
+
+    // create a ReadChars so that Codec only needs to be specified once
+    val readChars: ReaderResource[Reader] = in.reader(Codec.ISO8859)
+    val string2:String = readChars.slurpString
+    val chars2: ResourceView[Char] = readChars.chars
+
+    // Finally you can delcare an implicit val once and all calls will implicitly use that codec
+    implicit val codec = Codec.UTF8
+
+    val string3:String = in.slurpString
+    val chars3: ResourceView[Char] = in.chars
+    val readChars2: ReaderResource[Reader] = in.reader
+
+  
+</pre>
+      </div>
+    </div><div class="example">
+      <a name="readCsvFile.html"><h3>Read Csv File</h3></a>
+      <div class="example_summary"><span> read comma separated file </span></div>
+      <div class="example_code">
+        <pre class="brush: scala">
+    import scalax.io.Resource
+
+    // see codec examples in scala io core for details on why there is an implicit codec here
+    implicit val codec = scalax.io.Codec.UTF8
+
+    val resource = Resource.fromBufferedReader(new BufferedReader(new FileReader(&quot;csv&quot;)))
+    val records: Traversable[Array[String]] = resource.lines().map (_ split ',')
+
+    // after this it is normal scala collection type operations
+  
+</pre>
+      </div>
+    </div><div class="example">
+      <a name="addAllBytes.html"><h3>Add All Bytes</h3></a>
+      <div class="example_summary"><span> add all bytes in stream together </span></div>
+      <div class="example_code">
+        <pre class="brush: scala">
+    import scalax.io._
+    import java.io.InputStream
+    import java.net.URL
+
+    // see codec examples in scala io core for details on why there is an implicit codec here
+    implicit val codec = scalax.io.Codec.UTF8
+
+    val url:Input = Resource.fromURLString(&quot;file://someFile&quot;)
+
+    // Actual type is InputStreamResource[InputStream] but that is only needed if you want to convert to a reader
+    val url2: InputStreamResource[InputStream] = Resource.fromURLString(&quot;file://someFile&quot;)
+    val sum: Int = url.bytesAsInts.reduceLeft (_ + _)
+  
+</pre>
+      </div>
+    </div><div class="example">
+      <a name="loadIntoMemory.html"><h3>Load Into Memory</h3></a>
+      <div class="example_summary"><span> quickly (and unsafely) load all data into memory </span></div>
+      <div class="example_code">
+        <pre class="brush: scala">
+
+    // first load as strings and remove vowels
+    import scalax.io._
+    import Resource._
+    import java.net.URL
+    import java.io.InputStream
+
+    // see codec examples in scala io core for details on why there is an implicit codec here
+    implicit val codec = scalax.io.Codec.UTF8
+
+    val url: InputStreamResource[InputStream] = fromURLString(&quot;http://www.scala-lang.org&quot;)
+    // You can convert an InputStreamResource to a _ReadChars_ type if desired.  That means that the codec needs to be
+    // defined just once.
+    val someReader: ReadChars = url.reader(Codec.UTF8)
+    val consonants = url.slurpString.filterNot (c =&gt; &quot;aeiou&quot; contains c)
+
+    // ok now as bytes
+    val (small, large) = url.byteArray partition (_ &amp;lt; 128)
+  
+</pre>
+      </div>
+    </div><div class="example">
+      <a name="allChars.html"><h3>All Chars</h3></a>
+      <div class="example_summary"><span> iterate over all character in file </span></div>
+      <div class="example_code">
+        <pre class="brush: scala">
+    import scalax.io._
+    import Resource._
+
+    // see codec examples in scala io core for details on why there is an implicit codec here
+    implicit val codec = scalax.io.Codec.UTF8
+
+    val url:Input = fromURLString(&quot;file://someFile&quot;)
+    val doubled: Traversable[String] = for ( c &amp;lt;- url.chars ) yield &quot;&quot; + c + c
+  
+</pre>
+      </div>
+    </div><div class="example">
+      <a name="printLines.html"><h3>Print Lines</h3></a>
+      <div class="example_summary"><span> read and print out all lines from a URL </span></div>
+      <div class="example_code">
+        <pre class="brush: scala">
+    import scalax.io._
+    import Resource._
+    import java.net.URL
+
+    // see codec example for why codec is required
+    implicit val codec = Codec.UTF8
+
+    val url:Input = fromURLString(&quot;file://someFile&quot;)
+
+    // by default the line terminator is stripped and is
+    // auto detected
+    url.lines() foreach println _
+
+    // now do not strip terminator
+    url.lines (includeTerminator = true) foreach print _
+
+    // now declare explicitly the terminator
+    // terminator is restricted to 1 or 2 characters
+    url.lines (terminator = Line.Terminators.NewLine) foreach println _
+  
+</pre>
+      </div>
+    </div><div class="example">
+      <a name="moreOnWriting.html"><h3>More On Writing</h3></a>
+      <div class="example_summary"><span> several examples of writing data </span></div>
+      <div class="example_code">
+        <pre class="brush: scala">
+    import scalax.io.Resource._
+    import java.io.File
+    import scalax.io.{Seekable,Codec}
+    // see codec example for why codec is required
+    implicit val codec = Codec.UTF8
+
+    val someFile: Seekable = fromFileString(&quot;someFile&quot;)
+
+    // write bytes
+    // By default the file write will replace
+    // an existing file with the new data
+    someFile.write (Array (1,2,3) map ( _.toByte))
+
+    // another option for write is openOptions which allows the caller
+    // to specify in detail how the write should take place
+    // the openOptions parameter takes a collections of OpenOptions objects
+    // which are filesystem specific in general but the standard options
+    // are defined in the OpenOption object
+    // in addition to the definition common collections are also defined
+    // WriteAppend for example is a List(Create, Append, Write)
+    someFile.write (List (1,2,3) map (_.toByte))
+
+    // write a string to the file
+    someFile.write(&quot;Hello my dear file&quot;)
+
+    // with all options (these are the default options explicitely declared)
+    someFile.write(&quot;Hello my dear file&quot;)(codec = Codec.UTF8)
+
+    // Convert several strings to the file
+    // same options fromString as for write
+    someFile.writeStrings( &quot;It costs&quot; :: &quot;one&quot; :: &quot;dollar&quot; :: Nil)
+
+    // Now all options
+    someFile.writeStrings(&quot;It costs&quot; :: &quot;one&quot; :: &quot;dollar&quot; :: Nil,
+                    separator=&quot;||\n||&quot;)(codec = Codec.UTF8)
+  
+</pre>
+      </div>
+    </div>
+      </span>
+            </div>
+          </div>
+        </div>
+
+        <div id="leftcolumn">
+          <div class="innertube">
+            <div id="navcontainer">
+      <ul id="projectnavlist">
+        <li><a href="../..//../index.html">Overview</a></li>
+        <li><a href="../..//../getting-started.html">Getting Started</a></li>
+        <li><a href="../../core/index.html" title="An idiomatic IO library for Scala" class="active">Core</a>
+            <a href="../..//core/scaladoc/index.html">(Scaladoc)</a>
+          <ul id="navlist"><li><a href="../../core/access-segment-of-input/index.html" title=" Examples for reading sections of an Input object without reading all data in the underlying resourc...">Access Segment Of Input</a></li><li>
+                      <a href="../../core/basic-read-write/index.html" title=" These examples are a quick introduction to performing basic IO using the Scala IO API" class="active">Basic Read Write</a>
+                      <ul id="subnavlist"><li>
+        <a href="javaToScalaRightWay.html" title=" The right way to convert java IO objects to Scala IO objects " class="">Java To Scala Right Way</a>
+      </li><li>
+        <a href="javaToScalaWrongWay.html" title=" A discouraged method of creating Scala IO objects from java objects " class="">Java To Scala Wrong Way</a>
+      </li><li>
+        <a href="basicInput.html" title=" Examples of basic IO " class="">Basic Input</a>
+      </li><li>
+        <a href="basicOutput.html" title=" Basic output options " class="">Basic Output</a>
+      </li><li>
+        <a href="bufferedIO.html" title=" Demonstration of how to convert Input/Output to buffered counterparts " class="">Buffered I O</a>
+      </li><li>
+        <a href="usingCodecs.html" title=" When converting bytes to and from characters a Codec is needed for the encoding and decoding" class="">Using Codecs</a>
+      </li><li>
+        <a href="readCsvFile.html" title=" read comma separated file " class="">Read Csv File</a>
+      </li><li>
+        <a href="addAllBytes.html" title=" add all bytes in stream together " class="">Add All Bytes</a>
+      </li><li>
+        <a href="loadIntoMemory.html" title=" quickly (and unsafely) load all data into memory " class="">Load Into Memory</a>
+      </li><li>
+        <a href="allChars.html" title=" iterate over all character in file " class="">All Chars</a>
+      </li><li>
+        <a href="printLines.html" title=" read and print out all lines from a URL " class="">Print Lines</a>
+      </li><li>
+        <a href="moreOnWriting.html" title=" several examples of writing data " class="">More On Writing</a>
+      </li></ul>
+                    </li><li><a href="../../core/input/index.html" title=" One of the core IO classes is called Input">Input</a></li><li><a href="../../core/output/index.html" title=" One of the core IO classes is called Input">Output</a></li><li><a href="../../core/seekable/index.html" title=" Seekable permits random access read and write">Seekable</a></li><li><a href="../../core/resources/index.html" title=" Examples of using the Resource API to wrap existing Java IO objects">Resources</a></li><li><a href="../../core/writing-with-typeclasses/index.html" title=" Details on how output is converted to bytes and how the design can be extended and used">Writing With Typeclasses</a></li><li><a href="../../core/asFooConverter/index.html" title=" Examples for creating Output/Input/ReadChars/WriteChars etc">AsFooConverter</a></li><li><a href="../../core/standard-java-interop/index.html" title=" Examples demonstrating how to interoperate with Existing Java libraries">Standard Java Interop</a></li></ul>
+        </li><li><a href="../../file/index.html" title="An adaptation of the Java NIO2 Filesystem to Scala" class="">File</a>
+            <a href="../..//file/scaladoc/index.html">(Scaladoc)</a>
+          
+        </li>
+        <li><a href="../..//../roadmap.html">Roadmap</a></li>
+      </ul>
+    </div>
+          </div>
+        </div>
+
+        <div id="footer">
+          <div>Written by Jesse Eichar <a href="http://camptocamp.com">Camptocamp SA</a></div>
+          <div>Twitter: <a href="http://twitter.com/jeichar">@jeichar</a></div>
+          <div>(c) Jesse Eichar 2010-2011</div>
+        </div>
+      </div>
+      <script type="text/javascript">
+          SyntaxHighlighter.all()
+        </script>
+    </body>
+  </html>

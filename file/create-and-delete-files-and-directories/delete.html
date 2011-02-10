@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+    <head>
+      <title>Create And Delete Files And Directories</title>
+      <script type="text/javascript" src="../../js/shCore.js"></script><script type="text/javascript" src="../../js/shBrushScala.js"></script><link href="../../css/shCore.css" type="text/css" rel="stylesheet"></link><link href="../../css/shThemeDefault.css" type="text/css" rel="stylesheet"></link><link href="../../css/samples.css" type="text/css" rel="stylesheet"></link>
+    </head>
+    <body>
+      <div id="maincontainer">
+        <div id="topsection">
+          <div class="innertube">
+            <span>
+        <h1>Create And Delete Files And Directories</h1>
+        <p class="summary"> Demonstrate how to create files or directories from a path object</p>
+      </span>
+          </div>
+        </div>
+
+        <div id="contentwrapper">
+          <div id="contentcolumn">
+            <div class="innertube">
+              <span>
+        
+        <div class="example">
+      <a name="delete.html"><h3>Delete</h3></a>
+      <div class="example_summary"><span> Delete files and directories </span></div>
+      <div class="example_code">
+        <pre class="brush: scala">
+    import scalax.file.Path
+
+    val path: Path = Path (&quot;/tmp/file&quot;)
+
+    // Will throw IOException if file could not be deleted
+    // even if it cannot be deleted because it does not exist
+    path.delete()
+
+    // Will not throw exception if file does not exist but will
+    // if it is a non-empty directory or not writeable
+    path.deleteIfExists()
+
+    // Delete path and all children.  This is currently not a safe method so
+    // it should be used with caution.  Future versions will be better
+    // by default it will throw an exception if one of the files cannot be deleted
+    path.deleteRecursively()
+
+    // Delete path and all children. If a file cannot be deleted then continue on and delete
+    // all that can be deleted
+    path.deleteRecursively(true)
+    // or
+    path.deleteRecursively(continueOnFailure=true)
+  
+</pre>
+      </div>
+    </div>
+      </span>
+            </div>
+          </div>
+        </div>
+
+        <div id="leftcolumn">
+          <div class="innertube">
+            <div id="navcontainer">
+      <ul id="projectnavlist">
+        <li><a href="../..//../index.html">Overview</a></li>
+        <li><a href="../..//../getting-started.html">Getting Started</a></li>
+        <li><a href="../../core/index.html" title="An idiomatic IO library for Scala" class="">Core</a>
+            <a href="../..//core/scaladoc/index.html">(Scaladoc)</a>
+          
+        </li><li><a href="../../file/index.html" title="An adaptation of the Java NIO2 Filesystem to Scala" class="active">File</a>
+            <a href="../..//file/scaladoc/index.html">(Scaladoc)</a>
+          <ul id="navlist"><li><a href="../../file/creating-pathsets/index.html" title=" PathSets is a DSL API for selecting collections of Paths to operate on">Creating Pathsets</a></li><li><a href="../../file/create-temp/index.html" title=" Creating Temporary Files and directories ">Create Temp</a></li><li><a href="../../file/path-matcher/index.html" title=" Examples of using path matchers, such as IsFile, to select/match files and directories ">Path Matcher</a></li><li>
+                      <a href="../../file/create-and-delete-files-and-directories/index.html" title=" Demonstrate how to create files or directories from a path object" class="active">Create And Delete Files And Directories</a>
+                      <ul id="subnavlist"><li>
+        <a href="create.html" title=" Create files and directories " class="">Create</a>
+      </li><li>
+        <a href="delete.html" title=" Delete files and directories " class="active">Delete</a>
+      </li></ul>
+                    </li><li><a href="../../file/implicits/index.html" title=" Using implicit conversions to convert between strings Java Files and Scala Paths ">Implicits</a></li><li><a href="../../file/file-locking-and-block-execution/index.html" title=" Examples using file locks and executing multiple operations within the context of a single open fil...">File Locking And Block Execution</a></li><li><a href="../../file/read-write-files/index.html" title=" A Path are both Input and Output objects as well as Seekable so all read/write options available th...">Read Write Files</a></li><li><a href="../../file/create-and-move-files-and-directories/index.html" title=" Demonstrate creating simple paths and moving them withing the filesystem and to other filesystems">Create And Move Files And Directories</a></li><li><a href="../../file/Children/index.html" title=" Search the contents of a directory and perform operations on the objects encountered ">Children</a></li><li><a href="../../file/create-paths/index.html" title=" Demonstrate various ways of creating Path objects ">Create Paths</a></li><li><a href="../../file/roots/index.html" title=" Look up the rots of a path ">Roots</a></li><li><a href="../../file/standard-path-operations/index.html" title=" Comparison and queryoperations as well as making new paths relative to a base path">Standard Path Operations</a></li></ul>
+        </li>
+        <li><a href="../..//../roadmap.html">Roadmap</a></li>
+      </ul>
+    </div>
+          </div>
+        </div>
+
+        <div id="footer">
+          <div>Written by Jesse Eichar <a href="http://camptocamp.com">Camptocamp SA</a></div>
+          <div>Twitter: <a href="http://twitter.com/jeichar">@jeichar</a></div>
+          <div>(c) Jesse Eichar 2010-2011</div>
+        </div>
+      </div>
+      <script type="text/javascript">
+          SyntaxHighlighter.all()
+        </script>
+    </body>
+  </html>
