@@ -136,7 +136,7 @@ class ScalaIOProject(info: ProjectInfo)
         FileUtilities.copy((project.docPath / "main" / "api").##.***.get, siteOutput / projectSite.name / "scaladoc", log)
       }
 
-      val site = new WebsiteModel(parentProject,projectSites.toList,siteOutput,log)
+      val site = new WebsiteModel(this,parentProject,projectSites.toList,siteOutput,log)
       site.buildSite
 
       FileUtilities.zip(siteOutput.##.get,siteZip,true,log)
@@ -145,7 +145,6 @@ class ScalaIOProject(info: ProjectInfo)
     } dependsOn (samples,doc)
     lazy val site = siteTask describedAs "Generate documentation web-site"
 
-    override protected def compileAction = task{None}
     override protected def docAction = task{None}
     override protected def docTestAction = task{None}
 

@@ -1,7 +1,6 @@
 object GettingStarted {
 
   def html(model:WebsiteModel) = {
-
     val version = model.rootProject.version.toString
     val groupId = model.rootProject.organization
     val armVersion = model.rootProject.armVersion

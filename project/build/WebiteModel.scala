@@ -1,4 +1,5 @@
-import sbt.{ParentProject, Logger, Path}
+import java.nio.charset.Charset
+import sbt.{ExactFilter, ParentProject, Logger, Path}
 import xml.Node
 import xsbt.FileUtilities._
 
@@ -27,10 +28,9 @@ case class Example(htmlName:String, name:String, summary:Node, uberSummary:Strin
   }
 }
 
-class WebsiteModel(val rootProject:ScalaIOProject, val projectSites:List[ProjectSite],val outputDir:Path,log:Logger) {
+class WebsiteModel(val websiteProj:ScalaIOProject#WebSite, val rootProject:ScalaIOProject, val projectSites:List[ProjectSite],val outputDir:Path,log:Logger) {
   val self = this;
   def buildSite = {
-
     Printer.printPage(outputDir / "index.html",indexHtml,log)
     Printer.printPage(outputDir / "roadmap.html",Roadmap.html(this),log)
     Printer.printPage(outputDir / "getting-started.html",GettingStarted.html(this),log)
@@ -40,14 +40,26 @@ class WebsiteModel(val rootProject:ScalaIOProject, val projectSites:List[Project
     }
   }
 
+  def read(name:String) = {
+    val file = (websiteProj.sourcePath ** new ExactFilter(name)).getFiles.toStream.head
+    sbt.FileUtilities.readString(file,Charset.forName("UTF-8"),log).fold(
+      s => throw new Exception(s),
+      s => s
+    )
+  }
+  val javaExample = read("JavaIOExample.java")
+  val scalaExample = read("ScalaIOExample.scala")
+
   def indexHtml = {
     val content =
+      <span>
       <div class="explanation">
         <p>
         The Scala IO umbrella project consists of a few sub projects for different aspects and
         extensions of IO.  The core project deals with raw input and output, primarily through
         streams and channels (at least the Java implementation).
-        </p><p>
+        </p>
+        <p>
         <strong>Warning #1: </strong>The current API is a very early version and is likely to change.
         That said barring a massive outcry the core components should remain fairly consistent. Both the core and file projects will be changing but file is even more likely to change.
         Especially with regard to FileAttributes and the API for implementing custom filesystems.
@@ -65,10 +77,26 @@ class WebsiteModel(val rootProject:ScalaIOProject, val projectSites:List[Project
           If you are interested at looking at the code, you are welcome to take a look at:
           <a href="https://github.com/jesseeichar/scala-io/issues">https://github.com/jesseeichar/scala-io</a>
         </p>
-      </div>
+        As an example of what Scala IO brings to the table the following examples compare Java IO vs Scala IO performing
+        a simple task of reading data from two URLs and writing them to a file. (I found it amusing that I actually messed up
+        the Java example the first try and had to debug it).
+        </div>
+        <div class="example">
+          <p><div class="example_summary"><h3>Scala</h3></div></p>
+          <div class="example_code">
+            <pre class='brush: scala'>{scalaExample}</pre>
+          </div>
+        </div>
+        <div class="example">
+          <p><div class="example_summary"><h3>Java</h3></div></p>
+          <div class="example_code">
+            <pre class='brush: scala'>{javaExample}</pre>
+          </div>
+        </div>
+      </span>
 
-    Template(false, "Scala IO API Documentation")(
-        <link href={"css/samples.css"} rel="stylesheet" type="text/css" ></link>)(
+    Template(true, "Scala IO API Documentation")(
+        Template.cssAndJs("./"))(
         <h1>Scala IO API Documentation</h1>)(
         content)(Template.rootNavbar(Link.Overview,projectSites))
   }
