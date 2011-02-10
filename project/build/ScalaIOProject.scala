@@ -3,11 +3,15 @@ import xml.Node
 import java.io._
 
 class ScalaIOProject(info: ProjectInfo)
-        extends ParentProject(info) {
+        extends ParentProject(info) with posterous.Publish {
 
+  val parentProject = this;
   val mavenLocal = "Local Maven Repository" at "file://" + Path.userHome + "/.m2/repository"
   val scalatoolsSnapshot = "Scala Tools Snapshot" at "http://scala-tools.org/repo-snapshots/"
   val scalatoolsRelease = "Scala Tools Snapshot" at "http://scala-tools.org/repo-releases/"
+
+  val armVersion = "0.2"
+
 
   lazy val core:Core = project("core", "core", new Core(_))
   lazy val coreTest:TestProject = project("core-test", "core-test", new TestProject(_),core)
@@ -21,7 +25,7 @@ class ScalaIOProject(info: ProjectInfo)
           extends DefaultProject(info)
                   with IoProject {
 
-    val scalaArm = "com.github.jsuereth.scala-arm" %% "scala-arm" % "0.3-SNAPSHOT" withSources() withJavadoc()
+    val scalaArm = "com.github.jsuereth.scala-arm" %% "scala-arm" % armVersion withSources() withJavadoc()
     def descSummary = "An idiomatic IO library for Scala"
     def description =
       <span>
@@ -132,7 +136,7 @@ class ScalaIOProject(info: ProjectInfo)
         FileUtilities.copy((project.docPath / "main" / "api").##.***.get, siteOutput / projectSite.name / "scaladoc", log)
       }
 
-      val site = new WebsiteModel(projectSites.toList,siteOutput,log)
+      val site = new WebsiteModel(parentProject,projectSites.toList,siteOutput,log)
       site.buildSite
 
       FileUtilities.zip(siteOutput.##.get,siteZip,true,log)
@@ -142,10 +146,12 @@ class ScalaIOProject(info: ProjectInfo)
     lazy val site = siteTask describedAs "Generate documentation web-site"
 
     override protected def compileAction = task{None}
+    override protected def docAction = task{None}
+    override protected def docTestAction = task{None}
+
 /*    val siteArtifact = Artifact(name+"-"+version, "zip", "zip")
-    override def artifacts = Set(siteArtifact)
-    override def packageToPublishActions =  super.packageToPublishActions ++ Seq(site)*/
-    
+    override def artifacts = Set(siteArtifact)                                        */
+    override def packageToPublishActions =  super.packageToPublishActions ++ Seq(site)
   }
 }
 

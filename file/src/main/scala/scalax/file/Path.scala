@@ -250,7 +250,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    * path / "../sibling"
    * </code></pre>
    * <p>
-   * @Note This is a duplicate when the implicit string2Path is imported
+   * @note This is a duplicate when the implicit string2Path is imported
    *       But using the implicit makes the API less discoverable so I have
    *       added this method.
    * </p>

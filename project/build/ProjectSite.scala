@@ -16,6 +16,7 @@ class ProjectSite(val project:DefaultProject with IoProject,log:Logger) {
     <div id="navcontainer">
       <ul id="projectnavlist">
         <li><a href={relativeToBase+"/../index.html"}>Overview</a></li>
+        <li><a href={relativeToBase+"/../getting-started.html"}>Getting Started</a></li>
         {for(project <- site.projectSites) yield {
         <li><a href={relativeToBase+project.name+"/index.html"}
                title={project.summary}
