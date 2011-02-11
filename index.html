@@ -56,7 +56,7 @@ object ScalaIOExample extends Application {
   val scalalang = new URL(&quot;http://www.scala-lang.org&quot;).asInput.bytes
   val scalatools = new URL(&quot;http://www.scala-tools.org&quot;).asInput.bytes
 
-  Path(&quot;/tmp/scalaout&quot;).write(scalalang ++ scalatools)
+  Path(&quot;scalaout&quot;).write(scalalang ++ scalatools)
 }</pre>
           </div>
         </div>
@@ -84,7 +84,7 @@ public class JavaIOExample {
 
     }
     public static void main(String[] args) throws Exception {
-        FileOutputStream out = new FileOutputStream(&quot;/tmp/javaout&quot;);
+        FileOutputStream out = new FileOutputStream(&quot;javaout&quot;);
         try {
             write(out,&quot;http://www.scala-lang.org&quot;);
             write(out,&quot;http://www.scala-tools.org&quot;);
