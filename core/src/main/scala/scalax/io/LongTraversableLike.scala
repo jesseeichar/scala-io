@@ -42,6 +42,7 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
 
   override protected[this] def thisCollection: LongTraversable[A] = this.asInstanceOf[LongTraversable[A]]
   override protected[this] def toCollection(repr: Repr): LongTraversable[A] = repr.asInstanceOf[LongTraversable[A]]
+  override def toArray[B >: A : ClassManifest] = toBuffer.toArray
 
   /**
    * A foldLeft operation that can be terminated without processing the entire collection.
