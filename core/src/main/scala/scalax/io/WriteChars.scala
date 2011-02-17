@@ -10,7 +10,7 @@ package scalax.io
 
 import resource._
 import scala.collection.Traversable
-import java.io.{File, Writer}
+import java.io.{OutputStream, File, Writer}
 
 /**
  * A trait for objects that can have expect to have characters written to them. For example a
@@ -85,25 +85,25 @@ trait WriteChars {
 
 
 object WriteChars {
-  class AsWriteChars(op: (Codec) => WriteChars) {
+  class AsBinaryWriteChars(op: (Codec) => WriteChars) {
     /** An object to an WriteChars object */
-    def asWriteChars(implicit codec:Codec): WriteChars = op(codec)
+    def asBinaryWriteChars(implicit codec:Codec): WriteChars = op(codec)
   }
 
   /**
-   * Wrap an arbitraty object as and AsWriteChars object allowing the object to be converted to an WriteChars object.
+   * Wrap an arbitrary object as and AsWriteChars object allowing the object to be converted to an WriteChars object.
    *
    * The possible types of src are the subclasses of [[scalax.io.AsWriteCharsConverter]]
    */
-  implicit def asWriteCharsConverter[B](src:B)(implicit converter:AsWriteCharsConverter[B]) =
-    new AsWriteChars(codec => converter.toWriteChars(src,codec))
+  implicit def asWriteCharsConverter[B](src:B)(implicit converter:AsBinaryWriteCharsConverter[B]) =
+    new AsBinaryWriteChars(codec => converter.toWriteChars(src,codec))
     
   /**
    * Used by the [[scalax.io.WriteChars]] object for converting an arbitrary object to an WriteChars Object
    *
    * Note: this is a classic use of the type class pattern
    */
-  trait AsWriteCharsConverter[-A] {
+  trait AsBinaryWriteCharsConverter[-A] {
     def toWriteChars(t:A,codec:Codec) : WriteChars
   }
   
@@ -111,13 +111,56 @@ object WriteChars {
    * contains several implementations of [[scalax.io.AsWriteCharsConverter]].  They will be implicitely resolved allowing
    * a user of the library to simple call A.asWriteChars and the converter will be found without the user needing to look up these classes
    */
-  object AsWriteCharsConverter {
+  object AsBinaryWriteCharsConverter {
   
     /**
      * Converts a File to an WriteChars object
      */
-    implicit object FileConverter extends AsWriteCharsConverter[File]{
+    implicit object FileConverter extends AsBinaryWriteCharsConverter[File]{
       def toWriteChars(file: File,codec:Codec) = Resource.fromFile(file).writer(codec)
+    }
+
+    /**
+     * Converts a OutputStream to an WriteChars object
+     */
+    implicit object OutputStreamConverter extends AsBinaryWriteCharsConverter[OutputStream]{
+      def toWriteChars(out: OutputStream,codec:Codec) = Resource.fromOutputStream(out).writer(codec)
+    }
+  }
+
+    class AsWriteChars(op: => WriteChars) {
+    /** An object to an WriteChars object */
+    def asWriteChars: WriteChars = op
+  }
+
+  /**
+   * Wrap an arbitrary object as and AsWriteChars object allowing the object to be converted to an WriteChars object.
+   *
+   * The possible types of src are the subclasses of [[scalax.io.AsWriteCharsConverter]]
+   */
+  implicit def asWriteCharsConverter[B](src:B)(implicit converter:AsWriteCharsConverter[B]) =
+    new AsWriteChars(converter.toWriteChars(src))
+
+  /**
+   * Used by the [[scalax.io.WriteChars]] object for converting an arbitrary object to an WriteChars Object
+   *
+   * Note: this is a classic use of the type class pattern
+   */
+  trait AsWriteCharsConverter[-A] {
+    def toWriteChars(t:A) : WriteChars
+  }
+
+  /**
+   * contains several implementations of [[scalax.io.AsWriteCharsConverter]].  They will be implicitely resolved allowing
+   * a user of the library to simple call A.asWriteChars and the converter will be found without the user needing to look up these classes
+   */
+  object AsWriteCharsConverter {
+
+    /**
+     * Converts a File to an WriteChars object
+     */
+    implicit object WriterConverter extends AsWriteCharsConverter[Writer]{
+      def toWriteChars(writer: Writer) = Resource.fromWriter(writer)
     }
   }
 }

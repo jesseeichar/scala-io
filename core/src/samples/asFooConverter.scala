@@ -1,3 +1,4 @@
+import java.io.StringWriter
 
 /**
  * Examples for creating Output/Input/ReadChars/WriteChars etc... using the asFooConverter pattern.
@@ -51,7 +52,8 @@ object AsFooConverter {
     import scalax.io.Codec
     import scalax.io.WriteChars._
     
-    new java.io.File("io").asWriteChars(Codec.UTF8).write("This is a message in UTF8")
+    new java.io.File("io").asBinaryWriteChars(Codec.UTF8).write("This is a message in UTF8")
+    new StringWriter().asWriteChars
   }
   /**
    * Convert to ReadChars
@@ -60,6 +62,7 @@ object AsFooConverter {
     import scalax.io.Codec
     import scalax.io.ReadChars._
 
-    val lines:Traversable[String] = new java.io.File("io").asReadChars(Codec.UTF8).lines()
+    val lines:Traversable[String] = new java.io.File("io").asBinaryReadChars(Codec.UTF8).lines()
+    val webpage:String = new java.io.StringReader("hello").asReadChars.slurpString
   }
 }
