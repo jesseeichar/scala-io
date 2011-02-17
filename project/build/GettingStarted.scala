@@ -71,6 +71,11 @@ object GettingStarted {
     > mvn compile exec:java -Dexec.mainClass="Main" ]]>
           </pre>
         </div></p>
+        http://groups.google.com/group/scala-incubator
+        <p><div class="explanation">
+          <h3>Scala Bazaar installation</h3>
+          Coming soon...
+        </div></p>
         <p><div class="explanation">
           <h3>Manual Download Example</h3>
           Naturally a manual download option is also available.  The dependencies are fairly simple:

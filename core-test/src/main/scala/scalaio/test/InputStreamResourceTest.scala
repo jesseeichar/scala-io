@@ -28,7 +28,7 @@ class InputStreamResourceTest extends AssertionSugar with IOSugar {
     val byteArray = (resource.bytesAsInts map {
       _.toByte
     }).toArray
-    assertEquals(source, new String(byteArray))
+    assertEquals(source, new String(byteArray,codec.charSet))
   }
 
   @Test
@@ -40,4 +40,14 @@ class InputStreamResourceTest extends AssertionSugar with IOSugar {
     assertEquals(source, chars.mkString)
   }
 
+  @Test
+  def reading_should_only_open_stream_once = {
+    import Input._
+    val byteArray = source.inputStream.asInput.byteArray
+    assertEquals(source,new String(byteArray,codec.charSet))
+    val chars = source.inputStream.asInput.chars
+    assertEquals(source, chars.mkString)
+    val string = source.inputStream.asInput.slurpString
+    assertEquals(source, string)
+  }
 }

@@ -72,7 +72,10 @@ class WebsiteModel(val websiteProj:ScalaIOProject#WebSite, val rootProject:Scala
         </p>
         <div>
         I welcome patches, bug reports and suggestions for this documentation or for the libraries themselves.
-        </div>
+        </div><p>
+        The forum for discussions is the scala-incubator users group (at least for now)
+        <a href="http://groups.google.com/group/scala-incubator">http://groups.google.com/group/scala-incubator</a>
+        </p>
         <p>
           If you are interested at looking at the code, you are welcome to take a look at:
           <a href="https://github.com/jesseeichar/scala-io/issues">https://github.com/jesseeichar/scala-io</a>
@@ -82,13 +85,15 @@ class WebsiteModel(val websiteProj:ScalaIOProject#WebSite, val rootProject:Scala
         the Java example the first try and had to debug it).
         </div>
         <div class="example">
-          <p><div class="example_summary"><h3>Scala</h3></div></p>
+          <h3>Scala</h3>
+          <p><div class="example_summary"></div></p>
           <div class="example_code">
             <pre class='brush: scala'>{scalaExample}</pre>
           </div>
         </div>
         <div class="example">
-          <p><div class="example_summary"><h3>Java</h3></div></p>
+          <h3>Java</h3>
+          <p><div class="example_summary"></div></p>
           <div class="example_code">
             <pre class='brush: scala'>{javaExample}</pre>
           </div>

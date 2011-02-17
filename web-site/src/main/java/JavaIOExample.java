@@ -19,7 +19,7 @@ public class JavaIOExample {
 
     }
     public static void main(String[] args) throws Exception {
-        FileOutputStream out = new FileOutputStream("/tmp/javaout");
+        FileOutputStream out = new FileOutputStream("javaout");
         try {
             write(out,"http://www.scala-lang.org");
             write(out,"http://www.scala-tools.org");
