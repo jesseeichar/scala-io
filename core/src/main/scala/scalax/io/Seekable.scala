@@ -9,9 +9,7 @@
 package scalax.io
 
 import java.nio.{ByteBuffer, CharBuffer}
-import java.nio.channels.{
-    ByteChannel, WritableByteChannel
-}
+import nio.SeekableFileChannel
 import scalax.io._
 import Constants.BufferSize
 import scala.collection.Traversable
@@ -19,6 +17,7 @@ import scala.annotation._
 import collection.mutable.{ArrayOps, WrappedArray}
 import StandardOpenOption._
 import java.io.{RandomAccessFile, File}
+import java.nio.channels.{FileChannel, ByteChannel, WritableByteChannel}
 
 /**
  * A strategy trait used with the Seekable.patch to control how data is
@@ -558,6 +557,24 @@ object Seekable {
      */
     implicit object FileConverter extends AsSeekableConverter[File]{
       def toSeekable(file: File) = Resource.fromFile(file)
+    }
+    /**
+     * Converts a RandomAccessFile to an Seekable object
+     */
+    implicit object RandomAccessFileConverter extends AsSeekableConverter[RandomAccessFile]{
+      def toSeekable(raf: RandomAccessFile) = Resource.fromRandomAccessFile(raf)
+    }
+    /**
+     * Converts a FileChannel to an Seekable object
+     */
+    implicit object FileChannelConverter extends AsSeekableConverter[FileChannel]{
+      def toSeekable(channel: FileChannel) = Resource.fromSeekableByteChannel(new SeekableFileChannel(channel))
+    }
+    /**
+     * Converts a SeekableByteChannel to an Seekable object
+     */
+    implicit object SeekableByteChannelConverter extends AsSeekableConverter[SeekableByteChannel]{
+      def toSeekable(channel: SeekableByteChannel) = Resource.fromSeekableByteChannel(channel)
     }
   }
 }

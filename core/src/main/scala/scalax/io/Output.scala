@@ -138,5 +138,12 @@ object Output {
     implicit object FileConverter extends AsOutputConverter[File]{
       def toOutput(file: File) = Resource.fromFile(file)
     }
+
+    /**
+     * Converts a OutputStream to an Output object
+     */
+    implicit object OutputStreamConverter extends AsOutputConverter[OutputStream]{
+      def toOutput(out: OutputStream) = Resource.fromOutputStream(out)
+    }
   }
 }

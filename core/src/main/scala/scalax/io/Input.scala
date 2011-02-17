@@ -10,8 +10,8 @@ package scalax.io
 
 import scala.collection.Traversable
 import Line._
-import java.io.File
 import java.net.URL
+import java.io.{InputStream, File}
 
 /**
  * An trait for objects that viewed as a sequence of bytes. For example InputStream
@@ -154,6 +154,12 @@ object Input {
      */
     implicit object URLConverter extends AsInputConverter[URL]{
       def toInput(url: URL) = Resource.fromURL(url)
+    }
+    /**
+     * Converts a InputStream to an Input object
+     */
+    implicit object InputStreamConverter extends AsInputConverter[InputStream]{
+      def toInput(is: InputStream) = Resource.fromInputStream(is)
     }
     /**
      * Converts a Traversable of Ints to an Input object.  Each Int is treated as a byte
