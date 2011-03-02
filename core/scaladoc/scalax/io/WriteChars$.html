@@ -63,7 +63,31 @@
 
         <div class="types members" id="types">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" data-isabs="false" name="scalax.io.WriteChars.AsWriteChars">
+              <ol><li visbl="pub" data-isabs="false" name="scalax.io.WriteChars.AsBinaryWriteChars">
+      <a id="AsBinaryWriteChars:AsBinaryWriteChars"></a>
+      <h4 class="signature"><a href="WriteChars$$AsBinaryWriteChars.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">AsBinaryWriteChars</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="true" name="scalax.io.WriteChars.AsBinaryWriteCharsConverter">
+      <a id="AsBinaryWriteCharsConverter:AsBinaryWriteCharsConverter[A]"></a>
+      <h4 class="signature"><a href="WriteChars$$AsBinaryWriteCharsConverter.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">AsBinaryWriteCharsConverter</span>
+        <span class="tparams">[<span name="A">-A</span>]</span>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Used by the <a href="WriteChars.html" class="extype" name="scalax.io.WriteChars">WriteChars</a> object for converting an arbitrary object to an WriteChars Object</p>
+    </li><li visbl="pub" data-isabs="false" name="scalax.io.WriteChars.AsWriteChars">
       <a id="AsWriteChars:AsWriteChars"></a>
       <h4 class="signature"><a href="WriteChars$$AsWriteChars.html">
       <span class="kind">class</span>
@@ -240,6 +264,19 @@
             
           </div>
           
+    </li><li visbl="pub" data-isabs="false" name="scalax.io.WriteChars.AsBinaryWriteCharsConverter">
+      <a id="AsBinaryWriteCharsConverter:AsBinaryWriteCharsConverter"></a>
+      <h4 class="signature"><a href="WriteChars$$AsBinaryWriteCharsConverter$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">AsBinaryWriteCharsConverter</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">contains several implementations of 
+scalax.io.AsWriteCharsConverter.</p>
     </li><li visbl="pub" data-isabs="false" name="scalax.io.WriteChars.AsWriteCharsConverter">
       <a id="AsWriteCharsConverter:AsWriteCharsConverter"></a>
       <h4 class="signature"><a href="WriteChars$$AsWriteCharsConverter$.html">
@@ -290,8 +327,31 @@ part of compilation it is not possible to check whether the contents of the list
       </span>
       </h4>
       
-            <p class="shortcomment cmt">Wrap an arbitraty object as and AsWriteChars object allowing the object to be converted to an WriteChars object.</p>
-            <div class="fullcomment"><div class="comment cmt"><p>Wrap an arbitraty object as and AsWriteChars object allowing the object to be converted to an WriteChars object.</p><p>The possible types of src are the subclasses of 
+            <p class="shortcomment cmt">Wrap an arbitrary object as and AsWriteChars object allowing the object to be converted to an WriteChars object.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Wrap an arbitrary object as and AsWriteChars object allowing the object to be converted to an WriteChars object.</p><p>The possible types of src are the subclasses of 
+scalax.io.AsWriteCharsConverter
+</p></div><div class="block">
+          attributes: implicit 
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scalax.io.WriteChars#asWriteCharsConverter">
+      <a id="asWriteCharsConverter[B](B)(AsBinaryWriteCharsConverter[B]):AsBinaryWriteChars"></a>
+      <h4 class="signature">
+      <span class="kind">implicit def</span>
+      <span class="symbol">
+        <span class="name">asWriteCharsConverter</span>
+        <span class="tparams">[<span name="B">B</span>]</span>
+        <span class="params">(<span name="src">src: B</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="converter">converter: <a href="WriteChars$$AsBinaryWriteCharsConverter.html" class="extype" name="scalax.io.WriteChars.AsBinaryWriteCharsConverter">AsBinaryWriteCharsConverter</a>[B]</span>)</span>
+        <span class="result">: <a href="WriteChars$$AsBinaryWriteChars.html" class="extype" name="scalax.io.WriteChars.AsBinaryWriteChars">AsBinaryWriteChars</a></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Wrap an arbitrary object as and AsWriteChars object allowing the object to be converted to an WriteChars object.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Wrap an arbitrary object as and AsWriteChars object allowing the object to be converted to an WriteChars object.</p><p>The possible types of src are the subclasses of 
 scalax.io.AsWriteCharsConverter
 </p></div><div class="block">
           attributes: implicit 

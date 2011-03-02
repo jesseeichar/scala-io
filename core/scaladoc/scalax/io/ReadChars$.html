@@ -63,7 +63,31 @@
 
         <div class="types members" id="types">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" data-isabs="false" name="scalax.io.ReadChars.AsReadChars">
+              <ol><li visbl="pub" data-isabs="false" name="scalax.io.ReadChars.AsBinaryReadChars">
+      <a id="AsBinaryReadChars:AsBinaryReadChars"></a>
+      <h4 class="signature"><a href="ReadChars$$AsBinaryReadChars.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">AsBinaryReadChars</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" data-isabs="true" name="scalax.io.ReadChars.AsBinaryReadCharsConverter">
+      <a id="AsBinaryReadCharsConverter:AsBinaryReadCharsConverter[A]"></a>
+      <h4 class="signature"><a href="ReadChars$$AsBinaryReadCharsConverter.html">
+      <span class="kind">trait</span>
+      <span class="symbol">
+        <span class="name">AsBinaryReadCharsConverter</span>
+        <span class="tparams">[<span name="A">-A</span>]</span>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Used by the <a href="ReadChars.html" class="extype" name="scalax.io.ReadChars">ReadChars</a> object for converting an arbitrary object to an ReadChars Object</p>
+    </li><li visbl="pub" data-isabs="false" name="scalax.io.ReadChars.AsReadChars">
       <a id="AsReadChars:AsReadChars"></a>
       <h4 class="signature"><a href="ReadChars$$AsReadChars.html">
       <span class="kind">class</span>
@@ -240,6 +264,19 @@
             
           </div>
           
+    </li><li visbl="pub" data-isabs="false" name="scalax.io.ReadChars.AsBinaryReadCharsConverter">
+      <a id="AsBinaryReadCharsConverter:AsBinaryReadCharsConverter"></a>
+      <h4 class="signature"><a href="ReadChars$$AsBinaryReadCharsConverter$.html">
+      <span class="kind">object</span>
+      <span class="symbol">
+        <span class="name">AsBinaryReadCharsConverter</span>
+        
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">contains several implementations of 
+scalax.io.AsReadCharsConverterFromBinary.</p>
     </li><li visbl="pub" data-isabs="false" name="scalax.io.ReadChars.AsReadCharsConverter">
       <a id="AsReadCharsConverter:AsReadCharsConverter"></a>
       <h4 class="signature"><a href="ReadChars$$AsReadCharsConverter$.html">
@@ -290,9 +327,32 @@ part of compilation it is not possible to check whether the contents of the list
       </span>
       </h4>
       
-            <p class="shortcomment cmt">Wrap an arbitraty object as and AsReadChars object allowing the object to be converted to an ReadChars object.</p>
-            <div class="fullcomment"><div class="comment cmt"><p>Wrap an arbitraty object as and AsReadChars object allowing the object to be converted to an ReadChars object.</p><p>The possible types of src are the subclasses of 
+            <p class="shortcomment cmt">Wrap an arbitrary object as and AsReadChars object allowing the object to be converted to an ReadChars object.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Wrap an arbitrary object as and AsReadChars object allowing the object to be converted to an ReadChars object.</p><p>The possible types of src are the subclasses of 
 scalax.io.AsReadCharsConverter
+</p></div><div class="block">
+          attributes: implicit 
+        </div>
+            
+            
+            
+          </div>
+          
+    </li><li visbl="pub" data-isabs="false" name="scalax.io.ReadChars#asReadCharsConverter">
+      <a id="asReadCharsConverter[B](B)(AsBinaryReadCharsConverter[B]):AsBinaryReadChars"></a>
+      <h4 class="signature">
+      <span class="kind">implicit def</span>
+      <span class="symbol">
+        <span class="name">asReadCharsConverter</span>
+        <span class="tparams">[<span name="B">B</span>]</span>
+        <span class="params">(<span name="src">src: B</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="converter">converter: <a href="ReadChars$$AsBinaryReadCharsConverter.html" class="extype" name="scalax.io.ReadChars.AsBinaryReadCharsConverter">AsBinaryReadCharsConverter</a>[B]</span>)</span>
+        <span class="result">: <a href="ReadChars$$AsBinaryReadChars.html" class="extype" name="scalax.io.ReadChars.AsBinaryReadChars">AsBinaryReadChars</a></span>
+      </span>
+      </h4>
+      
+            <p class="shortcomment cmt">Wrap an arbitrary object as and AsReadChars object allowing the object to be converted to an ReadChars object.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>Wrap an arbitrary object as and AsReadChars object allowing the object to be converted to an ReadChars object.</p><p>The possible types of src are the subclasses of 
+scalax.io.AsReadCharsConverterFromBinary
 </p></div><div class="block">
           attributes: implicit 
         </div>

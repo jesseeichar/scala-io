@@ -29,7 +29,8 @@
     import scalax.io.Codec
     import scalax.io.WriteChars._
     
-    new java.io.File(&quot;io&quot;).asWriteChars(Codec.UTF8).write(&quot;This is a message in UTF8&quot;)
+    new java.io.File(&quot;io&quot;).asBinaryWriteChars(Codec.UTF8).write(&quot;This is a message in UTF8&quot;)
+    new StringWriter().asWriteChars
   
 </pre>
       </div>

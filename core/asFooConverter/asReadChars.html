@@ -29,7 +29,8 @@
     import scalax.io.Codec
     import scalax.io.ReadChars._
 
-    val lines:Traversable[String] = new java.io.File(&quot;io&quot;).asReadChars(Codec.UTF8).lines()
+    val lines:Traversable[String] = new java.io.File(&quot;io&quot;).asBinaryReadChars(Codec.UTF8).lines()
+    val webpage:String = new java.io.StringReader(&quot;hello&quot;).asReadChars.slurpString
   
 </pre>
       </div>
