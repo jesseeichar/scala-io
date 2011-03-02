@@ -38,6 +38,9 @@ class SeekableByteChannelResource[+A <: SeekableByteChannel] protected[io](opene
   def readableByteChannel = Resource.fromReadableByteChannel(opener)(closeAction)
   def byteChannel = Resource.fromByteChannel(opener)(closeAction)
 
+  override def bytesAsInts = inputStream.bytesAsInts // TODO optimize for byteChannel
+  override def chars(implicit codec: Codec) = reader(codec).chars  // TODO optimize for byteChannel
+
   protected def channel(openOptions:OpenOption*) = this
 }
 
