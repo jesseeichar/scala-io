@@ -15,6 +15,7 @@ import org.junit.Assert._
 import org.junit.{
 Test, Before, After, Rule, Ignore
 }
+import java.io.InputStream
 
 class InputStreamResourceTest extends AssertionSugar with IOSugar {
   implicit val codec = Codec.UTF8
@@ -43,11 +44,29 @@ class InputStreamResourceTest extends AssertionSugar with IOSugar {
   @Test
   def reading_should_only_open_stream_once = {
     import Input._
-    val byteArray = source.inputStream.asInput.byteArray
+    class InputStreamCloseCounter(in:InputStream) extends InputStream {
+      var closes = 0;
+      def read = in.read
+
+      override def close = {
+        closes += 1
+        in.close
+      }
+    }
+    val in = new InputStreamCloseCounter(source.inputStream)
+    val byteArray = in.asInput.byteArray
+    assertEquals(1,in.closes)
     assertEquals(source,new String(byteArray,codec.charSet))
-    val chars = source.inputStream.asInput.chars
-    assertEquals(source, chars.mkString)
-    val string = source.inputStream.asInput.slurpString
+    assertEquals(source,new String(byteArray,codec.charSet))
+
+    val in2 = new InputStreamCloseCounter(source.inputStream)
+    val chars = in2.asInput.chars.mkString
+    assertEquals(1,in2.closes)
+    assertEquals(source, chars)
+
+    val in3 = new InputStreamCloseCounter(source.inputStream)
+    val string = in3.asInput.slurpString
+    assertEquals(1,in3.closes)
     assertEquals(source, string)
   }
 }
