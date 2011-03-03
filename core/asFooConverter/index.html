@@ -11,7 +11,7 @@
           <div class="innertube">
             <span>
         <h1>AsFooConverter</h1>
-        <p class="summary"> Examples for creating Output/Input/ReadChars/WriteChars etc</p>
+        <p class="summary"> Examples for creating Output/Input/ReadChars/WriteChars/etc using the asFooConverter pattern</p>
       </span>
           </div>
         </div>
@@ -20,7 +20,7 @@
           <div id="contentcolumn">
             <div class="innertube">
               <span>
-        <span>..  using the asFooConverter pattern.  There are two patterns for creating IO objects.  One is using the Resources API.  This is often the best for creating resources from closeable objects such as InputStreams.  The Resource API takes a code block for constructing the resource and can there for recreate the resource when needed.  The other pattern is to convert an existing object to an Input/Ouput/ReadChars/WriteChars/Seekable object.  The idea here is to import the implicit conversions contained in the target object (Input/Ouput/ReadChars/WriteChars/Seekable) and then call the asInput//Ouput/ReadChars/WriteChars/Seekable.  Examples of the latter pattern are described here.  Note: In all examples where a codec is required, the codec can be explicitly or implicitly passed </span>
+        <span>  There are two patterns for creating IO objects.  One is using the Resources API.  This is often the best for creating resources from closeable objects such as InputStreams.  The Resource API takes a code block for constructing the resource and can there for recreate the resource when needed.  <br></br> The other pattern is to convert an existing object to an Input/Ouput/ReadChars/WriteChars/Seekable object.  The idea here is to import the implicit conversions contained in the target object (Input/Ouput/ReadChars/WriteChars/Seekable) and then call the asInput//Ouput/ReadChars/WriteChars/Seekable.  <br></br> Examples of the latter pattern are described here.  <br></br> Note: In all examples where a codec is required, the codec can be explicitly or implicitly passed </span>
         <div class="example">
       <a name="asInput.html"><h3>As Input</h3></a>
       <div class="example_summary"><span> Convert to Input </span></div>
@@ -100,7 +100,7 @@
         <li><a href="../../core/index.html" title="An idiomatic IO library for Scala" class="active">Core</a>
             <a href="../..//core/scaladoc/index.html">(Scaladoc)</a>
           <ul id="navlist"><li><a href="../../core/access-segment-of-input/index.html" title=" Examples for reading sections of an Input object without reading all data in the underlying resourc...">Access Segment Of Input</a></li><li><a href="../../core/basic-read-write/index.html" title=" These examples are a quick introduction to performing basic IO using the Scala IO API">Basic Read Write</a></li><li><a href="../../core/input/index.html" title=" One of the core IO classes is called Input">Input</a></li><li><a href="../../core/output/index.html" title=" One of the core IO classes is called Input">Output</a></li><li><a href="../../core/seekable/index.html" title=" Seekable permits random access read and write">Seekable</a></li><li><a href="../../core/resources/index.html" title=" Examples of using the Resource API to wrap existing Java IO objects">Resources</a></li><li><a href="../../core/writing-with-typeclasses/index.html" title=" Details on how output is converted to bytes and how the design can be extended and used">Writing With Typeclasses</a></li><li>
-                      <a href="../../core/asFooConverter/index.html" title=" Examples for creating Output/Input/ReadChars/WriteChars etc" class="active">AsFooConverter</a>
+                      <a href="../../core/asFooConverter/index.html" title=" Examples for creating Output/Input/ReadChars/WriteChars/etc using the asFooConverter pattern" class="active">AsFooConverter</a>
                       <ul id="subnavlist"><li>
         <a href="asInput.html" title=" Convert to Input " class="">As Input</a>
       </li><li>
