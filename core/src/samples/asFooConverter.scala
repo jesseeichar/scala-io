@@ -9,7 +9,7 @@ import java.io.StringWriter
  * <br/>
  * The other pattern is to convert an existing object to an Input/Ouput/ReadChars/WriteChars/Seekable object.  The
  * idea here is to import the implicit conversions contained in the target object (Input/Ouput/ReadChars/WriteChars/Seekable)
- * and then call the asInput//Ouput/ReadChars/WriteChars/Seekable.
+ * and then call the asInput/asOuput/asReadChars/asWriteChars/asSeekable.
  * <br/>
  * Examples of the latter pattern are described here.
  * <br/>
