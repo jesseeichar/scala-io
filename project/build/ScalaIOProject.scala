@@ -154,7 +154,7 @@ class ScalaIOProject(info: ProjectInfo)
   }
 }
 
-trait IoProject extends AutoCompilerPlugins with MavenPublishing{
+trait IoProject extends AutoCompilerPlugins with MavenPublishing {
   self : DefaultProject =>
 
   override def documentOptions = super.documentOptions //++ List(CompoundDocOption("-doc-source-url","https://github.com/scala-incubator/scala-io/raw/master/"))

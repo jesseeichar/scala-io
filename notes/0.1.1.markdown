@@ -1,0 +1,14 @@
+Two critical bugs with 0.1.0 so I have made a quick patch release to fix the issue.
+
+Specifically the bugs are:
+
+ * [Input.byteArray iterates through stream twice](https://github.com/jesseeichar/scala-io/issues/closed#issue/3)
+ * [Resource.fromFileString("...").byteArray goes into an infinite loop](https://github.com/jesseeichar/scala-io/issues/closed#issue/5)
+
+Both are now fixed with the 0.1.1 release.
+
+In addition the following issue was addressed:
+
+ * [Add more asFoo converters for converting objects to Input/Output/etc... objects](https://github.com/jesseeichar/scala-io/issues/closed#issue/2)
+
+The files are on scala-tools.org.  To get running with Scala IO take a look at http://jesseeichar.github.com/scala-io/getting-started.html

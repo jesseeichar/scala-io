@@ -1,18 +1,18 @@
 import java.io.StringWriter
 
 /**
- * Examples for creating Output/Input/ReadChars/WriteChars etc... using the asFooConverter pattern.
+ * Examples for creating Output/Input/ReadChars/WriteChars/etc using the asFooConverter pattern.
  * 
  * There are two patterns for creating IO objects.  One is using the Resources API.  This is often the best for
  * creating resources from closeable objects such as InputStreams.  The Resource API takes a code block for constructing
  * the resource and can there for recreate the resource when needed.
- *
+ * <br/>
  * The other pattern is to convert an existing object to an Input/Ouput/ReadChars/WriteChars/Seekable object.  The
  * idea here is to import the implicit conversions contained in the target object (Input/Ouput/ReadChars/WriteChars/Seekable)
- * and then call the asInput//Ouput/ReadChars/WriteChars/Seekable.  
- * 
+ * and then call the asInput//Ouput/ReadChars/WriteChars/Seekable.
+ * <br/>
  * Examples of the latter pattern are described here.
- *
+ * <br/>
  * Note: In all examples where a codec is required, the codec can be explicitly or implicitly passed
  */
 object AsFooConverter {
