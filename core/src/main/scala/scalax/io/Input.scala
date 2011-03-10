@@ -63,6 +63,9 @@ trait Input {
     */
     def byteArray: Array[Byte] = bytes.toArray
 
+    def copyData(output:Output): Unit = {
+      output.write(bytes)
+    }
     /**
      * The characters in the object.$
      *
