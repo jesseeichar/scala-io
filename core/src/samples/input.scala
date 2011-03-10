@@ -52,6 +52,16 @@ object InputExamples {
 
     // Traversable[Byte] can also be converted to an Input
     val input2:Input = List[Byte](1,2,3).asInput
+  }
 
+  /**
+   * copyData can be used to copy data from one Input object to another Output object
+   * as efficiently as possible.
+   */
+  def copyData {
+    import scalax.io._
+    import Resource._
+
+    fromFileString("in") copyData fromFileString("out")
   }
 }

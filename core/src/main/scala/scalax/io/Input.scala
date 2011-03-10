@@ -63,9 +63,16 @@ trait Input {
     */
     def byteArray: Array[Byte] = bytes.toArray
 
+  /**
+   * Copy all data from this Input object to the Output object
+   * as efficiently as possible.
+   *
+   * @param output output sink to copy the data to
+   */
     def copyData(output:Output): Unit = {
       output.write(bytes)
     }
+
     /**
      * The characters in the object.$
      *
