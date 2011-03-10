@@ -18,7 +18,7 @@ Test, Ignore
 }
 
 import Constants.TEXT_VALUE
-import java.io.ByteArrayInputStream
+import java.io.{ByteArrayOutputStream, ByteArrayInputStream}
 
 abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
 
@@ -202,6 +202,17 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
     val read = input(TextNewLine).lines()(UTF8).drop(2).take(2).toList
     val expected = TEXT_VALUE.split("\n").toList.drop(2).take(2)
     assertEquals(expected, read)
+  }
+
+  @Test(timeout = 3000) //@Ignore
+  def copyData(): Unit = {
+    import Output.asOutputConverter
+    val outStream = new ByteArrayOutputStream()
+    input(TextNewLine).copyData(outStream.asOutput)
+
+    val expected = TEXT_VALUE
+
+    assertEquals(expected, new String(outStream.toByteArray,"UTF-8"))
   }
 
 
