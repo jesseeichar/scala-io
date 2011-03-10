@@ -35,93 +35,93 @@ import java.io.{InputStream, File}
  */
 trait Input {
 
-    /**
-    * The number of bytes that can be read from the underlying resource.
-    *
-    * if length == None then it is not possible to determine the
-    * number of bytes in advance.
-    */
-    def size: Option[Long]
-
-    /**
-    * Obtains a Traversable for conveniently processing the resource as bytes.
-    *
-    * @return an non-strict traversable over all the bytes
-    */
-    def bytes : ResourceView[Byte] = (bytesAsInts map {_.toByte}).asInstanceOf[ResourceView[Byte]]    // TODO this is broken
-
-    /**
-    * Obtains a Traversable for conveniently processing the file as Ints.
-    *
-    * @return an non-strict traversable over all the bytes with the bytes being represented as Ints
-    */
-    def bytesAsInts: ResourceView[Int]
-
-    /**
-    * This method aspires to be the fastest way to read
-    * a stream of known length into memory.
-    */
-    def byteArray: Array[Byte] = bytes.toArray
+  /**
+  * The number of bytes that can be read from the underlying resource.
+  *
+  * if length == None then it is not possible to determine the
+  * number of bytes in advance.
+  */
+  def size: Option[Long]
 
   /**
-   * Copy all data from this Input object to the Output object
-   * as efficiently as possible.
+  * Obtains a Traversable for conveniently processing the resource as bytes.
+  *
+  * @return an non-strict traversable over all the bytes
+  */
+  def bytes : ResourceView[Byte] = (bytesAsInts map {_.toByte}).asInstanceOf[ResourceView[Byte]]    // TODO this is broken
+
+  /**
+  * Obtains a Traversable for conveniently processing the file as Ints.
+  *
+  * @return an non-strict traversable over all the bytes with the bytes being represented as Ints
+  */
+  def bytesAsInts: ResourceView[Int]
+
+  /**
+  * This method aspires to be the fastest way to read
+  * a stream of known length into memory.
+  */
+  def byteArray: Array[Byte] = bytes.toArray
+
+/**
+ * Copy all data from this Input object to the Output object
+ * as efficiently as possible.
+ *
+ * @param output output sink to copy the data to
+ */
+  def copyData(output:Output): Unit = {
+    output.write(bytes)
+  }
+
+  /**
+   * The characters in the object.$
    *
-   * @param output output sink to copy the data to
+   * If the codec is not the same as the source codec (the codec of
+   * the underlying data) then the characters will converted to the
+   * desired codec.
+   *
+   * @param codec
+   *          The codec representing the desired encoding of the characters
+   * @return
+   *          an traversable of all the characters
    */
-    def copyData(output:Output): Unit = {
-      output.write(bytes)
-    }
+  def chars(implicit codec: Codec): ResourceView[Char]
 
-    /**
-     * The characters in the object.$
-     *
-     * If the codec is not the same as the source codec (the codec of
-     * the underlying data) then the characters will converted to the
-     * desired codec.
-     *
-     * @param codec
-     *          The codec representing the desired encoding of the characters
-     * @return
-     *          an traversable of all the characters
-     */
-    def chars(implicit codec: Codec): ResourceView[Char]
-
-    /**
-     * Obtain an non-strict traversable for iterating through the lines in the object
-     *
-     * If the codec is not the same as the source codec (the codec of
-     * the underlying data) then the characters will converted to the
-     * desired codec.
-     *
-     * @param codec
-     *          The codec representing the desired encoding of the characters
-     * @param terminator
-     *          The strategy for determining the end of line
-     *          Default is to auto-detect the EOL
-     * @param includeTerminator
-     *          if true then the line will end with the line terminator
-     *          Default is false
-     *
-     * @return
-     *          a non-strict traversable for iterating through all the lines
-     */
-    def lines(terminator: Terminators.Terminator = new Terminators.Auto(),
-              includeTerminator: Boolean = false)(implicit codec: Codec): ResourceView[String] = {
-                  new LineTraversable(chars(codec), terminator, includeTerminator).view
-    }
-    /**
-     * Loads all the characters into memory. There is no protection against
-     * loading very large files/amounts of data.
-     *
-     * If the codec is not the same as the source codec (the codec of
-     * the underlying data) then the characters will converted to the
-     * desired codec.
-     *
-     * @param codec
-     *          The codec representing the desired encoding of the characters
-     */
-    def slurpString(implicit codec: Codec) = chars(codec).mkString
+  /**
+   * Obtain an non-strict traversable for iterating through the lines in the object
+   *
+   * If the codec is not the same as the source codec (the codec of
+   * the underlying data) then the characters will converted to the
+   * desired codec.
+   *
+   * @param codec
+   *          The codec representing the desired encoding of the characters
+   * @param terminator
+   *          The strategy for determining the end of line
+   *          Default is to auto-detect the EOL
+   * @param includeTerminator
+   *          if true then the line will end with the line terminator
+   *          Default is false
+   *
+   * @return
+   *          a non-strict traversable for iterating through all the lines
+   */
+  def lines(terminator: Terminators.Terminator = new Terminators.Auto(),
+            includeTerminator: Boolean = false)(implicit codec: Codec): ResourceView[String] = {
+                new LineTraversable(chars(codec), terminator, includeTerminator).view
+  }
+  /**
+   * Loads all the characters into memory. There is no protection against
+   * loading very large files/amounts of data.
+   *
+   * If the codec is not the same as the source codec (the codec of
+   * the underlying data) then the characters will converted to the
+   * desired codec.
+   *
+   * @param codec
+   *          The codec representing the desired encoding of the characters
+   */
+  def slurpString(implicit codec: Codec) = chars(codec).mkString
 }
 
 object Input {
