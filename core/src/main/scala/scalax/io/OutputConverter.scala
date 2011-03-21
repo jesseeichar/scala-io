@@ -190,6 +190,6 @@ object OutputConverter {
     def sizeInBytes = codec.encoder.maxBytesPerChar.toInt
   }
 
-  implicit def charsToOutputFunction(implicit codec:Codec):OutputConverter[TraversableOnce[Char]] = new TraversableCharConverter(codec)
-  implicit def charToOutputFunction(implicit codec:Codec):OutputConverter[Char] = new CharConverter(codec)
+  implicit def charsToOutputFunction(implicit codec:Codec = Codec.default):OutputConverter[TraversableOnce[Char]] = new TraversableCharConverter(codec)
+  implicit def charToOutputFunction(implicit codec:Codec = Codec.default):OutputConverter[Char] = new CharConverter(codec)
 }

@@ -70,7 +70,7 @@ trait ReadChars {
 object ReadChars {
   class AsBinaryReadChars(op: Codec => ReadChars) {
     /** An object to an ReadChars object */
-    def asBinaryReadChars(implicit codec:Codec): ReadChars = op(codec)
+    def asBinaryReadChars(implicit codec:Codec = Codec.default): ReadChars = op(codec)
   }
 
   /**

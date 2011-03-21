@@ -85,7 +85,7 @@ trait Input {
    * @return
    *          an traversable of all the characters
    */
-  def chars(implicit codec: Codec): ResourceView[Char]
+  def chars(implicit codec: Codec = Codec.default): ResourceView[Char]
 
   /**
    * Obtain an non-strict traversable for iterating through the lines in the object
@@ -107,7 +107,7 @@ trait Input {
    *          a non-strict traversable for iterating through all the lines
    */
   def lines(terminator: Terminators.Terminator = new Terminators.Auto(),
-            includeTerminator: Boolean = false)(implicit codec: Codec): ResourceView[String] = {
+            includeTerminator: Boolean = false)(implicit codec: Codec = Codec.default): ResourceView[String] = {
                 new LineTraversable(chars(codec), terminator, includeTerminator).view
   }
   /**
@@ -121,7 +121,7 @@ trait Input {
    * @param codec
    *          The codec representing the desired encoding of the characters
    */
-  def slurpString(implicit codec: Codec) = chars(codec).mkString
+  def slurpString(implicit codec: Codec = Codec.default) = chars(codec).mkString
 }
 
 object Input {
@@ -176,7 +176,7 @@ object Input {
      */
     implicit object TraversableIntsAsBytesConverter extends AsInputConverter[Traversable[Int]]{
       def toInput(t: Traversable[Int]) = new Input {
-        def chars(implicit codec: Codec) = new LongTraversable[Char] {
+        def chars(implicit codec: Codec = Codec.default) = new LongTraversable[Char] {
           val maxChars = codec.encoder.maxBytesPerChar
 
           lazy val chars = codec.decode(t.view.map{_.toByte}.toArray)
@@ -195,7 +195,7 @@ object Input {
      */
     implicit object TraversableByteConverter extends AsInputConverter[Traversable[Byte]]{
       def toInput(t: Traversable[Byte]) = new Input {
-        def chars(implicit codec: Codec) = new LongTraversable[Char] {
+        def chars(implicit codec: Codec = Codec.default) = new LongTraversable[Char] {
           val maxChars = codec.encoder.maxBytesPerChar
 
           lazy val chars = codec.decode(t.toArray)

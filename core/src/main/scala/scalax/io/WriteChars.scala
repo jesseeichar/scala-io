@@ -87,7 +87,7 @@ trait WriteChars {
 object WriteChars {
   class AsBinaryWriteChars(op: (Codec) => WriteChars) {
     /** An object to an WriteChars object */
-    def asBinaryWriteChars(implicit codec:Codec): WriteChars = op(codec)
+    def asBinaryWriteChars(implicit codec:Codec = Codec.default): WriteChars = op(codec)
   }
 
   /**

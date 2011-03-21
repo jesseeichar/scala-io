@@ -206,7 +206,7 @@ trait InputResource[+R <: Closeable] extends Resource[R] with Input with Resourc
      *
      * @return the [[scalax.io.ReadCharsResource]] version of this object.
      */
-    def reader(implicit sourceCodec: Codec = Codec.UTF8) : ReadCharsResource[Reader]
+    def reader(implicit sourceCodec: Codec = Codec.default) : ReadCharsResource[Reader]
     /**
      * Obtain the [[scalax.io.ReadableByteChannelResource]](typically) version of this object.
      *
@@ -251,7 +251,7 @@ trait OutputResource[+R <: Closeable] extends Resource[R] with Output with Resou
    *
    * @return the [[scalax.io.WriteCharsResource]] version of this object.
    */
-  def writer(implicit sourceCodec: Codec = Codec.UTF8) : WriteCharsResource[Writer]
+  def writer(implicit sourceCodec: Codec = Codec.default) : WriteCharsResource[Writer]
   /**
    * Obtain the [[scalax.io.WritableByteChannel]](typically) version of this object.
    *

@@ -71,7 +71,7 @@ trait Output {
   *          be converted to the encoding of {@link sourceCodec}
   *          Default is sourceCodec
   */
-  def write(string: String)(implicit codec: Codec): Unit = {
+  def write(string: String)(implicit codec: Codec = Codec.default): Unit = {
       underlyingOutput.writer writeString string
   }
 
@@ -81,7 +81,7 @@ trait Output {
    * @param characters the characters to write
    * @param codec the codec to use for encoding the characters
    */
-  def writeChars(characters: TraversableOnce[Char])(implicit codec: Codec) : Unit = {
+  def writeChars(characters: TraversableOnce[Char])(implicit codec: Codec = Codec.default) : Unit = {
     write(characters)(OutputConverter.charsToOutputFunction)
   }
 
@@ -98,7 +98,7 @@ trait Output {
   *          The codec of the strings to be written. The strings will
   *          be converted to the encoding of {@link sourceCodec}
   */
-  def writeStrings(strings: Traversable[String], separator:String = "")(implicit codec: Codec): Unit = {
+  def writeStrings(strings: Traversable[String], separator:String = "")(implicit codec: Codec = Codec.default): Unit = {
       underlyingOutput.writer.writeStrings(strings,separator)
   }
 }

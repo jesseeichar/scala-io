@@ -136,7 +136,7 @@ trait Seekable extends Input with Output {
    */
   def patch(position: Long,
             string: String,
-            overwrite : Overwrite)(implicit codec: Codec): Unit = {
+            overwrite : Overwrite)(implicit codec: Codec = Codec.default): Unit = {
     require(position >= 0, "The patch starting position must be greater than or equal 0")
 
     if (size.forall{position >= _} || codec.hasConstantSize) {
@@ -229,7 +229,7 @@ trait Seekable extends Input with Output {
    * @param codec The codec to use for determining the location for inserting the string and for encoding the
    *              string as bytes
    */
-  def insert(position : Long, string: String)(implicit codec: Codec): Unit = {
+  def insert(position : Long, string: String)(implicit codec: Codec = Codec.default): Unit = {
     insert(position, codec encode string)
   }
 
@@ -438,7 +438,7 @@ trait Seekable extends Input with Output {
   *          the codec of the string to be written. The string will
   *          be converted to the encoding of {@link codec}
   */
-  def append(string: String)(implicit codec: Codec): Unit = {
+  def append(string: String)(implicit codec: Codec = Codec.default): Unit = {
       append(codec encode string)
   }
 
@@ -455,7 +455,7 @@ trait Seekable extends Input with Output {
   *          The codec of the strings to be written. The strings will
   *          be converted to the encoding of {@link codec}
   */
-  def appendStrings(strings: Traversable[String], separator:String = "")(implicit codec: Codec): Unit = {
+  def appendStrings(strings: Traversable[String], separator:String = "")(implicit codec: Codec = Codec.default): Unit = {
     val sepBytes = codec encode separator
     for (c <- channel(Append)) (strings foldLeft false){
       (addSep, string) =>
@@ -476,7 +476,7 @@ trait Seekable extends Input with Output {
     * Truncate/Chop the Seekable to the number of bytes declared by the position param.  In this
     * method each position is one character instead of bytes.
     */
-  def truncateString(position : Long)(implicit codec:Codec) : Unit = {
+  def truncateString(position : Long)(implicit codec:Codec = Codec.default) : Unit = {
     val posInBytes = charCountToByteCount(0,position)
     channel(Append) foreach {_.truncate(posInBytes)}
   }

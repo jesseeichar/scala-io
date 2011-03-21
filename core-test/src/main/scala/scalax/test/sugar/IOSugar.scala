@@ -13,6 +13,6 @@ import scalax.io.Codec
 
 trait IOSugar {
     implicit def stringToStringExtras(s:String) = new {
-        def inputStream(implicit codec : Codec) = new ByteArrayInputStream(s getBytes codec.name)
+        def inputStream(implicit codec : Codec = Codec.default) = new ByteArrayInputStream(s getBytes codec.name)
     }
 }
