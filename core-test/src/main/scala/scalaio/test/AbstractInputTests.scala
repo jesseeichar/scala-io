@@ -205,6 +205,13 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
   }
 
   @Test(timeout = 3000) //@Ignore
+  def lines_toString_does_not_resolve_list(): Unit = {
+    val read = input(TextNewLine).lines()(UTF8).toString
+    val textExpected = TEXT_VALUE.split("\n").toString
+    assertFalse(read contains textExpected)
+  }
+
+  @Test(timeout = 3000) //@Ignore
   def copyData(): Unit = {
     import Output.asOutputConverter
     val outStream = new ByteArrayOutputStream()

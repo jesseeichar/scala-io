@@ -11,6 +11,8 @@ package scalaio.test.stream
 import scalaio.test._
 import java.io.ByteArrayInputStream
 import scalax.io.{Codec, Resource}
+import org.junit.Test
+import org.junit.Assert._
 
 class InputTest extends AbstractInputTests {
   private def text(sep: String) = {
@@ -30,5 +32,29 @@ class InputTest extends AbstractInputTests {
   }
 
   override protected def sizeIsDefined = false
+
+  @Test
+  def issue_8_lines_in_Input_not_lazy {
+    import scalax.io.Line.Terminators._
+
+    val file = largeResource(Key.TEXT)
+    
+    val start = System.currentTimeMillis
+    val fromFile = Resource.fromFile(file).lines(NewLine)(codec=Codec.UTF8)
+    val fromString = Resource.fromFileString(file.getAbsolutePath).lines(NewLine)(codec=Codec.UTF8)
+    fromString.toString
+    fromFile.toString
+    val end = System.currentTimeMillis
+    assertTrue(end-start < 500)
+  }
+
+  @Test
+  def issue_9_writer_resource_cannot_be_used_twice {
+    val file = java.io.File.createTempFile("sdfasfasf","asdfas")
+    val resource = Resource.fromFileString(file.getAbsolutePath).writer()
+    resource.acquireFor { _.write("hi")}
+    resource.acquireFor { _.write("ho")}
+    // no exception? good
+  }
 }
 

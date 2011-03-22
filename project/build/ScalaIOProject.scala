@@ -17,6 +17,7 @@ class ScalaIOProject(info: ProjectInfo)
   lazy val coreTest:TestProject = project("core-test", "core-test", new TestProject(_),core)
   lazy val file:File = project("file", "file", new File(_),core)
   lazy val fileTest:TestProject = project("file-test", "file-test", new TestProject(_),core,coreTest,file)
+  lazy val perf:PerfProject = project("perf", "perf", new PerfProject(_),core)
 //  lazy val archive:Archive = project("archive", "archive", new Archive(_),core, file)
   lazy val webSite:WebSite = project("web-site", "web-site", new WebSite(_),core, file)
 
@@ -58,16 +59,19 @@ class ScalaIOProject(info: ProjectInfo)
       </span>
   }
 
+  class PerfProject(info: ProjectInfo)
+          extends DefaultProject(info)  {
+    val sperf = "com.github.jsuereth" %% "sperformance" % "0.1"
+  }
+
   class TestProject(info: ProjectInfo)
           extends DefaultProject(info)  with MavenPublishing {
 
     val mockito = "org.mockito" % "mockito-all" % "1.8.0"
-    val junitInterface = "com.novocode" % "junit-interface" % "0.5"
+    val junitInterface = "com.novocode" % "junit-interface" % "0.6"
 
     override def testScalaSourcePath = mainScalaSourcePath
     override def testResourcesPath = mainResourcesPath
-
-
   }
 
   class File(info: ProjectInfo)

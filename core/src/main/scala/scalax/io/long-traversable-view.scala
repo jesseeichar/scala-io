@@ -21,7 +21,9 @@ import TraversableView.NoBuilder
  * [[http://www.scala-lang.org/api/current/scala/collection/TraversableView.html]] except adding the LongTraversable
  * methods
  */
-trait LongTraversableView[+A, +Coll] extends LongTraversableViewLike[A, Coll, LongTraversableView[A, Coll]]
+trait LongTraversableView[+A, +Coll] extends LongTraversableViewLike[A, Coll, LongTraversableView[A, Coll]] {
+  override def toString() = "LongTraversableView(...)"
+}
 
 /**
  * Defines the required canBuildFrom and Type definitions.  These are required by the collections framework.

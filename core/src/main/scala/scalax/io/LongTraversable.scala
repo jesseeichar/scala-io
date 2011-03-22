@@ -22,6 +22,8 @@ trait LongTraversable[+A] extends Traversable[A]
                             with GenericTraversableTemplate[A, LongTraversable]
                             with LongTraversableLike[A, LongTraversable[A]] {
   override def companion : GenericCompanion[LongTraversable] = LongTraversable
+
+  override def toString() = "LongTraversable(...)"
 }
 
 /**
