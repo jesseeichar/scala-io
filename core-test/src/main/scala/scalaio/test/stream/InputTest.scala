@@ -48,13 +48,5 @@ class InputTest extends AbstractInputTests {
     assertTrue(end-start < 500)
   }
 
-  @Test
-  def issue_9_writer_resource_cannot_be_used_twice {
-    val file = java.io.File.createTempFile("sdfasfasf","asdfas")
-    val resource = Resource.fromFileString(file.getAbsolutePath).writer()
-    resource.acquireFor { _.write("hi")}
-    resource.acquireFor { _.write("ho")}
-    // no exception? good
-  }
 }
 

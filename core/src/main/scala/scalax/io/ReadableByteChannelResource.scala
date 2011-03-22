@@ -17,12 +17,12 @@ class ReadableByteChannelResource[+A <: ReadableByteChannel] protected[io](opene
 
   def buffered = inputStream.buffered
   def inputStream = {
-    val nResource = new ChannelInputStreamAdapter(opener)
+    def nResource = new ChannelInputStreamAdapter(opener)
     val closer = ResourceAdapting.closeAction(closeAction)
     Resource.fromInputStream(nResource)(closer)
   }
   def reader(implicit sourceCodec: Codec) = {
-    val nResource = new ChannelReaderAdapter(opener,sourceCodec)
+    def nResource = new ChannelReaderAdapter(opener,sourceCodec)
     val closer = ResourceAdapting.closeAction(closeAction)
     Resource.fromReader(nResource)(closer)
   }

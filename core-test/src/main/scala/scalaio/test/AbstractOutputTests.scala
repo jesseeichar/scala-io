@@ -81,4 +81,5 @@ abstract class AbstractOutputTests extends scalax.test.sugar.AssertionSugar {
     assertEquals(DEFAULT_DATA + "-" + DEFAULT_DATA + "-" + DEFAULT_DATA, input2.slurpString)
   }
 
+
 }

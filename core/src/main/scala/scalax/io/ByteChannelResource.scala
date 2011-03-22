@@ -15,23 +15,23 @@ class ByteChannelResource[+A <: ByteChannel] protected[io](opener: => A, closeAc
   def appendCloseAction[B >: A](newAction: CloseAction[B]) = new ByteChannelResource(opener,closeAction +: newAction)
 
   def inputStream = {
-    val nResource = new ChannelInputStreamAdapter(opener)
+    def nResource = new ChannelInputStreamAdapter(opener)
     val closer = ResourceAdapting.closeAction(closeAction)
     Resource.fromInputStream(nResource)(closer)
   }
   def outputStream = {
-    val nResource = new ChannelOutputStreamAdapter(opener)
+    def nResource = new ChannelOutputStreamAdapter(opener)
     val closer = ResourceAdapting.closeAction(closeAction)
     Resource.fromOutputStream(nResource)(closer)
   }
   def underlyingOutput = outputStream
   def reader(implicit sourceCodec: Codec) = {
-    val nResource = new ChannelReaderAdapter(opener,sourceCodec)
+    def nResource = new ChannelReaderAdapter(opener,sourceCodec)
     val closer = ResourceAdapting.closeAction(closeAction)
     Resource.fromReader(nResource)(closer)
   }
   def writer(implicit sourceCodec: Codec) = {
-    val nResource = new ChannelWriterAdapter(opener,sourceCodec)
+    def nResource = new ChannelWriterAdapter(opener,sourceCodec)
     val closer = ResourceAdapting.closeAction(closeAction)
     Resource.fromWriter(nResource)(closer)
   }
