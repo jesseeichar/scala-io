@@ -1,0 +1,167 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>scalax.file.attributes</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link type="text/css" media="screen" rel="stylesheet" href="../../../lib/template.css" />
+      <script type="text/javascript" src="../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body onload="windowTitle();" class="value">
+
+      <p id="owner"><a name="scalax" class="extype" href="../../package.html">scalax</a>.<a name="scalax.file" class="extype" href="../package.html">file</a></p>
+
+      <div id="definition">
+        <img src="../../../lib/package_big.png" />
+        <h1>attributes</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="kind">package</span>
+      <span class="symbol">
+        <span class="name">attributes</span>
+        
+        
+        
+      </span>
+      </h4>
+      
+          
+          <div class="fullcomment" id="comment"></div>
+        
+
+      <div id="template">
+
+        <div id="mbrsel">
+          <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+          
+          
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in">Public</li><li class="all out">All</li></ol>
+            </div>
+          <div id="impl">
+              <span class="filtertype">Impl.</span>
+              <ol><li class="concrete in">Concrete</li><li class="abstract in">Abstract</li></ol>
+            </div>
+        </div>
+
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" name="scalax.file.attributes.ExecuteAccessAttribute" data-isabs="false">
+      <a id="ExecuteAccessAttribute:ExecuteAccessAttribute"></a>
+      <h4 class="signature"><a href="ExecuteAccessAttribute.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">ExecuteAccessAttribute</span>
+        
+        <span class="params">(<span name="executable">
+                  executable
+                  : Boolean
+                  
+                </span>)</span>
+        <span class="result"> extends FileAttribute[Boolean] with Product with Serializable</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" name="scalax.file.attributes.FileAttribute" data-isabs="true">
+      <a id="FileAttribute:FileAttribute[T]"></a>
+      <h4 class="signature"><a href="FileAttribute.html">
+      <span class="kind">class</span>
+      <span class="symbol">
+        <span class="name">FileAttribute</span>
+        <span class="tparams">[<span name="T">T</span>]</span>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </a></h4>
+      <p class="comment cmt">Represents a implementation specific attribute
+of a file or directory.</p>
+    </li><li visbl="pub" name="scalax.file.attributes.GenericFileAttribute" data-isabs="false">
+      <a id="GenericFileAttribute:GenericFileAttribute[T]"></a>
+      <h4 class="signature"><a href="GenericFileAttribute.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">GenericFileAttribute</span>
+        <span class="tparams">[<span name="T">T</span>]</span>
+        <span class="params">(<span name="name">
+                  name
+                  : String
+                  
+                </span>, <span name="value">
+                  value
+                  : T
+                  
+                </span>)</span>
+        <span class="result"> extends FileAttribute[T] with Product with Serializable</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" name="scalax.file.attributes.LastModifiedAttribute" data-isabs="false">
+      <a id="LastModifiedAttribute:LastModifiedAttribute"></a>
+      <h4 class="signature"><a href="LastModifiedAttribute.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">LastModifiedAttribute</span>
+        
+        <span class="params">(<span name="value">
+                  value
+                  : Long
+                  
+                </span>)</span>
+        <span class="result"> extends FileAttribute[Long] with Product with Serializable</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" name="scalax.file.attributes.ReadAccessAttribute" data-isabs="false">
+      <a id="ReadAccessAttribute:ReadAccessAttribute"></a>
+      <h4 class="signature"><a href="ReadAccessAttribute.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">ReadAccessAttribute</span>
+        
+        <span class="params">(<span name="readable">
+                  readable
+                  : Boolean
+                  
+                </span>)</span>
+        <span class="result"> extends FileAttribute[Boolean] with Product with Serializable</span>
+      </span>
+      </a></h4>
+      
+    </li><li visbl="pub" name="scalax.file.attributes.WriteAccessAttribute" data-isabs="false">
+      <a id="WriteAccessAttribute:WriteAccessAttribute"></a>
+      <h4 class="signature"><a href="WriteAccessAttribute.html">
+      <span class="kind">case class</span>
+      <span class="symbol">
+        <span class="name">WriteAccessAttribute</span>
+        
+        <span class="params">(<span name="writable">
+                  writable
+                  : Boolean
+                  
+                </span>)</span>
+        <span class="result"> extends FileAttribute[Boolean] with Product with Serializable</span>
+      </span>
+      </a></h4>
+      
+    </li></ol>
+            </div>
+
+        
+
+        
+
+      </div>
+      
+      <div id="tooltip"></div>
+      
+    </body>
+      </html>

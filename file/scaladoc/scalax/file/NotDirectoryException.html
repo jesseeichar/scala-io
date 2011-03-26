@@ -2,39 +2,73 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
         <head>
-          <title>scalax.file.ramfs.RamURLConnection</title>
+          <title>scalax.file.NotDirectoryException</title>
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link type="text/css" media="screen" rel="stylesheet" href="../../../lib/template.css" />
-      <script type="text/javascript" src="../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="../../../lib/template.js"></script>
-      <script type="text/javascript" src="../../../lib/tools.tooltip.js"></script>
+      <link type="text/css" media="screen" rel="stylesheet" href="../../lib/template.css" />
+      <script type="text/javascript" src="../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../lib/template.js"></script>
+      <script type="text/javascript" src="../../lib/tools.tooltip.js"></script>
     
         </head>
         <body onload="windowTitle();" class="type">
 
-      <p id="owner"><a name="scalax" class="extype" href="../../package.html">scalax</a>.<a name="scalax.file" class="extype" href="../package.html">file</a>.<a name="scalax.file.ramfs" class="extype" href="package.html">ramfs</a></p>
+      <p id="owner"><a name="scalax" class="extype" href="../package.html">scalax</a>.<a name="scalax.file" class="extype" href="package.html">file</a></p>
 
       <div id="definition">
-        <img src="../../../lib/class_big.png" />
-        <h1>RamURLConnection</h1>
+        <img src="../../lib/class_big.png" />
+        <h1>NotDirectoryException</h1>
       </div>
 
       <h4 class="signature" id="signature">
-      <span class="kind">class</span>
+      <span class="kind">case class</span>
       <span class="symbol">
-        <span class="name">RamURLConnection</span>
+        <span class="name">NotDirectoryException</span>
         
-        
-        <span class="result"> extends <span name="java.net.URLConnection" class="extype">URLConnection</span></span>
+        <span class="params">()</span>
+        <span class="result"> extends <span name="java.io.IOException" class="extype">IOException</span> with <span name="scala.util.control.ControlThrowable" class="extype">ControlThrowable</span> with <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
       </span>
       </h4>
       
-          
-          <div class="fullcomment" id="comment"><div class="block">
-            linear super types: <span name="java.net.URLConnection" class="extype">URLConnection</span>, AnyRef, <span name="scala.Any" class="extype">Any</span>
-          </div></div>
+          <div class="shortcomment cmt"><p>This is a control exception that indicates the underlying filesystem object either does not exist or is not a Directory</p><p>To safely use <code> PathSet</code> one should use the following code:
+<pre>
+&lt;code&gt;
+import scala.util.control.Exception._
+catching(classOf[NotDirectoryException]) opt {
+  ds map (_.name)
+} match {
+  case None =&gt; println (&quot;Oh no the path is not a directory!&quot;)
+  case Some(names) =&gt; println (&quot;oh everything went as planned and we got all the names: &quot;+names)
+}
+&lt;/code&gt;
+</pre>
+</p></div>
+          <div class="fullcomment" id="comment"><div class="comment cmt"><p>This is a control exception that indicates the underlying filesystem object either does not exist or is not a Directory</p><p>To safely use <code> PathSet</code> one should use the following code:
+<pre>
+&lt;code&gt;
+import scala.util.control.Exception._
+catching(classOf[NotDirectoryException]) opt {
+  ds map (_.name)
+} match {
+  case None =&gt; println (&quot;Oh no the path is not a directory!&quot;)
+  case Some(names) =&gt; println (&quot;oh everything went as planned and we got all the names: &quot;+names)
+}
+&lt;/code&gt;
+</pre>
+</p></div><div class="block">
+            go to: <a href="NotDirectoryException$.html">companion</a>
+          </div><div class="block">
+            linear super types: <span name="scala.Serializable" class="extype">Serializable</span>, <span name="scala.Product" class="extype">Product</span>, <span name="scala.Equals" class="extype">Equals</span>, <span name="scala.util.control.ControlThrowable" class="extype">ControlThrowable</span>, <span name="scala.util.control.NoStackTrace" class="extype">NoStackTrace</span>, <span name="java.io.IOException" class="extype">IOException</span>, <span name="java.lang.Exception" class="extype">Exception</span>, <span name="java.lang.Throwable" class="extype">Throwable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, AnyRef, <span name="scala.Any" class="extype">Any</span>
+          </div>
+            
+            
+            <div class="block"><ol>since
+                  <li class="cmt"><p>1.0
+</p></li>
+                </ol></div>
+            
+          </div>
         
 
       <div id="template">
@@ -48,7 +82,7 @@
           <div id="ancestors">
                 <span class="filtertype">Inherited</span>
                 <ol><li class="hideall">Hide All</li><li class="showall">Show all</li></ol>
-                <ol id="linearization"><li name="scalax.file.ramfs.RamURLConnection" class="in">RamURLConnection</li><li name="java.net.URLConnection" class="in">URLConnection</li><li name="scala.AnyRef" class="in">AnyRef</li><li name="scala.Any" class="in">Any</li></ol>
+                <ol id="linearization"><li name="scalax.file.NotDirectoryException" class="in">NotDirectoryException</li><li name="scala.Serializable" class="in">Serializable</li><li name="scala.Product" class="in">Product</li><li name="scala.Equals" class="in">Equals</li><li name="scala.util.control.ControlThrowable" class="in">ControlThrowable</li><li name="scala.util.control.NoStackTrace" class="in">NoStackTrace</li><li name="java.io.IOException" class="in">IOException</li><li name="java.lang.Exception" class="in">Exception</li><li name="java.lang.Throwable" class="in">Throwable</li><li name="java.io.Serializable" class="in">Serializable</li><li name="scala.AnyRef" class="in">AnyRef</li><li name="scala.Any" class="in">Any</li></ol>
               </div>
           <div id="visbl">
               <span class="filtertype">Visibility</span>
@@ -62,18 +96,14 @@
 
         <div class="members" id="constructors">
               <h3>Instance constructors</h3>
-              <ol><li visbl="pub" name="scalax.file.ramfs.RamURLConnection#this" data-isabs="false">
-      <a id="this:RamURLConnection"></a>
+              <ol><li visbl="pub" name="scalax.file.NotDirectoryException#this" data-isabs="false">
+      <a id="this:NotDirectoryException"></a>
       <h4 class="signature">
       <span class="kind">new</span>
       <span class="symbol">
-        <span class="name">RamURLConnection</span>
+        <span class="name">NotDirectoryException</span>
         
-        <span class="params">(<span name="url">
-                  url
-                  : <span name="java.net.URL" class="extype">URL</span>
-                  
-                </span>)</span>
+        <span class="params">()</span>
         
       </span>
       </h4>
@@ -252,31 +282,6 @@
             
           </div>
           
-    </li><li visbl="pub" name="java.net.URLConnection#addRequestProperty" data-isabs="false">
-      <a id="addRequestProperty(String,String):Unit"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol">
-        <span class="name">addRequestProperty</span>
-        
-        <span class="params">(<span name="arg0">
-                  arg0
-                  : <span name="java.lang.String" class="extype">String</span>
-                  
-                </span>, <span name="arg1">
-                  arg1
-                  : <span name="java.lang.String" class="extype">String</span>
-                  
-                </span>)</span>
-        <span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
-      </span>
-      </h4>
-      
-            
-            <div class="fullcomment"><div class="block">
-          definition classes: URLConnection
-        </div></div>
-          
     </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
@@ -305,6 +310,27 @@ part of compilation it is not possible to check whether the contents of the list
             
           </div>
           
+    </li><li visbl="pub" name="scalax.file.NotDirectoryException#canEqual" data-isabs="false">
+      <a id="canEqual(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">canEqual</span>
+        
+        <span class="params">(<span name="arg0">
+                  arg0
+                  : <span name="scala.Any" class="extype">Any</span>
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a name="scalax.file.NotDirectoryException" class="extype" href="">NotDirectoryException</a> → Equals
+        </div></div>
+          
     </li><li visbl="prt" name="scala.AnyRef#clone" data-isabs="false">
       <a id="clone():AnyRef"></a>
       <h4 class="signature">
@@ -320,7 +346,7 @@ part of compilation it is not possible to check whether the contents of the list
             <p class="shortcomment cmt">This method creates and returns a copy of the receiver object.</p>
             <div class="fullcomment"><div class="comment cmt"><p>This method creates and returns a copy of the receiver object.</p><p>The default implementation of the <code>clone</code> method is platform dependent.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a copy of the receiver object.</p></dd></dl><div class="block">
-          attributes: protected[<a name="java.lang" class="extype" href="../../../java/lang/package.html">lang</a>] 
+          attributes: protected[<a name="java.lang" class="extype" href="../../java/lang/package.html">lang</a>] 
         </div><div class="block">
           definition classes: AnyRef
         </div><div class="block">
@@ -333,23 +359,6 @@ part of compilation it is not possible to check whether the contents of the list
             
             
           </div>
-          
-    </li><li visbl="pub" name="scalax.file.ramfs.RamURLConnection#connect" data-isabs="false">
-      <a id="connect():Unit"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol">
-        <span class="name">connect</span>
-        
-        <span class="params">()</span>
-        <span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
-      </span>
-      </h4>
-      
-            
-            <div class="fullcomment"><div class="block">
-          definition classes: <a name="scalax.file.ramfs.RamURLConnection" class="extype" href="">RamURLConnection</a> → URLConnection
-        </div></div>
           
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
@@ -394,7 +403,7 @@ should be equal to each other (<code>o1 == o2</code>) and they should hash to th
             
           </div>
           
-    </li><li visbl="pub" name="scala.AnyRef#equals" data-isabs="false">
+    </li><li visbl="pub" name="scalax.file.NotDirectoryException#equals" data-isabs="false">
       <a id="equals(Any):Boolean"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -422,13 +431,30 @@ Additionally, when overriding this method it is often necessary to override <cod
 that are &quot;equal&quot; (<code>o1.equals(o2)</code> returns <code>true</code>) hash to the same scala.Int
 (<code>o1.hashCode.equals(o2.hashCode)</code>).
 </p></div><dl class="paramcmts block"><dt class="param">arg0</dt><dd class="cmt"><p>the object to compare against this object for equality.</p></dd><dt>returns</dt><dd class="cmt"><p><code>true</code> if the receiver object is equivalent to the argument; <code>false</code> otherwise.</p></dd></dl><div class="block">
-          definition classes: AnyRef → Any
+          definition classes: <a name="scalax.file.NotDirectoryException" class="extype" href="">NotDirectoryException</a> → Equals → AnyRef → Any
         </div>
             
             
             
             
           </div>
+          
+    </li><li visbl="pub" name="scala.util.control.NoStackTrace#fillInStackTrace" data-isabs="false">
+      <a id="fillInStackTrace():Throwable"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">fillInStackTrace</span>
+        
+        <span class="params">()</span>
+        <span class="result">: Throwable</span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: NoStackTrace → Throwable
+        </div></div>
           
     </li><li visbl="prt" name="scala.AnyRef#finalize" data-isabs="false">
       <a id="finalize():Unit"></a>
@@ -447,7 +473,7 @@ there are no more references to the object.</p>
             <div class="fullcomment"><div class="comment cmt"><p>This method is called by the garbage collector on the receiver object when garbage collection determines that
 there are no more references to the object.</p><p>The details of when and if the <code>finalize</code> method are invoked, as well as the interaction between <code>finalize</code>
 and non-local returns and exceptions, are all platform dependent.</p></div><div class="block">
-          attributes: protected[<a name="java.lang" class="extype" href="../../../java/lang/package.html">lang</a>] 
+          attributes: protected[<a name="java.lang" class="extype" href="../../java/lang/package.html">lang</a>] 
         </div><div class="block">
           definition classes: AnyRef
         </div><div class="block">
@@ -461,21 +487,21 @@ and non-local returns and exceptions, are all platform dependent.</p></div><div 
             
           </div>
           
-    </li><li visbl="pub" name="java.net.URLConnection#getAllowUserInteraction" data-isabs="false">
-      <a id="getAllowUserInteraction():Boolean"></a>
+    </li><li visbl="pub" name="java.lang.Throwable#getCause" data-isabs="false">
+      <a id="getCause():Throwable"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
-        <span class="name">getAllowUserInteraction</span>
+        <span class="name">getCause</span>
         
         <span class="params">()</span>
-        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+        <span class="result">: <span name="java.lang.Throwable" class="extype">Throwable</span></span>
       </span>
       </h4>
       
             
             <div class="fullcomment"><div class="block">
-          definition classes: URLConnection
+          definition classes: Throwable
         </div></div>
           
     </li><li visbl="pub" name="scala.AnyRef#getClass" data-isabs="false">
@@ -503,75 +529,12 @@ and non-local returns and exceptions, are all platform dependent.</p></div><div 
             
           </div>
           
-    </li><li visbl="pub" name="java.net.URLConnection#getConnectTimeout" data-isabs="false">
-      <a id="getConnectTimeout():Int"></a>
+    </li><li visbl="pub" name="java.lang.Throwable#getLocalizedMessage" data-isabs="false">
+      <a id="getLocalizedMessage():String"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
-        <span class="name">getConnectTimeout</span>
-        
-        <span class="params">()</span>
-        <span class="result">: <span name="scala.Int" class="extype">Int</span></span>
-      </span>
-      </h4>
-      
-            
-            <div class="fullcomment"><div class="block">
-          definition classes: URLConnection
-        </div></div>
-          
-    </li><li visbl="pub" name="java.net.URLConnection#getContent" data-isabs="false">
-      <a id="getContent(Array[java.lang.Class[_]]):AnyRef"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol">
-        <span class="name">getContent</span>
-        
-        <span class="params">(<span name="arg0">
-                  arg0
-                  : <span name="scala.Array" class="extype">Array</span>[java.lang.Class[_]]
-                  
-                </span>)</span>
-        <span class="result">: AnyRef</span>
-      </span>
-      </h4>
-      
-            
-            <div class="fullcomment"><div class="block">
-          definition classes: URLConnection
-        </div><div class="block">
-          annotations: 
-                <span class="name">@throws</span><span class="args">()</span>
-              
-        </div></div>
-          
-    </li><li visbl="pub" name="java.net.URLConnection#getContent" data-isabs="false">
-      <a id="getContent():AnyRef"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol">
-        <span class="name">getContent</span>
-        
-        <span class="params">()</span>
-        <span class="result">: AnyRef</span>
-      </span>
-      </h4>
-      
-            
-            <div class="fullcomment"><div class="block">
-          definition classes: URLConnection
-        </div><div class="block">
-          annotations: 
-                <span class="name">@throws</span><span class="args">()</span>
-              
-        </div></div>
-          
-    </li><li visbl="pub" name="java.net.URLConnection#getContentEncoding" data-isabs="false">
-      <a id="getContentEncoding():String"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol">
-        <span class="name">getContentEncoding</span>
+        <span class="name">getLocalizedMessage</span>
         
         <span class="params">()</span>
         <span class="result">: <span name="java.lang.String" class="extype">String</span></span>
@@ -580,32 +543,15 @@ and non-local returns and exceptions, are all platform dependent.</p></div><div 
       
             
             <div class="fullcomment"><div class="block">
-          definition classes: URLConnection
+          definition classes: Throwable
         </div></div>
           
-    </li><li visbl="pub" name="scalax.file.ramfs.RamURLConnection#getContentLength" data-isabs="false">
-      <a id="getContentLength():Int"></a>
+    </li><li visbl="pub" name="java.lang.Throwable#getMessage" data-isabs="false">
+      <a id="getMessage():String"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
-        <span class="name">getContentLength</span>
-        
-        <span class="params">()</span>
-        <span class="result">: <span name="scala.Int" class="extype">Int</span></span>
-      </span>
-      </h4>
-      
-            
-            <div class="fullcomment"><div class="block">
-          definition classes: <a name="scalax.file.ramfs.RamURLConnection" class="extype" href="">RamURLConnection</a> → URLConnection
-        </div></div>
-          
-    </li><li visbl="pub" name="java.net.URLConnection#getContentType" data-isabs="false">
-      <a id="getContentType():String"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol">
-        <span class="name">getContentType</span>
+        <span class="name">getMessage</span>
         
         <span class="params">()</span>
         <span class="result">: <span name="java.lang.String" class="extype">String</span></span>
@@ -614,403 +560,27 @@ and non-local returns and exceptions, are all platform dependent.</p></div><div 
       
             
             <div class="fullcomment"><div class="block">
-          definition classes: URLConnection
+          definition classes: Throwable
         </div></div>
           
-    </li><li visbl="pub" name="java.net.URLConnection#getDate" data-isabs="false">
-      <a id="getDate():Long"></a>
+    </li><li visbl="pub" name="java.lang.Throwable#getStackTrace" data-isabs="false">
+      <a id="getStackTrace():Array[StackTraceElement]"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
-        <span class="name">getDate</span>
+        <span class="name">getStackTrace</span>
         
         <span class="params">()</span>
-        <span class="result">: <span name="scala.Long" class="extype">Long</span></span>
+        <span class="result">: <span name="scala.Array" class="extype">Array</span>[<span name="java.lang.StackTraceElement" class="extype">StackTraceElement</span>]</span>
       </span>
       </h4>
       
             
             <div class="fullcomment"><div class="block">
-          definition classes: URLConnection
+          definition classes: Throwable
         </div></div>
           
-    </li><li visbl="pub" name="java.net.URLConnection#getDefaultUseCaches" data-isabs="false">
-      <a id="getDefaultUseCaches():Boolean"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol">
-        <span class="name">getDefaultUseCaches</span>
-        
-        <span class="params">()</span>
-        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
-      </span>
-      </h4>
-      
-            
-            <div class="fullcomment"><div class="block">
-          definition classes: URLConnection
-        </div></div>
-          
-    </li><li visbl="pub" name="java.net.URLConnection#getDoInput" data-isabs="false">
-      <a id="getDoInput():Boolean"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol">
-        <span class="name">getDoInput</span>
-        
-        <span class="params">()</span>
-        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
-      </span>
-      </h4>
-      
-            
-            <div class="fullcomment"><div class="block">
-          definition classes: URLConnection
-        </div></div>
-          
-    </li><li visbl="pub" name="java.net.URLConnection#getDoOutput" data-isabs="false">
-      <a id="getDoOutput():Boolean"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol">
-        <span class="name">getDoOutput</span>
-        
-        <span class="params">()</span>
-        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
-      </span>
-      </h4>
-      
-            
-            <div class="fullcomment"><div class="block">
-          definition classes: URLConnection
-        </div></div>
-          
-    </li><li visbl="pub" name="java.net.URLConnection#getExpiration" data-isabs="false">
-      <a id="getExpiration():Long"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol">
-        <span class="name">getExpiration</span>
-        
-        <span class="params">()</span>
-        <span class="result">: <span name="scala.Long" class="extype">Long</span></span>
-      </span>
-      </h4>
-      
-            
-            <div class="fullcomment"><div class="block">
-          definition classes: URLConnection
-        </div></div>
-          
-    </li><li visbl="pub" name="java.net.URLConnection#getHeaderField" data-isabs="false">
-      <a id="getHeaderField(Int):String"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol">
-        <span class="name">getHeaderField</span>
-        
-        <span class="params">(<span name="arg0">
-                  arg0
-                  : <span name="scala.Int" class="extype">Int</span>
-                  
-                </span>)</span>
-        <span class="result">: <span name="java.lang.String" class="extype">String</span></span>
-      </span>
-      </h4>
-      
-            
-            <div class="fullcomment"><div class="block">
-          definition classes: URLConnection
-        </div></div>
-          
-    </li><li visbl="pub" name="java.net.URLConnection#getHeaderField" data-isabs="false">
-      <a id="getHeaderField(String):String"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol">
-        <span class="name">getHeaderField</span>
-        
-        <span class="params">(<span name="arg0">
-                  arg0
-                  : <span name="java.lang.String" class="extype">String</span>
-                  
-                </span>)</span>
-        <span class="result">: <span name="java.lang.String" class="extype">String</span></span>
-      </span>
-      </h4>
-      
-            
-            <div class="fullcomment"><div class="block">
-          definition classes: URLConnection
-        </div></div>
-          
-    </li><li visbl="pub" name="java.net.URLConnection#getHeaderFieldDate" data-isabs="false">
-      <a id="getHeaderFieldDate(String,Long):Long"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol">
-        <span class="name">getHeaderFieldDate</span>
-        
-        <span class="params">(<span name="arg0">
-                  arg0
-                  : <span name="java.lang.String" class="extype">String</span>
-                  
-                </span>, <span name="arg1">
-                  arg1
-                  : <span name="scala.Long" class="extype">Long</span>
-                  
-                </span>)</span>
-        <span class="result">: <span name="scala.Long" class="extype">Long</span></span>
-      </span>
-      </h4>
-      
-            
-            <div class="fullcomment"><div class="block">
-          definition classes: URLConnection
-        </div></div>
-          
-    </li><li visbl="pub" name="java.net.URLConnection#getHeaderFieldInt" data-isabs="false">
-      <a id="getHeaderFieldInt(String,Int):Int"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol">
-        <span class="name">getHeaderFieldInt</span>
-        
-        <span class="params">(<span name="arg0">
-                  arg0
-                  : <span name="java.lang.String" class="extype">String</span>
-                  
-                </span>, <span name="arg1">
-                  arg1
-                  : <span name="scala.Int" class="extype">Int</span>
-                  
-                </span>)</span>
-        <span class="result">: <span name="scala.Int" class="extype">Int</span></span>
-      </span>
-      </h4>
-      
-            
-            <div class="fullcomment"><div class="block">
-          definition classes: URLConnection
-        </div></div>
-          
-    </li><li visbl="pub" name="java.net.URLConnection#getHeaderFieldKey" data-isabs="false">
-      <a id="getHeaderFieldKey(Int):String"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol">
-        <span class="name">getHeaderFieldKey</span>
-        
-        <span class="params">(<span name="arg0">
-                  arg0
-                  : <span name="scala.Int" class="extype">Int</span>
-                  
-                </span>)</span>
-        <span class="result">: <span name="java.lang.String" class="extype">String</span></span>
-      </span>
-      </h4>
-      
-            
-            <div class="fullcomment"><div class="block">
-          definition classes: URLConnection
-        </div></div>
-          
-    </li><li visbl="pub" name="java.net.URLConnection#getHeaderFields" data-isabs="false">
-      <a id="getHeaderFields():Map[String, List[String]]"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol">
-        <span class="name">getHeaderFields</span>
-        
-        <span class="params">()</span>
-        <span class="result">: <span name="java.util.Map" class="extype">Map</span>[<span name="java.lang.String" class="extype">String</span>, <span name="java.util.List" class="extype">List</span>[<span name="java.lang.String" class="extype">String</span>]]</span>
-      </span>
-      </h4>
-      
-            
-            <div class="fullcomment"><div class="block">
-          definition classes: URLConnection
-        </div></div>
-          
-    </li><li visbl="pub" name="java.net.URLConnection#getIfModifiedSince" data-isabs="false">
-      <a id="getIfModifiedSince():Long"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol">
-        <span class="name">getIfModifiedSince</span>
-        
-        <span class="params">()</span>
-        <span class="result">: <span name="scala.Long" class="extype">Long</span></span>
-      </span>
-      </h4>
-      
-            
-            <div class="fullcomment"><div class="block">
-          definition classes: URLConnection
-        </div></div>
-          
-    </li><li visbl="pub" name="scalax.file.ramfs.RamURLConnection#getInputStream" data-isabs="false">
-      <a id="getInputStream():InputStream"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol">
-        <span class="name">getInputStream</span>
-        
-        <span class="params">()</span>
-        <span class="result">: <span name="java.io.InputStream" class="extype">InputStream</span></span>
-      </span>
-      </h4>
-      
-            
-            <div class="fullcomment"><div class="block">
-          definition classes: <a name="scalax.file.ramfs.RamURLConnection" class="extype" href="">RamURLConnection</a> → URLConnection
-        </div></div>
-          
-    </li><li visbl="pub" name="scalax.file.ramfs.RamURLConnection#getLastModified" data-isabs="false">
-      <a id="getLastModified():Long"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol">
-        <span class="name">getLastModified</span>
-        
-        <span class="params">()</span>
-        <span class="result">: <span name="scala.Long" class="extype">Long</span></span>
-      </span>
-      </h4>
-      
-            
-            <div class="fullcomment"><div class="block">
-          definition classes: <a name="scalax.file.ramfs.RamURLConnection" class="extype" href="">RamURLConnection</a> → URLConnection
-        </div></div>
-          
-    </li><li visbl="pub" name="scalax.file.ramfs.RamURLConnection#getOutputStream" data-isabs="false">
-      <a id="getOutputStream():OutputStream"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol">
-        <span class="name">getOutputStream</span>
-        
-        <span class="params">()</span>
-        <span class="result">: <span name="java.io.OutputStream" class="extype">OutputStream</span></span>
-      </span>
-      </h4>
-      
-            
-            <div class="fullcomment"><div class="block">
-          definition classes: <a name="scalax.file.ramfs.RamURLConnection" class="extype" href="">RamURLConnection</a> → URLConnection
-        </div></div>
-          
-    </li><li visbl="pub" name="java.net.URLConnection#getPermission" data-isabs="false">
-      <a id="getPermission():Permission"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol">
-        <span class="name">getPermission</span>
-        
-        <span class="params">()</span>
-        <span class="result">: <span name="java.security.Permission" class="extype">Permission</span></span>
-      </span>
-      </h4>
-      
-            
-            <div class="fullcomment"><div class="block">
-          definition classes: URLConnection
-        </div><div class="block">
-          annotations: 
-                <span class="name">@throws</span><span class="args">()</span>
-              
-        </div></div>
-          
-    </li><li visbl="pub" name="java.net.URLConnection#getReadTimeout" data-isabs="false">
-      <a id="getReadTimeout():Int"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol">
-        <span class="name">getReadTimeout</span>
-        
-        <span class="params">()</span>
-        <span class="result">: <span name="scala.Int" class="extype">Int</span></span>
-      </span>
-      </h4>
-      
-            
-            <div class="fullcomment"><div class="block">
-          definition classes: URLConnection
-        </div></div>
-          
-    </li><li visbl="pub" name="java.net.URLConnection#getRequestProperties" data-isabs="false">
-      <a id="getRequestProperties():Map[String, List[String]]"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol">
-        <span class="name">getRequestProperties</span>
-        
-        <span class="params">()</span>
-        <span class="result">: <span name="java.util.Map" class="extype">Map</span>[<span name="java.lang.String" class="extype">String</span>, <span name="java.util.List" class="extype">List</span>[<span name="java.lang.String" class="extype">String</span>]]</span>
-      </span>
-      </h4>
-      
-            
-            <div class="fullcomment"><div class="block">
-          definition classes: URLConnection
-        </div></div>
-          
-    </li><li visbl="pub" name="java.net.URLConnection#getRequestProperty" data-isabs="false">
-      <a id="getRequestProperty(String):String"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol">
-        <span class="name">getRequestProperty</span>
-        
-        <span class="params">(<span name="arg0">
-                  arg0
-                  : <span name="java.lang.String" class="extype">String</span>
-                  
-                </span>)</span>
-        <span class="result">: <span name="java.lang.String" class="extype">String</span></span>
-      </span>
-      </h4>
-      
-            
-            <div class="fullcomment"><div class="block">
-          definition classes: URLConnection
-        </div></div>
-          
-    </li><li visbl="pub" name="java.net.URLConnection#getURL" data-isabs="false">
-      <a id="getURL():URL"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol">
-        <span class="name">getURL</span>
-        
-        <span class="params">()</span>
-        <span class="result">: <span name="java.net.URL" class="extype">URL</span></span>
-      </span>
-      </h4>
-      
-            
-            <div class="fullcomment"><div class="block">
-          definition classes: URLConnection
-        </div></div>
-          
-    </li><li visbl="pub" name="java.net.URLConnection#getUseCaches" data-isabs="false">
-      <a id="getUseCaches():Boolean"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol">
-        <span class="name">getUseCaches</span>
-        
-        <span class="params">()</span>
-        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
-      </span>
-      </h4>
-      
-            
-            <div class="fullcomment"><div class="block">
-          definition classes: URLConnection
-        </div></div>
-          
-    </li><li visbl="pub" name="scala.AnyRef#hashCode" data-isabs="false">
+    </li><li visbl="pub" name="scalax.file.NotDirectoryException#hashCode" data-isabs="false">
       <a id="hashCode():Int"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -1029,13 +599,34 @@ However, it is required that if two objects are equal (<code>o1.equals(o2)</code
 identical hash codes (<code>o1.hashCode.equals(o2.hashCode)</code>).  Therefore, when overriding this method, be sure
 to verify that the behavior is consistent with the <code>equals</code> method.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the hash code value for the object.</p></dd></dl><div class="block">
-          definition classes: AnyRef → Any
+          definition classes: <a name="scalax.file.NotDirectoryException" class="extype" href="">NotDirectoryException</a> → AnyRef → Any
         </div>
             
             
             
             
           </div>
+          
+    </li><li visbl="pub" name="java.lang.Throwable#initCause" data-isabs="false">
+      <a id="initCause(Throwable):Throwable"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">initCause</span>
+        
+        <span class="params">(<span name="arg0">
+                  arg0
+                  : <span name="java.lang.Throwable" class="extype">Throwable</span>
+                  
+                </span>)</span>
+        <span class="result">: <span name="java.lang.Throwable" class="extype">Throwable</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: Throwable
+        </div></div>
           
     </li><li visbl="pub" name="scala.Any#isInstanceOf" data-isabs="false">
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -1142,28 +733,16 @@ possible to check whether the contents of the list are of the requested typed.
             
           </div>
           
-    </li><li visbl="pub" name="scalax.file.ramfs.RamURLConnection#path" data-isabs="false">
-      <a id="path:Path"></a>
-      <h4 class="signature">
-      <span class="kind">lazy val</span>
-      <span class="symbol">
-        <span class="name">path</span>
-        
-        
-        <span class="result">: <a name="scalax.file.Path" class="extype" href="../Path.html">Path</a></span>
-      </span>
-      </h4>
-      
-    </li><li visbl="pub" name="java.net.URLConnection#setAllowUserInteraction" data-isabs="false">
-      <a id="setAllowUserInteraction(Boolean):Unit"></a>
+    </li><li visbl="pub" name="java.lang.Throwable#printStackTrace" data-isabs="false">
+      <a id="printStackTrace(PrintWriter):Unit"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
-        <span class="name">setAllowUserInteraction</span>
+        <span class="name">printStackTrace</span>
         
         <span class="params">(<span name="arg0">
                   arg0
-                  : <span name="scala.Boolean" class="extype">Boolean</span>
+                  : <span name="java.io.PrintWriter" class="extype">PrintWriter</span>
                   
                 </span>)</span>
         <span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
@@ -1172,40 +751,152 @@ possible to check whether the contents of the list are of the requested typed.
       
             
             <div class="fullcomment"><div class="block">
-          definition classes: URLConnection
+          definition classes: Throwable
         </div></div>
           
-    </li><li visbl="pub" name="java.net.URLConnection#setConnectTimeout" data-isabs="false">
-      <a id="setConnectTimeout(Int):Unit"></a>
+    </li><li visbl="pub" name="java.lang.Throwable#printStackTrace" data-isabs="false">
+      <a id="printStackTrace(PrintStream):Unit"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
-        <span class="name">setConnectTimeout</span>
+        <span class="name">printStackTrace</span>
+        
+        <span class="params">(<span name="arg0">
+                  arg0
+                  : <span name="java.io.PrintStream" class="extype">PrintStream</span>
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: Throwable
+        </div></div>
+          
+    </li><li visbl="pub" name="java.lang.Throwable#printStackTrace" data-isabs="false">
+      <a id="printStackTrace():Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">printStackTrace</span>
+        
+        <span class="params">()</span>
+        <span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: Throwable
+        </div></div>
+          
+    </li><li visbl="pub" name="scalax.file.NotDirectoryException#productArity" data-isabs="false">
+      <a id="productArity:Int"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">productArity</span>
+        
+        
+        <span class="result">: <span name="scala.Int" class="extype">Int</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a name="scalax.file.NotDirectoryException" class="extype" href="">NotDirectoryException</a> → Product
+        </div></div>
+          
+    </li><li visbl="pub" name="scalax.file.NotDirectoryException#productElement" data-isabs="false">
+      <a id="productElement(Int):Any"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">productElement</span>
         
         <span class="params">(<span name="arg0">
                   arg0
                   : <span name="scala.Int" class="extype">Int</span>
                   
                 </span>)</span>
-        <span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="result">: <span name="scala.Any" class="extype">Any</span></span>
       </span>
       </h4>
       
             
             <div class="fullcomment"><div class="block">
-          definition classes: URLConnection
+          definition classes: <a name="scalax.file.NotDirectoryException" class="extype" href="">NotDirectoryException</a> → Product
         </div></div>
           
-    </li><li visbl="pub" name="java.net.URLConnection#setDefaultUseCaches" data-isabs="false">
-      <a id="setDefaultUseCaches(Boolean):Unit"></a>
+    </li><li visbl="pub" name="scala.Product#productElements" data-isabs="false">
+      <a id="productElements:Iterator[Any]"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
-        <span class="name">setDefaultUseCaches</span>
+        <span class="name deprecated">productElements</span>
+        
+        
+        <span class="result">: Iterator[<span name="scala.Any" class="extype">Any</span>]</span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: Product
+        </div><div class="block">
+          annotations: 
+                <span class="name">@deprecated</span><span class="args">()</span>
+              
+        </div><div class="block"><ol>deprecated:
+          <li class="cmt"><p>use productIterator instead</p></li>
+        </ol></div></div>
+          
+    </li><li visbl="pub" name="scala.Product#productIterator" data-isabs="false">
+      <a id="productIterator:Iterator[Any]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">productIterator</span>
+        
+        
+        <span class="result">: Iterator[<span name="scala.Any" class="extype">Any</span>]</span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: Product
+        </div></div>
+          
+    </li><li visbl="pub" name="scalax.file.NotDirectoryException#productPrefix" data-isabs="false">
+      <a id="productPrefix:String"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">productPrefix</span>
+        
+        
+        <span class="result">: <span name="java.lang.String" class="extype">String</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: <a name="scalax.file.NotDirectoryException" class="extype" href="">NotDirectoryException</a> → Product
+        </div></div>
+          
+    </li><li visbl="pub" name="java.lang.Throwable#setStackTrace" data-isabs="false">
+      <a id="setStackTrace(Array[StackTraceElement]):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">setStackTrace</span>
         
         <span class="params">(<span name="arg0">
                   arg0
-                  : <span name="scala.Boolean" class="extype">Boolean</span>
+                  : <span name="scala.Array" class="extype">Array</span>[<span name="java.lang.StackTraceElement" class="extype">StackTraceElement</span>]
                   
                 </span>)</span>
         <span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
@@ -1214,137 +905,7 @@ possible to check whether the contents of the list are of the requested typed.
       
             
             <div class="fullcomment"><div class="block">
-          definition classes: URLConnection
-        </div></div>
-          
-    </li><li visbl="pub" name="java.net.URLConnection#setDoInput" data-isabs="false">
-      <a id="setDoInput(Boolean):Unit"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol">
-        <span class="name">setDoInput</span>
-        
-        <span class="params">(<span name="arg0">
-                  arg0
-                  : <span name="scala.Boolean" class="extype">Boolean</span>
-                  
-                </span>)</span>
-        <span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
-      </span>
-      </h4>
-      
-            
-            <div class="fullcomment"><div class="block">
-          definition classes: URLConnection
-        </div></div>
-          
-    </li><li visbl="pub" name="java.net.URLConnection#setDoOutput" data-isabs="false">
-      <a id="setDoOutput(Boolean):Unit"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol">
-        <span class="name">setDoOutput</span>
-        
-        <span class="params">(<span name="arg0">
-                  arg0
-                  : <span name="scala.Boolean" class="extype">Boolean</span>
-                  
-                </span>)</span>
-        <span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
-      </span>
-      </h4>
-      
-            
-            <div class="fullcomment"><div class="block">
-          definition classes: URLConnection
-        </div></div>
-          
-    </li><li visbl="pub" name="java.net.URLConnection#setIfModifiedSince" data-isabs="false">
-      <a id="setIfModifiedSince(Long):Unit"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol">
-        <span class="name">setIfModifiedSince</span>
-        
-        <span class="params">(<span name="arg0">
-                  arg0
-                  : <span name="scala.Long" class="extype">Long</span>
-                  
-                </span>)</span>
-        <span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
-      </span>
-      </h4>
-      
-            
-            <div class="fullcomment"><div class="block">
-          definition classes: URLConnection
-        </div></div>
-          
-    </li><li visbl="pub" name="java.net.URLConnection#setReadTimeout" data-isabs="false">
-      <a id="setReadTimeout(Int):Unit"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol">
-        <span class="name">setReadTimeout</span>
-        
-        <span class="params">(<span name="arg0">
-                  arg0
-                  : <span name="scala.Int" class="extype">Int</span>
-                  
-                </span>)</span>
-        <span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
-      </span>
-      </h4>
-      
-            
-            <div class="fullcomment"><div class="block">
-          definition classes: URLConnection
-        </div></div>
-          
-    </li><li visbl="pub" name="java.net.URLConnection#setRequestProperty" data-isabs="false">
-      <a id="setRequestProperty(String,String):Unit"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol">
-        <span class="name">setRequestProperty</span>
-        
-        <span class="params">(<span name="arg0">
-                  arg0
-                  : <span name="java.lang.String" class="extype">String</span>
-                  
-                </span>, <span name="arg1">
-                  arg1
-                  : <span name="java.lang.String" class="extype">String</span>
-                  
-                </span>)</span>
-        <span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
-      </span>
-      </h4>
-      
-            
-            <div class="fullcomment"><div class="block">
-          definition classes: URLConnection
-        </div></div>
-          
-    </li><li visbl="pub" name="java.net.URLConnection#setUseCaches" data-isabs="false">
-      <a id="setUseCaches(Boolean):Unit"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol">
-        <span class="name">setUseCaches</span>
-        
-        <span class="params">(<span name="arg0">
-                  arg0
-                  : <span name="scala.Boolean" class="extype">Boolean</span>
-                  
-                </span>)</span>
-        <span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
-      </span>
-      </h4>
-      
-            
-            <div class="fullcomment"><div class="block">
-          definition classes: URLConnection
+          definition classes: Throwable
         </div></div>
           
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
@@ -1370,7 +931,7 @@ possible to check whether the contents of the list are of the requested typed.
           definition classes: AnyRef
         </div></div>
           
-    </li><li visbl="pub" name="java.net.URLConnection#toString" data-isabs="false">
+    </li><li visbl="pub" name="java.lang.Throwable#toString" data-isabs="false">
       <a id="toString():String"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -1385,7 +946,7 @@ possible to check whether the contents of the list are of the requested typed.
             <p class="shortcomment cmt">Returns a string representation of the object.</p>
             <div class="fullcomment"><div class="comment cmt"><p>Returns a string representation of the object.</p><p>The default representation is platform dependent.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a string representation of the object.</p></dd></dl><div class="block">
-          definition classes: URLConnection → AnyRef → Any
+          definition classes: Throwable → AnyRef → Any
         </div>
             
             
@@ -1477,8 +1038,24 @@ possible to check whether the contents of the list are of the requested typed.
     </li></ol>
             </div>
 
-        <div name="java.net.URLConnection" class="parent">
-              <h3>Inherited from <span name="java.net.URLConnection" class="extype">URLConnection</span></h3>
+        <div name="scala.Serializable" class="parent">
+              <h3>Inherited from <span name="scala.Serializable" class="extype">Serializable</span></h3>
+            </div><div name="scala.Product" class="parent">
+              <h3>Inherited from <span name="scala.Product" class="extype">Product</span></h3>
+            </div><div name="scala.Equals" class="parent">
+              <h3>Inherited from <span name="scala.Equals" class="extype">Equals</span></h3>
+            </div><div name="scala.util.control.ControlThrowable" class="parent">
+              <h3>Inherited from <span name="scala.util.control.ControlThrowable" class="extype">ControlThrowable</span></h3>
+            </div><div name="scala.util.control.NoStackTrace" class="parent">
+              <h3>Inherited from <span name="scala.util.control.NoStackTrace" class="extype">NoStackTrace</span></h3>
+            </div><div name="java.io.IOException" class="parent">
+              <h3>Inherited from <span name="java.io.IOException" class="extype">IOException</span></h3>
+            </div><div name="java.lang.Exception" class="parent">
+              <h3>Inherited from <span name="java.lang.Exception" class="extype">Exception</span></h3>
+            </div><div name="java.lang.Throwable" class="parent">
+              <h3>Inherited from <span name="java.lang.Throwable" class="extype">Throwable</span></h3>
+            </div><div name="java.io.Serializable" class="parent">
+              <h3>Inherited from <span name="java.io.Serializable" class="extype">Serializable</span></h3>
             </div><div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>
             </div><div name="scala.Any" class="parent">
