@@ -562,7 +562,13 @@ object Resource {
    */
   def fromFileString(file:String)(implicit extraCloser:CloseAction[SeekableFileChannel]=Noop): SeekableByteChannelResource[SeekableByteChannel] = fromRandomAccessFile(new RandomAccessFile(file,"rw"))(extraCloser)
 
-def fromClasspath(name: String,
+  /**
+   * Create an InputStreamResource from a resource on the classpath.  The classloader from the provided class is used to resolve
+   * the resource.
+   *
+   * An exception is thrown if the resource does not exist
+   */
+  def fromClasspath(name: String,
                   cl: Class[_] )
                  (implicit extraCloser: CloseAction[InputStream] = Noop) : InputStreamResource[InputStream]= {
     val url = cl.getClassLoader.getResource(name)
