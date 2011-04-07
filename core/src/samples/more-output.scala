@@ -1,10 +1,10 @@
 import java.io.File
 
 /**
- * One of the core IO classes is called Input.  Normally the Input API will be encountered when a Resource object is
- * created.  But a resource is not required to have an Input object.
+ * One of the core IO classes is called Output.  Normally the Output API will be encountered when a Resource object is
+ * created.  But a resource is not required to have an Output object.
  */
-object OutputExamples {
+object MoreOutputExamples {
   /**
    * All Output resources extend the Output trait so the following operations can be used on any Output resource
    * (ReadableByteChannel or OutputStream for example).
@@ -24,7 +24,7 @@ object OutputExamples {
   }
 
   /**
-   * In addition to Resource.fromFoo methods to create Resources (which are often Output objects)  
+   * In addition to Resource.fromFoo methods to create Resources (which are often Output objects)
    * There is a second option for converting certain objects directly to an Output object.  This example
    * shows how to convert a File to an output object
    */

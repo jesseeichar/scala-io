@@ -2,7 +2,7 @@
  * One of the core IO classes is called Input.  Normally the Input API will be encountered when a Resource object is
  * created.  But a resource is not required to have an Input object.
  */
-object InputExamples {
+object MoreInputExamples {
   /**
    * All Input resources extend the Input trait so the following operations can be used on any Input resource
    * (ReadableByteChannel or InputStream for example).
