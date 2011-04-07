@@ -11,7 +11,6 @@ package defaultfs
 
 import scalax.io.StandardOpenOption
 import StandardOpenOption._
-import StandardOpenOption.{name => _}
 import scalax.io.nio.SeekableFileChannel
 
 

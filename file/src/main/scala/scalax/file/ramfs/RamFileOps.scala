@@ -49,10 +49,10 @@ private[file] trait RamFileOps {
         throw new NotFileException()
       case None if options exists {e => List(CreateNew, Create) contains e} =>
         createFile(false)
-        fileSystem.lookup(this).collect {case f:FileNode => toResource(f)}.getOrElse {error("file should have been created")}
+        fileSystem.lookup(this).collect {case f:FileNode => toResource(f)}.getOrElse {sys.error("file should have been created")}
       case None if options contains CreateFull =>
         createFile()
-        fileSystem.lookup(this).collect {case f:FileNode => toResource(f)}.getOrElse {error("file should have been created because of open option createFull")}
+        fileSystem.lookup(this).collect {case f:FileNode => toResource(f)}.getOrElse {sys.error("file should have been created because of open option createFull")}
       case None =>
         throw new FileNotFoundException("No file found and will not create when open options are: " + openOptions)
     }

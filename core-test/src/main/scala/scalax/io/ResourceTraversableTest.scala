@@ -111,7 +111,7 @@ class ResourceTraversableTest {
   }
 
   @Test //@Ignore
-  def should_handle_init = assertSizeAndType(newResource(), _ init)
+  def should_handle_init = assertSizeAndType(newResource(), _ init, false)
 
   @Test //@Ignore
   def should_handle_slice = assertSizeAndType(newResource(), _ slice(3,10))
@@ -136,9 +136,9 @@ class ResourceTraversableTest {
   }
   @Test //@Ignore
   def should_handle_splitAt = {
-    assertProductSizeAndType (newResource(), _ splitAt 13)
-    assertProductSizeAndType (newResource(), _ splitAt -1)
-    assertProductSizeAndType (newResource(), _ splitAt 50000)
+    assertProductSizeAndType (newResource(), _ splitAt 13,false)
+    assertProductSizeAndType (newResource(), _ splitAt -1,false)
+    assertProductSizeAndType (newResource(), _ splitAt 50000,false)
   }
 
   @Test //@Ignore
@@ -185,6 +185,12 @@ class ResourceTraversableTest {
 
   @Test //@Ignore
   def drop_then_append = assertSizeAndType(newResource(), t => (t drop 45) ++ List(1,2,3))
+
+  @Test //@Ignore
+  def drop_to_many = assertSizeAndType(newResource(), t => (t drop 1000))
+
+  @Test //@Ignore
+  def slice_to_0 = assertSizeAndType(newResource(), t => (t slice (5,10) slice (0,-3)))
 
   @Test //@Ignore
   def slice_then_unzip = assertProductSizeAndType (newResource(), _ slice (3,10) unzip {i => (1,i)} )

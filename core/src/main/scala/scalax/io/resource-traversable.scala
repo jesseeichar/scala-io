@@ -40,8 +40,8 @@ private[io] trait ResourceTraversable[A] extends LongTraversable[A]
   protected def start : Long
   protected def end : Long
 
-  def foreach[U](f: (A) => U) : Unit = doForeach(f)
-  def doForeach[U](f: A => U) : Unit = {
+  override def foreach[U](f: (A) => U) : Unit = doForeach(f)
+  protected def doForeach[U](f: A => U) : Unit = {
 
     for(stream <- source.resource) {
       if(start > 0) source.skip(stream,start)
@@ -50,6 +50,21 @@ private[io] trait ResourceTraversable[A] extends LongTraversable[A]
       var c = start
       val funAndInc = conv andThen f andThen {f => c += 1}
       while(v != None && c < end) {
+        funAndInc(v.get)
+        v = source.read(stream)
+      }
+    }
+  }
+  protected def doForeach[U](pred:A => Boolean, f: A => U) : Unit = {
+
+    for(stream <- source.resource) {
+      if(start > 0) source.skip(stream,start)
+
+      var v = source.read(stream)
+      var c = start
+      val funAndInc = conv andThen f andThen {f => c += 1}
+      val continue = conv andThen pred
+      while(v != None && c < end && continue(v.get)) {
         funAndInc(v.get)
         v = source.read(stream)
       }
@@ -129,7 +144,8 @@ private[io] object ResourceTraversable {
 
       def source = new TraversableSource[Reader, Char] {
         def resource = _in
-        def skip(reader:Reader, count:Long) = reader.skip(count)
+        def skip(reader:Reader, count:Long) =
+          reader.skip(count)
         def read(reader:Reader) = reader.read match {
           case -1 => None
           case i => Some(i.toChar)

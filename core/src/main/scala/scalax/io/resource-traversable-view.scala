@@ -50,7 +50,7 @@ private[io] trait ResourceTraversableViewLike[A, +Coll, +This <: ResourceTravers
   }
 
 //  trait Forced[B] extends Transformed[B] with super.Forced[B]
-  trait Sliced extends Transformed[A] with super.Sliced {
+   trait LSliced extends super.LSliced with Transformed[A] {
     override def start = self.start + (from max 0)
     override def end = if( until > self.end ) self.end
                        else safeSum(self.start,(until max 0))
@@ -58,24 +58,39 @@ private[io] trait ResourceTraversableViewLike[A, +Coll, +This <: ResourceTravers
 
     override def foreach[U](f: A => U) = doForeach(f)
   }
-  trait Mapped[B] extends Transformed[B] with super.Mapped[B] {
+  trait Mapped[B] extends super.Mapped[B] with Transformed[B] {
     def conv = self.conv andThen mapping
   }
-  trait TakenWhile extends Identity with super.TakenWhile
-  trait DroppedWhile extends Identity with super.DroppedWhile
+  trait TakenWhile extends super.TakenWhile with Identity {
+    override def foreach[U](f: (A) => U) = doForeach(pred,f)
+  }
+  trait DroppedWhile extends super.DroppedWhile with Identity {
+    override def foreach[U](f: (A) => U) = {
+      var take = false
+      doForeach{e =>
+        if(take) f(e)
+        else if(!pred(e)) {
+          take = true
+          f(e)
+        }
+      }
+    }
+  }
 
 
   /** Boilerplate method, to override in each subclass
    *  This method could be eliminated if Scala had virtual classes
    */
 //  protected override def newForced[B](xs: => Seq[B]): Transformed[B] = new Forced[B] { val forced = xs }
-  protected override def newMapped[B](f: A => B): Transformed[B] = new Mapped[B] {val mapping = f}
-  protected override def newLSliced(_from: Long, _until: Long): Transformed[A] = new Sliced { def from = _from; def until = _until }
-  protected override def newDroppedWhile(p: A => Boolean): Transformed[A] = new DroppedWhile { val pred = p }
-  protected override def newTakenWhile(p: A => Boolean): Transformed[A] = new TakenWhile { val pred = p }
+  protected override def newMapped[B](f: A => B): Transformed[B] = new {val mapping = f} with Mapped[B]
+  protected override def newLSliced(_from: Long, _until: Long): Transformed[A] = new { val from = _from; val until = _until } with LSliced
+  protected override def newDroppedWhile(p: A => Boolean): Transformed[A] = new { val pred = p } with DroppedWhile
+  protected override def newTakenWhile(p: A => Boolean): Transformed[A] = new  { val pred = p } with TakenWhile
 
 
-  override def lslice(_start : Long, _end : Long) = newLSliced(safeSum(start,0L max _start), _end min end).asInstanceOf[This]
+  override def slice(from: Int, until: Int) = lslice(from,until)
+
+  override def lslice(_start : Long, _end : Long) = newLSliced(0L max _start, _end).asInstanceOf[This]
 
   override def stringPrefix = "ResourceTraversableView"
 /*

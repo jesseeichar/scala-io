@@ -77,6 +77,8 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
   /**
    * The long equivalent of count in Traversable.
    */
+  override def slice(from: Int, until: Int) = lslice(from,until)
+
   def lcount(p: A => Boolean): Long = {
       var cnt = 0L
       for (x : A <- this) if (p(x)) cnt += 1
@@ -106,7 +108,7 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
   /**
    * The long equivalent of Traversable.slice
    */
-  def lslice(from: Long, until: Long): Repr = ldrop(from).ltake(until)
+  def lslice(from: Long, until: Long): Repr = ldrop(from).ltake(0L max until-from)
   /**
    * The long equivalent of Traversable.splitAt
    */
@@ -116,21 +118,16 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
    */
   def ltake(n: Long) : Repr = {
     val b = newBuilder
-    val traversable = new Traversable[A] {
-      def foreach[U](f: (A) => U): Unit = {
-        import util.control.Breaks._
+    import util.control.Breaks._
 
-        breakable {
-          var c = 0L
-          for(i <- this) yield {
-            if (c >= n) break;
-            c += 1
-            f(i)
-          }
-        }
+    breakable {
+      var c = 0L
+      foreach { i =>
+        if (c >= n) break;
+        c += 1
+        b += i
       }
     }
-    b ++= traversable
     b.result
   }
 

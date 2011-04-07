@@ -9,7 +9,7 @@
 package scalax.io
 
 import scala.collection._
-import scala.collection.generic._
+import generic._
 import TraversableView.NoBuilder
 
 /**
@@ -49,9 +49,11 @@ trait LongTraversableViewLike[+A, +Coll, +This <: LongTraversableView[A,Coll] wi
 
   trait Transformed[+B] extends LongTraversableView[B, Coll] with super.Transformed[B]
 
-  trait Forced[B] extends Transformed[B] with super.Forced[B]
+  trait EmptyView extends Transformed[Nothing] with super.EmptyView
 
-  trait Sliced extends Transformed[A] {
+  trait Forced[B] extends super.Forced[B] with Transformed[B]
+
+  trait LSliced extends Transformed[A] {
     protected[this] def from: Long
     protected[this] def until: Long
     override def foreach[U](f: A => U) {
@@ -66,26 +68,27 @@ trait LongTraversableViewLike[+A, +Coll, +This <: LongTraversableView[A,Coll] wi
     }
   }
 
-  trait Mapped[B] extends Transformed[B] with super.Mapped[B]
-
-  trait FlatMapped[B] extends Transformed[B] with super.FlatMapped[B]
-  trait Appended[B >: A] extends Transformed[B] with super.Appended[B]
-  trait Filtered extends Transformed[A] with super.Filtered
-  trait TakenWhile extends Transformed[A] with super.TakenWhile
-  trait DroppedWhile extends Transformed[A] with super.DroppedWhile
+  trait Mapped[B] extends super.Mapped[B] with Transformed[B]
+  trait FlatMapped[B] extends super.FlatMapped[B] with Transformed[B]
+  trait Appended[B >: A] extends super.Appended[B] with Transformed[B]
+  trait Filtered extends super.Filtered with Transformed[A]
+  trait TakenWhile extends super.TakenWhile with Transformed[A]
+  trait DroppedWhile extends super.DroppedWhile with Transformed[A]
 
   /** Boilerplate method, to override in each subclass
    *  This method could be eliminated if Scala had virtual classes
    */
-  protected override def newForced[B](xs: => Seq[B]): Transformed[B] = new Forced[B] { val forced = xs }
-  protected override def newAppended[B >: A](that: Traversable[B]): Transformed[B] = new Appended[B] { val rest = that }
-  protected override def newMapped[B](f: A => B): Transformed[B] = new Mapped[B] { val mapping = f }
-  protected override def newFlatMapped[B](f: A => Traversable[B]): Transformed[B] = new FlatMapped[B] { val mapping = f }
-  protected override def newFiltered(p: A => Boolean): Transformed[A] = new Filtered { val pred = p }
-  protected override def newSliced(_from: Int, _until: Int): Transformed[A] = newLSliced(_from.toLong, _until.toLong)
-  protected def newLSliced(_from: Long, _until: Long): Transformed[A] = new Sliced { val from = _from; val until = _until }
-  protected override def newDroppedWhile(p: A => Boolean): Transformed[A] = new DroppedWhile { val pred = p }
-  protected override def newTakenWhile(p: A => Boolean): Transformed[A] = new TakenWhile { val pred = p }
+  protected override def newForced[B](xs: => Seq[B]): Transformed[B] = new { val forced = xs } with Forced[B]
+  protected override def newAppended[B >: A](that: Traversable[B]): Transformed[B] = new { val rest = that } with Appended[B]
+  protected override def newMapped[B](f: A => B): Transformed[B] = new { val mapping = f } with Mapped[B]
+  protected override def newFlatMapped[B](f: A => TraversableOnce[B]): Transformed[B] = new { val mapping = f } with FlatMapped[B]
+  protected override def newFiltered(p: A => Boolean): Transformed[A] = new { val pred = p } with Filtered
+
+// TODO Implement when slice interval can be accessed
+//  protected def newSliced(_endpoints: SliceInterval): Transformed[A] = newLSliced(_endpoints.from.toLong, _endpoints.until.toLong)
+  protected def newLSliced(_from: Long, _until: Long): Transformed[A] = new { override val from = _from; override val until = _until } with LSliced
+  protected override def newDroppedWhile(p: A => Boolean): Transformed[A] = new { val pred = p } with  DroppedWhile
+  protected override def newTakenWhile(p: A => Boolean): Transformed[A] = new { val pred = p } with TakenWhile
 
   override def drop(n: Int): This = newLSliced(n max 0, Long.MaxValue).asInstanceOf[This]
   override def ldrop(n: Long): This = newLSliced(n max 0, Long.MaxValue).asInstanceOf[This]
@@ -93,5 +96,9 @@ trait LongTraversableViewLike[+A, +Coll, +This <: LongTraversableView[A,Coll] wi
   override def take(n: Int): This = newLSliced(0, n).asInstanceOf[This]
   override def ltake(n: Long): This = newLSliced(0, n).asInstanceOf[This]
 
+  override def slice(from: Int, until: Int) = newLSliced(from,until).asInstanceOf[This]
+
   override def stringPrefix = "LongTraversableView"
+
 }
+
