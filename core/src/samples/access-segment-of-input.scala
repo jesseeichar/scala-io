@@ -10,7 +10,7 @@ object AccessSegmentOfInput {
   def skippingBytes {
     import scalax.io._
 
-    val in:Input = Resource.fromURLString("file://someFile")
+    val in:Input = Resource.fromURL("file://someFile")
 
     // Skip the first 10 bytes.  If underlying resource supports it the
     // bytes will not be read
@@ -27,7 +27,7 @@ object AccessSegmentOfInput {
   def takingBytes {
     import scalax.io._
 
-    val in:Input = Resource.fromURLString("file://someFile")
+    val in:Input = Resource.fromURL("file://someFile")
 
     // Take first 10 bytes then close resource.
     // Remember the resource is lazy so firstTenBytes is not
@@ -48,7 +48,7 @@ object AccessSegmentOfInput {
 
     import scalax.io._
 
-    val in:Input = Resource.fromURLString("file://someFile")
+    val in:Input = Resource.fromURL("file://someFile")
 
     // take bytes until they one is greater than 5
     // Note: bytes is a view which means it does not open the
@@ -75,7 +75,7 @@ object AccessSegmentOfInput {
 
     import scalax.io._
 
-    val in:Input = Resource.fromURLString("file://someFile")
+    val in:Input = Resource.fromURL("file://someFile")
 
     // add bytes until the fifth encounter of a 5 occurs
     val (fives, sum) = in.bytes.limitFold((0,0)) {
@@ -95,7 +95,7 @@ object AccessSegmentOfInput {
 
     import scalax.io._
 
-    val in:Input = Resource.fromURLString("file://someFile")
+    val in:Input = Resource.fromURL("file://someFile")
 
     /**
      * Skip first 10 bytes and sum a random number of bytes up

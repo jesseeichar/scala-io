@@ -157,7 +157,7 @@ trait Resource[+R <: Closeable] extends ManagedResourceOperations[R] with Resour
    */
     def open(): R
 
-    def acquireFor[B](f : R => B) : Either[List[Throwable], B] = new CloseableResourceAcquirer(open,f,Noop)()
+    def acquireFor[B](f : R => B) : Either[List[Throwable], B] = (new CloseableResourceAcquirer(open,f,Noop))()
 
 }
 
@@ -327,7 +327,6 @@ trait BufferableWriteCharsResource[+C <: Closeable, +B <: Closeable] extends Wri
  * @author  Jesse Eichar
  * @since   1.0
  *
- * @define closeActionParam  @param extraCloser An optional parameter for specifying an additional action to perform as the Resource is closed. This action will be executed just before close.  Close actions can also be added to existing Resources
  * @define openDisclaimer  The opener param is a by-name argument an is use to open a new stream.
  * In other words it is important to try and pass in a function for opening
  * the stream rather than the already opened stream so that the returned
@@ -342,11 +341,9 @@ object Resource {
    *
    * @param opener the function for opening a new InputStream
    *
-   * $closeActionParam
-   *
    * @return an InputStreamResource
    */
-  def fromInputStream[A <: InputStream](opener: => A)(implicit extraCloser:CloseAction[A]=Noop) : InputStreamResource[A] = new InputStreamResource[A](opener, extraCloser)
+  def fromInputStream[A <: InputStream](opener: => A) : InputStreamResource[A] = new InputStreamResource[A](opener, Noop)
   /**
    * Create an Input Resource instance from a BufferedInputStream
    *
@@ -356,14 +353,9 @@ object Resource {
    *
    * @param opener the function for opening a new BufferedInputStream
    *
-   * $closeActionParam
-   *
    * @return a InputStreamResource that is backed by a BufferedInputStream
    */
-  def fromBufferedInputStream[A <: BufferedInputStream](opener: => A)(implicit extraCloser:CloseAction[A]=Noop) : InputStreamResource[A]  = new InputStreamResource[A](opener, extraCloser){
-      override def buffered = this;
-  }
-
+  def fromBufferedInputStream[A <: BufferedInputStream](opener: => A) : BufferedInputStreamResource[A] = new BufferedInputStreamResource[A](opener, Noop)
   // OutputStream factory methods
   /**
    * Create an Output Resource instance from an OutputStream.
@@ -372,11 +364,11 @@ object Resource {
    *
    * @param opener the function for opening a new OutputStream
    *
-   * $closeActionParam
+   *
    *
    * @return an OutputStreamResource
    */
-  def fromOutputStream[A <: OutputStream](opener: => A)(implicit extraCloser:CloseAction[A]=Noop) : OutputStreamResource[A] = new OutputStreamResource[A](opener,extraCloser)
+  def fromOutputStream[A <: OutputStream](opener: => A) : OutputStreamResource[A] = new OutputStreamResource[A](opener,Noop)
   /**
    * Create an Output Resource instance from a BufferedOutputStream
    *
@@ -385,15 +377,9 @@ object Resource {
    *
    * @param opener the function for opening a new BufferedOutputStream
    *
-   *
-   * $closeActionParam
-   *
    * @return a OutputStreamResource that is backed by a BufferedOutputStream
    */
-  def fromBufferedOutputStream[A <: BufferedOutputStream](opener: => A)(implicit extraCloser:CloseAction[A]=Noop) : OutputStreamResource[A] = new OutputStreamResource[A](opener,extraCloser) {
-    override def buffered = this
-  }
-
+  def fromBufferedOutputStream[A <: BufferedOutputStream](opener: => A) : BufferedOutputStreamResource[A] = new BufferedOutputStreamResource[A](opener,Noop)
   // Reader factory methods
   /**
    * Create an ReadChars Resource instance from an Reader.
@@ -402,11 +388,9 @@ object Resource {
    *
    * @param opener the function for opening a new Reader
    *
-   * $closeActionParam
-   *
    * @return an ReaderResource
    */
-  def fromReader[A <: Reader](opener: => A)(implicit extraCloser:CloseAction[A]=Noop) : ReaderResource[A] = new ReaderResource[A](opener, extraCloser)
+  def fromReader[A <: Reader](opener: => A) : ReaderResource[A] = new ReaderResource[A](opener, Noop)
   /**
    * Create an ReadChars Resource instance from an BufferedReader.
    *
@@ -415,13 +399,9 @@ object Resource {
    *
    * @param opener the function for opening a new BufferedReader
    *
-   * $closeActionParam
-   *
    * @return a ReaderResource that is backed by a BufferedReader
    */
-  def fromBufferedReader[A <: BufferedReader](opener: => A)(implicit extraCloser:CloseAction[A]=Noop): ReaderResource[A] = new ReaderResource[A](opener,extraCloser) {
-      override def buffered = this
-  }
+  def fromBufferedReader[A <: BufferedReader](opener: => A): BufferedReaderResource[A] = new BufferedReaderResource[A](opener,Noop)
 
   // Writer factory methods
   /**
@@ -431,11 +411,9 @@ object Resource {
    *
    * @param opener the function for opening a new Writer
    *
-   * $closeActionParam
-   *
    * @return an WriterResource
    */
-  def fromWriter[A <: Writer](opener: => A)(implicit extraCloser:CloseAction[A]=Noop) : WriterResource[A] = new WriterResource[A](opener,extraCloser)
+  def fromWriter[A <: Writer](opener: => A) : WriterResource[A] = new WriterResource[A](opener,Noop)
   /**
    * Create an WriteChars Resource instance with conversion traits from an BufferedWriter.
    *
@@ -443,14 +421,9 @@ object Resource {
    *
    * @param opener the function for opening a new BufferedWriter
    *
-   * $closeActionParam
-   *
    * @return a WriterResource that is backed by a BufferedWriter
    */
-  def fromBufferedWriter[A <: BufferedWriter](opener: => A)(implicit extraCloser:CloseAction[A]=Noop): WriterResource[A] = new WriterResource[A](opener, extraCloser) {
-      override def buffered = this
-  }
-
+  def fromBufferedWriter[A <: BufferedWriter](opener: => A): BufferedWriterResource[A] = new BufferedWriterResource(opener,Noop)
   // Channel factory methods
   /**
    * Create an Input Resource instance from an ReadableByteChannel.
@@ -459,11 +432,9 @@ object Resource {
    *
    * @param opener the function for opening a new ReadableByteChannel
    *
-   * $closeActionParam
-   *
    * @return an ReadableByteChannelResource
    */
-  def fromReadableByteChannel[A <: ReadableByteChannel](opener: => A)(implicit extraCloser:CloseAction[A]=Noop) : ReadableByteChannelResource[A] = new ReadableByteChannelResource[A](opener, extraCloser)
+  def fromReadableByteChannel[A <: ReadableByteChannel](opener: => A) : ReadableByteChannelResource[A] = new ReadableByteChannelResource[A](opener, Noop)
   /**
    * Create an Output Resource instance from an WritableByteChannel.
    *
@@ -471,11 +442,9 @@ object Resource {
    *
    * @param opener the function for opening a new WritableByteChannel
    *
-   * $closeActionParam
-   *
    * @return an WritableByteChannelResource
    */
-  def fromWritableByteChannel[A <: WritableByteChannel](opener: => A)(implicit extraCloser:CloseAction[A]=Noop) : WritableByteChannelResource[A] = new WritableByteChannelResource[A](opener,extraCloser)
+  def fromWritableByteChannel[A <: WritableByteChannel](opener: => A) : WritableByteChannelResource[A] = new WritableByteChannelResource[A](opener,Noop)
   /**
    * Create an Input/Output Resource instance from a ByteChannel.
    *
@@ -483,11 +452,9 @@ object Resource {
    *
    * @param opener the function for opening a new ByteChannel
    *
-   * $closeActionParam
-   *
    * @return a ByteChannelResource
    */
-  def fromByteChannel[A <: ByteChannel](opener: => A)(implicit extraCloser:CloseAction[A]=Noop) : ByteChannelResource[A] = new ByteChannelResource[A](opener,extraCloser)
+  def fromByteChannel[A <: ByteChannel](opener: => A) : ByteChannelResource[A] = new ByteChannelResource[A](opener,Noop)
   /**
    * Create an Input/Output/Seekable Resource instance from a SeekableByteChannel.
    *
@@ -495,11 +462,9 @@ object Resource {
    *
    * @param opener the function for opening a new SeekableByteChannel
    *
-   * $closeActionParam
-   *
    * @return a SeekableByteChannelResource
    */
-  def fromSeekableByteChannel[A <: SeekableByteChannel](opener: => A)(implicit extraCloser:CloseAction[A]=Noop) : SeekableByteChannelResource[A] = new SeekableByteChannelResource[A](opener,extraCloser)
+  def fromSeekableByteChannel[A <: SeekableByteChannel](opener: => A) : SeekableByteChannelResource[A] = new SeekableByteChannelResource[A](opener,Noop)
   /**
    * Create an Input/Output/Seekable Resource instance from a RandomAccess file.
    *
@@ -507,13 +472,11 @@ object Resource {
    *
    * @param opener the function for opening a new SeekableByteChannel
    *
-   * $closeActionParam
-   *
    * @return a SeekableByteChannelResource
    */
-  def fromRandomAccessFile(opener: => RandomAccessFile)(implicit extraCloser:CloseAction[SeekableFileChannel]=Noop) : SeekableByteChannelResource[SeekableFileChannel] = {
+  def fromRandomAccessFile(opener: => RandomAccessFile) : SeekableByteChannelResource[SeekableFileChannel] = {
     def open = new SeekableFileChannel(opener.getChannel)
-    new SeekableByteChannelResource[SeekableFileChannel](open,extraCloser)
+    new SeekableByteChannelResource[SeekableFileChannel](open,Noop)
   }
 
   /**
@@ -521,46 +484,38 @@ object Resource {
    *
    * @param url the url to use for constructing a InputStreamResource
    *
-   * $closeActionParam
-   *
    * @return an InputStreamResource
    */
-  def fromURL(url:URL)(implicit extraCloser:CloseAction[InputStream]=Noop): InputStreamResource[InputStream] = fromInputStream(url.openStream)(extraCloser)
+  def fromURL(url:URL): InputStreamResource[InputStream] = fromInputStream(url.openStream)
 
   /**
    * Converts the string to a URL and creates an Input Resource from the URL
    *
    * @param url the url string to use for constructing a InputStreamResource
    *
-   * $closeActionParam
-   *
    * @return an InputStreamResource
    *
    * @throws java.net.MalformedURLException if the url string is not a valid URL
    */
-  def fromURLString(url:String)(implicit extraCloser:CloseAction[InputStream]=Noop): InputStreamResource[InputStream] = fromURL(new URL(url))(extraCloser)
+  def fromURL(url:String): InputStreamResource[InputStream] = fromURL(new URL(url))
   /**
    * Creates a Seekable Resource from a File
    *
    * @param file the file to use for constructing a Seekable Resource
    *
-   * $closeActionParam
-   *
    * @return a SeekableByteChannelResource
    * @throws java.io.IOException if file does not exist
    */
-  def fromFile(file:File)(implicit extraCloser:CloseAction[SeekableFileChannel]=Noop): SeekableByteChannelResource[SeekableByteChannel] = fromRandomAccessFile(new RandomAccessFile(file,"rw"))(extraCloser)
+  def fromFile(file:File): SeekableByteChannelResource[SeekableByteChannel] = fromRandomAccessFile(new RandomAccessFile(file,"rw"))
   /**
    * Create a file from string then create a Seekable Resource from a File
    *
    * @param file the file to use for constructing a Seekable Resource
    *
-   * $closeActionParam
-   *
    * @return a SeekableByteChannelResource
    * @throws java.io.IOException if file does not exist
    */
-  def fromFileString(file:String)(implicit extraCloser:CloseAction[SeekableFileChannel]=Noop): SeekableByteChannelResource[SeekableByteChannel] = fromRandomAccessFile(new RandomAccessFile(file,"rw"))(extraCloser)
+  def fromFile(file:String): SeekableByteChannelResource[SeekableByteChannel] = fromRandomAccessFile(new RandomAccessFile(file,"rw"))
 
   /**
    * Create an InputStreamResource from a resource on the classpath.  The classloader from the provided class is used to resolve
@@ -569,11 +524,22 @@ object Resource {
    * An exception is thrown if the resource does not exist
    */
   def fromClasspath(name: String,
-                  cl: Class[_] )
-                 (implicit extraCloser: CloseAction[InputStream] = Noop) : InputStreamResource[InputStream]= {
+                  cl: Class[_] ) : InputStreamResource[InputStream]= {
     val url = cl.getClassLoader.getResource(name)
     require(url != null)
-    Resource.fromURL(url)(extraCloser)
+    Resource.fromURL(url)
+  }
+
+  /**
+   * Create an InputStreamResource from a resource on the classpath.  The current threads context class loader is
+   * used to load the resource
+   *
+   * An exception is thrown if the resource does not exist
+   */
+  def fromClasspath(name: String) : InputStreamResource[InputStream]= {
+    val url = Thread.currentThread.getContextClassLoader.getResource(name)
+    require(url != null)
+    Resource.fromURL(url)
   }
 }
 

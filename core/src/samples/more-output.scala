@@ -16,7 +16,7 @@ object MoreOutputExamples {
   def basicOutput {
     import scalax.io._
 
-    val output:Output = Resource.fromFileString("someFile")
+    val output:Output = Resource.fromFile("someFile")
 
     output.writeIntsAsBytes(1,2,3)
     output.write("hello")(Codec.UTF8)

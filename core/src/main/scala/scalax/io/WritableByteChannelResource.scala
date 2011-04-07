@@ -19,13 +19,13 @@ class WritableByteChannelResource[+A <: WritableByteChannel] protected[io](opene
   def outputStream = {
     def nResource = new ChannelOutputStreamAdapter(opener)
     val closer = ResourceAdapting.closeAction(closeAction)
-    Resource.fromOutputStream(nResource)(closer)
+    Resource.fromOutputStream(nResource).appendCloseAction(closer)
   }
   def underlyingOutput = outputStream
   def writer(implicit sourceCodec: Codec) = {
     def nResource = new ChannelWriterAdapter(opener,sourceCodec)
     val closer = ResourceAdapting.closeAction(closeAction)
-    Resource.fromWriter(nResource)(closer)
+    Resource.fromWriter(nResource).appendCloseAction(closer)
   }
   def writableByteChannel = this
 }

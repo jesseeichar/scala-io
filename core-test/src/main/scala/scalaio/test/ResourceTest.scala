@@ -42,7 +42,7 @@ class ResourceTest {
       out.write(dataAsBytes)
     }
 
-    val resource = Resource.fromFileString(file.getAbsolutePath)
+    val resource = Resource.fromFile(file.getAbsolutePath)
     val bytes = resource.byteArray
     assertArrayEquals(dataAsBytes,bytes)
     assertEquals(data,resource.slurpString)

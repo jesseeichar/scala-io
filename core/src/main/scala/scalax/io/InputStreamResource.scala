@@ -25,7 +25,7 @@ class InputStreamResource[+A <: InputStream] protected[io](opener: => A,closeAct
       }
     }
     val closer = ResourceAdapting.closeAction(closeAction)
-    Resource.fromBufferedInputStream(nResource)(closer)
+    Resource.fromBufferedInputStream(nResource).appendCloseAction(closer)
   }
   def reader(implicit sourceCodec: Codec): ReaderResource[Reader] = {
     def nResource = {
@@ -35,13 +35,13 @@ class InputStreamResource[+A <: InputStream] protected[io](opener: => A,closeAct
       }
     }
     val closer = ResourceAdapting.closeAction(closeAction)
-    Resource.fromReader(nResource)(closer)
+    Resource.fromReader(nResource).appendCloseAction(closer)
   }
 
   def readableByteChannel = {
     val nResource = new ReadableChannelAdapter(opener)
     val closer = ResourceAdapting.closeAction(closeAction)
-    Resource.fromReadableByteChannel(nResource)(closer)
+    Resource.fromReadableByteChannel(nResource).appendCloseAction(closer)
   }
   def chars(implicit codec: Codec) = reader(codec).chars
 

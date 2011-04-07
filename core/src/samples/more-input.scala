@@ -14,7 +14,7 @@ object MoreInputExamples {
   def basicInput {
     import scalax.io._
 
-    val input:Input = Resource.fromFileString("someFile")
+    val input:Input = Resource.fromFile("someFile")
 
     // read all bytes into an in memory arry
     input.byteArray
@@ -62,6 +62,6 @@ object MoreInputExamples {
     import scalax.io._
     import Resource._
 
-    fromFileString("in") copyData fromFileString("out")
+    fromFile("in") copyData fromFile("out")
   }
 }

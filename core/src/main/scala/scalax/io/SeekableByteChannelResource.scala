@@ -17,26 +17,26 @@ class SeekableByteChannelResource[+A <: SeekableByteChannel] protected[io](opene
   def inputStream = {
     def nResource = new ChannelInputStreamAdapter(opener)
     val closer = ResourceAdapting.closeAction(closeAction)
-    Resource.fromInputStream(nResource)(closer)
+    Resource.fromInputStream(nResource).appendCloseAction(closer)
   }
   def outputStream = {
     def nResource = new ChannelOutputStreamAdapter(opener)
     val closer = ResourceAdapting.closeAction(closeAction)
-    Resource.fromOutputStream(nResource)(closer)
+    Resource.fromOutputStream(nResource).appendCloseAction(closer)
   }
   def reader(implicit sourceCodec: Codec) = {
     def nResource = new ChannelReaderAdapter(opener,sourceCodec)
     val closer = ResourceAdapting.closeAction(closeAction)
-    Resource.fromReader(nResource)(closer)
+    Resource.fromReader(nResource).appendCloseAction(closer)
   }
   def writer(implicit sourceCodec: Codec) = {
     def nResource = new ChannelWriterAdapter(opener,sourceCodec)
     val closer = ResourceAdapting.closeAction(closeAction)
-    Resource.fromWriter(nResource)(closer)
+    Resource.fromWriter(nResource).appendCloseAction(closer)
   }
-  def writableByteChannel = Resource.fromWritableByteChannel(opener)(closeAction)
-  def readableByteChannel = Resource.fromReadableByteChannel(opener)(closeAction)
-  def byteChannel = Resource.fromByteChannel(opener)(closeAction)
+  def writableByteChannel = Resource.fromWritableByteChannel(opener).appendCloseAction(closeAction)
+  def readableByteChannel = Resource.fromReadableByteChannel(opener).appendCloseAction(closeAction)
+  def byteChannel = Resource.fromByteChannel(opener).appendCloseAction(closeAction)
 
   override def bytesAsInts = inputStream.bytesAsInts // TODO optimize for byteChannel
   override def chars(implicit codec: Codec) = reader(codec).chars  // TODO optimize for byteChannel

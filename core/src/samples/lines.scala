@@ -18,7 +18,7 @@ object LinesExamples {
   def linesDefaults {
     import scalax.io._
 
-    val lines = Resource.fromFileString("file").lines()
+    val lines = Resource.fromFile("file").lines()
     println(lines.size)
   }
   /**
@@ -28,7 +28,7 @@ object LinesExamples {
     import scalax.io._
     import Line.Terminators.Auto
 
-    val lines = Resource.fromFileString("file").lines(Auto(),true)
+    val lines = Resource.fromFile("file").lines(Auto(),true)
     println(lines.size)
   }
   /**
@@ -38,7 +38,7 @@ object LinesExamples {
     import scalax.io._
     import Line.Terminators.NewLine
 
-    val lines = Resource.fromFileString("file").lines(NewLine,false)
+    val lines = Resource.fromFile("file").lines(NewLine,false)
     println(lines.size)
   }
   /**
@@ -48,7 +48,7 @@ object LinesExamples {
     import scalax.io._
     import Line.Terminators.Custom
 
-    val readChars:ReadChars = Resource.fromFileString("file").reader
+    val readChars:ReadChars = Resource.fromFile("file").reader
     val lines = readChars.lines(Custom("**"))
     println(lines.size)
   }

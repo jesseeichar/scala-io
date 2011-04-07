@@ -13,7 +13,7 @@ class ReaderResource[+A <: Reader] protected[io](opener: => A, closeAction:Close
   def prependCloseAction[B >: A](newAction: CloseAction[B]) = new ReaderResource(opener,newAction :+ closeAction)
   def appendCloseAction[B >: A](newAction: CloseAction[B]) = new ReaderResource(opener,closeAction +: newAction)
 
-  def buffered : ReaderResource[BufferedReader] = {
+  def buffered : BufferedReaderResource[BufferedReader] = {
     def nResource = {
       val a = open()
       new BufferedReader(a) with ResourceAdapting.Adapter[A] {
@@ -21,7 +21,7 @@ class ReaderResource[+A <: Reader] protected[io](opener: => A, closeAction:Close
       }
     }
     val closer = ResourceAdapting.closeAction(closeAction)
-    Resource.fromBufferedReader(nResource)(closer)
+    Resource.fromBufferedReader(nResource).appendCloseAction(closer)
   }
 
   override def chars : ResourceView[Char]= ResourceTraversable.readerBased(this).view

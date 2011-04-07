@@ -44,7 +44,7 @@ object SeekableSamples {
     // see codec example for why codec is required
     implicit val codec = Codec.UTF8
 
-    val someFile: Seekable = Resource.fromFileString("someFile")
+    val someFile: Seekable = Resource.fromFile("someFile")
     someFile.insert(3,List[Byte](3,2,1))
   }
 
@@ -57,7 +57,7 @@ object SeekableSamples {
     // see codec example for why codec is required
     implicit val codec = Codec.UTF8
 
-    val someFile: Seekable = Resource.fromFileString("someFile")
+    val someFile: Seekable = Resource.fromFile("someFile")
     someFile.append("append this string")
     someFile.appendStrings(List("s one", "s two"),Line.Terminators.RNPair.sep)
   }
@@ -73,7 +73,7 @@ object SeekableSamples {
     // see codec example for why codec is required
     implicit val codec = Codec.UTF8
 
-    val someFile: Seekable = Resource.fromFileString("someFile")
+    val someFile: Seekable = Resource.fromFile("someFile")
     // "people" is being written after the 6th character
     someFile.patch(6, "people",OverwriteAll)
 

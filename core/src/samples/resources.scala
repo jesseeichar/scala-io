@@ -39,7 +39,7 @@ object Resources {
 
     // examples getting ByteChannels
     // default is a read/write/create channel
-    val channel: SeekableByteChannelResource[SeekableByteChannel] = Resource.fromFileString("file")
+    val channel: SeekableByteChannelResource[SeekableByteChannel] = Resource.fromFile("file")
     val channel2: SeekableByteChannelResource[SeekableByteChannel] =
         Resource.fromRandomAccessFile(new RandomAccessFile("file","rw"))
     val seekable: Seekable = channel2
@@ -133,7 +133,7 @@ object Resources {
     // we can then create a resource and pass it to the closer parameter
     // now each time resource is used (and closed) the closer will also be executed
     // just before the actual closing.
-    val resource = Resource.fromFileString("file")(closer)
+    val resource = Resource.fromFile("file").appendCloseAction(closer)
 
     // closeActions can also be added to an existing resource
     // NOTE: Appended actions still are performed BEFORE
@@ -142,9 +142,9 @@ object Resources {
     resource.prependCloseAction(closer2)
 
     // The following are equivalent
-    Resource.fromFileString("file")(closer :+ closer2)
-    Resource.fromFileString("file")(closer).appendCloseAction(closer2)
-    Resource.fromFileString("file").appendCloseAction (closer :+ closer2)
+    Resource.fromFile("file").appendCloseAction(closer :+ closer2)
+    Resource.fromFile("file").appendCloseAction(closer).appendCloseAction(closer2)
+    Resource.fromFile("file").appendCloseAction (closer :+ closer2)
 
   }
 

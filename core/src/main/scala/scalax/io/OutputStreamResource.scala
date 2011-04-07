@@ -27,7 +27,7 @@ class OutputStreamResource[+A <: OutputStream] protected[io](opener: => A, close
       }
     }
     val closer = ResourceAdapting.closeAction(closeAction)
-    Resource.fromBufferedOutputStream(nResource)(closer)
+    Resource.fromBufferedOutputStream(nResource).appendCloseAction(closer)
   }
   def writer(implicit sourceCodec: Codec): WriterResource[Writer] = {
     def nResource = {
@@ -37,11 +37,11 @@ class OutputStreamResource[+A <: OutputStream] protected[io](opener: => A, close
       }
     }
     val closer = ResourceAdapting.closeAction(closeAction)
-    Resource.fromWriter(nResource)(closer)
+    Resource.fromWriter(nResource).appendCloseAction(closer)
   }
   def writableByteChannel = {
     val nResource = new WritableChannelAdapter(opener)
     val closer = ResourceAdapting.closeAction(closeAction)
-    Resource.fromWritableByteChannel(nResource)(closer)
+    Resource.fromWritableByteChannel(nResource).appendCloseAction(closer)
   }
 }

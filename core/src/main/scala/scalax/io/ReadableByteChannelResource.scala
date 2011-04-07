@@ -19,12 +19,12 @@ class ReadableByteChannelResource[+A <: ReadableByteChannel] protected[io](opene
   def inputStream = {
     def nResource = new ChannelInputStreamAdapter(opener)
     val closer = ResourceAdapting.closeAction(closeAction)
-    Resource.fromInputStream(nResource)(closer)
+    Resource.fromInputStream(nResource).appendCloseAction(closer)
   }
   def reader(implicit sourceCodec: Codec) = {
     def nResource = new ChannelReaderAdapter(opener,sourceCodec)
     val closer = ResourceAdapting.closeAction(closeAction)
-    Resource.fromReader(nResource)(closer)
+    Resource.fromReader(nResource).appendCloseAction(closer)
   }
   def readableByteChannel = this
   def bytesAsInts = inputStream.bytesAsInts // TODO optimize for byteChannel

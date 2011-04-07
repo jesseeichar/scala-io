@@ -41,7 +41,7 @@ class InputTest extends AbstractInputTests {
     
     val start = System.currentTimeMillis
     val fromFile = Resource.fromFile(file).lines(NewLine)(codec=Codec.UTF8)
-    val fromString = Resource.fromFileString(file.getAbsolutePath).lines(NewLine)(codec=Codec.UTF8)
+    val fromString = Resource.fromFile(file.getAbsolutePath).lines(NewLine)(codec=Codec.UTF8)
     fromString.toString
     fromFile.toString
     val end = System.currentTimeMillis

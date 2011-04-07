@@ -13,7 +13,7 @@ class WriterResource[+A <: Writer] protected[io](opener: => A, closeAction:Close
 
   override def acquireFor[B](f: (A) => B) = new CloseableResourceAcquirer(open,f,closeAction)()
 
-  def buffered : WriterResource[BufferedWriter] = {
+  def buffered : BufferedWriterResource[BufferedWriter] = {
     def nResource = {
       val a = open()
       new BufferedWriter(a) with ResourceAdapting.Adapter[A] {
@@ -21,7 +21,7 @@ class WriterResource[+A <: Writer] protected[io](opener: => A, closeAction:Close
       }
     }
     val closer = ResourceAdapting.closeAction(closeAction)
-    Resource.fromBufferedWriter(nResource)(closer)
+    Resource.fromBufferedWriter(nResource).appendCloseAction(closer)
   }
   protected def writer = this
 }
