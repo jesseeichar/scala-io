@@ -20,7 +20,7 @@
           <div id="contentcolumn">
             <div class="innertube">
               <span>
-        <span>  <p> Both Input and ReadChars objects have a method traversing the object one line at a time.  The terminator can be autodetected (which assumes the ending is one of \n, \r\n, \r) or it can be explicitely declared, or it can be a custom separator such as <em>';'</em>.  </p><p> Note: The <em>lines()</em> method is lazily evaluated so calling the method without processing will not result in any processing of the resource</p></span>
+        
         <div class="example">
       <a name="linesDefaults.html"><h3>Lines Defaults</h3></a>
       <div class="example_summary"><span> Default behaviour.  Autodetect ending assuming one of \n, \r\n or \r.  The terminator is not included in results </span></div>
@@ -29,45 +29,6 @@
     import scalax.io._
 
     val lines = Resource.fromFileString(&quot;file&quot;).lines()
-    println(lines.size)
-  
-</pre>
-      </div>
-    </div><div class="example">
-      <a name="linesAutoIncludeTerminators.html"><h3>Lines Auto Include Terminators</h3></a>
-      <div class="example_summary"><span> Explicitly declare line ending as AutoDetect and include terminator </span></div>
-      <div class="example_code">
-        <pre class="brush: scala">
-    import scalax.io._
-    import Line.Terminators.Auto
-
-    val lines = Resource.fromFileString(&quot;file&quot;).lines(Auto(),true)
-    println(lines.size)
-  
-</pre>
-      </div>
-    </div><div class="example">
-      <a name="linesNewLineTerminator.html"><h3>Lines New Line Terminator</h3></a>
-      <div class="example_summary"><span> Explicitly declare line ending as NewLine and <em>do not</em> include terminator </span></div>
-      <div class="example_code">
-        <pre class="brush: scala">
-    import scalax.io._
-    import Line.Terminators.NewLine
-
-    val lines = Resource.fromFileString(&quot;file&quot;).lines(NewLine,false)
-    println(lines.size)
-  
-</pre>
-      </div>
-    </div><div class="example">
-      <a name="linesCustomTerminator.html"><h3>Lines Custom Terminator</h3></a>
-      <div class="example_summary"><span> Explicitly declare a custom line terminator and <em>do not</em> include terminator </span></div>
-      <div class="example_code">
-        <pre class="brush: scala">
-    import scalax.io._
-    import Line.Terminators.Custom
-
-    val lines = Resource.fromFileString(&quot;file&quot;).lines(Custom(&quot;**&quot;))
     println(lines.size)
   
 </pre>
@@ -89,7 +50,7 @@
           <ul id="navlist"><li>
                       <a href="../../core/lines/index.html" title=" Traversing lines in Input or ReadChars" class="active">Lines</a>
                       <ul id="subnavlist"><li>
-        <a href="linesDefaults.html" title=" Default behaviour" class="">Lines Defaults</a>
+        <a href="linesDefaults.html" title=" Default behaviour" class="active">Lines Defaults</a>
       </li><li>
         <a href="linesAutoIncludeTerminators.html" title=" Explicitly declare line ending as AutoDetect and include terminator " class="">Lines Auto Include Terminators</a>
       </li><li>
