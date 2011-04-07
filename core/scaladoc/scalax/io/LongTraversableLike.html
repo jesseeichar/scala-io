@@ -5,16 +5,16 @@
           <title>scalax.io.LongTraversableLike</title>
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link href="../../lib/template.css" rel="stylesheet" type="text/css" media="screen" />
+      <link type="text/css" media="screen" rel="stylesheet" href="../../lib/template.css" />
       <script type="text/javascript" src="../../lib/jquery.js"></script>
       <script type="text/javascript" src="../../lib/jquery-ui.js"></script>
       <script type="text/javascript" src="../../lib/template.js"></script>
       <script type="text/javascript" src="../../lib/tools.tooltip.js"></script>
     
         </head>
-        <body class="type" onload="windowTitle();">
+        <body onload="windowTitle();" class="type">
 
-      <p id="owner"><a href="../package.html" class="extype" name="scalax">scalax</a>.<a href="package.html" class="extype" name="scalax.io">io</a></p>
+      <p id="owner"><a name="scalax" class="extype" href="../package.html">scalax</a>.<a name="scalax.io" class="extype" href="package.html">io</a></p>
 
       <div id="definition">
         <img src="../../lib/trait_big.png" />
@@ -25,24 +25,30 @@
       <span class="kind">trait</span>
       <span class="symbol">
         <span class="name">LongTraversableLike</span>
-        <span class="tparams">[<span name="A">+A</span>, <span name="Repr">+Repr &lt;: <a href="" class="extype" name="scalax.io.LongTraversableLike">LongTraversableLike</a>[A, Repr]</span>]</span>
+        <span class="tparams">[<span name="A">+A</span>, <span name="Repr">+Repr &lt;: <a name="scalax.io.LongTraversableLike" class="extype" href="">LongTraversableLike</a>[A, Repr]</span>]</span>
         
-        <span class="result"> extends <span class="extype" name="scala.collection.TraversableLike">TraversableLike</span>[A, Repr]</span>
+        <span class="result"> extends <span name="scala.collection.TraversableLike" class="extype">TraversableLike</span>[A, Repr]</span>
       </span>
       </h4>
-      <div class="fullcomment" id="comment"><div class="comment cmt"><p>A traversable for use on very large datasets which cannot be indexed with Ints but instead
+      
+          <div class="shortcomment cmt"><p>A traversable for use on very large datasets which cannot be indexed with Ints but instead
+require Longs for indexing.</p><p>This trait adds methods for accessing the extra portions of the dataset.
+</p></div>
+          <div class="fullcomment" id="comment"><div class="comment cmt"><p>A traversable for use on very large datasets which cannot be indexed with Ints but instead
 require Longs for indexing.</p><p>This trait adds methods for accessing the extra portions of the dataset.
 </p></div><div class="block">
-            linear super types: <span class="extype" name="scala.collection.TraversableLike">TraversableLike</span>[A, Repr], <span class="extype" name="scala.collection.TraversableOnce">TraversableOnce</span>[A], <span class="extype" name="scala.collection.generic.FilterMonadic">FilterMonadic</span>[A, Repr], <span class="extype" name="scala.collection.generic.HasNewBuilder">HasNewBuilder</span>[A, Repr], AnyRef, <span class="extype" name="scala.Any">Any</span>
+            linear super types: <span name="scala.collection.TraversableLike" class="extype">TraversableLike</span>[A, Repr], <span name="scala.collection.Parallelizable" class="extype">Parallelizable</span>[A, <span name="scala.collection.parallel.ParIterable" class="extype">ParIterable</span>[A]], <span name="scala.collection.TraversableOnce" class="extype">TraversableOnce</span>[A], <span name="scala.collection.generic.FilterMonadic" class="extype">FilterMonadic</span>[A, Repr], <span name="scala.collection.generic.HasNewBuilder" class="extype">HasNewBuilder</span>[A, Repr], AnyRef, <span name="scala.Any" class="extype">Any</span>
           </div><div class="block">
-            known subclasses: <a href="LongTraversable.html" class="extype" name="scalax.io.LongTraversable">LongTraversable</a>, <a href="LongTraversableViewLike.html" class="extype" name="scalax.io.LongTraversableViewLike">LongTraversableViewLike</a>, <a href="LongTraversableView.html" class="extype" name="scalax.io.LongTraversableView">LongTraversableView</a>, <a href="LongTraversableViewLike$TakenWhile.html" class="extype" name="scalax.io.LongTraversableViewLike.TakenWhile">TakenWhile</a>, <a href="LongTraversableViewLike$Filtered.html" class="extype" name="scalax.io.LongTraversableViewLike.Filtered">Filtered</a>, <a href="LongTraversableViewLike$Appended.html" class="extype" name="scalax.io.LongTraversableViewLike.Appended">Appended</a>, <a href="LongTraversableViewLike$FlatMapped.html" class="extype" name="scalax.io.LongTraversableViewLike.FlatMapped">FlatMapped</a>, <a href="LongTraversableViewLike$Mapped.html" class="extype" name="scalax.io.LongTraversableViewLike.Mapped">Mapped</a>, <a href="LongTraversableViewLike$Sliced.html" class="extype" name="scalax.io.LongTraversableViewLike.Sliced">Sliced</a>, <a href="LongTraversableViewLike$Forced.html" class="extype" name="scalax.io.LongTraversableViewLike.Forced">Forced</a>, <a href="LongTraversableViewLike$Transformed.html" class="extype" name="scalax.io.LongTraversableViewLike.Transformed">Transformed</a>, <a href="LongTraversableViewLike$DroppedWhile.html" class="extype" name="scalax.io.LongTraversableViewLike.DroppedWhile">DroppedWhile</a>, <a href="LineTraversable.html" class="extype" name="scalax.io.LineTraversable">LineTraversable</a>
+            known subclasses: <a name="scalax.io.LongTraversable" class="extype" href="LongTraversable.html">LongTraversable</a>, <a name="scalax.io.LongTraversableViewLike" class="extype" href="LongTraversableViewLike.html">LongTraversableViewLike</a>, <a name="scalax.io.LongTraversableView" class="extype" href="LongTraversableView.html">LongTraversableView</a>, <a name="scalax.io.LongTraversableViewLike.TakenWhile" class="extype" href="LongTraversableViewLike$TakenWhile.html">TakenWhile</a>, <a name="scalax.io.LongTraversableViewLike.Filtered" class="extype" href="LongTraversableViewLike$Filtered.html">Filtered</a>, <a name="scalax.io.LongTraversableViewLike.Appended" class="extype" href="LongTraversableViewLike$Appended.html">Appended</a>, <a name="scalax.io.LongTraversableViewLike.FlatMapped" class="extype" href="LongTraversableViewLike$FlatMapped.html">FlatMapped</a>, <a name="scalax.io.LongTraversableViewLike.Mapped" class="extype" href="LongTraversableViewLike$Mapped.html">Mapped</a>, <a name="scalax.io.LongTraversableViewLike.LSliced" class="extype" href="LongTraversableViewLike$LSliced.html">LSliced</a>, <a name="scalax.io.LongTraversableViewLike.Forced" class="extype" href="LongTraversableViewLike$Forced.html">Forced</a>, <a name="scalax.io.LongTraversableViewLike.EmptyView" class="extype" href="LongTraversableViewLike$EmptyView.html">EmptyView</a>, <a name="scalax.io.LongTraversableViewLike.Transformed" class="extype" href="LongTraversableViewLike$Transformed.html">Transformed</a>, <a name="scalax.io.LongTraversableViewLike.DroppedWhile" class="extype" href="LongTraversableViewLike$DroppedWhile.html">DroppedWhile</a>, <a name="scalax.io.LineTraversable" class="extype" href="LineTraversable.html">LineTraversable</a>
           </div><div class="block">
-            self type: <a href="" class="extype" name="scalax.io.LongTraversableLike">LongTraversableLike</a>[A, Repr]
+            self type: <a name="scalax.io.LongTraversableLike" class="extype" href="">LongTraversableLike</a>[A, Repr]
           </div>
             
             
             
+            
           </div>
+        
 
       <div id="template">
 
@@ -55,7 +61,7 @@ require Longs for indexing.</p><p>This trait adds methods for accessing the extr
           <div id="ancestors">
                 <span class="filtertype">Inherited</span>
                 <ol><li class="hideall">Hide All</li><li class="showall">Show all</li></ol>
-                <ol id="linearization"><li class="in" name="scalax.io.LongTraversableLike">LongTraversableLike</li><li class="in" name="scala.collection.TraversableLike">TraversableLike</li><li class="in" name="scala.collection.TraversableOnce">TraversableOnce</li><li class="in" name="scala.collection.generic.FilterMonadic">FilterMonadic</li><li class="in" name="scala.collection.generic.HasNewBuilder">HasNewBuilder</li><li class="in" name="scala.AnyRef">AnyRef</li><li class="in" name="scala.Any">Any</li></ol>
+                <ol id="linearization"><li name="scalax.io.LongTraversableLike" class="in">LongTraversableLike</li><li name="scala.collection.TraversableLike" class="in">TraversableLike</li><li name="scala.collection.Parallelizable" class="in">Parallelizable</li><li name="scala.collection.TraversableOnce" class="in">TraversableOnce</li><li name="scala.collection.generic.FilterMonadic" class="in">FilterMonadic</li><li name="scala.collection.generic.HasNewBuilder" class="in">HasNewBuilder</li><li name="scala.AnyRef" class="in">AnyRef</li><li name="scala.Any" class="in">Any</li></ol>
               </div>
           <div id="visbl">
               <span class="filtertype">Visibility</span>
@@ -71,7 +77,7 @@ require Longs for indexing.</p><p>This trait adds methods for accessing the extr
 
         <div class="types members" id="types">
               <h3>Type Members</h3>
-              <ol><li visbl="prt" data-isabs="false" name="scala.collection.TraversableLike#Self">
+              <ol><li visbl="prt" name="scala.collection.TraversableLike#Self" data-isabs="false">
       <a id="Self:Self"></a>
       <h4 class="signature">
       <span class="kind">type</span>
@@ -95,15 +101,19 @@ require Longs for indexing.</p><p>This trait adds methods for accessing the extr
 
         <div class="values members" id="values">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" data-isabs="false" name="scala.AnyRef#!=">
+              <ol><li visbl="pub" name="scala.AnyRef#!=" data-isabs="false">
       <a id="!=(AnyRef):Boolean"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">!=</span>
         
-        <span class="params">(<span name="arg0">arg0: AnyRef</span>)</span>
-        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="params">(<span name="arg0">
+                  arg0
+                  : AnyRef
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
       
@@ -114,15 +124,19 @@ require Longs for indexing.</p><p>This trait adds methods for accessing the extr
           definition classes: AnyRef
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.Any#!=">
+    </li><li visbl="pub" name="scala.Any#!=" data-isabs="false">
       <a id="!=(Any):Boolean"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">!=</span>
         
-        <span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span>
-        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="params">(<span name="arg0">
+                  arg0
+                  : <span name="scala.Any" class="extype">Any</span>
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
       
@@ -136,9 +150,10 @@ require Longs for indexing.</p><p>This trait adds methods for accessing the extr
             
             
             
+            
           </div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef###">
+    </li><li visbl="pub" name="scala.AnyRef###" data-isabs="false">
       <a id="##():Int"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -146,7 +161,7 @@ require Longs for indexing.</p><p>This trait adds methods for accessing the extr
         <span class="name">##</span>
         
         <span class="params">()</span>
-        <span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+        <span class="result">: <span name="scala.Int" class="extype">Int</span></span>
       </span>
       </h4>
       
@@ -157,7 +172,7 @@ require Longs for indexing.</p><p>This trait adds methods for accessing the extr
           definition classes: AnyRef → Any
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#$asInstanceOf">
+    </li><li visbl="pub" name="scala.AnyRef#$asInstanceOf" data-isabs="false">
       <a id="$asInstanceOf[T0]():T0"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -176,7 +191,7 @@ require Longs for indexing.</p><p>This trait adds methods for accessing the extr
           definition classes: AnyRef
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#$isInstanceOf">
+    </li><li visbl="pub" name="scala.AnyRef#$isInstanceOf" data-isabs="false">
       <a id="$isInstanceOf[T0]():Boolean"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -184,7 +199,7 @@ require Longs for indexing.</p><p>This trait adds methods for accessing the extr
         <span class="name">$isInstanceOf</span>
         <span class="tparams">[<span name="T0">T0</span>]</span>
         <span class="params">()</span>
-        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
       
@@ -195,14 +210,22 @@ require Longs for indexing.</p><p>This trait adds methods for accessing the extr
           definition classes: AnyRef
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableLike#++">
+    </li><li visbl="pub" name="scala.collection.TraversableLike#++" data-isabs="false">
       <a id="++[B&gt;:A, That](TraversableOnce[B])(CanBuildFrom[Repr, B, That]):That"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">++</span>
         <span class="tparams">[<span name="B">B &gt;: A</span>, <span name="That">That</span>]</span>
-        <span class="params">(<span name="that">that: <span class="extype" name="scala.collection.TraversableOnce">TraversableOnce</span>[B]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <span class="extype" name="scala.collection.generic.CanBuildFrom">CanBuildFrom</span>[Repr, B, That]</span>)</span>
+        <span class="params">(<span name="that">
+                  that
+                  : <span name="scala.collection.TraversableOnce" class="extype">TraversableOnce</span>[B]
+                  
+                </span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">
+                  bf
+                  : <span name="scala.collection.generic.CanBuildFrom" class="extype">CanBuildFrom</span>[Repr, B, That]
+                  
+                </span>)</span>
         <span class="result">: That</span>
       </span>
       </h4>
@@ -212,14 +235,72 @@ require Longs for indexing.</p><p>This trait adds methods for accessing the extr
           definition classes: TraversableLike
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableOnce#/:">
+    </li><li visbl="pub" name="scala.collection.TraversableLike#++:" data-isabs="false">
+      <a id="++:[B&gt;:A, That](Traversable[B])(CanBuildFrom[Repr, B, That]):That"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">++:</span>
+        <span class="tparams">[<span name="B">B &gt;: A</span>, <span name="That">That</span>]</span>
+        <span class="params">(<span name="that">
+                  that
+                  : <span name="scala.collection.Traversable" class="extype">Traversable</span>[B]
+                  
+                </span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">
+                  bf
+                  : <span name="scala.collection.generic.CanBuildFrom" class="extype">CanBuildFrom</span>[Repr, B, That]
+                  
+                </span>)</span>
+        <span class="result">: That</span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: TraversableLike
+        </div></div>
+          
+    </li><li visbl="pub" name="scala.collection.TraversableLike#++:" data-isabs="false">
+      <a id="++:[B&gt;:A, That](TraversableOnce[B])(CanBuildFrom[Repr, B, That]):That"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">++:</span>
+        <span class="tparams">[<span name="B">B &gt;: A</span>, <span name="That">That</span>]</span>
+        <span class="params">(<span name="that">
+                  that
+                  : <span name="scala.collection.TraversableOnce" class="extype">TraversableOnce</span>[B]
+                  
+                </span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">
+                  bf
+                  : <span name="scala.collection.generic.CanBuildFrom" class="extype">CanBuildFrom</span>[Repr, B, That]
+                  
+                </span>)</span>
+        <span class="result">: That</span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: TraversableLike
+        </div></div>
+          
+    </li><li visbl="pub" name="scala.collection.TraversableOnce#/:" data-isabs="false">
       <a id="/:[B](B)((B, A) ⇒ B):B"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">/:</span>
         <span class="tparams">[<span name="B">B</span>]</span>
-        <span class="params">(<span name="z">z: B</span>)</span><span class="params">(<span name="op">op: (B, A) ⇒ B</span>)</span>
+        <span class="params">(<span name="z">
+                  z
+                  : B
+                  
+                </span>)</span><span class="params">(<span name="op">
+                  op
+                  : (B, A) ⇒ B
+                  
+                </span>)</span>
         <span class="result">: B</span>
       </span>
       </h4>
@@ -229,14 +310,22 @@ require Longs for indexing.</p><p>This trait adds methods for accessing the extr
           definition classes: TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableOnce#:\">
+    </li><li visbl="pub" name="scala.collection.TraversableOnce#:\" data-isabs="false">
       <a id=":\[B](B)((A, B) ⇒ B):B"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">:\</span>
         <span class="tparams">[<span name="B">B</span>]</span>
-        <span class="params">(<span name="z">z: B</span>)</span><span class="params">(<span name="op">op: (A, B) ⇒ B</span>)</span>
+        <span class="params">(<span name="z">
+                  z
+                  : B
+                  
+                </span>)</span><span class="params">(<span name="op">
+                  op
+                  : (A, B) ⇒ B
+                  
+                </span>)</span>
         <span class="result">: B</span>
       </span>
       </h4>
@@ -246,15 +335,19 @@ require Longs for indexing.</p><p>This trait adds methods for accessing the extr
           definition classes: TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#==">
+    </li><li visbl="pub" name="scala.AnyRef#==" data-isabs="false">
       <a id="==(AnyRef):Boolean"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">==</span>
         
-        <span class="params">(<span name="arg0">arg0: AnyRef</span>)</span>
-        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="params">(<span name="arg0">
+                  arg0
+                  : AnyRef
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
       
@@ -268,17 +361,22 @@ require Longs for indexing.</p><p>This trait adds methods for accessing the extr
             
             
             
+            
           </div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.Any#==">
+    </li><li visbl="pub" name="scala.Any#==" data-isabs="false">
       <a id="==(Any):Boolean"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">==</span>
         
-        <span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span>
-        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="params">(<span name="arg0">
+                  arg0
+                  : <span name="scala.Any" class="extype">Any</span>
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
       
@@ -292,16 +390,21 @@ require Longs for indexing.</p><p>This trait adds methods for accessing the extr
             
             
             
+            
           </div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableOnce#addString">
+    </li><li visbl="pub" name="scala.collection.TraversableOnce#addString" data-isabs="false">
       <a id="addString(StringBuilder):StringBuilder"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">addString</span>
         
-        <span class="params">(<span name="b">b: StringBuilder</span>)</span>
+        <span class="params">(<span name="b">
+                  b
+                  : StringBuilder
+                  
+                </span>)</span>
         <span class="result">: StringBuilder</span>
       </span>
       </h4>
@@ -311,14 +414,22 @@ require Longs for indexing.</p><p>This trait adds methods for accessing the extr
           definition classes: TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableOnce#addString">
+    </li><li visbl="pub" name="scala.collection.TraversableOnce#addString" data-isabs="false">
       <a id="addString(StringBuilder,String):StringBuilder"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">addString</span>
         
-        <span class="params">(<span name="b">b: StringBuilder</span>, <span name="sep">sep: String</span>)</span>
+        <span class="params">(<span name="b">
+                  b
+                  : StringBuilder
+                  
+                </span>, <span name="sep">
+                  sep
+                  : String
+                  
+                </span>)</span>
         <span class="result">: StringBuilder</span>
       </span>
       </h4>
@@ -328,14 +439,30 @@ require Longs for indexing.</p><p>This trait adds methods for accessing the extr
           definition classes: TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableOnce#addString">
+    </li><li visbl="pub" name="scala.collection.TraversableOnce#addString" data-isabs="false">
       <a id="addString(StringBuilder,String,String,String):StringBuilder"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">addString</span>
         
-        <span class="params">(<span name="b">b: StringBuilder</span>, <span name="start">start: String</span>, <span name="sep">sep: String</span>, <span name="end">end: String</span>)</span>
+        <span class="params">(<span name="b">
+                  b
+                  : StringBuilder
+                  
+                </span>, <span name="start">
+                  start
+                  : String
+                  
+                </span>, <span name="sep">
+                  sep
+                  : String
+                  
+                </span>, <span name="end">
+                  end
+                  : String
+                  
+                </span>)</span>
         <span class="result">: StringBuilder</span>
       </span>
       </h4>
@@ -345,7 +472,7 @@ require Longs for indexing.</p><p>This trait adds methods for accessing the extr
           definition classes: TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.Any#asInstanceOf">
+    </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -358,7 +485,9 @@ require Longs for indexing.</p><p>This trait adds methods for accessing the extr
       </h4>
       
             <p class="shortcomment cmt">This method is used to cast the receiver object to be of type <code>T0</code>.</p>
-            <div class="fullcomment"><div class="comment cmt"><p>This method is used to cast the receiver object to be of type <code>T0</code>.</p><p>Note that the success of a cast at runtime is modulo Scala's erasure semantics.  Therefore the expression<code>1.asInstanceOf[String]</code> will throw a <code>ClassCastException</code> at runtime, while the expression<code>List(1).asInstanceOf[List[String]]</code> will not.  In the latter example, because the type argument is erased as
+            <div class="fullcomment"><div class="comment cmt"><p>This method is used to cast the receiver object to be of type <code>T0</code>.</p><p>Note that the success of a cast at runtime is modulo Scala's erasure semantics.  Therefore the expression
+<code>1.asInstanceOf[String]</code> will throw a <code>ClassCastException</code> at runtime, while the expression
+<code>List(1).asInstanceOf[List[String]]</code> will not.  In the latter example, because the type argument is erased as
 part of compilation it is not possible to check whether the contents of the list are of the requested typed.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the receiver object.</p></dd></dl><div class="block">
           attributes: final 
@@ -368,9 +497,10 @@ part of compilation it is not possible to check whether the contents of the list
             
             
             
+            
           </div>
           
-    </li><li visbl="prt" data-isabs="false" name="scala.AnyRef#clone">
+    </li><li visbl="prt" name="scala.AnyRef#clone" data-isabs="false">
       <a id="clone():AnyRef"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -385,23 +515,36 @@ part of compilation it is not possible to check whether the contents of the list
             <p class="shortcomment cmt">This method creates and returns a copy of the receiver object.</p>
             <div class="fullcomment"><div class="comment cmt"><p>This method creates and returns a copy of the receiver object.</p><p>The default implementation of the <code>clone</code> method is platform dependent.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a copy of the receiver object.</p></dd></dl><div class="block">
-          attributes: protected 
+          attributes: protected[<a name="java.lang" class="extype" href="../../java/lang/package.html">lang</a>] 
         </div><div class="block">
           definition classes: AnyRef
+        </div><div class="block">
+          annotations: 
+                <span class="name">@throws</span><span class="args">()</span>
+              
         </div>
+            
             
             
             
           </div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableLike#collect">
+    </li><li visbl="pub" name="scala.collection.TraversableLike#collect" data-isabs="false">
       <a id="collect[B, That](PartialFunction[A, B])(CanBuildFrom[Repr, B, That]):That"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">collect</span>
         <span class="tparams">[<span name="B">B</span>, <span name="That">That</span>]</span>
-        <span class="params">(<span name="pf">pf: <span class="extype" name="scala.PartialFunction">PartialFunction</span>[A, B]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <span class="extype" name="scala.collection.generic.CanBuildFrom">CanBuildFrom</span>[Repr, B, That]</span>)</span>
+        <span class="params">(<span name="pf">
+                  pf
+                  : <span name="scala.PartialFunction" class="extype">PartialFunction</span>[A, B]
+                  
+                </span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">
+                  bf
+                  : <span name="scala.collection.generic.CanBuildFrom" class="extype">CanBuildFrom</span>[Repr, B, That]
+                  
+                </span>)</span>
         <span class="result">: That</span>
       </span>
       </h4>
@@ -411,15 +554,48 @@ part of compilation it is not possible to check whether the contents of the list
           definition classes: TraversableLike
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableLike#copyToArray">
+    </li><li visbl="pub" name="scala.collection.TraversableOnce#collectFirst" data-isabs="false">
+      <a id="collectFirst[B](PartialFunction[A, B]):Option[B]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">collectFirst</span>
+        <span class="tparams">[<span name="B">B</span>]</span>
+        <span class="params">(<span name="pf">
+                  pf
+                  : <span name="scala.PartialFunction" class="extype">PartialFunction</span>[A, B]
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Option" class="extype">Option</span>[B]</span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: TraversableOnce
+        </div></div>
+          
+    </li><li visbl="pub" name="scala.collection.TraversableLike#copyToArray" data-isabs="false">
       <a id="copyToArray[B&gt;:A](Array[B],Int,Int):Unit"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">copyToArray</span>
         <span class="tparams">[<span name="B">B &gt;: A</span>]</span>
-        <span class="params">(<span name="xs">xs: <span class="extype" name="scala.Array">Array</span>[B]</span>, <span name="start">start: <span class="extype" name="scala.Int">Int</span></span>, <span name="len">len: <span class="extype" name="scala.Int">Int</span></span>)</span>
-        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="params">(<span name="xs">
+                  xs
+                  : <span name="scala.Array" class="extype">Array</span>[B]
+                  
+                </span>, <span name="start">
+                  start
+                  : <span name="scala.Int" class="extype">Int</span>
+                  
+                </span>, <span name="len">
+                  len
+                  : <span name="scala.Int" class="extype">Int</span>
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
       
@@ -428,15 +604,19 @@ part of compilation it is not possible to check whether the contents of the list
           definition classes: TraversableLike → TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableOnce#copyToArray">
+    </li><li visbl="pub" name="scala.collection.TraversableOnce#copyToArray" data-isabs="false">
       <a id="copyToArray[B&gt;:A](Array[B]):Unit"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">copyToArray</span>
         <span class="tparams">[<span name="B">B &gt;: A</span>]</span>
-        <span class="params">(<span name="xs">xs: <span class="extype" name="scala.Array">Array</span>[B]</span>)</span>
-        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="params">(<span name="xs">
+                  xs
+                  : <span name="scala.Array" class="extype">Array</span>[B]
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
       
@@ -445,15 +625,23 @@ part of compilation it is not possible to check whether the contents of the list
           definition classes: TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableOnce#copyToArray">
+    </li><li visbl="pub" name="scala.collection.TraversableOnce#copyToArray" data-isabs="false">
       <a id="copyToArray[B&gt;:A](Array[B],Int):Unit"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">copyToArray</span>
         <span class="tparams">[<span name="B">B &gt;: A</span>]</span>
-        <span class="params">(<span name="xs">xs: <span class="extype" name="scala.Array">Array</span>[B]</span>, <span name="start">start: <span class="extype" name="scala.Int">Int</span></span>)</span>
-        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="params">(<span name="xs">
+                  xs
+                  : <span name="scala.Array" class="extype">Array</span>[B]
+                  
+                </span>, <span name="start">
+                  start
+                  : <span name="scala.Int" class="extype">Int</span>
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
       
@@ -462,15 +650,19 @@ part of compilation it is not possible to check whether the contents of the list
           definition classes: TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableOnce#copyToBuffer">
+    </li><li visbl="pub" name="scala.collection.TraversableOnce#copyToBuffer" data-isabs="false">
       <a id="copyToBuffer[B&gt;:A](Buffer[B]):Unit"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">copyToBuffer</span>
         <span class="tparams">[<span name="B">B &gt;: A</span>]</span>
-        <span class="params">(<span name="dest">dest: <span class="extype" name="scala.collection.mutable.Buffer">Buffer</span>[B]</span>)</span>
-        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="params">(<span name="dest">
+                  dest
+                  : <span name="scala.collection.mutable.Buffer" class="extype">Buffer</span>[B]
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
       
@@ -479,15 +671,19 @@ part of compilation it is not possible to check whether the contents of the list
           definition classes: TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableOnce#count">
+    </li><li visbl="pub" name="scala.collection.TraversableOnce#count" data-isabs="false">
       <a id="count((A) ⇒ Boolean):Int"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">count</span>
         
-        <span class="params">(<span name="p">p: (A) ⇒ <span class="extype" name="scala.Boolean">Boolean</span></span>)</span>
-        <span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+        <span class="params">(<span name="p">
+                  p
+                  : (A) ⇒ <span name="scala.Boolean" class="extype">Boolean</span>
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Int" class="extype">Int</span></span>
       </span>
       </h4>
       
@@ -496,14 +692,18 @@ part of compilation it is not possible to check whether the contents of the list
           definition classes: TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableLike#drop">
+    </li><li visbl="pub" name="scala.collection.TraversableLike#drop" data-isabs="false">
       <a id="drop(Int):Repr"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">drop</span>
         
-        <span class="params">(<span name="n">n: <span class="extype" name="scala.Int">Int</span></span>)</span>
+        <span class="params">(<span name="n">
+                  n
+                  : <span name="scala.Int" class="extype">Int</span>
+                  
+                </span>)</span>
         <span class="result">: Repr</span>
       </span>
       </h4>
@@ -513,14 +713,18 @@ part of compilation it is not possible to check whether the contents of the list
           definition classes: TraversableLike
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableLike#dropWhile">
+    </li><li visbl="pub" name="scala.collection.TraversableLike#dropWhile" data-isabs="false">
       <a id="dropWhile((A) ⇒ Boolean):Repr"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">dropWhile</span>
         
-        <span class="params">(<span name="p">p: (A) ⇒ <span class="extype" name="scala.Boolean">Boolean</span></span>)</span>
+        <span class="params">(<span name="p">
+                  p
+                  : (A) ⇒ <span name="scala.Boolean" class="extype">Boolean</span>
+                  
+                </span>)</span>
         <span class="result">: Repr</span>
       </span>
       </h4>
@@ -530,15 +734,19 @@ part of compilation it is not possible to check whether the contents of the list
           definition classes: TraversableLike
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#eq">
+    </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">eq</span>
         
-        <span class="params">(<span name="arg0">arg0: AnyRef</span>)</span>
-        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="params">(<span name="arg0">
+                  arg0
+                  : AnyRef
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
       
@@ -550,7 +758,8 @@ non-null instances of <code>AnyRef</code>:
  * It is reflexive: for any non-null instance <code>x</code> of type <code>AnyRef</code>, <code>x.eq(x)</code> returns <code>true</code>.
  * It is symmetric: for any non-null instances <code>x</code> and <code>y</code> of type <code>AnyRef</code>, <code>x.eq(y)</code> returns <code>true</code> if and
    only if <code>y.eq(x)</code> returns <code>true</code>.
- * It is transitive: for any non-null instances <code>x</code>, <code>y</code>, and <code>z</code> of type <code>AnyRef</code> if <code>x.eq(y)</code> returns <code>true</code>   and <code>y.eq(z)</code> returns <code>true</code>, then <code>x.eq(z)</code> returns <code>true</code>.</p><p>Additionally, the <code>eq</code> method has three other properties.
+ * It is transitive: for any non-null instances <code>x</code>, <code>y</code>, and <code>z</code> of type <code>AnyRef</code> if <code>x.eq(y)</code> returns <code>true</code>
+   and <code>y.eq(z)</code> returns <code>true</code>, then <code>x.eq(z)</code> returns <code>true</code>.</p><p>Additionally, the <code>eq</code> method has three other properties.
  * It is consistent: for any non-null instances <code>x</code> and <code>y</code> of type <code>AnyRef</code>, multiple invocations of
    <code>x.eq(y)</code> consistently returns <code>true</code> or consistently returns <code>false</code>.
  * For any non-null instance <code>x</code> of type <code>AnyRef</code>, <code>x.eq(null)</code> and <code>null.eq(x)</code> returns <code>false</code>.
@@ -565,17 +774,22 @@ should be equal to each other (<code>o1 == o2</code>) and they should hash to th
             
             
             
+            
           </div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#equals">
+    </li><li visbl="pub" name="scala.AnyRef#equals" data-isabs="false">
       <a id="equals(Any):Boolean"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">equals</span>
         
-        <span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span>
-        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="params">(<span name="arg0">
+                  arg0
+                  : <span name="scala.Any" class="extype">Any</span>
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
       
@@ -588,8 +802,7 @@ relation]:
  * It is transitive: for any instances <code>x</code>, <code>y</code>, and <code>z</code> of type <code>AnyRef</code> if <code>x.equals(y)</code> returns <code>true</code> and
    <code>y.equals(z)</code> returns <code>true</code>, then <code>x.equals(z)</code> should return <code>true</code>.</p><p>If you override this method, you should verify that your implementation remains an equivalence relation.
 Additionally, when overriding this method it is often necessary to override <code>hashCode</code> to ensure that objects
-that are &quot;equal&quot; (<code>o1.equals(o2)</code> returns <code>true</code>) hash to the same 
-scala.Int
+that are &quot;equal&quot; (<code>o1.equals(o2)</code> returns <code>true</code>) hash to the same scala.Int
 (<code>o1.hashCode.equals(o2.hashCode)</code>).
 </p></div><dl class="paramcmts block"><dt class="param">arg0</dt><dd class="cmt"><p>the object to compare against this object for equality.</p></dd><dt>returns</dt><dd class="cmt"><p><code>true</code> if the receiver object is equivalent to the argument; <code>false</code> otherwise.</p></dd></dl><div class="block">
           definition classes: AnyRef → Any
@@ -597,17 +810,22 @@ scala.Int
             
             
             
+            
           </div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableLike#exists">
+    </li><li visbl="pub" name="scala.collection.TraversableLike#exists" data-isabs="false">
       <a id="exists((A) ⇒ Boolean):Boolean"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">exists</span>
         
-        <span class="params">(<span name="p">p: (A) ⇒ <span class="extype" name="scala.Boolean">Boolean</span></span>)</span>
-        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="params">(<span name="p">
+                  p
+                  : (A) ⇒ <span name="scala.Boolean" class="extype">Boolean</span>
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
       
@@ -616,14 +834,18 @@ scala.Int
           definition classes: TraversableLike → TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableLike#filter">
+    </li><li visbl="pub" name="scala.collection.TraversableLike#filter" data-isabs="false">
       <a id="filter((A) ⇒ Boolean):Repr"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">filter</span>
         
-        <span class="params">(<span name="p">p: (A) ⇒ <span class="extype" name="scala.Boolean">Boolean</span></span>)</span>
+        <span class="params">(<span name="p">
+                  p
+                  : (A) ⇒ <span name="scala.Boolean" class="extype">Boolean</span>
+                  
+                </span>)</span>
         <span class="result">: Repr</span>
       </span>
       </h4>
@@ -633,14 +855,18 @@ scala.Int
           definition classes: TraversableLike
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableLike#filterNot">
+    </li><li visbl="pub" name="scala.collection.TraversableLike#filterNot" data-isabs="false">
       <a id="filterNot((A) ⇒ Boolean):Repr"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">filterNot</span>
         
-        <span class="params">(<span name="p">p: (A) ⇒ <span class="extype" name="scala.Boolean">Boolean</span></span>)</span>
+        <span class="params">(<span name="p">
+                  p
+                  : (A) ⇒ <span name="scala.Boolean" class="extype">Boolean</span>
+                  
+                </span>)</span>
         <span class="result">: Repr</span>
       </span>
       </h4>
@@ -650,7 +876,7 @@ scala.Int
           definition classes: TraversableLike
         </div></div>
           
-    </li><li visbl="prt" data-isabs="false" name="scala.AnyRef#finalize">
+    </li><li visbl="prt" name="scala.AnyRef#finalize" data-isabs="false">
       <a id="finalize():Unit"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -658,32 +884,42 @@ scala.Int
         <span class="name">finalize</span>
         
         <span class="params">()</span>
-        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
       
             <p class="shortcomment cmt">This method is called by the garbage collector on the receiver object when garbage collection determines that
 there are no more references to the object.</p>
             <div class="fullcomment"><div class="comment cmt"><p>This method is called by the garbage collector on the receiver object when garbage collection determines that
-there are no more references to the object.</p><p>The details of when and if the <code>finalize</code> method are invoked, as well as the interaction between <code>finalize</code>and non-local returns and exceptions, are all platform dependent.</p></div><div class="block">
-          attributes: protected 
+there are no more references to the object.</p><p>The details of when and if the <code>finalize</code> method are invoked, as well as the interaction between <code>finalize</code>
+and non-local returns and exceptions, are all platform dependent.</p></div><div class="block">
+          attributes: protected[<a name="java.lang" class="extype" href="../../java/lang/package.html">lang</a>] 
         </div><div class="block">
           definition classes: AnyRef
+        </div><div class="block">
+          annotations: 
+                <span class="name">@throws</span><span class="args">()</span>
+              
         </div>
+            
             
             
             
           </div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableLike#find">
+    </li><li visbl="pub" name="scala.collection.TraversableLike#find" data-isabs="false">
       <a id="find((A) ⇒ Boolean):Option[A]"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">find</span>
         
-        <span class="params">(<span name="p">p: (A) ⇒ <span class="extype" name="scala.Boolean">Boolean</span></span>)</span>
-        <span class="result">: <span class="extype" name="scala.Option">Option</span>[A]</span>
+        <span class="params">(<span name="p">
+                  p
+                  : (A) ⇒ <span name="scala.Boolean" class="extype">Boolean</span>
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Option" class="extype">Option</span>[A]</span>
       </span>
       </h4>
       
@@ -692,14 +928,22 @@ there are no more references to the object.</p><p>The details of when and if the
           definition classes: TraversableLike → TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableLike#flatMap">
-      <a id="flatMap[B, That]((A) ⇒ Traversable[B])(CanBuildFrom[Repr, B, That]):That"></a>
+    </li><li visbl="pub" name="scala.collection.TraversableLike#flatMap" data-isabs="false">
+      <a id="flatMap[B, That]((A) ⇒ TraversableOnce[B])(CanBuildFrom[Repr, B, That]):That"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">flatMap</span>
         <span class="tparams">[<span name="B">B</span>, <span name="That">That</span>]</span>
-        <span class="params">(<span name="f">f: (A) ⇒ <span class="extype" name="scala.collection.Traversable">Traversable</span>[B]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <span class="extype" name="scala.collection.generic.CanBuildFrom">CanBuildFrom</span>[Repr, B, That]</span>)</span>
+        <span class="params">(<span name="f">
+                  f
+                  : (A) ⇒ <span name="scala.collection.TraversableOnce" class="extype">TraversableOnce</span>[B]
+                  
+                </span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">
+                  bf
+                  : <span name="scala.collection.generic.CanBuildFrom" class="extype">CanBuildFrom</span>[Repr, B, That]
+                  
+                </span>)</span>
         <span class="result">: That</span>
       </span>
       </h4>
@@ -709,14 +953,22 @@ there are no more references to the object.</p><p>The details of when and if the
           definition classes: TraversableLike → FilterMonadic
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableOnce#foldLeft">
+    </li><li visbl="pub" name="scala.collection.TraversableOnce#foldLeft" data-isabs="false">
       <a id="foldLeft[B](B)((B, A) ⇒ B):B"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">foldLeft</span>
         <span class="tparams">[<span name="B">B</span>]</span>
-        <span class="params">(<span name="z">z: B</span>)</span><span class="params">(<span name="op">op: (B, A) ⇒ B</span>)</span>
+        <span class="params">(<span name="z">
+                  z
+                  : B
+                  
+                </span>)</span><span class="params">(<span name="op">
+                  op
+                  : (B, A) ⇒ B
+                  
+                </span>)</span>
         <span class="result">: B</span>
       </span>
       </h4>
@@ -726,14 +978,22 @@ there are no more references to the object.</p><p>The details of when and if the
           definition classes: TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableOnce#foldRight">
+    </li><li visbl="pub" name="scala.collection.TraversableOnce#foldRight" data-isabs="false">
       <a id="foldRight[B](B)((A, B) ⇒ B):B"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">foldRight</span>
         <span class="tparams">[<span name="B">B</span>]</span>
-        <span class="params">(<span name="z">z: B</span>)</span><span class="params">(<span name="op">op: (A, B) ⇒ B</span>)</span>
+        <span class="params">(<span name="z">
+                  z
+                  : B
+                  
+                </span>)</span><span class="params">(<span name="op">
+                  op
+                  : (A, B) ⇒ B
+                  
+                </span>)</span>
         <span class="result">: B</span>
       </span>
       </h4>
@@ -743,15 +1003,19 @@ there are no more references to the object.</p><p>The details of when and if the
           definition classes: TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableLike#forall">
+    </li><li visbl="pub" name="scala.collection.TraversableLike#forall" data-isabs="false">
       <a id="forall((A) ⇒ Boolean):Boolean"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">forall</span>
         
-        <span class="params">(<span name="p">p: (A) ⇒ <span class="extype" name="scala.Boolean">Boolean</span></span>)</span>
-        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="params">(<span name="p">
+                  p
+                  : (A) ⇒ <span name="scala.Boolean" class="extype">Boolean</span>
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
       
@@ -760,15 +1024,19 @@ there are no more references to the object.</p><p>The details of when and if the
           definition classes: TraversableLike → TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="true" name="scala.collection.TraversableLike#foreach">
+    </li><li visbl="pub" name="scala.collection.TraversableLike#foreach" data-isabs="true">
       <a id="foreach[U]((A) ⇒ U):Unit"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">foreach</span>
         <span class="tparams">[<span name="U">U</span>]</span>
-        <span class="params">(<span name="f">f: (A) ⇒ U</span>)</span>
-        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="params">(<span name="f">
+                  f
+                  : (A) ⇒ U
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
       
@@ -779,7 +1047,7 @@ there are no more references to the object.</p><p>The details of when and if the
           definition classes: TraversableLike → TraversableOnce → FilterMonadic
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#getClass">
+    </li><li visbl="pub" name="scala.AnyRef#getClass" data-isabs="false">
       <a id="getClass():java.lang.Class[_]"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -801,17 +1069,22 @@ there are no more references to the object.</p><p>The details of when and if the
             
             
             
+            
           </div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableLike#groupBy">
+    </li><li visbl="pub" name="scala.collection.TraversableLike#groupBy" data-isabs="false">
       <a id="groupBy[K]((A) ⇒ K):Map[K, Repr]"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">groupBy</span>
         <span class="tparams">[<span name="K">K</span>]</span>
-        <span class="params">(<span name="f">f: (A) ⇒ K</span>)</span>
-        <span class="result">: <span class="extype" name="scala.collection.immutable.Map">Map</span>[K, Repr]</span>
+        <span class="params">(<span name="f">
+                  f
+                  : (A) ⇒ K
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.collection.immutable.Map" class="extype">Map</span>[K, Repr]</span>
       </span>
       </h4>
       
@@ -820,7 +1093,7 @@ there are no more references to the object.</p><p>The details of when and if the
           definition classes: TraversableLike
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.LongTraversableLike#hasDefiniteSize">
+    </li><li visbl="pub" name="scalax.io.LongTraversableLike#hasDefiniteSize" data-isabs="false">
       <a id="hasDefiniteSize:Boolean"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -828,16 +1101,16 @@ there are no more references to the object.</p><p>The details of when and if the
         <span class="name">hasDefiniteSize</span>
         
         
-        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
       
             
             <div class="fullcomment"><div class="block">
-          definition classes: <a href="" class="extype" name="scalax.io.LongTraversableLike">LongTraversableLike</a> → TraversableLike → TraversableOnce
+          definition classes: <a name="scalax.io.LongTraversableLike" class="extype" href="">LongTraversableLike</a> → TraversableLike → TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#hashCode">
+    </li><li visbl="pub" name="scala.AnyRef#hashCode" data-isabs="false">
       <a id="hashCode():Int"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -845,7 +1118,7 @@ there are no more references to the object.</p><p>The details of when and if the
         <span class="name">hashCode</span>
         
         <span class="params">()</span>
-        <span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+        <span class="result">: <span name="scala.Int" class="extype">Int</span></span>
       </span>
       </h4>
       
@@ -861,9 +1134,10 @@ to verify that the behavior is consistent with the <code>equals</code> method.
             
             
             
+            
           </div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableLike#head">
+    </li><li visbl="pub" name="scala.collection.TraversableLike#head" data-isabs="false">
       <a id="head:A"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -880,7 +1154,7 @@ to verify that the behavior is consistent with the <code>equals</code> method.
           definition classes: TraversableLike
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableLike#headOption">
+    </li><li visbl="pub" name="scala.collection.TraversableLike#headOption" data-isabs="false">
       <a id="headOption:Option[A]"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -888,7 +1162,7 @@ to verify that the behavior is consistent with the <code>equals</code> method.
         <span class="name">headOption</span>
         
         
-        <span class="result">: <span class="extype" name="scala.Option">Option</span>[A]</span>
+        <span class="result">: <span name="scala.Option" class="extype">Option</span>[A]</span>
       </span>
       </h4>
       
@@ -897,7 +1171,7 @@ to verify that the behavior is consistent with the <code>equals</code> method.
           definition classes: TraversableLike
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableLike#init">
+    </li><li visbl="pub" name="scala.collection.TraversableLike#init" data-isabs="false">
       <a id="init:Repr"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -914,7 +1188,24 @@ to verify that the behavior is consistent with the <code>equals</code> method.
           definition classes: TraversableLike
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableLike#isEmpty">
+    </li><li visbl="pub" name="scala.collection.TraversableLike#inits" data-isabs="false">
+      <a id="inits:Iterator[Repr]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">inits</span>
+        
+        
+        <span class="result">: <span name="scala.collection.Iterator" class="extype">Iterator</span>[Repr]</span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: TraversableLike
+        </div></div>
+          
+    </li><li visbl="pub" name="scala.collection.TraversableLike#isEmpty" data-isabs="false">
       <a id="isEmpty:Boolean"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -922,7 +1213,7 @@ to verify that the behavior is consistent with the <code>equals</code> method.
         <span class="name">isEmpty</span>
         
         
-        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
       
@@ -931,7 +1222,7 @@ to verify that the behavior is consistent with the <code>equals</code> method.
           definition classes: TraversableLike → TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.Any#isInstanceOf">
+    </li><li visbl="pub" name="scala.Any#isInstanceOf" data-isabs="false">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -939,12 +1230,13 @@ to verify that the behavior is consistent with the <code>equals</code> method.
         <span class="name">isInstanceOf</span>
         <span class="tparams">[<span name="T0">T0</span>]</span>
         
-        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
       
             <p class="shortcomment cmt">This method is used to test whether the dynamic type of the receiver object is <code>T0</code>.</p>
-            <div class="fullcomment"><div class="comment cmt"><p>This method is used to test whether the dynamic type of the receiver object is <code>T0</code>.</p><p>Note that the test result of the test is modulo Scala's erasure semantics.  Therefore the expression<code>1.isInstanceOf[String]</code> will return <code>false</code>, while the expression <code>List(1).isInstanceOf[List[String]]</code> will
+            <div class="fullcomment"><div class="comment cmt"><p>This method is used to test whether the dynamic type of the receiver object is <code>T0</code>.</p><p>Note that the test result of the test is modulo Scala's erasure semantics.  Therefore the expression
+<code>1.isInstanceOf[String]</code> will return <code>false</code>, while the expression <code>List(1).isInstanceOf[List[String]]</code> will
 return <code>true</code>.  In the latter example, because the type argument is erased as part of compilation it is not
 possible to check whether the contents of the list are of the requested typed.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p><code>true</code> if the receiver object is an instance of erasure of type <code>T0</code>; <code>false</code> otherwise.</p></dd></dl><div class="block">
@@ -955,9 +1247,10 @@ possible to check whether the contents of the list are of the requested typed.
             
             
             
+            
           </div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableLike#isTraversableAgain">
+    </li><li visbl="pub" name="scala.collection.TraversableLike#isTraversableAgain" data-isabs="false">
       <a id="isTraversableAgain:Boolean"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -965,7 +1258,7 @@ possible to check whether the contents of the list are of the requested typed.
         <span class="name">isTraversableAgain</span>
         
         
-        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
       
@@ -976,7 +1269,7 @@ possible to check whether the contents of the list are of the requested typed.
           definition classes: TraversableLike → TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableLike#last">
+    </li><li visbl="pub" name="scala.collection.TraversableLike#last" data-isabs="false">
       <a id="last:A"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -993,7 +1286,7 @@ possible to check whether the contents of the list are of the requested typed.
           definition classes: TraversableLike
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableLike#lastOption">
+    </li><li visbl="pub" name="scala.collection.TraversableLike#lastOption" data-isabs="false">
       <a id="lastOption:Option[A]"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -1001,7 +1294,7 @@ possible to check whether the contents of the list are of the requested typed.
         <span class="name">lastOption</span>
         
         
-        <span class="result">: <span class="extype" name="scala.Option">Option</span>[A]</span>
+        <span class="result">: <span name="scala.Option" class="extype">Option</span>[A]</span>
       </span>
       </h4>
       
@@ -1010,34 +1303,34 @@ possible to check whether the contents of the list are of the requested typed.
           definition classes: TraversableLike
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.LongTraversableLike#lcount">
+    </li><li visbl="pub" name="scalax.io.LongTraversableLike#lcount" data-isabs="false">
       <a id="lcount((A) ⇒ Boolean):Long"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">lcount</span>
         
-        <span class="params">(<span name="p">p: (A) ⇒ <span class="extype" name="scala.Boolean">Boolean</span></span>)</span>
-        <span class="result">: <span class="extype" name="scala.Long">Long</span></span>
+        <span class="params">(<span name="p">
+                  p
+                  : (A) ⇒ <span name="scala.Boolean" class="extype">Boolean</span>
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Long" class="extype">Long</span></span>
       </span>
       </h4>
       
-            <p class="shortcomment cmt">The long equivalent of count in Traversable.</p>
-            <div class="fullcomment"><div class="comment cmt"><p>The long equivalent of count in Traversable.
-</p></div>
-            
-            
-            
-          </div>
-          
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.LongTraversableLike#ldrop">
+    </li><li visbl="pub" name="scalax.io.LongTraversableLike#ldrop" data-isabs="false">
       <a id="ldrop(Long):Repr"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">ldrop</span>
         
-        <span class="params">(<span name="n">n: <span class="extype" name="scala.Long">Long</span></span>)</span>
+        <span class="params">(<span name="n">
+                  n
+                  : <span name="scala.Long" class="extype">Long</span>
+                  
+                </span>)</span>
         <span class="result">: Repr</span>
       </span>
       </h4>
@@ -1048,36 +1341,46 @@ possible to check whether the contents of the list are of the requested typed.
             
             
             
+            
           </div>
           
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.LongTraversableLike#limitFold">
+    </li><li visbl="pub" name="scalax.io.LongTraversableLike#limitFold" data-isabs="false">
       <a id="limitFold[U](U)((U, A) ⇒ FoldResult[U]):U"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">limitFold</span>
         <span class="tparams">[<span name="U">U</span>]</span>
-        <span class="params">(<span name="init">init: U</span>)</span><span class="params">(<span name="op">op: (U, A) ⇒ <a href="FoldResult.html" class="extype" name="scalax.io.FoldResult">FoldResult</a>[U]</span>)</span>
+        <span class="params">(<span name="init">
+                  init
+                  : U
+                  
+                </span>)</span><span class="params">(<span name="op">
+                  op
+                  : (U, A) ⇒ <a name="scalax.io.FoldResult" class="extype" href="FoldResult.html">FoldResult</a>[U]
+                  
+                </span>)</span>
         <span class="result">: U</span>
       </span>
       </h4>
       
             <p class="shortcomment cmt">A foldLeft operation that can be terminated without processing the entire collection.</p>
-            <div class="fullcomment"><div class="comment cmt"><p>A foldLeft operation that can be terminated without processing the entire collection.</p><p>Unlike a normal fold, the function passed to limitFold returns a <a href="FoldResult.html" class="extype" name="scalax.io.FoldResult">FoldResult</a> which both provides the
+            <div class="fullcomment"><div class="comment cmt"><p>A foldLeft operation that can be terminated without processing the entire collection.</p><p>Unlike a normal fold, the function passed to limitFold returns a <a name="scalax.io.FoldResult" class="extype" href="FoldResult.html">FoldResult</a> which both provides the
 value that is to be passed to the next stage of the fold as well as represents if the fold should continue
 or terminate.
 </p></div><dl class="paramcmts block"><dt class="param">init</dt><dd class="cmt"><p>the value to seed the operation with.  IE the value that is passed as the accumulator for the first
             value of the fold operation</p></dd><dt class="param">op</dt><dd class="cmt"><p>the operation that combines the current and previous versions.  The input is the (acc,next) where
           acc is the result from the previous call and next is the next value in the collection to be processed.
-          The return value of the op is Either <a href="Continue.html" class="extype" name="scalax.io.Continue">Continue</a> or <a href="End.html" class="extype" name="scalax.io.End">End</a> indicating if the
-          process should continue to next element or terminate, returning the value contained in the result object</p></dd><dt>returns</dt><dd class="cmt"><p>the last value contained in the <a href="FoldResult.html" class="extype" name="scalax.io.FoldResult">FoldResult</a> which was returned by op
+          The return value of the op is Either <a name="scalax.io.Continue" class="extype" href="Continue.html">Continue</a> or <a name="scalax.io.End" class="extype" href="End.html">End</a> indicating if the
+          process should continue to next element or terminate, returning the value contained in the result object</p></dd><dt>returns</dt><dd class="cmt"><p>the last value contained in the <a name="scalax.io.FoldResult" class="extype" href="FoldResult.html">FoldResult</a> which was returned by op
 </p></dd></dl>
+            
             
             
             
           </div>
           
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.LongTraversableLike#lsize">
+    </li><li visbl="pub" name="scalax.io.LongTraversableLike#lsize" data-isabs="false">
       <a id="lsize:Long"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -1085,7 +1388,7 @@ or terminate.
         <span class="name">lsize</span>
         
         
-        <span class="result">: <span class="extype" name="scala.Long">Long</span></span>
+        <span class="result">: <span name="scala.Long" class="extype">Long</span></span>
       </span>
       </h4>
       
@@ -1095,16 +1398,25 @@ or terminate.
             
             
             
+            
           </div>
           
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.LongTraversableLike#lslice">
+    </li><li visbl="pub" name="scalax.io.LongTraversableLike#lslice" data-isabs="false">
       <a id="lslice(Long,Long):Repr"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">lslice</span>
         
-        <span class="params">(<span name="from">from: <span class="extype" name="scala.Long">Long</span></span>, <span name="until">until: <span class="extype" name="scala.Long">Long</span></span>)</span>
+        <span class="params">(<span name="from">
+                  from
+                  : <span name="scala.Long" class="extype">Long</span>
+                  
+                </span>, <span name="until">
+                  until
+                  : <span name="scala.Long" class="extype">Long</span>
+                  
+                </span>)</span>
         <span class="result">: Repr</span>
       </span>
       </h4>
@@ -1115,16 +1427,21 @@ or terminate.
             
             
             
+            
           </div>
           
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.LongTraversableLike#lsplitAt">
+    </li><li visbl="pub" name="scalax.io.LongTraversableLike#lsplitAt" data-isabs="false">
       <a id="lsplitAt(Long):(Repr, Repr)"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">lsplitAt</span>
         
-        <span class="params">(<span name="n">n: <span class="extype" name="scala.Long">Long</span></span>)</span>
+        <span class="params">(<span name="n">
+                  n
+                  : <span name="scala.Long" class="extype">Long</span>
+                  
+                </span>)</span>
         <span class="result">: (Repr, Repr)</span>
       </span>
       </h4>
@@ -1135,16 +1452,21 @@ or terminate.
             
             
             
+            
           </div>
           
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.LongTraversableLike#ltake">
+    </li><li visbl="pub" name="scalax.io.LongTraversableLike#ltake" data-isabs="false">
       <a id="ltake(Long):Repr"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">ltake</span>
         
-        <span class="params">(<span name="n">n: <span class="extype" name="scala.Long">Long</span></span>)</span>
+        <span class="params">(<span name="n">
+                  n
+                  : <span name="scala.Long" class="extype">Long</span>
+                  
+                </span>)</span>
         <span class="result">: Repr</span>
       </span>
       </h4>
@@ -1155,17 +1477,26 @@ or terminate.
             
             
             
+            
           </div>
           
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.LongTraversableLike#lview">
+    </li><li visbl="pub" name="scalax.io.LongTraversableLike#lview" data-isabs="false">
       <a id="lview(Long,Long):LongTraversableView[A, Repr]"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">lview</span>
         
-        <span class="params">(<span name="from">from: <span class="extype" name="scala.Long">Long</span></span>, <span name="until">until: <span class="extype" name="scala.Long">Long</span></span>)</span>
-        <span class="result">: <a href="LongTraversableView.html" class="extype" name="scalax.io.LongTraversableView">LongTraversableView</a>[A, Repr]</span>
+        <span class="params">(<span name="from">
+                  from
+                  : <span name="scala.Long" class="extype">Long</span>
+                  
+                </span>, <span name="until">
+                  until
+                  : <span name="scala.Long" class="extype">Long</span>
+                  
+                </span>)</span>
+        <span class="result">: <a name="scalax.io.LongTraversableView" class="extype" href="LongTraversableView.html">LongTraversableView</a>[A, Repr]</span>
       </span>
       </h4>
       
@@ -1175,16 +1506,25 @@ or terminate.
             
             
             
+            
           </div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableLike#map">
+    </li><li visbl="pub" name="scala.collection.TraversableLike#map" data-isabs="false">
       <a id="map[B, That]((A) ⇒ B)(CanBuildFrom[Repr, B, That]):That"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">map</span>
         <span class="tparams">[<span name="B">B</span>, <span name="That">That</span>]</span>
-        <span class="params">(<span name="f">f: (A) ⇒ B</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <span class="extype" name="scala.collection.generic.CanBuildFrom">CanBuildFrom</span>[Repr, B, That]</span>)</span>
+        <span class="params">(<span name="f">
+                  f
+                  : (A) ⇒ B
+                  
+                </span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">
+                  bf
+                  : <span name="scala.collection.generic.CanBuildFrom" class="extype">CanBuildFrom</span>[Repr, B, That]
+                  
+                </span>)</span>
         <span class="result">: That</span>
       </span>
       </h4>
@@ -1194,14 +1534,18 @@ or terminate.
           definition classes: TraversableLike → FilterMonadic
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableOnce#max">
+    </li><li visbl="pub" name="scala.collection.TraversableOnce#max" data-isabs="false">
       <a id="max[B&gt;:A](Ordering[B]):A"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">max</span>
         <span class="tparams">[<span name="B">B &gt;: A</span>]</span>
-        <span class="params">(<span class="implicit">implicit </span><span name="cmp">cmp: Ordering[B]</span>)</span>
+        <span class="params">(<span class="implicit">implicit </span><span name="cmp">
+                  cmp
+                  : Ordering[B]
+                  
+                </span>)</span>
         <span class="result">: A</span>
       </span>
       </h4>
@@ -1211,14 +1555,43 @@ or terminate.
           definition classes: TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableOnce#min">
+    </li><li visbl="pub" name="scala.collection.TraversableOnce#maxBy" data-isabs="false">
+      <a id="maxBy[B]((A) ⇒ B)(Ordering[B]):A"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">maxBy</span>
+        <span class="tparams">[<span name="B">B</span>]</span>
+        <span class="params">(<span name="f">
+                  f
+                  : (A) ⇒ B
+                  
+                </span>)</span><span class="params">(<span class="implicit">implicit </span><span name="cmp">
+                  cmp
+                  : Ordering[B]
+                  
+                </span>)</span>
+        <span class="result">: A</span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: TraversableOnce
+        </div></div>
+          
+    </li><li visbl="pub" name="scala.collection.TraversableOnce#min" data-isabs="false">
       <a id="min[B&gt;:A](Ordering[B]):A"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">min</span>
         <span class="tparams">[<span name="B">B &gt;: A</span>]</span>
-        <span class="params">(<span class="implicit">implicit </span><span name="cmp">cmp: Ordering[B]</span>)</span>
+        <span class="params">(<span class="implicit">implicit </span><span name="cmp">
+                  cmp
+                  : Ordering[B]
+                  
+                </span>)</span>
         <span class="result">: A</span>
       </span>
       </h4>
@@ -1228,7 +1601,32 @@ or terminate.
           definition classes: TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableOnce#mkString">
+    </li><li visbl="pub" name="scala.collection.TraversableOnce#minBy" data-isabs="false">
+      <a id="minBy[B]((A) ⇒ B)(Ordering[B]):A"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">minBy</span>
+        <span class="tparams">[<span name="B">B</span>]</span>
+        <span class="params">(<span name="f">
+                  f
+                  : (A) ⇒ B
+                  
+                </span>)</span><span class="params">(<span class="implicit">implicit </span><span name="cmp">
+                  cmp
+                  : Ordering[B]
+                  
+                </span>)</span>
+        <span class="result">: A</span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: TraversableOnce
+        </div></div>
+          
+    </li><li visbl="pub" name="scala.collection.TraversableOnce#mkString" data-isabs="false">
       <a id="mkString:String"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -1245,14 +1643,18 @@ or terminate.
           definition classes: TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableOnce#mkString">
+    </li><li visbl="pub" name="scala.collection.TraversableOnce#mkString" data-isabs="false">
       <a id="mkString(String):String"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">mkString</span>
         
-        <span class="params">(<span name="sep">sep: String</span>)</span>
+        <span class="params">(<span name="sep">
+                  sep
+                  : String
+                  
+                </span>)</span>
         <span class="result">: String</span>
       </span>
       </h4>
@@ -1262,14 +1664,26 @@ or terminate.
           definition classes: TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableOnce#mkString">
+    </li><li visbl="pub" name="scala.collection.TraversableOnce#mkString" data-isabs="false">
       <a id="mkString(String,String,String):String"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">mkString</span>
         
-        <span class="params">(<span name="start">start: String</span>, <span name="sep">sep: String</span>, <span name="end">end: String</span>)</span>
+        <span class="params">(<span name="start">
+                  start
+                  : String
+                  
+                </span>, <span name="sep">
+                  sep
+                  : String
+                  
+                </span>, <span name="end">
+                  end
+                  : String
+                  
+                </span>)</span>
         <span class="result">: String</span>
       </span>
       </h4>
@@ -1279,15 +1693,19 @@ or terminate.
           definition classes: TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#ne">
+    </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
       <a id="ne(AnyRef):Boolean"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">ne</span>
         
-        <span class="params">(<span name="arg0">arg0: AnyRef</span>)</span>
-        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="params">(<span name="arg0">
+                  arg0
+                  : AnyRef
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
       
@@ -1301,9 +1719,10 @@ or terminate.
             
             
             
+            
           </div>
           
-    </li><li visbl="prt" data-isabs="true" name="scala.collection.TraversableLike#newBuilder">
+    </li><li visbl="prt" name="scala.collection.TraversableLike#newBuilder" data-isabs="true">
       <a id="newBuilder:Builder[A, Repr]"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -1311,7 +1730,7 @@ or terminate.
         <span class="name">newBuilder</span>
         
         
-        <span class="result">: <span class="extype" name="scala.collection.mutable.Builder">Builder</span>[A, Repr]</span>
+        <span class="result">: <span name="scala.collection.mutable.Builder" class="extype">Builder</span>[A, Repr]</span>
       </span>
       </h4>
       
@@ -1322,7 +1741,7 @@ or terminate.
           definition classes: TraversableLike → HasNewBuilder
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableOnce#nonEmpty">
+    </li><li visbl="pub" name="scala.collection.TraversableOnce#nonEmpty" data-isabs="false">
       <a id="nonEmpty:Boolean"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -1330,7 +1749,7 @@ or terminate.
         <span class="name">nonEmpty</span>
         
         
-        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
       
@@ -1339,7 +1758,7 @@ or terminate.
           definition classes: TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#notify">
+    </li><li visbl="pub" name="scala.AnyRef#notify" data-isabs="false">
       <a id="notify():Unit"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -1347,7 +1766,7 @@ or terminate.
         <span class="name">notify</span>
         
         <span class="params">()</span>
-        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
       
@@ -1360,9 +1779,10 @@ or terminate.
             
             
             
+            
           </div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#notifyAll">
+    </li><li visbl="pub" name="scala.AnyRef#notifyAll" data-isabs="false">
       <a id="notifyAll():Unit"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -1370,7 +1790,7 @@ or terminate.
         <span class="name">notifyAll</span>
         
         <span class="params">()</span>
-        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
       
@@ -1383,16 +1803,57 @@ or terminate.
             
             
             
+            
           </div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableLike#partition">
+    </li><li visbl="pub" name="scala.collection.Parallelizable#par" data-isabs="false">
+      <a id="par:ParIterable[A]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">par</span>
+        
+        
+        <span class="result">: <span name="scala.collection.parallel.ParIterable" class="extype">ParIterable</span>[A]</span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: Parallelizable → Parallelizable
+        </div></div>
+          
+    </li><li visbl="prt" name="scala.collection.TraversableLike#parCombiner" data-isabs="false">
+      <a id="parCombiner:Combiner[A, ParIterable[A]]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">parCombiner</span>
+        
+        
+        <span class="result">: <span name="scala.collection.parallel.Combiner" class="extype">Combiner</span>[A, <span name="scala.collection.parallel.ParIterable" class="extype">ParIterable</span>[A]]</span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          attributes: protected[this] 
+        </div><div class="block">
+          definition classes: TraversableLike → Parallelizable
+        </div></div>
+          
+    </li><li visbl="pub" name="scala.collection.TraversableLike#partition" data-isabs="false">
       <a id="partition((A) ⇒ Boolean):(Repr, Repr)"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">partition</span>
         
-        <span class="params">(<span name="p">p: (A) ⇒ <span class="extype" name="scala.Boolean">Boolean</span></span>)</span>
+        <span class="params">(<span name="p">
+                  p
+                  : (A) ⇒ <span name="scala.Boolean" class="extype">Boolean</span>
+                  
+                </span>)</span>
         <span class="result">: (Repr, Repr)</span>
       </span>
       </h4>
@@ -1402,14 +1863,18 @@ or terminate.
           definition classes: TraversableLike
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableOnce#product">
+    </li><li visbl="pub" name="scala.collection.TraversableOnce#product" data-isabs="false">
       <a id="product[B&gt;:A](Numeric[B]):B"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">product</span>
         <span class="tparams">[<span name="B">B &gt;: A</span>]</span>
-        <span class="params">(<span class="implicit">implicit </span><span name="num">num: Numeric[B]</span>)</span>
+        <span class="params">(<span class="implicit">implicit </span><span name="num">
+                  num
+                  : Numeric[B]
+                  
+                </span>)</span>
         <span class="result">: B</span>
       </span>
       </h4>
@@ -1419,14 +1884,18 @@ or terminate.
           definition classes: TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableOnce#reduceLeft">
+    </li><li visbl="pub" name="scala.collection.TraversableOnce#reduceLeft" data-isabs="false">
       <a id="reduceLeft[B&gt;:A]((B, A) ⇒ B):B"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">reduceLeft</span>
         <span class="tparams">[<span name="B">B &gt;: A</span>]</span>
-        <span class="params">(<span name="op">op: (B, A) ⇒ B</span>)</span>
+        <span class="params">(<span name="op">
+                  op
+                  : (B, A) ⇒ B
+                  
+                </span>)</span>
         <span class="result">: B</span>
       </span>
       </h4>
@@ -1436,15 +1905,19 @@ or terminate.
           definition classes: TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableOnce#reduceLeftOption">
+    </li><li visbl="pub" name="scala.collection.TraversableOnce#reduceLeftOption" data-isabs="false">
       <a id="reduceLeftOption[B&gt;:A]((B, A) ⇒ B):Option[B]"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">reduceLeftOption</span>
         <span class="tparams">[<span name="B">B &gt;: A</span>]</span>
-        <span class="params">(<span name="op">op: (B, A) ⇒ B</span>)</span>
-        <span class="result">: <span class="extype" name="scala.Option">Option</span>[B]</span>
+        <span class="params">(<span name="op">
+                  op
+                  : (B, A) ⇒ B
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Option" class="extype">Option</span>[B]</span>
       </span>
       </h4>
       
@@ -1453,14 +1926,18 @@ or terminate.
           definition classes: TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableOnce#reduceRight">
+    </li><li visbl="pub" name="scala.collection.TraversableOnce#reduceRight" data-isabs="false">
       <a id="reduceRight[B&gt;:A]((A, B) ⇒ B):B"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">reduceRight</span>
         <span class="tparams">[<span name="B">B &gt;: A</span>]</span>
-        <span class="params">(<span name="op">op: (A, B) ⇒ B</span>)</span>
+        <span class="params">(<span name="op">
+                  op
+                  : (A, B) ⇒ B
+                  
+                </span>)</span>
         <span class="result">: B</span>
       </span>
       </h4>
@@ -1470,15 +1947,19 @@ or terminate.
           definition classes: TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableOnce#reduceRightOption">
+    </li><li visbl="pub" name="scala.collection.TraversableOnce#reduceRightOption" data-isabs="false">
       <a id="reduceRightOption[B&gt;:A]((A, B) ⇒ B):Option[B]"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">reduceRightOption</span>
         <span class="tparams">[<span name="B">B &gt;: A</span>]</span>
-        <span class="params">(<span name="op">op: (A, B) ⇒ B</span>)</span>
-        <span class="result">: <span class="extype" name="scala.Option">Option</span>[B]</span>
+        <span class="params">(<span name="op">
+                  op
+                  : (A, B) ⇒ B
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Option" class="extype">Option</span>[B]</span>
       </span>
       </h4>
       
@@ -1487,7 +1968,7 @@ or terminate.
           definition classes: TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableLike#repr">
+    </li><li visbl="pub" name="scala.collection.TraversableLike#repr" data-isabs="false">
       <a id="repr:Repr"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -1504,7 +1985,7 @@ or terminate.
           definition classes: TraversableLike
         </div></div>
           
-    </li><li visbl="prt" data-isabs="false" name="scala.collection.TraversableOnce#reversed">
+    </li><li visbl="prt" name="scala.collection.TraversableOnce#reversed" data-isabs="false">
       <a id="reversed:List[A]"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -1523,14 +2004,26 @@ or terminate.
           definition classes: TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableLike#scanLeft">
+    </li><li visbl="pub" name="scala.collection.TraversableLike#scanLeft" data-isabs="false">
       <a id="scanLeft[B, That](B)((B, A) ⇒ B)(CanBuildFrom[Repr, B, That]):That"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">scanLeft</span>
         <span class="tparams">[<span name="B">B</span>, <span name="That">That</span>]</span>
-        <span class="params">(<span name="z">z: B</span>)</span><span class="params">(<span name="op">op: (B, A) ⇒ B</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <span class="extype" name="scala.collection.generic.CanBuildFrom">CanBuildFrom</span>[Repr, B, That]</span>)</span>
+        <span class="params">(<span name="z">
+                  z
+                  : B
+                  
+                </span>)</span><span class="params">(<span name="op">
+                  op
+                  : (B, A) ⇒ B
+                  
+                </span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">
+                  bf
+                  : <span name="scala.collection.generic.CanBuildFrom" class="extype">CanBuildFrom</span>[Repr, B, That]
+                  
+                </span>)</span>
         <span class="result">: That</span>
       </span>
       </h4>
@@ -1540,14 +2033,26 @@ or terminate.
           definition classes: TraversableLike
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableLike#scanRight">
+    </li><li visbl="pub" name="scala.collection.TraversableLike#scanRight" data-isabs="false">
       <a id="scanRight[B, That](B)((A, B) ⇒ B)(CanBuildFrom[Repr, B, That]):That"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">scanRight</span>
         <span class="tparams">[<span name="B">B</span>, <span name="That">That</span>]</span>
-        <span class="params">(<span name="z">z: B</span>)</span><span class="params">(<span name="op">op: (A, B) ⇒ B</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <span class="extype" name="scala.collection.generic.CanBuildFrom">CanBuildFrom</span>[Repr, B, That]</span>)</span>
+        <span class="params">(<span name="z">
+                  z
+                  : B
+                  
+                </span>)</span><span class="params">(<span name="op">
+                  op
+                  : (A, B) ⇒ B
+                  
+                </span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">
+                  bf
+                  : <span name="scala.collection.generic.CanBuildFrom" class="extype">CanBuildFrom</span>[Repr, B, That]
+                  
+                </span>)</span>
         <span class="result">: That</span>
       </span>
       </h4>
@@ -1555,17 +2060,21 @@ or terminate.
             
             <div class="fullcomment"><div class="block">
           definition classes: TraversableLike
+        </div><div class="block">
+          annotations: 
+                <span class="name">@migration</span><span class="args">()</span>
+              
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableOnce#size">
-      <a id="size:Int"></a>
+    </li><li visbl="pub" name="scala.collection.TraversableOnce#seq" data-isabs="false">
+      <a id="seq:TraversableOnce[A]"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
-        <span class="name">size</span>
+        <span class="name">seq</span>
         
         
-        <span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+        <span class="result">: <span name="scala.collection.TraversableOnce" class="extype">TraversableOnce</span>[A]</span>
       </span>
       </h4>
       
@@ -1574,31 +2083,66 @@ or terminate.
           definition classes: TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableLike#slice">
+    </li><li visbl="pub" name="scala.collection.TraversableOnce#size" data-isabs="false">
+      <a id="size:Int"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">size</span>
+        
+        
+        <span class="result">: <span name="scala.Int" class="extype">Int</span></span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: TraversableOnce
+        </div></div>
+          
+    </li><li visbl="pub" name="scalax.io.LongTraversableLike#slice" data-isabs="false">
       <a id="slice(Int,Int):Repr"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">slice</span>
         
-        <span class="params">(<span name="from">from: <span class="extype" name="scala.Int">Int</span></span>, <span name="until">until: <span class="extype" name="scala.Int">Int</span></span>)</span>
+        <span class="params">(<span name="from">
+                  from
+                  : <span name="scala.Int" class="extype">Int</span>
+                  
+                </span>, <span name="until">
+                  until
+                  : <span name="scala.Int" class="extype">Int</span>
+                  
+                </span>)</span>
         <span class="result">: Repr</span>
       </span>
       </h4>
       
+            <p class="shortcomment cmt">The long equivalent of count in Traversable.</p>
+            <div class="fullcomment"><div class="comment cmt"><p>The long equivalent of count in Traversable.
+</p></div><div class="block">
+          definition classes: <a name="scalax.io.LongTraversableLike" class="extype" href="">LongTraversableLike</a> → TraversableLike
+        </div>
             
-            <div class="fullcomment"><div class="block">
-          definition classes: TraversableLike
-        </div></div>
+            
+            
+            
+          </div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableLike#span">
+    </li><li visbl="pub" name="scala.collection.TraversableLike#span" data-isabs="false">
       <a id="span((A) ⇒ Boolean):(Repr, Repr)"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">span</span>
         
-        <span class="params">(<span name="p">p: (A) ⇒ <span class="extype" name="scala.Boolean">Boolean</span></span>)</span>
+        <span class="params">(<span name="p">
+                  p
+                  : (A) ⇒ <span name="scala.Boolean" class="extype">Boolean</span>
+                  
+                </span>)</span>
         <span class="result">: (Repr, Repr)</span>
       </span>
       </h4>
@@ -1608,14 +2152,18 @@ or terminate.
           definition classes: TraversableLike
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableLike#splitAt">
+    </li><li visbl="pub" name="scala.collection.TraversableLike#splitAt" data-isabs="false">
       <a id="splitAt(Int):(Repr, Repr)"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">splitAt</span>
         
-        <span class="params">(<span name="n">n: <span class="extype" name="scala.Int">Int</span></span>)</span>
+        <span class="params">(<span name="n">
+                  n
+                  : <span name="scala.Int" class="extype">Int</span>
+                  
+                </span>)</span>
         <span class="result">: (Repr, Repr)</span>
       </span>
       </h4>
@@ -1625,7 +2173,7 @@ or terminate.
           definition classes: TraversableLike
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableLike#stringPrefix">
+    </li><li visbl="pub" name="scala.collection.TraversableLike#stringPrefix" data-isabs="false">
       <a id="stringPrefix:String"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -1642,14 +2190,18 @@ or terminate.
           definition classes: TraversableLike
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableOnce#sum">
+    </li><li visbl="pub" name="scala.collection.TraversableOnce#sum" data-isabs="false">
       <a id="sum[B&gt;:A](Numeric[B]):B"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">sum</span>
         <span class="tparams">[<span name="B">B &gt;: A</span>]</span>
-        <span class="params">(<span class="implicit">implicit </span><span name="num">num: Numeric[B]</span>)</span>
+        <span class="params">(<span class="implicit">implicit </span><span name="num">
+                  num
+                  : Numeric[B]
+                  
+                </span>)</span>
         <span class="result">: B</span>
       </span>
       </h4>
@@ -1659,14 +2211,18 @@ or terminate.
           definition classes: TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#synchronized">
-      <a id="synchronized[T0](T0):T0"></a>
+    </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
+      <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">synchronized</span>
         <span class="tparams">[<span name="T0">T0</span>]</span>
-        <span class="params">(<span name="arg0">arg0: T0</span>)</span>
+        <span class="params">(<span name="arg0">
+                  arg0
+                  : ⇒ T0
+                  
+                </span>)</span>
         <span class="result">: T0</span>
       </span>
       </h4>
@@ -1678,7 +2234,7 @@ or terminate.
           definition classes: AnyRef
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableLike#tail">
+    </li><li visbl="pub" name="scala.collection.TraversableLike#tail" data-isabs="false">
       <a id="tail:Repr"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -1695,14 +2251,35 @@ or terminate.
           definition classes: TraversableLike
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableLike#take">
+    </li><li visbl="pub" name="scala.collection.TraversableLike#tails" data-isabs="false">
+      <a id="tails:Iterator[Repr]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol">
+        <span class="name">tails</span>
+        
+        
+        <span class="result">: <span name="scala.collection.Iterator" class="extype">Iterator</span>[Repr]</span>
+      </span>
+      </h4>
+      
+            
+            <div class="fullcomment"><div class="block">
+          definition classes: TraversableLike
+        </div></div>
+          
+    </li><li visbl="pub" name="scala.collection.TraversableLike#take" data-isabs="false">
       <a id="take(Int):Repr"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">take</span>
         
-        <span class="params">(<span name="n">n: <span class="extype" name="scala.Int">Int</span></span>)</span>
+        <span class="params">(<span name="n">
+                  n
+                  : <span name="scala.Int" class="extype">Int</span>
+                  
+                </span>)</span>
         <span class="result">: Repr</span>
       </span>
       </h4>
@@ -1712,14 +2289,18 @@ or terminate.
           definition classes: TraversableLike
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableLike#takeWhile">
+    </li><li visbl="pub" name="scala.collection.TraversableLike#takeWhile" data-isabs="false">
       <a id="takeWhile((A) ⇒ Boolean):Repr"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">takeWhile</span>
         
-        <span class="params">(<span name="p">p: (A) ⇒ <span class="extype" name="scala.Boolean">Boolean</span></span>)</span>
+        <span class="params">(<span name="p">
+                  p
+                  : (A) ⇒ <span name="scala.Boolean" class="extype">Boolean</span>
+                  
+                </span>)</span>
         <span class="result">: Repr</span>
       </span>
       </h4>
@@ -1729,7 +2310,7 @@ or terminate.
           definition classes: TraversableLike
         </div></div>
           
-    </li><li visbl="prt" data-isabs="false" name="scalax.io.LongTraversableLike#thisCollection">
+    </li><li visbl="prt" name="scalax.io.LongTraversableLike#thisCollection" data-isabs="false">
       <a id="thisCollection:LongTraversable[A]"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -1737,7 +2318,7 @@ or terminate.
         <span class="name">thisCollection</span>
         
         
-        <span class="result">: <a href="LongTraversable.html" class="extype" name="scalax.io.LongTraversable">LongTraversable</a>[A]</span>
+        <span class="result">: <a name="scalax.io.LongTraversable" class="extype" href="LongTraversable.html">LongTraversable</a>[A]</span>
       </span>
       </h4>
       
@@ -1745,27 +2326,31 @@ or terminate.
             <div class="fullcomment"><div class="block">
           attributes: protected[this] 
         </div><div class="block">
-          definition classes: <a href="" class="extype" name="scalax.io.LongTraversableLike">LongTraversableLike</a> → TraversableLike
+          definition classes: <a name="scalax.io.LongTraversableLike" class="extype" href="">LongTraversableLike</a> → TraversableLike
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.LongTraversableLike#toArray">
+    </li><li visbl="pub" name="scalax.io.LongTraversableLike#toArray" data-isabs="false">
       <a id="toArray[B&gt;:A](ClassManifest[B]):Array[B]"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">toArray</span>
         <span class="tparams">[<span name="B">B &gt;: A</span>]</span>
-        <span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: ClassManifest[B]</span>)</span>
-        <span class="result">: <span class="extype" name="scala.Array">Array</span>[B]</span>
+        <span class="params">(<span class="implicit">implicit </span><span name="arg0">
+                  arg0
+                  : ClassManifest[B]
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Array" class="extype">Array</span>[B]</span>
       </span>
       </h4>
       
             
             <div class="fullcomment"><div class="block">
-          definition classes: <a href="" class="extype" name="scalax.io.LongTraversableLike">LongTraversableLike</a> → TraversableOnce
+          definition classes: <a name="scalax.io.LongTraversableLike" class="extype" href="">LongTraversableLike</a> → TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableOnce#toBuffer">
+    </li><li visbl="pub" name="scala.collection.TraversableOnce#toBuffer" data-isabs="false">
       <a id="toBuffer[B&gt;:A]:Buffer[B]"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -1773,7 +2358,7 @@ or terminate.
         <span class="name">toBuffer</span>
         <span class="tparams">[<span name="B">B &gt;: A</span>]</span>
         
-        <span class="result">: <span class="extype" name="scala.collection.mutable.Buffer">Buffer</span>[B]</span>
+        <span class="result">: <span name="scala.collection.mutable.Buffer" class="extype">Buffer</span>[B]</span>
       </span>
       </h4>
       
@@ -1782,15 +2367,19 @@ or terminate.
           definition classes: TraversableOnce
         </div></div>
           
-    </li><li visbl="prt" data-isabs="false" name="scalax.io.LongTraversableLike#toCollection">
+    </li><li visbl="prt" name="scalax.io.LongTraversableLike#toCollection" data-isabs="false">
       <a id="toCollection(Repr):LongTraversable[A]"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">toCollection</span>
         
-        <span class="params">(<span name="repr">repr: Repr</span>)</span>
-        <span class="result">: <a href="LongTraversable.html" class="extype" name="scalax.io.LongTraversable">LongTraversable</a>[A]</span>
+        <span class="params">(<span name="repr">
+                  repr
+                  : Repr
+                  
+                </span>)</span>
+        <span class="result">: <a name="scalax.io.LongTraversable" class="extype" href="LongTraversable.html">LongTraversable</a>[A]</span>
       </span>
       </h4>
       
@@ -1798,10 +2387,10 @@ or terminate.
             <div class="fullcomment"><div class="block">
           attributes: protected[this] 
         </div><div class="block">
-          definition classes: <a href="" class="extype" name="scalax.io.LongTraversableLike">LongTraversableLike</a> → TraversableLike
+          definition classes: <a name="scalax.io.LongTraversableLike" class="extype" href="">LongTraversableLike</a> → TraversableLike
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableOnce#toIndexedSeq">
+    </li><li visbl="pub" name="scala.collection.TraversableOnce#toIndexedSeq" data-isabs="false">
       <a id="toIndexedSeq[B&gt;:A]:IndexedSeq[B]"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -1809,7 +2398,7 @@ or terminate.
         <span class="name">toIndexedSeq</span>
         <span class="tparams">[<span name="B">B &gt;: A</span>]</span>
         
-        <span class="result">: <span class="extype" name="scala.collection.immutable.IndexedSeq">IndexedSeq</span>[B]</span>
+        <span class="result">: <span name="scala.collection.immutable.IndexedSeq" class="extype">IndexedSeq</span>[B]</span>
       </span>
       </h4>
       
@@ -1818,7 +2407,7 @@ or terminate.
           definition classes: TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableOnce#toIterable">
+    </li><li visbl="pub" name="scala.collection.TraversableOnce#toIterable" data-isabs="false">
       <a id="toIterable:Iterable[A]"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -1826,7 +2415,7 @@ or terminate.
         <span class="name">toIterable</span>
         
         
-        <span class="result">: <span class="extype" name="scala.collection.Iterable">Iterable</span>[A]</span>
+        <span class="result">: <span name="scala.collection.Iterable" class="extype">Iterable</span>[A]</span>
       </span>
       </h4>
       
@@ -1835,7 +2424,7 @@ or terminate.
           definition classes: TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableLike#toIterator">
+    </li><li visbl="pub" name="scala.collection.TraversableLike#toIterator" data-isabs="false">
       <a id="toIterator:Iterator[A]"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -1843,7 +2432,7 @@ or terminate.
         <span class="name">toIterator</span>
         
         
-        <span class="result">: <span class="extype" name="scala.collection.Iterator">Iterator</span>[A]</span>
+        <span class="result">: <span name="scala.collection.Iterator" class="extype">Iterator</span>[A]</span>
       </span>
       </h4>
       
@@ -1852,7 +2441,7 @@ or terminate.
           definition classes: TraversableLike → TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableOnce#toList">
+    </li><li visbl="pub" name="scala.collection.TraversableOnce#toList" data-isabs="false">
       <a id="toList:List[A]"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -1869,15 +2458,19 @@ or terminate.
           definition classes: TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableOnce#toMap">
+    </li><li visbl="pub" name="scala.collection.TraversableOnce#toMap" data-isabs="false">
       <a id="toMap[T, U](&lt;:&lt;[A, (T, U)]):Map[T, U]"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">toMap</span>
         <span class="tparams">[<span name="T">T</span>, <span name="U">U</span>]</span>
-        <span class="params">(<span class="implicit">implicit </span><span name="ev">ev: <span class="extype" name="scala.Predef.&lt;:&lt;">&lt;:&lt;</span>[A, (T, U)]</span>)</span>
-        <span class="result">: <span class="extype" name="scala.collection.immutable.Map">Map</span>[T, U]</span>
+        <span class="params">(<span class="implicit">implicit </span><span name="ev">
+                  ev
+                  : <span name="scala.Predef.&lt;:&lt;" class="extype">&lt;:&lt;</span>[A, (T, U)]
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.collection.immutable.Map" class="extype">Map</span>[T, U]</span>
       </span>
       </h4>
       
@@ -1886,7 +2479,7 @@ or terminate.
           definition classes: TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableOnce#toSeq">
+    </li><li visbl="pub" name="scala.collection.TraversableOnce#toSeq" data-isabs="false">
       <a id="toSeq:Seq[A]"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -1894,7 +2487,7 @@ or terminate.
         <span class="name">toSeq</span>
         
         
-        <span class="result">: <span class="extype" name="scala.collection.Seq">Seq</span>[A]</span>
+        <span class="result">: <span name="scala.collection.Seq" class="extype">Seq</span>[A]</span>
       </span>
       </h4>
       
@@ -1903,7 +2496,7 @@ or terminate.
           definition classes: TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableOnce#toSet">
+    </li><li visbl="pub" name="scala.collection.TraversableOnce#toSet" data-isabs="false">
       <a id="toSet[B&gt;:A]:Set[B]"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -1911,7 +2504,7 @@ or terminate.
         <span class="name">toSet</span>
         <span class="tparams">[<span name="B">B &gt;: A</span>]</span>
         
-        <span class="result">: <span class="extype" name="scala.collection.immutable.Set">Set</span>[B]</span>
+        <span class="result">: <span name="scala.collection.immutable.Set" class="extype">Set</span>[B]</span>
       </span>
       </h4>
       
@@ -1920,7 +2513,7 @@ or terminate.
           definition classes: TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableLike#toStream">
+    </li><li visbl="pub" name="scala.collection.TraversableLike#toStream" data-isabs="false">
       <a id="toStream:Stream[A]"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -1928,7 +2521,7 @@ or terminate.
         <span class="name">toStream</span>
         
         
-        <span class="result">: <span class="extype" name="scala.collection.immutable.Stream">Stream</span>[A]</span>
+        <span class="result">: Stream[A]</span>
       </span>
       </h4>
       
@@ -1937,7 +2530,7 @@ or terminate.
           definition classes: TraversableLike → TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableLike#toString">
+    </li><li visbl="pub" name="scala.collection.TraversableLike#toString" data-isabs="false">
       <a id="toString():String"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -1957,9 +2550,10 @@ or terminate.
             
             
             
+            
           </div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableLike#toTraversable">
+    </li><li visbl="pub" name="scala.collection.TraversableLike#toTraversable" data-isabs="false">
       <a id="toTraversable:Traversable[A]"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -1967,7 +2561,7 @@ or terminate.
         <span class="name">toTraversable</span>
         
         
-        <span class="result">: <span class="extype" name="scala.collection.Traversable">Traversable</span>[A]</span>
+        <span class="result">: <span name="scala.collection.Traversable" class="extype">Traversable</span>[A]</span>
       </span>
       </h4>
       
@@ -1976,24 +2570,32 @@ or terminate.
           definition classes: TraversableLike → TraversableOnce
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.LongTraversableLike#view">
+    </li><li visbl="pub" name="scalax.io.LongTraversableLike#view" data-isabs="false">
       <a id="view(Int,Int):LongTraversableView[A, Repr]"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">view</span>
         
-        <span class="params">(<span name="from">from: <span class="extype" name="scala.Int">Int</span></span>, <span name="until">until: <span class="extype" name="scala.Int">Int</span></span>)</span>
-        <span class="result">: <a href="LongTraversableView.html" class="extype" name="scalax.io.LongTraversableView">LongTraversableView</a>[A, Repr]</span>
+        <span class="params">(<span name="from">
+                  from
+                  : <span name="scala.Int" class="extype">Int</span>
+                  
+                </span>, <span name="until">
+                  until
+                  : <span name="scala.Int" class="extype">Int</span>
+                  
+                </span>)</span>
+        <span class="result">: <a name="scalax.io.LongTraversableView" class="extype" href="LongTraversableView.html">LongTraversableView</a>[A, Repr]</span>
       </span>
       </h4>
       
             
             <div class="fullcomment"><div class="block">
-          definition classes: <a href="" class="extype" name="scalax.io.LongTraversableLike">LongTraversableLike</a> → TraversableLike
+          definition classes: <a name="scalax.io.LongTraversableLike" class="extype" href="">LongTraversableLike</a> → TraversableLike
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.LongTraversableLike#view">
+    </li><li visbl="pub" name="scalax.io.LongTraversableLike#view" data-isabs="false">
       <a id="view:LongTraversableView[A, Repr]"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -2001,16 +2603,16 @@ or terminate.
         <span class="name">view</span>
         
         
-        <span class="result">: <a href="LongTraversableView.html" class="extype" name="scalax.io.LongTraversableView">LongTraversableView</a>[A, Repr]</span>
+        <span class="result">: <a name="scalax.io.LongTraversableView" class="extype" href="LongTraversableView.html">LongTraversableView</a>[A, Repr]</span>
       </span>
       </h4>
       
             
             <div class="fullcomment"><div class="block">
-          definition classes: <a href="" class="extype" name="scalax.io.LongTraversableLike">LongTraversableLike</a> → TraversableLike
+          definition classes: <a name="scalax.io.LongTraversableLike" class="extype" href="">LongTraversableLike</a> → TraversableLike
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#wait">
+    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
       <a id="wait():Unit"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -2018,7 +2620,7 @@ or terminate.
         <span class="name">wait</span>
         
         <span class="params">()</span>
-        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
       
@@ -2027,17 +2629,29 @@ or terminate.
           attributes: final 
         </div><div class="block">
           definition classes: AnyRef
+        </div><div class="block">
+          annotations: 
+                <span class="name">@throws</span><span class="args">()</span>
+              
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#wait">
+    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
       <a id="wait(Long,Int):Unit"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">wait</span>
         
-        <span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span>
-        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="params">(<span name="arg0">
+                  arg0
+                  : <span name="scala.Long" class="extype">Long</span>
+                  
+                </span>, <span name="arg1">
+                  arg1
+                  : <span name="scala.Int" class="extype">Int</span>
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
       
@@ -2046,17 +2660,25 @@ or terminate.
           attributes: final 
         </div><div class="block">
           definition classes: AnyRef
+        </div><div class="block">
+          annotations: 
+                <span class="name">@throws</span><span class="args">()</span>
+              
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#wait">
+    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
       <a id="wait(Long):Unit"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">wait</span>
         
-        <span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span>
-        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="params">(<span name="arg0">
+                  arg0
+                  : <span name="scala.Long" class="extype">Long</span>
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
       
@@ -2065,17 +2687,25 @@ or terminate.
           attributes: final 
         </div><div class="block">
           definition classes: AnyRef
+        </div><div class="block">
+          annotations: 
+                <span class="name">@throws</span><span class="args">()</span>
+              
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.collection.TraversableLike#withFilter">
+    </li><li visbl="pub" name="scala.collection.TraversableLike#withFilter" data-isabs="false">
       <a id="withFilter((A) ⇒ Boolean):FilterMonadic[A, Repr]"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">withFilter</span>
         
-        <span class="params">(<span name="p">p: (A) ⇒ <span class="extype" name="scala.Boolean">Boolean</span></span>)</span>
-        <span class="result">: <span class="extype" name="scala.collection.generic.FilterMonadic">FilterMonadic</span>[A, Repr]</span>
+        <span class="params">(<span name="p">
+                  p
+                  : (A) ⇒ <span name="scala.Boolean" class="extype">Boolean</span>
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.collection.generic.FilterMonadic" class="extype">FilterMonadic</span>[A, Repr]</span>
       </span>
       </h4>
       
@@ -2087,18 +2717,20 @@ or terminate.
     </li></ol>
             </div>
 
-        <div class="parent" name="scala.collection.TraversableLike">
-              <h3>Inherited from <span class="extype" name="scala.collection.TraversableLike">TraversableLike</span>[A, Repr]</h3>
-            </div><div class="parent" name="scala.collection.TraversableOnce">
-              <h3>Inherited from <span class="extype" name="scala.collection.TraversableOnce">TraversableOnce</span>[A]</h3>
-            </div><div class="parent" name="scala.collection.generic.FilterMonadic">
-              <h3>Inherited from <span class="extype" name="scala.collection.generic.FilterMonadic">FilterMonadic</span>[A, Repr]</h3>
-            </div><div class="parent" name="scala.collection.generic.HasNewBuilder">
-              <h3>Inherited from <span class="extype" name="scala.collection.generic.HasNewBuilder">HasNewBuilder</span>[A, Repr]</h3>
-            </div><div class="parent" name="scala.AnyRef">
+        <div name="scala.collection.TraversableLike" class="parent">
+              <h3>Inherited from <span name="scala.collection.TraversableLike" class="extype">TraversableLike</span>[A, Repr]</h3>
+            </div><div name="scala.collection.Parallelizable" class="parent">
+              <h3>Inherited from <span name="scala.collection.Parallelizable" class="extype">Parallelizable</span>[A, <span name="scala.collection.parallel.ParIterable" class="extype">ParIterable</span>[A]]</h3>
+            </div><div name="scala.collection.TraversableOnce" class="parent">
+              <h3>Inherited from <span name="scala.collection.TraversableOnce" class="extype">TraversableOnce</span>[A]</h3>
+            </div><div name="scala.collection.generic.FilterMonadic" class="parent">
+              <h3>Inherited from <span name="scala.collection.generic.FilterMonadic" class="extype">FilterMonadic</span>[A, Repr]</h3>
+            </div><div name="scala.collection.generic.HasNewBuilder" class="parent">
+              <h3>Inherited from <span name="scala.collection.generic.HasNewBuilder" class="extype">HasNewBuilder</span>[A, Repr]</h3>
+            </div><div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>
-            </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div><div name="scala.Any" class="parent">
+              <h3>Inherited from <span name="scala.Any" class="extype">Any</span></h3>
             </div>
 
       </div>

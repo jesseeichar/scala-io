@@ -5,16 +5,16 @@
           <title>scalax.io</title>
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link href="../../lib/template.css" rel="stylesheet" type="text/css" media="screen" />
+      <link type="text/css" media="screen" rel="stylesheet" href="../../lib/template.css" />
       <script type="text/javascript" src="../../lib/jquery.js"></script>
       <script type="text/javascript" src="../../lib/jquery-ui.js"></script>
       <script type="text/javascript" src="../../lib/template.js"></script>
       <script type="text/javascript" src="../../lib/tools.tooltip.js"></script>
     
         </head>
-        <body class="value" onload="windowTitle();">
+        <body onload="windowTitle();" class="value">
 
-      <p id="owner"><a href="../package.html" class="extype" name="scalax">scalax</a></p>
+      <p id="owner"><a name="scalax" class="extype" href="../package.html">scalax</a></p>
 
       <div id="definition">
         <img src="../../lib/package_big.png" />
@@ -30,12 +30,17 @@
         
       </span>
       </h4>
-      <div class="fullcomment" id="comment"><div class="comment cmt"><p>Scala IO core classes
+      
+          <div class="shortcomment cmt"><p>Scala IO core classes
+</p></div>
+          <div class="fullcomment" id="comment"><div class="comment cmt"><p>Scala IO core classes
 </p></div>
             
             
             
+            
           </div>
+        
 
       <div id="template">
 
@@ -57,7 +62,7 @@
 
         <div class="types members" id="types">
               <h3>Type Members</h3>
-              <ol><li visbl="pub" data-isabs="true" name="scalax.io.Bufferable">
+              <ol><li visbl="pub" name="scalax.io.Bufferable" data-isabs="true">
       <a id="Bufferable:Bufferable[R]"></a>
       <h4 class="signature"><a href="Bufferable.html">
       <span class="kind">trait</span>
@@ -69,7 +74,7 @@
       </span>
       </a></h4>
       <p class="comment cmt">An Object that has an associated Buffered object.</p>
-    </li><li visbl="pub" data-isabs="true" name="scalax.io.BufferableInputResource">
+    </li><li visbl="pub" name="scalax.io.BufferableInputResource" data-isabs="true">
       <a id="BufferableInputResource:BufferableInputResource[C, B]"></a>
       <h4 class="signature"><a href="BufferableInputResource.html">
       <span class="kind">trait</span>
@@ -80,8 +85,8 @@
         <span class="result"> extends InputResource[C] with Bufferable[InputResource[B]] with ResourceOps[C, BufferableInputResource[C, B]]</span>
       </span>
       </a></h4>
-      <p class="comment cmt">A trait consisting of the Combination of <a href="InputResource.html" class="extype" name="scalax.io.InputResource">InputResource</a> and <a href="Bufferable.html" class="extype" name="scalax.io.Bufferable">Bufferable</a>.</p>
-    </li><li visbl="pub" data-isabs="true" name="scalax.io.BufferableOutputResource">
+      <p class="comment cmt">A trait consisting of the Combination of <a name="scalax.io.InputResource" class="extype" href="InputResource.html">InputResource</a> and <a name="scalax.io.Bufferable" class="extype" href="Bufferable.html">Bufferable</a>.</p>
+    </li><li visbl="pub" name="scalax.io.BufferableOutputResource" data-isabs="true">
       <a id="BufferableOutputResource:BufferableOutputResource[C, B]"></a>
       <h4 class="signature"><a href="BufferableOutputResource.html">
       <span class="kind">trait</span>
@@ -92,8 +97,8 @@
         <span class="result"> extends OutputResource[C] with Bufferable[OutputResource[B]] with ResourceOps[C, BufferableOutputResource[C, B]]</span>
       </span>
       </a></h4>
-      <p class="comment cmt">A trait consisting of the Combination of <a href="OutputResource.html" class="extype" name="scalax.io.OutputResource">OutputResource</a> and <a href="Bufferable.html" class="extype" name="scalax.io.Bufferable">Bufferable</a>.</p>
-    </li><li visbl="pub" data-isabs="true" name="scalax.io.BufferableReadCharsResource">
+      <p class="comment cmt">A trait consisting of the Combination of <a name="scalax.io.OutputResource" class="extype" href="OutputResource.html">OutputResource</a> and <a name="scalax.io.Bufferable" class="extype" href="Bufferable.html">Bufferable</a>.</p>
+    </li><li visbl="pub" name="scalax.io.BufferableReadCharsResource" data-isabs="true">
       <a id="BufferableReadCharsResource:BufferableReadCharsResource[C, B]"></a>
       <h4 class="signature"><a href="BufferableReadCharsResource.html">
       <span class="kind">trait</span>
@@ -104,8 +109,8 @@
         <span class="result"> extends ReadCharsResource[C] with Bufferable[ReadCharsResource[B]] with ResourceOps[C, BufferableReadCharsResource[C, B]]</span>
       </span>
       </a></h4>
-      <p class="comment cmt">A trait consisting of the Combination of <a href="ReadCharsResource.html" class="extype" name="scalax.io.ReadCharsResource">ReadCharsResource</a> and <a href="Bufferable.html" class="extype" name="scalax.io.Bufferable">Bufferable</a>.</p>
-    </li><li visbl="pub" data-isabs="true" name="scalax.io.BufferableWriteCharsResource">
+      <p class="comment cmt">A trait consisting of the Combination of <a name="scalax.io.ReadCharsResource" class="extype" href="ReadCharsResource.html">ReadCharsResource</a> and <a name="scalax.io.Bufferable" class="extype" href="Bufferable.html">Bufferable</a>.</p>
+    </li><li visbl="pub" name="scalax.io.BufferableWriteCharsResource" data-isabs="true">
       <a id="BufferableWriteCharsResource:BufferableWriteCharsResource[C, B]"></a>
       <h4 class="signature"><a href="BufferableWriteCharsResource.html">
       <span class="kind">trait</span>
@@ -116,8 +121,8 @@
         <span class="result"> extends WriteCharsResource[C] with Bufferable[WriteCharsResource[B]] with ResourceOps[C, BufferableWriteCharsResource[C, B]]</span>
       </span>
       </a></h4>
-      <p class="comment cmt">A trait consisting of the Combination of <a href="WriteCharsResource.html" class="extype" name="scalax.io.WriteCharsResource">WriteCharsResource</a> and <a href="Bufferable.html" class="extype" name="scalax.io.Bufferable">Bufferable</a>.</p>
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.ByteChannelResource">
+      <p class="comment cmt">A trait consisting of the Combination of <a name="scalax.io.WriteCharsResource" class="extype" href="WriteCharsResource.html">WriteCharsResource</a> and <a name="scalax.io.Bufferable" class="extype" href="Bufferable.html">Bufferable</a>.</p>
+    </li><li visbl="pub" name="scalax.io.ByteChannelResource" data-isabs="false">
       <a id="ByteChannelResource:ByteChannelResource[A]"></a>
       <h4 class="signature"><a href="ByteChannelResource.html">
       <span class="kind">class</span>
@@ -129,7 +134,7 @@
       </span>
       </a></h4>
       <p class="comment cmt">A for accessing and using ByteChannels.</p>
-    </li><li visbl="prt" data-isabs="false" name="scalax.io.CharInputStream">
+    </li><li visbl="prt" name="scalax.io.CharInputStream" data-isabs="false">
       <a id="CharInputStream:CharInputStream"></a>
       <h4 class="signature"><a href="CharInputStream.html">
       <span class="kind">class</span>
@@ -146,7 +151,7 @@
           attributes: protected 
         </div></div>
           
-    </li><li visbl="pub" data-isabs="true" name="scalax.io.CloseAction">
+    </li><li visbl="pub" name="scalax.io.CloseAction" data-isabs="true">
       <a id="CloseAction:CloseAction[A]"></a>
       <h4 class="signature"><a href="CloseAction.html">
       <span class="kind">trait</span>
@@ -157,8 +162,8 @@
         <span class="result"> extends AnyRef</span>
       </span>
       </a></h4>
-      <p class="comment cmt">A strategy object representing an action to take upon closing a <a href="Resource.html" class="extype" name="scalax.io.Resource">Resource</a>.</p>
-    </li><li visbl="prt" data-isabs="false" name="scalax.io.CloseableResourceAcquirer">
+      <p class="comment cmt">A strategy object representing an action to take upon closing a <a name="scalax.io.Resource" class="extype" href="Resource.html">Resource</a>.</p>
+    </li><li visbl="prt" name="scalax.io.CloseableResourceAcquirer" data-isabs="false">
       <a id="CloseableResourceAcquirer:CloseableResourceAcquirer[R, U, B]"></a>
       <h4 class="signature"><a href="CloseableResourceAcquirer.html">
       <span class="kind">class</span>
@@ -170,7 +175,7 @@
       </span>
       </a></h4>
       <p class="comment cmt">Implementation that only works with Closables.</p>
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.Codec">
+    </li><li visbl="pub" name="scalax.io.Codec" data-isabs="false">
       <a id="Codec:Codec"></a>
       <h4 class="signature"><a href="Codec.html">
       <span class="kind">class</span>
@@ -182,33 +187,41 @@
       </span>
       </a></h4>
       <p class="comment cmt">A class for character encoding/decoding preferences.</p>
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.Continue">
+    </li><li visbl="pub" name="scalax.io.Continue" data-isabs="false">
       <a id="Continue:Continue[A]"></a>
       <h4 class="signature"><a href="Continue.html">
       <span class="kind">case class</span>
       <span class="symbol">
         <span class="name">Continue</span>
         <span class="tparams">[<span name="A">+A</span>]</span>
-        <span class="params">(<span name="result">result: A</span>)</span>
-        <span class="result"> extends FoldResult[A] with Product</span>
+        <span class="params">(<span name="result">
+                  result
+                  : A
+                  
+                </span>)</span>
+        <span class="result"> extends FoldResult[A] with Product with Serializable</span>
       </span>
       </a></h4>
       <p class="comment cmt">Signal indicating that the fold should continue to process another value
 </p>
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.End">
+    </li><li visbl="pub" name="scalax.io.End" data-isabs="false">
       <a id="End:End[A]"></a>
       <h4 class="signature"><a href="End.html">
       <span class="kind">case class</span>
       <span class="symbol">
         <span class="name">End</span>
         <span class="tparams">[<span name="A">+A</span>]</span>
-        <span class="params">(<span name="result">result: A</span>)</span>
-        <span class="result"> extends FoldResult[A] with Product</span>
+        <span class="params">(<span name="result">
+                  result
+                  : A
+                  
+                </span>)</span>
+        <span class="result"> extends FoldResult[A] with Product with Serializable</span>
       </span>
       </a></h4>
       <p class="comment cmt">Signal indicating that the fold should stop and return the contained result
 </p>
-    </li><li visbl="pub" data-isabs="true" name="scalax.io.FoldResult">
+    </li><li visbl="pub" name="scalax.io.FoldResult" data-isabs="true">
       <a id="FoldResult:FoldResult[A]"></a>
       <h4 class="signature"><a href="FoldResult.html">
       <span class="kind">class</span>
@@ -219,8 +232,8 @@
         <span class="result"> extends AnyRef</span>
       </span>
       </a></h4>
-      <p class="comment cmt">The control signals for the limitFold method in <a href="LongTraversable.html" class="extype" name="scalax.io.LongTraversable">LongTraversable</a>.</p>
-    </li><li visbl="pub" data-isabs="true" name="scalax.io.Input">
+      <p class="comment cmt">The control signals for the limitFold method in <a name="scalax.io.LongTraversable" class="extype" href="LongTraversable.html">LongTraversable</a>.</p>
+    </li><li visbl="pub" name="scalax.io.Input" data-isabs="true">
       <a id="Input:Input"></a>
       <h4 class="signature"><a href="Input.html">
       <span class="kind">trait</span>
@@ -232,7 +245,7 @@
       </span>
       </a></h4>
       <p class="comment cmt">An trait for objects that viewed as a sequence of bytes.</p>
-    </li><li visbl="pub" data-isabs="true" name="scalax.io.InputResource">
+    </li><li visbl="pub" name="scalax.io.InputResource" data-isabs="true">
       <a id="InputResource:InputResource[R]"></a>
       <h4 class="signature"><a href="InputResource.html">
       <span class="kind">trait</span>
@@ -243,8 +256,8 @@
         <span class="result"> extends Resource[R] with Input with ResourceOps[R, InputResource[R]]</span>
       </span>
       </a></h4>
-      <p class="comment cmt">An Resource object that is a also an <a href="Input.html" class="extype" name="scalax.io.Input">Input</a>.</p>
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.InputStreamResource">
+      <p class="comment cmt">An Resource object that is a also an <a name="scalax.io.Input" class="extype" href="Input.html">Input</a>.</p>
+    </li><li visbl="pub" name="scalax.io.InputStreamResource" data-isabs="false">
       <a id="InputStreamResource:InputStreamResource[A]"></a>
       <h4 class="signature"><a href="InputStreamResource.html">
       <span class="kind">class</span>
@@ -256,7 +269,7 @@
       </span>
       </a></h4>
       <p class="comment cmt">A ManagedResource for accessing and using InputStreams.</p>
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.LineTraversable">
+    </li><li visbl="pub" name="scalax.io.LineTraversable" data-isabs="false">
       <a id="LineTraversable:LineTraversable"></a>
       <h4 class="signature"><a href="LineTraversable.html">
       <span class="kind">class</span>
@@ -267,8 +280,9 @@
         <span class="result"> extends LongTraversable[String]</span>
       </span>
       </a></h4>
-      <p class="comment cmt">Creates a Traversable[String] from a Traversable[Char] where each String is a line as indicated by the<a href="Line$$Terminators$$Terminator.html" class="extype" name="scalax.io.Line.Terminators.Terminator">Terminator</a>.</p>
-    </li><li visbl="pub" data-isabs="true" name="scalax.io.LongTraversable">
+      <p class="comment cmt">Creates a Traversable[String] from a Traversable[Char] where each String is a line as indicated by the
+<a name="scalax.io.Line.Terminators.Terminator" class="extype" href="Line$$Terminators$$Terminator.html">Terminator</a>.</p>
+    </li><li visbl="pub" name="scalax.io.LongTraversable" data-isabs="true">
       <a id="LongTraversable:LongTraversable[A]"></a>
       <h4 class="signature"><a href="LongTraversable.html">
       <span class="kind">trait</span>
@@ -281,7 +295,7 @@
       </a></h4>
       <p class="comment cmt">A traversable for use on very large datasets which cannot be indexed with Ints but instead
 require Longs for indexing.</p>
-    </li><li visbl="pub" data-isabs="true" name="scalax.io.LongTraversableLike">
+    </li><li visbl="pub" name="scalax.io.LongTraversableLike" data-isabs="true">
       <a id="LongTraversableLike:LongTraversableLike[A, Repr]"></a>
       <h4 class="signature"><a href="LongTraversableLike.html">
       <span class="kind">trait</span>
@@ -294,7 +308,7 @@ require Longs for indexing.</p>
       </a></h4>
       <p class="comment cmt">A traversable for use on very large datasets which cannot be indexed with Ints but instead
 require Longs for indexing.</p>
-    </li><li visbl="pub" data-isabs="true" name="scalax.io.LongTraversableView">
+    </li><li visbl="pub" name="scalax.io.LongTraversableView" data-isabs="true">
       <a id="LongTraversableView:LongTraversableView[A, Coll]"></a>
       <h4 class="signature"><a href="LongTraversableView.html">
       <span class="kind">trait</span>
@@ -306,7 +320,7 @@ require Longs for indexing.</p>
       </span>
       </a></h4>
       <p class="comment cmt">The view object associated with LongTraversable.</p>
-    </li><li visbl="pub" data-isabs="true" name="scalax.io.LongTraversableViewLike">
+    </li><li visbl="pub" name="scalax.io.LongTraversableViewLike" data-isabs="true">
       <a id="LongTraversableViewLike:LongTraversableViewLike[A, Coll, This]"></a>
       <h4 class="signature"><a href="LongTraversableViewLike.html">
       <span class="kind">trait</span>
@@ -317,8 +331,8 @@ require Longs for indexing.</p>
         <span class="result"> extends LongTraversable[A] with LongTraversableLike[A, This] with TraversableView[A, Coll] with TraversableViewLike[A, Coll, This]</span>
       </span>
       </a></h4>
-      <p class="comment cmt">The actual <a href="LongTraversableView.html" class="extype" name="scalax.io.LongTraversableView">LongTraversableView</a> implementations.</p>
-    </li><li visbl="pub" data-isabs="true" name="scalax.io.OpenOption">
+      <p class="comment cmt">The actual <a name="scalax.io.LongTraversableView" class="extype" href="LongTraversableView.html">LongTraversableView</a> implementations.</p>
+    </li><li visbl="pub" name="scalax.io.OpenOption" data-isabs="true">
       <a id="OpenOption:OpenOption"></a>
       <h4 class="signature"><a href="OpenOption.html">
       <span class="kind">trait</span>
@@ -332,7 +346,7 @@ require Longs for indexing.</p>
       <p class="comment cmt">A flag interface for indicating that the object
 represents a filesystem dependent option for opening
 a file.</p>
-    </li><li visbl="pub" data-isabs="true" name="scalax.io.Output">
+    </li><li visbl="pub" name="scalax.io.Output" data-isabs="true">
       <a id="Output:Output"></a>
       <h4 class="signature"><a href="Output.html">
       <span class="kind">trait</span>
@@ -344,7 +358,7 @@ a file.</p>
       </span>
       </a></h4>
       <p class="comment cmt">A trait for objects that can have data written to them.</p>
-    </li><li visbl="pub" data-isabs="true" name="scalax.io.OutputConverter">
+    </li><li visbl="pub" name="scalax.io.OutputConverter" data-isabs="true">
       <a id="OutputConverter:OutputConverter[T]"></a>
       <h4 class="signature"><a href="OutputConverter.html">
       <span class="kind">trait</span>
@@ -357,7 +371,7 @@ a file.</p>
       </a></h4>
       <p class="comment cmt">Functions used by Seekable and Output to either convert data to bytes for writing
 or write directly to an output stream depending on the requirements of the caller.</p>
-    </li><li visbl="pub" data-isabs="true" name="scalax.io.OutputResource">
+    </li><li visbl="pub" name="scalax.io.OutputResource" data-isabs="true">
       <a id="OutputResource:OutputResource[R]"></a>
       <h4 class="signature"><a href="OutputResource.html">
       <span class="kind">trait</span>
@@ -368,8 +382,8 @@ or write directly to an output stream depending on the requirements of the calle
         <span class="result"> extends Resource[R] with Output with ResourceOps[R, OutputResource[R]]</span>
       </span>
       </a></h4>
-      <p class="comment cmt">An Resource object that is a also an <a href="Output.html" class="extype" name="scalax.io.Output">Output</a>.</p>
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.OutputStreamResource">
+      <p class="comment cmt">An Resource object that is a also an <a name="scalax.io.Output" class="extype" href="Output.html">Output</a>.</p>
+    </li><li visbl="pub" name="scalax.io.OutputStreamResource" data-isabs="false">
       <a id="OutputStreamResource:OutputStreamResource[A]"></a>
       <h4 class="signature"><a href="OutputStreamResource.html">
       <span class="kind">class</span>
@@ -381,7 +395,7 @@ or write directly to an output stream depending on the requirements of the calle
       </span>
       </a></h4>
       <p class="comment cmt">A ManagedResource for accessing and using OutputStreams.</p>
-    </li><li visbl="pub" data-isabs="true" name="scalax.io.Overwrite">
+    </li><li visbl="pub" name="scalax.io.Overwrite" data-isabs="true">
       <a id="Overwrite:Overwrite"></a>
       <h4 class="signature"><a href="Overwrite.html">
       <span class="kind">trait</span>
@@ -393,19 +407,23 @@ or write directly to an output stream depending on the requirements of the calle
       </span>
       </a></h4>
       <p class="comment cmt">A strategy trait used with the Seekable.</p>
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.OverwriteSome">
+    </li><li visbl="pub" name="scalax.io.OverwriteSome" data-isabs="false">
       <a id="OverwriteSome:OverwriteSome"></a>
       <h4 class="signature"><a href="OverwriteSome.html">
       <span class="kind">case class</span>
       <span class="symbol">
         <span class="name">OverwriteSome</span>
         
-        <span class="params">(<span name="replacementLength">replacementLength: Long</span>)</span>
-        <span class="result"> extends Overwrite with Product</span>
+        <span class="params">(<span name="replacementLength">
+                  replacementLength
+                  : Long
+                  
+                </span>)</span>
+        <span class="result"> extends Overwrite with Product with Serializable</span>
       </span>
       </a></h4>
       <p class="comment cmt">Strategy for (potentially) only overwriting a subset of the data.</p>
-    </li><li visbl="pub" data-isabs="true" name="scalax.io.ReadChars">
+    </li><li visbl="pub" name="scalax.io.ReadChars" data-isabs="true">
       <a id="ReadChars:ReadChars"></a>
       <h4 class="signature"><a href="ReadChars.html">
       <span class="kind">trait</span>
@@ -417,7 +435,7 @@ or write directly to an output stream depending on the requirements of the calle
       </span>
       </a></h4>
       <p class="comment cmt">An trait for objects that viewed as a sequence of characters.</p>
-    </li><li visbl="pub" data-isabs="true" name="scalax.io.ReadCharsResource">
+    </li><li visbl="pub" name="scalax.io.ReadCharsResource" data-isabs="true">
       <a id="ReadCharsResource:ReadCharsResource[R]"></a>
       <h4 class="signature"><a href="ReadCharsResource.html">
       <span class="kind">trait</span>
@@ -428,8 +446,8 @@ or write directly to an output stream depending on the requirements of the calle
         <span class="result"> extends Resource[R] with ReadChars with ResourceOps[R, ReadCharsResource[R]]</span>
       </span>
       </a></h4>
-      <p class="comment cmt">An object that in addition to being a resource is also a <a href="ReadChars.html" class="extype" name="scalax.io.ReadChars">ReadChars</a> Resource.</p>
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.ReadableByteChannelResource">
+      <p class="comment cmt">An object that in addition to being a resource is also a <a name="scalax.io.ReadChars" class="extype" href="ReadChars.html">ReadChars</a> Resource.</p>
+    </li><li visbl="pub" name="scalax.io.ReadableByteChannelResource" data-isabs="false">
       <a id="ReadableByteChannelResource:ReadableByteChannelResource[A]"></a>
       <h4 class="signature"><a href="ReadableByteChannelResource.html">
       <span class="kind">class</span>
@@ -441,7 +459,7 @@ or write directly to an output stream depending on the requirements of the calle
       </span>
       </a></h4>
       <p class="comment cmt">A ManagedResource for accessing and using ByteChannels.</p>
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.ReaderResource">
+    </li><li visbl="pub" name="scalax.io.ReaderResource" data-isabs="false">
       <a id="ReaderResource:ReaderResource[A]"></a>
       <h4 class="signature"><a href="ReaderResource.html">
       <span class="kind">class</span>
@@ -453,7 +471,7 @@ or write directly to an output stream depending on the requirements of the calle
       </span>
       </a></h4>
       <p class="comment cmt">A ManagedResource for accessing and using Readers.</p>
-    </li><li visbl="pub" data-isabs="true" name="scalax.io.Resource">
+    </li><li visbl="pub" name="scalax.io.Resource" data-isabs="true">
       <a id="Resource:Resource[R]"></a>
       <h4 class="signature"><a href="Resource.html">
       <span class="kind">trait</span>
@@ -465,7 +483,7 @@ or write directly to an output stream depending on the requirements of the calle
       </span>
       </a></h4>
       <p class="comment cmt">A Resource that can be used to do IO.</p>
-    </li><li visbl="prt" data-isabs="true" name="scalax.io.ResourceAcquirer">
+    </li><li visbl="prt" name="scalax.io.ResourceAcquirer" data-isabs="true">
       <a id="ResourceAcquirer:ResourceAcquirer[R, U, B]"></a>
       <h4 class="signature"><a href="ResourceAcquirer.html">
       <span class="kind">class</span>
@@ -477,7 +495,7 @@ or write directly to an output stream depending on the requirements of the calle
       </span>
       </a></h4>
       <p class="comment cmt">Essentially the resource aquire and close functionality.</p>
-    </li><li visbl="pub" data-isabs="true" name="scalax.io.ResourceOps">
+    </li><li visbl="pub" name="scalax.io.ResourceOps" data-isabs="true">
       <a id="ResourceOps:ResourceOps[R, Repr]"></a>
       <h4 class="signature"><a href="ResourceOps.html">
       <span class="kind">trait</span>
@@ -489,7 +507,7 @@ or write directly to an output stream depending on the requirements of the calle
       </span>
       </a></h4>
       <p class="comment cmt">A trait allowing adding close actions to a Resource.</p>
-    </li><li visbl="pub" data-isabs="false" name="_root_#ResourceView">
+    </li><li visbl="pub" name="scalax.io.package#ResourceView" data-isabs="false">
       <a id="ResourceView:ResourceView[A]"></a>
       <h4 class="signature">
       <span class="kind">type</span>
@@ -497,7 +515,7 @@ or write directly to an output stream depending on the requirements of the calle
         <span class="name">ResourceView</span>
         <span class="tparams">[<span name="A">A</span>]</span>
         
-        <span class="result"> = <a href="LongTraversableView.html" class="extype" name="scalax.io.LongTraversableView">LongTraversableView</a>[A, <a href="LongTraversable.html" class="extype" name="scalax.io.LongTraversable">LongTraversable</a>[A]]</span>
+        <span class="result"> = <a name="scalax.io.LongTraversableView" class="extype" href="LongTraversableView.html">LongTraversableView</a>[A, <a name="scalax.io.LongTraversable" class="extype" href="LongTraversable.html">LongTraversable</a>[A]]</span>
       </span>
       </h4>
       
@@ -505,14 +523,15 @@ or write directly to an output stream depending on the requirements of the calle
             <div class="fullcomment"><div class="comment cmt"><p>An alias from LongTraversableView[A,LongTraversable[A]]. The only purpose
 is to make the type signatures easier to read
 </p></div><div class="block">
-          definition classes: <a href="../../package.html" class="extype" name="_root_">root</a>
+          definition classes: <a name="scalax.io.package" class="extype" href="package$.html">package</a>
         </div>
+            
             
             
             
           </div>
           
-    </li><li visbl="pub" data-isabs="true" name="scalax.io.Seekable">
+    </li><li visbl="pub" name="scalax.io.Seekable" data-isabs="true">
       <a id="Seekable:Seekable"></a>
       <h4 class="signature"><a href="Seekable.html">
       <span class="kind">trait</span>
@@ -524,7 +543,7 @@ is to make the type signatures easier to read
       </span>
       </a></h4>
       <p class="comment cmt">An object for reading and writing to Random Access IO objects such as Files.</p>
-    </li><li visbl="pub" data-isabs="true" name="scalax.io.SeekableByteChannel">
+    </li><li visbl="pub" name="scalax.io.SeekableByteChannel" data-isabs="true">
       <a id="SeekableByteChannel:SeekableByteChannel"></a>
       <h4 class="signature"><a href="SeekableByteChannel.html">
       <span class="kind">trait</span>
@@ -536,7 +555,7 @@ is to make the type signatures easier to read
       </span>
       </a></h4>
       <p class="comment cmt">An object for reading and writing to Random Access IO objects such as Files.</p>
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.SeekableByteChannelResource">
+    </li><li visbl="pub" name="scalax.io.SeekableByteChannelResource" data-isabs="false">
       <a id="SeekableByteChannelResource:SeekableByteChannelResource[A]"></a>
       <h4 class="signature"><a href="SeekableByteChannelResource.html">
       <span class="kind">class</span>
@@ -548,7 +567,7 @@ is to make the type signatures easier to read
       </span>
       </a></h4>
       <p class="comment cmt">A ManagedResource for accessing and using SeekableByteChannels.</p>
-    </li><li visbl="pub" data-isabs="true" name="scalax.io.SeekableResource">
+    </li><li visbl="pub" name="scalax.io.SeekableResource" data-isabs="true">
       <a id="SeekableResource:SeekableResource[R]"></a>
       <h4 class="signature"><a href="SeekableResource.html">
       <span class="kind">trait</span>
@@ -560,7 +579,7 @@ is to make the type signatures easier to read
       </span>
       </a></h4>
       <p class="comment cmt">An object that can be viewed as a Seekable object.</p>
-    </li><li visbl="prt" data-isabs="false" name="scalax.io.StreamIterator">
+    </li><li visbl="prt" name="scalax.io.StreamIterator" data-isabs="false">
       <a id="StreamIterator:StreamIterator[E]"></a>
       <h4 class="signature"><a href="StreamIterator.html">
       <span class="kind">class</span>
@@ -577,7 +596,7 @@ is to make the type signatures easier to read
           attributes: protected 
         </div></div>
           
-    </li><li visbl="prt" data-isabs="true" name="scalax.io.TraversableSource">
+    </li><li visbl="prt" name="scalax.io.TraversableSource" data-isabs="true">
       <a id="TraversableSource:TraversableSource[In, A]"></a>
       <h4 class="signature"><a href="TraversableSource.html">
       <span class="kind">trait</span>
@@ -590,7 +609,7 @@ is to make the type signatures easier to read
       </a></h4>
       <p class="comment cmt">A way of abstracting over the source Resource's type
 </p>
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.WritableByteChannelResource">
+    </li><li visbl="pub" name="scalax.io.WritableByteChannelResource" data-isabs="false">
       <a id="WritableByteChannelResource:WritableByteChannelResource[A]"></a>
       <h4 class="signature"><a href="WritableByteChannelResource.html">
       <span class="kind">class</span>
@@ -602,7 +621,7 @@ is to make the type signatures easier to read
       </span>
       </a></h4>
       <p class="comment cmt">A ManagedResource for accessing and using ByteChannels.</p>
-    </li><li visbl="pub" data-isabs="true" name="scalax.io.WriteChars">
+    </li><li visbl="pub" name="scalax.io.WriteChars" data-isabs="true">
       <a id="WriteChars:WriteChars"></a>
       <h4 class="signature"><a href="WriteChars.html">
       <span class="kind">trait</span>
@@ -614,7 +633,7 @@ is to make the type signatures easier to read
       </span>
       </a></h4>
       <p class="comment cmt">A trait for objects that can have expect to have characters written to them.</p>
-    </li><li visbl="pub" data-isabs="true" name="scalax.io.WriteCharsResource">
+    </li><li visbl="pub" name="scalax.io.WriteCharsResource" data-isabs="true">
       <a id="WriteCharsResource:WriteCharsResource[R]"></a>
       <h4 class="signature"><a href="WriteCharsResource.html">
       <span class="kind">trait</span>
@@ -625,8 +644,8 @@ is to make the type signatures easier to read
         <span class="result"> extends Resource[R] with WriteChars with ResourceOps[R, WriteCharsResource[R]]</span>
       </span>
       </a></h4>
-      <p class="comment cmt">An object that in addition to being a resource is also a <a href="WriteChars.html" class="extype" name="scalax.io.WriteChars">WriteChars</a> Resource.</p>
-    </li><li visbl="prt" data-isabs="false" name="scalax.io.WriterOutputStream">
+      <p class="comment cmt">An object that in addition to being a resource is also a <a name="scalax.io.WriteChars" class="extype" href="WriteChars.html">WriteChars</a> Resource.</p>
+    </li><li visbl="prt" name="scalax.io.WriterOutputStream" data-isabs="false">
       <a id="WriterOutputStream:WriterOutputStream"></a>
       <h4 class="signature"><a href="WriterOutputStream.html">
       <span class="kind">class</span>
@@ -638,7 +657,7 @@ is to make the type signatures easier to read
       </span>
       </a></h4>
       <p class="comment cmt">Takes a writer and allows it to be treated like a OutputStream,  The data is encoded as it is written to the Writer</p>
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.WriterResource">
+    </li><li visbl="pub" name="scalax.io.WriterResource" data-isabs="false">
       <a id="WriterResource:WriterResource[A]"></a>
       <h4 class="signature"><a href="WriterResource.html">
       <span class="kind">class</span>
@@ -655,7 +674,7 @@ is to make the type signatures easier to read
 
         <div class="values members" id="values">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" data-isabs="false" name="scalax.io.CloseAction">
+              <ol><li visbl="pub" name="scalax.io.CloseAction" data-isabs="false">
       <a id="CloseAction:CloseAction"></a>
       <h4 class="signature"><a href="CloseAction$.html">
       <span class="kind">object</span>
@@ -666,8 +685,8 @@ is to make the type signatures easier to read
         <span class="result"> extends AnyRef</span>
       </span>
       </a></h4>
-      <p class="comment cmt">Factory for <a href="CloseAction.html" class="extype" name="scalax.io.CloseAction">CloseAction</a>.</p>
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.Codec">
+      <p class="comment cmt">Factory for <a name="scalax.io.CloseAction" class="extype" href="CloseAction.html">CloseAction</a>.</p>
+    </li><li visbl="pub" name="scalax.io.Codec" data-isabs="false">
       <a id="Codec:Codec"></a>
       <h4 class="signature"><a href="Codec$.html">
       <span class="kind">object</span>
@@ -679,7 +698,7 @@ is to make the type signatures easier to read
       </span>
       </a></h4>
       
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.Constants">
+    </li><li visbl="pub" name="scalax.io.Constants" data-isabs="false">
       <a id="Constants:Constants"></a>
       <h4 class="signature"><a href="Constants$.html">
       <span class="kind">object</span>
@@ -691,7 +710,7 @@ is to make the type signatures easier to read
       </span>
       </a></h4>
       <p class="comment cmt">Not public API.</p>
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.Input">
+    </li><li visbl="pub" name="scalax.io.Input" data-isabs="false">
       <a id="Input:Input"></a>
       <h4 class="signature"><a href="Input$.html">
       <span class="kind">object</span>
@@ -703,7 +722,7 @@ is to make the type signatures easier to read
       </span>
       </a></h4>
       
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.JavaConversions">
+    </li><li visbl="pub" name="scalax.io.JavaConversions" data-isabs="false">
       <a id="JavaConversions:JavaConversions"></a>
       <h4 class="signature"><a href="JavaConversions$.html">
       <span class="kind">object</span>
@@ -715,7 +734,7 @@ is to make the type signatures easier to read
       </span>
       </a></h4>
       
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.Line">
+    </li><li visbl="pub" name="scalax.io.Line" data-isabs="false">
       <a id="Line:Line"></a>
       <h4 class="signature"><a href="Line$.html">
       <span class="kind">object</span>
@@ -728,7 +747,7 @@ is to make the type signatures easier to read
       </a></h4>
       <p class="comment cmt">A modularizing object for containing objects/classes related to reading lines
 </p>
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.LongTraversable">
+    </li><li visbl="pub" name="scalax.io.LongTraversable" data-isabs="false">
       <a id="LongTraversable:LongTraversable"></a>
       <h4 class="signature"><a href="LongTraversable$.html">
       <span class="kind">object</span>
@@ -740,7 +759,7 @@ is to make the type signatures easier to read
       </span>
       </a></h4>
       <p class="comment cmt">This class is not interesting from an API point of view.</p>
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.LongTraversableView">
+    </li><li visbl="pub" name="scalax.io.LongTraversableView" data-isabs="false">
       <a id="LongTraversableView:LongTraversableView"></a>
       <h4 class="signature"><a href="LongTraversableView$.html">
       <span class="kind">object</span>
@@ -752,7 +771,7 @@ is to make the type signatures easier to read
       </span>
       </a></h4>
       <p class="comment cmt">Defines the required canBuildFrom and Type definitions.</p>
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.Output">
+    </li><li visbl="pub" name="scalax.io.Output" data-isabs="false">
       <a id="Output:Output"></a>
       <h4 class="signature"><a href="Output$.html">
       <span class="kind">object</span>
@@ -764,7 +783,7 @@ is to make the type signatures easier to read
       </span>
       </a></h4>
       
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.OutputConverter">
+    </li><li visbl="pub" name="scalax.io.OutputConverter" data-isabs="false">
       <a id="OutputConverter:OutputConverter"></a>
       <h4 class="signature"><a href="OutputConverter$.html">
       <span class="kind">object</span>
@@ -777,7 +796,7 @@ is to make the type signatures easier to read
       </a></h4>
       <p class="comment cmt">Contains implicit Converter objects for the compiler to resolve the converters for write operations
 </p>
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.OverwriteAll">
+    </li><li visbl="pub" name="scalax.io.OverwriteAll" data-isabs="false">
       <a id="OverwriteAll:OverwriteAll"></a>
       <h4 class="signature"><a href="OverwriteAll$.html">
       <span class="kind">object</span>
@@ -785,11 +804,11 @@ is to make the type signatures easier to read
         <span class="name">OverwriteAll</span>
         
         
-        <span class="result"> extends Overwrite with Product</span>
+        <span class="result"> extends Overwrite with Product with Serializable</span>
       </span>
       </a></h4>
       <p class="comment cmt">Strategy to overwrite as much data as possible.</p>
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.ReadChars">
+    </li><li visbl="pub" name="scalax.io.ReadChars" data-isabs="false">
       <a id="ReadChars:ReadChars"></a>
       <h4 class="signature"><a href="ReadChars$.html">
       <span class="kind">object</span>
@@ -801,7 +820,7 @@ is to make the type signatures easier to read
       </span>
       </a></h4>
       
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.Resource">
+    </li><li visbl="pub" name="scalax.io.Resource" data-isabs="false">
       <a id="Resource:Resource"></a>
       <h4 class="signature"><a href="Resource$.html">
       <span class="kind">object</span>
@@ -813,7 +832,7 @@ is to make the type signatures easier to read
       </span>
       </a></h4>
       <p class="comment cmt">Defines several factory methods for creating instances of Resource.</p>
-    </li><li visbl="prt" data-isabs="false" name="scalax.io.ResourceAdapting">
+    </li><li visbl="prt" name="scalax.io.ResourceAdapting" data-isabs="false">
       <a id="ResourceAdapting:ResourceAdapting"></a>
       <h4 class="signature"><a href="ResourceAdapting$.html">
       <span class="kind">object</span>
@@ -825,7 +844,7 @@ is to make the type signatures easier to read
       </span>
       </a></h4>
       <p class="comment cmt">Contains a method</p>
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.Seekable">
+    </li><li visbl="pub" name="scalax.io.Seekable" data-isabs="false">
       <a id="Seekable:Seekable"></a>
       <h4 class="signature"><a href="Seekable$.html">
       <span class="kind">object</span>
@@ -837,7 +856,7 @@ is to make the type signatures easier to read
       </span>
       </a></h4>
       
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.StandardOpenOption">
+    </li><li visbl="pub" name="scalax.io.StandardOpenOption" data-isabs="false">
       <a id="StandardOpenOption:StandardOpenOption"></a>
       <h4 class="signature"><a href="StandardOpenOption$.html">
       <span class="kind">object</span>
@@ -849,7 +868,7 @@ is to make the type signatures easier to read
       </span>
       </a></h4>
       <p class="comment cmt">Several options that are supported by most filesystems.</p>
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.WriteChars">
+    </li><li visbl="pub" name="scalax.io.WriteChars" data-isabs="false">
       <a id="WriteChars:WriteChars"></a>
       <h4 class="signature"><a href="WriteChars$.html">
       <span class="kind">object</span>
@@ -861,7 +880,7 @@ is to make the type signatures easier to read
       </span>
       </a></h4>
       
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.nio">
+    </li><li visbl="pub" name="scalax.io.nio" data-isabs="false">
       <a id="nio:nio"></a>
       <h4 class="signature"><a href="nio/package.html">
       <span class="kind">package</span>
@@ -873,7 +892,7 @@ is to make the type signatures easier to read
       </span>
       </a></h4>
       
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.support">
+    </li><li visbl="pub" name="scalax.io.support" data-isabs="false">
       <a id="support:support"></a>
       <h4 class="signature"><a href="support/package.html">
       <span class="kind">package</span>

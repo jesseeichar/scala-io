@@ -5,16 +5,16 @@
           <title>scalax.io.SeekableByteChannel</title>
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link href="../../lib/template.css" rel="stylesheet" type="text/css" media="screen" />
+      <link type="text/css" media="screen" rel="stylesheet" href="../../lib/template.css" />
       <script type="text/javascript" src="../../lib/jquery.js"></script>
       <script type="text/javascript" src="../../lib/jquery-ui.js"></script>
       <script type="text/javascript" src="../../lib/template.js"></script>
       <script type="text/javascript" src="../../lib/tools.tooltip.js"></script>
     
         </head>
-        <body class="type" onload="windowTitle();">
+        <body onload="windowTitle();" class="type">
 
-      <p id="owner"><a href="../package.html" class="extype" name="scalax">scalax</a>.<a href="package.html" class="extype" name="scalax.io">io</a></p>
+      <p id="owner"><a name="scalax" class="extype" href="../package.html">scalax</a>.<a name="scalax.io" class="extype" href="package.html">io</a></p>
 
       <div id="definition">
         <img src="../../lib/trait_big.png" />
@@ -27,23 +27,29 @@
         <span class="name">SeekableByteChannel</span>
         
         
-        <span class="result"> extends <span class="extype" name="java.nio.channels.ByteChannel">ByteChannel</span> with <span class="extype" name="java.nio.channels.Channel">Channel</span> with <span class="extype" name="java.io.Closeable">Closeable</span> with <span class="extype" name="java.nio.channels.ReadableByteChannel">ReadableByteChannel</span> with <span class="extype" name="java.nio.channels.WritableByteChannel">WritableByteChannel</span></span>
+        <span class="result"> extends <span name="java.nio.channels.ByteChannel" class="extype">ByteChannel</span> with <span name="java.nio.channels.Channel" class="extype">Channel</span> with <span name="java.io.Closeable" class="extype">Closeable</span> with <span name="java.nio.channels.ReadableByteChannel" class="extype">ReadableByteChannel</span> with <span name="java.nio.channels.WritableByteChannel" class="extype">WritableByteChannel</span></span>
       </span>
       </h4>
-      <div class="fullcomment" id="comment"><div class="comment cmt"><p>An object for reading and writing to Random Access IO objects such as Files.  This is analogous to the Java 7 NIO2
+      
+          <div class="shortcomment cmt"><p>An object for reading and writing to Random Access IO objects such as Files.  This is analogous to the Java 7 NIO2
+SeekableByteChannel.  In large part this is as an abstraction away from FileChannel allowing other implementations.
+</p></div>
+          <div class="fullcomment" id="comment"><div class="comment cmt"><p>An object for reading and writing to Random Access IO objects such as Files.  This is analogous to the Java 7 NIO2
 SeekableByteChannel.  In large part this is as an abstraction away from FileChannel allowing other implementations.
 </p></div><div class="block">
-            linear super types: <span class="extype" name="java.nio.channels.ByteChannel">ByteChannel</span>, <span class="extype" name="java.nio.channels.WritableByteChannel">WritableByteChannel</span>, <span class="extype" name="java.nio.channels.ReadableByteChannel">ReadableByteChannel</span>, <span class="extype" name="java.nio.channels.Channel">Channel</span>, <span class="extype" name="java.io.Closeable">Closeable</span>, AnyRef, <span class="extype" name="scala.Any">Any</span>
+            linear super types: <span name="java.nio.channels.ByteChannel" class="extype">ByteChannel</span>, <span name="java.nio.channels.WritableByteChannel" class="extype">WritableByteChannel</span>, <span name="java.nio.channels.ReadableByteChannel" class="extype">ReadableByteChannel</span>, <span name="java.nio.channels.Channel" class="extype">Channel</span>, <span name="java.io.Closeable" class="extype">Closeable</span>, AnyRef, <span name="scala.Any" class="extype">Any</span>
           </div><div class="block">
-            known subclasses: <a href="nio/SeekableFileChannel.html" class="extype" name="scalax.io.nio.SeekableFileChannel">SeekableFileChannel</a>
+            known subclasses: <a name="scalax.io.nio.SeekableFileChannel" class="extype" href="nio/SeekableFileChannel.html">SeekableFileChannel</a>
           </div>
             
+            
             <div class="block"><ol>since
-                  <li><p>1.0
+                  <li class="cmt"><p>1.0
 </p></li>
                 </ol></div>
             
           </div>
+        
 
       <div id="template">
 
@@ -56,7 +62,7 @@ SeekableByteChannel.  In large part this is as an abstraction away from FileChan
           <div id="ancestors">
                 <span class="filtertype">Inherited</span>
                 <ol><li class="hideall">Hide All</li><li class="showall">Show all</li></ol>
-                <ol id="linearization"><li class="in" name="scalax.io.SeekableByteChannel">SeekableByteChannel</li><li class="in" name="java.nio.channels.ByteChannel">ByteChannel</li><li class="in" name="java.nio.channels.WritableByteChannel">WritableByteChannel</li><li class="in" name="java.nio.channels.ReadableByteChannel">ReadableByteChannel</li><li class="in" name="java.nio.channels.Channel">Channel</li><li class="in" name="java.io.Closeable">Closeable</li><li class="in" name="scala.AnyRef">AnyRef</li><li class="in" name="scala.Any">Any</li></ol>
+                <ol id="linearization"><li name="scalax.io.SeekableByteChannel" class="in">SeekableByteChannel</li><li name="java.nio.channels.ByteChannel" class="in">ByteChannel</li><li name="java.nio.channels.WritableByteChannel" class="in">WritableByteChannel</li><li name="java.nio.channels.ReadableByteChannel" class="in">ReadableByteChannel</li><li name="java.nio.channels.Channel" class="in">Channel</li><li name="java.io.Closeable" class="in">Closeable</li><li name="scala.AnyRef" class="in">AnyRef</li><li name="scala.Any" class="in">Any</li></ol>
               </div>
           <div id="visbl">
               <span class="filtertype">Visibility</span>
@@ -74,15 +80,19 @@ SeekableByteChannel.  In large part this is as an abstraction away from FileChan
 
         <div class="values members" id="values">
               <h3>Value Members</h3>
-              <ol><li visbl="pub" data-isabs="false" name="scala.AnyRef#!=">
+              <ol><li visbl="pub" name="scala.AnyRef#!=" data-isabs="false">
       <a id="!=(AnyRef):Boolean"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">!=</span>
         
-        <span class="params">(<span name="arg0">arg0: AnyRef</span>)</span>
-        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="params">(<span name="arg0">
+                  arg0
+                  : AnyRef
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
       
@@ -93,15 +103,19 @@ SeekableByteChannel.  In large part this is as an abstraction away from FileChan
           definition classes: AnyRef
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.Any#!=">
+    </li><li visbl="pub" name="scala.Any#!=" data-isabs="false">
       <a id="!=(Any):Boolean"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">!=</span>
         
-        <span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span>
-        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="params">(<span name="arg0">
+                  arg0
+                  : <span name="scala.Any" class="extype">Any</span>
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
       
@@ -115,9 +129,10 @@ SeekableByteChannel.  In large part this is as an abstraction away from FileChan
             
             
             
+            
           </div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef###">
+    </li><li visbl="pub" name="scala.AnyRef###" data-isabs="false">
       <a id="##():Int"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -125,7 +140,7 @@ SeekableByteChannel.  In large part this is as an abstraction away from FileChan
         <span class="name">##</span>
         
         <span class="params">()</span>
-        <span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+        <span class="result">: <span name="scala.Int" class="extype">Int</span></span>
       </span>
       </h4>
       
@@ -136,7 +151,7 @@ SeekableByteChannel.  In large part this is as an abstraction away from FileChan
           definition classes: AnyRef → Any
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#$asInstanceOf">
+    </li><li visbl="pub" name="scala.AnyRef#$asInstanceOf" data-isabs="false">
       <a id="$asInstanceOf[T0]():T0"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -155,7 +170,7 @@ SeekableByteChannel.  In large part this is as an abstraction away from FileChan
           definition classes: AnyRef
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#$isInstanceOf">
+    </li><li visbl="pub" name="scala.AnyRef#$isInstanceOf" data-isabs="false">
       <a id="$isInstanceOf[T0]():Boolean"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -163,7 +178,7 @@ SeekableByteChannel.  In large part this is as an abstraction away from FileChan
         <span class="name">$isInstanceOf</span>
         <span class="tparams">[<span name="T0">T0</span>]</span>
         <span class="params">()</span>
-        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
       
@@ -174,15 +189,19 @@ SeekableByteChannel.  In large part this is as an abstraction away from FileChan
           definition classes: AnyRef
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#==">
+    </li><li visbl="pub" name="scala.AnyRef#==" data-isabs="false">
       <a id="==(AnyRef):Boolean"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">==</span>
         
-        <span class="params">(<span name="arg0">arg0: AnyRef</span>)</span>
-        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="params">(<span name="arg0">
+                  arg0
+                  : AnyRef
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
       
@@ -196,17 +215,22 @@ SeekableByteChannel.  In large part this is as an abstraction away from FileChan
             
             
             
+            
           </div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.Any#==">
+    </li><li visbl="pub" name="scala.Any#==" data-isabs="false">
       <a id="==(Any):Boolean"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">==</span>
         
-        <span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span>
-        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="params">(<span name="arg0">
+                  arg0
+                  : <span name="scala.Any" class="extype">Any</span>
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
       
@@ -220,9 +244,10 @@ SeekableByteChannel.  In large part this is as an abstraction away from FileChan
             
             
             
+            
           </div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.Any#asInstanceOf">
+    </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -235,7 +260,9 @@ SeekableByteChannel.  In large part this is as an abstraction away from FileChan
       </h4>
       
             <p class="shortcomment cmt">This method is used to cast the receiver object to be of type <code>T0</code>.</p>
-            <div class="fullcomment"><div class="comment cmt"><p>This method is used to cast the receiver object to be of type <code>T0</code>.</p><p>Note that the success of a cast at runtime is modulo Scala's erasure semantics.  Therefore the expression<code>1.asInstanceOf[String]</code> will throw a <code>ClassCastException</code> at runtime, while the expression<code>List(1).asInstanceOf[List[String]]</code> will not.  In the latter example, because the type argument is erased as
+            <div class="fullcomment"><div class="comment cmt"><p>This method is used to cast the receiver object to be of type <code>T0</code>.</p><p>Note that the success of a cast at runtime is modulo Scala's erasure semantics.  Therefore the expression
+<code>1.asInstanceOf[String]</code> will throw a <code>ClassCastException</code> at runtime, while the expression
+<code>List(1).asInstanceOf[List[String]]</code> will not.  In the latter example, because the type argument is erased as
 part of compilation it is not possible to check whether the contents of the list are of the requested typed.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the receiver object.</p></dd></dl><div class="block">
           attributes: final 
@@ -245,9 +272,10 @@ part of compilation it is not possible to check whether the contents of the list
             
             
             
+            
           </div>
           
-    </li><li visbl="prt" data-isabs="false" name="scala.AnyRef#clone">
+    </li><li visbl="prt" name="scala.AnyRef#clone" data-isabs="false">
       <a id="clone():AnyRef"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -262,16 +290,21 @@ part of compilation it is not possible to check whether the contents of the list
             <p class="shortcomment cmt">This method creates and returns a copy of the receiver object.</p>
             <div class="fullcomment"><div class="comment cmt"><p>This method creates and returns a copy of the receiver object.</p><p>The default implementation of the <code>clone</code> method is platform dependent.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a copy of the receiver object.</p></dd></dl><div class="block">
-          attributes: protected 
+          attributes: protected[<a name="java.lang" class="extype" href="../../java/lang/package.html">lang</a>] 
         </div><div class="block">
           definition classes: AnyRef
+        </div><div class="block">
+          annotations: 
+                <span class="name">@throws</span><span class="args">()</span>
+              
         </div>
+            
             
             
             
           </div>
           
-    </li><li visbl="pub" data-isabs="true" name="java.nio.channels.Channel#close">
+    </li><li visbl="pub" name="java.nio.channels.Channel#close" data-isabs="true">
       <a id="close():Unit"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -279,7 +312,7 @@ part of compilation it is not possible to check whether the contents of the list
         <span class="name">close</span>
         
         <span class="params">()</span>
-        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
       
@@ -288,17 +321,25 @@ part of compilation it is not possible to check whether the contents of the list
           attributes: abstract 
         </div><div class="block">
           definition classes: Channel → Closeable
+        </div><div class="block">
+          annotations: 
+                <span class="name">@throws</span><span class="args">()</span>
+              
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#eq">
+    </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">eq</span>
         
-        <span class="params">(<span name="arg0">arg0: AnyRef</span>)</span>
-        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="params">(<span name="arg0">
+                  arg0
+                  : AnyRef
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
       
@@ -310,7 +351,8 @@ non-null instances of <code>AnyRef</code>:
  * It is reflexive: for any non-null instance <code>x</code> of type <code>AnyRef</code>, <code>x.eq(x)</code> returns <code>true</code>.
  * It is symmetric: for any non-null instances <code>x</code> and <code>y</code> of type <code>AnyRef</code>, <code>x.eq(y)</code> returns <code>true</code> if and
    only if <code>y.eq(x)</code> returns <code>true</code>.
- * It is transitive: for any non-null instances <code>x</code>, <code>y</code>, and <code>z</code> of type <code>AnyRef</code> if <code>x.eq(y)</code> returns <code>true</code>   and <code>y.eq(z)</code> returns <code>true</code>, then <code>x.eq(z)</code> returns <code>true</code>.</p><p>Additionally, the <code>eq</code> method has three other properties.
+ * It is transitive: for any non-null instances <code>x</code>, <code>y</code>, and <code>z</code> of type <code>AnyRef</code> if <code>x.eq(y)</code> returns <code>true</code>
+   and <code>y.eq(z)</code> returns <code>true</code>, then <code>x.eq(z)</code> returns <code>true</code>.</p><p>Additionally, the <code>eq</code> method has three other properties.
  * It is consistent: for any non-null instances <code>x</code> and <code>y</code> of type <code>AnyRef</code>, multiple invocations of
    <code>x.eq(y)</code> consistently returns <code>true</code> or consistently returns <code>false</code>.
  * For any non-null instance <code>x</code> of type <code>AnyRef</code>, <code>x.eq(null)</code> and <code>null.eq(x)</code> returns <code>false</code>.
@@ -325,17 +367,22 @@ should be equal to each other (<code>o1 == o2</code>) and they should hash to th
             
             
             
+            
           </div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#equals">
+    </li><li visbl="pub" name="scala.AnyRef#equals" data-isabs="false">
       <a id="equals(Any):Boolean"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">equals</span>
         
-        <span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span>
-        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="params">(<span name="arg0">
+                  arg0
+                  : <span name="scala.Any" class="extype">Any</span>
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
       
@@ -348,8 +395,7 @@ relation]:
  * It is transitive: for any instances <code>x</code>, <code>y</code>, and <code>z</code> of type <code>AnyRef</code> if <code>x.equals(y)</code> returns <code>true</code> and
    <code>y.equals(z)</code> returns <code>true</code>, then <code>x.equals(z)</code> should return <code>true</code>.</p><p>If you override this method, you should verify that your implementation remains an equivalence relation.
 Additionally, when overriding this method it is often necessary to override <code>hashCode</code> to ensure that objects
-that are &quot;equal&quot; (<code>o1.equals(o2)</code> returns <code>true</code>) hash to the same 
-scala.Int
+that are &quot;equal&quot; (<code>o1.equals(o2)</code> returns <code>true</code>) hash to the same scala.Int
 (<code>o1.hashCode.equals(o2.hashCode)</code>).
 </p></div><dl class="paramcmts block"><dt class="param">arg0</dt><dd class="cmt"><p>the object to compare against this object for equality.</p></dd><dt>returns</dt><dd class="cmt"><p><code>true</code> if the receiver object is equivalent to the argument; <code>false</code> otherwise.</p></dd></dl><div class="block">
           definition classes: AnyRef → Any
@@ -357,9 +403,10 @@ scala.Int
             
             
             
+            
           </div>
           
-    </li><li visbl="prt" data-isabs="false" name="scala.AnyRef#finalize">
+    </li><li visbl="prt" name="scala.AnyRef#finalize" data-isabs="false">
       <a id="finalize():Unit"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -367,24 +414,30 @@ scala.Int
         <span class="name">finalize</span>
         
         <span class="params">()</span>
-        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
       
             <p class="shortcomment cmt">This method is called by the garbage collector on the receiver object when garbage collection determines that
 there are no more references to the object.</p>
             <div class="fullcomment"><div class="comment cmt"><p>This method is called by the garbage collector on the receiver object when garbage collection determines that
-there are no more references to the object.</p><p>The details of when and if the <code>finalize</code> method are invoked, as well as the interaction between <code>finalize</code>and non-local returns and exceptions, are all platform dependent.</p></div><div class="block">
-          attributes: protected 
+there are no more references to the object.</p><p>The details of when and if the <code>finalize</code> method are invoked, as well as the interaction between <code>finalize</code>
+and non-local returns and exceptions, are all platform dependent.</p></div><div class="block">
+          attributes: protected[<a name="java.lang" class="extype" href="../../java/lang/package.html">lang</a>] 
         </div><div class="block">
           definition classes: AnyRef
+        </div><div class="block">
+          annotations: 
+                <span class="name">@throws</span><span class="args">()</span>
+              
         </div>
+            
             
             
             
           </div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#getClass">
+    </li><li visbl="pub" name="scala.AnyRef#getClass" data-isabs="false">
       <a id="getClass():java.lang.Class[_]"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -406,9 +459,10 @@ there are no more references to the object.</p><p>The details of when and if the
             
             
             
+            
           </div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#hashCode">
+    </li><li visbl="pub" name="scala.AnyRef#hashCode" data-isabs="false">
       <a id="hashCode():Int"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -416,7 +470,7 @@ there are no more references to the object.</p><p>The details of when and if the
         <span class="name">hashCode</span>
         
         <span class="params">()</span>
-        <span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+        <span class="result">: <span name="scala.Int" class="extype">Int</span></span>
       </span>
       </h4>
       
@@ -432,9 +486,10 @@ to verify that the behavior is consistent with the <code>equals</code> method.
             
             
             
+            
           </div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.Any#isInstanceOf">
+    </li><li visbl="pub" name="scala.Any#isInstanceOf" data-isabs="false">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -442,12 +497,13 @@ to verify that the behavior is consistent with the <code>equals</code> method.
         <span class="name">isInstanceOf</span>
         <span class="tparams">[<span name="T0">T0</span>]</span>
         
-        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
       
             <p class="shortcomment cmt">This method is used to test whether the dynamic type of the receiver object is <code>T0</code>.</p>
-            <div class="fullcomment"><div class="comment cmt"><p>This method is used to test whether the dynamic type of the receiver object is <code>T0</code>.</p><p>Note that the test result of the test is modulo Scala's erasure semantics.  Therefore the expression<code>1.isInstanceOf[String]</code> will return <code>false</code>, while the expression <code>List(1).isInstanceOf[List[String]]</code> will
+            <div class="fullcomment"><div class="comment cmt"><p>This method is used to test whether the dynamic type of the receiver object is <code>T0</code>.</p><p>Note that the test result of the test is modulo Scala's erasure semantics.  Therefore the expression
+<code>1.isInstanceOf[String]</code> will return <code>false</code>, while the expression <code>List(1).isInstanceOf[List[String]]</code> will
 return <code>true</code>.  In the latter example, because the type argument is erased as part of compilation it is not
 possible to check whether the contents of the list are of the requested typed.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p><code>true</code> if the receiver object is an instance of erasure of type <code>T0</code>; <code>false</code> otherwise.</p></dd></dl><div class="block">
@@ -458,9 +514,10 @@ possible to check whether the contents of the list are of the requested typed.
             
             
             
+            
           </div>
           
-    </li><li visbl="pub" data-isabs="true" name="java.nio.channels.Channel#isOpen">
+    </li><li visbl="pub" name="java.nio.channels.Channel#isOpen" data-isabs="true">
       <a id="isOpen():Boolean"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -468,7 +525,7 @@ possible to check whether the contents of the list are of the requested typed.
         <span class="name">isOpen</span>
         
         <span class="params">()</span>
-        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
       
@@ -479,15 +536,19 @@ possible to check whether the contents of the list are of the requested typed.
           definition classes: Channel
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#ne">
+    </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
       <a id="ne(AnyRef):Boolean"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">ne</span>
         
-        <span class="params">(<span name="arg0">arg0: AnyRef</span>)</span>
-        <span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="params">(<span name="arg0">
+                  arg0
+                  : AnyRef
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
       
@@ -501,9 +562,10 @@ possible to check whether the contents of the list are of the requested typed.
             
             
             
+            
           </div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#notify">
+    </li><li visbl="pub" name="scala.AnyRef#notify" data-isabs="false">
       <a id="notify():Unit"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -511,7 +573,7 @@ possible to check whether the contents of the list are of the requested typed.
         <span class="name">notify</span>
         
         <span class="params">()</span>
-        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
       
@@ -524,9 +586,10 @@ possible to check whether the contents of the list are of the requested typed.
             
             
             
+            
           </div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#notifyAll">
+    </li><li visbl="pub" name="scala.AnyRef#notifyAll" data-isabs="false">
       <a id="notifyAll():Unit"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -534,7 +597,7 @@ possible to check whether the contents of the list are of the requested typed.
         <span class="name">notifyAll</span>
         
         <span class="params">()</span>
-        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
       
@@ -547,17 +610,22 @@ possible to check whether the contents of the list are of the requested typed.
             
             
             
+            
           </div>
           
-    </li><li visbl="pub" data-isabs="true" name="scalax.io.SeekableByteChannel#position">
+    </li><li visbl="pub" name="scalax.io.SeekableByteChannel#position" data-isabs="true">
       <a id="position(Long):SeekableByteChannel"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">position</span>
         
-        <span class="params">(<span name="newPosition">newPosition: <span class="extype" name="scala.Long">Long</span></span>)</span>
-        <span class="result">: <a href="" class="extype" name="scalax.io.SeekableByteChannel">SeekableByteChannel</a></span>
+        <span class="params">(<span name="newPosition">
+                  newPosition
+                  : <span name="scala.Long" class="extype">Long</span>
+                  
+                </span>)</span>
+        <span class="result">: <a name="scalax.io.SeekableByteChannel" class="extype" href="">SeekableByteChannel</a></span>
       </span>
       </h4>
       
@@ -571,9 +639,10 @@ grow the channel to <i>position</i> and begin writing there.
             
             
             
+            
           </div>
           
-    </li><li visbl="pub" data-isabs="true" name="scalax.io.SeekableByteChannel#position">
+    </li><li visbl="pub" name="scalax.io.SeekableByteChannel#position" data-isabs="true">
       <a id="position:Long"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -581,7 +650,7 @@ grow the channel to <i>position</i> and begin writing there.
         <span class="name">position</span>
         
         
-        <span class="result">: <span class="extype" name="scala.Long">Long</span></span>
+        <span class="result">: <span name="scala.Long" class="extype">Long</span></span>
       </span>
       </h4>
       
@@ -594,29 +663,42 @@ grow the channel to <i>position</i> and begin writing there.
             
             
             
+            
           </div>
           
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.SeekableByteChannel#read">
+    </li><li visbl="pub" name="scalax.io.SeekableByteChannel#read" data-isabs="false">
       <a id="read(ByteBuffer,Long):Int"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">read</span>
         
-        <span class="params">(<span name="dst">dst: <span class="extype" name="java.nio.ByteBuffer">ByteBuffer</span></span>, <span name="pos">pos: <span class="extype" name="scala.Long">Long</span></span>)</span>
-        <span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+        <span class="params">(<span name="dst">
+                  dst
+                  : <span name="java.nio.ByteBuffer" class="extype">ByteBuffer</span>
+                  
+                </span>, <span name="pos">
+                  pos
+                  : <span name="scala.Long" class="extype">Long</span>
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Int" class="extype">Int</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" data-isabs="true" name="scalax.io.SeekableByteChannel#read">
+    </li><li visbl="pub" name="scalax.io.SeekableByteChannel#read" data-isabs="true">
       <a id="read(ByteBuffer):Int"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">read</span>
         
-        <span class="params">(<span name="dst">dst: <span class="extype" name="java.nio.ByteBuffer">ByteBuffer</span></span>)</span>
-        <span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+        <span class="params">(<span name="dst">
+                  dst
+                  : <span name="java.nio.ByteBuffer" class="extype">ByteBuffer</span>
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Int" class="extype">Int</span></span>
       </span>
       </h4>
       
@@ -624,10 +706,10 @@ grow the channel to <i>position</i> and begin writing there.
             <div class="fullcomment"><div class="block">
           attributes: abstract 
         </div><div class="block">
-          definition classes: <a href="" class="extype" name="scalax.io.SeekableByteChannel">SeekableByteChannel</a> → ReadableByteChannel
+          definition classes: <a name="scalax.io.SeekableByteChannel" class="extype" href="">SeekableByteChannel</a> → ReadableByteChannel
         </div></div>
           
-    </li><li visbl="pub" data-isabs="true" name="scalax.io.SeekableByteChannel#size">
+    </li><li visbl="pub" name="scalax.io.SeekableByteChannel#size" data-isabs="true">
       <a id="size:Long"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -635,7 +717,7 @@ grow the channel to <i>position</i> and begin writing there.
         <span class="name">size</span>
         
         
-        <span class="result">: <span class="extype" name="scala.Long">Long</span></span>
+        <span class="result">: <span name="scala.Long" class="extype">Long</span></span>
       </span>
       </h4>
       
@@ -648,16 +730,21 @@ grow the channel to <i>position</i> and begin writing there.
             
             
             
+            
           </div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#synchronized">
-      <a id="synchronized[T0](T0):T0"></a>
+    </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
+      <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">synchronized</span>
         <span class="tparams">[<span name="T0">T0</span>]</span>
-        <span class="params">(<span name="arg0">arg0: T0</span>)</span>
+        <span class="params">(<span name="arg0">
+                  arg0
+                  : ⇒ T0
+                  
+                </span>)</span>
         <span class="result">: T0</span>
       </span>
       </h4>
@@ -669,7 +756,7 @@ grow the channel to <i>position</i> and begin writing there.
           definition classes: AnyRef
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#toString">
+    </li><li visbl="pub" name="scala.AnyRef#toString" data-isabs="false">
       <a id="toString():String"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -677,7 +764,7 @@ grow the channel to <i>position</i> and begin writing there.
         <span class="name">toString</span>
         
         <span class="params">()</span>
-        <span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+        <span class="result">: <span name="java.lang.String" class="extype">String</span></span>
       </span>
       </h4>
       
@@ -689,17 +776,22 @@ grow the channel to <i>position</i> and begin writing there.
             
             
             
+            
           </div>
           
-    </li><li visbl="pub" data-isabs="true" name="scalax.io.SeekableByteChannel#truncate">
+    </li><li visbl="pub" name="scalax.io.SeekableByteChannel#truncate" data-isabs="true">
       <a id="truncate(Long):SeekableByteChannel"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">truncate</span>
         
-        <span class="params">(<span name="size">size: <span class="extype" name="scala.Long">Long</span></span>)</span>
-        <span class="result">: <a href="" class="extype" name="scalax.io.SeekableByteChannel">SeekableByteChannel</a></span>
+        <span class="params">(<span name="size">
+                  size
+                  : <span name="scala.Long" class="extype">Long</span>
+                  
+                </span>)</span>
+        <span class="result">: <a name="scalax.io.SeekableByteChannel" class="extype" href="">SeekableByteChannel</a></span>
       </span>
       </h4>
       
@@ -713,9 +805,10 @@ modified
             
             
             
+            
           </div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#wait">
+    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
       <a id="wait():Unit"></a>
       <h4 class="signature">
       <span class="kind">def</span>
@@ -723,7 +816,7 @@ modified
         <span class="name">wait</span>
         
         <span class="params">()</span>
-        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
       
@@ -732,17 +825,29 @@ modified
           attributes: final 
         </div><div class="block">
           definition classes: AnyRef
+        </div><div class="block">
+          annotations: 
+                <span class="name">@throws</span><span class="args">()</span>
+              
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#wait">
+    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
       <a id="wait(Long,Int):Unit"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">wait</span>
         
-        <span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span>
-        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="params">(<span name="arg0">
+                  arg0
+                  : <span name="scala.Long" class="extype">Long</span>
+                  
+                </span>, <span name="arg1">
+                  arg1
+                  : <span name="scala.Int" class="extype">Int</span>
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
       
@@ -751,17 +856,25 @@ modified
           attributes: final 
         </div><div class="block">
           definition classes: AnyRef
+        </div><div class="block">
+          annotations: 
+                <span class="name">@throws</span><span class="args">()</span>
+              
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scala.AnyRef#wait">
+    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
       <a id="wait(Long):Unit"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">wait</span>
         
-        <span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span>
-        <span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="params">(<span name="arg0">
+                  arg0
+                  : <span name="scala.Long" class="extype">Long</span>
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
       
@@ -770,29 +883,45 @@ modified
           attributes: final 
         </div><div class="block">
           definition classes: AnyRef
+        </div><div class="block">
+          annotations: 
+                <span class="name">@throws</span><span class="args">()</span>
+              
         </div></div>
           
-    </li><li visbl="pub" data-isabs="false" name="scalax.io.SeekableByteChannel#write">
+    </li><li visbl="pub" name="scalax.io.SeekableByteChannel#write" data-isabs="false">
       <a id="write(ByteBuffer,Long):Int"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">write</span>
         
-        <span class="params">(<span name="src">src: <span class="extype" name="java.nio.ByteBuffer">ByteBuffer</span></span>, <span name="pos">pos: <span class="extype" name="scala.Long">Long</span></span>)</span>
-        <span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+        <span class="params">(<span name="src">
+                  src
+                  : <span name="java.nio.ByteBuffer" class="extype">ByteBuffer</span>
+                  
+                </span>, <span name="pos">
+                  pos
+                  : <span name="scala.Long" class="extype">Long</span>
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Int" class="extype">Int</span></span>
       </span>
       </h4>
       
-    </li><li visbl="pub" data-isabs="true" name="scalax.io.SeekableByteChannel#write">
+    </li><li visbl="pub" name="scalax.io.SeekableByteChannel#write" data-isabs="true">
       <a id="write(ByteBuffer):Int"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol">
         <span class="name">write</span>
         
-        <span class="params">(<span name="src">src: <span class="extype" name="java.nio.ByteBuffer">ByteBuffer</span></span>)</span>
-        <span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+        <span class="params">(<span name="src">
+                  src
+                  : <span name="java.nio.ByteBuffer" class="extype">ByteBuffer</span>
+                  
+                </span>)</span>
+        <span class="result">: <span name="scala.Int" class="extype">Int</span></span>
       </span>
       </h4>
       
@@ -800,26 +929,26 @@ modified
             <div class="fullcomment"><div class="block">
           attributes: abstract 
         </div><div class="block">
-          definition classes: <a href="" class="extype" name="scalax.io.SeekableByteChannel">SeekableByteChannel</a> → WritableByteChannel
+          definition classes: <a name="scalax.io.SeekableByteChannel" class="extype" href="">SeekableByteChannel</a> → WritableByteChannel
         </div></div>
           
     </li></ol>
             </div>
 
-        <div class="parent" name="java.nio.channels.ByteChannel">
-              <h3>Inherited from <span class="extype" name="java.nio.channels.ByteChannel">ByteChannel</span></h3>
-            </div><div class="parent" name="java.nio.channels.WritableByteChannel">
-              <h3>Inherited from <span class="extype" name="java.nio.channels.WritableByteChannel">WritableByteChannel</span></h3>
-            </div><div class="parent" name="java.nio.channels.ReadableByteChannel">
-              <h3>Inherited from <span class="extype" name="java.nio.channels.ReadableByteChannel">ReadableByteChannel</span></h3>
-            </div><div class="parent" name="java.nio.channels.Channel">
-              <h3>Inherited from <span class="extype" name="java.nio.channels.Channel">Channel</span></h3>
-            </div><div class="parent" name="java.io.Closeable">
-              <h3>Inherited from <span class="extype" name="java.io.Closeable">Closeable</span></h3>
-            </div><div class="parent" name="scala.AnyRef">
+        <div name="java.nio.channels.ByteChannel" class="parent">
+              <h3>Inherited from <span name="java.nio.channels.ByteChannel" class="extype">ByteChannel</span></h3>
+            </div><div name="java.nio.channels.WritableByteChannel" class="parent">
+              <h3>Inherited from <span name="java.nio.channels.WritableByteChannel" class="extype">WritableByteChannel</span></h3>
+            </div><div name="java.nio.channels.ReadableByteChannel" class="parent">
+              <h3>Inherited from <span name="java.nio.channels.ReadableByteChannel" class="extype">ReadableByteChannel</span></h3>
+            </div><div name="java.nio.channels.Channel" class="parent">
+              <h3>Inherited from <span name="java.nio.channels.Channel" class="extype">Channel</span></h3>
+            </div><div name="java.io.Closeable" class="parent">
+              <h3>Inherited from <span name="java.io.Closeable" class="extype">Closeable</span></h3>
+            </div><div name="scala.AnyRef" class="parent">
               <h3>Inherited from AnyRef</h3>
-            </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div><div name="scala.Any" class="parent">
+              <h3>Inherited from <span name="scala.Any" class="extype">Any</span></h3>
             </div>
 
       </div>
