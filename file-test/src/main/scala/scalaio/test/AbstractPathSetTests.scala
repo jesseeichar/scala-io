@@ -85,9 +85,8 @@ trait AbstractPathSetTests extends scalax.test.sugar.FSAssertionSugar {
     assertSameStructure (stream, tree.children, 1)
   }
 
-
   @Test //@Ignore
-  def directory_stream_skips_read_protected_directories {
+  def path_set_skips_read_protected_directories {
     val (root,tree) = fixtures()
     assertTrue(root.descendants() forall {_.exists})
 
@@ -95,6 +94,14 @@ trait AbstractPathSetTests extends scalax.test.sugar.FSAssertionSugar {
     root.descendants().take(totalFiles/2) foreach {p => p.access = p.access - Write}
 
     assertEquals(totalFiles, root.descendants().size)
+  }
+
+
+  @Test //@Ignore
+  def path_set_toString_should_not_trigger_directory_traversal {
+    val (root,tree) = fixtures()
+    val toString = root.***.toString
+    assertFalse(toString contains tree.head.name)
   }
 
   @Test //@Ignore

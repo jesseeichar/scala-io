@@ -191,6 +191,8 @@ final class BasicPathSet[+T <: Path](srcFiles: Iterable[T],
       }
     }
   }
+
+  override def toString(): String = getClass().getSimpleName+"(...)"
 }
 
 
