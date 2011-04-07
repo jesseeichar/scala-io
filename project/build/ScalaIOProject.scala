@@ -72,6 +72,7 @@ class ScalaIOProject(info: ProjectInfo)
 
     override def testScalaSourcePath = mainScalaSourcePath
     override def testResourcesPath = mainResourcesPath
+
   }
 
   class File(info: ProjectInfo)
