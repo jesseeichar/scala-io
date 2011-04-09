@@ -30,14 +30,10 @@ class CloseActionTest extends AssertionSugar with IOSugar {
     assertEquals(1, c)
     resource2.bytes.force
     assertEquals(2, c)
-    resource2.buffered.bytes.force
+    resource2.chars.force
     assertEquals(3, c)
-    resource2.buffered.chars.force
-    assertEquals(4, c)
     resource2.readableByteChannel.bytes.force
-    assertEquals(5, c)
-    resource2.readableByteChannel.buffered.bytes.force
-    assertEquals(6, c)
+    assertEquals(4, c)
   }
 
   @Test

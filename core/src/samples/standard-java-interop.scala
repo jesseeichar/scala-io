@@ -26,9 +26,7 @@ object JavaInterop {
 
     // other APIs use inversion of to obtain the file object.
     // here is how to get a raw java OutputStream from a file
-    // and just for good measure it will be a BufferedOutputStream
-    // streams and writer both have buffered versions, similar to their java counterparts
-    val out: OutputStream = file.outputStream.buffered.open
+    val out: OutputStream = file.outputStream.open
   }
 
 }

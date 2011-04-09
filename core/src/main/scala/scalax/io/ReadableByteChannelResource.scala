@@ -11,7 +11,7 @@ class ReadableByteChannelResource[+A <: ReadableByteChannel] (
     opener: => A,
     closeAction:CloseAction[A],
     protected val sizeFunc:() => Option[Long])
-  extends BufferableInputResource[A, BufferedInputStream]
+  extends InputResource[A]
   with ResourceOps[A, ReadableByteChannelResource[A]] {
 
   def open() = opener
@@ -20,7 +20,6 @@ class ReadableByteChannelResource[+A <: ReadableByteChannel] (
   def prependCloseAction[B >: A](newAction: CloseAction[B]) = new ReadableByteChannelResource(opener,newAction :+ closeAction,sizeFunc)
   def appendCloseAction[B >: A](newAction: CloseAction[B]) = new ReadableByteChannelResource(opener,closeAction +: newAction,sizeFunc)
 
-  def buffered = inputStream.buffered
   def inputStream = {
     def nResource = new ChannelInputStreamAdapter(opener)
     val closer = ResourceAdapting.closeAction(closeAction)

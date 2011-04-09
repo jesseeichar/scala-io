@@ -162,24 +162,6 @@ trait Resource[+R <: Closeable] extends ManagedResourceOperations[R] with Resour
 }
 
 /**
- * An Object that has an associated Buffered object. For example InputStream
- * has BufferedInputStream
- *
- * @tparam R
- *          The resource type that is returned when the buffered method is called
- *
- * @author  Jesse Eichar
- * @since   1.0
- */
-trait Bufferable[+R <: Resource[Closeable]] {
-    /**
-    * Obtain the buffered version of this object.
-    *
-    * @return the buffered version of this object
-    */
-    def buffered: R
-}
-/**
  * An Resource object that is a also an [[scalax.io.Input]].  This trait adds methods
  * for converting between common io types such as to a [[scalax.io.ReaderResource]] or
  * [[scalax.io.ReadableByteChannelResource]]
@@ -284,33 +266,6 @@ trait SeekableResource[+R <: Closeable] extends Seekable with InputResource[R] w
 trait WriteCharsResource[+R <: Closeable] extends Resource[R] with WriteChars with ResourceOps[R, WriteCharsResource[R]]
 
 /**
- * A trait consisting of the Combination of [[scalax.io.InputResource]] and [[scalax.io.Bufferable]].  Primary use is to simply the signature of
- * the objects created by the Resource factory object.
- */
-trait BufferableInputResource[+C <: Closeable, +B <: Closeable] extends InputResource[C] with Bufferable[InputResource[B]]
-    with ResourceOps[C, BufferableInputResource[C,B]]
-/**
- * A trait consisting of the Combination of [[scalax.io.OutputResource]] and [[scalax.io.Bufferable]].  Primary use is to simply the signature of
- * the objects created by the Resource factory object.
- */
-trait BufferableOutputResource[+C <: Closeable, +B <: Closeable] extends OutputResource[C] with Bufferable[OutputResource[B]]
-    with ResourceOps[C, BufferableOutputResource[C,B]]
-/**
- * A trait consisting of the Combination of [[scalax.io.ReadCharsResource]] and [[scalax.io.Bufferable]].  Primary use is to simply the signature of
- * the objects created by the Resource factory object.
- */
-trait BufferableReadCharsResource[+C <: Closeable, +B <: Closeable] extends ReadCharsResource[C] with Bufferable[ReadCharsResource[B]]
-    with ResourceOps[C, BufferableReadCharsResource[C,B]]
-/**
- * A trait consisting of the Combination of [[scalax.io.WriteCharsResource]] and [[scalax.io.Bufferable]].  Primary use is to simply the signature of
- * the objects created by the Resource factory object.
- */
-trait BufferableWriteCharsResource[+C <: Closeable, +B <: Closeable] extends WriteCharsResource[C] with Bufferable[WriteCharsResource[B]]
-    with ResourceOps[C, BufferableWriteCharsResource[C,B]]
-
-
-
-/**
  * Defines several factory methods for creating instances of Resource.
  *
  * '''Note:''' It is very important to try an pass a method that creates/opens the underlying resource or
@@ -346,19 +301,6 @@ object Resource {
    */
   def fromInputStream[A <: InputStream](opener: => A) : InputStreamResource[A] = new InputStreamResource[A](opener, Noop, () => None)
   /**
-   * Create an Input Resource instance from a BufferedInputStream
-   *
-   * $openDisclaimer
-   *
-   * the buffered method simply returns the same instance
-   *
-   * @param opener the function for opening a new BufferedInputStream
-   *
-   * @return a InputStreamResource that is backed by a BufferedInputStream
-   */
-  def fromBufferedInputStream[A <: BufferedInputStream](opener: => A) : BufferedInputStreamResource[A] = new BufferedInputStreamResource[A](opener, Noop)
-  // OutputStream factory methods
-  /**
    * Create an Output Resource instance from an OutputStream.
    *
    * $openDisclaimer
@@ -370,17 +312,6 @@ object Resource {
    * @return an OutputStreamResource
    */
   def fromOutputStream[A <: OutputStream](opener: => A) : OutputStreamResource[A] = new OutputStreamResource[A](opener,Noop)
-  /**
-   * Create an Output Resource instance from a BufferedOutputStream
-   *
-   * $openDisclaimer
-   *
-   *
-   * @param opener the function for opening a new BufferedOutputStream
-   *
-   * @return a OutputStreamResource that is backed by a BufferedOutputStream
-   */
-  def fromBufferedOutputStream[A <: BufferedOutputStream](opener: => A) : BufferedOutputStreamResource[A] = new BufferedOutputStreamResource[A](opener,Noop)
   // Reader factory methods
   /**
    * Create an ReadChars Resource instance from an Reader.
@@ -392,17 +323,6 @@ object Resource {
    * @return an ReaderResource
    */
   def fromReader[A <: Reader](opener: => A) : ReaderResource[A] = new ReaderResource[A](opener, Noop)
-  /**
-   * Create an ReadChars Resource instance from an BufferedReader.
-   *
-   * $openDisclaimer
-   *
-   *
-   * @param opener the function for opening a new BufferedReader
-   *
-   * @return a ReaderResource that is backed by a BufferedReader
-   */
-  def fromBufferedReader[A <: BufferedReader](opener: => A): BufferedReaderResource[A] = new BufferedReaderResource[A](opener,Noop)
 
   // Writer factory methods
   /**
@@ -415,16 +335,6 @@ object Resource {
    * @return an WriterResource
    */
   def fromWriter[A <: Writer](opener: => A) : WriterResource[A] = new WriterResource[A](opener,Noop)
-  /**
-   * Create an WriteChars Resource instance with conversion traits from an BufferedWriter.
-   *
-   * $openDisclaimer
-   *
-   * @param opener the function for opening a new BufferedWriter
-   *
-   * @return a WriterResource that is backed by a BufferedWriter
-   */
-  def fromBufferedWriter[A <: BufferedWriter](opener: => A): BufferedWriterResource[A] = new BufferedWriterResource(opener,Noop)
   // Channel factory methods
   /**
    * Create an Input Resource instance from an ReadableByteChannel.

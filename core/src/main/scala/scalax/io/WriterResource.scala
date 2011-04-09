@@ -7,7 +7,7 @@ import java.io.{Writer, BufferedWriter}
 class WriterResource[+A <: Writer] (
     opener: => A,
     closeAction:CloseAction[A])
-  extends BufferableWriteCharsResource[A, BufferedWriter]
+  extends WriteCharsResource[A]
   with ResourceOps[A, WriterResource[A]]  {
 
   def open() = opener
@@ -15,15 +15,5 @@ class WriterResource[+A <: Writer] (
   def prependCloseAction[B >: A](newAction: CloseAction[B]) = new WriterResource(opener,newAction :+ closeAction)
   def appendCloseAction[B >: A](newAction: CloseAction[B]) = new WriterResource(opener,closeAction +: newAction)
 
-  def buffered : BufferedWriterResource[BufferedWriter] = {
-    def nResource = {
-      val a = open()
-      new BufferedWriter(a) with ResourceAdapting.Adapter[A] {
-        def src = a
-      }
-    }
-    val closer = ResourceAdapting.closeAction(closeAction)
-    Resource.fromBufferedWriter(nResource).appendCloseAction(closer)
-  }
   protected def writer = this
 }

@@ -136,14 +136,9 @@ object BasicIO {
    * Demonstration of how to convert Input/Output to buffered counterparts
    */
   def bufferedIO {
-    import scalax.io._
-    import java.io._
 
-    // All io.Resource objects can be converted to a buffered equivalent if the buffered method is called
-    val bufferedInput:Input = Resource.fromInputStream(new FileInputStream("file")).buffered
-    val bufferedOutput:Output = Resource.fromOutputStream(new FileOutputStream("file")).buffered
-    val bufferedRead:ReadChars = Resource.fromReader(new FileReader("file")).buffered
-    val bufferedWrite:WriteChars = Resource.fromWriter(new FileWriter("file")).buffered
+    // The next version will have a new strategy for buffering.
+    ()
   }
 
   /**
@@ -186,7 +181,7 @@ object BasicIO {
     // see codec examples in scala io core for details on why there is an implicit codec here
     implicit val codec = scalax.io.Codec.UTF8
 
-    val resource = Resource.fromBufferedReader(new BufferedReader(new FileReader("csv")))
+    val resource = Resource.fromReader(new BufferedReader(new FileReader("csv")))
     val records: Traversable[Array[String]] = resource.lines().map (_ split ',')
 
     // after this it is normal scala collection type operations

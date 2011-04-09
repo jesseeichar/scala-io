@@ -85,16 +85,6 @@ class ResourceTest {
       val out = fileResource.outputStream
       out.write("abc")
       out.write("cba")
-
-
-      fileResource match {
-        case b:BufferableOutputResource[_,_] =>
-          val buffered = b.buffered
-          buffered.write("hip")
-          buffered.write("hee")
-        case _ => ()
-      }
-
     }
 
     def testInReuse(fileResource:InputResource[_]) {
@@ -106,26 +96,16 @@ class ResourceTest {
       val in = fileResource.inputStream
       in.slurpString
       in.slurpString
-
-      fileResource match {
-        case b:BufferableInputResource[_,_] =>
-          val buffered = b.buffered
-          buffered.slurpString
-          buffered.slurpString
-        case _ => ()
-      }
     }
 
     testOutReuse(Resource.fromFile(file))
     testOutReuse(Resource.fromByteChannel(new RandomAccessFile(file,"rw").getChannel))
     testOutReuse(Resource.fromOutputStream(new ByteArrayOutputStream()))
-    testOutReuse(Resource.fromBufferedOutputStream(new BufferedOutputStream(new ByteArrayOutputStream())))
 
     testInReuse(Resource.fromFile(file))
     testInReuse(Resource.fromByteChannel(new RandomAccessFile(file,"rw").getChannel))
 
     testInReuse(Resource.fromInputStream(new ByteArrayInputStream("hi".getBytes)))
-    testInReuse(Resource.fromBufferedInputStream(new BufferedInputStream(new ByteArrayInputStream("hi".getBytes))))
 
     // no exception is a pass
   }

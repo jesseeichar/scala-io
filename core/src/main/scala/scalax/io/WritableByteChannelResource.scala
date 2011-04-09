@@ -10,7 +10,7 @@ import scalax.io.ResourceAdapting.{ChannelOutputStreamAdapter, ChannelWriterAdap
 class WritableByteChannelResource[+A <: WritableByteChannel] (
     opener: => A,
     closeAction:CloseAction[A])
-  extends BufferableOutputResource[A, BufferedOutputStream]
+  extends OutputResource[A]
   with ResourceOps[A, WritableByteChannelResource[A]]  {
 
   def open() = opener
@@ -19,7 +19,6 @@ class WritableByteChannelResource[+A <: WritableByteChannel] (
   def prependCloseAction[B >: A](newAction: CloseAction[B]) = new WritableByteChannelResource(opener,newAction :+ closeAction)
   def appendCloseAction[B >: A](newAction: CloseAction[B]) = new WritableByteChannelResource(opener,closeAction +: newAction)
 
-  def buffered = outputStream.buffered
   def outputStream = {
     def nResource = new ChannelOutputStreamAdapter(opener)
     val closer = ResourceAdapting.closeAction(closeAction)

@@ -53,19 +53,15 @@ object Resources {
     // get various input streams, readers an channels
     val inputStream: InputStream = new URL("http://someurl.com").openStream
     val in: InputStreamResource[InputStream] = Resource.fromInputStream(inputStream)
-    val bufferedIn: InputStreamResource[BufferedInputStream] = in.buffered
     val readableChannel: Resource[ReadableByteChannel] = in.readableByteChannel
     val reader: ReaderResource[Reader] = in.reader
-    val bufferedReader: ReaderResource[BufferedReader] = reader.buffered
 
     // get various output streams and channels
     val outputStream: FileOutputStream = new FileOutputStream("file")
     val out: OutputStreamResource[OutputStream] = Resource.fromOutputStream(outputStream)
 
-    val bufferedOut: OutputStreamResource[BufferedOutputStream] = out.buffered
     val writableChannel: Resource[WritableByteChannel] = out.writableByteChannel
     val writer: WriterResource[Writer] = out.writer
-    val bufferedWriter: WriterResource[BufferedWriter] = writer.buffered
 
     // examples getting ByteChannels
     // default is a read/write/create channel
@@ -108,23 +104,21 @@ object Resources {
     val resource = Resource.fromInputStream(new FileInputStream("file"))
 
     // The Resource objects have methods for converting between the common types
-    val bufferedInput: InputStreamResource[BufferedInputStream] = resource.buffered
     val readChars: ReaderResource[Reader] = resource.reader(Codec.UTF8)
     val readableByteChannel: ReadableByteChannelResource[ReadableByteChannel] =
               resource.readableByteChannel
-    val bufferedReader = readChars.buffered
 
     // there are also several ways to obtain the underlying java object
     // for certain operations.  Typically this is to micro manage how the
     // data is read from the input
-    val availableBytes: Int = bufferedInput.acquireAndGet{
-      bufferedInputStream => bufferedInputStream.available
+    val availableBytes: Int = resource.acquireAndGet{
+      inputStream => inputStream.available
     }
 
     // If you want to perform an operation and have the option to easily
     // get the exception acquireFor is a good solution
-    val firstLine: Either[scala.List[scala.Throwable], String] = bufferedReader.acquireFor{
-      reader => reader.readLine
+    val firstLine: Either[scala.List[scala.Throwable], String] = readChars.acquireFor{
+      reader => new BufferedReader(reader).readLine()
     }
   }
 

@@ -11,7 +11,7 @@ class InputStreamResource[+A <: InputStream] (
     opener: => A,
     closeAction:CloseAction[A],
     protected val sizeFunc:() => Option[Long] )
-  extends BufferableInputResource[A, BufferedInputStream]
+  extends InputResource[A]
   with ResourceOps[A, InputStreamResource[A]] {
 
   def open() = opener
@@ -22,16 +22,6 @@ class InputStreamResource[+A <: InputStream] (
   override def acquireFor[B](f: (A) => B) = new CloseableResourceAcquirer(open,f,closeAction)()
 
   def inputStream = this
-  def buffered:InputStreamResource[BufferedInputStream] = {
-    def nResource = {
-      val a = open()
-      new BufferedInputStream(a) with ResourceAdapting.Adapter[A] {
-        def src = a
-      }
-    }
-    val closer = ResourceAdapting.closeAction(closeAction)
-    Resource.fromBufferedInputStream(nResource).appendCloseAction(closer)
-  }
   def reader(implicit sourceCodec: Codec): ReaderResource[Reader] = {
     def nResource = {
       val a = open()

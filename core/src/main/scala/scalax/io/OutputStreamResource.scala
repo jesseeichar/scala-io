@@ -10,7 +10,7 @@ import scalax.io.ResourceAdapting.WritableChannelAdapter
 class OutputStreamResource[+A <: OutputStream] (
     opener: => A,
     closeAction:CloseAction[A])
-  extends BufferableOutputResource[A, BufferedOutputStream]
+  extends OutputResource[A]
   with ResourceOps[A, OutputStreamResource[A]] {
 
   def open() = opener
@@ -21,16 +21,6 @@ class OutputStreamResource[+A <: OutputStream] (
 
   def outputStream = this
   def underlyingOutput = this
-  def buffered:OutputStreamResource[BufferedOutputStream] = {
-    def nResource = {
-      val a = open()
-      new BufferedOutputStream(a) with ResourceAdapting.Adapter[A] {
-        def src = a
-      }
-    }
-    val closer = ResourceAdapting.closeAction(closeAction)
-    Resource.fromBufferedOutputStream(nResource).appendCloseAction(closer)
-  }
   def writer(implicit sourceCodec: Codec): WriterResource[Writer] = {
     def nResource = {
       val a = open()
