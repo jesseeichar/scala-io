@@ -6,18 +6,23 @@ import scalax.io.ResourceAdapting.{ChannelInputStreamAdapter, ChannelWriterAdapt
 /**
  * A ManagedResource for accessing and using SeekableByteChannels.  Class can be created using the [[scalax.io.Resource]] object.
  */
-class SeekableByteChannelResource[+A <: SeekableByteChannel] protected[io](opener: => A, closeAction:CloseAction[A]) extends SeekableResource[A]
-    with ResourceOps[A, SeekableByteChannelResource[A]]  {
+class SeekableByteChannelResource[+A <: SeekableByteChannel] (
+    opener: => A,
+    closeAction:CloseAction[A],
+    protected val sizeFunc:() => Option[Long])
+  extends SeekableResource[A]
+  with ResourceOps[A, SeekableByteChannelResource[A]]  {
+
   def open() = opener
   override def acquireFor[B](f: (A) => B) = new CloseableResourceAcquirer(open,f,closeAction)()
 
-  def prependCloseAction[B >: A](newAction: CloseAction[B]) = new SeekableByteChannelResource(opener,newAction :+ closeAction)
-  def appendCloseAction[B >: A](newAction: CloseAction[B]) = new SeekableByteChannelResource(opener,closeAction +: newAction)
+  def prependCloseAction[B >: A](newAction: CloseAction[B]) = new SeekableByteChannelResource(opener,newAction :+ closeAction,sizeFunc)
+  def appendCloseAction[B >: A](newAction: CloseAction[B]) = new SeekableByteChannelResource(opener,closeAction +: newAction,sizeFunc)
 
   def inputStream = {
     def nResource = new ChannelInputStreamAdapter(opener)
     val closer = ResourceAdapting.closeAction(closeAction)
-    Resource.fromInputStream(nResource).appendCloseAction(closer)
+    new InputStreamResource(nResource,closer,sizeFunc)
   }
   def outputStream = {
     def nResource = new ChannelOutputStreamAdapter(opener)
@@ -35,8 +40,8 @@ class SeekableByteChannelResource[+A <: SeekableByteChannel] protected[io](opene
     Resource.fromWriter(nResource).appendCloseAction(closer)
   }
   def writableByteChannel = Resource.fromWritableByteChannel(opener).appendCloseAction(closeAction)
-  def readableByteChannel = Resource.fromReadableByteChannel(opener).appendCloseAction(closeAction)
-  def byteChannel = Resource.fromByteChannel(opener).appendCloseAction(closeAction)
+  def readableByteChannel = new ReadableByteChannelResource(opener,closeAction,sizeFunc)
+  def byteChannel = new ByteChannelResource(opener,closeAction,sizeFunc)
 
   override def bytesAsInts = inputStream.bytesAsInts // TODO optimize for byteChannel
   override def chars(implicit codec: Codec) = reader(codec).chars  // TODO optimize for byteChannel

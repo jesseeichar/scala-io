@@ -5,7 +5,7 @@ import java.io._
 /**
  * A ManagedResource for accessing and using BufferedWriters.  Class can be created using the [[scalax.io.Resource]] object.
  */
-class BufferedWriterResource[+A <: BufferedWriter] protected[io](opener: => A, closeAction:CloseAction[A]) extends WriterResource[A](opener,closeAction)
+class BufferedWriterResource[+A <: BufferedWriter] (opener: => A, closeAction:CloseAction[A]) extends WriterResource[A](opener,closeAction)
     with ResourceOps[A, BufferedWriterResource[A]]  {
   override def prependCloseAction[B >: A](newAction: CloseAction[B]) = new BufferedWriterResource(opener,newAction :+ closeAction)
   override def appendCloseAction[B >: A](newAction: CloseAction[B]) = new BufferedWriterResource(opener,closeAction +: newAction)
@@ -18,7 +18,7 @@ class BufferedWriterResource[+A <: BufferedWriter] protected[io](opener: => A, c
 /**
  * A ManagedResource for accessing and using BufferedReader.  Class can be created using the [[scalax.io.Resource]] object.
  */
-class BufferedReaderResource[+A <: BufferedReader] protected[io](opener: => A, closeAction:CloseAction[A]) extends ReaderResource[A](opener,closeAction)
+class BufferedReaderResource[+A <: BufferedReader] (opener: => A, closeAction:CloseAction[A]) extends ReaderResource[A](opener,closeAction)
     with ResourceOps[A, BufferedReaderResource[A]]  {
   override def prependCloseAction[B >: A](newAction: CloseAction[B]) = new BufferedReaderResource(opener,newAction :+ closeAction)
   override def appendCloseAction[B >: A](newAction: CloseAction[B]) = new BufferedReaderResource(opener,closeAction +: newAction)
@@ -31,7 +31,7 @@ class BufferedReaderResource[+A <: BufferedReader] protected[io](opener: => A, c
 /**
  * A ManagedResource for accessing and using BufferedInputStream.  Class can be created using the [[scalax.io.Resource]] object.
  */
-class BufferedInputStreamResource[+A <: BufferedInputStream] protected[io](opener: => A, closeAction:CloseAction[A]) extends InputStreamResource[A](opener,closeAction)
+class BufferedInputStreamResource[+A <: BufferedInputStream] (opener: => A, closeAction:CloseAction[A]) extends InputStreamResource[A](opener,closeAction,() => None)
     with ResourceOps[A, BufferedInputStreamResource[A]]  {
   override def prependCloseAction[B >: A](newAction: CloseAction[B]) = new BufferedInputStreamResource(opener,newAction :+ closeAction)
   override def appendCloseAction[B >: A](newAction: CloseAction[B]) = new BufferedInputStreamResource(opener,closeAction +: newAction)
@@ -44,7 +44,7 @@ class BufferedInputStreamResource[+A <: BufferedInputStream] protected[io](opene
 /**
  * A ManagedResource for accessing and using BufferedOutputStream.  Class can be created using the [[scalax.io.Resource]] object.
  */
-class BufferedOutputStreamResource[+A <: BufferedOutputStream] protected[io](opener: => A, closeAction:CloseAction[A]) extends OutputStreamResource[A](opener,closeAction)
+class BufferedOutputStreamResource[+A <: BufferedOutputStream] (opener: => A, closeAction:CloseAction[A]) extends OutputStreamResource[A](opener,closeAction)
     with ResourceOps[A, BufferedOutputStreamResource[A]]  {
   override def prependCloseAction[B >: A](newAction: CloseAction[B]) = new BufferedOutputStreamResource(opener,newAction :+ closeAction)
   override def appendCloseAction[B >: A](newAction: CloseAction[B]) = new BufferedOutputStreamResource(opener,closeAction +: newAction)

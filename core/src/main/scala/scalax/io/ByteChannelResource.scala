@@ -6,13 +6,19 @@ import scalax.io.ResourceAdapting.{ChannelWriterAdapter, ChannelReaderAdapter, C
 /**
  * A for accessing and using ByteChannels.  Class can be created using the [[scalax.io.Resource]] object.
  */
-class ByteChannelResource[+A <: ByteChannel] protected[io](opener: => A, closeAction:CloseAction[A]) extends InputResource[A] with OutputResource[A]
-    with ResourceOps[A, ByteChannelResource[A]] {
+class ByteChannelResource[+A <: ByteChannel] (
+    opener: => A,
+    closeAction:CloseAction[A],
+    protected val sizeFunc:() => Option[Long])
+  extends InputResource[A]
+  with OutputResource[A]
+  with ResourceOps[A, ByteChannelResource[A]] {
+
   def open() = opener
   override def acquireFor[B](f: (A) => B) = new CloseableResourceAcquirer(open,f,closeAction)()
 
-  def prependCloseAction[B >: A](newAction: CloseAction[B]) = new ByteChannelResource(opener,newAction :+ closeAction)
-  def appendCloseAction[B >: A](newAction: CloseAction[B]) = new ByteChannelResource(opener,closeAction +: newAction)
+  def prependCloseAction[B >: A](newAction: CloseAction[B]) = new ByteChannelResource(opener,newAction :+ closeAction,sizeFunc)
+  def appendCloseAction[B >: A](newAction: CloseAction[B]) = new ByteChannelResource(opener,closeAction +: newAction,sizeFunc)
 
   def inputStream = {
     def nResource = new ChannelInputStreamAdapter(opener)

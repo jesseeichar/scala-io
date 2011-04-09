@@ -7,6 +7,8 @@ import scalax.io.nio.SeekableFileChannel
 import scalax.io._
 import java.nio.channels.ByteChannel
 import java.io._
+import actors.Futures
+import java.net._
 
 class ResourceTest {
 
@@ -66,7 +68,7 @@ class ResourceTest {
     assertFalse(file.exists)
   }
 
-    @Test //@Ignore
+  @Test //@Ignore
   def issue_9_file_writer_cannot_be_used_twice(): Unit = {
     implicit val codec = Codec.UTF8
 
@@ -128,4 +130,58 @@ class ResourceTest {
     // no exception is a pass
   }
 
+  @Test //@Ignore
+  def issue_13_size_is_none_even_when_it_could_be_calculated_file(): Unit = {
+    val file = new File(folder.getRoot,"file")
+
+    val fResource = Resource.fromFile(file)
+    fResource.write(new Array[Byte](0))
+    assertEquals(Some(file.length),fResource.size)
+
+    val data = "data"
+    fResource.write(data)
+    val dataSize = Some(data.getBytes("UTF8").length.toLong)
+    assertEquals(Some(file.length),fResource.size);
+
+    assertEquals(Some(file.length),fResource.inputStream.size)
+
+    import Input._
+    assertEquals(Some(file.length),file.asInput.size)
+
+  }
+
+  @Test //@Ignore
+  def issue_13_size_is_none_even_when_it_could_be_calculated_traversable(): Unit = {
+    import Input._
+
+    assertEquals(Some(5),(1 to 5).asInput.size)
+
+  }
+
+  @Test //@Ignore
+  def issue_13_size_is_none_even_when_it_could_be_calculated_url(): Unit = {
+    class TestUrlConnectionFactory(size:Int) extends URLStreamHandler(){
+      def openConnection(p1: URL): URLConnection = new HttpURLConnection(p1){
+
+        override def getContentLength: Int = size
+
+        override def getInputStream: InputStream = new ByteArrayInputStream(1 to size map {_.toByte} toArray)
+
+        def connect() {}
+        def usingProxy(): Boolean = false
+        def disconnect() {}
+      }
+    }
+    val unknownSize = new URL("http","localhost",80,"/",new TestUrlConnectionFactory(-1))
+    assertEquals(None,Resource.fromURL(unknownSize).size)
+
+    val zeroSize = new URL("http","localhost",80,"/",new TestUrlConnectionFactory(0))
+    assertEquals(Some(0),Resource.fromURL(zeroSize).size)
+
+    val positiveSize = new URL("http","localhost",80,"/",new TestUrlConnectionFactory(1000))
+    assertEquals(Some(1000),Resource.fromURL(positiveSize).size)
+
+    import Input._
+    assertEquals(Some(1000),positiveSize.asInput.size)
+  }
 }

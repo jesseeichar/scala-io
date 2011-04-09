@@ -12,7 +12,7 @@ import java.io.File
  */
 object LinesExamples {
   /**
-   * Default behaviour.  Autodetect ending assuming one of
+   * Default behaviour with the parameter defaults.  Autodetect ending assuming one of
    * \n, \r\n or \r.  The terminator is not included in results
    */
   def linesDefaults {

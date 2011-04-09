@@ -7,19 +7,24 @@ import scalax.io.ResourceAdapting.{ChannelReaderAdapter, ChannelInputStreamAdapt
 /**
  * A ManagedResource for accessing and using ByteChannels.  Class can be created using the [[scalax.io.Resource]] object.
  */
-class ReadableByteChannelResource[+A <: ReadableByteChannel] protected[io](opener: => A, closeAction:CloseAction[A]) extends BufferableInputResource[A, BufferedInputStream]
-    with ResourceOps[A, ReadableByteChannelResource[A]] {
+class ReadableByteChannelResource[+A <: ReadableByteChannel] (
+    opener: => A,
+    closeAction:CloseAction[A],
+    protected val sizeFunc:() => Option[Long])
+  extends BufferableInputResource[A, BufferedInputStream]
+  with ResourceOps[A, ReadableByteChannelResource[A]] {
+
   def open() = opener
   override def acquireFor[B](f: (A) => B) = new CloseableResourceAcquirer(open,f,closeAction)()
 
-  def prependCloseAction[B >: A](newAction: CloseAction[B]) = new ReadableByteChannelResource(opener,newAction :+ closeAction)
-  def appendCloseAction[B >: A](newAction: CloseAction[B]) = new ReadableByteChannelResource(opener,closeAction +: newAction)
+  def prependCloseAction[B >: A](newAction: CloseAction[B]) = new ReadableByteChannelResource(opener,newAction :+ closeAction,sizeFunc)
+  def appendCloseAction[B >: A](newAction: CloseAction[B]) = new ReadableByteChannelResource(opener,closeAction +: newAction,sizeFunc)
 
   def buffered = inputStream.buffered
   def inputStream = {
     def nResource = new ChannelInputStreamAdapter(opener)
     val closer = ResourceAdapting.closeAction(closeAction)
-    Resource.fromInputStream(nResource).appendCloseAction(closer)
+    new InputStreamResource(nResource, closer, sizeFunc)
   }
   def reader(implicit sourceCodec: Codec) = {
     def nResource = new ChannelReaderAdapter(opener,sourceCodec)

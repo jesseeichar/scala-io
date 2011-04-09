@@ -9,6 +9,36 @@
 object Resources {
 
   /**
+   * Wrap any closeable resources with a Resource.  The scala-arm resource.managed method can be used
+   * to wrap many types of objects (like Closeable or jdbc connections) with the ARM (Automatic Resource Management) functionality
+   * which handles closing the resource after use.
+   * <p>
+   * For common IO it is recommended to use a specific Resource.fromFoo methods so that the convenient
+   * methods of bytes, chars, copy, etc... are available for use.  But for other things like jdbc connections
+   * or RandomAccessFiles resource.managed is useful.
+   * </p>
+   */
+  def wrapCloseables {
+    import java.io.RandomAccessFile
+
+    val fileResource = resource.managed(new RandomAccessFile("foo.txt","rw"))
+
+    // now resource can be used using acquire etc... with the confidence that the resource will
+    // be closed when done
+
+    // acquireAndGet will make the request but any exceptions will be thrown when encountered
+    val length:Long = fileResource.acquireAndGet(_.length)
+
+    // If you want to handle the possible errors then acquireFor is what you want
+    fileResource.acquireFor(_.readByte) match {
+      case Left(errors) =>
+        errors.foreach {_.printStackTrace}
+      case Right(b) =>
+        println("I got a byte :) "+b)
+    }
+
+  }
+  /**
    * Several examples of creating Resources
    */
   def createResources {

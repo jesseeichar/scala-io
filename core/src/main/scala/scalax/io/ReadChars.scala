@@ -146,5 +146,21 @@ object ReadChars {
     implicit object ReaderConverter extends AsReadCharsConverter[Reader]{
       def toReadChars(reader: Reader) = Resource.fromReader(reader)
     }
+    /**
+     * Converts a String to a ReadChars object
+     */
+    implicit object TraversableStringConverter extends AsReadCharsConverter[String]{
+      def toReadChars(string: String): ReadChars = TraversableCharConverter.toReadChars(string)
+    }
+    /**
+     * Converts a Traversable[Char] to a ReadChars object
+     */
+    implicit object TraversableCharConverter extends AsReadCharsConverter[Traversable[Char]]{
+      def toReadChars(t: Traversable[Char]): ReadChars = new ReadChars {
+        def chars: LongTraversable[Char] = new LongTraversable[Char] {
+          def foreach[U](f: (Char) => U) = t.foreach(f)
+        }.view
+      }
+    }
   }
 }

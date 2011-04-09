@@ -59,10 +59,12 @@ object AsFooConverter {
    * Convert to ReadChars
    */
   def asReadChars {
-    import scalax.io.Codec
-    import scalax.io.ReadChars._
+    import scalax.io.{ReadChars,Codec,LongTraversable,Line}
+    import Line.Terminators.Custom
+    import ReadChars._
 
     val lines:Traversable[String] = new java.io.File("io").asBinaryReadChars(Codec.UTF8).lines()
     val webpage:String = new java.io.StringReader("hello").asReadChars.slurpString
+    val wrapTraversable: LongTraversable[String] = "hello".asReadChars.lines(Custom(";"))
   }
 }

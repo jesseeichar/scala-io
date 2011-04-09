@@ -16,7 +16,7 @@ import java.nio.channels.{
 import CloseAction.Noop
 import java.io._
 import nio.SeekableFileChannel
-import java.net.URL
+import java.net.{URLConnection, HttpURLConnection, URL}
 
 /**
  * Essentially the resource aquire and close functionality.  This is extracted out into a class
@@ -93,14 +93,14 @@ trait ResourceOps[+R, +Repr] {
    * Creates a [[scalax.io.CloseAction]] from the function and passes it to prependCloseAction(CloseAction)
    *
    * @param newAction The new action to prepend
-   * @return a new instance with the added [[scalax.io.CloseAction]]   *
+   * @return a new instance with the added [[scalax.io.CloseAction]]
    */
   def prependCloseAction[B >: R](newAction: B => Unit):Repr = prependCloseAction(CloseAction(newAction))
   /**
    * Creates a [[scalax.io.CloseAction]] from the function and passes it to appendCloseAction(CloseAction)
    *
    * @param newAction The new action to append
-   * @return a new instance with the added [[scalax.io.CloseAction]]   *
+   * @return a new instance with the added [[scalax.io.CloseAction]]
    */
   def appendCloseAction[B >: R](newAction: B => Unit):Repr = appendCloseAction(CloseAction(newAction))
 }
@@ -213,7 +213,8 @@ trait InputResource[+R <: Closeable] extends Resource[R] with Input with Resourc
      * @return the [[scalax.io.ReadableByteChannelResource]](typically) version of this object.
      */
     def readableByteChannel: InputResource[ReadableByteChannel]
-    def size : Option[Long] = None
+    final def size : Option[Long] = sizeFunc()
+    protected def sizeFunc: () => Option[Long]
 }
 
 /**
@@ -343,7 +344,7 @@ object Resource {
    *
    * @return an InputStreamResource
    */
-  def fromInputStream[A <: InputStream](opener: => A) : InputStreamResource[A] = new InputStreamResource[A](opener, Noop)
+  def fromInputStream[A <: InputStream](opener: => A) : InputStreamResource[A] = new InputStreamResource[A](opener, Noop, () => None)
   /**
    * Create an Input Resource instance from a BufferedInputStream
    *
@@ -434,7 +435,7 @@ object Resource {
    *
    * @return an ReadableByteChannelResource
    */
-  def fromReadableByteChannel[A <: ReadableByteChannel](opener: => A) : ReadableByteChannelResource[A] = new ReadableByteChannelResource[A](opener, Noop)
+  def fromReadableByteChannel[A <: ReadableByteChannel](opener: => A) : ReadableByteChannelResource[A] = new ReadableByteChannelResource[A](opener, Noop, () => None)
   /**
    * Create an Output Resource instance from an WritableByteChannel.
    *
@@ -454,7 +455,7 @@ object Resource {
    *
    * @return a ByteChannelResource
    */
-  def fromByteChannel[A <: ByteChannel](opener: => A) : ByteChannelResource[A] = new ByteChannelResource[A](opener,Noop)
+  def fromByteChannel[A <: ByteChannel](opener: => A) : ByteChannelResource[A] = new ByteChannelResource[A](opener,Noop, () => None)
   /**
    * Create an Input/Output/Seekable Resource instance from a SeekableByteChannel.
    *
@@ -464,7 +465,8 @@ object Resource {
    *
    * @return a SeekableByteChannelResource
    */
-  def fromSeekableByteChannel[A <: SeekableByteChannel](opener: => A) : SeekableByteChannelResource[A] = new SeekableByteChannelResource[A](opener,Noop)
+  def fromSeekableByteChannel[A <: SeekableByteChannel](opener: => A) : SeekableByteChannelResource[A] = new SeekableByteChannelResource[A](opener,Noop, () => None)
+
   /**
    * Create an Input/Output/Seekable Resource instance from a RandomAccess file.
    *
@@ -476,7 +478,13 @@ object Resource {
    */
   def fromRandomAccessFile(opener: => RandomAccessFile) : SeekableByteChannelResource[SeekableFileChannel] = {
     def open = new SeekableFileChannel(opener.getChannel)
-    new SeekableByteChannelResource[SeekableFileChannel](open,Noop)
+    def sizeFunc = () => resource.managed(opener).acquireAndGet {
+      _.length match {
+        case len if len < 0 => None
+        case len => Some(len)
+      }
+    }
+    new SeekableByteChannelResource[SeekableFileChannel](open,Noop,sizeFunc)
   }
 
   /**
@@ -486,7 +494,21 @@ object Resource {
    *
    * @return an InputStreamResource
    */
-  def fromURL(url:URL): InputStreamResource[InputStream] = fromInputStream(url.openStream)
+  def fromURL(url:URL): InputStreamResource[InputStream] = {
+    val sizeFunc = () => {
+      val conn: URLConnection = url.openConnection
+      try {
+        conn.connect()
+        conn.getContentLength match {
+          case len if len < 0 => None
+          case len => Some(len.toLong)
+        }
+      } finally {
+        conn.getInputStream.close()
+      }
+    }
+    new InputStreamResource(url.openStream,Noop,sizeFunc)
+  }
 
   /**
    * Converts the string to a URL and creates an Input Resource from the URL

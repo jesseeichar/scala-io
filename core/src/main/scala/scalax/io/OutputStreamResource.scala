@@ -7,11 +7,13 @@ import scalax.io.ResourceAdapting.WritableChannelAdapter
 /**
  * A ManagedResource for accessing and using OutputStreams.  Class can be created using the [[scalax.io.Resource]] object.
  */
-class OutputStreamResource[+A <: OutputStream] protected[io](opener: => A, closeAction:CloseAction[A]) extends BufferableOutputResource[A, BufferedOutputStream]
-    with ResourceOps[A, OutputStreamResource[A]] {
+class OutputStreamResource[+A <: OutputStream] (
+    opener: => A,
+    closeAction:CloseAction[A])
+  extends BufferableOutputResource[A, BufferedOutputStream]
+  with ResourceOps[A, OutputStreamResource[A]] {
+
   def open() = opener
-
-
   def prependCloseAction[B >: A](newAction: CloseAction[B]) = new OutputStreamResource(opener,newAction :+ closeAction)
   def appendCloseAction[B >: A](newAction: CloseAction[B]) = new OutputStreamResource(opener,closeAction +: newAction)
 
