@@ -184,10 +184,14 @@ object Input {
         }.view
 
         def bytesAsInts = new LongTraversable[Int]{
-          def foreach[U](f: (Int) => U) = t.foreach(f)
+          def foreach[U](f: (Int) => U) = t.foreach{
+            i =>
+              val convertIntsToBytes = OutputConverter.IntConverter.toBytes(i)
+              convertIntsToBytes.foreach {b => f(b.toInt)}
+          }
         }.view
 
-        def size = Some(t.size)
+        def size = Some(t.size * 4)
       }
     }
     /**

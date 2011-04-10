@@ -131,11 +131,14 @@ class ResourceTest {
   }
 
   @Test //@Ignore
-  def issue_13_size_is_none_even_when_it_could_be_calculated_traversable(): Unit = {
+  def issue_15_list_size_of_ints_wrong(): Unit = {
     import Input._
 
-    assertEquals(Some(5),(1 to 5).asInput.size)
+    assertEquals(Some(5*4),(1 to 5).asInput.size)
+    assertEquals(5*4,(1 to 5).asInput.byteArray.size)
 
+    assertEquals(Some(5),(1 to 5 map {_.toByte}).asInput.size)
+    assertEquals(5,(1 to 5 map {_.toByte}).asInput.byteArray.size)
   }
 
   @Test //@Ignore
@@ -164,4 +167,6 @@ class ResourceTest {
     import Input._
     assertEquals(Some(1000),positiveSize.asInput.size)
   }
+
+
 }
