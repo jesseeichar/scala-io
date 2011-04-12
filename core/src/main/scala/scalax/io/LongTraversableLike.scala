@@ -11,6 +11,7 @@ package scalax.io
 import scala.collection._
 import mutable.Builder
 import util.control.Breaks._
+import java.io.Closeable
 
 /**
  * The control signals for the limitFold method in [[scalax.io.LongTraversable]].
@@ -32,7 +33,25 @@ case class Continue[+A](currentResult:A) extends FoldResult(currentResult)
  */
 case class End[+A](endResult:A) extends FoldResult(endResult)
 
+trait CloseableIterator[A] extends Iterator[A] with Closeable {
+  self =>
+  class Proxy[B](wrapped:Iterator[B]) extends CloseableIterator[B] {
+    def next() = wrapped.next
+    def hasNext: Boolean = wrapped.hasNext
+    def close() = self.close
+  }
+  override def map[B](f: (A) => B): CloseableIterator[B] = new Proxy[B](super.map(f))
+  override def dropWhile(p: (A) => Boolean) = new Proxy[A](super.dropWhile(p))
+  override def takeWhile(p: (A) => Boolean) = new Proxy[A](super.takeWhile(p))
+}
 
+object CloseableIterator {
+  def apply[A](iter:Iterator[A]) = new CloseableIterator[A]{
+    def next(): A = iter.next
+    def hasNext: Boolean = iter.hasNext
+    def close() {}
+  }
+}
 /**
  * A traversable for use on very large datasets which cannot be indexed with Ints but instead
  * require Longs for indexing.
@@ -76,9 +95,20 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
     }
   }
 
+  protected def iterator:CloseableIterator[A]
+
   /**
    * The long equivalent of count in Traversable.
    */
+  def foreach[U](f: (A) => U) {
+    val iter = iterator
+    try {
+      iter.foreach(f)
+    }finally{
+      iter.close
+    }
+  }
+
   override def slice(from: Int, until: Int) = lslice(from,until)
 
   def lcount(p: A => Boolean): Long = {
@@ -134,7 +164,8 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
 
   override def view = new LongTraversableView[A,Repr] {
     protected lazy val underlying = self.repr
-    def foreach[U](f: (A) => U): Unit = self foreach f
+
+    protected def iterator: Iterator[A] with Closeable = self.iterator
   }
   override def view(from: Int, until: Int) = view.slice(from, until)
   /**
@@ -142,7 +173,18 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
    */
   def lview(from: Long, until: Long) : LongTraversableView[A,Repr] = this.view.lslice(from, until)
 
+  /*
+  def sameContents[B >: A](that:Traversable[B]):Boolean = {
 
+  }
+  */
+
+  /** Selects an element by its index in the $coll.
+   *
+   *  @param  idx  The index to select.
+   *  @return the element of this $coll at index `idx`, where `0` indicates the first element.
+   *  @throws `IndexOutOfBoundsException` if `idx` does not satisfy `0 <= idx < length`.
+   */
   def apply (idx: Long):A = ldrop(idx).head
 
   /** Tests whether every element of this $coll relates to the
@@ -156,18 +198,13 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
    *                  and `y` of `that`, otherwise `false`.
    */
   def corresponds[B](that: Seq[B])(p: (A,B) => Boolean): Boolean = {
+    val i = this.iterator
     val j = that.iterator
-    var result = true
-    breakable{
-      foreach { next =>
-        if(!j.hasNext || !p(next,j.next)) {
-          result = false
-          break
-        }
-      }
-    }
+    while (i.hasNext && j.hasNext)
+      if (!p(i.next, j.next))
+        return false
 
-    result && !j.hasNext
+    !i.hasNext && !j.hasNext
   }
 
   /** Finds index of first element satisfying some predicate.
@@ -191,15 +228,15 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
    */
   def indexWhere(p: A => Boolean, from: Long): Long = {
     var i = from
-    breakable{
-      ldrop(from) foreach { next =>
-          if (p(next)) break
-        else i += 1
-      }
-      i = -1
+    var it = ldrop(from).iterator
+    while (it.hasNext) {
+      if (p(it.next())) return i
+      else i += 1
     }
-    i
+
+    -1
   }
+
   def isDefinedAt ( idx : Long ) : Boolean = (idx >= 0) && (idx < lsize)
   /** Finds index of first occurrence of some value in this $coll.
    *

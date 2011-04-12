@@ -11,6 +11,7 @@ package scalax.io
 import scala.collection._
 import scala.collection.generic._
 import TraversableView.NoBuilder
+import java.io.Closeable
 
 /**
  * A LongTraversableView that is uses a Resource as its underpinnings
@@ -56,25 +57,16 @@ private[io] trait ResourceTraversableViewLike[A, +Coll, +This <: ResourceTravers
                        else safeSum(self.start,(until max 0))
     def conv = self.conv
 
-    override def foreach[U](f: A => U) = doForeach(f)
+    override protected def iterator = getIterator
   }
   trait Mapped[B] extends super.Mapped[B] with Transformed[B] {
     def conv = self.conv andThen mapping
   }
   trait TakenWhile extends super.TakenWhile with Identity {
-    override def foreach[U](f: (A) => U) = doForeach(pred,f)
+    override protected def iterator:CloseableIterator[A] = getIterator.takeWhile(pred)
   }
   trait DroppedWhile extends super.DroppedWhile with Identity {
-    override def foreach[U](f: (A) => U) = {
-      var take = false
-      doForeach{e =>
-        if(take) f(e)
-        else if(!pred(e)) {
-          take = true
-          f(e)
-        }
-      }
-    }
+    override protected def iterator:CloseableIterator[A] = getIterator.dropWhile(pred)
   }
 
 

@@ -180,10 +180,15 @@ object Input {
           val maxChars = codec.encoder.maxBytesPerChar
 
           lazy val chars = codec.decode(t.view.map{_.toByte}.toArray)
-          def foreach[U](f: (Char) => U) = chars.foreach(f)
+
+          protected def iterator: CloseableIterator[Char] = CloseableIterator(chars.iterator)
         }.view
 
         def bytesAsInts = new LongTraversable[Int]{
+          protected def iterator: CloseableIterator[Int] = new CloseableIterator {
+            t.toStream.iterator
+            var bytes =
+          }
           def foreach[U](f: (Int) => U) = t.foreach{
             i =>
               val convertIntsToBytes = OutputConverter.IntConverter.toBytes(i)
