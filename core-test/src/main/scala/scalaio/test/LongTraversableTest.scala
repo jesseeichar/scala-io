@@ -15,9 +15,16 @@ class LongTraversableTest {
                      dataFunc: (Int) => Traversable[Int] = (i:Int) => 1 to i) =
     new LongTraversable[Int] {
       val data = dataFunc(tsize)
-      def foreach[U](f: (Int) => U) = data foreach {i =>
-        callback(i)
-        f(i)
+
+      def iterator: CloseableIterator[Int] = new CloseableIterator[Int] {
+        val iter = data.toIterator
+        def next(): Int = {
+          val i = iter.next()
+          callback(i)
+          i
+        }
+        def hasNext: Boolean = iter.hasNext
+        def close() {}
       }
     }
 

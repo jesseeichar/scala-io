@@ -10,6 +10,7 @@ package scalax.io
 
 import scala.collection.mutable.Buffer
 import Line.Terminators._
+import annotation.tailrec
 
 /**
  * Creates a Traversable[String] from a Traversable[Char] where each String is a line as indicated by the
@@ -19,24 +20,35 @@ import Line.Terminators._
  * @see [[scalax.io.Input]]
  * @see [[scalax.io.ReadChars]]
  */
-class LineTraversable(source: Traversable[Char], terminator: Terminator, includeTerminator: Boolean) extends LongTraversable[String] {
-    def foreach[U](f: String => U) : Unit = {
-        val buffer = source.foldLeft(Buffer[Char]()) {
-            case (buffer, nextChar) =>
-              terminator.split(buffer :+ nextChar) match {
-                case split @ LineSplit(_,_,nextLine) if nextLine.nonEmpty => {
-                  f(split toString includeTerminator)
-                  Buffer(nextLine:_*)
-                }
-                case _ =>
-                  buffer += nextChar
-                  buffer
-              }
-        }
+class LineTraversable(source: => CloseableIterator[Char], terminator: Terminator, includeTerminator: Boolean) extends LongTraversable[String] {
 
-        if (buffer.nonEmpty) {
-          val line = terminator.split(buffer).toString(includeTerminator)
-          f (line)
+  protected[io] def iterator = new CloseableIterator[String] {
+    val sourceIterator = source
+    val buffer = Buffer[Char]()
+    def next() = {
+      var line:String = ""
+
+      while(line == null && sourceIterator.hasNext) {
+        val nextChar = sourceIterator.next()
+        terminator.split(buffer :+ nextChar) match {
+          case split @ LineSplit(_,_,nextLine) if nextLine.nonEmpty => {
+            line = split toString includeTerminator
+            buffer.clear
+            buffer ++= nextLine
+          }
+          case _ =>
+            buffer += nextChar
         }
+      }
+      if(line == "") {
+        line = terminator.split(buffer).toString(includeTerminator)
+        buffer.clear()
+      }
+      line
     }
+    def hasNext: Boolean = sourceIterator.hasNext || buffer.nonEmpty
+
+    def close() = sourceIterator.close()
+  }
+
 }

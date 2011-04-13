@@ -11,6 +11,7 @@ package scalax.io
 import scala.collection._
 import generic._
 import TraversableView.NoBuilder
+import java.util.NoSuchElementException
 
 /**
  * The view object associated with LongTraversable.  If you are nor familiar with the pattern essentially a view allows
@@ -47,33 +48,54 @@ trait LongTraversableViewLike[+A, +Coll, +This <: LongTraversableView[A,Coll] wi
       extends LongTraversable[A] with LongTraversableLike[A, This] with TraversableView[A,Coll] with TraversableViewLike[A,Coll,This]{
   self =>
 
-  trait Transformed[+B] extends LongTraversableView[B, Coll] with super.Transformed[B]
+  trait Transformed[+B] extends LongTraversableView[B, Coll] with super.Transformed[B] {
+    protected[io] def iterator:CloseableIterator[B]
+    override def foreach[U](f: (B) => U) = {
+      val iter = iterator
+      try {
+        iter.foreach(f)
+      } finally {
+        iter.close()
+      }
+    }
+    override def toString = viewToString
+  }
 
-  trait EmptyView extends Transformed[Nothing] with super.EmptyView
 
-  trait Forced[B] extends super.Forced[B] with Transformed[B]
+  trait EmptyView extends Transformed[Nothing] with super.EmptyView {
+    final def iterator: CloseableIterator[Nothing] = CloseableIterator(Iterator.empty)
+  }
+
+  trait Forced[B] extends super.Forced[B] with Transformed[B] {
+
+    def iterator = CloseableIterator(forced.iterator)
+  }
 
   trait LSliced extends Transformed[A] {
     protected[this] def from: Long
     protected[this] def until: Long
-    override def foreach[U](f: A => U) {
-      var index = 0
-      for (x <- self) {
-        if (from <= index) {
-          if (until <= index) return
-          f(x)
-        }
-        index += 1
-      }
-    }
+
+    protected[io] def iterator = self.iterator.lslice(from,until)
   }
 
-  trait Mapped[B] extends super.Mapped[B] with Transformed[B]
-  trait FlatMapped[B] extends super.FlatMapped[B] with Transformed[B]
-  trait Appended[B >: A] extends super.Appended[B] with Transformed[B]
-  trait Filtered extends super.Filtered with Transformed[A]
-  trait TakenWhile extends super.TakenWhile with Transformed[A]
-  trait DroppedWhile extends super.DroppedWhile with Transformed[A]
+  trait Mapped[B] extends super.Mapped[B] with Transformed[B] {
+    protected[io] def iterator = self.iterator.map(mapping)
+  }
+  trait FlatMapped[B] extends super.FlatMapped[B] with Transformed[B] {
+    protected[io] def iterator = self.iterator.flatMap(mapping)
+  }
+  trait Appended[B >: A] extends super.Appended[B] with Transformed[B] {
+    protected[io] def iterator = self.iterator ++ rest
+  }
+  trait Filtered extends super.Filtered with Transformed[A] {
+    protected[io] def iterator = self.iterator filter pred
+  }
+  trait TakenWhile extends super.TakenWhile with Transformed[A] {
+    protected[io] def iterator: CloseableIterator[A] = self.iterator takeWhile pred
+  }
+  trait DroppedWhile extends super.DroppedWhile with Transformed[A] {
+    protected[io] def iterator: CloseableIterator[A] = self.iterator dropWhile pred
+  }
 
   /** Boilerplate method, to override in each subclass
    *  This method could be eliminated if Scala had virtual classes

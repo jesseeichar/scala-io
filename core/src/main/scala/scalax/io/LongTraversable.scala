@@ -39,5 +39,8 @@ object LongTraversable extends TraversableFactory[LongTraversable] {
 }
 
 private class LongTraversableImpl[A](contained:Traversable[A]) extends LongTraversable[A] {
-  def foreach[U](f: A => U): Unit = contained foreach f
+  protected[io] def iterator: CloseableIterator[A] = contained match {
+    case c:LongTraversable[A] => c.iterator
+    case _ => CloseableIterator(contained.toIterator)
+  }
 }

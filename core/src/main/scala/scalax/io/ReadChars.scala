@@ -56,7 +56,7 @@ trait ReadChars {
    */
   def lines(terminator: Terminators.Terminator = new Terminators.Auto(),
             includeTerminator: Boolean = false): ResourceView[String] = {
-             new LineTraversable(chars, terminator, includeTerminator).view
+             new LineTraversable(chars.iterator, terminator, includeTerminator).view
         }
   /**
    * Loads all the characters into memory. There is no protection against
@@ -158,7 +158,8 @@ object ReadChars {
     implicit object TraversableCharConverter extends AsReadCharsConverter[Traversable[Char]]{
       def toReadChars(t: Traversable[Char]): ReadChars = new ReadChars {
         def chars: LongTraversable[Char] = new LongTraversable[Char] {
-          def foreach[U](f: (Char) => U) = t.foreach(f)
+
+          protected[io] def iterator: CloseableIterator[Char] = CloseableIterator(t.toIterator)
         }.view
       }
     }

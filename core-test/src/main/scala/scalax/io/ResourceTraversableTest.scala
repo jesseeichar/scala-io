@@ -116,6 +116,9 @@ class ResourceTraversableTest {
   @Test //@Ignore
   def should_handle_slice = assertSizeAndType(newResource(), _ slice(3,10))
 
+  //@Test //@Ignore
+  //def should_handle_zip = assertSizeAndType(newResource(), _ zip (101 to 200))
+
   @Test //@Ignore
   def should_handle_tail = assertSizeAndType(newResource(), _ tail)
 

@@ -33,25 +33,6 @@ case class Continue[+A](currentResult:A) extends FoldResult(currentResult)
  */
 case class End[+A](endResult:A) extends FoldResult(endResult)
 
-trait CloseableIterator[A] extends Iterator[A] with Closeable {
-  self =>
-  class Proxy[B](wrapped:Iterator[B]) extends CloseableIterator[B] {
-    def next() = wrapped.next
-    def hasNext: Boolean = wrapped.hasNext
-    def close() = self.close
-  }
-  override def map[B](f: (A) => B): CloseableIterator[B] = new Proxy[B](super.map(f))
-  override def dropWhile(p: (A) => Boolean) = new Proxy[A](super.dropWhile(p))
-  override def takeWhile(p: (A) => Boolean) = new Proxy[A](super.takeWhile(p))
-}
-
-object CloseableIterator {
-  def apply[A](iter:Iterator[A]) = new CloseableIterator[A]{
-    def next(): A = iter.next
-    def hasNext: Boolean = iter.hasNext
-    def close() {}
-  }
-}
 /**
  * A traversable for use on very large datasets which cannot be indexed with Ints but instead
  * require Longs for indexing.
@@ -95,17 +76,14 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
     }
   }
 
-  protected def iterator:CloseableIterator[A]
+  protected[io] def iterator:CloseableIterator[A]
 
-  /**
-   * The long equivalent of count in Traversable.
-   */
-  def foreach[U](f: (A) => U) {
+  def foreach[U](f: (A) => U) = {
     val iter = iterator
     try {
       iter.foreach(f)
-    }finally{
-      iter.close
+    } finally {
+      iter.close()
     }
   }
 
@@ -165,7 +143,7 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
   override def view = new LongTraversableView[A,Repr] {
     protected lazy val underlying = self.repr
 
-    protected def iterator: Iterator[A] with Closeable = self.iterator
+    protected[io] def iterator = self.iterator
   }
   override def view(from: Int, until: Int) = view.slice(from, until)
   /**
@@ -200,11 +178,15 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
   def corresponds[B](that: Seq[B])(p: (A,B) => Boolean): Boolean = {
     val i = this.iterator
     val j = that.iterator
+    try {
     while (i.hasNext && j.hasNext)
-      if (!p(i.next, j.next))
+      if (!p(i.next(), j.next))
         return false
 
     !i.hasNext && !j.hasNext
+    } finally {
+      i.close()
+    }
   }
 
   /** Finds index of first element satisfying some predicate.
@@ -229,9 +211,13 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
   def indexWhere(p: A => Boolean, from: Long): Long = {
     var i = from
     var it = ldrop(from).iterator
-    while (it.hasNext) {
-      if (p(it.next())) return i
-      else i += 1
+    try {
+      while (it.hasNext) {
+        if (p(it.next())) return i
+        else i += 1
+      }
+    }finally {
+      it.close()
     }
 
     -1

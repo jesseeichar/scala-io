@@ -57,16 +57,17 @@ private[io] trait ResourceTraversableViewLike[A, +Coll, +This <: ResourceTravers
                        else safeSum(self.start,(until max 0))
     def conv = self.conv
 
-    override protected def iterator = getIterator
+    override def iterator = getIterator
   }
-  trait Mapped[B] extends super.Mapped[B] with Transformed[B] {
+  trait Mapped[B] extends Transformed[B] {
+    val mapping: A => B
     def conv = self.conv andThen mapping
   }
   trait TakenWhile extends super.TakenWhile with Identity {
-    override protected def iterator:CloseableIterator[A] = getIterator.takeWhile(pred)
+    override protected[io] def iterator:CloseableIterator[A] = getIterator.takeWhile(pred)
   }
   trait DroppedWhile extends super.DroppedWhile with Identity {
-    override protected def iterator:CloseableIterator[A] = getIterator.dropWhile(pred)
+    override protected[io] def iterator:CloseableIterator[A] = getIterator.dropWhile(pred)
   }
 
 

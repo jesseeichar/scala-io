@@ -153,11 +153,12 @@ trait Resource[+R <: Closeable] extends ManagedResourceOperations[R] with Resour
    * }
    * }}}
    *
-   * @return the actual resource that has been openned
+   * @return the actual resource that has been opened
    */
     def open(): R
 
-    def acquireFor[B](f : R => B) : Either[List[Throwable], B] = (new CloseableResourceAcquirer(open,f,Noop))()
+    def acquireFor[B](f : R => B) : Either[List[Throwable], B] =
+      (new CloseableResourceAcquirer(open,f,Noop))()
 
 }
 
