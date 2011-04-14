@@ -11,8 +11,7 @@ class ReaderResource[+A <: Reader] (
   extends ReadCharsResource[A]
   with ResourceOps[A, ReaderResource[A]] {
 
-  def open() = opener
-  override def acquireFor[B](f: (A) => B) = new CloseableResourceAcquirer(open,f,closeAction)()
+  def open() = new CloseableOpenedResource(opener,closeAction)
 
   def prependCloseAction[B >: A](newAction: CloseAction[B]) = new ReaderResource(opener,newAction :+ closeAction)
   def appendCloseAction[B >: A](newAction: CloseAction[B]) = new ReaderResource(opener,closeAction +: newAction)

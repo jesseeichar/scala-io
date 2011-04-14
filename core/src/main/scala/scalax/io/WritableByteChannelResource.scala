@@ -13,8 +13,7 @@ class WritableByteChannelResource[+A <: WritableByteChannel] (
   extends OutputResource[A]
   with ResourceOps[A, WritableByteChannelResource[A]]  {
 
-  def open() = opener
-  override def acquireFor[B](f: (A) => B) = new CloseableResourceAcquirer(open,f,closeAction)()
+  def open() = new CloseableOpenedResource(opener,closeAction)
 
   def prependCloseAction[B >: A](newAction: CloseAction[B]) = new WritableByteChannelResource(opener,newAction :+ closeAction)
   def appendCloseAction[B >: A](newAction: CloseAction[B]) = new WritableByteChannelResource(opener,closeAction +: newAction)

@@ -46,8 +46,8 @@ private[io] trait ResourceTraversable[A] extends LongTraversable[A]
 
   protected def getIterator = new CloseableIterator[A] {
 
-    private val ioResource: Resource[ResourceTraversable.this.type#In] = source.resource
-    private val resource = ioResource.open()
+    private val openedResource = source.resource.open()
+    private val resource = openedResource.get
     source.skip(resource,start)
 
     var nextEl:Option[SourceOut] = _
@@ -69,7 +69,7 @@ private[io] trait ResourceTraversable[A] extends LongTraversable[A]
       nextEl.isDefined
     }
 
-    def close() = resource.close
+    def close() = openedResource.close()
   }
 
   /*

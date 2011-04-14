@@ -13,50 +13,17 @@ import java.nio.channels.{
   ByteChannel, ReadableByteChannel, WritableByteChannel,
   Channels
 }
-import CloseAction.Noop
 import java.io._
 import nio.SeekableFileChannel
 import java.net.{URLConnection, HttpURLConnection, URL}
+import scalax.io.CloseAction._
 
-/**
- * Essentially the resource aquire and close functionality.  This is extracted out into a class
- * so that subclasses can reuse the functionality.
- *
- * This was necessary so that subclasses could add [[scalax.io.CloseActions]] but still
- * prevent the signature of the [[scalax.io.CloseActions]] from polluting the type
- * signature of the Resource type.
- */
-protected[io] abstract class ResourceAcquirer[R,U >: R,B](open:()=>R,f:R=>B,closeAction:CloseAction[U]) {
-  def close(r:R):Unit
-  def apply():Either[List[Throwable],B] = {
-    val resource = open()
-
-    var exceptions = List[Throwable]()
-    val result = try {
-        Some(f(resource))
-    } catch {
-        case e =>
-            exceptions ::= e
-            None
-    } finally {
-        exceptions ++= (closeAction :+ CloseAction(close _))(resource)
-    }
-
-    result match {
-        case Some(r) => Right(r)
-        case None => Left(exceptions)
-    }
-
-  }
+trait OpenedResource[+R] {
+  def get:R
+  def close():List[Throwable]
 }
-
-/**
- * Implementation that only works with Closables.  Maybe over engineering but maybe we will have other types of
- * Resources that aren't Closeable dependant
- */
-protected[io] class CloseableResourceAcquirer[R <: Closeable,U >: R,B](open:()=>R,f:R=>B,closeAction:CloseAction[U])
-    extends ResourceAcquirer[R,U,B](open,f,closeAction) {
-  def close(r:R):Unit = r.close()
+class CloseableOpenedResource[+R <: Closeable](val get:R,closeAction:CloseAction[R]) extends OpenedResource[R]{
+  def close():List[Throwable] = (closeAction :+ CloseAction ((_:R).close()))(get)
 }
 
 /**
@@ -155,10 +122,26 @@ trait Resource[+R <: Closeable] extends ManagedResourceOperations[R] with Resour
    *
    * @return the actual resource that has been opened
    */
-    def open(): R
+    def open(): OpenedResource[R]
+    def acquireFor[B](f : R => B) : Either[List[Throwable], B] ={
+      val resource = open()
 
-    def acquireFor[B](f : R => B) : Either[List[Throwable], B] =
-      (new CloseableResourceAcquirer(open,f,Noop))()
+      var exceptions = List[Throwable]()
+      val result = try {
+          Some(f(resource.get))
+      } catch {
+          case e =>
+              exceptions ::= e
+              None
+      } finally {
+          exceptions ++= resource.close()
+      }
+
+      result match {
+          case Some(r) => Right(r)
+          case None => Left(exceptions)
+      }
+    }
 
 }
 

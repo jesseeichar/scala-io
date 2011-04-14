@@ -13,19 +13,17 @@ class OutputStreamResource[+A <: OutputStream] (
   extends OutputResource[A]
   with ResourceOps[A, OutputStreamResource[A]] {
 
-  def open() = opener
+  def open() = new CloseableOpenedResource(opener,closeAction)
   def prependCloseAction[B >: A](newAction: CloseAction[B]) = new OutputStreamResource(opener,newAction :+ closeAction)
   def appendCloseAction[B >: A](newAction: CloseAction[B]) = new OutputStreamResource(opener,closeAction +: newAction)
-
-  override def acquireFor[B](f: (A) => B) = new CloseableResourceAcquirer(open,f,closeAction)()
 
   def outputStream = this
   def underlyingOutput = this
   def writer(implicit sourceCodec: Codec): WriterResource[Writer] = {
     def nResource = {
       val a = open()
-      new OutputStreamWriter(a) with ResourceAdapting.Adapter[A] {
-        def src = a
+      new OutputStreamWriter(a.get) with ResourceAdapting.Adapter[A] {
+        def src = a.get
       }
     }
     val closer = ResourceAdapting.closeAction(closeAction)

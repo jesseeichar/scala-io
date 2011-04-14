@@ -13,8 +13,7 @@ class SeekableByteChannelResource[+A <: SeekableByteChannel] (
   extends SeekableResource[A]
   with ResourceOps[A, SeekableByteChannelResource[A]]  {
 
-  def open() = opener
-  override def acquireFor[B](f: (A) => B) = new CloseableResourceAcquirer(open,f,closeAction)()
+  def open() = new CloseableOpenedResource(opener,closeAction)
 
   def prependCloseAction[B >: A](newAction: CloseAction[B]) = new SeekableByteChannelResource(opener,newAction :+ closeAction,sizeFunc)
   def appendCloseAction[B >: A](newAction: CloseAction[B]) = new SeekableByteChannelResource(opener,closeAction +: newAction,sizeFunc)

@@ -26,7 +26,15 @@ object JavaInterop {
 
     // other APIs use inversion of to obtain the file object.
     // here is how to get a raw java OutputStream from a file
-    val out: OutputStream = file.outputStream.open
+    val out: OutputStream = file.outputStream.open().get
+
+    // however the above pattern must be used with care since any close actions will not be executed.
+    // If acquireFor cannot be used (for example if you are implementing an interator) you can do the following
+    val openedResource = file.outputStream.open()
+    // do something with resource
+    val out2: OutputStream = openedResource.get
+    // this will close out2 and execute any closeActions
+    val errorsDuringClose: scala.List[scala.Throwable] = openedResource.close()
   }
 
 }

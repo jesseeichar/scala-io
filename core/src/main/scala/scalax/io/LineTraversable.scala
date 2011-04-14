@@ -28,7 +28,7 @@ class LineTraversable(source: => CloseableIterator[Char], terminator: Terminator
     def next() = {
       var line:String = ""
 
-      while(line == null && sourceIterator.hasNext) {
+      while(line == "" && sourceIterator.hasNext) {
         val nextChar = sourceIterator.next()
         terminator.split(buffer :+ nextChar) match {
           case split @ LineSplit(_,_,nextLine) if nextLine.nonEmpty => {
