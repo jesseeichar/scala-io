@@ -63,6 +63,22 @@ class LongTraversableTest {
       assertEquals(i,input(i-1))
     }
   }
+
+  @Test
+  def ldrop{
+    val input = traversable(100)
+    assertEquals(90,input.ldrop(10).size)
+  }
+  @Test
+  def ltake{
+    val input = traversable(100)
+    assertEquals(10,input.ltake(10).size)
+  }
+  @Test
+  def lslice{
+    val input = traversable(100)
+    assertEquals(8,input.lslice(2,10).size)
+  }
   @Test
   def corresponds{
     val input = traversable(100)
