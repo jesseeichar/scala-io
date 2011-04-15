@@ -118,7 +118,7 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
   /**
    * The long equivalent of Traversable.slice
    */
-  def lslice(from: Long, until: Long): Repr = ldrop(from).ltake(0L max until-from)
+  def lslice(from: Long, until: Long): Repr = ldrop(from).ltake(0L max (until - (0L max from)))
   /**
    * The long equivalent of Traversable.splitAt
    */

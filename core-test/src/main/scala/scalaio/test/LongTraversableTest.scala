@@ -78,6 +78,9 @@ class LongTraversableTest {
   def lslice{
     val input = traversable(100)
     assertEquals(8,input.lslice(2,10).size)
+    assertEquals(0,input.lslice(11,10).size)
+    assertEquals(10,input.lslice(-1,10).lslice(-1,10).size)
+    assertEquals(98,input.lslice(2,Long.MaxValue).size)
   }
   @Test
   def corresponds{
