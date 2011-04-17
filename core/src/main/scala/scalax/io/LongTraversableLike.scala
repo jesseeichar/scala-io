@@ -128,14 +128,15 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
    */
   def ltake(n: Long) : Repr = {
     val b = newBuilder
-
-    breakable {
+    val iter = iterator
+    try {
       var c = 0L
-      foreach { i =>
-        if (c >= n) break;
+      while (c < n && iter.hasNext) {
+        b += iter.next()
         c += 1
-        b += i
       }
+    } finally {
+      iter.close()
     }
     b.result
   }
@@ -151,11 +152,16 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
    */
   def lview(from: Long, until: Long) : LongTraversableView[A,Repr] = this.view.lslice(from, until)
 
-  /*
-  def sameContents[B >: A](that:Traversable[B]):Boolean = {
 
+  def sameContents[B >: A](that:Iterable[B]):Boolean = {
+    val i = iterator
+    try i.sameElements(that.iterator) finally i.close()
   }
-  */
+  def sameContents[B >: A](that:LongTraversable[B]):Boolean = {
+    val i = iterator
+    try i.sameElements(that.iterator) finally i.close()
+  }
+
 
   /** Selects an element by its index in the $coll.
    *

@@ -11,12 +11,22 @@ package scalax.io
 
 class ReaderResourceTraversableViewTest extends ResourceTraversableViewTest {
 
-  protected override def expectedData : Traversable[Int] = super.expectedData mkString "" map {_.toInt}
+  protected override def expectedData(tsize:Int,
+                             dataFunc: (Int) => Seq[Int]) =
+    dataFunc(tsize) mkString "" map {_.toInt}
 
-    override def newResource[A](conv:Int=>A) = {
-      val data = super.expectedData mkString ""
-      def resource = Resource.fromReader(new java.io.StringReader(data))
-      ResourceTraversable.readerBased(resource, _conv = (c:Char) => conv(c.toInt)).view
+  override def traversable[U, A](tsize: Int,
+                                 callback: (Int) => U,
+                                 dataFunc: (Int) => Traversable[Int],
+                                 conv: (Int) => A) = {
+    val callBackAndConv = (c:Char) => {
+      val i = c.toInt
+      callback(i)
+      conv(i)
     }
+    val data = dataFunc(tsize) mkString ""
+    def resource = Resource.fromReader(new java.io.StringReader(data))
+    ResourceTraversable.readerBased(resource, _conv=callBackAndConv).view
+  }
 
 }

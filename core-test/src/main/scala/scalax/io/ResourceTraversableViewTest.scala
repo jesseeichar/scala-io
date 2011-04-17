@@ -14,29 +14,34 @@ import org.junit.{
 }
 class ResourceTraversableViewTest extends ResourceTraversableTest {
 
-    override def newResource[A](conv:Int=>A) : ResourceTraversable[A] = super.newResource(conv).view
+
+  override def traversable[U, A](tsize: Int,
+                                 callback: (Int) => U,
+                                 dataFunc: (Int) => Traversable[Int],
+                                 conv: (Int) => A):LongTraversable[A] =
+    super.traversable(tsize,callback,dataFunc,conv).view
 
     @Test //@Ignore
     def map_should_not_trigger_resolution = {
       var count = 0
-      newResource().map{i => count += 1;i.toString}
+      traversable().map{i => count += 1;i.toString}
       assertEquals(0, count)
     }
 
     @Test //@Ignore
     def flatMap_should_not_trigger_resolution = {
       var count = 0
-      newResource().flatMap{i => count += 1;i.toString}
+      traversable().flatMap{i => count += 1;i.toString}
       assertEquals(0, count)
     }
 
     @Test //@Ignore
-    def foreach_on_drop_should_skip_dropped_elements = assertLazy(newResource(), _.drop(5))
+    def foreach_on_drop_should_skip_dropped_elements = assertLazy(traversable(), _.drop(5))
 
     private def assertLazy[A](traversable : Traversable[Int], f : Traversable[Int] => Traversable[A], isLongTraversable:Boolean = true) = {
       var expectedCount = 0
       var count = 0
-      val list = (f(expectedData.toList.view) map {i => expectedCount += 1; i})
+      val list = (f(expectedData().toList.view) map {i => expectedCount += 1; i})
       val applied = (f(traversable) map {i => count += 1; i})
       if(isLongTraversable)
         assert(applied.isInstanceOf[LongTraversableView[_,_]], "new traversable is not a LongTraversable: "+applied)
