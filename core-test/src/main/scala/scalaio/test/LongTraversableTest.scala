@@ -311,7 +311,8 @@ class LongTraversableTest {
     val expected = expectedData()
     assertEquals(expected.slice(2,10).size,input.lslice(2,10).size)
     assertEquals(expected.slice(11,10).size,input.lslice(11,10).size)
-    assertEquals(expected.slice(-1,10).slice(-1,10).size,input.lslice(-1,10).lslice(-1,10).size)
+    assertEquals(expected.take(10).size,input.lslice(-1,10).size)
+    assertEquals(expected.take(10).size,input.lslice(-1,10).lslice(-1,10).size)
     assertEquals(expected.slice(2,Int.MaxValue).size,input.lslice(2,Long.MaxValue).size)
   }
   @Test
@@ -322,6 +323,12 @@ class LongTraversableTest {
     assertFalse(input.corresponds(expectedData(dataFunc = _ => 0 to 100))( _ == _))
     assertFalse(input.corresponds(expectedData(dataFunc = _ => 0 to 99))( _ == _))
     assertTrue(input.corresponds(expectedData(dataFunc = _ => 1 to 100) map {_=> 300})( _ < _))
+
+    assertTrue(input.corresponds(toLongResource(expectedData()))( _ == _))
+    assertFalse(input.corresponds(toLongResource(expectedData(dataFunc = _ => 1 to 101)))( _ == _))
+    assertFalse(input.corresponds(toLongResource(expectedData(dataFunc = _ => 0 to 100)))( _ == _))
+    assertFalse(input.corresponds(toLongResource(expectedData(dataFunc = _ => 0 to 99)))( _ == _))
+    assertTrue(input.corresponds(toLongResource(expectedData(dataFunc = _ => 1 to 100) map {_=> 300}))( _ < _))
   }
   @Test
   def indexWhere{
@@ -393,6 +400,7 @@ class LongTraversableTest {
   def indexOfSlice{
     val input = traversable()
     val expected = expectedData(101)
+
     assertEquals(0,input.indexOfSlice(expected.take(55)))
     assertEquals(2,input.indexOfSlice(expected.slice(2,55),2))
     assertEquals(39,input.indexOfSlice(expected.slice(39,55),30))
@@ -404,6 +412,7 @@ class LongTraversableTest {
   def containsSlice{
     val input = traversable()
     val expected = expectedData(101)
+
     assertTrue(input.containsSlice(Nil))
     assertTrue(input.containsSlice(expected take 55))
     assertTrue(input.containsSlice(expected slice (2,55),2))
@@ -415,6 +424,7 @@ class LongTraversableTest {
   def sameContents {
     val input = traversable()
     val expected = expectedData(101)
+
     assertFalse(input.sameContents(Nil))
     assertFalse(input.sameContents(expected))
     assertFalse(input.sameContents(expected take 1))
@@ -423,5 +433,16 @@ class LongTraversableTest {
     assertTrue(input.take(3).sameContents(expected take 3))
     assertTrue(input.take(100).sameContents(expected take 100))
 
+    assertFalse(input.sameContents(toLongResource (Nil)))
+    assertFalse(input.sameContents(toLongResource (expected)))
+    assertFalse(input.sameContents(toLongResource (expected take 1)))
+    assertTrue(traversable(3).sameContents(toLongResource (expectedData(3))))
+    assertTrue(traversable(20).sameContents(toLongResource (expectedData(20))))
+    assertTrue(input.take(3).sameContents(toLongResource (expected take 3)))
+    assertTrue(input.take(100).sameContents(toLongResource (expected take 100)))
+  }
+
+  def toLongResource[A](seq:Seq[A]):LongTraversable[A] = new LongTraversable[A]{
+    def iterator: CloseableIterator[A] = CloseableIterator(seq.iterator)
   }
 }

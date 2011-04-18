@@ -182,27 +182,38 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
    *                  and `y` of `that`, otherwise `false`.
    */
   def corresponds[B](that: Seq[B])(p: (A,B) => Boolean): Boolean = {
-    val i = this.iterator
-    val j = that.iterator
-    try {
-    while (i.hasNext && j.hasNext)
-      if (!p(i.next(), j.next))
-        return false
+    doCorresponds(that.iterator,p)
+  }
 
-    !i.hasNext && !j.hasNext
+  /** Tests whether every element of this $coll relates to the
+   *  corresponding element of another sequence by satisfying a test predicate.
+   *
+   *  @param   that  the other sequence
+   *  @param   p     the test predicate, which relates elements from both sequences
+   *  @tparam  B     the type of the elements of `that`
+   *  @return  `true` if both sequences have the same length and
+   *                  `p(x, y)` is `true` for all corresponding elements `x` of this $coll
+   *                  and `y` of `that`, otherwise `false`.
+   */
+  def corresponds[B](that: LongTraversable[B])(p: (A,B) => Boolean): Boolean = {
+    val iter = that.iterator
+    try doCorresponds(iter,p)
+    finally iter.close()
+  }
+  private def doCorresponds[B](j: Iterator[B],p: (A,B) => Boolean): Boolean = {
+    val i = this.iterator
+    try {
+      while (i.hasNext && j.hasNext)
+        if (!p(i.next(), j.next))
+          return false
+
+      !i.hasNext && !j.hasNext
     } finally {
       i.close()
     }
+
   }
 
-  /** Finds index of first element satisfying some predicate.
-   *
-   *  $mayNotTerminateInf
-   *
-   *  @param   p     the predicate used to test elements.
-   *  @return  the index of the first element of this $coll that satisfies the predicate `p`,
-   *           or `-1`, if none exists.
-   */
   def indexWhere(p: A => Boolean): Long = indexWhere(p, 0)
 
   /** Finds index of the first element satisfying some predicate after or at some start index.
