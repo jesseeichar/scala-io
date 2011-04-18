@@ -442,7 +442,7 @@ class LongTraversableTest {
     assertTrue(input.take(100).sameContents(toLongResource (expected take 100)))
   }
 
-  def toLongResource[A](seq:Seq[A]):LongTraversable[A] = new LongTraversable[A]{
-    def iterator: CloseableIterator[A] = CloseableIterator(seq.iterator)
+  def toLongResource[A](wrappedSeq:Seq[A]):LongTraversable[A] = new LongTraversable[A]{
+    def iterator: CloseableIterator[A] = CloseableIterator(wrappedSeq.iterator)
   }
 }
