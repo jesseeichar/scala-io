@@ -9,10 +9,9 @@
 package scalax.io
 
 import scala.collection._
-import mutable.Builder
+import generic.CanBuildFrom
 import util.control.Breaks._
-import java.io.Closeable
-
+import CloseableIterator.managed
 /**
  * The control signals for the limitFold method in [[scalax.io.LongTraversable]].
  *
@@ -46,6 +45,7 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
   override protected[this] def toCollection(repr: Repr): LongTraversable[A] = repr.asInstanceOf[LongTraversable[A]]
   override def toArray[B >: A : ClassManifest] = toBuffer.toArray
 
+  private implicit val resource = CloseableIterator.ManagedResource
   /**
    * A foldLeft operation that can be terminated without processing the entire collection.
    *
@@ -78,13 +78,8 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
 
   protected[io] def iterator:CloseableIterator[A]
 
-  def foreach[U](f: (A) => U) = {
-    val iter = iterator
-    try {
-      iter.foreach(f)
-    } finally {
-      iter.close()
-    }
+  def foreach[U](f: (A) => U) {
+    managed(iterator).acquireAndGet(_.foreach(f))
   }
 
   override def slice(from: Int, until: Int) = lslice(from,until)
@@ -108,6 +103,178 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
     b.result
   }
 
+  /** Returns a $coll formed from this $coll and another iterable collection
+   *  by combining corresponding elements in pairs.
+   *  If one of the two collections is longer than the other, its remaining elements are ignored.
+   *
+   *
+   *  @param   that  The iterable providing the second half of each result pair
+   *  @tparam  A1    the type of the first half of the returned pairs (this is always a supertype
+   *                 of the collection's element type `A`).
+   *  @tparam  B     the type of the second half of the returned pairs
+   *  @tparam  That  $zipthatinfo
+   *  @param   bf    $zipbfinfo
+   *  @return        a new collection of type `That` containing pairs consisting of
+   *                 corresponding elements of this $coll and `that`. The length
+   *                 of the returned collection is the minimum of the lengths of this $coll and `that`.
+   *
+   *  @usecase def zip[B](that: Iterable[B]): $Coll[(A, B)]
+   *
+   *  @param   that  The iterable providing the second half of each result pair
+   *  @tparam  B     the type of the second half of the returned pairs
+   *  @return        a new $coll containing pairs consisting of
+   *                 corresponding elements of this $coll and `that`. The length
+   *                 of the returned collection is the minimum of the lengths of this $coll and `that`.
+   */
+  def zip[A1 >: A, B, That](that: Iterable[B])(implicit bf: CanBuildFrom[Repr, (A1, B), That]): That =
+    doZip(that.iterator)
+
+  /** Returns a $coll formed from this $coll and another iterable collection
+   *  by combining corresponding elements in pairs.
+   *  If one of the two collections is longer than the other, its remaining elements are ignored.
+   *
+   *  @param   that  The iterable providing the second half of each result pair
+   *  @tparam  A1    the type of the first half of the returned pairs (this is always a supertype
+   *                 of the collection's element type `A`).
+   *  @tparam  B     the type of the second half of the returned pairs
+   *  @tparam  That  $zipthatinfo
+   *  @param   bf    $zipbfinfo
+   *  @return        a new collection of type `That` containing pairs consisting of
+   *                 corresponding elements of this $coll and `that`. The length
+   *                 of the returned collection is the minimum of the lengths of this $coll and `that`.
+   *
+   *  @usecase def zip[B](that: Iterable[B]): $Coll[(A, B)]
+   *
+   *  @param   that  The iterable providing the second half of each result pair
+   *  @tparam  B     the type of the second half of the returned pairs
+   *  @return        a new $coll containing pairs consisting of
+   *                 corresponding elements of this $coll and `that`. The length
+   *                 of the returned collection is the minimum of the lengths of this $coll and `that`.
+   */
+  def zip[A1 >: A, B, That](that: LongTraversable[B])(implicit bf: CanBuildFrom[Repr, (A1, B), That]): That =
+    managed(that.iterator).acquireAndGet(i => doZip(i))
+
+  private def doZip[A1 >: A, B, That](those: Iterator[B])(implicit bf: CanBuildFrom[Repr, (A1, B), That]): That = {
+    val b = bf(repr)
+    val these = this.iterator
+    managed(this.iterator).acquireAndGet{these =>
+      while (these.hasNext && those.hasNext)
+        b += ((these.next, those.next))
+      b.result
+    }
+  }
+
+
+  /** Returns a $coll formed from this $coll and another iterable collection
+   *  by combining corresponding elements in pairs.
+   *  If one of the two collections is shorter than the other,
+   *  placeholder elements are used to extend the shorter collection to the length of the longer.
+   *
+   *  $orderDependent
+   *
+   *  @param that     the iterable providing the second half of each result pair
+   *  @param thisElem the element to be used to fill up the result if this $coll is shorter than `that`.
+   *  @param thatElem the element to be used to fill up the result if `that` is shorter than this $coll.
+   *  @return        a new collection of type `That` containing pairs consisting of
+   *                 corresponding elements of this $coll and `that`. The length
+   *                 of the returned collection is the maximum of the lengths of this $coll and `that`.
+   *                 If this $coll is shorter than `that`, `thisElem` values are used to pad the result.
+   *                 If `that` is shorter than this $coll, `thatElem` values are used to pad the result.
+   *
+   *  @usecase def zipAll[B](that: Iterable[B], thisElem: A, thatElem: B): $Coll[(A, B)]
+   *
+   *  @param   that  The iterable providing the second half of each result pair
+   *  @param thisElem the element to be used to fill up the result if this $coll is shorter than `that`.
+   *  @param thatElem the element to be used to fill up the result if `that` is shorter than this $coll.
+   *  @tparam  B     the type of the second half of the returned pairs
+   *  @return        a new $coll containing pairs consisting of
+   *                 corresponding elements of this $coll and `that`. The length
+   *                 of the returned collection is the maximum of the lengths of this $coll and `that`.
+   *                 If this $coll is shorter than `that`, `thisElem` values are used to pad the result.
+   *                 If `that` is shorter than this $coll, `thatElem` values are used to pad the result.
+   */
+  def zipAll[B, A1 >: A, That](that: Iterable[B], thisElem: A1, thatElem: B)(implicit bf: CanBuildFrom[Repr, (A1, B), That]): That =
+    doZipAll(that.iterator,thisElem,thatElem)
+
+  /** Returns a $coll formed from this $coll and another iterable collection
+   *  by combining corresponding elements in pairs.
+   *  If one of the two collections is shorter than the other,
+   *  placeholder elements are used to extend the shorter collection to the length of the longer.
+   *
+   *  $orderDependent
+   *
+   *  @param that     the iterable providing the second half of each result pair
+   *  @param thisElem the element to be used to fill up the result if this $coll is shorter than `that`.
+   *  @param thatElem the element to be used to fill up the result if `that` is shorter than this $coll.
+   *  @return        a new collection of type `That` containing pairs consisting of
+   *                 corresponding elements of this $coll and `that`. The length
+   *                 of the returned collection is the maximum of the lengths of this $coll and `that`.
+   *                 If this $coll is shorter than `that`, `thisElem` values are used to pad the result.
+   *                 If `that` is shorter than this $coll, `thatElem` values are used to pad the result.
+   *
+   *  @usecase def zipAll[B](that: Iterable[B], thisElem: A, thatElem: B): $Coll[(A, B)]
+   *
+   *  @param   that  The iterable providing the second half of each result pair
+   *  @param thisElem the element to be used to fill up the result if this $coll is shorter than `that`.
+   *  @param thatElem the element to be used to fill up the result if `that` is shorter than this $coll.
+   *  @tparam  B     the type of the second half of the returned pairs
+   *  @return        a new $coll containing pairs consisting of
+   *                 corresponding elements of this $coll and `that`. The length
+   *                 of the returned collection is the maximum of the lengths of this $coll and `that`.
+   *                 If this $coll is shorter than `that`, `thisElem` values are used to pad the result.
+   *                 If `that` is shorter than this $coll, `thatElem` values are used to pad the result.
+   */
+  def zipAll[B, A1 >: A, That](that: LongTraversable[B], thisElem: A1, thatElem: B)(implicit bf: CanBuildFrom[Repr, (A1, B), That]): That =
+    managed(that.iterator).acquireAndGet(those => doZipAll(those,thisElem,thatElem))
+
+  def doZipAll[B, A1 >: A, That](those: Iterator[B], thisElem: A1, thatElem: B)(implicit bf: CanBuildFrom[Repr, (A1, B), That]): That = {
+    val b = bf(repr)
+    managed(this.iterator).acquireAndGet{ these =>
+      while (these.hasNext && those.hasNext)
+        b += ((these.next, those.next))
+      while (these.hasNext)
+        b += ((these.next, thatElem))
+      while (those.hasNext)
+        b += ((thisElem, those.next))
+      b.result
+    }
+  }
+
+  /** Zips this $coll with its indices.
+   *
+   *  $orderDependent
+   *
+   *  @tparam  A1    the type of the first half of the returned pairs (this is always a supertype
+   *                 of the collection's element type `A`).
+   *  @tparam  That  the class of the returned collection. Where possible, `That` is
+   *    the same class as the current collection class `Repr`, but this
+   *    depends on the element type `(A1, Int)` being admissible for that class,
+   *    which means that an implicit instance of type `CanBuildFrom[Repr, (A1, Int), That]`.
+   *    is found.
+   *  @tparam  bf    an implicit value of class `CanBuildFrom` which determines the
+   *    result class `That` from the current representation type `Repr`
+   *    and the new element type `(A1, Int)`.
+   *  @return        A new collection of type `That` containing pairs consisting of all elements of this
+   *                 $coll paired with their index. Indices start at `0`.
+   *
+   *  @usecase def zipWithIndex: $Coll[(A, Int)]
+   *
+   *  @return        A new $coll containing pairs consisting of all elements of this
+   *                 $coll paired with their index. Indices start at `0`.
+   *  @example
+   *    `List("a", "b", "c").zipWithIndex = List(("a", 0), ("b", 1), ("c", 2))`
+   *
+   */
+  def zipWithIndex[A1 >: A, That](implicit bf: CanBuildFrom[Repr, (A1, Int), That]): That = {
+    val b = bf(repr)
+    var i = 0
+    for (x <- this) {
+      b += ((x, i))
+      i +=1
+    }
+    b.result
+  }
+
   override def hasDefiniteSize = false
   /**
    * The long equivalent of Traversable.size
@@ -128,15 +295,12 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
    */
   def ltake(n: Long) : Repr = {
     val b = newBuilder
-    val iter = iterator
-    try {
+    managed(iterator).acquireAndGet{iter =>
       var c = 0L
       while (c < n && iter.hasNext) {
         b += iter.next()
         c += 1
       }
-    } finally {
-      iter.close()
     }
     b.result
   }
@@ -153,13 +317,15 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
   def lview(from: Long, until: Long) : LongTraversableView[A,Repr] = this.view.lslice(from, until)
 
 
-  def sameContents[B >: A](that:Iterable[B]):Boolean = {
-    val i = iterator
-    try i.sameElements(that.iterator) finally i.close()
-  }
+  def sameContents[B >: A](that:Iterable[B]):Boolean =
+    managed(iterator).acquireAndGet(_.sameElements(that.iterator))
+
   def sameContents[B >: A](that:LongTraversable[B]):Boolean = {
-    val i = iterator
-    try i.sameElements(that.iterator) finally i.close()
+    managed(iterator).acquireAndGet {these =>
+      managed(that.iterator).acquireAndGet{ those =>
+        these.sameElements(those)
+      }
+    }
   }
 
 

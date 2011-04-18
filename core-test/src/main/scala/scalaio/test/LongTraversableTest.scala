@@ -442,6 +442,40 @@ class LongTraversableTest {
     assertTrue(input.take(100).sameContents(toLongResource (expected take 100)))
   }
 
+  @Test
+  def zip {
+    val input = traversable()
+    val expected = expectedData()
+
+    assertEquals(expected.zip(1 to expected.size).toList,
+      input.zip(1 to expected.size).toList)
+  }
+  @Test
+  def zip_is_lazy {
+    var count = 0
+    val input = traversable(callback = _ => count += 1).view
+
+    input.zip(1 to 100)
+    assertEquals(0,count)
+  }
+
+  @Test
+  def zipAll {
+    val input = traversable()
+    val expected = expectedData()
+
+    assertEquals(expected.zipAll(1 to (expected.size * 2), 1,2).toList,
+      input.zipAll(1 to (expected.size * 2), 1,2).toList)
+  }
+
+  @Test
+  def zipWithIndex {
+    val input = traversable()
+    val expected = expectedData()
+
+    assertEquals(expected.zipWithIndex.toList, input.zipWithIndex.toList)
+  }
+
   def toLongResource[A](wrappedSeq:Seq[A]):LongTraversable[A] = new LongTraversable[A]{
     def iterator: CloseableIterator[A] = CloseableIterator(wrappedSeq.iterator)
   }
