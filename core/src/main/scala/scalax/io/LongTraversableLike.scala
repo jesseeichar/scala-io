@@ -227,7 +227,7 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
   def zipAll[B, A1 >: A, That](that: LongTraversable[B], thisElem: A1, thatElem: B)(implicit bf: CanBuildFrom[Repr, (A1, B), That]): That =
     managed(that.iterator).acquireAndGet(those => doZipAll(those,thisElem,thatElem))
 
-  def doZipAll[B, A1 >: A, That](those: Iterator[B], thisElem: A1, thatElem: B)(implicit bf: CanBuildFrom[Repr, (A1, B), That]): That = {
+  private def doZipAll[B, A1 >: A, That](those: Iterator[B], thisElem: A1, thatElem: B)(implicit bf: CanBuildFrom[Repr, (A1, B), That]): That = {
     val b = bf(repr)
     managed(this.iterator).acquireAndGet{ these =>
       while (these.hasNext && those.hasNext)
@@ -317,10 +317,10 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
   def lview(from: Long, until: Long) : LongTraversableView[A,Repr] = this.view.lslice(from, until)
 
 
-  def sameContents[B >: A](that:Iterable[B]):Boolean =
+  def sameElements[B >: A](that:Iterable[B]):Boolean =
     managed(iterator).acquireAndGet(_.sameElements(that.iterator))
 
-  def sameContents[B >: A](that:LongTraversable[B]):Boolean = {
+  def sameElements[B >: A](that:LongTraversable[B]):Boolean = {
     managed(iterator).acquireAndGet {these =>
       managed(that.iterator).acquireAndGet{ those =>
         these.sameElements(those)
@@ -512,6 +512,14 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
    */
   def prefixLength(p: A => Boolean) = segmentLength(p, 0)
 
+  private def doStartsWith[B](those:Iterator[B],offset:Long) = {
+    breakable{
+      ldrop(offset) foreach {next =>
+        if(!those.hasNext || those.next != next) break
+      }
+    }
+    !those.hasNext
+  }
 
   /** Tests whether this $coll contains the given sequence at a given index.
    *
@@ -524,15 +532,28 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
    * @return `true` if the sequence `that` is contained in this $coll at index `offset`,
    *         otherwise `false`.
    */
-  def startsWith[B](that: Seq[B], offset: Long): Boolean = {
-    val j = that.iterator
-    breakable{
-      ldrop(offset) foreach {next =>
-        if(!j.hasNext || j.next != next) break
-      }
-    }
-    !j.hasNext
-  }
+  def startsWith[B](that: LongTraversable[B], offset: Long): Boolean =
+    managed(that.iterator).acquireAndGet(i => doStartsWith(i,offset))
+
+  /** Tests whether this $coll starts with the given sequence.
+   *
+   * @param  that    the sequence to test
+   * @return `true` if this collection has `that` as a prefix, `false` otherwise.
+   */
+  def startsWith[B](that: LongTraversable[B]): Boolean = startsWith(that, 0)
+
+  /** Tests whether this $coll contains the given sequence at a given index.
+   *
+   * If the both the receiver object, <code>this</code> and
+   * the argument, <code>that</code> are infinite sequences
+   * this method may not terminate.
+   *
+   * @param  that    the sequence to test
+   * @param  offset  the index where the sequence is searched.
+   * @return `true` if the sequence `that` is contained in this $coll at index `offset`,
+   *         otherwise `false`.
+   */
+  def startsWith[B](that: Seq[B], offset: Long): Boolean = doStartsWith(that.iterator,offset)
 
   /** Tests whether this $coll starts with the given sequence.
    *

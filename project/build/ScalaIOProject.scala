@@ -216,6 +216,9 @@ trait IoProject extends AutoCompilerPlugins with MavenPublishing {
   lazy val samples = compileSamples dependsOn compile
 
   lazy val compileAll = compileSamples dependsOn (compile,testCompile)
+
+  override protected def testCompileAction = super.testCompileAction.dependsOn(compile,samples)
+
 }
 
 trait PackageToPublishActions {
