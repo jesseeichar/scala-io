@@ -74,6 +74,8 @@ trait CloseableIterator[+A] extends Iterator[A] with Closeable {
         count < until && iter.hasNext
       }
   })
+
+  def modifiedSliding(size: Int, step: Int): CloseableIterator[Seq[A]] = Proxy(super.sliding(size,step))
 }
 
 object CloseableIterator {

@@ -45,7 +45,6 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
   override protected[this] def toCollection(repr: Repr): LongTraversable[A] = repr.asInstanceOf[LongTraversable[A]]
   override def toArray[B >: A : ClassManifest] = toBuffer.toArray
 
-  private implicit val resource = CloseableIterator.ManagedResource
   /**
    * A foldLeft operation that can be terminated without processing the entire collection.
    *
@@ -612,6 +611,24 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
    *           as `that`, otherwise `false`.
    */
   def containsSlice[B](that: Seq[B],start:Long): Boolean = indexOfSlice(that,start) != -1
+
+  /** Groups elements in fixed size blocks by passing a "sliding window"
+   *  over them (as opposed to partitioning them, as is done in grouped.)
+   *
+   *  This is based on Iterator#sliding but does not return an iterator
+   *  to ensure that a resource is not left open.
+   *
+   *  @param size the number of elements per group
+   *  @param step the distance between the first elements of successive
+   *         groups (defaults to 1)
+   *  @return An iterator producing ${coll}s of size `size`, except the
+   *          last and the only element will be truncated if there are
+   *          fewer elements than size.
+   */
+  def sliding[B >: A](size: Int, step: Int=1): LongTraversable[Seq[A]] =
+    LongTraversable[Seq[A]](
+      self.iterator.modifiedSliding(size, step),
+      "Sliding("+size+","+step+" LongTraversable(...)")
 
 
   /*

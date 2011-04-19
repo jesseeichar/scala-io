@@ -462,22 +462,6 @@ class LongTraversableTest {
     input.zip(1 to 100)
     assertEquals(0,count)
   }
-  @Test
-  def zipAll_is_lazy {
-    var count = 0
-    val input = traversable(callback = _ => count += 1).view
-
-    input.zipAll(1 to 130,2,3)
-    assertEquals(0,count)
-  }
-  @Test
-  def zipWithIndex_is_lazy {
-    var count = 0
-    val input = traversable(callback = _ => count += 1).view
-
-    input.zipWithIndex
-    assertEquals(0,count)
-  }
 
   @Test
   def zipAll {
@@ -490,6 +474,14 @@ class LongTraversableTest {
     assertEquals(expected.zipAll(1 to (expected.size * 2), 1,2).toList,
       input.zipAll(toLongResource (1 to (expected.size * 2)), 1,2).toList)
   }
+  @Test
+  def zipAll_is_lazy {
+    var count = 0
+    val input = traversable(callback = _ => count += 1).view
+
+    input.zipAll(1 to 130,2,3)
+    assertEquals(0,count)
+  }
 
   @Test
   def zipWithIndex {
@@ -498,7 +490,42 @@ class LongTraversableTest {
 
     assertEquals(expected.zipWithIndex.toList, input.zipWithIndex.toList)
   }
+  @Test
+  def zipWithIndex_is_lazy {
+    var count = 0
+    val input = traversable(callback = _ => count += 1).view
 
+    input.zipWithIndex
+    assertEquals(0,count)
+  }
+
+  @Test
+  def sliding {
+    val input = traversable()
+    val expected = expectedData()
+
+    val basicsliding = input.sliding(10)
+    assertEquals(expected.sliding(10).size,basicsliding.size)
+    basicsliding.zip(expected.sliding(10).toSeq).forall{
+      case (actual,expected) =>
+        actual.toList == expected.toList
+    }
+
+    val skipsliding = input.sliding(10,10)
+    assertEquals(expected.sliding(10,10).size,skipsliding.size)
+    skipsliding.zip(expected.sliding(10,10).toSeq).forall{
+      case (actual,expected) =>
+        actual.toList == expected.toList
+    }
+  }
+  @Test
+  def sliding_is_lazy {
+    var count = 0
+    val input = traversable(callback = _ => count += 1).view
+
+    input.sliding(10)
+    assertEquals(0,count)
+  }
   def toLongResource[A](wrappedSeq:Seq[A]):LongTraversable[A] = new LongTraversable[A]{
     def iterator: CloseableIterator[A] = CloseableIterator(wrappedSeq.iterator)
   }

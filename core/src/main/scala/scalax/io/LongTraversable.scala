@@ -36,6 +36,11 @@ object LongTraversable extends TraversableFactory[LongTraversable] {
 
   // TODO consider a correct implementation
   def newBuilder[A]: Builder[A, LongTraversable[A]] = new ListBuffer[A] mapResult (x => new LongTraversableImpl[A](x))
+
+  def apply[A](iteratorImpl: => CloseableIterator[A],toStringImpl:String="LongTraversable(...)") = new LongTraversable[A] {
+    protected[io] def iterator: CloseableIterator[A] = iteratorImpl
+    override def toString() = toStringImpl
+  }
 }
 
 private class LongTraversableImpl[A](contained:Traversable[A]) extends LongTraversable[A] {
