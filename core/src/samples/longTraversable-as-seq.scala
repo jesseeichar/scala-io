@@ -89,4 +89,37 @@ object LongTraversableAsSeq {
     // value can be an arbitrary Iterable
     file1.bytes.sameElements(1 to 30)
   }
+
+  /**
+   * Create a sliding 'window' on the underlying data.
+   * The sliding method is part of the LongTraversable in order
+   * to permit easy processing of the data in chunks rather
+   * than one byte at a time.  An alternative would be to use foldLeft
+   * and manage the buffer of data manually but sliding reduces the complexity of
+   * performing such operations.
+   * <p>
+   * For example, suppose every 1000 bytes is a logical block and each block has a
+   * checksum of 8 bytes at the end of the 1000 bytes.  The following would provide
+   * one method of processing such a file
+   * </p>
+   */
+  def slidingOnLongTraversable {
+    import scalax.io._
+
+    val file1 = Resource.fromFile("file1")
+
+    // use sliding to visit each 1008 bytes.
+    // map splits the window into two parts, block and checksum
+    // NOTE:  Data is not loaded from the resource until foreach
+    // or some other method that triggers the actual access of the data
+    val blocks = file1.bytes.sliding(1008,1008).map{_ splitAt 1000}
+
+    // grouped is sliding(size,size) so the following is equivalent
+    val blocks2 = file1.bytes.grouped(1008).map{_ splitAt 1000}
+
+    blocks foreach {
+      case (block,checksum) =>
+        // verify checksum and process
+    }
+  }
 }

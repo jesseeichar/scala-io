@@ -98,39 +98,26 @@ trait LongTraversableViewLike[+A, +Coll, +This <: LongTraversableView[A,Coll] wi
   }
 
   trait Zipped[B] extends Transformed[(A, B)] {
-    protected[this] val other: Iterable[B]
-    def iterator: CloseableIterator[(A, B)] = self.iterator zip other.iterator
+    protected[this] val other: () => CloseableIterator[B]
+    def iterator: CloseableIterator[(A, B)] = self.iterator zip other()
     final override protected[this] def viewIdentifier = "Z"
   }
 
   trait ZippedAll[A1 >: A, B] extends Transformed[(A1, B)] {
-    protected[this] val other: Iterable[B]
+    protected[this] val other: () => CloseableIterator[B]
     protected[this] val thisElem: A1
     protected[this] val thatElem: B
     final override protected[this] def viewIdentifier = "Z"
     def iterator: CloseableIterator[(A1, B)] =
-      self.iterator.zipAll(other.iterator, thisElem, thatElem)
+      self.iterator.zipAll(other(), thisElem, thatElem)
   }
-
-  override def zip[A1 >: A, B, That](that: Iterable[B])(implicit bf: CanBuildFrom[This, (A1, B), That]): That = {
-    newZipped(that).asInstanceOf[That]
-// was:    val b = bf(repr)
-//    if (b.isInstanceOf[NoBuilder[_]]) newZipped(that).asInstanceOf[That]
-//    else super.zip[A1, B, That](that)(bf)
-  }
-
-  override def zipWithIndex[A1 >: A, That](implicit bf: CanBuildFrom[This, (A1, Int), That]): That =
-    zip[A1, Int, That](Stream from 0)(bf)
-
-  override def zipAll[B, A1 >: A, That](that: Iterable[B], thisElem: A1, thatElem: B)(implicit bf: CanBuildFrom[This, (A1, B), That]): That =
-    newZippedAll(that, thisElem, thatElem).asInstanceOf[That]
 
   /** Boilerplate method, to override in each subclass
    *  This method could be eliminated if Scala had virtual classes
    */
-  protected def newZipped[B](that: Iterable[B]): Transformed[(A, B)] = new { val other = that } with Zipped[B]
-  protected def newZippedAll[A1 >: A, B](that: Iterable[B], _thisElem: A1, _thatElem: B): Transformed[(A1, B)] = new {
-    val other: Iterable[B] = that
+  protected def newZipped[B](that: () => CloseableIterator[B]): Transformed[(A, B)] = new { val other = that } with Zipped[B]
+  protected def newZippedAll[A1 >: A, B](that: () => CloseableIterator[B], _thisElem: A1, _thatElem: B): Transformed[(A1, B)] = new {
+    val other: () => CloseableIterator[B] = that
     val thisElem = _thisElem
     val thatElem = _thatElem
   } with ZippedAll[A1, B]
@@ -159,6 +146,29 @@ trait LongTraversableViewLike[+A, +Coll, +This <: LongTraversableView[A,Coll] wi
   override def slice(from: Int, until: Int) = newLSliced(from,until).asInstanceOf[This]
 
   override def stringPrefix = "LongTraversableView"
+
+
+  override def zipWithIndex[A1 >: A, That](implicit bf: CanBuildFrom[This, (A1, Int), That]): That =
+    zip[A1, Int, That](Stream from 0)(bf)
+
+  override def zip[A1 >: A, B, That](that: Iterable[B])(implicit bf: CanBuildFrom[This, (A1, B), That]): That = {
+    newZipped(() => CloseableIterator(that.iterator)).asInstanceOf[That]
+  }
+
+  override def zipAll[B, A1 >: A, That](that: Iterable[B], thisElem: A1, thatElem: B)(implicit bf: CanBuildFrom[This, (A1, B), That]): That =
+    newZippedAll(() => CloseableIterator(that.iterator), thisElem, thatElem).asInstanceOf[That]
+
+  override def zip[A1 >: A, B, That](that: LongTraversable[B])(implicit bf: CanBuildFrom[This, (A1, B), That]): That = {
+    newZipped(() => that.iterator).asInstanceOf[That]
+  }
+
+  override def zipAll[B, A1 >: A, That](that: LongTraversable[B], thisElem: A1, thatElem: B)(implicit bf: CanBuildFrom[This, (A1, B), That]): That =
+    newZippedAll(() => that.iterator, thisElem, thatElem).asInstanceOf[That]
+
+  override def sliding(size: Int, step: Int): LongTraversable[Seq[A]] =
+    LongTraversable[Seq[A]](
+      self.iterator.modifiedSliding(size,step),
+      "Sliding("+size+","+step+" LongTraversableView(...)")
 
 }
 

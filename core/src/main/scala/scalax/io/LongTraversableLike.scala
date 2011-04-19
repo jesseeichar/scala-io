@@ -613,7 +613,7 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
   def containsSlice[B](that: Seq[B],start:Long): Boolean = indexOfSlice(that,start) != -1
 
   /** Groups elements in fixed size blocks by passing a "sliding window"
-   *  over them (as opposed to partitioning them, as is done in grouped.)
+   *  over them.
    *
    *  This is based on Iterator#sliding but does not return an iterator
    *  to ensure that a resource is not left open.
@@ -621,15 +621,26 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
    *  @param size the number of elements per group
    *  @param step the distance between the first elements of successive
    *         groups (defaults to 1)
-   *  @return An iterator producing ${coll}s of size `size`, except the
+   *  @return An LongTraversable producing Seqs of size `size`, except the
    *          last and the only element will be truncated if there are
    *          fewer elements than size.
    */
-  def sliding[B >: A](size: Int, step: Int=1): LongTraversable[Seq[A]] =
+  def sliding(size: Int, step: Int=1): LongTraversable[Seq[A]] = {
+    val data:Seq[Seq[A]] = self.iterator.modifiedSliding(size,step).toSeq
     LongTraversable[Seq[A]](
-      self.iterator.modifiedSliding(size, step),
+      CloseableIterator(data.iterator),
       "Sliding("+size+","+step+" LongTraversable(...)")
+  }
 
+  /**
+   * Partitions the data into fixed size blocks (same as sliding(size,size).
+   *
+   *  @param size the number of elements per group
+   *  @return An LongTraversable producing Seqs of size `size`, except the
+   *          last and the only element will be truncated if there are
+   *          fewer elements than size.
+   */
+  def grouped(size:Int) = sliding(size,size)
 
   /*
   Probably can be done but requires more work than I have time for

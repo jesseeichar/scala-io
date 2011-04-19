@@ -6,10 +6,27 @@ import resource.{AbstractManagedResource, ManagedResourceOperations}
 
 trait CloseableIterator[+A] extends Iterator[A] with Closeable {
   self =>
+  private var closed = false
+
+  final def hasNext:Boolean = {
+    val hasNext = doHasNext
+    if(!hasNext) close()
+    hasNext
+  }
+  final def close() = {
+    if(!closed) {
+      doClose()
+      closed = true
+    }
+  }
+
+  def doHasNext:Boolean
+  protected def doClose():Unit
+
   class Proxy[+B,C <: Iterator[B]](protected val wrapped:C,otherComposingIterators:CloseableIterator[_]*) extends CloseableIterator[B] {
     def next() = wrapped.next
-    def hasNext: Boolean = wrapped.hasNext
-    def close() = {
+    def doHasNext: Boolean = wrapped.hasNext
+    def doClose() = {
       safeClose(self)
       otherComposingIterators.foreach(safeClose)
     }
@@ -38,7 +55,7 @@ trait CloseableIterator[+A] extends Iterator[A] with Closeable {
   override def takeWhile(p: A => Boolean) = Proxy(super.takeWhile(p))
   override def ++[B >: A](that: => TraversableOnce[B]): CloseableIterator[B] =
     new Proxy[B,Iterator[B]](super.++(that)) {
-      override def close() = {
+      override def doClose() = {
         self.close()
         that match {
           case that:Closeable => that.close
@@ -81,8 +98,8 @@ trait CloseableIterator[+A] extends Iterator[A] with Closeable {
 object CloseableIterator {
   def apply[A](iter:Iterator[A]) = new CloseableIterator[A]{
     def next(): A = iter.next
-    def hasNext: Boolean = iter.hasNext
-    def close() {}
+    def doHasNext: Boolean = iter.hasNext
+    def doClose() {}
   }
   implicit object ManagedResource extends resource.Resource[CloseableIterator[_]] {
     def close(r: CloseableIterator[_]) = r.close()

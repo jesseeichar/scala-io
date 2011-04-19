@@ -187,8 +187,8 @@ object Input {
             var iter = OutputConverter.TraversableIntConverter.toBytes(t)
 
             def next() = iter.next.toInt
-            def hasNext: Boolean = iter.hasNext
-            def close() {}
+            def doHasNext: Boolean = iter.hasNext
+            def doClose() {}
           }
         }.view
 

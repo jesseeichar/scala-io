@@ -46,9 +46,9 @@ class LineTraversable(source: => CloseableIterator[Char], terminator: Terminator
       }
       line
     }
-    def hasNext: Boolean = sourceIterator.hasNext || buffer.nonEmpty
+    def doHasNext: Boolean = sourceIterator.hasNext || buffer.nonEmpty
 
-    def close() = sourceIterator.close()
+    def doClose() = sourceIterator.close()
   }
 
 }

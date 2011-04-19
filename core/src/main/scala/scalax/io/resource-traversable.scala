@@ -59,7 +59,7 @@ private[io] trait ResourceTraversable[A] extends LongTraversable[A]
       conv(n)
     }
 
-    def hasNext: Boolean = {
+    def doHasNext: Boolean = {
       if(c >= end) return false
 
       if(nextEl == null) {
@@ -69,7 +69,7 @@ private[io] trait ResourceTraversable[A] extends LongTraversable[A]
       nextEl.isDefined
     }
 
-    def close() = openedResource.close()
+    def doClose() = openedResource.close()
   }
 
   /*
