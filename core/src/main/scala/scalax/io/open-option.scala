@@ -94,7 +94,7 @@ object StandardOpenOption extends Enumeration {
   /**
    * Collection of options: {@link #Create}, {@link #Truncate}, {@link #Write}
    */
-  final val ReadWrite = List(Read, CreateFull, Truncate, Write)
+  final val ReadWrite = List(Read, CreateFull, Write)
   /**
    * Collection of options: {@link #Create}, {@link #Append}, {@link #Write}
    */

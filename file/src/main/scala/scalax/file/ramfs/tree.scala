@@ -9,14 +9,11 @@
 package scalax.file
 package ramfs
 
-import scalax.io.{
-  Resource, InputStreamResource, OutputStreamResource
-}
 import scala.collection.mutable.ArrayBuffer
 import java.io.{
   OutputStream, InputStream, ByteArrayOutputStream, ByteArrayInputStream, IOException
 }
-import scalax.io.{OpenOption, StandardOpenOption}
+import scalax.io._
 import StandardOpenOption._
 
 private[ramfs] trait NodeFac {

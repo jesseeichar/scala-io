@@ -3,6 +3,7 @@ package scalax.io
 import java.io.{InputStreamReader, Reader, BufferedInputStream, InputStream}
 import java.nio.channels.Channels
 import scalax.io.ResourceAdapting.ReadableChannelAdapter
+import java.lang.String
 
 /**
  * A ManagedResource for accessing and using InputStreams.  Class can be created using the [[scalax.io.Resource]] object.
@@ -10,16 +11,20 @@ import scalax.io.ResourceAdapting.ReadableChannelAdapter
 class InputStreamResource[+A <: InputStream] (
     opener: => A,
     closeAction:CloseAction[A],
-    protected val sizeFunc:() => Option[Long] )
+    protected val sizeFunc:() => Option[Long],
+    descName:ResourceDescName)
   extends InputResource[A]
   with ResourceOps[A, InputStreamResource[A]] {
 
-  def open() = new CloseableOpenedResource(opener,closeAction)
+  def open():OpenedResource[A] = new CloseableOpenedResource(opener,closeAction)
 
-  def prependCloseAction[B >: A](newAction: CloseAction[B]) = new InputStreamResource[A](opener,newAction :+ closeAction,sizeFunc)
-  def appendCloseAction[B >: A](newAction: CloseAction[B]) = new InputStreamResource[A](opener,closeAction +: newAction,sizeFunc)
+  def prependCloseAction[B >: A](newAction: CloseAction[B]) = new InputStreamResource[A](opener,newAction :+ closeAction,sizeFunc,descName)
+  def appendCloseAction[B >: A](newAction: CloseAction[B]) = new InputStreamResource[A](opener,closeAction +: newAction,sizeFunc,descName)
 
   def inputStream = this
+
+  override def toString: String = "InputStreamResource("+descName.name+")"
+
   def reader(implicit sourceCodec: Codec): ReaderResource[Reader] = {
     def nResource = {
       val a = open()
@@ -28,7 +33,8 @@ class InputStreamResource[+A <: InputStream] (
       }
     }
     val closer = ResourceAdapting.closeAction(closeAction)
-    Resource.fromReader(nResource).appendCloseAction(closer)
+    new ReaderResource(nResource,closer,descName)
+
   }
 
   def readableByteChannel = {

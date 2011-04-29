@@ -7,14 +7,17 @@ import java.io.{Reader, BufferedReader}
  */
 class ReaderResource[+A <: Reader] (
     opener: => A,
-    closeAction:CloseAction[A])
+    closeAction:CloseAction[A],
+    descName:ResourceDescName)
   extends ReadCharsResource[A]
   with ResourceOps[A, ReaderResource[A]] {
 
-  def open() = new CloseableOpenedResource(opener,closeAction)
+  def open():OpenedResource[A] = new CloseableOpenedResource(opener,closeAction)
 
-  def prependCloseAction[B >: A](newAction: CloseAction[B]) = new ReaderResource(opener,newAction :+ closeAction)
-  def appendCloseAction[B >: A](newAction: CloseAction[B]) = new ReaderResource(opener,closeAction +: newAction)
+  def prependCloseAction[B >: A](newAction: CloseAction[B]) = new ReaderResource(opener,newAction :+ closeAction,descName)
+  def appendCloseAction[B >: A](newAction: CloseAction[B]) = new ReaderResource(opener,closeAction +: newAction,descName)
 
   override def chars : ResourceView[Char]= ResourceTraversable.readerBased(this).view
+
+  override def toString: String = "ReaderResource("+descName.name+")"
 }

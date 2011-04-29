@@ -1,3 +1,5 @@
+package scalax.io
+
 /*                     __                                               *\
 **     ________ ___   / /  ___     Scala API                            **
 **    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar          **
@@ -6,18 +8,15 @@
 **                          |/                                          **
 \*                                                                      */
 
-package scalax.file
-
 import java.io.IOException
 import java.lang.Math.min
 import collection.mutable.ArrayBuffer
 import scalax.io.StandardOpenOption._
-import scalax.io.{OpenOption, SeekableByteChannel}
 
 class ArrayBufferSeekableChannel(data:ArrayBuffer[Byte],
-                                               openOptions: OpenOption*)
-                                              (forceDeleteAction: =>Unit,
-                                               closeAction: => Unit) extends SeekableByteChannel {
+                                 openOptions: OpenOption*)
+                                (forceDeleteAction: =>Unit,
+                                 closeAction: => Unit) extends SeekableByteChannel {
 
   var closed = false
   var position = 0L

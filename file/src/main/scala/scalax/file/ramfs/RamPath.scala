@@ -141,4 +141,5 @@ class RamPath(relativeTo: String, val path: String, override val fileSystem: Ram
       }.flatten.toList
     })
   }
+
 }

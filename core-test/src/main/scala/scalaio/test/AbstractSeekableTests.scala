@@ -21,9 +21,9 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
   implicit val codec = Codec.UTF8
 
   /**
-   * Seekable containing TEXT_VALUE
+   * Seekable containing TEXT_VALUE, otherwise
    */
-  def open(data: Option[String] = None): Seekable
+  def open(data: String = TEXT_VALUE): Seekable
 
 
   val patchParams =
@@ -52,7 +52,7 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
 
   @Test //@Ignore
   def patchStringASCII(): Unit = {
-    val seekable = open(Some("abc"))
+    val seekable = open("abc")
 
     seekable.patch(1, "x", OverwriteSome(1))(Codec.ISO8859)
 
@@ -77,7 +77,7 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
 
   @Test //@Ignore
   def patchWithIterator(): Unit = {
-    val seekable = open(Some("abc"))
+    val seekable = open("abc")
 
     seekable.patch(1, "x".getBytes(UTF8.name).toIterator, OverwriteAll)
 
@@ -95,7 +95,7 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
 
 
     def test[T](msg: String, f: Seekable => T, pos: Int, bytes: Array[Byte]) = {
-      val seekable = open(Some("abc"))
+      val seekable = open("abc")
       try {
         f(seekable)
       } catch {

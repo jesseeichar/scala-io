@@ -88,8 +88,8 @@ class DefaultPath private[file] (val jfile: JFile, override val fileSystem: Defa
     assert(isFile, "Source %s is not a valid file." format name)
 
 // TODO ARM this
-    import scalax.io.StandardOpenOption.{Create,Truncate,Write}
-    for {inResource <- fileChannel()
+    import scalax.io.StandardOpenOption.{Create,Truncate,Write,Read}
+    for {inResource <- fileChannel(Read)
          in <- inResource
          out <- dest.channel(Create, Truncate, Write)
     } {
@@ -137,6 +137,4 @@ class DefaultPath private[file] (val jfile: JFile, override val fileSystem: Defa
   def descendants[U >: Path, F](filter:F, depth:Int, options:Traversable[LinkOption])(implicit factory:PathMatcherFactory[F]) = {
     new BasicPathSet[DefaultPath](this, factory(filter), depth, false, (_:DefaultPath).jfile.listFiles.view.map (fileSystem.apply).toList)
   }
-
-
 }

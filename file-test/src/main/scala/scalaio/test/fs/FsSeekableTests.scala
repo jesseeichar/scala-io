@@ -13,12 +13,9 @@ import scalaio.test.AbstractSeekableTests
 
 
 abstract class FsSeekableTests extends AbstractSeekableTests with Fixture {
-    def open(data : Option[String] = None) : Seekable = data match {
-      case None =>
-        fixture.text("\n")
-      case Some(text) =>
-        val path = fixture.path
-        path write text
-        path
-    }
+  def open(data : String) : Seekable = {
+    val path = fixture.path
+    path write data
+    path
+  }
 }

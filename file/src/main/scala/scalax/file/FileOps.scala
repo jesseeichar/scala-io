@@ -172,5 +172,12 @@ abstract class FileOps extends Seekable {
 
   // required method for Output trait
   override protected def underlyingOutput = outputStream()
+  protected def underlyingChannel(append: Boolean) = {
+    if(append) {
+      channel((ReadWrite :+ Append) :_*).open.get
+    } else {
+      channel(ReadWrite : _*).open.get
+    }
+  }
 }
 

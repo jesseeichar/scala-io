@@ -15,8 +15,10 @@ import java.nio.channels.{
 }
 import java.io._
 import nio.SeekableFileChannel
-import java.net.{URLConnection, HttpURLConnection, URL}
+import java.net.{URLConnection, URL}
 import scalax.io.CloseAction._
+import StandardOpenOption._
+import collection.immutable.List._
 
 trait OpenedResource[+R] {
   def get:R
@@ -283,7 +285,7 @@ object Resource {
    *
    * @return an InputStreamResource
    */
-  def fromInputStream[A <: InputStream](opener: => A) : InputStreamResource[A] = new InputStreamResource[A](opener, Noop, () => None)
+  def fromInputStream[A <: InputStream](opener: => A) : InputStreamResource[A] = new InputStreamResource[A](opener, Noop, () => None,UnknownName())
   /**
    * Create an Output Resource instance from an OutputStream.
    *
@@ -306,7 +308,7 @@ object Resource {
    *
    * @return an ReaderResource
    */
-  def fromReader[A <: Reader](opener: => A) : ReaderResource[A] = new ReaderResource[A](opener, Noop)
+  def fromReader[A <: Reader](opener: => A) : ReaderResource[A] = new ReaderResource[A](opener, Noop,UnknownName())
 
   // Writer factory methods
   /**
@@ -329,7 +331,7 @@ object Resource {
    *
    * @return an ReadableByteChannelResource
    */
-  def fromReadableByteChannel[A <: ReadableByteChannel](opener: => A) : ReadableByteChannelResource[A] = new ReadableByteChannelResource[A](opener, Noop, () => None)
+  def fromReadableByteChannel[A <: ReadableByteChannel](opener: => A) : ReadableByteChannelResource[A] = new ReadableByteChannelResource[A](opener, Noop, () => None,UnknownName())
   /**
    * Create an Output Resource instance from an WritableByteChannel.
    *
@@ -350,6 +352,8 @@ object Resource {
    * @return a ByteChannelResource
    */
   def fromByteChannel[A <: ByteChannel](opener: => A) : ByteChannelResource[A] = new ByteChannelResource[A](opener,Noop, () => None)
+
+  private def seekablesizeFunction(resource:SeekableByteChannel)= () => try{Some(resource.size)}finally{resource.close()}
   /**
    * Create an Input/Output/Seekable Resource instance from a SeekableByteChannel.
    *
@@ -359,7 +363,12 @@ object Resource {
    *
    * @return a SeekableByteChannelResource
    */
-  def fromSeekableByteChannel[A <: SeekableByteChannel](opener: => A) : SeekableByteChannelResource[A] = new SeekableByteChannelResource[A](opener,Noop, () => None)
+  def fromSeekableByteChannel[A <: SeekableByteChannel](opener: => A) : SeekableByteChannelResource[A] = {
+    new SeekableByteChannelResource[A](_ => opener,Noop, seekablesizeFunction(opener),UnknownName(), None)
+  }
+  def fromSeekableByteChannel[A <: SeekableByteChannel](opener: Seq[OpenOption] => A) : SeekableByteChannelResource[A] = {
+    new SeekableByteChannelResource[A](opener,Noop, seekablesizeFunction(opener(Read :: Nil)),UnknownName(), Some(ReadWrite))
+  }
 
   /**
    * Create an Input/Output/Seekable Resource instance from a RandomAccess file.
@@ -371,14 +380,14 @@ object Resource {
    * @return a SeekableByteChannelResource
    */
   def fromRandomAccessFile(opener: => RandomAccessFile) : SeekableByteChannelResource[SeekableFileChannel] = {
-    def open = new SeekableFileChannel(opener.getChannel)
+    def open = (opts:Seq[OpenOption]) => support.FileUtils.openChannel(opener,opts)
     def sizeFunc = () => resource.managed(opener).acquireAndGet {
       _.length match {
         case len if len < 0 => None
         case len => Some(len)
       }
     }
-    new SeekableByteChannelResource[SeekableFileChannel](open,Noop,sizeFunc)
+    new SeekableByteChannelResource[SeekableFileChannel](open ,Noop,sizeFunc,PrefixedName("RandomAccessFile"),Some(ReadWrite))
   }
 
   /**
@@ -401,7 +410,7 @@ object Resource {
         conn.getInputStream.close()
       }
     }
-    new InputStreamResource(url.openStream,Noop,sizeFunc)
+    new InputStreamResource(url.openStream,Noop,sizeFunc,KnownName(url.toExternalForm))
   }
 
   /**
@@ -422,7 +431,15 @@ object Resource {
    * @return a SeekableByteChannelResource
    * @throws java.io.IOException if file does not exist
    */
-  def fromFile(file:File): SeekableByteChannelResource[SeekableByteChannel] = fromRandomAccessFile(new RandomAccessFile(file,"rw"))
+  def fromFile(file:File): SeekableByteChannelResource[SeekableByteChannel] = {
+    def open = (opts:Seq[OpenOption]) => support.FileUtils.openChannel(file,opts)
+    def sizeFunc = () => {
+      if(file.exists) Some(file.length)
+      else None
+    }
+    new SeekableByteChannelResource[SeekableFileChannel](open,Noop,sizeFunc,KnownName(file.getPath), Some(ReadWrite))
+
+  }
   /**
    * Create a file from string then create a Seekable Resource from a File
    *
@@ -431,7 +448,8 @@ object Resource {
    * @return a SeekableByteChannelResource
    * @throws java.io.IOException if file does not exist
    */
-  def fromFile(file:String): SeekableByteChannelResource[SeekableByteChannel] = fromRandomAccessFile(new RandomAccessFile(file,"rw"))
+  def fromFile(file:String): SeekableByteChannelResource[SeekableByteChannel] =
+    fromFile(new File(file))
 
   /**
    * Create an InputStreamResource from a resource on the classpath.  The classloader from the provided class is used to resolve
@@ -440,7 +458,7 @@ object Resource {
    * An exception is thrown if the resource does not exist
    */
   def fromClasspath(name: String,
-                  cl: Class[_] ) : InputStreamResource[InputStream]= {
+                    cl: Class[_] ) : InputStreamResource[InputStream]= {
     val url = cl.getClassLoader.getResource(name)
     require(url != null)
     Resource.fromURL(url)
@@ -459,3 +477,13 @@ object Resource {
   }
 }
 
+sealed trait ResourceDescName{
+  def name:String
+}
+case class KnownName(name:String) extends ResourceDescName
+case class PrefixedName(prefix:String) extends ResourceDescName{
+  def name: String = prefix+":"+hashCode
+}
+case class UnknownName() extends ResourceDescName{
+  lazy val name = hashCode.toString
+}

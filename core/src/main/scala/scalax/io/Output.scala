@@ -10,7 +10,8 @@ package scalax.io
 
 import resource._
 import scala.collection.Traversable
-import java.io.{File, OutputStream}
+import scalax.io.CloseAction.Noop
+import java.io.{FilterOutputStream, File, OutputStream}
 
 /**
  * A trait for objects that can have data written to them. For example an
@@ -30,6 +31,32 @@ import java.io.{File, OutputStream}
 trait Output {
 
   protected def underlyingOutput : OutputResource[OutputStream]
+  /**
+   * Execute the function 'f' passing an Output instance that performs all operations
+   * on a single opened connection to the underlying resource. Typically each call to
+   * one of the Output's methods results in a new connection.  For example if the underlying
+   * OutputStream truncates the file each time the connection is made then calling write
+   * two times will result in the contents of the second write overwriting the second write.
+   *
+   * Even if the underlying resource is an appending, using open will be more efficient since
+   * the connection only needs to be made a single time.
+   *
+   * @param f the function to execute on the new Output instance (which uses a single connection)
+   * @return the result of the function
+   */
+  def openOutput[U](f:Output=> U):U = {
+    underlyingOutput.acquireAndGet {out =>
+      val nonClosingOutput:Output = new OutputStreamResource[OutputStream](null,Noop) {
+        override def open():OpenedResource[OutputStream] = new OpenedResource[OutputStream]{
+          def close(): List[Throwable] = Nil
+          def get = new FilterOutputStream(out){
+            override def close() {}
+          }
+        }
+      }
+      f(nonClosingOutput)
+    }
+  }
 
   /**
    * Write data to the underlying object.  In the case of writing ints and bytes it is often

@@ -13,7 +13,7 @@ class OutputStreamResource[+A <: OutputStream] (
   extends OutputResource[A]
   with ResourceOps[A, OutputStreamResource[A]] {
 
-  def open() = new CloseableOpenedResource(opener,closeAction)
+  def open(): OpenedResource[A] = new CloseableOpenedResource(opener,closeAction)
   def prependCloseAction[B >: A](newAction: CloseAction[B]) = new OutputStreamResource(opener,newAction :+ closeAction)
   def appendCloseAction[B >: A](newAction: CloseAction[B]) = new OutputStreamResource(opener,closeAction +: newAction)
 

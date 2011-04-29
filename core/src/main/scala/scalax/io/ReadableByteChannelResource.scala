@@ -10,19 +10,20 @@ import scalax.io.ResourceAdapting.{ChannelReaderAdapter, ChannelInputStreamAdapt
 class ReadableByteChannelResource[+A <: ReadableByteChannel] (
     opener: => A,
     closeAction:CloseAction[A],
-    protected val sizeFunc:() => Option[Long])
+    protected val sizeFunc:() => Option[Long],
+    descName:ResourceDescName)
   extends InputResource[A]
   with ResourceOps[A, ReadableByteChannelResource[A]] {
 
-  def open() = new CloseableOpenedResource(opener,closeAction)
+  def open():OpenedResource[A] = new CloseableOpenedResource(opener,closeAction)
 
-  def prependCloseAction[B >: A](newAction: CloseAction[B]) = new ReadableByteChannelResource(opener,newAction :+ closeAction,sizeFunc)
-  def appendCloseAction[B >: A](newAction: CloseAction[B]) = new ReadableByteChannelResource(opener,closeAction +: newAction,sizeFunc)
+  def prependCloseAction[B >: A](newAction: CloseAction[B]) = new ReadableByteChannelResource(opener,newAction :+ closeAction,sizeFunc,descName)
+  def appendCloseAction[B >: A](newAction: CloseAction[B]) = new ReadableByteChannelResource(opener,closeAction +: newAction,sizeFunc,descName)
 
   def inputStream = {
     def nResource = new ChannelInputStreamAdapter(opener)
     val closer = ResourceAdapting.closeAction(closeAction)
-    new InputStreamResource(nResource, closer, sizeFunc)
+    new InputStreamResource(nResource, closer, sizeFunc,descName)
   }
   def reader(implicit sourceCodec: Codec) = {
     def nResource = new ChannelReaderAdapter(opener,sourceCodec)
@@ -32,4 +33,6 @@ class ReadableByteChannelResource[+A <: ReadableByteChannel] (
   def readableByteChannel = this
   def bytesAsInts = inputStream.bytesAsInts // TODO optimize for byteChannel
   def chars(implicit codec: Codec) = reader(codec).chars  // TODO optimize for byteChannel
+
+  override def toString: String = "ReadableByteChannelResource ("+descName.name+")"
 }

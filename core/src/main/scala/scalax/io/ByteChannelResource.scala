@@ -14,7 +14,7 @@ class ByteChannelResource[+A <: ByteChannel] (
   with OutputResource[A]
   with ResourceOps[A, ByteChannelResource[A]] {
 
-  def open() = new CloseableOpenedResource(opener,closeAction)
+  def open():OpenedResource[A] = new CloseableOpenedResource(opener,closeAction)
 
   def prependCloseAction[B >: A](newAction: CloseAction[B]) = new ByteChannelResource(opener,newAction :+ closeAction,sizeFunc)
   def appendCloseAction[B >: A](newAction: CloseAction[B]) = new ByteChannelResource(opener,closeAction +: newAction,sizeFunc)

@@ -16,8 +16,9 @@ import scala.collection.Traversable
 import scala.annotation._
 import collection.mutable.{ArrayOps, WrappedArray}
 import StandardOpenOption._
-import java.io.{RandomAccessFile, File}
 import java.nio.channels.{FileChannel, ByteChannel, WritableByteChannel}
+import java.io.{OutputStream, RandomAccessFile, File}
+import scalax.io.ResourceAdapting.ChannelOutputStreamAdapter
 
 /**
  * A strategy trait used with the Seekable.patch to control how data is
@@ -95,18 +96,48 @@ case class OverwriteSome(replacementLength:Long) extends Overwrite {
  * @define converterParamconverterParam @param converter The strategy for writing the data/converting the data to bytes
  */
 trait Seekable extends Input with Output {
+  self =>
 
-    private final val MaxPermittedInMemory = 50 * BufferSize
+  private final val MaxPermittedInMemory = 50 * BufferSize
 
-    private final val OVERWRITE_CODE = Long.MinValue
+  private final val OVERWRITE_CODE = Long.MinValue
 
 
-    // for Java 7 change this to a Seekable Channel
-    /**
-     * The underlying channel to write to.  The open options indicate the preferred way
-     * to interact with the underlying channel.
-     */
-    protected def channel(openOptions:OpenOption*) : OutputResource[SeekableByteChannel] with InputResource[SeekableByteChannel]
+  protected def underlyingChannel(append:Boolean):SeekableByteChannel
+  // for Java 7 change this to a Seekable Channel
+  protected def readWriteChannel[U](f:SeekableByteChannel => U) : U =
+    Resource.fromSeekableByteChannel(underlyingChannel(false)).acquireAndGet(f)
+
+  protected def appendChannel[U](f:SeekableByteChannel => U) : U = {
+    Resource.fromSeekableByteChannel(underlyingChannel(true)).acquireAndGet(f)
+  }
+
+  /**
+   * Execute the function 'f' passing an Output instance that performs all operations
+   * on a single opened connection to the underlying resource. Typically each call to
+   * one of the Output's methods results in a new connection.  For example if the underlying
+   * OutputStream truncates the file each time the connection is made then calling write
+   * two times will result in the contents of the second write overwriting the second write.
+   *
+   * Even if the underlying resource is an appending, using open will be more efficient since
+   * the connection only needs to be made a single time.
+   *
+   * @param f the function to execute on the new Output instance (which uses a single connection)
+   * @return the result of the function
+   */
+  def open[U](f: Seekable => U):U = {
+    readWriteChannel{ out =>
+      val nonSeekable:Seekable = new SeekableByteChannelResource[SeekableByteChannel](null,CloseAction.Noop,() => Some(out.size),KnownName("Seekable opened resource"),None) {
+        override def open():OpenedResource[SeekableByteChannel] = new OpenedResource[SeekableByteChannel]{
+          def close(): List[Throwable] = Nil
+          def get = out
+        }
+
+        override def toString: String = "Opened "+self.toString
+      }
+      f(nonSeekable)
+    }
+  }
 
   /**
    * $patchDesc
@@ -263,7 +294,7 @@ trait Seekable extends Input with Output {
   def insertIntsAsBytes(position : Long, data : Int*) = insert(position, data)(OutputConverter.TraversableIntAsByteConverter)
 
   private def insertDataInMemory(position : Long, bytes : TraversableOnce[Byte]) = {
-    for(channel <- channel(Write) ) {
+    readWriteChannel { channel =>
       channel position position
       var buffers = (ByteBuffer allocateDirect MaxPermittedInMemory, ByteBuffer allocateDirect MaxPermittedInMemory)
 
@@ -294,9 +325,7 @@ trait Seekable extends Input with Output {
    */
   protected def tempFile() : Input with Output = {
     val file = File.createTempFile("SeekableCache","tmp")
-    val raf = new RandomAccessFile(file,"rw")
-    // TODO Resource.fromRandomAccessFile(raf.getChannel)
-    Resource.fromByteChannel(raf.getChannel)
+    Resource.fromFile(file)
   }
 
   private def insertDataTmpFile(position : Long, bytes : TraversableOnce[Byte]) = {
@@ -304,7 +333,7 @@ trait Seekable extends Input with Output {
 
       tmp write (this.bytes ldrop position)
 
-      for(channel <- channel(Write) ) {
+      readWriteChannel {channel =>
            channel position  position
            writeTo(channel, bytes, -1)
            writeTo(channel, tmp.bytes, tmp.size.get)
@@ -312,8 +341,8 @@ trait Seekable extends Input with Output {
   }
 
   private def overwriteFileData(position : Long, bytes : TraversableOnce[Byte], replaced : Long) = {
-      for(channel <- channel(Write) ) {
-          channel.position(position)
+      readWriteChannel {channel =>
+        channel.position(position)
 //            println("byte size,replaced",bytes.size,replaced)
           val (wrote, earlyTermination) = writeTo(channel,bytes, replaced)
 
@@ -370,7 +399,9 @@ trait Seekable extends Input with Output {
    */
   def append[T](data: T)(implicit converter:OutputConverter[T]): Unit = {
     val bytes = converter.toBytes(data)
-    for (c <- channel(Append)) writeTo(c, bytes, -1)
+    appendChannel{channel =>
+      writeTo(channel, bytes, -1)
+    }
   }
 
   /**
@@ -457,12 +488,14 @@ trait Seekable extends Input with Output {
   */
   def appendStrings(strings: Traversable[String], separator:String = "")(implicit codec: Codec = Codec.default): Unit = {
     val sepBytes = codec encode separator
-    for (c <- channel(Append)) (strings foldLeft false){
-      (addSep, string) =>
-        if(addSep) writeTo(c, sepBytes, Long.MaxValue)
-        writeTo(c, codec encode string, Long.MaxValue)
+    appendChannel { c =>
+      (strings foldLeft false){
+        (addSep, string) =>
+          if(addSep) writeTo(c, sepBytes, Long.MaxValue)
+          writeTo(c, codec encode string, Long.MaxValue)
 
-        true
+          true
+      }
     }
   }
 
@@ -470,7 +503,7 @@ trait Seekable extends Input with Output {
    * Truncate/Chop the Seekable to the number of bytes declared by the position param
    */
   def truncate(position : Long) : Unit = {
-       channel(Append) foreach {_.truncate(position)}
+       appendChannel{_.truncate(position)}
   }
    /**
     * Truncate/Chop the Seekable to the number of bytes declared by the position param.  In this
@@ -478,15 +511,16 @@ trait Seekable extends Input with Output {
     */
   def truncateString(position : Long)(implicit codec:Codec = Codec.default) : Unit = {
     val posInBytes = charCountToByteCount(0,position)
-    channel(Append) foreach {_.truncate(posInBytes)}
+    appendChannel{_.truncate(posInBytes)}
   }
 
-  // required methods for Input trait
-  def chars(implicit codec: Codec): ResourceView[Char] = (channel(Read).reader(codec).chars).asInstanceOf[ResourceView[Char]]  // TODO this is broken
-  def bytesAsInts:ResourceView[Int] = channel(Read).bytesAsInts
 
-  // required method for Output trait
-  protected def underlyingOutput = channel(WriteTruncate:_*).outputStream
+  protected def underlyingOutput: OutputResource[OutputStream] =
+    Resource.fromOutputStream(new ChannelOutputStreamAdapter(underlyingChannel(false)))
+
+  def chars(implicit codec: Codec) = Resource.fromByteChannel(underlyingChannel(false)).chars(codec)
+
+  def bytesAsInts = Resource.fromByteChannel(underlyingChannel(false)).bytesAsInts
 
   private def charCountToByteCount(start:Long, end:Long)(implicit codec:Codec) = {
     val encoder = codec.encoder
@@ -514,7 +548,7 @@ trait Seekable extends Input with Output {
       */
     }
 
-    val segment = channel(Read).chars.lslice(start, end)
+    val segment = Resource.fromByteChannel(underlyingChannel(false)).chars().lslice(start, end)
 
     (0L /: segment ) { (replacedInBytes, nextChar) =>
           replacedInBytes + sizeInBytes(nextChar)
