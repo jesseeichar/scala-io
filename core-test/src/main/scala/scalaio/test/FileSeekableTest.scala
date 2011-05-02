@@ -1,8 +1,6 @@
-package scalaio.test.stream
+package scalaio.test
 
-import scalaio.test.AbstractSeekableTests
-import collection.mutable.ArrayBuffer
-import scalax.io.{Codec, Resource, ArrayBufferSeekableChannel, Seekable}
+import scalax.io.{Resource, Seekable}
 import org.junit.rules.TemporaryFolder
 import org.junit.{After, Before}
 import java.io.{RandomAccessFile, File}

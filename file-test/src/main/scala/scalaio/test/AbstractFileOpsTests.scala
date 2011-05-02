@@ -33,7 +33,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
 
   @Test //@Ignore
   def open_can_perform_several_ops {
-    path.open() {stream =>
+    path.open(StandardOpenOption.ReadWrite) {stream =>
       assertEquals("initial read works", demoData take 2, stream.chars take 2 mkString)
       stream.truncate(2)
       assertEquals("chop works", demoData take 2, stream.slurpString)

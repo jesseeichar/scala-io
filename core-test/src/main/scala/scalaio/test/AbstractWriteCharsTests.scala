@@ -43,4 +43,28 @@ abstract class AbstractWriteCharsTests extends scalax.test.sugar.AssertionSugar 
     assertEquals(DEFAULT_DATA + "-" + DEFAULT_DATA + "-" + DEFAULT_DATA, input2.slurpString)
   }
 
+
+  @Test //@Ignore
+  def openOutput: Unit = {
+    val (in,out0) = open()
+    out0 match {
+      case out0:WriteCharsResource[_] =>
+        var closes = 0;
+        val out = out0.appendCloseAction(_ => closes += 1)
+
+        assertEquals(0,closes)
+        out.write("whoop!")
+        assertEquals(1,closes)
+
+        out.open(opened => {
+          opened.write("hello")
+          opened.write(" ")
+          opened.write("world")
+        })
+        assertEquals(2,closes)
+        assertEquals("whoop!hello world",in.slurpString)
+      case _ => ()
+    }
+  }
+
 }

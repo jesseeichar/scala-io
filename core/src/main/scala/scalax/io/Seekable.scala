@@ -103,21 +103,26 @@ trait Seekable extends Input with Output {
   private final val OVERWRITE_CODE = Long.MinValue
 
 
-  protected def underlyingChannel(append:Boolean):SeekableByteChannel
+  protected def underlyingChannel(append:Boolean):OpenedResource[SeekableByteChannel]
+
   // for Java 7 change this to a Seekable Channel
   protected def readWriteChannel[U](f:SeekableByteChannel => U) : U =
-    Resource.fromSeekableByteChannel(underlyingChannel(false)).acquireAndGet(f)
+    underlyingChannel(false).toSingleUseResource.acquireAndGet(f)
 
-  protected def appendChannel[U](f:SeekableByteChannel => U) : U = {
-    Resource.fromSeekableByteChannel(underlyingChannel(true)).acquireAndGet(f)
+  protected def appendChannel[U](f:SeekableByteChannel => U) : U =
+    underlyingChannel(true).toSingleUseResource.acquireAndGet(f)
+
+  type OpenSeekable = Seekable {
+    def position:Long
+    def position_=(position:Long):Unit
   }
 
   /**
-   * Execute the function 'f' passing an Output instance that performs all operations
+   * Execute the function 'f' passing an Seekable instance that performs all operations
    * on a single opened connection to the underlying resource. Typically each call to
-   * one of the Output's methods results in a new connection.  For example if the underlying
-   * OutputStream truncates the file each time the connection is made then calling write
-   * two times will result in the contents of the second write overwriting the second write.
+   * one of the Seekable's methods results in a new connection.  For example if write it called
+   * typically it will write to the start of the seekable but in open it will write to the
+   * current position.
    *
    * Even if the underlying resource is an appending, using open will be more efficient since
    * the connection only needs to be made a single time.
@@ -125,15 +130,29 @@ trait Seekable extends Input with Output {
    * @param f the function to execute on the new Output instance (which uses a single connection)
    * @return the result of the function
    */
-  def open[U](f: Seekable => U):U = {
+  def open[U](f: OpenSeekable => U):U = {
     readWriteChannel{ out =>
-      val nonSeekable:Seekable = new SeekableByteChannelResource[SeekableByteChannel](null,CloseAction.Noop,() => Some(out.size),KnownName("Seekable opened resource"),None) {
-        override def open():OpenedResource[SeekableByteChannel] = new OpenedResource[SeekableByteChannel]{
-          def close(): List[Throwable] = Nil
-          def get = out
-        }
+      val nonCloseable = new SeekableByteChannel{
+        def close() {}
+        def isOpen: Boolean = true
+        def write(src: ByteBuffer): Int = out.write(src)
 
-        override def toString: String = "Opened "+self.toString
+        def truncate(size: Long): SeekableByteChannel = out.truncate(size)
+
+        def size: Long = out.size
+
+        def read(dst: ByteBuffer): Int = out.read(dst)
+
+        def position(newPosition: Long): SeekableByteChannel = out.position(newPosition)
+
+        def position: Long = out.position
+      }
+      val nonSeekable:OpenSeekable = new SeekableByteChannelResource[SeekableByteChannel](_ => nonCloseable,CloseAction.Noop,() => Some(out.size),KnownName("Seekable opened resource"),None) {
+        override def toString: String = "Seekable-opened "+self.toString
+
+        def position:Long = out.position
+        def position_=(position:Long):Unit = {out.position(position)}
+
       }
       f(nonSeekable)
     }
@@ -503,24 +522,31 @@ trait Seekable extends Input with Output {
    * Truncate/Chop the Seekable to the number of bytes declared by the position param
    */
   def truncate(position : Long) : Unit = {
-       appendChannel{_.truncate(position)}
+     readWriteChannel{_.truncate(position)}
   }
-   /**
-    * Truncate/Chop the Seekable to the number of bytes declared by the position param.  In this
-    * method each position is one character instead of bytes.
-    */
+
   def truncateString(position : Long)(implicit codec:Codec = Codec.default) : Unit = {
     val posInBytes = charCountToByteCount(0,position)
     appendChannel{_.truncate(posInBytes)}
   }
 
 
-  protected def underlyingOutput: OutputResource[OutputStream] =
-    Resource.fromOutputStream(new ChannelOutputStreamAdapter(underlyingChannel(false)))
+  protected def underlyingOutput: OutputResource[OutputStream] = {
+    val resource = underlyingChannel(false)
+    Resource.fromOutputStream(new ChannelOutputStreamAdapter(resource.get)).appendCloseAction(_ => resource.close())
+  }
 
-  def chars(implicit codec: Codec) = Resource.fromByteChannel(underlyingChannel(false)).chars(codec)
+  def chars(implicit codec: Codec) = {
+    val resource = underlyingChannel(false)
+    resource.get.position(0)
+    Resource.fromByteChannel(resource.get).appendCloseAction(_ => resource.close()).chars(codec)
+  }
 
-  def bytesAsInts = Resource.fromByteChannel(underlyingChannel(false)).bytesAsInts
+  def bytesAsInts = {
+    val resource = underlyingChannel(false)
+    resource.get.position(0)
+    Resource.fromByteChannel(resource.get).appendCloseAction(_ => resource.close()).bytesAsInts
+  }
 
   private def charCountToByteCount(start:Long, end:Long)(implicit codec:Codec) = {
     val encoder = codec.encoder
@@ -548,7 +574,9 @@ trait Seekable extends Input with Output {
       */
     }
 
-    val segment = Resource.fromByteChannel(underlyingChannel(false)).chars().lslice(start, end)
+    val resource = underlyingChannel(false)
+    val chars = Resource.fromByteChannel(resource.get).appendCloseAction(_ => resource.close()).chars(codec)
+    val segment = chars.lslice(start, end)
 
     (0L /: segment ) { (replacedInBytes, nextChar) =>
           replacedInBytes + sizeInBytes(nextChar)

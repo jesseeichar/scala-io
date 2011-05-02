@@ -134,7 +134,7 @@ abstract class FileOps extends Seekable {
    * @param action
    *          The function that will be executed within the block
    */
-  def open[R](openOptions: Seq[OpenOption] = WriteTruncate)(action: Seekable => R): R
+  def open[R](openOptions: Seq[OpenOption] = WriteTruncate)(action: OpenSeekable => R): R
 
   /**
    * Performs an operation on the file with a FileLock
@@ -174,9 +174,9 @@ abstract class FileOps extends Seekable {
   override protected def underlyingOutput = outputStream()
   protected def underlyingChannel(append: Boolean) = {
     if(append) {
-      channel((ReadWrite :+ Append) :_*).open.get
+      channel((ReadWrite :+ Append) :_*).open
     } else {
-      channel(ReadWrite : _*).open.get
+      channel(ReadWrite : _*).open
     }
   }
 }

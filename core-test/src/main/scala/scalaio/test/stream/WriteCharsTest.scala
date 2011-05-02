@@ -8,20 +8,18 @@
 
 package scalaio.test.stream
 
-import scalax.io.{
-ReadChars, WriteChars, Codec, Resource
-}
 import scalaio.test._
 
-import java.io.{
-PipedInputStream, PipedOutputStream
-}
+import scalax.io._
+import org.junit.Test
+import org.junit.Assert._
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream, PipedInputStream, PipedOutputStream}
 
 class WriteCharsTest extends AbstractWriteCharsTests {
-  def open(): (ReadChars, WriteChars) = {
+  def open() = {
 
-    val in = new PipedInputStream()
-    val out = new PipedOutputStream(in)
+    val out = new ByteArrayOutputStream()
+    def in = new ByteArrayInputStream(out.toByteArray)
 
     val inResource = Resource.fromInputStream(in).reader(Codec.UTF8)
     val outResource = Resource.fromOutputStream(out).writer(Codec.UTF8)

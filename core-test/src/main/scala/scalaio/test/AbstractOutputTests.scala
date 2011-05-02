@@ -90,4 +90,27 @@ abstract class AbstractOutputTests extends scalax.test.sugar.AssertionSugar {
     assertEquals(line1+line2,input.slurpString)
   }
 
+  @Test //@Ignore
+  def openOutput: Unit = {
+    val (in,out0) = open()
+    out0 match {
+      case out0:OutputResource[_] =>
+        var closes = 0;
+        val out = out0.appendCloseAction(_ => closes += 1)
+
+        assertEquals(0,closes)
+        out.write("whoop!")
+        assertEquals(1,closes)
+
+        out.openOutput(opened => {
+          opened.write("hello")
+          opened.write(" ")
+          opened.write("world")
+        })
+        assertEquals(2,closes)
+        assertEquals("whoop!hello world",in.slurpString)
+      case _ => ()
+    }
+
+  }
 }

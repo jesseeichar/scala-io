@@ -71,5 +71,5 @@ private[file] trait RamFileOps {
   def fileChannel(openOptions: OpenOption*) : Option[ByteChannelResource[FileChannel]] = None // not supported
 
   def withLock[R](start: Long,size: Long,shared: Boolean)(block: (Seekable) => R):Option[R] = None // TODO
-  def open[R](openOptions: Seq[OpenOption])(action: (Seekable) => R):R = null.asInstanceOf[R] // TODO
+  def open[R](openOptions: Seq[OpenOption])(action: (OpenSeekable) => R):R = null.asInstanceOf[R] // TODO
 }

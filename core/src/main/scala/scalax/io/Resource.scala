@@ -19,10 +19,20 @@ import java.net.{URLConnection, URL}
 import scalax.io.CloseAction._
 import StandardOpenOption._
 import collection.immutable.List._
+import util.control.Exception
 
 trait OpenedResource[+R] {
   def get:R
   def close():List[Throwable]
+  def toSingleUseResource = new ManagedResourceOperations[R] {
+    def acquireFor[B](f: (R) => B): Either[List[Throwable], B] = {
+      val result = f(get)
+      close() match {
+        case Nil => Right(result)
+        case errors => Left(errors)
+      }
+    }
+  }
 }
 class CloseableOpenedResource[+R <: Closeable](val get:R,closeAction:CloseAction[R]) extends OpenedResource[R]{
   def close():List[Throwable] = (closeAction :+ CloseAction ((_:R).close()))(get)

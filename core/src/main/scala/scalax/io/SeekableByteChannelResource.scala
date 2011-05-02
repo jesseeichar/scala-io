@@ -49,21 +49,23 @@ class SeekableByteChannelResource[+A <: SeekableByteChannel] (
   override def chars(implicit codec: Codec) = reader(codec).chars  // TODO optimize for byteChannel
 
 
-  protected override def underlyingChannel(append:Boolean): SeekableByteChannel = {
-    (openOptions,append) match {
+  protected override def underlyingChannel(append:Boolean) = {
+    val resource:A = (openOptions,append) match {
       case (None,true) =>
         val c = opener(ReadWrite)
         c.position(c.size)
+        c
       case (Some(_),true) =>
         opener(ReadWrite :+ Append)
       case (_,false) =>
         opener(ReadWrite)
     }
+
+    new CloseableOpenedResource(resource,closeAction)
   }
 
   protected override def underlyingOutput: OutputResource[OutputStream] = outputStream
 
   override def toString: String = "SeekableByteChannelResource("+descName.name+")"
-
 }
 

@@ -123,10 +123,10 @@ object BasicIO {
     // cannot be created so a WriteChars object is created
     // WriteChars have the benefit of not needing to have a codec declared since the underlying writer
     // takes care of encoding
-    Resource.fromWriter(new OutputStreamWriter(new ByteArrayOutputStream())).writeString("howdy")
+    Resource.fromWriter(new OutputStreamWriter(new ByteArrayOutputStream())).write("howdy")
 
 
-    Resource.fromOutputStream(new PrintStream(new ByteArrayOutputStream())).writer.writeString("howdy")
+    Resource.fromOutputStream(new PrintStream(new ByteArrayOutputStream())).writer.write("howdy")
 
     // Channels can also be wrapped in Resource objects and accessed as normal Input/Output objects
     val resource = Resource.fromWritableByteChannel(new FileOutputStream("file").getChannel)

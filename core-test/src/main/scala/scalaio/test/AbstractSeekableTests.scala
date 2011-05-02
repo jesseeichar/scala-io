@@ -207,11 +207,17 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
   }
 
   @Test //@Ignore
-  def chop: Unit = {
+  def truncate: Unit = {
     val seekable = open()
     val expected = TEXT_VALUE take 2
-    seekable.truncate(UTF8 encode expected size)
+    seekable.truncate((UTF8 encode expected)size)
     assertEquals(expected, seekable.slurpString)
+
+    seekable.truncate(0)
+    assertEquals("", seekable.slurpString)
+    seekable.append("more")
+    assertEquals("more", seekable.slurpString)
+
   }
 
   @Test //@Ignore
@@ -230,4 +236,29 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
     }
     0 to 2 foreach test
   }
+
+  @Test //@Ignore
+  def openSeekable: Unit = {
+    var closes = 0;
+    val seekable = open() match {
+      case raw:SeekableResource[_] =>
+        val seekable = raw.appendCloseAction(_ => closes += 1)
+        assertEquals(0,closes)
+        seekable.write("whoop!")
+        assertEquals(1, closes)
+        seekable.open(opened => {
+          opened.truncate(0)
+          opened.write("hello-")
+          opened.write("world")
+          opened.position = 5
+          opened.write(' ')
+        })
+        assertEquals(2, closes)
+        assertEquals("hello world", seekable.slurpString)
+      case _ => ()
+    }
+
+
+  }
+
 }

@@ -42,4 +42,8 @@ object MoreOutputExamples {
 
     output.write("data is being written to file")
   }
+
+  /**
+   *
+   */
 }

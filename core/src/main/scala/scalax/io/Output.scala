@@ -11,7 +11,7 @@ package scalax.io
 import resource._
 import scala.collection.Traversable
 import scalax.io.CloseAction.Noop
-import java.io.{FilterOutputStream, File, OutputStream}
+import java.io.{Writer, FilterOutputStream, File, OutputStream}
 
 /**
  * A trait for objects that can have data written to them. For example an
@@ -47,12 +47,13 @@ trait Output {
   def openOutput[U](f:Output=> U):U = {
     underlyingOutput.acquireAndGet {out =>
       val nonClosingOutput:Output = new OutputStreamResource[OutputStream](null,Noop) {
-        override def open():OpenedResource[OutputStream] = new OpenedResource[OutputStream]{
+        val instance = new OpenedResource[OutputStream]{
           def close(): List[Throwable] = Nil
-          def get = new FilterOutputStream(out){
+          val get = new FilterOutputStream(out){
             override def close() {}
           }
         }
+        override def open():OpenedResource[OutputStream] = instance
       }
       f(nonClosingOutput)
     }
@@ -99,7 +100,7 @@ trait Output {
   *          Default is sourceCodec
   */
   def write(string: String)(implicit codec: Codec = Codec.default): Unit = {
-      underlyingOutput.writer writeString string
+      underlyingOutput.writer write string
   }
 
   /*

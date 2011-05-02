@@ -47,19 +47,25 @@ private[file] trait DefaultFileOps {
   }
   def fileChannel(openOptions: OpenOption*) = Some(Resource fromByteChannel openChannel(jfile,openOptions).self)
 
-  def open[R](openOptions: Seq[OpenOption] = List(Read,Write))(action: Seekable => R): R = {
+  def open[R](openOptions: Seq[OpenOption] = List(Read,Write))(action: OpenSeekable => R): R = {
     val c = openChannel(jfile,openOptions)
     val path = this
     val seekable = new Seekable {
       def size = path.size
-      override def open[U](f: (Seekable) => U): U = f(this)
-      protected def underlyingChannel(append: Boolean): SeekableByteChannel = new SeekableFileChannel(c.self){
-        override def close = {}
+      def position:Long = c.position
+      def position_=(position:Long):Unit = {c.position(position)}
+
+      override def open[U](f: (OpenSeekable) => U): U = f(this)
+      protected def underlyingChannel(append: Boolean) = new OpenedResource[SeekableFileChannel] {
+        val get = new SeekableFileChannel(c.self){
+          override def close = {}
+        }
+
+        def close(): List[Throwable] = Nil
       }
     }
-
     try {
-      action(this)
+      seekable.open(action)
     } finally {
       c.close()
     }

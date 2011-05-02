@@ -8,17 +8,17 @@
 
 package scalaio.test.stream
 
-import scalax.io.{
-Input, Output, Resource
-}
 import scalaio.test._
 
 import java.io.{
 ByteArrayInputStream, ByteArrayOutputStream
 }
+import org.junit.Test
+import org.junit.Assert._
+import scalax.io._
 
 class OutputTest extends AbstractOutputTests {
-  def open(): (Input, Output) = {
+  def open() = {
     val cache = new Array[Byte](1000)
     val out = new ByteArrayOutputStream()
     def in = new ByteArrayInputStream(out.toByteArray)
@@ -28,4 +28,5 @@ class OutputTest extends AbstractOutputTests {
 
     (inResource, outResource)
   }
+
 }

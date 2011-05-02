@@ -108,14 +108,27 @@ object SeekableSamples {
    * Multiple Random accesses from a file opened only a single time
    */
   def multipleAccesses {
-    // TODO at the moment I am not sure what the best way to perform multiple
-    // read / write operations on a single file.  The typical seek - write - seek - read
-    // does not seem very "scala-like"
+    import scalax.io._
+    import java.io.File
+    import Seekable.asSeekableConverter
 
-    // A potential idea is to have the access like:
-    // file.apply { file =>
-    //   val name:Seekable = file.bytes.slice(5,10)  // take bytes 5 -> 10
-    //   name.write("hello")(codec)  // overwrite bytes 5-10
-    // }
+    val someFile: Seekable = Resource.fromFile("someFile")
+
+    // Often it is preferable to open a file/resource a single time
+    // and perform several operations on that file with the single
+    // connection as it normally offers better performance and uses
+    // fewer resources
+
+    // The following will replace the first instanceof "hello" with "Hello"
+    someFile.open{ file =>
+       val index = file.chars.indexOf("hello")
+       file.patch(index,"Hello",OverwriteAll)
+    }
+
+    someFile.open{ file =>
+       val index = file.chars.indexOf("hello")
+       file.patch(index,"Hello",OverwriteAll)
+    }
+
   }
 }

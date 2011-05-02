@@ -10,7 +10,9 @@ package scalax.io
 
 import resource._
 import scala.collection.Traversable
-import java.io.{OutputStream, File, Writer}
+import scalax.io.CloseAction.Noop
+import java.io._
+import collection.immutable.StringLike
 
 /**
  * A trait for objects that can have expect to have characters written to them. For example a
@@ -32,27 +34,43 @@ trait WriteChars {
 
 
   protected def writer : WriteCharsResource[Writer]
+  /**
+   * Execute the function 'f' passing an WriteChars instance that performs all operations
+   * on a single opened connection to the underlying resource. Typically each call to
+   * one of the Output's methods results in a new connection.  For example if the underlying
+   * OutputStream truncates the file each time the connection is made then calling write
+   * two times will result in the contents of the second write overwriting the second write.
+   *
+   * Even if the underlying resource is an appending, using open will be more efficient since
+   * the connection only needs to be made a single time.
+   *
+   * @param f the function to execute on the new Output instance (which uses a single connection)
+   * @return the result of the function
+   */
+  def open[U](f:WriteChars=> U):U = {
+    writer.acquireAndGet {out =>
+      val nonClosingOutput:WriteChars = new WriterResource[Writer](null,Noop) {
+        val instance = new OpenedResource[Writer]{
+          def close(): List[Throwable] = Nil
+          val get = new FilterWriter(out){
+            override def close() {}
+          }
+        }
+        override def open():OpenedResource[Writer] = instance
+      }
+      f(nonClosingOutput)
+    }
+  }
 
   /**
    * Write several characters to the underlying object
    */
   def write(characters : TraversableOnce[Char]) : Unit = {
     for (out <- writer) {
-      characters foreach out.append
-    }
-  }
-
-  /**
-   * Writes a string. The open options that can be used are dependent
-   * on the implementation and implementors should clearly document
-   * which option are permitted.
-   *
-   * @param string
-   *          the data to write
-   */
-  def writeString(string : String) : Unit = {
-    for (out <- writer) {
-      out write string
+      characters match {
+        case string:StringLike[_] => out.write(string.toString)
+        case _ => characters foreach out.append
+      }
     }
   }
 
