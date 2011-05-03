@@ -18,8 +18,12 @@ import java.io.{Writer, FilterOutputStream, File, OutputStream}
  * OutputStream and File can be an Output object (or be converted to one).
  *
  * Note: Each invocation of a method will typically open a new stream or
- * channel.  That behaviour can be overridden by the implementation but
+ * channel. That behaviour can be overridden by the implementation but
  * it is the default behaviour.
+ *
+ * The consequence of a new stream being opened each time a write is performed
+ * is different for each implementation.  In the case of a [[scalax.io.Resource]].fromFile
+ * reach write will write to the beginning of the file rather than appending to the file.
  *
  * @author Jesse Eichar
  * @since 1.0
@@ -60,7 +64,10 @@ trait Output {
   }
 
   /**
-   * Write data to the underlying object.  In the case of writing ints and bytes it is often
+   * Write data to the underlying object.  Each time write is called the resource is reopened, in the case of a
+   * file this means that the file will be opened and truncated.  The
+   *
+   * In the case of writing ints and bytes it is often
    * recommended to write arrays of data since normally the underlying object can write arrays
    * of bytes or integers most efficiently.
    *

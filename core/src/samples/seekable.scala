@@ -109,8 +109,6 @@ object SeekableSamples {
    */
   def multipleAccesses {
     import scalax.io._
-    import java.io.File
-    import Seekable.asSeekableConverter
 
     val someFile: Seekable = Resource.fromFile("someFile")
 
@@ -121,13 +119,29 @@ object SeekableSamples {
 
     // The following will replace the first instanceof "hello" with "Hello"
     someFile.open{ file =>
-       val index = file.chars.indexOf("hello")
-       file.patch(index,"Hello",OverwriteAll)
+      val index = file.chars.indexOf("hello")
+      file.patch(index,"Hello",OverwriteAll)
     }
 
+    // This example demonstrates processing a file as strings and
+    // while convenient if the codec used is a variable sized codec like
+    // UTF8 it can be quite expensive since determining the index in the file
+    // requires counting from the beginning of the file each time
     someFile.open{ file =>
-       val index = file.chars.indexOf("hello")
-       file.patch(index,"Hello",OverwriteAll)
+      val index = file.chars.indexOf("hello")
+      // move to position index
+      file.position = index
+      // overwrite data starting at index with Hello
+      file.write("Hello")
+      // continue overwriting with World.
+      // It is important to note that we are not inserting data
+      // data insertion is intentionally made more difficult because
+      // it is very expensive since copies of the file must be made
+      // to perform the operation
+      file.write(" World")
+      file.insert(index,"<")
+
+      file.insert(index+("Hello World".size),">")
     }
 
   }
