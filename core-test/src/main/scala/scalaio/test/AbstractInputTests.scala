@@ -78,11 +78,12 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
   }
 
 
-  @Test(timeout = 3000) //@Ignore
+  @Test//(timeout = 3000) //@Ignore
   def read_all_bytes_as_Ints(): Unit = {
     val ints = input(TextNewLine).bytesAsInts.toArray
     val expected = {
-      val in = new ByteArrayInputStream(Constants.TEXT_VALUE.getBytes(Codec.UTF8.charSet))
+      val bytes = Constants.TEXT_VALUE.getBytes(Codec.UTF8.charSet)
+      val in = new ByteArrayInputStream(bytes)
       try {
         var i = in.read()
         val buffer = new collection.mutable.ArrayBuffer[Int]()

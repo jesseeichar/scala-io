@@ -15,6 +15,7 @@ import org.junit.{
 
 import java.io._
 import scalaio.test.LongTraversableTest
+import scalax.io.CloseAction.Noop
 
 class ResourceTraversableTest extends LongTraversableTest {
   override def traversable[U, A](tsize: Int,
@@ -22,10 +23,11 @@ class ResourceTraversableTest extends LongTraversableTest {
                                  dataFunc: (Int) => Traversable[Int],
                                  conv: (Int) => A):LongTraversable[A] = {
     def stream = new ByteArrayInputStream(dataFunc(tsize) map {_.toByte} toArray)
-    val callBackAndConv = (i:Int) => {
-      callback(i)
-      conv(i)
+    def resource = new CloseableOpenedResource(stream,Noop)
+    val callBackAndConv = (i:Byte) => {
+      callback(i.toInt)
+      conv(i.toInt)
     }
-    ResourceTraversable.streamBased(Resource.fromInputStream(stream), _conv=callBackAndConv)
+    ResourceTraversable.streamBased(resource, initialConv = callBackAndConv)
   }
 }

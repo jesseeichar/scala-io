@@ -13,10 +13,13 @@ import java.io.ByteArrayInputStream
 import scalax.io.{Codec, Resource}
 import org.junit.Test
 import org.junit.Assert._
+import java.lang.String
 
 class InputTest extends AbstractInputTests {
-  private def text(sep: String) = {
-    val bytes = Constants.TEXT_VALUE.replaceAll("""\n""", sep).getBytes(Codec.UTF8.name)
+  protected def text(sep: String) = {
+    val startText = Constants.TEXT_VALUE
+    val finalText: String = Constants.TEXT_VALUE.replaceAll("""\n""", sep)
+    val bytes = finalText.getBytes(Codec.UTF8.charSet)
     new java.io.ByteArrayInputStream(bytes)
   }
 

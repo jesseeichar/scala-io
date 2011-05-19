@@ -537,14 +537,20 @@ trait Seekable extends Input with Output {
   }
 
   def chars(implicit codec: Codec) = {
-    val resource = underlyingChannel(false)
-    resource.get.position(0)
+    def resource = {
+      val r = underlyingChannel(false)
+      r.get.position(0)
+      r
+    }
     Resource.fromByteChannel(resource.get).appendCloseAction(_ => resource.close()).chars(codec)
   }
 
   def bytesAsInts = {
-    val resource = underlyingChannel(false)
-    resource.get.position(0)
+    def resource = {
+      val r = underlyingChannel(false)
+      r.get.position(0)
+      r
+    }
     Resource.fromByteChannel(resource.get).appendCloseAction(_ => resource.close()).bytesAsInts
   }
 

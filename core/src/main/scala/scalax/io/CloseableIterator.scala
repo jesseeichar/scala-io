@@ -1,8 +1,8 @@
 package scalax.io
 
 import java.io.Closeable
-import collection.{Iterator, TraversableOnce}
 import resource.{AbstractManagedResource, ManagedResourceOperations}
+import collection.{GenTraversableOnce, Iterator, TraversableOnce}
 
 trait CloseableIterator[+A] extends Iterator[A] with Closeable {
   self =>
@@ -49,11 +49,11 @@ trait CloseableIterator[+A] extends Iterator[A] with Closeable {
     Proxy(super.zip(that))
 
   override def map[B](f: (A) => B) = Proxy(super.map(f))
-  override def flatMap[B](f: (A) => TraversableOnce[B]) = Proxy(super.flatMap(f))
+  override def flatMap[B](f: (A) => GenTraversableOnce[B]) = Proxy(super.flatMap(f))
   override def dropWhile(p: (A) => Boolean) = Proxy(super.dropWhile(p))
   override def filter(p: (A) => Boolean) = Proxy(super.filter(p))
   override def takeWhile(p: A => Boolean) = Proxy(super.takeWhile(p))
-  override def ++[B >: A](that: => TraversableOnce[B]): CloseableIterator[B] =
+  override def ++[B >: A](that: => GenTraversableOnce[B]): CloseableIterator[B] =
     new Proxy[B,Iterator[B]](super.++(that)) {
       override def doClose() = {
         self.close()

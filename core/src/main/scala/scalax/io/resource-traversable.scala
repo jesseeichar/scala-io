@@ -11,7 +11,11 @@ package scalax.io
 import java.io.{
   InputStream, Reader, Closeable
 }
-import collection.Iterator
+import java.nio.{ByteBuffer => NioByteBuffer}
+import java.nio.channels.{Channels, ReadableByteChannel}
+import resource.{DeferredExtractableManagedResource, ManagedResource, CanSafelyMap, CanSafelyFlatMap}
+import collection.generic.CanBuildFrom
+import java.nio.channels.ReadableByteChannel._
 
 /**
  * A way of abstracting over the source Resource's type
@@ -19,9 +23,9 @@ import collection.Iterator
  * @see [[ResourceTraversable]]
  */
 protected[io] trait TraversableSource[In <: Closeable, A] {
-  def resource : Resource[In]
-  def skip(stream:In, count:Long) : Unit
-  def read(stream:In) : Option[A]
+  def close(): List[Throwable]
+  def skip(count:Long) : Unit
+  def read() : Iterator[A]
 }
 
 /**
@@ -35,6 +39,9 @@ private[io] trait ResourceTraversable[A] extends LongTraversable[A]
   type In <: java.io.Closeable
   type SourceOut
 
+  /**
+   * returns the strategy that permits
+   */
   def source : TraversableSource[In,SourceOut]
 
   protected def conv : SourceOut => A
@@ -46,16 +53,19 @@ private[io] trait ResourceTraversable[A] extends LongTraversable[A]
 
   protected def getIterator = new CloseableIterator[A] {
 
-    private val openedResource = source.resource.open()
-    private val resource = openedResource.get
-    source.skip(resource,start)
+    private val openedSource = source
+    openedSource.skip(start)
 
-    var nextEl:Option[SourceOut] = _
+    var nextEl:Iterator[SourceOut] = null
     var c = start
 
     def next(): A = {
-      val n = nextEl.get
-      nextEl = null
+      val n = nextEl.next()
+      c += 1
+
+      if(!nextEl.hasNext) {
+        nextEl = null
+      }
       conv(n)
     }
 
@@ -63,46 +73,15 @@ private[io] trait ResourceTraversable[A] extends LongTraversable[A]
       if(c >= end) return false
 
       if(nextEl == null) {
-        nextEl = source.read(resource)
-        c += 1
+        nextEl = openedSource.read()
       }
-      nextEl.isDefined
+      nextEl.nonEmpty
     }
 
-    def doClose() = openedResource.close()
+    def doClose() = source.close()
   }
 
-  /*
-  override def foreach[U](f: (A) => U) : Unit = doForeach(f)
-  protected def doForeach[U](f: A => U) : Unit = {
-    for(stream <- source.resource) {
-      if(start > 0) source.skip(stream,start)
-
-      var v = source.read(stream)
-      var c = start
-      val funAndInc = conv andThen f andThen {f => c += 1}
-      while(v != None && c < end) {
-        funAndInc(v.get)
-        v = source.read(stream)
-      }
-    }
-  }
-  protected def doForeach[U](pred:A => Boolean, f: A => U) : Unit = {
-
-    for(stream <- source.resource) {
-      if(start > 0) source.skip(stream,start)
-
-      var v = source.read(stream)
-      var c = start
-      val funAndInc = conv andThen f andThen {f => c += 1}
-      val continue = conv andThen pred
-      while(v != None && c < end && continue(v.get)) {
-        funAndInc(v.get)
-        v = source.read(stream)
-      }
-    }
-  }
-  */
+  override def isEmpty: Boolean = CloseableIterator.managed(iterator).acquireAndGet(_.isEmpty)
 
   override def ldrop(length : Long) : LongTraversable[A] = lslice(length,Long.MaxValue)
   override def drop(length : Int) = ldrop(length.toLong)
@@ -151,86 +130,144 @@ private[io] trait ResourceTraversable[A] extends LongTraversable[A]
 }
 
 private[io] object ResourceTraversable {
-  def streamBased[A](_in : Resource[InputStream], _conv : Int => A = (i:Int) => i, _start : Long = 0, _end : Long = Long.MaxValue) = {
-    new ResourceTraversable[A] {
+  def streamBased[A,B](opener : => OpenedResource[InputStream],
+                     bufferFactory : => Array[Byte] = new Array[Byte](Constants.BufferSize),
+                     parser : (Array[Byte],Int) => Iterator[A] = (a:Array[Byte],length:Int) => a.take(length).iterator,
+                     initialConv: A => B = (a:A) => a,
+                     startIndex : Long = 0,
+                     endIndex : Long = Long.MaxValue) = {
+    new ResourceTraversable[B] {
       type In = InputStream
-      type SourceOut = Int
+      type SourceOut = A
 
-      def source = new TraversableSource[InputStream, Int] {
-        def resource = _in
-        def skip(stream:InputStream, count:Long) = stream.skip(count)
-        def read(stream:InputStream) = stream.read match {
-          case -1 => None
-          case i => Some(i)
+      def source = new TraversableSource[InputStream, A] {
+        val buffer = bufferFactory
+
+        val openedResource = opener
+        val stream = openedResource.get
+        def read() = {
+          val read = stream.read (buffer)
+          parser(buffer,read)
         }
+
+        def skip(count: Long) = stream.skip(count)
+
+        def close(): List[Throwable] = openedResource.close()
       }
 
-      def conv = _conv
-      def start = _start
-      def end = _end
+      protected val conv = initialConv
+      protected val start = startIndex
+      protected val end = endIndex
     }
   }
-  def readerBased[A](_in : Resource[Reader], _conv : Char => A = (c:Char) => c, _start : Long = 0, _end : Long = Long.MaxValue) = {
+
+  def readerBased[A](opener : => OpenedResource[Reader],
+                  initialConv: Char => A = (a:Char) => a,
+                  startIndex : Long = 0,
+                  endIndex : Long = Long.MaxValue) = {
     new ResourceTraversable[A] {
       type In = Reader
       type SourceOut = Char
 
       def source = new TraversableSource[Reader, Char] {
-        def resource = _in
-        def skip(reader:Reader, count:Long) =
-          reader.skip(count)
-        def read(reader:Reader) = reader.read match {
-          case -1 => None
-          case i => Some(i.toChar)
+        val openedResource = opener
+        def close(): List[Throwable] = openedResource.close()
+        def skip(count:Long) = openedResource.get.skip(count)
+        def read() = openedResource.get.read match {
+          case -1 => Iterator.empty
+          case i => Iterator.single(i.toChar)
         }
       }
 
-      def conv = _conv
-      def start = _start
-      def end = _end
+      protected val conv = initialConv
+      protected val start = startIndex
+      protected val end = endIndex
     }
   }
-  /*
-  def byteChannelBased[A](_in : Resource[ReadableByteChannel],
-                          _byteBuffer : => NioByteBuffer,
-                          _conv : NioByteBuffer => A = (c:NioByteBuffer) => JavaConversions.byteBufferToTraversable(c) : Traversable[Byte],
-                          _start : Long = 0, _end : Long = Long.MaxValue) = {
-    new ResourceTraversable[A] {
+
+  def byteChannelBased[A,B](opener : => OpenedResource[ReadableByteChannel],
+                          byteBufferFactory : => NioByteBuffer = NioByteBuffer.allocate(Constants.BufferSize),
+                          parser : NioByteBuffer => Iterator[A] = (c:NioByteBuffer) => JavaConversions.byteBufferToTraversable(c).iterator,
+                          initialConv: A => B = (a:A) => a,
+                          startIndex : Long = 0,
+                          endIndex : Long = Long.MaxValue) = {
+    new ResourceTraversable[B] {
       type In = ReadableByteChannel
-      type SourceOut = NioByteBuffer
+      type SourceOut = A
 
-      def source = new TraversableSource[ReadableByteChannel, NioByteBuffer] {
-        val buffer = _byteBuffer
+      def source = new TraversableSource[ReadableByteChannel, A] {
+        val buffer = byteBufferFactory
 
-        def resource = _in
-        def skip(channel:ReadableByteChannel, count:Long) = {
+        val openedResource = opener
+        val channel = openedResource.get
+        def read() = {
+          buffer.clear
+          channel read buffer
+          buffer.flip
+          parser(buffer)
+        }
+
+        def skip(count: Long) {
           if(count > 0) {
-            val toRead = buffer.capacity min count.toInt
+            val toRead = (buffer.capacity.toLong min count).toInt
 
-            buffer.clear.limit(toRead)
+            buffer.clear()
+            buffer.limit(toRead)
 
             val read = channel read buffer
-            if(read > -1) skip(channel, count - read)
+            if(read > -1) skip(count - read)
           }
         }
 
-        def read(channel:ReadableByteChannel) = {
-          buffer.clear
-          channel read buffer match {
-            case -1 =>
-              None
-            case i =>
-              buffer.flip
-              Some(buffer)
-          }
-        }
+        def close(): List[Throwable] = openedResource.close()
       }
 
-      def conv = _conv
-      def start = _start
-      def end = _end
+      protected val conv = initialConv
+      protected val start = startIndex
+      protected val end = endIndex
     }
-  }*/
+  }
+  def seekableByteChannelBased[A,B](opener : => OpenedResource[SeekableByteChannel],
+                          byteBufferFactory : => NioByteBuffer = NioByteBuffer.allocate(Constants.BufferSize),
+                          parser : NioByteBuffer => Iterator[A] = (c:NioByteBuffer) => JavaConversions.byteBufferToTraversable(c).iterator,
+                          initialConv: A => B = (a:A) => a,
+                          startIndex : Long = 0,
+                          endIndex : Long = Long.MaxValue) = {
+    new ResourceTraversable[B] {
+      type In = SeekableByteChannel
+      type SourceOut = A
 
+      def source = new TraversableSource[SeekableByteChannel, A] {
+        val buffer = byteBufferFactory
+
+        val openedResource = opener
+        val channel = openedResource.get
+        channel.position(0)
+        def read() = {
+          buffer.clear
+          channel read buffer
+          buffer.flip
+          parser(buffer)
+        }
+
+        def skip(count: Long) {
+          if(count > 0) {
+            channel.position(channel.position + count)
+          }
+        }
+
+        def close(): List[Throwable] = openedResource.close()
+      }
+
+      protected val conv = initialConv
+      protected val start = startIndex
+      protected val end = endIndex
+    }
+  }
+
+  val toIntConv : Byte => Int = (b:Byte) => {
+    if(b < 0) 256 + b
+    else b.toInt
+  }
 
 }

@@ -40,7 +40,7 @@ trait ReadChars {
    * @return
    *          an traversable of all the characters
    */
-  def chars: LongTraversable[Char]
+  def chars: ResourceView[Char]
   /**
    * Obtain an non-strict traversable for iterating through the lines in the object
    *
@@ -157,7 +157,7 @@ object ReadChars {
      */
     implicit object TraversableCharConverter extends AsReadCharsConverter[Traversable[Char]]{
       def toReadChars(t: Traversable[Char]): ReadChars = new ReadChars {
-        def chars: LongTraversable[Char] = new LongTraversable[Char] {
+        def chars: ResourceView[Char] = new LongTraversable[Char] {
 
           protected[io] def iterator: CloseableIterator[Char] = CloseableIterator(t.toIterator)
         }.view

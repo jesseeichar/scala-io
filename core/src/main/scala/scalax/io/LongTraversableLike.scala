@@ -490,14 +490,12 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
   }
   /** Computes length of longest segment whose elements all satisfy some predicate.
    *
-   *  $mayNotTerminateInf
-   *
    *  @param   p     the predicate used to test elements.
    *  @param   from  the index where the search starts.
    *  @return  the length of the longest segment of this $coll starting from index `from`
    *           such that every element of the segment satisfies the predicate `p`.
    */
-  def segmentLength ( p : (A) ⇒ Boolean , from : Long = 0 ) : Long =
+  def segmentLength ( p : (A) => Boolean , from : Long = 0 ) : Long =
     ldrop(from).limitFold(0){
       case (acc,next) if p(next) => Continue(acc + 1)
       case (acc,next) => End(acc)
@@ -584,8 +582,9 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
       LongTraversableLike.indexOf(thisCollection, 0L, lsize, that, 0, that.length, from)
     else {
       var i = from
+
       var s: LongTraversable[A] = thisCollection ldrop i
-      while (!s.isEmpty) {
+      while (s.nonEmpty) {
         if (s startsWith that)
           return i
 

@@ -178,7 +178,7 @@ trait IoProject extends AutoCompilerPlugins with MavenPublishing {
 
 
   override def compileOptions = super.compileOptions ++ List(
-    CompileOption("-P:continuations:enable"),
+    //CompileOption("-P:continuations:enable"),
     //CompileOption("-P:sxr:base-directory:" + mainScalaSourcePath.absolutePath),
     Unchecked)
 

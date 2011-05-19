@@ -15,6 +15,7 @@ class SeekableByteChannelResource[+A <: SeekableByteChannel] (
     protected val openOptions:Option[Seq[OpenOption]])
   extends SeekableResource[A]
   with ResourceOps[A, SeekableByteChannelResource[A]]  {
+
   private def rawOpen() = opener(openOptions getOrElse ReadWrite)
   def open():OpenedResource[A] = new CloseableOpenedResource(rawOpen(),closeAction)
 
@@ -45,10 +46,6 @@ class SeekableByteChannelResource[+A <: SeekableByteChannel] (
   def readableByteChannel = new ReadableByteChannelResource(rawOpen(),closeAction,sizeFunc,descName)
   def byteChannel = new ByteChannelResource(rawOpen(),closeAction,sizeFunc)
 
-  override def bytesAsInts = inputStream.bytesAsInts // TODO optimize for byteChannel
-  override def chars(implicit codec: Codec) = reader(codec).chars  // TODO optimize for byteChannel
-
-
   protected override def underlyingChannel(append:Boolean) = {
     val resource:A = (openOptions,append) match {
       case (None,true) =>
@@ -65,6 +62,10 @@ class SeekableByteChannelResource[+A <: SeekableByteChannel] (
   }
 
   protected override def underlyingOutput: OutputResource[OutputStream] = outputStream
+
+
+  override def bytesAsInts = ResourceTraversable.seekableByteChannelBased[Byte,Int](this.open, initialConv = ResourceTraversable.toIntConv).view
+  override def bytes = ResourceTraversable.seekableByteChannelBased[Byte,Byte](this.open).view
 
   override def toString: String = "SeekableByteChannelResource("+descName.name+")"
 }

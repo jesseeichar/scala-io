@@ -26,7 +26,7 @@ class ReaderResourceTraversableViewTest extends ResourceTraversableViewTest {
     }
     val data = dataFunc(tsize) mkString ""
     def resource = Resource.fromReader(new java.io.StringReader(data))
-    ResourceTraversable.readerBased(resource, _conv=callBackAndConv).view
+    ResourceTraversable.readerBased(resource.open,initialConv = callBackAndConv).view
   }
 
 }

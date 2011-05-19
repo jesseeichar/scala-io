@@ -10,12 +10,12 @@ package scalaio.test
 
 import scalax.io._
 import Codec.UTF8
-import org.junit.Assert._
 import org.junit.{
 Test, Ignore
 }
 
 import Constants.TEXT_VALUE
+import org.junit.Assert._
 
 abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
   implicit val codec = Codec.UTF8
@@ -250,6 +250,7 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
           opened.truncate(0)
           opened.write("hello-")
           opened.write("world")
+
           opened.position = 5
           opened.write(' ')
         })
@@ -257,8 +258,69 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
         assertEquals("hello world", seekable.slurpString)
       case _ => ()
     }
-
-
   }
+
+  @Test //@Ignore
+  def openSeekableReadAndWrite: Unit = {
+    var closes = 0;
+    val seekable = open() match {
+      case raw:SeekableResource[_] =>
+        val seekable = raw.appendCloseAction(_ => closes += 1)
+
+        val data = "it is a wonderful world"
+        val expectedEnd = "it is a fantastic place to be"
+
+        seekable.open(opened => {
+          opened.truncate(0)
+          opened.write(data)
+
+          assertEquals(data, opened.slurpString)
+
+          val pos = opened.chars.indexOfSlice("wonderful")
+          opened.patch(pos,"fantastic", OverwriteSome("wonderful".size))
+
+          assertEquals("it is a fantastic world", opened.slurpString)
+
+          val worldPos = opened.bytes.indexOfSlice("world".getBytes(Codec.UTF8.charSet))
+          opened.position = worldPos
+          opened.write("place to be")
+          assertEquals(expectedEnd, opened.slurpString)
+        })
+        assertEquals(1, closes)
+        assertEquals(expectedEnd, seekable.slurpString)
+      case _ => ()
+    }
+  }
+
+
+  @Test //@Ignore
+  def interleavingReadWrite: Unit = {
+    val testData = "12345"
+    val appendedData = "09876"
+    def perform(seekable:Seekable,msg:String) {
+      val bytes = seekable.bytes
+      val firstPart = bytes.take(5)
+      assertEquals(msg+": checking firstpart before write", testData.getBytes(UTF8.charSet).mkString, firstPart.mkString)
+      seekable.append(appendedData)
+      val secondPart = bytes.drop(5)
+      assertEquals(msg+": verifying that data is correctly appended", (testData + appendedData).getBytes(UTF8.charSet).mkString, seekable.bytes.mkString)
+      assertEquals(msg+": checking that bytes correctly gets the appended data but not first part", appendedData.getBytes(UTF8.charSet).mkString, secondPart.mkString)
+      assertEquals(msg+": checking that the first part traversable still works", testData.getBytes(UTF8.charSet).mkString, firstPart.mkString)
+
+      val zipped = firstPart.zip(secondPart)
+
+      assertEquals(msg+": does not correctly handle the same data zipped together in same openned resource", testData.getBytes(UTF8.charSet).zip(appendedData.getBytes(UTF8.charSet)).mkString, zipped.mkString)
+    }
+
+    val seekable = open()
+    seekable.truncate(0)
+    seekable.write(testData)
+    perform(seekable, "basic seekable")
+
+    seekable.write(testData)
+
+    seekable.open(perform(_, "opened seekable"))
+  }
+
 
 }

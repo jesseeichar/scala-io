@@ -17,7 +17,7 @@ class ReaderResource[+A <: Reader] (
   def prependCloseAction[B >: A](newAction: CloseAction[B]) = new ReaderResource(opener,newAction :+ closeAction,descName)
   def appendCloseAction[B >: A](newAction: CloseAction[B]) = new ReaderResource(opener,closeAction +: newAction,descName)
 
-  override def chars : ResourceView[Char]= ResourceTraversable.readerBased(this).view
+  override def chars : ResourceView[Char]= ResourceTraversable.readerBased(this.open).view
 
   override def toString: String = "ReaderResource("+descName.name+")"
 }

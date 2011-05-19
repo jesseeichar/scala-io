@@ -4,6 +4,7 @@ import java.io.{InputStreamReader, Reader, BufferedInputStream, InputStream}
 import java.nio.channels.Channels
 import scalax.io.ResourceAdapting.ReadableChannelAdapter
 import java.lang.String
+import java.nio.ByteBuffer
 
 /**
  * A ManagedResource for accessing and using InputStreams.  Class can be created using the [[scalax.io.Resource]] object.
@@ -44,5 +45,6 @@ class InputStreamResource[+A <: InputStream] (
   }
   def chars(implicit codec: Codec) = reader(codec).chars
 
-  def bytesAsInts : ResourceView[Int] = ResourceTraversable.streamBased(this).view
+  def bytesAsInts : ResourceView[Int] = ResourceTraversable.streamBased[Byte,Int](this.open,initialConv = ResourceTraversable.toIntConv).view
+  override def bytes : ResourceView[Byte] = ResourceTraversable.streamBased[Byte,Byte](this.open).view
 }

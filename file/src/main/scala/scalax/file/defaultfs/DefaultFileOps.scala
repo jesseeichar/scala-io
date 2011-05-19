@@ -57,12 +57,16 @@ private[file] trait DefaultFileOps {
 
       override def open[U](f: (OpenSeekable) => U): U = f(this)
       protected def underlyingChannel(append: Boolean) = new OpenedResource[SeekableFileChannel] {
+        if(append) {
+          c.self.position(c.self.position)
+        }
         val get = new SeekableFileChannel(c.self){
           override def close = {}
         }
 
         def close(): List[Throwable] = Nil
       }
+
     }
     try {
       seekable.open(action)

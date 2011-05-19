@@ -31,7 +31,8 @@ class ReadableByteChannelResource[+A <: ReadableByteChannel] (
     Resource.fromReader(nResource).appendCloseAction(closer)
   }
   def readableByteChannel = this
-  def bytesAsInts = inputStream.bytesAsInts // TODO optimize for byteChannel
+  def bytesAsInts = ResourceTraversable.byteChannelBased[Byte,Int](this.open,initialConv = ResourceTraversable.toIntConv).view
+  override def bytes = ResourceTraversable.byteChannelBased[Byte,Byte](this.open).view
   def chars(implicit codec: Codec) = reader(codec).chars  // TODO optimize for byteChannel
 
   override def toString: String = "ReadableByteChannelResource ("+descName.name+")"
