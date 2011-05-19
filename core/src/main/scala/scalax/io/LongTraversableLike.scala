@@ -497,7 +497,7 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
    *  @return  the length of the longest segment of this $coll starting from index `from`
    *           such that every element of the segment satisfies the predicate `p`.
    */
-  def segmentLength ( p : (A) ⇒ Boolean , from : Long = 0 ) : Long =
+  def segmentLength ( p : (A) => Boolean, from : Long = 0 ) : Long =
     ldrop(from).limitFold(0){
       case (acc,next) if p(next) => Continue(acc + 1)
       case (acc,next) => End(acc)
