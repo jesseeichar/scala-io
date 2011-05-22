@@ -11,27 +11,28 @@ package scalaio.test.stream
 import scalaio.test._
 import java.io.ByteArrayInputStream
 import scalax.io.{Codec, Resource}
+import Resource._
 import org.junit.Test
 import org.junit.Assert._
 import java.lang.String
 
 class InputTest extends AbstractInputTests {
+  protected def stringBasedStream(sep: String) =
+    new java.io.ByteArrayInputStream(text(sep))
   protected def text(sep: String) = {
-    val startText = Constants.TEXT_VALUE
     val finalText: String = Constants.TEXT_VALUE.replaceAll("""\n""", sep)
-    val bytes = finalText.getBytes(Codec.UTF8.charSet)
-    new java.io.ByteArrayInputStream(bytes)
+    finalText.getBytes(Codec.UTF8.charSet)
   }
 
   protected def input(t: Type) = t match {
-    case t@TextNewLine => Resource.fromInputStream(text(t.sep))
-    case t@TextPair => Resource.fromInputStream(text(t.sep))
-    case t@TextCarriageReturn => Resource.fromInputStream(text(t.sep))
-    case TextCustom(sep) => Resource.fromInputStream(text(sep))
-    case TextCustomData(sep, data) => Resource.fromInputStream(
+    case t@TextNewLine => fromInputStream(stringBasedStream(t.sep))
+    case t@TextPair => fromInputStream(stringBasedStream(t.sep))
+    case t@TextCarriageReturn => fromInputStream(stringBasedStream(t.sep))
+    case TextCustom(sep) => fromInputStream(stringBasedStream(sep))
+    case TextCustomData(sep, data) => fromInputStream(
       new ByteArrayInputStream(data.getBytes(Codec.UTF8.charSet))
     )
-    case Image => Resource.fromInputStream(Constants.IMAGE.openStream())
+    case Image => fromInputStream(Constants.IMAGE.openStream())
   }
 
   override protected def sizeIsDefined = false

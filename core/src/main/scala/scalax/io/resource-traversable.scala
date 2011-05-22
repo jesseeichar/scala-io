@@ -12,10 +12,7 @@ import java.io.{
   InputStream, Reader, Closeable
 }
 import java.nio.{ByteBuffer => NioByteBuffer}
-import java.nio.channels.{Channels, ReadableByteChannel}
-import resource.{DeferredExtractableManagedResource, ManagedResource, CanSafelyMap, CanSafelyFlatMap}
-import collection.generic.CanBuildFrom
-import java.nio.channels.ReadableByteChannel._
+import java.nio.channels.ReadableByteChannel
 
 /**
  * A way of abstracting over the source Resource's type
@@ -26,6 +23,7 @@ protected[io] trait TraversableSource[In <: Closeable, A] {
   def close(): List[Throwable]
   def skip(count:Long) : Unit
   def read() : Iterator[A]
+  def initializePosition(pos:Long) : Unit
 }
 
 /**
@@ -150,6 +148,8 @@ private[io] object ResourceTraversable {
           parser(buffer,read)
         }
 
+        def initializePosition(pos: Long) = skip(pos)
+
         def skip(count: Long) = stream.skip(count)
 
         def close(): List[Throwable] = openedResource.close()
@@ -172,6 +172,7 @@ private[io] object ResourceTraversable {
       def source = new TraversableSource[Reader, Char] {
         val openedResource = opener
         def close(): List[Throwable] = openedResource.close()
+        def initializePosition(pos: Long) = skip(pos)
         def skip(count:Long) = openedResource.get.skip(count)
         def read() = openedResource.get.read match {
           case -1 => Iterator.empty
@@ -206,6 +207,8 @@ private[io] object ResourceTraversable {
           buffer.flip
           parser(buffer)
         }
+
+        def initializePosition(pos: Long) = skip(pos)
 
         def skip(count: Long) {
           if(count > 0) {
@@ -249,6 +252,8 @@ private[io] object ResourceTraversable {
           buffer.flip
           parser(buffer)
         }
+
+        def initializePosition(pos: Long) = channel.position(pos)
 
         def skip(count: Long) {
           if(count > 0) {
