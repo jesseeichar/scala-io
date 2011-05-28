@@ -1,4 +1,6 @@
-libraryDependencies += "com.github.jsuereth.scala-arm" %% "scala-arm" % "0.2" withSources() withJavadoc()
+name := "scala-io-core"
 
-scalaVersion := "2.9.0"
+libraryDependencies += "com.github.jsuereth.scala-arm" % "scala-arm_2.9.0" % "0.2" withSources() withJavadoc()
+
+version := "0.2.0-SNAPSHOT"
 

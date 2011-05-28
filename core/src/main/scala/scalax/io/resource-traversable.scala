@@ -245,19 +245,26 @@ private[io] object ResourceTraversable {
 
         val openedResource = opener
         val channel = openedResource.get
-        channel.position(0)
+
+        var position = 0L
+
         def read() = {
+          channel.position(position)
           buffer.clear
-          channel read buffer
+          position += (channel read buffer)
           buffer.flip
           parser(buffer)
         }
 
-        def initializePosition(pos: Long) = channel.position(pos)
+        def initializePosition(pos: Long) = {
+          position = pos
+          channel.position(pos)
+        }
 
         def skip(count: Long) {
           if(count > 0) {
-            channel.position(channel.position + count)
+            position += count
+            channel.position(position)
           }
         }
 

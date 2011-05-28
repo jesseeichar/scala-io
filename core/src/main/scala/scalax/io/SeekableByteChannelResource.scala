@@ -47,14 +47,17 @@ class SeekableByteChannelResource[+A <: SeekableByteChannel] (
   def byteChannel = new ByteChannelResource(rawOpen(),closeAction,sizeFunc)
 
   protected override def underlyingChannel(append:Boolean) = {
-    val resource:A = (openOptions,append) match {
-      case (None,true) =>
-        val c = opener(ReadWrite)
-        c.position(c.size)
+    val resource:A = append match {
+      case true =>
+        val c = opener(ReadWrite :+ Append)
+        val pos = c.position
+        val size = c.size
+        if(pos < c.size) {
+          c.position(c.size)
+        }
+        val newPos = c.position
         c
-      case (Some(_),true) =>
-        opener(ReadWrite :+ Append)
-      case (_,false) =>
+      case false =>
         opener(ReadWrite)
     }
 

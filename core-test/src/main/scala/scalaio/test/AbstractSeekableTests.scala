@@ -297,25 +297,33 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
   def interleavingReadWrite: Unit = {
     val testData = "12345"
     val appendedData = "09876"
+    val testDataAsBytes: Array[Byte] = testData.getBytes(UTF8.charSet)
+    val appendedDataAsBytes: Array[Byte] = appendedData.getBytes(UTF8.charSet)
+
     def perform(seekable:Seekable,msg:String) {
       val bytes = seekable.bytes
       val firstPart = bytes.take(5)
-      assertEquals(msg+": checking firstpart before write", testData.getBytes(UTF8.charSet).mkString, firstPart.mkString)
+
+      assertEquals(msg+": checking firstpart before write", testDataAsBytes.mkString, firstPart.mkString)
       seekable.append(appendedData)
       val secondPart = bytes.drop(5)
       assertEquals(msg+": verifying that data is correctly appended", (testData + appendedData).getBytes(UTF8.charSet).mkString, seekable.bytes.mkString)
-      assertEquals(msg+": checking that bytes correctly gets the appended data but not first part", appendedData.getBytes(UTF8.charSet).mkString, secondPart.mkString)
-      assertEquals(msg+": checking that the first part traversable still works", testData.getBytes(UTF8.charSet).mkString, firstPart.mkString)
+      assertEquals(msg+": checking that bytes correctly gets the appended data but not first part", appendedDataAsBytes.mkString, secondPart.mkString)
+      assertEquals(msg+": checking that the first part traversable still works", testDataAsBytes.mkString, firstPart.mkString)
 
       val zipped = firstPart.zip(secondPart)
 
-      assertEquals(msg+": does not correctly handle the same data zipped together in same openned resource", testData.getBytes(UTF8.charSet).zip(appendedData.getBytes(UTF8.charSet)).mkString, zipped.mkString)
+      val expectedZip: Array[(Byte, Byte)] = testDataAsBytes.zip(appendedData.getBytes(UTF8.charSet))
+
+      assertEquals(msg+": does not correctly handle the same data zipped together in same openned resource", expectedZip.mkString, zipped.mkString)
     }
 
     val seekable = open()
     seekable.truncate(0)
     seekable.write(testData)
     perform(seekable, "basic seekable")
+
+    seekable.truncate(0)
 
     seekable.write(testData)
 
