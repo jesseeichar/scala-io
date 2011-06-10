@@ -97,7 +97,7 @@ class DefaultPath private[file] (val jfile: JFile, override val fileSystem: Defa
       while (size exists {pos < _}) {
         count = (size.get - pos) min FIFTY_MB
         val prepos = pos
-        pos += in.transferTo(pos, count, out)
+        pos += in.self.transferTo(pos, count, out)
         if(prepos == pos) fail("no data can be copied for unknown reason!")
       }
       if (this.size != dest.size)

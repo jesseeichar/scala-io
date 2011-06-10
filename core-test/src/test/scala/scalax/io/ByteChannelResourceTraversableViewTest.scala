@@ -48,6 +48,7 @@ class ByteChannelResourceInputTest extends InputTest {
 }
 
 class SeekableByteChannelResourceInputTest extends InputTest {
+  
   def wrap(data:Array[Byte]) = Resource.fromSeekableByteChannel(
     new ArrayBufferSeekableChannel(ArrayBuffer.apply(data:_*),StandardOpenOption.ReadWrite:_*)((),())
   )
@@ -61,4 +62,5 @@ class SeekableByteChannelResourceInputTest extends InputTest {
       val bytes = Resource.fromInputStream(scalaio.test.Constants.IMAGE.openStream()).byteArray
       wrap(bytes)
   }
+  override def sizeIsDefined = true
 }

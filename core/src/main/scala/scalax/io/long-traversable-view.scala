@@ -48,7 +48,7 @@ trait LongTraversableViewLike[+A, +Coll, +This <: LongTraversableView[A,Coll] wi
       extends LongTraversable[A] with LongTraversableLike[A, This] with TraversableView[A,Coll] with TraversableViewLike[A,Coll,This]{
   self =>
 
-  trait Transformed[+B] extends LongTraversableView[B, Coll] with super.Transformed[B] {
+  trait Transformed[+B] extends LongTraversableView[B, Coll] with super.Transformed[B]{
     protected[io] def iterator:CloseableIterator[B]
     override def foreach[U](f: (B) => U) = {
       val iter = iterator

@@ -118,7 +118,7 @@ class LongTraversableTest {
   @Test //@Ignore
   def should_handle_filterNot = assertSizeAndType(traversable(), _ filterNot {_ > 55})
 
-  @Test //@Ignore
+  @Test @Ignore
   def should_handle_groupBy = {
     def f(t : Traversable[Int]) = t groupBy {_.toString()(0)}
     val list = f(expectedData() toList)

@@ -99,7 +99,7 @@ abstract class FileOps extends Seekable {
    *           the options that define how the file is opened when using the stream
    *           Default is options only
    */
-  def channel(openOptions:OpenOption*): ByteChannelResource[SeekableByteChannel]
+  def channel(openOptions:OpenOption*): SeekableByteChannelResource[SeekableByteChannel]
   /**
    * Obtains a FileChannel for read/write access to the file.  Not all filesystems
    * can support FileChannels therefore None will be returned if the filesystem
@@ -113,7 +113,7 @@ abstract class FileOps extends Seekable {
   *          the options that define how the file is opened when using the stream
   *          Default is read/write/create/truncate
   */
-  def fileChannel(openOptions:OpenOption*): Option[ByteChannelResource[FileChannel]]
+  def fileChannel(openOptions:OpenOption*): Option[SeekableByteChannelResource[SeekableByteChannel]]
 
   /**
    * Runs several operations as efficiently as possible. If the filesystem

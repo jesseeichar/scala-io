@@ -43,9 +43,9 @@ private[file] trait DefaultFileOps {
   }
 
   def channel(openOptions: OpenOption*) = {
-    Resource fromByteChannel openChannel(jfile,openOptions)
+    Resource.fromSeekableByteChannel(openChannel(jfile,openOptions))
   }
-  def fileChannel(openOptions: OpenOption*) = Some(Resource fromByteChannel openChannel(jfile,openOptions).self)
+  override def fileChannel(openOptions: OpenOption*):Some[SeekableByteChannelResource[SeekableFileChannel]] = Some(Resource fromSeekableByteChannel openChannel(jfile,openOptions))
 
   def open[R](openOptions: Seq[OpenOption] = List(Read,Write))(action: OpenSeekable => R): R = {
     val c = openChannel(jfile,openOptions)
@@ -58,7 +58,7 @@ private[file] trait DefaultFileOps {
       override def open[U](f: (OpenSeekable) => U): U = f(this)
       protected def underlyingChannel(append: Boolean) = new OpenedResource[SeekableFileChannel] {
         if(append) {
-          c.self.position(c.self.position)
+          c.self.position(c.self.size())
         }
         val get = new SeekableFileChannel(c.self){
           override def close = {}
@@ -78,7 +78,7 @@ private[file] trait DefaultFileOps {
   def withLock[R](start: Long = 0, size: Long = -1, shared: Boolean = false)(block: Seekable => R): Option[R] = {
     val self = this
     fileChannel().get.acquireAndGet{ fc =>
-      Option(fc.tryLock(start,size,shared)).map{_ => block(self)}
+      Option(fc.self.tryLock(start,size,shared)).map{_ => block(self)}
     }
   }
 }

@@ -26,7 +26,7 @@ class ScalaIOProject(info: ProjectInfo)
           extends DefaultProject(info)
                   with IoProject {
 
-    val scalaArm = "com.github.jsuereth.scala-arm" %% "scala-arm" % armVersion withSources() withJavadoc()
+    val scalaArm = "com.github.jsuereth.scala-arm" % "scala-arm_2.9.0" % armVersion withSources() withJavadoc()
     def descSummary = "An idiomatic IO library for Scala"
     def description =
       <span>
@@ -70,8 +70,8 @@ class ScalaIOProject(info: ProjectInfo)
     val mockito = "org.mockito" % "mockito-all" % "1.8.0"
     val junitInterface = "com.novocode" % "junit-interface" % "0.6"
 
-    override def testScalaSourcePath = mainScalaSourcePath
-    override def testResourcesPath = mainResourcesPath
+//    override def testScalaSourcePath = mainScalaSourcePath
+//    override def testResourcesPath = mainResourcesPath
 
   }
 
