@@ -48,7 +48,7 @@ object PathSetSamples {
     val sources:PathSet[Path] = ("src" ** "*.scala") --- ("src" ** ".svn" ** "*.scala")
 
     val altsources = "src" ** "*.{scala,java}"
-    def imageResources = "src"/"main"/"resources" * "*.png" filterNot { _.name == "logo.png"}
+    def imageResources = "src"/"main"/ "resources" * "*.png" filterNot { _.name == "logo.png"}
   }
 
 }

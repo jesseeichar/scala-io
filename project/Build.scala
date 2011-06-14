@@ -3,16 +3,26 @@ import Keys._
 
 object ScalaIoBuild extends Build {
   // ----------------------- Root Project ----------------------- //
-	lazy val root:Project = Project("root", file(".")) aggregate(coreProject,coreTestProject,fileProject,fileTestProject)
+
+	lazy val root:Project = Project("root", file(".")).
+    aggregate(coreProject,fileProject).
+    settings(sharedSettings ++ Seq(publishArtifact := false) :_*)
+
+  // ----------------------- Samples Settings ----------------------- //
+
+  lazy val Samples = config("samples") extend (Compile)
+  val samplesSettings = inConfig(Samples)(Defaults.configSettings) ++ Seq[Setting[_]](
+    compile in Test <<= (compile in Test).dependsOn(compile in Samples)
+  )
 
   // ----------------------- Shared Settings ----------------------- //
-  val publishToSetting = publishTo <<= (version) { version => 
+  val publishToSettings = publishTo <<= (version) { version =>
     if(version.toString endsWith "-SNAPSHOT")
       Some("nexus.scala-tools.org" at "http://nexus.scala-tools.org/content/repositories/snapshots/")
     else
       Some("Scala Tools Nexus" at "http://nexus.scala-tools.org/content/repositories/releases/")
   }
-  
+
   val pomExtraSetting = pomExtra :=
     <licenses>
       <license>
@@ -29,7 +39,7 @@ object ScalaIoBuild extends Build {
     scalacOptions += "-deprecation",
     offline := false,
     scalaVersion := "2.9.0-1",
-    publishToSetting,
+    publishToSettings,
     credentials += Credentials(Path.userHome / ".sbt" / ".credentials"),
     pomExtraSetting
   )
@@ -37,31 +47,21 @@ object ScalaIoBuild extends Build {
   // ----------------------- Core Project ----------------------- //
   val coreSettings = Seq[Setting[_]](
     name := "scala-io-core",
-    libraryDependencies += "com.github.jsuereth.scala-arm" % "scala-arm_2.9.0" % "0.2" withSources()
+    libraryDependencies += "com.github.jsuereth.scala-arm" % "scala-arm_2.9.0" % "0.2" withSources(),
+    libraryDependencies += "com.novocode" % "junit-interface" % "0.6" % "test",
+    publishArtifact in Test := true
   )
 	lazy val coreProject = Project("core", file("core")).
-	  settings(sharedSettings ++ coreSettings : _*)
-  // ----------------------- Core Test Project ----------------------- //
-  val coreTestSettings = Seq[Setting[_]](
-    name := "scala-io-core-test",
-    libraryDependencies += "com.novocode" % "junit-interface" % "0.6"
-  )
-	lazy val coreTestProject = Project("core-test", file("core-test")).
-	  settings(sharedSettings ++ coreTestSettings : _*).
-	  dependsOn(coreProject)
+    configs(Samples).
+	  settings(samplesSettings ++ sharedSettings ++ coreSettings : _*)
   // ----------------------- File Project ----------------------- //
-  val fileSettings: Setting[_] = name := "scala-io-file"
-	lazy val fileProject = Project("file", file("file")).
-	  settings (sharedSettings ++ fileSettings : _*).
-	  dependsOn(coreProject)
-  // ----------------------- File Test Project ----------------------- //
-  val fileTestSettings =  Seq[Setting[_]](
-    name := "scala-io-file-test"/*,
-    dependencyClasspath += "core-test/test:class-directory"*/
+  val fileSettings: Seq[Setting[_]] = Seq(
+    name := "scala-io-file",
+    libraryDependencies += "com.novocode" % "junit-interface" % "0.6" % "test",
+    publishArtifact in Test := true
   )
-        
-	lazy val fileTestProject = Project("file-test", file("file-test")).
-	  settings(sharedSettings ++ fileTestSettings : _*).
-	  dependsOn(fileProject,coreTestProject % "test->test")
-	
+	lazy val fileProject = Project("file", file("file")).
+	  settings (samplesSettings ++ sharedSettings ++ fileSettings : _*).
+	  dependsOn(coreProject, coreProject % "test->test")
+
 }
