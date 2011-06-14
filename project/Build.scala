@@ -13,6 +13,7 @@ object ScalaIoBuild extends Build {
   lazy val Samples = config("samples") extend (Compile)
   val samplesSettings = inConfig(Samples)(Defaults.configSettings) ++ Seq[Setting[_]](
     compile in Test <<= (compile in Test).dependsOn(compile in Samples)
+    //dependencyClasspath in Samples <<= (dependencyClasspath in Test)
   )
 
   // ----------------------- Shared Settings ----------------------- //
@@ -61,6 +62,7 @@ object ScalaIoBuild extends Build {
     publishArtifact in Test := true
   )
 	lazy val fileProject = Project("file", file("file")).
+    configs(Samples).
 	  settings (samplesSettings ++ sharedSettings ++ fileSettings : _*).
 	  dependsOn(coreProject, coreProject % "test->test")
 
