@@ -1,6 +1,12 @@
 import sbt._
 import Keys._
 
+object BuildConstants {
+  val organization = "com.github.scala-incubator.io"
+  val version = "0.2.0-SNAPSHOT"
+  val armVersion = "0.2"
+}
+
 object ScalaIoBuild extends Build {
   // ----------------------- Root Project ----------------------- //
 
@@ -34,8 +40,8 @@ object ScalaIoBuild extends Build {
     </licenses>
 
   val sharedSettings = Seq[Setting[_]](
-    organization := "com.github.scala-incubator.io",
-    version := "0.2.0-SNAPSHOT",
+    organization := BuildConstants.organization,
+    version := BuildConstants.version,
     maxErrors := 20,
     scalacOptions += "-deprecation",
     offline := false,
@@ -48,7 +54,7 @@ object ScalaIoBuild extends Build {
   // ----------------------- Core Project ----------------------- //
   val coreSettings = Seq[Setting[_]](
     name := "scala-io-core",
-    libraryDependencies += "com.github.jsuereth.scala-arm" % "scala-arm_2.9.0" % "0.2" withSources(),
+    libraryDependencies += "com.github.jsuereth.scala-arm" %% "scala-arm" % BuildConstants.armVersion withSources(),
     libraryDependencies += "com.novocode" % "junit-interface" % "0.6" % "test",
     publishArtifact in Test := true
   )
@@ -65,5 +71,29 @@ object ScalaIoBuild extends Build {
     configs(Samples).
 	  settings (samplesSettings ++ sharedSettings ++ fileSettings : _*).
 	  dependsOn(coreProject, coreProject % "test->test")
+
+  // ----------------------- Website Project ----------------------- //
+
+  lazy val site = TaskKey[Unit]("site","Generate documentation web-site")
+  lazy val siteDir = TaskKey[File]("site-dir","Directory of the generated website")
+
+  lazy val SiteTask = site <<= (siteDir,baseDirectory,scalaVersion,resourceDirectory) map {
+    (out,baseDirectory,scalaVersion,resourceDirectory) =>
+
+      val model = new WebsiteModel(
+      sourcePath = baseDirectory,
+      websiteResources = Seq(resourceDirectory),
+      buildScalaVersion = scalaVersion,
+      outputDir = out)
+
+      model.buildSite
+  }
+  lazy val siteSettings = Defaults.defaultSettings ++ Seq[Setting[_]](
+    resourceDirectory := new File("web-site/src/main/resources"),
+    siteDir <<= baseDirectory map { base => new File(base, "target/website") },
+    SiteTask
+  )
+
+  lazy val webSiteProject = Project("website", file("."), settings = siteSettings)
 
 }

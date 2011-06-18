@@ -21,7 +21,7 @@ object Resources {
   def wrapCloseables {
     import java.io.RandomAccessFile
 
-    val fileResource = resource.managed(new RandomAccessFile("foo.txt","rw"))
+    val fileResource = _root_.resource.managed(new RandomAccessFile("foo.txt","rw"))
 
     // now resource can be used using acquire etc... with the confidence that the resource will
     // be closed when done
