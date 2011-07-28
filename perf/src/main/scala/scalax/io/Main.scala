@@ -10,7 +10,7 @@ import sperformance.PerformanceTest
  * This object is meant to be the final runner of the SPerformance test framework.
  */
 object Main {
-  var outputDirectory = new File("target/sperformance")
+  var outputDirectory = new File("results")
 
 
   def runTestsReflectively(tests: Class[_ <: PerformanceTest]*) {
