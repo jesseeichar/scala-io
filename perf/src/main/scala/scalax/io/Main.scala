@@ -1,7 +1,10 @@
 package scalax.io
 
-import java.io.{FileOutputStream, PrintStream, BufferedOutputStream, File}
-import sperformance.{CSVRunContext, PerformanceTest}
+import java.io.File
+
+import sperformance.store.XmlLoadResults
+import sperformance.store.XmlStoreResults
+import sperformance.PerformanceTest
 
 /**
  * This object is meant to be the final runner of the SPerformance test framework.
@@ -17,9 +20,10 @@ object Main {
 
   def runTests(tests : PerformanceTest*) {
     for(test <- tests) {
-      val context = new CSVRunContext(new File(outputDirectory,test.name+".csv"))
-      test.runTest(context)
-      context.writeResults()
+    val context = new sperformance.HistoricalRunContext(outputDirectory, new XmlStoreResults(_), new XmlLoadResults(_))
+    test.runTest(context)
+
+    context.generateResultsPage(test.name)
     }
   }
 

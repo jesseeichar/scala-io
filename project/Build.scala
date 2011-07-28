@@ -11,7 +11,7 @@ object ScalaIoBuild extends Build {
   // ----------------------- Root Project ----------------------- //
 
 	lazy val root:Project = Project("root", file(".")).
-    aggregate(coreProject,fileProject).
+    aggregate(coreProject,fileProject,perfProject).
     settings(sharedSettings ++ Seq(publishArtifact := false) :_*)
 
   // ----------------------- Samples Settings ----------------------- //
@@ -48,29 +48,43 @@ object ScalaIoBuild extends Build {
     scalaVersion := "2.9.0-1",
     publishToSettings,
     credentials += Credentials(Path.userHome / ".sbt" / ".credentials"),
-    pomExtraSetting
+    pomExtraSetting,
+    resolvers += {
+      val mapfishRepoUrl = new java.net.URL("http://dev.mapfish.org/ivy2")
+      Resolver.url("Mapfish Ivy Repository", mapfishRepoUrl)(Resolver.ivyStylePatterns)
+    },
+//    libraryDependencies += "com.novocode" % "junit-interface" % "0.6" % "test",
+    publishArtifact in Test := true
   )
 
   // ----------------------- Core Project ----------------------- //
   val coreSettings = Seq[Setting[_]](
     name := "scala-io-core",
-    libraryDependencies += "com.github.jsuereth.scala-arm" %% "scala-arm" % BuildConstants.armVersion withSources(),
-    libraryDependencies += "com.novocode" % "junit-interface" % "0.6" % "test",
-    publishArtifact in Test := true
+    libraryDependencies += "com.github.jsuereth.scala-arm" %% "scala-arm" % BuildConstants.armVersion withSources()
   )
 	lazy val coreProject = Project("core", file("core")).
     configs(Samples).
 	  settings(samplesSettings ++ sharedSettings ++ coreSettings : _*)
   // ----------------------- File Project ----------------------- //
   val fileSettings: Seq[Setting[_]] = Seq(
-    name := "scala-io-file",
-    libraryDependencies += "com.novocode" % "junit-interface" % "0.6" % "test",
-    publishArtifact in Test := true
+    name := "scala-io-file"
   )
 	lazy val fileProject = Project("file", file("file")).
     configs(Samples).
 	  settings (samplesSettings ++ sharedSettings ++ fileSettings : _*).
 	  dependsOn(coreProject, coreProject % "test->test")
+    
+  // ----------------------- Performace Project ---------------------//
+  
+  val perfSettings: Seq[Setting[_]] = Seq(
+    name := "scala-io-performace",
+    libraryDependencies += "com.github.jsuereth" %% "sperformance" % "0.1",
+    publishArtifact in Test := false
+  )
+	lazy val perfProject = Project("perf", file("perf")).
+	  settings (samplesSettings ++ sharedSettings ++ perfSettings : _*).
+	  dependsOn(coreProject, fileProject)
+  
 
   // ----------------------- Website Project ----------------------- //
 
