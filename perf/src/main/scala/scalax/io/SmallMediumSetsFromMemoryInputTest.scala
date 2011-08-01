@@ -12,13 +12,15 @@ import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.InputStreamReader
 import java.nio.charset.Charset
+import java.io.File
+import java.io.FileInputStream
 
-object SmallSetsInMemoryInputTest extends AbstractInputTest {
+object SmallMediumSetsFromMemoryInputTest extends AbstractInputTest {
 
-  val MaxSize = 50
-  val Inc = 25
-  val From = 1
-  val WarmUpRuns = 1000
+  val MaxSize = 15000
+  val Inc = 5000
+  val From = 5000
+  val WarmUpRuns = 10
 
   def newIn(size: Int, lines: Int = 2, term: String = NewLine.sep) = {
     val lineStrings = 1 to lines map { _ =>

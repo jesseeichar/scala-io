@@ -12,22 +12,23 @@ import sperformance.PerformanceTest
 object Main {
   var outputDirectory = new File("results")
 
-
   def runTestsReflectively(tests: Class[_ <: PerformanceTest]*) {
     //TODO - ClassLoader magic....
-    runTests(tests.map(_.newInstance) : _* )
+    runTests(tests.map(_.newInstance): _*)
   }
 
-  def runTests(tests : PerformanceTest*) {
-    for(test <- tests) {
-    val context = new sperformance.HistoricalRunContext(outputDirectory, new XmlStoreResults(_), new XmlLoadResults(_))
-    test.runTest(context)
+  def runTests(tests: PerformanceTest*) {
+    for (test <- tests) {
+      val context = new sperformance.HistoricalRunContext(outputDirectory, new XmlStoreResults(_), new XmlLoadResults(_))
+      test.runTest(context)
 
-    context.generateResultsPage(test.name)
+      if (!"true".equalsIgnoreCase(System.getProperty("sperf.no.graphs"))) {
+        context.generateResultsPage(test.name)
+      }
     }
   }
 
-  def main(args : Array[String]) {
-    runTestsReflectively(args.map( arg => Class.forName(arg).asInstanceOf[Class[_ <: PerformanceTest]]) : _*)
+  def main(args: Array[String]) {
+    runTestsReflectively(args.map(arg => Class.forName(arg).asInstanceOf[Class[_ <: PerformanceTest]]): _*)
   }
 }

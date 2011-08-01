@@ -53,7 +53,7 @@ object ScalaIoBuild extends Build {
       val mapfishRepoUrl = new java.net.URL("http://dev.mapfish.org/ivy2")
       Resolver.url("Mapfish Ivy Repository", mapfishRepoUrl)(Resolver.ivyStylePatterns)
     },
-//    libraryDependencies += "com.novocode" % "junit-interface" % "0.6" % "test",
+    libraryDependencies += "com.novocode" % "junit-interface" % "0.7" % "test->default",
     publishArtifact in Test := true
   )
 
@@ -83,7 +83,7 @@ object ScalaIoBuild extends Build {
   )
 	lazy val perfProject = Project("perf", file("perf")).
 	  settings (samplesSettings ++ sharedSettings ++ perfSettings : _*).
-	  dependsOn(coreProject, fileProject)
+	  dependsOn(coreProject,coreProject % "compile->test", fileProject)
   
 
   // ----------------------- Website Project ----------------------- //

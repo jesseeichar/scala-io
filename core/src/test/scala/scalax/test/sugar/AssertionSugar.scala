@@ -10,6 +10,11 @@ package scalax.test.sugar
 import scala.reflect.Manifest
 import org.junit.Assert._
 import scalax.io.Output
+import java.io.File
+import java.io.FileWriter
+import java.io.Writer
+import java.io.OutputStreamWriter
+import java.io.FileOutputStream
 
 
 
@@ -43,32 +48,44 @@ trait AssertionSugar {
 
   def repeat[U] (f : => U)(implicit times : Int = 50) = 1 to times foreach {_ => f}
 
-  def largeResource(key:KEY.Value):java.io.File = {
-    if(key == KEY.TEXT) largeResource(key, KEY.TEXT_CREATION)
+  def largeResource(key:KEY.Value):java.io.File = LargeResource.largeResource(key)
+  def largeResource(key: String)(f: Writer => Unit):java.io.File = LargeResource.largeResource(key)(f)
+  val Key=KEY
+}
+
+object LargeResource {
+  def largeResource(key: KEY.Value):java.io.File = {
+    if(key == KEY.TEXT) largeResource(key.toString)(KEY.TEXT_CREATION)
     else throw new IllegalArgumentException(key+" not recognized")
   }
-  def largeResource(key:KEY.Value, f : Output => Unit):java.io.File = {
+  def largeResource(key: String)(f: Writer => Unit):java.io.File = {
     import Output._
-    
     val tmpPath = java.io.File.createTempFile("klkjlkj","klkjlkj").getParentFile
-    val file = new java.io.File(tmpPath, key.toString)
+    val file = new java.io.File(tmpPath, key)
     if(!file.exists) {
       println("Need to generate data file")
-      f(file.asOutput)
+      val writer = new OutputStreamWriter(new FileOutputStream(file),"UTF-8")
+      f(writer)
+      writer.close
       println("Data generation complete")
     }
     file
   }
-  val Key=KEY
 }
 
 object KEY extends Enumeration {
   val TEXT = Value("LOTS_OF_TEXT.txt")
   
-  val TEXT_CREATION = (out:Output) => {
+  val TEXT_CREATION = (writer:Writer) => {
     def lines(c:Int = 1000000) : Stream[String] = {
       util.Random.nextString(30) #:: (if(c > 0) lines(c - 1) else Stream.empty)
     }
-    out.writeStrings(lines(),"\n")      
+    
+    lines().foreach{l=>
+    	writer.write(l)
+    	writer.write("\n")
+    }
+    writer.close()
+    
   }
 }

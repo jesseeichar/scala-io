@@ -127,10 +127,27 @@ private[io] trait ResourceTraversable[A] extends LongTraversable[A]
    }
 }
 
+class ArrayIterator(var a:Array[Byte]) extends Iterator[Byte]{
+  var start=0
+  var end=0
+  var now=0
+  def hasNext = now < end
+  @specialized(Byte)
+  def next = {
+    now += 1
+    a(now - 1)
+  }
+}
 private[io] object ResourceTraversable {
   def streamBased[A,B](opener : => OpenedResource[InputStream],
                      bufferFactory : => Array[Byte] = new Array[Byte](Constants.BufferSize),
-                     parser : (Array[Byte],Int) => Iterator[A] = (a:Array[Byte],length:Int) => a.take(length).iterator,
+                     parser : (ArrayIterator, Array[Byte],Int) => Iterator[A] = 
+                       (wrapper:ArrayIterator, a:Array[Byte],length:Int) => {
+                         wrapper.start = 0
+                         wrapper.now = 0
+                         wrapper.end = length
+                         wrapper
+                       },
                      initialConv: A => B = (a:A) => a,
                      startIndex : Long = 0,
                      endIndex : Long = Long.MaxValue) = {
@@ -140,12 +157,12 @@ private[io] object ResourceTraversable {
 
       def source = new TraversableSource[InputStream, A] {
         val buffer = bufferFactory
-
+        val iter = new ArrayIterator(buffer)
         val openedResource = opener
         val stream = openedResource.get
         def read() = {
           val read = stream.read (buffer)
-          parser(buffer,read)
+          parser(iter,buffer,read)
         }
 
         def initializePosition(pos: Long) = skip(pos)

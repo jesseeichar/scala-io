@@ -12,20 +12,26 @@ import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.InputStreamReader
 import java.nio.charset.Charset
+import java.io.File
+import java.io.FileInputStream
+import scalax.test.sugar.LargeResource
 
-object SmallSetsInMemoryInputTest extends AbstractInputTest {
+object MediumSetsFromFileInputTest extends AbstractInputTest {
 
-  val MaxSize = 50
-  val Inc = 25
-  val From = 1
-  val WarmUpRuns = 1000
+  val MaxSize = 500000
+  val Inc = 250000
+  val From = 250000
+  val WarmUpRuns = 1
 
   def newIn(size: Int, lines: Int = 2, term: String = NewLine.sep) = {
-    val lineStrings = 1 to lines map { _ =>
-      nextString(size).replaceAll("\n"," ")
+    val largeFile = LargeResource.largeResource(getClass.getSimpleName + size + lines + term) { writer =>
+      val lineStrings = 1 to lines map { _ =>
+        nextString(size).replaceAll("\n", " ")
+      }
+      val data = lineStrings mkString term
+      writer.write( data)
     }
-    val data = lineStrings mkString term
-    () => new ByteArrayInputStream(data.getBytes)
+    () => new FileInputStream(largeFile)
   }
 
   def main(args: Array[String]) {
