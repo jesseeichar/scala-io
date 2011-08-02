@@ -1,5 +1,7 @@
-package scalax.io
+package scalax.io.perf
+package channel
 
+import scalax.io._
 import sperformance.Keys.WarmupRuns
 import sperformance.dsl._
 import util.Random._
@@ -16,7 +18,7 @@ import java.io.File
 import java.io.FileInputStream
 import scalax.test.sugar._
 
-object LargeSetsFromFileInputTest extends AbstractInputTest {
+object LargeSetsFromFileReadableByteChannelTest extends AbstractReadableByteChannelInputTest {
 
   val MaxSize = 1000000 
   val Inc = 1
@@ -32,15 +34,12 @@ object LargeSetsFromFileInputTest extends AbstractInputTest {
     } else {
       LargeResource.largeResource("LargeSetsFromFileInputTest-" + term) {
         output =>
-          val lineStrings = 1 to lines map { _ =>
-            nextString(size).replaceAll("\n", " ")
-          }
-          val data = lineStrings mkString term
+          val data = generateTestData(size,lines,term)
           val file = File.createTempFile(getClass().getSimpleName(), "txt")
           FileUtils.writeStringToFile(file, data, "UTF-8")
       }
     }
-    () => new FileInputStream(actualFile)
+    () => new FileInputStream(actualFile).getChannel()
   }
 
   def main(args: Array[String]) {

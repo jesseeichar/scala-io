@@ -1,4 +1,4 @@
-package scalax.io
+package scalax.io.perf
 
 import java.io.File
 

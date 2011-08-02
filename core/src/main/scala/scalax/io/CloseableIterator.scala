@@ -7,11 +7,19 @@ import collection.{GenTraversableOnce, Iterator, TraversableOnce}
 trait CloseableIterator[+A] extends Iterator[A] with Closeable {
   self =>
   private var closed = false
+    @inline @specialized(Byte,Int,Float,Double,Long)
+    def next():A
+    @inline
+    def hasNext: Boolean
 
-  final def hasNext:Boolean = {
-    val hasNext = doHasNext
-    if(!hasNext) close()
-    hasNext
+  override def finalize {
+    try {
+      if(!closed) {
+        Console.err.println("ERROR: A Closeable Iterator was left unclosed: "+this)
+      }
+    } finally {
+      super.finalize
+    }
   }
   final def close() = {
     if(!closed) {
@@ -20,12 +28,13 @@ trait CloseableIterator[+A] extends Iterator[A] with Closeable {
     }
   }
 
-  def doHasNext:Boolean
   protected def doClose():Unit
 
   class Proxy[+B,C <: Iterator[B]](protected val wrapped:C,otherComposingIterators:CloseableIterator[_]*) extends CloseableIterator[B] {
+    @inline @specialized(Byte,Int,Float,Double,Long)
     def next() = wrapped.next
-    def doHasNext: Boolean = wrapped.hasNext
+    @inline
+    def hasNext: Boolean = wrapped.hasNext
     def doClose() = {
       safeClose(self)
       otherComposingIterators.foreach(safeClose)
@@ -97,8 +106,10 @@ trait CloseableIterator[+A] extends Iterator[A] with Closeable {
 
 object CloseableIterator {
   def apply[A](iter:Iterator[A]) = new CloseableIterator[A]{
+    @inline @specialized(Byte,Int,Float,Double,Long)
     def next(): A = iter.next
-    def doHasNext: Boolean = iter.hasNext
+    @inline
+    def hasNext: Boolean = iter.hasNext
     def doClose() {}
   }
   implicit object ManagedResource extends resource.Resource[CloseableIterator[_]] {

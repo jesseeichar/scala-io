@@ -57,6 +57,7 @@ private[io] trait ResourceTraversable[A] extends LongTraversable[A]
     var nextEl:Iterator[SourceOut] = null
     var c = start
 
+    @inline @specialized(Byte,Int,Float,Double,Long)
     def next(): A = {
       val n = nextEl.next()
       c += 1
@@ -67,7 +68,8 @@ private[io] trait ResourceTraversable[A] extends LongTraversable[A]
       conv(n)
     }
 
-    def doHasNext: Boolean = {
+    @inline
+    def hasNext: Boolean = {
       if(c >= end) return false
 
       if(nextEl == null) {
@@ -127,9 +129,8 @@ private[io] trait ResourceTraversable[A] extends LongTraversable[A]
    }
 }
 
-class ArrayIterator(var a:Array[Byte]) extends Iterator[Byte]{
+class ArrayIterator(var a:Array[Byte],var end:Int) extends Iterator[Byte]{
   var start=0
-  var end=0
   var now=0
   def hasNext = now < end
   @specialized(Byte)
@@ -139,42 +140,69 @@ class ArrayIterator(var a:Array[Byte]) extends Iterator[Byte]{
   }
 }
 private[io] object ResourceTraversable {
-  def streamBased[A,B](opener : => OpenedResource[InputStream],
-                     bufferFactory : => Array[Byte] = new Array[Byte](Constants.BufferSize),
-                     parser : (ArrayIterator, Array[Byte],Int) => Iterator[A] = 
-                       (wrapper:ArrayIterator, a:Array[Byte],length:Int) => {
-                         wrapper.start = 0
-                         wrapper.now = 0
-                         wrapper.end = length
-                         wrapper
-                       },
-                     initialConv: A => B = (a:A) => a,
-                     startIndex : Long = 0,
-                     endIndex : Long = Long.MaxValue) = {
-    new ResourceTraversable[B] {
-      type In = InputStream
-      type SourceOut = A
+  /**
+   * The strategy defined for reading the input bytes and converting them
+   * to the output type
+   * 
+   * @param A the type of object created by parsing the read byte array
+   * @param I The type of iterator created to iterate through the result type A
+   */
+  trait InputParser[+A] {
+    type I <: Iterator[A]
+    /**
+     * Create the initial iterator.  The same object will be passed to apply
+     * and the iterator will not be shared between threads so it is ok to reuse
+     * the same iterator to reduce the number of object creations.
+     */
+    def iterator(input:Array[Byte], length:Int):I
+    def apply(iter:I,input:Array[Byte],length:Int):I
+  }
+  val DefaultParser = new InputParser[Byte] {
+    type I = ArrayIterator
+    def iterator(input:Array[Byte], length:Int) = new ArrayIterator(input,length)
+    def apply(iter: ArrayIterator, input: Array[Byte], length: Int) = {
+      iter.start = 0
+      iter.now = 0
+      iter.end = length
+      iter
+    }
+  }
+  val IndentityConversion = identity[Byte]_
+  def streamBased[A,B]
+		  (opener : => OpenedResource[InputStream],
+          bufferFactory : => Array[Byte] = new Array[Byte](Constants.BufferSize),
+          parser : InputParser[A] = DefaultParser,
+          initialConv: A => B = IndentityConversion,
+          startIndex : Long = 0,
+      endIndex: Long = Long.MaxValue) = {
+    if (parser == DefaultParser && initialConv == IndentityConversion) {
+      new traversable.InputStreamResourceTraversable(opener,bufferFactory,startIndex,endIndex).asInstanceOf[LongTraversable[B]]
+    } else {
+      new ResourceTraversable[B] {
+        type In = InputStream
+        type SourceOut = A
 
-      def source = new TraversableSource[InputStream, A] {
-        val buffer = bufferFactory
-        val iter = new ArrayIterator(buffer)
-        val openedResource = opener
-        val stream = openedResource.get
-        def read() = {
-          val read = stream.read (buffer)
-          parser(iter,buffer,read)
+        def source = new TraversableSource[InputStream, A] {
+          val buffer = bufferFactory
+          val iter = parser.iterator(buffer, 0)
+          val openedResource = opener
+          val stream = openedResource.get
+          def read() = {
+            val read = stream.read(buffer)
+            parser(iter, buffer, read)
+          }
+
+          def initializePosition(pos: Long) = skip(pos)
+
+          def skip(count: Long) = stream.skip(count)
+
+          def close(): List[Throwable] = openedResource.close()
         }
 
-        def initializePosition(pos: Long) = skip(pos)
-
-        def skip(count: Long) = stream.skip(count)
-
-        def close(): List[Throwable] = openedResource.close()
+        protected val conv = initialConv
+        protected val start = startIndex
+        protected val end = endIndex
       }
-
-      protected val conv = initialConv
-      protected val start = startIndex
-      protected val end = endIndex
     }
   }
 

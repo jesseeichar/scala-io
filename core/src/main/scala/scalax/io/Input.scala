@@ -186,8 +186,10 @@ object Input {
           def iterator = new CloseableIterator[Int] {
             var iter = OutputConverter.TraversableIntConverter.toBytes(t)
 
+            @inline @specialized(Int)
             def next() = iter.next.toInt
-            def doHasNext: Boolean = iter.hasNext
+            @inline
+            def hasNext: Boolean = iter.hasNext
             def doClose() {}
           }
         }.view

@@ -1,5 +1,6 @@
-package scalax.io
+package scalax.io.perf
 
+import scalax.io._
 import sperformance.Keys
 import sperformance.dsl._
 import util.Random._
@@ -13,9 +14,12 @@ import java.io.BufferedOutputStream
 import java.io.InputStreamReader
 import java.nio.charset.Charset
 import java.io.InputStream
+import java.nio.channels.ReadableByteChannel
+import java.nio.ByteBuffer
+import java.nio.channels.Channels
 
 
-abstract class AbstractInputTest extends PerformanceDSLTest {
+abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
   implicit val codec = Codec.UTF8
 
   def MaxSize:Int
@@ -30,13 +34,19 @@ abstract class AbstractInputTest extends PerformanceDSLTest {
    * 
    * For example newIn could create a file and the function would simply open a stream to the file
    */
-  def newIn(size: Int, lines: Int = 2, term: String = NewLine.sep):() => InputStream
-  def newInResource(size: Int, lines: Int = 2, term: String = NewLine.sep):InputStreamResource[InputStream] = {
+  def newIn(size: Int, lines: Int = 2, term: String = NewLine.sep):() => ReadableByteChannel
+  def newInResource(size: Int, lines: Int = 2, term: String = NewLine.sep):Input = {
     val in = newIn(size, lines, term)
-    fromInputStream(in())
+    fromReadableByteChannel(in())
     
   }
-
+  def generateTestData(size: Int, lines: Int = 2, term: String = NewLine.sep) = {
+    val lineStrings = 1 to lines map { _ =>
+      nextString(size).replaceAll("\n", " ")
+    }
+    lineStrings mkString term
+  }
+  
   def withSizeDef[U](f: Int => U) = withSize from(From) upTo MaxSize by Inc withSetup (f)
   
   performance of "Input" in {
@@ -55,9 +65,15 @@ abstract class AbstractInputTest extends PerformanceDSLTest {
           } run {
             case (size, inFunc) =>
               val in = inFunc()
-              val buffer = new Array[Byte](size * 2)
+              val buffer = ByteBuffer.allocateDirect(size * 2)
               var read = in.read(buffer)
               while (read > 0) {
+                var i = 0
+                while (i < read) {
+                  buffer.get(i)
+                  i += 1
+                }
+                buffer.clear()
                 read = in.read(buffer)
               }
               in.close
@@ -74,13 +90,19 @@ abstract class AbstractInputTest extends PerformanceDSLTest {
       measure method "bytesAsInts" in {
         having attribute ("version", "java.io while loop impl") in {
           withSizeDef { size =>
-            (newInResource(size).bytesAsInts.size, newIn(size))
+            (size, newIn(size))
           } run {
             case (size, inFunc) =>
               val in = inFunc()
-              val buffer = new Array[Byte](size*2)
+              val buffer = ByteBuffer.allocateDirect(size * 2)
               var read = in.read(buffer)
               while (read > -1) {
+                var i = 0
+                while(i<read) {
+                  buffer.get(i).toInt
+                  i += 1
+                }
+                buffer.clear()
                 read = in.read(buffer)
               }
               in.close
@@ -99,7 +121,9 @@ abstract class AbstractInputTest extends PerformanceDSLTest {
           withSizeDef { size =>
             newIn(size)
           } run { in =>
-            IOUtils.toByteArray(in());
+            val channel = in()
+            IOUtils.toByteArray(Channels.newInputStream(channel));
+            channel.close()
           }
         }
       }
@@ -117,11 +141,20 @@ abstract class AbstractInputTest extends PerformanceDSLTest {
         having attribute ("version", "Apache IO copy bytes") in {
           withSizeDef { size =>
             val in = newIn(size)
-            val out = new ByteArrayOutputStream()
-            (in, out)
+            val out = Channels.newChannel(new ByteArrayOutputStream())
+            (size, in, out)
           } run {
-            case (in, out) =>
-              IOUtils.copy(in(), out)
+            case (size, inFunc, out) =>
+              val in = inFunc()
+              val buffer = ByteBuffer.allocateDirect(size * 2)
+              var read = in.read(buffer)
+              while (read > -1) {
+                read = in.read(buffer)
+                buffer.flip()
+                out.write(buffer)
+              }
+              in.close
+              
           }
         }
       }
@@ -139,11 +172,16 @@ abstract class AbstractInputTest extends PerformanceDSLTest {
           } run {
             case (size, in) =>
               val buffer = new Array[Char](size * 2)
-              val reader = new InputStreamReader(in(), Charset.forName("UTF-8"))
+              val reader = Channels.newReader(in(), "UTF-8")
               var read = 0
 
               do {
                 read = reader.read(buffer)
+                var i=0
+                while (i < read) {
+                  buffer(i)
+                  i += 1
+                }
               } while (read > 0)
               reader.close()
           }
@@ -155,7 +193,7 @@ abstract class AbstractInputTest extends PerformanceDSLTest {
             newIn(5, size, NewLine.sep)
           } run { inFunc =>
             val in = inFunc()
-            val iter = IOUtils.lineIterator(in, "UTF-8")
+            val iter = IOUtils.lineIterator(Channels.newInputStream(in), "UTF-8")
             while (iter.hasNext()) {
               iter.next()
             }
@@ -183,7 +221,7 @@ abstract class AbstractInputTest extends PerformanceDSLTest {
             newIn(5, size, NewLine.sep)
           } run { inFunc =>
             val in = inFunc()
-            val iter = IOUtils.lineIterator(in, "UTF-8")
+            val iter = IOUtils.lineIterator(Channels.newInputStream(in), "UTF-8")
             while (iter.hasNext()) {
               iter.next()
             }
@@ -204,7 +242,7 @@ abstract class AbstractInputTest extends PerformanceDSLTest {
             newIn(5, size, CarriageReturn.sep)
           } run { inFunc =>
             val in = inFunc()
-            val iter = IOUtils.lineIterator(in, "UTF-8")
+            val iter = IOUtils.lineIterator(Channels.newInputStream(in), "UTF-8")
             while (iter.hasNext()) {
               iter.next()
             }
@@ -225,7 +263,7 @@ abstract class AbstractInputTest extends PerformanceDSLTest {
             newIn(5, size, RNPair.sep)
           } run { inFunc =>
             val in = inFunc()
-            IOUtils.toString(in,"UTF-8").split("\r\n")
+            IOUtils.toString(Channels.newInputStream(in),"UTF-8").split("\r\n")
             in.close()
           }
         }
@@ -243,7 +281,7 @@ abstract class AbstractInputTest extends PerformanceDSLTest {
             newIn(5, size, "**")
           } run { inFunc =>
             val in = inFunc()
-            IOUtils.toString(in, "UTF-8").split("\\*\\*")
+            IOUtils.toString(Channels.newInputStream(in), "UTF-8").split("\\*\\*")
             in.close()
           }
         }

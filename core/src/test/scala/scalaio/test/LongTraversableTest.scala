@@ -28,7 +28,7 @@ class LongTraversableTest {
           callback(i)
           i
         }
-        def doHasNext: Boolean = iter.hasNext
+        def hasNext: Boolean = iter.hasNext
         def doClose() {}
       }
     }

@@ -1,5 +1,7 @@
-package scalax.io
+package scalax.io.perf
+package inputstream
 
+import scalax.io._
 import sperformance.Keys.WarmupRuns
 import sperformance.dsl._
 import util.Random._
@@ -16,7 +18,7 @@ import java.io.File
 import java.io.FileInputStream
 import scalax.test.sugar.LargeResource
 
-object MediumSetsFromFileInputTest extends AbstractInputTest {
+object MediumSetsFromFileInputStreamTest extends AbstractInputTest {
 
   val MaxSize = 500000
   val Inc = 250000
@@ -25,10 +27,7 @@ object MediumSetsFromFileInputTest extends AbstractInputTest {
 
   def newIn(size: Int, lines: Int = 2, term: String = NewLine.sep) = {
     val largeFile = LargeResource.largeResource(getClass.getSimpleName + size + lines + term) { writer =>
-      val lineStrings = 1 to lines map { _ =>
-        nextString(size).replaceAll("\n", " ")
-      }
-      val data = lineStrings mkString term
+      val data = generateTestData(size, lines, term)
       writer.write( data)
     }
     () => new FileInputStream(largeFile)
