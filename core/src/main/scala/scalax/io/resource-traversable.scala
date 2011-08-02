@@ -27,7 +27,7 @@ protected[io] trait TraversableSource[In <: Closeable, A] {
 }
 
 /**
- * A Resource based implementation of a TraversableLong.  Optimized to only read the
+ * A Resource based implementation of a LongTraversable.  Optimized to only read the
  * required data from a stream
  */
 private[io] trait ResourceTraversable[A] extends LongTraversable[A]
