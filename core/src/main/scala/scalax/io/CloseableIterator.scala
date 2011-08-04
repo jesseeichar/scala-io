@@ -3,29 +3,22 @@ package scalax.io
 import java.io.Closeable
 import resource.{AbstractManagedResource, ManagedResourceOperations}
 import collection.{GenTraversableOnce, Iterator, TraversableOnce}
+import java.util.concurrent.locks.ReentrantLock
+import scala.concurrent.SyncVar
 
 trait CloseableIterator[+A] extends Iterator[A] with Closeable {
   self =>
-  private var closed = false
-    @inline @specialized(Byte,Int,Float,Double,Long)
-    def next():A
-    @inline
-    def hasNext: Boolean
+  val creationPoint = new Exception();
 
-  override def finalize {
-    try {
-      if(!closed) {
-        Console.err.println("ERROR: A Closeable Iterator was left unclosed: "+this)
-      }
-    } finally {
-      super.finalize
-    }
-  }
-  final def close() = {
-    if(!closed) {
-      doClose()
-      closed = true
-    }
+  @inline
+  @specialized(Byte, Int, Float, Double, Long)
+  def next(): A
+  
+  @inline
+  def hasNext: Boolean
+  
+  final def close() {
+    doClose()
   }
 
   protected def doClose():Unit
@@ -111,6 +104,17 @@ object CloseableIterator {
     @inline
     def hasNext: Boolean = iter.hasNext
     def doClose() {}
+  }
+  def selfClosing[A](wrapped: CloseableIterator[A]) = new CloseableIterator[A] {
+    @inline @specialized(Byte,Int,Float,Double,Long,Char)
+    def next(): A = wrapped.next
+    @inline
+    def hasNext: Boolean = {
+      val next = wrapped.hasNext
+      if(!next) close()
+      next
+    }
+    def doClose = wrapped.close
   }
   implicit object ManagedResource extends resource.Resource[CloseableIterator[_]] {
     def close(r: CloseableIterator[_]) = r.close()

@@ -1,0 +1,3122 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<clusterResults version="1.0"> <cluster name="100-Mac OS X-x86_64-Input-byteArray-20.1-b02-384-Apple Inc.-Java HotSpot(TM) 64-Bit Server VM-2">
+          <meta>
+            <axis>
+              <string>size</string>
+            </axis>
+            <atts>
+              <element>
+          <name>method</name>
+          <value><string>byteArray</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+            </atts>
+          </meta>
+          <results>
+          <result time="7175000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>byteArray</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>5000</int></value>
+        </element>
+              </axisData>
+            </result><result time="13252000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>byteArray</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>10000</int></value>
+        </element>
+              </axisData>
+            </result><result time="19829000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>byteArray</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>15000</int></value>
+        </element>
+              </axisData>
+            </result>
+          </results>
+        </cluster><cluster name="100-java.io Reader-Mac OS X-x86_64-Input-lines Custom-20.1-b02-384-Apple Inc.-Java HotSpot(TM) 64-Bit Server VM-2">
+          <meta>
+            <axis>
+              <string>size</string>
+            </axis>
+            <atts>
+              <element>
+          <name>method</name>
+          <value><string>lines Custom</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>java.io Reader</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+            </atts>
+          </meta>
+          <results>
+          <result time="1701000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>lines Custom</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>java.io Reader</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>5000</int></value>
+        </element>
+              </axisData>
+            </result><result time="3330000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>lines Custom</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>java.io Reader</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>10000</int></value>
+        </element>
+              </axisData>
+            </result><result time="4883000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>lines Custom</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>java.io Reader</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>15000</int></value>
+        </element>
+              </axisData>
+            </result>
+          </results>
+        </cluster><cluster name="100-Mac OS X-x86_64-Input-lines RN-20.1-b02-384-Apple Inc.-Java HotSpot(TM) 64-Bit Server VM-2">
+          <meta>
+            <axis>
+              <string>size</string>
+            </axis>
+            <atts>
+              <element>
+          <name>method</name>
+          <value><string>lines RN</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+            </atts>
+          </meta>
+          <results>
+          <result time="30407000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>lines RN</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>5000</int></value>
+        </element>
+              </axisData>
+            </result><result time="62519000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>lines RN</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>10000</int></value>
+        </element>
+              </axisData>
+            </result><result time="94843000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>lines RN</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>15000</int></value>
+        </element>
+              </axisData>
+            </result>
+          </results>
+        </cluster><cluster name="100-Apache IO read bytes-Mac OS X-x86_64-Input-byteArray-20.1-b02-384-Apple Inc.-Java HotSpot(TM) 64-Bit Server VM-2">
+          <meta>
+            <axis>
+              <string>size</string>
+            </axis>
+            <atts>
+              <element>
+          <name>method</name>
+          <value><string>byteArray</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>Apache IO read bytes</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+            </atts>
+          </meta>
+          <results>
+          <result time="97000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>byteArray</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>Apache IO read bytes</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>5000</int></value>
+        </element>
+              </axisData>
+            </result><result time="163000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>byteArray</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>Apache IO read bytes</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>10000</int></value>
+        </element>
+              </axisData>
+            </result><result time="250000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>byteArray</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>Apache IO read bytes</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>15000</int></value>
+        </element>
+              </axisData>
+            </result>
+          </results>
+        </cluster><cluster name="100-toString split on terminator-Mac OS X-x86_64-Input-lines RN-20.1-b02-384-Apple Inc.-Java HotSpot(TM) 64-Bit Server VM-2">
+          <meta>
+            <axis>
+              <string>size</string>
+            </axis>
+            <atts>
+              <element>
+          <name>method</name>
+          <value><string>lines RN</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>toString split on terminator</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+            </atts>
+          </meta>
+          <results>
+          <result time="1691000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>lines RN</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>toString split on terminator</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>5000</int></value>
+        </element>
+              </axisData>
+            </result><result time="3342000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>lines RN</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>toString split on terminator</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>10000</int></value>
+        </element>
+              </axisData>
+            </result><result time="4878000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>lines RN</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>toString split on terminator</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>15000</int></value>
+        </element>
+              </axisData>
+            </result>
+          </results>
+        </cluster><cluster name="100-Mac OS X-x86_64-Input-lines Custom-20.1-b02-384-Apple Inc.-Java HotSpot(TM) 64-Bit Server VM-2">
+          <meta>
+            <axis>
+              <string>size</string>
+            </axis>
+            <atts>
+              <element>
+          <name>method</name>
+          <value><string>lines Custom</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+            </atts>
+          </meta>
+          <results>
+          <result time="30183000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>lines Custom</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>5000</int></value>
+        </element>
+              </axisData>
+            </result><result time="61932000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>lines Custom</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>10000</int></value>
+        </element>
+              </axisData>
+            </result><result time="93688000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>lines Custom</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>15000</int></value>
+        </element>
+              </axisData>
+            </result>
+          </results>
+        </cluster><cluster name="100-java.io while loop impl-Mac OS X-x86_64-Input-bytesAsInts-20.1-b02-384-Apple Inc.-Java HotSpot(TM) 64-Bit Server VM-2">
+          <meta>
+            <axis>
+              <string>size</string>
+            </axis>
+            <atts>
+              <element>
+          <name>method</name>
+          <value><string>bytesAsInts</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>java.io while loop impl</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+            </atts>
+          </meta>
+          <results>
+          <result time="51000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>bytesAsInts</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>java.io while loop impl</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>5000</int></value>
+        </element>
+              </axisData>
+            </result><result time="63000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>bytesAsInts</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>java.io while loop impl</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>10000</int></value>
+        </element>
+              </axisData>
+            </result><result time="76000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>bytesAsInts</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>java.io while loop impl</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>15000</int></value>
+        </element>
+              </axisData>
+            </result>
+          </results>
+        </cluster><cluster name="100-Apache IOUtils line-Mac OS X-x86_64-Input-lines newline-20.1-b02-384-Apple Inc.-Java HotSpot(TM) 64-Bit Server VM-2">
+          <meta>
+            <axis>
+              <string>size</string>
+            </axis>
+            <atts>
+              <element>
+          <name>method</name>
+          <value><string>lines newline</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>Apache IOUtils line</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+            </atts>
+          </meta>
+          <results>
+          <result time="1061000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>lines newline</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>Apache IOUtils line</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>5000</int></value>
+        </element>
+              </axisData>
+            </result><result time="2044000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>lines newline</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>Apache IOUtils line</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>10000</int></value>
+        </element>
+              </axisData>
+            </result><result time="2985000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>lines newline</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>Apache IOUtils line</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>15000</int></value>
+        </element>
+              </axisData>
+            </result>
+          </results>
+        </cluster><cluster name="100-Mac OS X-x86_64-Input-lines newline-20.1-b02-384-Apple Inc.-Java HotSpot(TM) 64-Bit Server VM-2">
+          <meta>
+            <axis>
+              <string>size</string>
+            </axis>
+            <atts>
+              <element>
+          <name>method</name>
+          <value><string>lines newline</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+            </atts>
+          </meta>
+          <results>
+          <result time="25889000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>lines newline</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>5000</int></value>
+        </element>
+              </axisData>
+            </result><result time="53615000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>lines newline</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>10000</int></value>
+        </element>
+              </axisData>
+            </result><result time="81175000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>lines newline</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>15000</int></value>
+        </element>
+              </axisData>
+            </result>
+          </results>
+        </cluster><cluster name="100-java.io while loop with buffer-Mac OS X-x86_64-Input-bytes-20.1-b02-384-Apple Inc.-Java HotSpot(TM) 64-Bit Server VM-2">
+          <meta>
+            <axis>
+              <string>size</string>
+            </axis>
+            <atts>
+              <element>
+          <name>method</name>
+          <value><string>bytes</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>java.io while loop with buffer</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+            </atts>
+          </meta>
+          <results>
+          <result time="49000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>bytes</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>java.io while loop with buffer</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>5000</int></value>
+        </element>
+              </axisData>
+            </result><result time="63000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>bytes</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>java.io while loop with buffer</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>10000</int></value>
+        </element>
+              </axisData>
+            </result><result time="78000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>bytes</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>java.io while loop with buffer</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>15000</int></value>
+        </element>
+              </axisData>
+            </result>
+          </results>
+        </cluster><cluster name="100-Mac OS X-x86_64-Input-bytes-20.1-b02-384-Apple Inc.-Java HotSpot(TM) 64-Bit Server VM-2">
+          <meta>
+            <axis>
+              <string>size</string>
+            </axis>
+            <atts>
+              <element>
+          <name>method</name>
+          <value><string>bytes</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+            </atts>
+          </meta>
+          <results>
+          <result time="5791000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>bytes</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>5000</int></value>
+        </element>
+              </axisData>
+            </result><result time="10698000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>bytes</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>10000</int></value>
+        </element>
+              </axisData>
+            </result><result time="15318000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>bytes</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>15000</int></value>
+        </element>
+              </axisData>
+            </result>
+          </results>
+        </cluster><cluster name="100-java.io read chars with InputStreamReader-Mac OS X-x86_64-Input-chars-20.1-b02-384-Apple Inc.-Java HotSpot(TM) 64-Bit Server VM-2">
+          <meta>
+            <axis>
+              <string>size</string>
+            </axis>
+            <atts>
+              <element>
+          <name>method</name>
+          <value><string>chars</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>java.io read chars with InputStreamReader</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+            </atts>
+          </meta>
+          <results>
+          <result time="299000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>chars</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>java.io read chars with InputStreamReader</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>5000</int></value>
+        </element>
+              </axisData>
+            </result><result time="570000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>chars</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>java.io read chars with InputStreamReader</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>10000</int></value>
+        </element>
+              </axisData>
+            </result><result time="848000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>chars</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>java.io read chars with InputStreamReader</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>15000</int></value>
+        </element>
+              </axisData>
+            </result>
+          </results>
+        </cluster><cluster name="100-Apache IOUtils line-Mac OS X-x86_64-Input-lines CR-20.1-b02-384-Apple Inc.-Java HotSpot(TM) 64-Bit Server VM-2">
+          <meta>
+            <axis>
+              <string>size</string>
+            </axis>
+            <atts>
+              <element>
+          <name>method</name>
+          <value><string>lines CR</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>Apache IOUtils line</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+            </atts>
+          </meta>
+          <results>
+          <result time="1035000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>lines CR</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>Apache IOUtils line</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>5000</int></value>
+        </element>
+              </axisData>
+            </result><result time="2065000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>lines CR</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>Apache IOUtils line</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>10000</int></value>
+        </element>
+              </axisData>
+            </result><result time="2989000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>lines CR</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>Apache IOUtils line</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>15000</int></value>
+        </element>
+              </axisData>
+            </result>
+          </results>
+        </cluster><cluster name="100-Mac OS X-x86_64-Input-lines Auto-20.1-b02-384-Apple Inc.-Java HotSpot(TM) 64-Bit Server VM-2">
+          <meta>
+            <axis>
+              <string>size</string>
+            </axis>
+            <atts>
+              <element>
+          <name>method</name>
+          <value><string>lines Auto</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+            </atts>
+          </meta>
+          <results>
+          <result time="39273000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>lines Auto</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>5000</int></value>
+        </element>
+              </axisData>
+            </result><result time="80041000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>lines Auto</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>10000</int></value>
+        </element>
+              </axisData>
+            </result><result time="118658000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>lines Auto</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>15000</int></value>
+        </element>
+              </axisData>
+            </result>
+          </results>
+        </cluster><cluster name="100-Mac OS X-x86_64-Input-copyData-20.1-b02-384-Apple Inc.-Java HotSpot(TM) 64-Bit Server VM-2">
+          <meta>
+            <axis>
+              <string>size</string>
+            </axis>
+            <atts>
+              <element>
+          <name>method</name>
+          <value><string>copyData</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+            </atts>
+          </meta>
+          <results>
+          <result time="5293000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>copyData</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>5000</int></value>
+        </element>
+              </axisData>
+            </result><result time="9468000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>copyData</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>10000</int></value>
+        </element>
+              </axisData>
+            </result><result time="13929000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>copyData</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>15000</int></value>
+        </element>
+              </axisData>
+            </result>
+          </results>
+        </cluster><cluster name="100-Mac OS X-x86_64-Input-bytesAsInts-20.1-b02-384-Apple Inc.-Java HotSpot(TM) 64-Bit Server VM-2">
+          <meta>
+            <axis>
+              <string>size</string>
+            </axis>
+            <atts>
+              <element>
+          <name>method</name>
+          <value><string>bytesAsInts</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+            </atts>
+          </meta>
+          <results>
+          <result time="6050000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>bytesAsInts</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>5000</int></value>
+        </element>
+              </axisData>
+            </result><result time="11034000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>bytesAsInts</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>10000</int></value>
+        </element>
+              </axisData>
+            </result><result time="16089000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>bytesAsInts</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>15000</int></value>
+        </element>
+              </axisData>
+            </result>
+          </results>
+        </cluster><cluster name="100-Mac OS X-x86_64-Input-chars-20.1-b02-384-Apple Inc.-Java HotSpot(TM) 64-Bit Server VM-2">
+          <meta>
+            <axis>
+              <string>size</string>
+            </axis>
+            <atts>
+              <element>
+          <name>method</name>
+          <value><string>chars</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+            </atts>
+          </meta>
+          <results>
+          <result time="2113000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>chars</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>5000</int></value>
+        </element>
+              </axisData>
+            </result><result time="4216000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>chars</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>10000</int></value>
+        </element>
+              </axisData>
+            </result><result time="6412000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>chars</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>15000</int></value>
+        </element>
+              </axisData>
+            </result>
+          </results>
+        </cluster><cluster name="100-Apache IO copy bytes-Mac OS X-x86_64-Input-copyData-20.1-b02-384-Apple Inc.-Java HotSpot(TM) 64-Bit Server VM-2">
+          <meta>
+            <axis>
+              <string>size</string>
+            </axis>
+            <atts>
+              <element>
+          <name>method</name>
+          <value><string>copyData</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>Apache IO copy bytes</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+            </atts>
+          </meta>
+          <results>
+          <result time="69000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>copyData</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>Apache IO copy bytes</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>5000</int></value>
+        </element>
+              </axisData>
+            </result><result time="105000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>copyData</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>Apache IO copy bytes</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>10000</int></value>
+        </element>
+              </axisData>
+            </result><result time="140000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>copyData</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>Apache IO copy bytes</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>15000</int></value>
+        </element>
+              </axisData>
+            </result>
+          </results>
+        </cluster><cluster name="100-Apache IOUtils line-Mac OS X-x86_64-Input-lines Auto-20.1-b02-384-Apple Inc.-Java HotSpot(TM) 64-Bit Server VM-2">
+          <meta>
+            <axis>
+              <string>size</string>
+            </axis>
+            <atts>
+              <element>
+          <name>method</name>
+          <value><string>lines Auto</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>Apache IOUtils line</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+            </atts>
+          </meta>
+          <results>
+          <result time="1048000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>lines Auto</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>Apache IOUtils line</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>5000</int></value>
+        </element>
+              </axisData>
+            </result><result time="2080000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>lines Auto</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>Apache IOUtils line</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>10000</int></value>
+        </element>
+              </axisData>
+            </result><result time="2987000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>lines Auto</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>version</name>
+          <value><string>Apache IOUtils line</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>15000</int></value>
+        </element>
+              </axisData>
+            </result>
+          </results>
+        </cluster><cluster name="100-Mac OS X-x86_64-Input-lines CR-20.1-b02-384-Apple Inc.-Java HotSpot(TM) 64-Bit Server VM-2">
+          <meta>
+            <axis>
+              <string>size</string>
+            </axis>
+            <atts>
+              <element>
+          <name>method</name>
+          <value><string>lines CR</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+            </atts>
+          </meta>
+          <results>
+          <result time="25820000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>lines CR</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>5000</int></value>
+        </element>
+              </axisData>
+            </result><result time="53550000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>lines CR</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>10000</int></value>
+        </element>
+              </axisData>
+            </result><result time="81124000">
+              <attributes>
+                <element>
+          <name>method</name>
+          <value><string>lines CR</string></value>
+        </element><element>
+          <name>module</name>
+          <value><string>Input</string></value>
+        </element><element>
+          <name>warm-up runs</name>
+          <value><int>100</int></value>
+        </element><element>
+          <name>jvm-vendor</name>
+          <value><string>Apple Inc.</string></value>
+        </element><element>
+          <name>cores</name>
+          <value><int>2</int></value>
+        </element><element>
+          <name>jvm-name</name>
+          <value><string>Java HotSpot(TM) 64-Bit Server VM</string></value>
+        </element><element>
+          <name>os-name</name>
+          <value><string>Mac OS X</string></value>
+        </element><element>
+          <name>jvm-version</name>
+          <value><string>20.1-b02-384</string></value>
+        </element><element>
+          <name>os-arch</name>
+          <value><string>x86_64</string></value>
+        </element>
+              </attributes>
+              <axisData>
+                <element>
+          <name>size</name>
+          <value><int>15000</int></value>
+        </element>
+              </axisData>
+            </result>
+          </results>
+        </cluster></clusterResults>

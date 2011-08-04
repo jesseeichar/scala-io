@@ -39,7 +39,7 @@
             </atts>
           </meta>
           <results>
-          <result time="328000">
+          <result time="362000">
               <attributes>
                 <element>
           <name>method</name>
@@ -79,7 +79,7 @@
           <value><int>5000</int></value>
         </element>
               </axisData>
-            </result><result time="590000">
+            </result><result time="723000">
               <attributes>
                 <element>
           <name>method</name>
@@ -119,7 +119,7 @@
           <value><int>10000</int></value>
         </element>
               </axisData>
-            </result><result time="874000">
+            </result><result time="1030000">
               <attributes>
                 <element>
           <name>method</name>
@@ -198,7 +198,7 @@
             </atts>
           </meta>
           <results>
-          <result time="41731000">
+          <result time="45854000">
               <attributes>
                 <element>
           <name>method</name>
@@ -235,7 +235,7 @@
           <value><int>5000</int></value>
         </element>
               </axisData>
-            </result><result time="83104000">
+            </result><result time="90067000">
               <attributes>
                 <element>
           <name>method</name>
@@ -272,7 +272,7 @@
           <value><int>10000</int></value>
         </element>
               </axisData>
-            </result><result time="123558000">
+            </result><result time="132853000">
               <attributes>
                 <element>
           <name>method</name>
@@ -348,7 +348,7 @@
             </atts>
           </meta>
           <results>
-          <result time="33368000">
+          <result time="27857000">
               <attributes>
                 <element>
           <name>method</name>
@@ -385,7 +385,7 @@
           <value><int>5000</int></value>
         </element>
               </axisData>
-            </result><result time="68042000">
+            </result><result time="55604000">
               <attributes>
                 <element>
           <name>method</name>
@@ -422,7 +422,7 @@
           <value><int>10000</int></value>
         </element>
               </axisData>
-            </result><result time="102487000">
+            </result><result time="83308000">
               <attributes>
                 <element>
           <name>method</name>
@@ -501,7 +501,7 @@
             </atts>
           </meta>
           <results>
-          <result time="1855000">
+          <result time="1843000">
               <attributes>
                 <element>
           <name>method</name>
@@ -541,7 +541,7 @@
           <value><int>5000</int></value>
         </element>
               </axisData>
-            </result><result time="3667000">
+            </result><result time="3792000">
               <attributes>
                 <element>
           <name>method</name>
@@ -581,7 +581,7 @@
           <value><int>10000</int></value>
         </element>
               </axisData>
-            </result><result time="5393000">
+            </result><result time="5741000">
               <attributes>
                 <element>
           <name>method</name>
@@ -660,7 +660,7 @@
             </atts>
           </meta>
           <results>
-          <result time="31305000">
+          <result time="29677000">
               <attributes>
                 <element>
           <name>method</name>
@@ -697,7 +697,7 @@
           <value><int>5000</int></value>
         </element>
               </axisData>
-            </result><result time="63565000">
+            </result><result time="58618000">
               <attributes>
                 <element>
           <name>method</name>
@@ -734,7 +734,7 @@
           <value><int>10000</int></value>
         </element>
               </axisData>
-            </result><result time="95519000">
+            </result><result time="87855000">
               <attributes>
                 <element>
           <name>method</name>
@@ -810,7 +810,7 @@
             </atts>
           </meta>
           <results>
-          <result time="1907000">
+          <result time="1559000">
               <attributes>
                 <element>
           <name>method</name>
@@ -847,7 +847,7 @@
           <value><int>5000</int></value>
         </element>
               </axisData>
-            </result><result time="3707000">
+            </result><result time="2254000">
               <attributes>
                 <element>
           <name>method</name>
@@ -884,7 +884,7 @@
           <value><int>10000</int></value>
         </element>
               </axisData>
-            </result><result time="5538000">
+            </result><result time="2771000">
               <attributes>
                 <element>
           <name>method</name>
@@ -960,7 +960,7 @@
             </atts>
           </meta>
           <results>
-          <result time="2524000">
+          <result time="2951000">
               <attributes>
                 <element>
           <name>method</name>
@@ -997,7 +997,7 @@
           <value><int>5000</int></value>
         </element>
               </axisData>
-            </result><result time="3945000">
+            </result><result time="5417000">
               <attributes>
                 <element>
           <name>method</name>
@@ -1034,7 +1034,7 @@
           <value><int>10000</int></value>
         </element>
               </axisData>
-            </result><result time="5481000">
+            </result><result time="8071000">
               <attributes>
                 <element>
           <name>method</name>
@@ -1113,7 +1113,7 @@
             </atts>
           </meta>
           <results>
-          <result time="1011000">
+          <result time="1108000">
               <attributes>
                 <element>
           <name>method</name>
@@ -1153,7 +1153,7 @@
           <value><int>5000</int></value>
         </element>
               </axisData>
-            </result><result time="1961000">
+            </result><result time="2250000">
               <attributes>
                 <element>
           <name>method</name>
@@ -1193,7 +1193,7 @@
           <value><int>10000</int></value>
         </element>
               </axisData>
-            </result><result time="2979000">
+            </result><result time="3331000">
               <attributes>
                 <element>
           <name>method</name>
@@ -1275,7 +1275,7 @@
             </atts>
           </meta>
           <results>
-          <result time="77000">
+          <result time="113000">
               <attributes>
                 <element>
           <name>method</name>
@@ -1315,7 +1315,7 @@
           <value><int>5000</int></value>
         </element>
               </axisData>
-            </result><result time="107000">
+            </result><result time="210000">
               <attributes>
                 <element>
           <name>method</name>
@@ -1355,7 +1355,7 @@
           <value><int>10000</int></value>
         </element>
               </axisData>
-            </result><result time="131000">
+            </result><result time="307000">
               <attributes>
                 <element>
           <name>method</name>
@@ -1437,7 +1437,7 @@
             </atts>
           </meta>
           <results>
-          <result time="1024000">
+          <result time="1106000">
               <attributes>
                 <element>
           <name>method</name>
@@ -1477,7 +1477,7 @@
           <value><int>5000</int></value>
         </element>
               </axisData>
-            </result><result time="2039000">
+            </result><result time="2201000">
               <attributes>
                 <element>
           <name>method</name>
@@ -1517,7 +1517,7 @@
           <value><int>10000</int></value>
         </element>
               </axisData>
-            </result><result time="3023000">
+            </result><result time="3319000">
               <attributes>
                 <element>
           <name>method</name>
@@ -1596,7 +1596,7 @@
             </atts>
           </meta>
           <results>
-          <result time="1678000">
+          <result time="1464000">
               <attributes>
                 <element>
           <name>method</name>
@@ -1633,7 +1633,7 @@
           <value><int>5000</int></value>
         </element>
               </axisData>
-            </result><result time="2356000">
+            </result><result time="2494000">
               <attributes>
                 <element>
           <name>method</name>
@@ -1670,7 +1670,7 @@
           <value><int>10000</int></value>
         </element>
               </axisData>
-            </result><result time="2993000">
+            </result><result time="3572000">
               <attributes>
                 <element>
           <name>method</name>
@@ -1746,7 +1746,7 @@
             </atts>
           </meta>
           <results>
-          <result time="3429000">
+          <result time="1624000">
               <attributes>
                 <element>
           <name>method</name>
@@ -1783,7 +1783,7 @@
           <value><int>5000</int></value>
         </element>
               </axisData>
-            </result><result time="5829000">
+            </result><result time="2859000">
               <attributes>
                 <element>
           <name>method</name>
@@ -1820,7 +1820,7 @@
           <value><int>10000</int></value>
         </element>
               </axisData>
-            </result><result time="8278000">
+            </result><result time="4247000">
               <attributes>
                 <element>
           <name>method</name>
@@ -1899,7 +1899,7 @@
             </atts>
           </meta>
           <results>
-          <result time="63000">
+          <result time="98000">
               <attributes>
                 <element>
           <name>method</name>
@@ -1939,7 +1939,7 @@
           <value><int>5000</int></value>
         </element>
               </axisData>
-            </result><result time="82000">
+            </result><result time="218000">
               <attributes>
                 <element>
           <name>method</name>
@@ -1979,7 +1979,7 @@
           <value><int>10000</int></value>
         </element>
               </axisData>
-            </result><result time="98000">
+            </result><result time="317000">
               <attributes>
                 <element>
           <name>method</name>
@@ -2061,7 +2061,7 @@
             </atts>
           </meta>
           <results>
-          <result time="1852000">
+          <result time="1890000">
               <attributes>
                 <element>
           <name>method</name>
@@ -2101,7 +2101,7 @@
           <value><int>5000</int></value>
         </element>
               </axisData>
-            </result><result time="3669000">
+            </result><result time="3821000">
               <attributes>
                 <element>
           <name>method</name>
@@ -2141,7 +2141,7 @@
           <value><int>10000</int></value>
         </element>
               </axisData>
-            </result><result time="5418000">
+            </result><result time="5574000">
               <attributes>
                 <element>
           <name>method</name>
@@ -2223,7 +2223,7 @@
             </atts>
           </meta>
           <results>
-          <result time="1058000">
+          <result time="1121000">
               <attributes>
                 <element>
           <name>method</name>
@@ -2263,7 +2263,7 @@
           <value><int>5000</int></value>
         </element>
               </axisData>
-            </result><result time="2045000">
+            </result><result time="2217000">
               <attributes>
                 <element>
           <name>method</name>
@@ -2303,7 +2303,7 @@
           <value><int>10000</int></value>
         </element>
               </axisData>
-            </result><result time="3057000">
+            </result><result time="3324000">
               <attributes>
                 <element>
           <name>method</name>
@@ -2385,7 +2385,7 @@
             </atts>
           </meta>
           <results>
-          <result time="85000">
+          <result time="109000">
               <attributes>
                 <element>
           <name>method</name>
@@ -2425,7 +2425,7 @@
           <value><int>5000</int></value>
         </element>
               </axisData>
-            </result><result time="113000">
+            </result><result time="206000">
               <attributes>
                 <element>
           <name>method</name>
@@ -2465,7 +2465,7 @@
           <value><int>10000</int></value>
         </element>
               </axisData>
-            </result><result time="165000">
+            </result><result time="333000">
               <attributes>
                 <element>
           <name>method</name>
@@ -2544,7 +2544,7 @@
             </atts>
           </meta>
           <results>
-          <result time="28493000">
+          <result time="29270000">
               <attributes>
                 <element>
           <name>method</name>
@@ -2581,7 +2581,7 @@
           <value><int>5000</int></value>
         </element>
               </axisData>
-            </result><result time="57804000">
+            </result><result time="58661000">
               <attributes>
                 <element>
           <name>method</name>
@@ -2618,7 +2618,7 @@
           <value><int>10000</int></value>
         </element>
               </axisData>
-            </result><result time="87499000">
+            </result><result time="85469000">
               <attributes>
                 <element>
           <name>method</name>
@@ -2694,7 +2694,7 @@
             </atts>
           </meta>
           <results>
-          <result time="2282000">
+          <result time="2604000">
               <attributes>
                 <element>
           <name>method</name>
@@ -2731,7 +2731,7 @@
           <value><int>5000</int></value>
         </element>
               </axisData>
-            </result><result time="3495000">
+            </result><result time="4381000">
               <attributes>
                 <element>
           <name>method</name>
@@ -2768,7 +2768,7 @@
           <value><int>10000</int></value>
         </element>
               </axisData>
-            </result><result time="4727000">
+            </result><result time="5983000">
               <attributes>
                 <element>
           <name>method</name>
@@ -2844,7 +2844,7 @@
             </atts>
           </meta>
           <results>
-          <result time="32779000">
+          <result time="27689000">
               <attributes>
                 <element>
           <name>method</name>
@@ -2881,7 +2881,7 @@
           <value><int>5000</int></value>
         </element>
               </axisData>
-            </result><result time="66265000">
+            </result><result time="55960000">
               <attributes>
                 <element>
           <name>method</name>
@@ -2918,7 +2918,7 @@
           <value><int>10000</int></value>
         </element>
               </axisData>
-            </result><result time="99755000">
+            </result><result time="83122000">
               <attributes>
                 <element>
           <name>method</name>
@@ -2997,7 +2997,7 @@
             </atts>
           </meta>
           <results>
-          <result time="116000">
+          <result time="155000">
               <attributes>
                 <element>
           <name>method</name>
@@ -3037,7 +3037,7 @@
           <value><int>5000</int></value>
         </element>
               </axisData>
-            </result><result time="190000">
+            </result><result time="338000">
               <attributes>
                 <element>
           <name>method</name>
@@ -3077,7 +3077,7 @@
           <value><int>10000</int></value>
         </element>
               </axisData>
-            </result><result time="269000">
+            </result><result time="506000">
               <attributes>
                 <element>
           <name>method</name>

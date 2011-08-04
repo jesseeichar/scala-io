@@ -141,19 +141,15 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
         having attribute ("version", "Apache IO copy bytes") in {
           withSizeDef { size =>
             val in = newIn(size)
-            val out = Channels.newChannel(new ByteArrayOutputStream())
-            (size, in, out)
+            val out = new ByteArrayOutputStream()
+            (in, out)
           } run {
-            case (size, inFunc, out) =>
+            case (inFunc, out) =>
               val in = inFunc()
-              val buffer = ByteBuffer.allocateDirect(size * 2)
-              var read = in.read(buffer)
-              while (read > -1) {
-                read = in.read(buffer)
-                buffer.flip()
-                out.write(buffer)
-              }
-              in.close
+              val inStream = Channels.newInputStream(in)
+              IOUtils.copy(inStream, out)
+              inStream.close()
+              in.close()
               
           }
         }

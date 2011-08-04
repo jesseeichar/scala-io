@@ -78,7 +78,14 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
   protected[io] def iterator:CloseableIterator[A]
 
   def foreach[U](f: (A) => U) {
-    managed(iterator).acquireAndGet(_.foreach(f))
+    val iter = iterator
+    try {
+      while (iter.hasNext) {
+        f(iter.next)
+      }
+    } finally {
+      iter.close()
+    }
   }
 
   override def slice(from: Int, until: Int) = lslice(from,until)

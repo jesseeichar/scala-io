@@ -129,53 +129,71 @@ private[io] trait ResourceTraversable[A] extends LongTraversable[A]
    }
 }
 
-class ArrayIterator(var a:Array[Byte],var end:Int) extends Iterator[Byte]{
+class ArrayIterator[A](var a:Array[A],var end:Int) extends Iterator[A]{
   var start=0
   var now=0
   def hasNext = now < end
-  @specialized(Byte)
+  @specialized(Byte,Char)
   def next = {
     now += 1
     a(now - 1)
   }
 }
+class NioByteBufferIterator(var buffer: NioByteBuffer) extends Iterator[Byte] {
+  def hasNext = buffer.hasRemaining()
+  @specialized(Byte)
+  def next = buffer.get()
+}
+
+
 private[io] object ResourceTraversable {
   /**
    * The strategy defined for reading the input bytes and converting them
    * to the output type
    * 
    * @param A the type of object created by parsing the read byte array
-   * @param I The type of iterator created to iterate through the result type A
+   * @param I 
    */
-  trait InputParser[+A] {
+  trait InputParser[+A,B] {
+    /**
+     * The type of iterator used by apply and created by iterator.
+     */
     type I <: Iterator[A]
     /**
-     * Create the initial iterator.  The same object will be passed to apply
-     * and the iterator will not be shared between threads so it is ok to reuse
+     * Create the initial iterator.  The returned iterator will be passed to the apply
+     * and the iterator will not be shared between threads so it is acceptable to reuse
      * the same iterator to reduce the number of object creations.
+     * 
+     * @param input the object that collects the raw input data.  The object B should be mutable 
+     * 		  and the contents should be updated, the reason for this is to have acceptable performance 
+     * 		  during tight read loops 
      */
-    def iterator(input:Array[Byte], length:Int):I
-    def apply(iter:I,input:Array[Byte],length:Int):I
+    def iterator(input:B):I
+    /**
+     * create the final iterator object to return.  Each call the same iterator object (created by calling iterator) is passed
+     * to apply.   The iterator can be ignored if required but for performance it is recommended to reuse the same object as much as possible
+     */
+    def apply(iter:I,length:Int):I
   }
-  val DefaultParser = new InputParser[Byte] {
-    type I = ArrayIterator
-    def iterator(input:Array[Byte], length:Int) = new ArrayIterator(input,length)
-    def apply(iter: ArrayIterator, input: Array[Byte], length: Int) = {
+  val DefaultByteParser = new InputParser[Byte,Array[Byte]] {
+    type I = ArrayIterator[Byte]
+    def iterator(input:Array[Byte]) = new ArrayIterator(input,0)
+    def apply(iter: ArrayIterator[Byte], length: Int) = {
       iter.start = 0
       iter.now = 0
       iter.end = length
       iter
     }
   }
-  val IndentityConversion = identity[Byte]_
+  val IdentityByteConversion = identity[Byte]_
   def streamBased[A,B]
 		  (opener : => OpenedResource[InputStream],
           bufferFactory : => Array[Byte] = new Array[Byte](Constants.BufferSize),
-          parser : InputParser[A] = DefaultParser,
-          initialConv: A => B = IndentityConversion,
+          parser : InputParser[A,Array[Byte]] = DefaultByteParser,
+          initialConv: A => B = IdentityByteConversion,
           startIndex : Long = 0,
-      endIndex: Long = Long.MaxValue) = {
-    if (parser == DefaultParser && initialConv == IndentityConversion) {
+          endIndex: Long = Long.MaxValue) = {
+    if (parser == DefaultByteParser && initialConv == IdentityByteConversion) {
       new traversable.InputStreamResourceTraversable(opener,bufferFactory,startIndex,endIndex).asInstanceOf[LongTraversable[B]]
     } else {
       new ResourceTraversable[B] {
@@ -184,12 +202,60 @@ private[io] object ResourceTraversable {
 
         def source = new TraversableSource[InputStream, A] {
           val buffer = bufferFactory
-          val iter = parser.iterator(buffer, 0)
+          val iter = parser.iterator(buffer)
           val openedResource = opener
           val stream = openedResource.get
           def read() = {
             val read = stream.read(buffer)
-            parser(iter, buffer, read)
+            parser(iter, read)
+          }
+
+          def initializePosition(pos: Long) = skip(pos)
+
+          def skip(count: Long) = stream.skip(count)
+
+          def close(): List[Throwable] = openedResource.close()
+        }
+
+        protected val conv = initialConv
+        protected val start = startIndex
+        protected val end = endIndex
+      }
+    }
+  }
+  val DefaultCharParser = new InputParser[Char,Array[Char]] {
+    type I = ArrayIterator[Char]
+    def iterator(input:Array[Char]) = new ArrayIterator(input,0)
+    def apply(iter: ArrayIterator[Char], length: Int) = {
+      iter.start = 0
+      iter.now = 0
+      iter.end = length
+      iter
+    }
+  }
+  val IdentityCharConversion = identity[Char]_
+  def readerBased[A](opener : => OpenedResource[Reader],
+                  bufferFactory : => Array[Char] = new Array[Char](Constants.BufferSize),
+                  parser : InputParser[Char,Array[Char]] = DefaultCharParser,
+                  initialConv: Char => A = IdentityCharConversion,
+                  startIndex : Long = 0,
+                  endIndex: Long = Long.MaxValue) = {
+
+    if (parser == DefaultCharParser && initialConv == IdentityCharConversion) {
+    	new traversable.ReaderResourceTraversable(opener, bufferFactory, startIndex, endIndex).asInstanceOf[LongTraversable[A]]
+    } else {
+      new ResourceTraversable[A] {
+        type In = Reader
+        type SourceOut = Char
+
+        def source = new TraversableSource[Reader, Char] {
+          val buffer = bufferFactory
+          val iter = parser.iterator(buffer)
+          val openedResource = opener
+          val stream = openedResource.get
+          def read() = {
+            val read = stream.read(buffer)
+            parser(iter, read)
           }
 
           def initializePosition(pos: Long) = skip(pos)
@@ -206,120 +272,110 @@ private[io] object ResourceTraversable {
     }
   }
 
-  def readerBased[A](opener : => OpenedResource[Reader],
-                  initialConv: Char => A = (a:Char) => a,
-                  startIndex : Long = 0,
-                  endIndex : Long = Long.MaxValue) = {
-    new ResourceTraversable[A] {
-      type In = Reader
-      type SourceOut = Char
-
-      def source = new TraversableSource[Reader, Char] {
-        val openedResource = opener
-        def close(): List[Throwable] = openedResource.close()
-        def initializePosition(pos: Long) = skip(pos)
-        def skip(count:Long) = openedResource.get.skip(count)
-        def read() = openedResource.get.read match {
-          case -1 => Iterator.empty
-          case i => Iterator.single(i.toChar)
-        }
-      }
-
-      protected val conv = initialConv
-      protected val start = startIndex
-      protected val end = endIndex
-    }
+  val DefaultByteBufferParser = new InputParser[Byte,NioByteBuffer] {
+    type I = NioByteBufferIterator
+    def iterator(input:NioByteBuffer) = new NioByteBufferIterator(input)
+    def apply(iter: NioByteBufferIterator, length: Int) = iter
   }
 
   def byteChannelBased[A,B](opener : => OpenedResource[ReadableByteChannel],
                           byteBufferFactory : => NioByteBuffer = NioByteBuffer.allocate(Constants.BufferSize),
-                          parser : NioByteBuffer => Iterator[A] = (c:NioByteBuffer) => JavaConversions.byteBufferToTraversable(c).iterator,
-                          initialConv: A => B = (a:A) => a,
+                          parser : InputParser[A,NioByteBuffer] = DefaultByteBufferParser,
+                          initialConv: A => B = IdentityByteConversion,
                           startIndex : Long = 0,
-                          endIndex : Long = Long.MaxValue) = {
-    new ResourceTraversable[B] {
-      type In = ReadableByteChannel
-      type SourceOut = A
+                          endIndex : Long = Long.MaxValue):LongTraversable[B] = {
+    if (parser == DefaultByteBufferParser && initialConv == IdentityByteConversion) {
+      new traversable.ReadableByteChannelTraversable(opener, byteBufferFactory, startIndex, endIndex).asInstanceOf[LongTraversable[B]]
+    } else {
+      new ResourceTraversable[B] {
+        type In = ReadableByteChannel
+        type SourceOut = A
 
-      def source = new TraversableSource[ReadableByteChannel, A] {
-        val buffer = byteBufferFactory
-
-        val openedResource = opener
-        val channel = openedResource.get
-        def read() = {
-          buffer.clear
-          channel read buffer
-          buffer.flip
-          parser(buffer)
-        }
-
-        def initializePosition(pos: Long) = skip(pos)
-
-        def skip(count: Long) {
-          if(count > 0) {
-            val toRead = (buffer.capacity.toLong min count).toInt
-
-            buffer.clear()
-            buffer.limit(toRead)
-
+        def source = new TraversableSource[ReadableByteChannel, A] {
+          val buffer = byteBufferFactory
+          val iter = parser.iterator(buffer)
+          
+          val openedResource = opener
+          val channel = openedResource.get
+          def read() = {
+            buffer.clear
             val read = channel read buffer
-            if(read > -1) skip(count - read)
+            buffer.flip
+            parser(iter, read)
           }
+
+          def initializePosition(pos: Long) = skip(pos)
+
+          def skip(count: Long) {
+            if (count > 0) {
+              val toRead = (buffer.capacity.toLong min count).toInt
+
+              buffer.clear()
+              buffer.limit(toRead)
+
+              val read = channel read buffer
+              if (read > -1) skip(count - read)
+            }
+          }
+
+          def close(): List[Throwable] = openedResource.close()
         }
 
-        def close(): List[Throwable] = openedResource.close()
+        protected val conv = initialConv
+        protected val start = startIndex
+        protected val end = endIndex
       }
-
-      protected val conv = initialConv
-      protected val start = startIndex
-      protected val end = endIndex
     }
   }
   def seekableByteChannelBased[A,B](opener : => OpenedResource[SeekableByteChannel],
                           byteBufferFactory : => NioByteBuffer = NioByteBuffer.allocate(Constants.BufferSize),
-                          parser : NioByteBuffer => Iterator[A] = (c:NioByteBuffer) => JavaConversions.byteBufferToTraversable(c).iterator,
-                          initialConv: A => B = (a:A) => a,
+                          parser : InputParser[A,NioByteBuffer] = DefaultByteBufferParser,
+                          initialConv: A => B = IdentityByteConversion,
                           startIndex : Long = 0,
-                          endIndex : Long = Long.MaxValue) = {
-    new ResourceTraversable[B] {
-      type In = SeekableByteChannel
-      type SourceOut = A
-
-      def source = new TraversableSource[SeekableByteChannel, A] {
-        val buffer = byteBufferFactory
-
-        val openedResource = opener
-        val channel = openedResource.get
-
-        var position = 0L
-
-        def read() = {
-          channel.position(position)
-          buffer.clear
-          position += (channel read buffer)
-          buffer.flip
-          parser(buffer)
-        }
-
-        def initializePosition(pos: Long) = {
-          position = pos
-          channel.position(pos)
-        }
-
-        def skip(count: Long) {
-          if(count > 0) {
-            position += count
-            channel.position(position)
+                          endIndex : Long = Long.MaxValue):LongTraversable[B] = {
+    if (parser == DefaultByteBufferParser && initialConv == IdentityByteConversion) {
+      new traversable.ReadableByteChannelTraversable(opener, byteBufferFactory, startIndex, endIndex).asInstanceOf[LongTraversable[B]]
+    } else {
+        new ResourceTraversable[B] {
+          type In = SeekableByteChannel
+          type SourceOut = A
+    
+          def source = new TraversableSource[SeekableByteChannel, A] {
+            val buffer = byteBufferFactory
+            val iter = parser.iterator(buffer)
+            val openedResource = opener
+            val channel = openedResource.get
+    
+            var position = 0L
+    
+            def read() = {
+              channel.position(position)
+              buffer.clear
+              position += (channel read buffer)
+              buffer.flip
+              parser(iter,0) // length is ignored so just pass 0
+            }
+    
+            def initializePosition(pos: Long) = {
+              position = pos
+              channel.position(pos)
+            }
+    
+            def skip(count: Long) {
+              if (count > 0) {
+                position += count
+                channel.position(position)
+              }
+            }
+    
+            def close(): List[Throwable] = openedResource.close()
           }
+    
+          protected val conv = initialConv
+          protected val start = startIndex
+          protected val end = endIndex
         }
-
-        def close(): List[Throwable] = openedResource.close()
       }
-
-      protected val conv = initialConv
-      protected val start = startIndex
-      protected val end = endIndex
-    }
   }
 
   val toIntConv : Byte => Int = (b:Byte) => {

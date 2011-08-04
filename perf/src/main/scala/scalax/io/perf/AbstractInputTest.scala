@@ -95,8 +95,8 @@ abstract class AbstractInputTest extends PerformanceDSLTest {
               while (read > -1) {
                 var i = 0
                 while (i < read) {
-                  i += 1
                   buffer(i)
+                  i += 1
                 }
 
                 read = in.read(buffer)
@@ -164,8 +164,8 @@ abstract class AbstractInputTest extends PerformanceDSLTest {
                 read = reader.read(buffer)
                 var i = 0
                 while (i < read) {
-                  i += 1
                   buffer(i)
+                  i += 1
                 }
 
               } while (read > 0)

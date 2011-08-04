@@ -22,7 +22,7 @@ object SmallMediumSetsFromFileReadableByteChannelTest extends AbstractReadableBy
   val MaxSize = 15000
   val Inc = 5000
   val From = 5000
-  val WarmUpRuns = 10000
+  val WarmUpRuns = 100
 
   def newIn(size: Int, lines: Int = 2, term: String = NewLine.sep) = {
     val data = generateTestData(size, lines, term)
