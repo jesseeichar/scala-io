@@ -6,7 +6,7 @@
 **                          |/                                          **
 \*                                                                      */
 
-package scalaio.test.fs.default
+package scalaio.test.fs.defaultfs
 
 
 import util.Random

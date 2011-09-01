@@ -6,10 +6,11 @@
 **                          |/                                          **
 \*                                                                      */
 
-package scalaio.test.fs.default
+package scalaio.test.fs.defaultfs
 
 import scalax.file.FileSystem
 import org.junit.Test
+import org.junit.Ignore
 
 class RandomPrefixTest {
   @Test
@@ -21,7 +22,22 @@ class RandomPrefixTest {
   }
 }
 class FsMatchingTest extends scalaio.test.fs.FsMatchingTests with DefaultFixture
-class FsDirectoryStreamTest extends scalaio.test.fs.FsPathSetTests with DefaultFixture
+class FsDirectoryStreamTest extends scalaio.test.fs.FsPathSetTests with DefaultFixture {
+    @Test @Ignore // ignore because if it passes it does nearly a full scan of harddrive so only when the issue is known to fail do we want to test this
+    def stackOverflowBug : Unit = {
+      println("start overflow bug test")
+      FileSystem.default.roots.headOption foreach {path =>
+          val start = System.currentTimeMillis()
+          val iter = (path ** "*.scala").iterator
+          while(iter.hasNext && System.currentTimeMillis() - start < 30000) {
+            iter.next
+          }
+      }
+      println("done overflow bug test and it passed... yay")
+      // no error is a pass
+  }
+
+}
 class FsInputTest extends scalaio.test.fs.FsInputTests with DefaultFixture
 class FsOutputTest extends scalaio.test.fs.FsOutputTests with DefaultFixture
 class FsFileOpsTest extends scalaio.test.fs.FsFileOpsTests with DefaultFixture
@@ -30,5 +46,5 @@ class SeekableTest extends scalaio.test.fs.FsSeekableTests with DefaultFixture
 class BasicPathTest extends scalaio.test.fs.FsBasicPathTests with DefaultFixture
 class AccessSetTest extends scalaio.test.fs.FsAccessSetTests with DefaultFixture
 class PathObjectTest extends scalaio.test.fs.FsPathObjectTests with DefaultFixture
-class PathFinderTest extends scalaio.test.fs.FsPathFinderTests with DefaultFixture
+class PathFinderTest extends scalaio.test.fs.FsPathFinderTests with DefaultFixture 
 

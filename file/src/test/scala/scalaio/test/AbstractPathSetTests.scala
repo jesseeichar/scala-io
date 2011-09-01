@@ -24,7 +24,6 @@ trait AbstractPathSetTests extends scalax.test.sugar.FSAssertionSugar {
    */
   protected def fixtures(depth:Int=4) : (Path, Node)
 
-
   @Test //@Ignore
   def lists_entire_tree : Unit = {
     val (path,tree) = fixtures()

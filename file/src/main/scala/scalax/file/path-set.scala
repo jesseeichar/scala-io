@@ -10,6 +10,7 @@ package scalax.file
 import java.io.Closeable
 import java.nio.channels.ByteChannel
 import collection.{Iterator, IterableView}
+import annotation.tailrec
 
 trait PathFinder[+T] {
   /**The union of the paths found by this <code>PathSet</code> with the paths found by 'paths'.*/
@@ -163,6 +164,7 @@ final class BasicPathSet[+T <: Path](srcFiles: Iterable[T],
                       nextElem.nonEmpty
                     }
 
+    @tailrec
     def loadNext() : Option[T] = {
       toVisit match {
         case Nil => None
@@ -172,10 +174,10 @@ final class BasicPathSet[+T <: Path](srcFiles: Iterable[T],
             toVisit = children(path) ::: toVisit.tail
           else
             toVisit = toVisit.tail
-          Some(path).filter(pathFilter).orElse{loadNext}
+          if (pathFilter(path)) Some(path) else loadNext
         case file :: _ =>
           toVisit = toVisit.tail
-          Some(file).filter(pathFilter).orElse{loadNext}
+          if (pathFilter(file)) Some(file) else loadNext
       }
     }
 
