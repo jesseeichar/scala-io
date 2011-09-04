@@ -1,0 +1,31 @@
+<html xmlns:ng="http://angularjs.org">
+<head>
+<title> Scala IO API Documentation </title> 
+        <script type="text/javascript" src="js/shCore.js"></script>
+        <script type="text/javascript" src="js/shBrushScala.js"></script>
+        <link href="css/shCore.css" type="text/css" rel="stylesheet"></link>
+        <link href="css/shThemeDefault.css" type="text/css" rel="stylesheet"></link>
+        <link href="css/samples.css" type="text/css" rel="stylesheet"></link>
+</head>
+<body>
+  <div id="maincontainer" ng:controller="ContentController">
+     <ng:view></ng:view>          
+  </div>
+  <div id="leftcolumn"  ng:controller="NavController"> 
+    <div class="innertube"> 
+      <div id="navcontainer"> 
+        <ul id="projectnavlist"> 
+          <li><a href="./api/index.html">Scala API docs</a>
+          </li>
+          <li ng:repeat="nav in page.navItems">
+            {{nav.href}}
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <script src="http://code.angularjs.org/angular-0.9.19.min.js" ng:autobind></script>
+  <script src="js/controllers.js"></script>
+  <script type="text/javascript">SyntaxHighlighter.all()</script>
+</body>
+</html> 

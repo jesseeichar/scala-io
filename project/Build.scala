@@ -97,8 +97,8 @@ object ScalaIoBuild extends Build {
       val model = new WebsiteModel(
       sourcePath = baseDirectory,
       websiteResources = Seq(resourceDirectory),
-      buildScalaVersion = scalaVersion,
-      outputDir = out)
+      buildScalaVersion = scalaVersion)/*,
+      outputDir = out)*/
 
       model.buildSite
   }
