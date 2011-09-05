@@ -28,7 +28,7 @@ class Example(project:String, path:File) {
   lazy val description:Node = parseXML(base,if(rawDesc == summary) "" else rawDesc.dropWhile{_ != '.'}.drop(1).mkString)
   lazy val shortSummaryText:String = shortSummary(summary)
   lazy val keyword = Keyword(project, name.toLowerCase,name,1,name,"category",Set(name))
-  lazy val page = Page(keyword,description,shortSummaryText,"")
+  lazy val page = Page(keyword,description,shortSummaryText,"",pages)
   
   lazy val pages:Seq[Page] = {
     
@@ -63,7 +63,7 @@ class Example(project:String, path:File) {
         }
         lines mkString
       }
-      val keyword = Keyword(project,name.toLowerCase,name,2,name,"example",Keyword.split(summary))
+      val keyword = Keyword(project,name.toLowerCase.replaceAll("\\s","_"),name,2,name,"example",Keyword.split(code))
       Page(keyword,summaryXml,shortSummary(summary),code)
     }
   }
@@ -77,6 +77,9 @@ class Example(project:String, path:File) {
   }
 }
 
-case class Page(keyword:Keyword, fullSummaryXml:Node, shortSummary:String, code:String) {
-  
+case class Page(keyword:Keyword, fullSummaryXml:Node, shortSummary:String, code:String, children:Seq[Page]=Nil) {
+  def html = <span>
+    <div class="example_summary"><span>{fullSummaryXml}</span></div> 
+    {if(code.trim().nonEmpty) <div class="example_code"><pre class="brush: scala">{code}</pre></div> else ""}
+</span>
 }

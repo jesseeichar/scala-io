@@ -6,8 +6,11 @@ case class Keyword(section:String,id:String,name:String,depth:Int,shortName:Stri
 }
 
 object Keyword {
-  val core = Keyword("core","index","Core",0,"Core","overview", Set("core"))
-  val file = Keyword("file","index","File",0,"File","overview", Set("file"))
+  val gettingStarted = Keyword("getting-started","index","Getting Started Guide",0,"Getting Started","overview", Set("start introduction intro"))
+  val roadmap = Keyword("roadmap","index","Scala IO Development Roadmap",0,"Roadmap","overview", Set("future map roadmap"))
+  val overview = Keyword("overview","index","Scala IO Documentation ",0,"Overview","overview", Set("overview"))
+  val core = Keyword("core","index","Scala IO Core API",0,"Core API","overview", Set("core"))
+  val file = Keyword("file","index","Scala IO File API",0,"File API","overview", Set("file"))
   
   def split(text:String):Set[String] = {
     val words = text.split("""\s+""").filter(_.trim.nonEmpty).toSet

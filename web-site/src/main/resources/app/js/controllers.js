@@ -1,5 +1,6 @@
 DocsController.$inject = ['$location', '$browser', '$window', '$cookies'];
 function DocsController($location, $browser, $window, $cookies) {
+    this.props = IO_PROPS;
   window.$root = this.$root;
   var self = this,
       OFFLINE_COOKIE_NAME = 'ng-offline',
@@ -9,7 +10,7 @@ function DocsController($location, $browser, $window, $cookies) {
   if (!HAS_HASH.test($location.href)) {
       $location.hashPath = '!/api';
   }
-  this.$watch('$location.hashPath', function(hashPath) {
+  this.$watch('$location.hashPath', function(scope,hashPath) {
     if (hashPath.match(/^!/)) {
       var parts = hashPath.substring(1).split('/');
       self.sectionId = parts[1];

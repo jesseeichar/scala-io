@@ -4,7 +4,8 @@ import Keys._
 object BuildConstants {
   val organization = "com.github.scala-incubator.io"
   val version = "0.2.0-SNAPSHOT"
-  val armVersion = "0.2"
+  val armVersion = "0.3"
+  val scalaVersion = "2.9.1"
 }
 
 object ScalaIoBuild extends Build {
@@ -45,7 +46,7 @@ object ScalaIoBuild extends Build {
     maxErrors := 20,
     scalacOptions += "-deprecation",
     offline := false,
-    scalaVersion := "2.9.0-1",
+    scalaVersion := BuildConstants.scalaVersion,
     publishToSettings,
     credentials += Credentials(Path.userHome / ".sbt" / ".credentials"),
     pomExtraSetting,
@@ -97,7 +98,7 @@ object ScalaIoBuild extends Build {
       val model = new WebsiteModel(
       sourcePath = baseDirectory,
       websiteResources = Seq(resourceDirectory),
-      buildScalaVersion = scalaVersion)/*,
+      buildScalaVersion = BuildConstants.scalaVersion)/*,
       outputDir = out)*/
 
       model.buildSite
