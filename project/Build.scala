@@ -12,7 +12,7 @@ object ScalaIoBuild extends Build {
   // ----------------------- Root Project ----------------------- //
 
 	lazy val root:Project = Project("root", file(".")).
-    aggregate(coreProject,fileProject,perfProject,docsProj).
+    aggregate(coreProject,fileProject,perfProject,webSiteProject).
     settings(sharedSettings ++ Seq(publishArtifact := false) :_*)
 
   // ----------------------- Samples Settings ----------------------- //
@@ -88,11 +88,12 @@ object ScalaIoBuild extends Build {
   
 
   // ----------------------- Website Project ----------------------- //
+/*  lazy val Docs = config("docs") extend (Compile)
 
   lazy val site = TaskKey[Unit]("site","Generate documentation web-site")
   lazy val siteDir = TaskKey[File]("site-dir","Directory of the generated website")
 
-  lazy val SiteTask = site <<= (siteDir,baseDirectory,scalaVersion,resourceDirectory) map {
+  lazy val SiteTask = site in Docs <<= (siteDir,baseDirectory,scalaVersion,resourceDirectory) map {
     (out,baseDirectory,scalaVersion,resourceDirectory) =>
 
       val model = new WebsiteModel(
@@ -103,22 +104,45 @@ object ScalaIoBuild extends Build {
 
       model.buildSite
   }
-  lazy val siteSettings = Defaults.defaultSettings ++ Seq[Setting[_]](
-    resourceDirectory := new File("web-site/src/main/resources"),
-    siteDir <<= baseDirectory map { base => new File(base, "target/website") },
+  lazy val siteSettings = inConfig(Docs)(Defaults.configSettings) ++ Seq(
+    resourceDirectory in Docs := new File("web-site/src/main/resources"),
+    siteDir in Docs <<= baseDirectory map { base => new File(base, "target/website") },
+    sources in Docs <<=
+      (sources in (coreProject,Compile),
+      sources in (fileProject,Compile)) map { _ ++ _ },
     SiteTask
-  )
+  ) ++ inConfig(Docs)(sharedSettings)
 
-  lazy val webSiteProject = Project("website", file("."), settings = siteSettings)
+  lazy val webSiteProject = Project("website", file("."), settings = siteSettings).
+    dependsOn(fileProject % "docs -> compile")*/
 
   // ------------------------------ Docs Project ------------------------------ //
+  lazy val site = TaskKey[Unit]("site","Generate documentation web-site")
+  lazy val siteDir = TaskKey[File]("site-dir","Directory of the generated website")
+  lazy val SiteTask = site in Docs <<= (siteDir,baseDirectory,scalaVersion,resourceDirectory,docDirectory in Docs) map {
+    (out,baseDirectory,scalaVersion,resourceDirectory,docDirectory) =>
+
+    val model = new WebsiteModel(
+    sourcePath = baseDirectory,
+    websiteResources = Seq(resourceDirectory),
+    docDirectory = docDirectory,
+    buildScalaVersion = BuildConstants.scalaVersion)/*,
+    outputDir = out)*/
+
+    model.buildSite
+  }
   lazy val Docs = config("docs") extend (Compile)
-  val docsSettings = inConfig(Docs)(Defaults.configSettings) ++ Seq(
+  val docsSettings = inConfig(Docs)(Defaults.configSettings) ++ Seq[Setting[_]](
+      scaladocOptions in Docs ++= Seq("-doc-title", "Scala IO"),//, "–doc-source-url", "https://raw.github.com/jesseeichar/scala-io/master/core/src/main/scala/"),
+      resourceDirectory := new File("documentation/src/main/resources"),
+      siteDir <<= baseDirectory map { base => new File(base, "target/website") },
+      SiteTask,
+      site in Docs <<= (site in Docs).dependsOn(doc in Docs),
       sources in Docs <<=
         (sources in (coreProject,Compile),
         sources in (fileProject,Compile)) map { _ ++ _ }
     )
-  lazy val docsProj:Project = Project("documentation", file("documentation")).
-    dependsOn(fileProject % "docs -> compile").
+  lazy val webSiteProject:Project = Project("documentation", file("documentation")).
+    dependsOn(fileProject, fileProject % "docs->compile").
     settings(sharedSettings ++ docsSettings :_*)
 }

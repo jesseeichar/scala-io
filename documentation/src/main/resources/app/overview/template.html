@@ -1,0 +1,31 @@
+<span>
+  <p>
+  The Scala IO umbrella project consists of a few sub projects for different aspects and
+  extensions of IO.  The core project deals with raw input and output, primarily through
+  streams and channels (at least the Java implementation).
+  </p>
+  <p>
+  <em>Warning:</em> I have spent no time on optimization so there are a large number of
+  known inefficiencies.  I have started to write a suite of performance tests to track and measure the performance and the performance should begin to improve from this point forward.
+  </p><p>
+  If you have any suggestions please open a ticket at
+  <a href="https://github.com/jesseeichar/scala-io/issues">https://github.com/jesseeichar/scala-io/issues</a>
+  </p><p>
+  I welcome patches, bug reports and suggestions for this documentation or for the libraries themselves.
+  </p><p>
+  The forum for discussions is the scala-incubator users group (at least for now)
+  <a href="http://groups.google.com/group/scala-incubator">http://groups.google.com/group/scala-incubator</a>
+  </p>
+  <p>
+    If you are interested at looking at the code, you are welcome to take a look at:
+    <a href="https://github.com/jesseeichar/scala-io/issues">https://github.com/jesseeichar/scala-io</a>
+  </p><p>
+  As an example of what Scala IO brings to the table the following examples compare Java IO vs Scala IO performing
+  a simple task of reading data from two URLs and writing them to a file. (I found it amusing that I actually messed up
+  the Java example the first try and had to debug it).
+    <h3>Scala</h3>
+      {{scalaExample}}
+    <h3>Java</h3>
+    {{javaExample}}
+    </p>
+</span>

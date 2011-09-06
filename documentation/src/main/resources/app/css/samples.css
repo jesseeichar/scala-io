@@ -1,0 +1,192 @@
+body{
+	margin:	0;
+	padding:0;
+	line-height: 1.5em;
+	background: #EAEAEA;
+}
+
+b{font-size: 110%;}
+em{color: red;}
+.summary {
+    font-style: italic;
+    font-weight: bold;
+}
+.explanation {
+	padding: 5px;
+	background-color: white;
+    border-color: black;
+    border-style: solid;
+    border-width: 1px;
+    -moz-border-radius: 15px;
+    border-radius: 15px;
+	line-height: 1em;
+}
+#topsection{
+    background: white;
+    border-style:solid;
+    border-color:black;
+    border-width:1px 0px; /* top and bottom borders: 1px; left and right borders: 0px */
+    line-height: 1em;
+/*    height: 90px; *//*Height of top section*/
+    margin: 15px 10px 0 10px;
+}
+#topsection h1{
+    margin: 0;
+    padding-top: 5px;
+    margin-top: 15px;
+}
+#contentwrapper{
+    float: left;
+    width: 100%;
+}
+#contentcolumn{
+    margin-left: 200px; /*Set left margin to LeftColumnWidth*/
+}
+#leftcolumn{
+    float: left;
+    width: 200px; /*Width of left column*/
+    margin-left: -100%;
+}
+#footer{
+    background: black;
+    clear: left;
+    color: white;
+    line-height: 1.2em;
+    font-size: 0.9em;
+    margin: 15px 10px 0 10px;
+    padding: 5px 0 5px 0;
+    text-align: center;
+    width: 100%;
+}
+#footer a {
+	color: #FFFF80;
+}
+.innertube {
+    margin: 10px; /*Margins for inner DIV inside each column (to provide padding)*/
+}
+.page_examples {
+	margin: 0 25px 0 25px;
+	line-height: 1em;
+}
+.example_excerpt {
+	padding:0 5px 0 10px;
+	margin: 10px 0 10px 0;
+    background-color: white !important;
+    -moz-border-radius: 15px;
+    border-radius: 15px;
+    border-color: black;
+    border-style: solid;
+    border-width: 1px;
+}
+.page a {
+	text-decoration: none;
+	color: black;
+    background-color: white !important;
+}
+.page h3 {
+	margin: 5px 0px;
+}
+/*.page p {
+	margin: 0px 0px;
+}*/
+.example_excerpt h3 {
+    font-weight: bold;
+	margin: 5px 0px;
+	font-size: 1em;
+}
+.example_excerpt_summary {
+    font-style: italic;
+	font-size: 1em;
+}
+
+.example {
+    background-color: white;
+    border-color: black;
+    border-style: solid;
+    border-width: 1px;
+    -moz-border-radius: 15px;
+    border-radius: 15px;
+    margin-top: 10px;
+}
+.example_code {
+	font-size: 0.8em;
+    padding: 0 5px 0 5px;
+}
+.example h3{
+    -moz-border-top-left-radius: 15px;
+    border-top-left-radius: 15px;
+    -moz-border-top-right-radius: 15px;
+    border-top-right-radius: 15px;
+    background-color: white;
+    padding: 10px 5px 5px 20px;
+    margin: 0;
+}
+.example_summary {
+    background-color: white;
+    margin: 0;
+    font-style: italic;
+    padding-left: 20px;
+    border-bottom-color: black;
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+}
+#navcontainer {
+    font-size: 12px;
+    font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+}
+#navcontainer ul
+{
+    list-style-type: none;
+    margin-left: 0;
+    padding-left: 0;
+}
+
+#navlist a
+{
+    display: block;
+    color: black;
+    padding: 1px 0 1px 8px;
+    line-height: 1em;
+}
+.active {
+    font-weight: bold !important;
+    border-left: 8px solid #CCCCCC !important;
+}
+/*boxmodel hack. http://css-discuss.incutio.com/?page=BoxModelHack SBMH*/
+#navlist a { width: 184px; }
+
+#navlist a
+{
+\width: 200px;
+w\idth: 184px;
+}
+
+#subnavlist a
+{
+display: block;
+color: black;
+padding: 1px 0 1px 8px;
+margin-left: 8px;
+}
+
+/*boxmodel hack. http://css-discuss.incutio.com/?page=BoxModelHack SBMH*/
+#subnavlist a { width: 174px; }
+
+#subnavlist a
+{
+    \width: 180px;
+    w\idth: 174px;
+}
+
+#projectnavlist a, #projectnavlist a:visited, #navlist a, #navlist a:visited,#subnavlist a, #subnavlist a:visited
+{
+    border-left: 8px solid #EAEAEA;
+    color: black;
+    text-decoration: none;
+}
+
+#projectnavlist a:hover, #projectnavlist a#current:hover, #navlist a:hover, #navlist a#current:hover,#subnavlist a:hover, #subnavlist a#subcurrent:hover
+{
+    border-left: 8px solid #CCCCCC;
+    text-decoration: underline;
+}

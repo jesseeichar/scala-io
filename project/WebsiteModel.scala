@@ -5,11 +5,12 @@ import java.io.File
 
 
 class WebsiteModel(
-    val sourcePath:File = new File("."),
-    val websiteResources:Seq[File] = List(new File("web-site/src/main/resources")),
-    val buildScalaVersion:String = "2.9.0-1",
-//    val outputDir:File = new File("target/website")) {
-  val outputDir:File = new File("/Users/jeichar/Sites/scala-io")) {
+    sourcePath:File,
+    websiteResources:Seq[File],
+    buildScalaVersion:String,
+    docDirectory:File,
+//    val outputDir:File) {
+    outputDir:File = new File("/Users/jeichar/Sites/scala-io")) {
 
   val version = BuildConstants.version
   val organization = BuildConstants.organization
@@ -20,6 +21,7 @@ class WebsiteModel(
     val js = new File(app,"js")
     val core = new File(app,"core")
     val file = new File(app,"file")
+    val api = new File(app,"api")
     val overview = new File(app,"overview")
   }
   
@@ -30,6 +32,7 @@ class WebsiteModel(
   def buildSite = {
     IO.delete(Dir.app)
     websiteResources foreach {dir => IO.copyDirectory(dir,outputDir)}
+    IO.copyDirectory(docDirectory,Dir.api)
     val corePages = pages(new File("core"))
     val filePages = pages(new File("file"))
     val keywords = (Keyword.core +: corePages.map(_.keyword)) ++ (Keyword.file +: filePages.map(_.keyword)) ++ List(Keyword.overview, Keyword.gettingStarted, Keyword.roadmap)

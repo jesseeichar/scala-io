@@ -1,0 +1,85 @@
+<span>
+  <p>
+    <h3>SBT Example</h3>
+    <ol>
+      <li>Add core or file dependency to you project definition
+          <pre>
+val core = "{{props.groupId}}" %% "core" % "{{props.version}}"
+val file = "{{props.groupId}}" %% "file" % "{{props.version}}"
+          </pre>
+      </li>
+      <li>update your SBT project to download the dependencies
+        <pre>sbt update</pre>
+      </li>
+    </ol>
+
+    There is an example SBT project prepackaged at <a href="https://github.com/downloads/jesseeichar/scala-io/example-sbt-project.zip">example-sbt-project.zip</a>.
+    <pre>
+> curl -L https://github.com/downloads/jesseeichar/scala-io/example-sbt-project.zip > \
+    tmp.zip &amp;&amp; unzip tmp.zip &amp;&amp; rm tmp.zip
+> cd example-sbt-project
+> sbt update run</pre>
+  </p>
+  <p>
+    <h3>Maven Example</h3>
+    <ol>
+      <li>Add core or file dependency to you project definition
+        <div><pre>
+&lt;!-- Core -->
+&lt;dependency>
+ &lt;groupId>{{props.groupId}}&lt;/groupId>
+ &lt;artifactId>core_{{props.scalaVersion}}&lt;/artifactId>
+ &lt;version>{{props.version}}&lt;/version>
+&lt;/dependency>
+
+&lt;!-- File -->
+&lt;dependency>
+ &lt;groupId>{{props.groupId}}&lt;/groupId>
+ &lt;artifactId>file_{{props.scalaVersion}}&lt;/artifactId>
+ &lt;version>{{props.version}}&lt;/version>
+&lt;/dependency>
+      </pre></div>
+        Note that the scala version (_version) needs to be kept up to date manually unlike the sbt version
+      </li>
+      <li>Ensure that you have the scala tools repository added as one of your repositories in your pom.xml
+        <pre>
+&lt;repositories>
+  &lt;repository>
+    &lt;id>scala-tools.org&lt;/id>
+    &lt;name>Scala-Tools Maven2 Repository&lt;/name>
+    &lt;url>http://scala-tools.org/repo-releases&lt;/url>
+  &lt;/repository>
+&lt;/repositories>
+        </pre>
+      </li>
+    </ol>
+
+    There is an example maven project prepackaged at <a href="https://github.com/downloads/jesseeichar/scala-io/example-maven-project.zip">example-maven-project.zip</a>.
+    <pre>
+> curl -L https://github.com/downloads/jesseeichar/scala-io/example-maven-project.zip > \
+    tmp.zip &amp;&amp; unzip tmp.zip &amp;&amp; rm tmp.zip
+> cd example-maven-project
+> mvn compile exec:java -Dexec.mainClass="Main" ]]>
+    </pre>
+  </p>
+  http://groups.google.com/group/scala-incubator
+  <p>
+    <h3>Scala Bazaar installation</h3>
+    Coming soon...
+  </p>
+  <p>
+    <h3>Manual Download Example</h3>
+    Naturally a manual download option is also available.  The dependencies are fairly simple:
+    <ul>
+      <li>
+        <a href="http://scala-tools.org/repo-releases/com/github/jsuereth/scala-arm/scala-arm_{{props.scalaVersion}}/{{props.armVersion}}/scala-arm_{{props.scalaVersion}}-{{props.armVersion}}.jar">Scala ARM</a>
+      </li>
+      <li>
+        <a href="http://scala-tools.org/repo-releases/{{props.ioMavenPath}}/core_{{props.scalaVersion}}/{{props.version}}/core_{{props.scalaVersion}}-{{props.version}}.jar">Scala Core</a>
+      </li>
+      <li>
+        <a href="http://scala-tools.org/repo-releases/{{props.ioMavenPath}}/file_{{props.scalaVersion}}/{{props.version}}/core_{{props.scalaVersion}}-{{props.version}}.jar">Scala File (Optional)</a>
+      </li>
+    </ul>
+  </p>
+</span>

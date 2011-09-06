@@ -1,0 +1,59 @@
+<html 
+  xmlns:ng="http://angularjs.org" 
+  ng:controller="DocsController">
+<head>
+<title> Scala IO API Documentation </title> 
+        <script type="text/javascript" src="js/shCore.js"></script>
+        <script type="text/javascript" src="js/shBrushScala.js"></script>
+        <link href="css/shCore.css" type="text/css" rel="stylesheet"></link>
+        <link href="css/shThemeDefault.css" type="text/css" rel="stylesheet"></link>
+        <link href="css/main.css" type="text/css" rel="stylesheet"></link>
+</head>
+<body>
+  <div id="container"> 
+    <!--[if lt IE 9]>
+         <div id="oldIePrompt">
+           You are using an old version of Internet Explorer.
+           For better and safer browsing experience please <a href="http://www.microsoft.com/IE9">upgrade IE</a>
+           or install <a href="http://google.com/chrome">Google Chrome browser</a>.
+         </div>
+       <![endif]--> 
+    
+  <ul id="navbar">
+    <li><a href="#!/overview">Scala IO</a></li>
+    <li><a href="#!/getting-started"ng:class="selectedSection('start')">Getting Started</a></li>
+    <li><a href="api/index.html">API Reference</a></li>
+    <li><a href="#!/core" ng:class="selectedSection('core')">Core</a></li>
+    <li><a href="#!/file" ng:class="selectedSection('file')">File</a></li>
+    <li><a href="#!/roadmap"ng:class="selectedSection('roadmap')">Roadmap</a></li>
+  </ul>
+  <div id="sidebar"> 
+    <input type="text" name="search" id="search-box" placeholder="search the examples"
+           tabindex="1" accesskey="s"> 
+
+    <ul id="content-list" ng:class="sectionId"> 
+      <li ng:repeat="page in pages.$filter(search)" ng:class="getClass(page)"> 
+        <a href="{{getUrl(page)}}" ng:class="selectedPartial(page)"
+           ng:bind="page.shortName"
+           tabindex="2"></a> 
+      </li> 
+    </ul> 
+  </div>
+
+  <div id="content-panel"> 
+    <h2 ng:bind="partialTitle"></h2> 
+    <a id="feedback1" href="https://github.com/jesseeichar/scala-io/issues">Report an Issue</a> 
+    <a id="feedback2" href="http://groups.google.com/group/scala-incubator">Ask a Question</a> 
+    <ng:include id="content" src="getCurrentPartial()" onload="afterPartialLoaded()"></ng:include> 
+  </div> 
+
+  <div id="footer"> 
+  </div> 
+</div>
+  <script src="http://code.angularjs.org/angular-0.10.0.min.js" ng:autobind></script>
+<!--  <script src="http://code.angularjs.org/angular-0.10.0.js" ng:autobind></script>-->
+  <script src="js/keywords.js"></script>
+  <script src="js/controllers.js"></script>
+  <script src="js/projectProperties.js"></script>
+</body>
+</html> 
