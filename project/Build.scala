@@ -12,7 +12,7 @@ object ScalaIoBuild extends Build {
   // ----------------------- Root Project ----------------------- //
 
 	lazy val root:Project = Project("root", file(".")).
-    aggregate(coreProject,fileProject,perfProject).
+    aggregate(coreProject,fileProject,perfProject,docsProj).
     settings(sharedSettings ++ Seq(publishArtifact := false) :_*)
 
   // ----------------------- Samples Settings ----------------------- //
@@ -111,4 +111,14 @@ object ScalaIoBuild extends Build {
 
   lazy val webSiteProject = Project("website", file("."), settings = siteSettings)
 
+  // ------------------------------ Docs Project ------------------------------ //
+  lazy val Docs = config("docs") extend (Compile)
+  val docsSettings = inConfig(Docs)(Defaults.configSettings) ++ Seq(
+      sources in Docs <<=
+        (sources in (coreProject,Compile),
+        sources in (fileProject,Compile)) map { _ ++ _ }
+    )
+  lazy val docsProj:Project = Project("documentation", file("documentation")).
+    dependsOn(fileProject % "docs -> compile").
+    settings(sharedSettings ++ docsSettings :_*)
 }

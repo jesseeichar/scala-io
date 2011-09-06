@@ -45,16 +45,20 @@ class WebsiteModel(
       write(file,page.html.toString)
     }
     write(new File(Dir.js,"projectProperties.js"), projectPropertiesJS)
-    write(new File(Dir.overview,"scalaExample.html"),scalaExample.toString)
-    write(new File(Dir.overview,"javaExample.html"),javaExample.toString)
+    writeOverview()
   }
 
   def read(name:String) = {
     val file = (PathFinder(sourcePath) ** new ExactFilter(name)).get.head
     IO.read(file,Charset.forName("UTF-8"))
   }
-  val javaExample = <pre class='brush: scala'>{read("JavaIOExample.java")}</pre>
-  val scalaExample = <pre class='brush: scala'>{read("ScalaIOExample.scala")}</pre>
+  def writeOverview() = {
+    val template = IO.read(new File(Dir.overview,"template.html"),Charset.forName("UTF-8"))
+    val overview =  template.replace("{{scalaExample}}",scalaExample).replace("{{javaExample}}",javaExample)
+    write(new File(Dir.overview,"index.html"), overview)
+  }
+  lazy val javaExample = (<pre class='brush: scala'>{read("JavaIOExample.java")}</pre>).toString
+  lazy val scalaExample = (<pre class='brush: scala'>{read("ScalaIOExample.scala")}</pre>).toString
 
   def pages(projectPath:File):Seq[Page] = {
     val examples = (PathFinder(projectPath) ** new ExactFilter("samples") ** new PatternFilter(".*\\.scala".r.pattern)).get map {

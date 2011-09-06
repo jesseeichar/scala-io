@@ -15,7 +15,11 @@ function DocsController($location, $browser, $window, $cookies) {
       var parts = hashPath.substring(1).split('/');
       self.sectionId = parts[1];
       self.partialId = parts[2] || 'index';
-      self.pages = angular.Array.filter(IO_PAGES, {section:self.sectionId});
+      if(self.sectionId === 'file' || self.sectionId === 'core') {
+        self.pages = angular.Array.filter(IO_PAGES, {section:self.sectionId});
+      } else {
+          self.pages = IO_PAGES;
+      }
 
       var i = self.pages.length;
       while (i--) {

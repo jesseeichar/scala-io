@@ -273,9 +273,18 @@ li {
 }
 
 
-#feedback {
+#feedback1 {
   float: right;
   margin-top: -2.3em;
+  margin-right: 0.5em;
+  width: 8em;
+  font-size: 0.8em;
+  color: #fff;
+}
+
+#feedback2 {
+  float: right;
+  margin-top: -1em;
   margin-right: 0.5em;
   width: 8em;
   font-size: 0.8em;
