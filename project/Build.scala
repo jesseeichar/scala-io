@@ -87,35 +87,6 @@ object ScalaIoBuild extends Build {
 	  dependsOn(coreProject,coreProject % "compile->test", fileProject)
   
 
-  // ----------------------- Website Project ----------------------- //
-/*  lazy val Docs = config("docs") extend (Compile)
-
-  lazy val site = TaskKey[Unit]("site","Generate documentation web-site")
-  lazy val siteDir = TaskKey[File]("site-dir","Directory of the generated website")
-
-  lazy val SiteTask = site in Docs <<= (siteDir,baseDirectory,scalaVersion,resourceDirectory) map {
-    (out,baseDirectory,scalaVersion,resourceDirectory) =>
-
-      val model = new WebsiteModel(
-      sourcePath = baseDirectory,
-      websiteResources = Seq(resourceDirectory),
-      buildScalaVersion = BuildConstants.scalaVersion)/*,
-      outputDir = out)*/
-
-      model.buildSite
-  }
-  lazy val siteSettings = inConfig(Docs)(Defaults.configSettings) ++ Seq(
-    resourceDirectory in Docs := new File("web-site/src/main/resources"),
-    siteDir in Docs <<= baseDirectory map { base => new File(base, "target/website") },
-    sources in Docs <<=
-      (sources in (coreProject,Compile),
-      sources in (fileProject,Compile)) map { _ ++ _ },
-    SiteTask
-  ) ++ inConfig(Docs)(sharedSettings)
-
-  lazy val webSiteProject = Project("website", file("."), settings = siteSettings).
-    dependsOn(fileProject % "docs -> compile")*/
-
   // ------------------------------ Docs Project ------------------------------ //
   lazy val site = TaskKey[Unit]("site","Generate documentation web-site")
   lazy val siteDir = TaskKey[File]("site-dir","Directory of the generated website")
@@ -124,10 +95,10 @@ object ScalaIoBuild extends Build {
 
     val model = new WebsiteModel(
     sourcePath = baseDirectory,
-    websiteResources = Seq(resourceDirectory),
+    websiteResources = resourceDirectory,
     docDirectory = docDirectory,
-    buildScalaVersion = BuildConstants.scalaVersion)/*,
-    outputDir = out)*/
+    buildScalaVersion = BuildConstants.scalaVersion,
+    indexDir = out)
 
     model.buildSite
   }
@@ -135,7 +106,8 @@ object ScalaIoBuild extends Build {
   val docsSettings = inConfig(Docs)(Defaults.configSettings) ++ Seq[Setting[_]](
       scaladocOptions in Docs ++= Seq("-doc-title", "Scala IO"),//, "–doc-source-url", "https://raw.github.com/jesseeichar/scala-io/master/core/src/main/scala/"),
       resourceDirectory := new File("documentation/src/main/resources"),
-      siteDir <<= baseDirectory map { base => new File(base, "target/website") },
+      //siteDir <<= baseDirectory map { base => new File(base, "target/website") },
+      siteDir := new File("/Users/jeichar/Sites/scala-io-doc/"),
       SiteTask,
       site in Docs <<= (site in Docs).dependsOn(doc in Docs),
       sources in Docs <<=

@@ -1,0 +1,21 @@
+<html xmlns:ng="http://angularjs.org/">
+<head>
+  <meta charset="utf-8">
+  <title>Scala IO Documentation version index</title>
+  <link rel="stylesheet" href="css/app.css"/>
+</head>
+<body ng:controller="VersionIndexCtrl">
+  <p>Welcome to the new Scala IO documentation Site.</p>
+    
+  Find Version: <input name="query"/>
+  <ul>
+    <li ng:repeat="version in versions.$filter(query)">
+      <a href="{{version}}/index.html">Scala IO version {{version}}</a>
+    </li>
+  </ul>
+
+
+  <script src="http://code.angularjs.org/angular-0.10.0.min.js" ng:autobind></script>
+  <script src="version-controller.js"></script>
+</body>
+</html>

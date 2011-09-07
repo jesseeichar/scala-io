@@ -5,7 +5,8 @@ import java.nio.charset.Charset
 object PerformanceReport {
   val utf8 = Charset.forName("UTF-8")
   def buildSite(outDir:File, inDir:File):Seq[Keyword] = {
-    inDir.listFiles.filter(_.isDirectory) flatMap { reportDir =>
+    val reportDirs = inDir.listFiles.filter(_.isDirectory)
+    reportDirs.zipWithIndex flatMap { case (reportDir,i) =>
       val name = {
         val raw = reportDir.getName.split("\\.").last
         if(raw endsWith "Test") {
@@ -16,7 +17,7 @@ object PerformanceReport {
       }
       val children = reportDir.listFiles
       val childNames = children.map(childName)
-      val keyword = Keyword("performance",name,name.capitalize+" Performance Report",1,name.capitalize,"performance",Set("performance", name.toLowerCase) ++ childNames.map(_.toLowerCase))
+      val keyword = Keyword("performance",name,formatName(name)+" Performance Report",1,formatName(name),"performance",Set("performance", name.toLowerCase) ++ childNames.map(_.toLowerCase))
       val childKeywords = childNames.map{n => Keyword("performance",childId(reportDir,n),n.capitalize,2,n.capitalize,"performance graph",Set("performance", n.toLowerCase))} 
       
       IO.write(new File(outDir, name+".html"), mainReport(reportDir,name,children).toString, utf8)
@@ -42,6 +43,10 @@ object PerformanceReport {
       </table>
     </span>
   }
+  def formatName(string:String)=string.capitalize.flatMap{
+    case c if c.isUpperCase => " "+c
+    case c => Seq(c)
+  }.trim
   def childReport(imgFile:File) = {
     <img id="performanceGraph" src={"performance/"+imgFile.getParentFile.getName+"/"+imgFile.getName}></img>
   }
