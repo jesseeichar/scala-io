@@ -8,14 +8,14 @@ function DocsController($location, $browser, $window, $cookies) {
   
   this.$location = $location;
   if (!HAS_HASH.test($location.href)) {
-      $location.hashPath = '!/api';
+      $location.hashPath = '!/overview';
   }
   this.$watch('$location.hashPath', function(scope,hashPath) {
     if (hashPath.match(/^!/)) {
       var parts = hashPath.substring(1).split('/');
       self.sectionId = parts[1];
       self.partialId = parts[2] || 'index';
-      if(self.sectionId === 'file' || self.sectionId === 'core') {
+      if(self.sectionId === 'file' || self.sectionId === 'core' || self.sectionId === 'performance') {
         self.pages = angular.Array.filter(IO_PAGES, {section:self.sectionId});
       } else {
           self.pages = IO_PAGES;
@@ -23,7 +23,7 @@ function DocsController($location, $browser, $window, $cookies) {
 
       var i = self.pages.length;
       while (i--) {
-        if (self.pages[i].id == self.partialId) {
+        if (self.pages[i].id == self.partialId && self.pages[i].section == self.sectionId) {
           self.partialTitle = self.pages[i].name
           break;
         }
@@ -57,8 +57,8 @@ function DocsController($location, $browser, $window, $cookies) {
     return section == self.sectionId ? 'current' : '';
   };
 
-  this.selectedPartial = function(partial) {
-    return partial.id == self.partialId ? 'current' : '';
+  this.selectedPartial = function(page) {
+    return (page.section == self.sectionId && page.id == self.partialId) ? 'current' : '';
   };
 
   this.afterPartialLoaded = function() {

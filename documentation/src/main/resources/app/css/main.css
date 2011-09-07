@@ -72,7 +72,7 @@ li {
 #container  {
     width: 1150px;
     margin: 0 auto;
-    background: #11694B url(img/yellow_bkgnd.jpg) no-repeat top left;
+    background: #11694B; /* url(img/yellow_bkgnd.jpg) no-repeat top left;*/
 }
 
 
@@ -552,4 +552,13 @@ div.tabs-content-inner {
 
 #tutorial-nav a:hover {
   color: #000;
+}
+
+#performance img.report {
+  margin-right: 10px;
+  width: 350px;
+}
+
+#performanceGraph {
+  width: 750px;
 }

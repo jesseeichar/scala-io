@@ -23,6 +23,7 @@ class WebsiteModel(
     val file = new File(app,"file")
     val api = new File(app,"api")
     val overview = new File(app,"overview")
+    val performance = new File(app,"performance")
   }
   
   def write(to:File,data:String) = {
@@ -30,12 +31,18 @@ class WebsiteModel(
   }
 
   def buildSite = {
-    IO.delete(Dir.app)
+    println("Building website at "+outputDir)
+    
+    IO.delete(outputDir)
+    
+    outputDir.mkdirs
     websiteResources foreach {dir => IO.copyDirectory(dir,outputDir)}
     IO.copyDirectory(docDirectory,Dir.api)
+    
     val corePages = pages(new File("core"))
     val filePages = pages(new File("file"))
-    val keywords = (Keyword.core +: corePages.map(_.keyword)) ++ (Keyword.file +: filePages.map(_.keyword)) ++ List(Keyword.overview, Keyword.gettingStarted, Keyword.roadmap)
+    val performanceKeywords = Keyword.performance +: PerformanceReport.buildSite(Dir.performance,new File("perf/results/graphs"))
+    val keywords = List(Keyword.overview, Keyword.gettingStarted, Keyword.roadmap) ++ (Keyword.core +: corePages.map(_.keyword)) ++ (Keyword.file +: filePages.map(_.keyword)) ++ performanceKeywords
     val keywordJSON = keywords.mkString("IO_PAGES=[",",\n\t","]")
     write(new File(Dir.js,"keywords.js"), keywordJSON)
     
@@ -49,6 +56,7 @@ class WebsiteModel(
     }
     write(new File(Dir.js,"projectProperties.js"), projectPropertiesJS)
     writeOverview()
+    println("website build is complete")
   }
 
   def read(name:String) = {
