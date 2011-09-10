@@ -66,8 +66,8 @@ trait CloseableIterator[+A] extends Iterator[A] with Closeable {
       }
     }
   def lslice(from:Long,until:Long) = Proxy[A](new Iterator[A]{
-      var count = from
-      val iter = {
+      private var count = from
+      private val iter = {
         var toDrop = from
         var iter:Iterator[A] = self
         while(toDrop > 0) {

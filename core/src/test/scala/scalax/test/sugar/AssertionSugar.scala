@@ -7,14 +7,13 @@
 \*                                                                      */
 
 package scalax.test.sugar
-import scala.reflect.Manifest
-import org.junit.Assert._
-import scalax.io.Output
-import java.io.File
-import java.io.FileWriter
-import java.io.Writer
-import java.io.OutputStreamWriter
 import java.io.FileOutputStream
+import java.io.OutputStreamWriter
+import java.io.Writer
+
+import scala.reflect.Manifest
+
+import org.junit.Assert.fail
 
 
 
@@ -59,7 +58,7 @@ object LargeResource {
     else throw new IllegalArgumentException(key+" not recognized")
   }
   def largeResource(key: String)(f: Writer => Unit):java.io.File = {
-    import Output._
+    import scalax.io.JavaConverters._
     val tmpPath = java.io.File.createTempFile("klkjlkj","klkjlkj").getParentFile
     val file = new java.io.File(tmpPath, key)
     if(!file.exists) {

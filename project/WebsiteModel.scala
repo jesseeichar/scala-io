@@ -76,7 +76,7 @@ class WebsiteModel(
   
   def writeIndexjson() = {
     val names = indexDir.listFiles.toSeq.filter(_.isDirectory).filterNot(_.getName startsWith ".").map(f => "\""+f.getName+"\"")
-    val json = names.sorted.mkString("[",",","]")
+    val json = names.sorted.reverse.mkString("[",",","]")
     IO.write(new File(indexDir,"version-index.json"), json, utf8)
   }
 
@@ -103,14 +103,21 @@ class WebsiteModel(
   }
   
   def projectPropertiesJS = {
+    val snapshotBlurb = 
+      if (version.endsWith("-SNAPSHOT")) 
+        "These are directions for a SNAPSHOT Release so the http://scala-tools.org/repo-snapshots/ repository must be used instead of the normal releases repo that are in the following directions. Since this is a snapshot release I leave learning how to do that to you."
+      else
+        ""
+      
     val properties =
     """|var IO_PROPS = {
        |  groupId: "%s",
        |  version: "%s",
        |  scalaVersion: "%s",
        |  armVersion: "%s",
-       |  ioMavenPath: "%1$s".replace(/\./g,'/')
-       |};""".format(organization, version, buildScalaVersion, armVersion)
+       |  ioMavenPath: "%1$s".replace(/\./g,'/'),
+       |  SNAPSHOT_BLURB: "%s"
+       |};""".format(organization, version, buildScalaVersion, armVersion, snapshotBlurb)
          
     properties.trim.stripMargin.lines.map(_.trim).mkString
   }

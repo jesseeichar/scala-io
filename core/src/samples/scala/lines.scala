@@ -28,7 +28,7 @@ object LinesExamples {
     import scalax.io._
     import Line.Terminators.Auto
 
-    val lines = Resource.fromFile("file").lines(Auto(),true)
+    val lines = Resource.fromFile("file").lines(Auto,true)
     println(lines.size)
   }
   /**

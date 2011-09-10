@@ -80,7 +80,7 @@ object BasicIO {
 
     // TODO make Lines return a ResourceView[String]
     // one can also iterate across all lines.  The line ending can be autodetected or can be explicitly declared
-    val lines_Autodetect: Traversable[String] = input.lines(Line.Terminators.Auto())
+    val lines_Autodetect: Traversable[String] = input.lines(Line.Terminators.Auto)
     val lines_NewLineChar: Traversable[String] = input.lines(Line.Terminators.NewLine)
     val lines_CarriageReturn: Traversable[String] = input.lines(Line.Terminators.CarriageReturn)
     val lines_BothCarriageAndNewLine: Traversable[String] = input.lines(Line.Terminators.RNPair)

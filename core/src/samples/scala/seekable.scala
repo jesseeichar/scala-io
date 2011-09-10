@@ -92,7 +92,7 @@ object SeekableSamples {
   def convertObjectToSeekable {
     import scalax.io._
     import java.io.File
-    import Seekable.asSeekableConverter
+    import JavaConverters.asSeekableConverter
 
     // By default files can be converted to an Seekable Object by importing
     // Seekable.asSeekableConverter and calling asSeekable on the file

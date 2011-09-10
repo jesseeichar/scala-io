@@ -78,6 +78,7 @@ private[traversable] class SeekableByteChannelIterator(
   val channel = openResource.get
   channel.position(startIndex)
   channel.read(buffer)
+  buffer.flip
   var position = startIndex
   
   @inline
@@ -94,6 +95,7 @@ private[traversable] class SeekableByteChannelIterator(
   @inline
   @specialized(Byte)
   def next = {
+    position += 1
     buffer.get()
   }
   def doClose() = openResource.close()

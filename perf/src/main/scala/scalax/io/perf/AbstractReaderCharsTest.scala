@@ -1,6 +1,7 @@
 package scalax.io.perf
 
 import scalax.io._
+import JavaConverters._
 import sperformance.Keys
 import sperformance.dsl._
 import util.Random._
@@ -75,7 +76,7 @@ abstract class AbstractReaderCharsTest extends PerformanceDSLTest {
         withSizeDef { size =>
           newInResource(size)
         } run { in =>
-          in.chars.foreach(_ => ())
+          in.chars.size
         }
       }
       measure method "chars" in {
@@ -110,17 +111,37 @@ abstract class AbstractReaderCharsTest extends PerformanceDSLTest {
         }
       }
       measure method "lines newline" in {
+        having attribute ("version", "io.Source.getLines") in {
+          withSizeDef { size =>
+            val in = newIn(5, size, NewLine.sep)().asReadChars.chars.mkString 
+            scala.io.Source.fromString(in)
+          } run { source =>
+            source.getLines().size
+          }
+        }
+      }
+      measure method "lines newline" in {
         withSizeDef { size =>
           newInResource(5, size, NewLine.sep)
         } run { in =>
-          in.lines(Line.Terminators.NewLine).foreach(_ => ())
+          in.lines(Line.Terminators.NewLine).size
         }
       }
       measure method "lines Auto" in {
         withSizeDef { size =>
           newInResource(5, size, NewLine.sep)
         } run { in =>
-          in.lines(Line.Terminators.Auto()).foreach(_ => ())
+          in.lines(Line.Terminators.Auto).size
+        }
+      }
+      measure method "lines Auto" in {
+        having attribute ("version", "io.Source.getLines") in {
+          withSizeDef { size =>
+            val in = newIn(5, size, NewLine.sep)().asReadChars.chars.mkString 
+            scala.io.Source.fromString(in)
+          } run { source =>
+            source.getLines().size
+          }
         }
       }
       measure method "lines Auto" in {
@@ -141,7 +162,17 @@ abstract class AbstractReaderCharsTest extends PerformanceDSLTest {
         withSizeDef { size =>
           newInResource(5, size, CarriageReturn.sep)
         } run { in =>
-          in.lines(CarriageReturn).foreach(_ => ())
+          in.lines(CarriageReturn).size
+        }
+      }
+      measure method "lines CR" in {
+        having attribute ("version", "io.Source.getLines") in {
+          withSizeDef { size =>
+            val in = newIn(5, size, NewLine.sep)().asReadChars.chars.mkString 
+            scala.io.Source.fromString(in)
+          } run { source =>
+            source.getLines().size
+          }
         }
       }
       measure method "lines CR" in {
@@ -166,6 +197,16 @@ abstract class AbstractReaderCharsTest extends PerformanceDSLTest {
         }
       }
       measure method "lines RN" in {
+        having attribute ("version", "io.Source.getLines") in {
+          withSizeDef { size =>
+            val in = newIn(5, size, NewLine.sep)().asReadChars.chars.mkString 
+            scala.io.Source.fromString(in)
+          } run { source =>
+            source.getLines().size
+          }
+        }
+      }
+      measure method "lines RN" in {
         having attribute ("version", "toString split on terminator") in {
           withSizeDef { size =>
             newIn(5, size, RNPair.sep)
@@ -180,7 +221,7 @@ abstract class AbstractReaderCharsTest extends PerformanceDSLTest {
         withSizeDef { size =>
           newInResource(5, size, "**")
         } run { in =>
-          in.lines(Custom("**")).foreach(_ => ())
+          in.lines(Custom("**")).size
         }
       }
       measure method "lines Custom" in {

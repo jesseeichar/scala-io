@@ -37,7 +37,7 @@ object MoreInputExamples {
    */
   def convertTraversableToInput {
     import scalax.io._
-    import Input.asInputConverter
+    import JavaConverters.asInputConverter
 
     // any Traversable[Int] can be implicitly converted
     // to an Input by the implicit conversions in the

@@ -126,7 +126,7 @@ object Path
                    deleteOnExit : Boolean = true,
                    attributes:Iterable[FileAttribute[_]] = Nil )
                   (implicit fileSystem: FileSystem = FileSystem.default) : Path = {
-    fileSystem.createTempDirectory(prefix,suffix,dir,deleteOnExit)
+    fileSystem.createTempFile(prefix,suffix,dir,deleteOnExit)
   }
 
 

@@ -106,7 +106,9 @@ object OutputConverter {
     def toBytes(data: Array[T]) = base.toBytes(data)
   }
   implicit object ByteConverter extends NonTraversableAdapter(TraversableByteConverter)
-  implicit object ByteArrayConverter extends ArrayAdapter(TraversableByteConverter)
+  implicit object ByteArrayConverter extends ArrayAdapter(TraversableByteConverter) {
+    override def apply(out: OutputStream, bytes:Array[Byte]) = if(bytes.length > 0) out.write(bytes)
+  }
   implicit object TraversableByteConverter extends OutputConverter[TraversableOnce[Byte]] {
     override def apply(out: OutputStream, bytes:TraversableOnce[Byte]) = {
       bytes foreach {i => out write i.toInt}

@@ -125,14 +125,14 @@ class ResourceTest {
 
     assertEquals(Some(file.length),fResource.inputStream.size)
 
-    import Input._
+    import JavaConverters._
     assertEquals(Some(file.length),file.asInput.size)
 
   }
 
   @Test //@Ignore
   def issue_15_list_size_of_ints_wrong(): Unit = {
-    import Input._
+    import JavaConverters._
 
     assertEquals(Some(5*4),(1 to 5).asInput.size)
     assertEquals(5*4,(1 to 5).asInput.byteArray.size)
@@ -164,7 +164,7 @@ class ResourceTest {
     val positiveSize = new URL("http","localhost",80,"/",new TestUrlConnectionFactory(1000))
     assertEquals(Some(1000),Resource.fromURL(positiveSize).size)
 
-    import Input._
+    import JavaConverters._
     assertEquals(Some(1000),positiveSize.asInput.size)
   }
 

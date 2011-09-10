@@ -43,7 +43,7 @@ class InputStreamResourceTest extends AssertionSugar with IOSugar {
 
   @Test
   def reading_should_only_open_stream_once = {
-    import Input._
+    import JavaConverters._
     class InputStreamCloseCounter(in:InputStream) extends InputStream {
       var closes = 0;
       def read = in.read

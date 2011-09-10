@@ -111,6 +111,5 @@ abstract class AbstractOutputTests extends scalax.test.sugar.AssertionSugar {
         assertEquals("whoop!hello world",in.slurpString)
       case _ => ()
     }
-
   }
 }

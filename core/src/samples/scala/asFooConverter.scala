@@ -21,7 +21,7 @@ object AsFooConverter {
    */
   def asInput {
     import scalax.io.Codec
-    import scalax.io.Input._
+    import scalax.io.JavaConverters._
     
     val webpage:String = new java.net.URL("http://www.scala-lang.org").asInput.slurpString(Codec.UTF8)
     val bytes:Array[Byte] = List[Byte](1,2,3,4).asInput.byteArray
@@ -31,7 +31,7 @@ object AsFooConverter {
    */
   def asOutput {
     import scalax.io.Codec
-    import scalax.io.Output._
+    import scalax.io.JavaConverters._
 
     implicit val codec = Codec.UTF8
 
@@ -41,7 +41,7 @@ object AsFooConverter {
    * Convert to Seekable
    */
   def asSeekable {
-    import scalax.io.Seekable._
+    import scalax.io.JavaConverters._
     
     new java.io.File("io").asSeekable.insert(2,List[Byte](1,2,3))
   }
@@ -50,7 +50,7 @@ object AsFooConverter {
    */
   def asWriteChars {
     import scalax.io.Codec
-    import scalax.io.WriteChars._
+    import scalax.io.JavaConverters._
     
     new java.io.File("io").asBinaryWriteChars(Codec.UTF8).write("This is a message in UTF8")
     new StringWriter().asWriteChars
@@ -59,9 +59,9 @@ object AsFooConverter {
    * Convert to ReadChars
    */
   def asReadChars {
-    import scalax.io.{ReadChars,Codec,LongTraversable,Line}
+    import scalax.io.{JavaConverters,Codec,LongTraversable,Line}
     import Line.Terminators.Custom
-    import ReadChars._
+    import JavaConverters._
 
     val lines:Traversable[String] = new java.io.File("io").asBinaryReadChars(Codec.UTF8).lines()
     val webpage:String = new java.io.StringReader("hello").asReadChars.slurpString

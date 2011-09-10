@@ -104,14 +104,16 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
           error.setStackTrace(e.getStackTrace)
           throw error
       }
-      assertEquals(msg, "abc".getBytes(UTF8.name).toList.patch(pos, bytes.toSeq, -1), seekable.bytes.toList)
+      val expected = "abc".getBytes(UTF8.name).toList.patch(pos, bytes.toSeq, -1)
+      val actual = seekable.bytes.toList
+      assertEquals(msg, expected, actual)
     }
     def run[T](msg: String, pos: Int, data: String) {
       val bytes = data.getBytes(UTF8.name)
-      //test("Array: "+msg, _.insert(pos,bytes), pos, bytes)
+      test("Array: "+msg, _.insert(pos,bytes), pos, bytes)
       test("Iterator: " + msg, _.insert(pos, bytes.toIterator), pos, bytes)
-      //test("List: "+msg,_.insert(pos,bytes.toList), pos, bytes)
-      //test("String: "+msg,_.insert(pos,data), pos, bytes)
+      test("List: "+msg,_.insert(pos,bytes.toList), pos, bytes)
+      test("String: "+msg,_.insert(pos,data), pos, bytes)
     }
 
     val func = Function tupled (run _)

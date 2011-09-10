@@ -36,7 +36,7 @@ class InputTest extends AbstractInputTests {
   }
 
   override protected def sizeIsDefined = false
-
+/*
   @Test
   def issue_8_lines_in_Input_not_lazy {
     import scalax.io.Line.Terminators._
@@ -51,6 +51,6 @@ class InputTest extends AbstractInputTests {
     val end = System.currentTimeMillis
     assertTrue(end-start < 500)
   }
-
+*/
 }
 

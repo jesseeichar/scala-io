@@ -61,14 +61,14 @@ abstract class AbstractReadCharsTests extends scalax.test.sugar.AssertionSugar {
   }
 
   @Test //(timeout = 3000)
-  def read_all_lines_auto(): Unit = {
-    testLines("NewLine", TextNewLine, Auto(), false)
-    testLines("Pair", TextPair, Auto(), false)
-    testLines("CarriageReturn", TextCarriageReturn, Auto(), false)
+  def read_all_lines_Auto: Unit = {
+    testLines("NewLine", TextNewLine, Auto, false)
+    testLines("Pair", TextPair, Auto, false)
+    testLines("CarriageReturn", TextCarriageReturn, Auto, false)
 
-    testLines("include NewLine", TextNewLine, Auto(), true)
-    testLines("include Pair", TextPair, Auto(), true)
-    testLines("include CarriageReturn", TextCarriageReturn, Auto(), true)
+    testLines("include NewLine", TextNewLine, Auto, true)
+    testLines("include Pair", TextPair, Auto, true)
+    testLines("include CarriageReturn", TextCarriageReturn, Auto, true)
   }
 
   @Test(timeout = 3000)
@@ -82,7 +82,7 @@ abstract class AbstractReadCharsTests extends scalax.test.sugar.AssertionSugar {
 
   @Test(timeout = 3000)
   def read_all_lines_includeTerminator(): Unit = {
-    testLines("Auto", TextNewLine, Auto(), true)
+    testLines("Auto", TextNewLine, Auto, true)
     testLines("NewLine", TextNewLine, NewLine, true)
     testLines("Pair", TextPair, RNPair, true)
     testLines("CarriageReturn", TextCarriageReturn, CarriageReturn, true)

@@ -52,7 +52,7 @@ abstract class AbstractInputTest extends PerformanceDSLTest {
         withSizeDef { size =>
           newInResource(size)
         } run { in =>
-          in.bytes.foreach(_ => ())
+          in.bytes.size
         }
       }
       measure method "bytes" in {
@@ -80,7 +80,7 @@ abstract class AbstractInputTest extends PerformanceDSLTest {
         withSizeDef { size =>
           newInResource(size)
         } run { in =>
-          in.bytesAsInts.foreach(_ => ())
+          in.bytesAsInts.size
         }
       }
       measure method "bytesAsInts" in {
@@ -147,7 +147,7 @@ abstract class AbstractInputTest extends PerformanceDSLTest {
         withSizeDef { size =>
           newInResource(size)
         } run { in =>
-          in.chars.foreach(_ => ())
+          in.chars.size
         }
       }
       measure method "chars" in {
@@ -188,17 +188,38 @@ abstract class AbstractInputTest extends PerformanceDSLTest {
         }
       }
       measure method "lines newline" in {
+        having attribute ("version", "io.Source.getLines") in {
+          withSizeDef { size =>
+            val in = newIn(5, size, NewLine.sep)
+            () => scala.io.Source.fromInputStream(in(),"UTF-8")
+          } run { source =>
+            source().getLines().size
+          }
+        }
+      }
+      measure method "lines newline" in {
         withSizeDef { size =>
           newInResource(5, size, NewLine.sep)
         } run { in =>
-          in.lines(Line.Terminators.NewLine).foreach(_ => ())
+          in.lines(Line.Terminators.NewLine).size
         }
       }
       measure method "lines Auto" in {
         withSizeDef { size =>
           newInResource(5, size, NewLine.sep)
         } run { in =>
-          in.lines(Line.Terminators.Auto()).foreach(_ => ())
+          in.lines(Line.Terminators.Auto).size
+        }
+      }
+      measure method "lines Auto" in {
+        having attribute ("version", "io.Source.getLines") in {
+          withSizeDef { size =>
+            import JavaConverters._
+            val in = newIn(5, size, NewLine.sep)
+            () => scala.io.Source.fromInputStream(in(),"UTF-8")
+          } run { source =>
+            source().getLines().size
+          }
         }
       }
       measure method "lines Auto" in {
@@ -219,7 +240,17 @@ abstract class AbstractInputTest extends PerformanceDSLTest {
         withSizeDef { size =>
           newInResource(5, size, CarriageReturn.sep)
         } run { in =>
-          in.lines(CarriageReturn).foreach(_ => ())
+          in.lines(CarriageReturn).size
+        }
+      }
+      measure method "lines CR" in {
+        having attribute ("version", "io.Source.getLines") in {
+          withSizeDef { size =>
+            val in = newIn(5, size, CarriageReturn.sep)
+            () => scala.io.Source.fromInputStream(in(),"UTF-8")
+          } run { source =>
+            source().getLines().size
+          }
         }
       }
       measure method "lines CR" in {
@@ -240,7 +271,31 @@ abstract class AbstractInputTest extends PerformanceDSLTest {
         withSizeDef { size =>
           newInResource(5, size, RNPair.sep)
         } run { in =>
-          assert(in.lines(RNPair).forall{_.last != '\n'})
+          in.lines(RNPair).size
+        }
+      }
+      measure method "lines RN" in {
+        having attribute ("version", "Apache IOUtils line") in {
+          withSizeDef { size =>
+            newIn(5, size, NewLine.sep)
+          } run { inFunc =>
+            val in = inFunc()
+            val iter = IOUtils.lineIterator(in, "UTF-8")
+            while (iter.hasNext()) {
+              iter.next()
+            }
+            in.close()
+          }
+        }
+      }
+      measure method "lines RN" in {
+        having attribute ("version", "io.Source.getLines") in {
+          withSizeDef { size =>
+            val in = newIn(5, size, RNPair.sep)
+            () => scala.io.Source.fromInputStream(in(),"UTF-8")
+          } run { source =>
+            source().getLines().size
+          }
         }
       }
       measure method "lines RN" in {
@@ -258,7 +313,7 @@ abstract class AbstractInputTest extends PerformanceDSLTest {
         withSizeDef { size =>
           newInResource(5, size, "**")
         } run { in =>
-          in.lines(Custom("**")).foreach(_ => ())
+          in.lines(Custom("**")).size
         }
       }
       measure method "lines Custom" in {

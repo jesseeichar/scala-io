@@ -106,7 +106,7 @@ trait Input {
    * @return
    *          a non-strict traversable for iterating through all the lines
    */
-  def lines(terminator: Terminators.Terminator = new Terminators.Auto(),
+  def lines(terminator: Terminators.Terminator = Terminators.Auto,
             includeTerminator: Boolean = false)(implicit codec: Codec = Codec.default): ResourceView[String] = {
     new LineTraversable(chars(codec).iterator, terminator, includeTerminator).view
   }
@@ -122,108 +122,4 @@ trait Input {
    *          The codec representing the desired encoding of the characters
    */
   def slurpString(implicit codec: Codec = Codec.default) = chars(codec).mkString
-}
-
-object Input {
-  class AsInput(op: => Input) {
-    /** An object to an input object */
-    def asInput: Input = op
-  }
-
-  /**
-   * Wrap an arbitraty object as and AsInput object allowing the object to be converted to an Input object.
-   *
-   * The possible types of src are the subclasses of [[scalax.io.AsInputConverter]]
-   */
-  implicit def asInputConverter[B](src:B)(implicit converter:AsInputConverter[B]) =
-    new AsInput(converter.toInput(src))
-
-  /**
-   * Used by the [[scalax.io.Input]] object for converting an arbitrary object to an Input Object
-   *
-   * Note: this is a classic use of the type class pattern
-   */
-  trait AsInputConverter[-A] {
-    def toInput(t:A) : Input
-  }
-
-  /**
-   * contains several implementations of [[scalax.io.AsInputConverter]].  They will be implicitely resolved allowing
-   * a user of the library to simple call A.asInput and the converter will be found without the user needing to look up these classes
-   */
-  object AsInputConverter {
-
-    /**
-     * Converts a File to an Input object
-     */
-    implicit object FileConverter extends AsInputConverter[File]{
-      def toInput(file: File) = Resource.fromFile(file)
-    }
-    /**
-     * Converts a URL to an Input object
-     */
-    implicit object URLConverter extends AsInputConverter[URL]{
-      def toInput(url: URL) = Resource.fromURL(url)
-    }
-    /**
-     * Converts a InputStream to an Input object
-     */
-    implicit object InputStreamConverter extends AsInputConverter[InputStream]{
-      def toInput(is: InputStream) = Resource.fromInputStream(is)
-    }
-    /**
-     * Converts a Traversable of Ints to an Input object.  Each Int is treated as a byte
-     */
-    implicit object TraversableIntsAsBytesConverter extends AsInputConverter[Traversable[Int]]{
-      def toInput(t: Traversable[Int]) = new Input {
-        def chars(implicit codec: Codec = Codec.default) = new LongTraversable[Char] {
-          val maxChars = codec.encoder.maxBytesPerChar
-          lazy val chars = codec.decode(t.view.map{_.toByte}.toArray)
-          def iterator: CloseableIterator[Char] = CloseableIterator(chars.iterator)
-        }.view
-
-        def bytesAsInts = new LongTraversable[Int]{
-          def iterator = new CloseableIterator[Int] {
-            var iter = OutputConverter.TraversableIntConverter.toBytes(t)
-
-            @inline @specialized(Int)
-            def next() = iter.next.toInt
-            @inline
-            def hasNext: Boolean = iter.hasNext
-            def doClose() {}
-          }
-        }.view
-
-        def size = Some(t.size * 4)
-      }
-    }
-    /**
-     * Converts a Traversable[Byte] to an Input object
-     */
-    implicit object TraversableByteConverter extends AsInputConverter[Traversable[Byte]]{
-      def toInput(t: Traversable[Byte]) = new Input {
-        def chars(implicit codec: Codec = Codec.default) = new LongTraversable[Char] {
-          val maxChars = codec.encoder.maxBytesPerChar
-
-          lazy val chars = codec.decode(t.toArray)
-
-          def iterator: CloseableIterator[Char] = CloseableIterator(chars.iterator)
-        }.view
-
-        def bytesAsInts = new LongTraversable[Int]{
-
-          def iterator: CloseableIterator[Int] = CloseableIterator(t.toIterator.map(_.toInt))
-        }.view
-
-
-        override def bytes = new LongTraversable[Byte]{
-          def iterator: CloseableIterator[Byte] = CloseableIterator(t.toIterator)
-        }.view
-
-        def size = Some(t.size)
-      }
-    }
-  }
-
-
 }

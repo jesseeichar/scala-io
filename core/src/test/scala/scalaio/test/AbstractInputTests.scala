@@ -145,18 +145,28 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
     assertEquals(expected, read)
   }
 
-  @Test //(timeout = 3000) //@Ignore
-  def read_all_lines_auto(): Unit = {
-    testLines("NewLine", TextCustomData("\n", "\n"), Auto(), false)
-    testLines("NewLine", TextCustomData("\n", "aa\n"), Auto(), false)
-    testLines("NewLine", TextCustomData(RNPair.sep, "aa" + RNPair.sep), Auto(), false)
-    testLines("NewLine", TextNewLine, Auto(), false)
-    testLines("Pair", TextPair, Auto(), false)
-    testLines("CarriageReturn", TextCarriageReturn, Auto(), false)
+  
+  @Test(timeout = 3000) //@Ignore
+  def read_lines_Auto_stackoverflow_bug: Unit = {
+    import JavaConverters._
+    
+    val data = "l1\nl2\nlastline not terminator"
+    val lines = data.asReadChars.lines()
+    assertEquals(data.split("\\n").toList, lines.toList)
+  }
+  
+  @Test(timeout = 3000) //@Ignore
+  def read_all_lines_Auto: Unit = {
+    testLines("NewLine", TextCustomData("\n", "\n"), Auto, false)
+    testLines("NewLine", TextCustomData("\n", "aa\n"), Auto, false)
+    testLines("NewLine", TextCustomData(RNPair.sep, "aa" + RNPair.sep), Auto, false)
+    testLines("NewLine", TextNewLine, Auto, false)
+    testLines("Pair", TextPair, Auto, false)
+    testLines("CarriageReturn", TextCarriageReturn, Auto, false)
 
-    testLines("include NewLine", TextNewLine, Auto(), true)
-    testLines("include Pair", TextPair, Auto(), true)
-    testLines("include CarriageReturn", TextCarriageReturn, Auto(), true)
+    testLines("include NewLine", TextNewLine, Auto, true)
+    testLines("include Pair", TextPair, Auto, true)
+    testLines("include CarriageReturn", TextCarriageReturn, Auto, true)
   }
 
   @Test //(timeout = 3000) //@Ignore
@@ -170,7 +180,7 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
 
   @Test(timeout = 3000) //@Ignore
   def read_all_lines_includeTerminator(): Unit = {
-    testLines("Auto", TextNewLine, Auto(), true)
+    testLines("Auto", TextNewLine, Auto, true)
     testLines("NewLine", TextNewLine, NewLine, true)
     testLines("Pair", TextPair, RNPair, true)
     testLines("CarriageReturn", TextCarriageReturn, CarriageReturn, true)
@@ -195,7 +205,8 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
       }
       else withLastEl
     }
-    assertEquals(msg, expected, read)
+    def display(c:List[String]) = c.map(_.replace("\n","\\n").replace("\r","\\r")) 
+    assert(expected == read, "expected: "+display(expected)+" but was "+display(read));
   }
 
   @Test(timeout = 3000) //@Ignore
@@ -214,7 +225,7 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
 
   @Test(timeout = 3000) //@Ignore
   def copyData(): Unit = {
-    import Output.asOutputConverter
+    import JavaConverters.asOutputConverter
     val outStream = new ByteArrayOutputStream()
     input(TextNewLine).copyData(outStream.asOutput)
 

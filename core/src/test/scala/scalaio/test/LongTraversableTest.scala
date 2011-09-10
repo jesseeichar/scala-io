@@ -1,7 +1,7 @@
 package scalaio.test
 
 import scalax.io._
-import Input._
+import JavaConverters._
 import scalax.test.sugar._
 
 import org.junit.Assert._

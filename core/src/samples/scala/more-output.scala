@@ -36,7 +36,7 @@ object MoreOutputExamples {
   def convertObjectToOutput {
     import scalax.io._
     import java.io.File
-    import Output.asOutputConverter
+    import JavaConverters.asOutputConverter
 
     // By default files can be converted to an Output Object by importing
     // Output.asOutputConverter and calling asOutput on the file
