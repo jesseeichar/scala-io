@@ -16,7 +16,7 @@ import java.nio.charset.Charset
 import java.io.InputStream
 
 
-abstract class AbstractInputTest extends PerformanceDSLTest {
+trait AbstractInputTest extends PerformanceDSLTest {
   implicit val codec = Codec.UTF8
 
   def MaxSize:Int

@@ -3,6 +3,7 @@ package scalax.io.perf
 import inputstream._
 import channel._
 import reader._
+import seekable._
 
 /**
  * Run all performance tests
@@ -22,7 +23,11 @@ object PerformanceSuite {
         SmallMediumSetsFromMemoryReaderCharsTest,
         SmallMediumSetsFromFileInputStreamTest,
         SmallMediumSetsFromFileReadableByteChannelTest,
-        SmallMediumSetsFromFileReaderCharsTest
+        SmallMediumSetsFromFileReaderCharsTest,
+        SmallMediumSetFileSeekable,
+        SmallSetFileSeekable,
+        SmallMediumSetMemorySeekable,
+        SmallSetMemorySeekable
         )
   }
 }

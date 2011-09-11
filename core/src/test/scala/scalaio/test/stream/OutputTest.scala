@@ -9,13 +9,13 @@
 package scalaio.test.stream
 
 import scalaio.test._
-
 import java.io.{
 ByteArrayInputStream, ByteArrayOutputStream
 }
 import org.junit.Test
 import org.junit.Assert._
 import scalax.io._
+import java.sql.Date
 
 class OutputTest extends AbstractOutputTests {
   def open() = {
@@ -28,5 +28,6 @@ class OutputTest extends AbstractOutputTests {
 
     (inResource, outResource)
   }
+
 
 }
