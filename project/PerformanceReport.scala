@@ -37,7 +37,12 @@ object PerformanceReport {
     <span id="performance">Performance reports for module {name.capitalize}
       <table>
         {for(r <- namesInRows) yield {
-              <tr>{for(c <- r) yield <td><img class="report" src={"performance/"+reportDir.getName+"/"+c.getName}></img></td>}</tr> 
+              <tr>{for(c <- r) yield 
+                <td>
+                  <a href={"{{getUrl({section:'performance',id:'"+childId(reportDir,childName(c))+"'})}}"}>
+                    <img class="report" src={"performance/"+reportDir.getName+"/"+c.getName}></img>
+                  </a>
+                </td>}</tr> 
             }
         }
       </table>
