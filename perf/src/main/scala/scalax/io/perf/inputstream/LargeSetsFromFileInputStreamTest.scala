@@ -1,6 +1,7 @@
 package scalax.io.perf
 package inputstream
 
+import Utils._
 import scalax.io._
 import sperformance.Keys.WarmupRuns
 import sperformance.dsl._
@@ -24,6 +25,7 @@ object LargeSetsFromFileInputStreamTest extends AbstractInputTest {
   val Inc = 1
   val From = 1
   val WarmUpRuns = 1
+  val WarmUpRunsForLines = 1
 
   // create Test File once for all tests
   val file = LargeResource.largeResource(KEY.TEXT)

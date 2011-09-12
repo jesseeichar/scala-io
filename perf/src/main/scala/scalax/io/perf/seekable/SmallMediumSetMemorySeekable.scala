@@ -2,7 +2,7 @@ package scalax.io
 package perf
 package seekable
 
-object SmallMediumSetMemorySeekable extends AbstractSeekableTest {
+object SmallMediumSetMemorySeekable extends AbstractArrayBufferSeekableTest {
   val MaxSize = 15000
   val Inc = 5000
   val From = 5000

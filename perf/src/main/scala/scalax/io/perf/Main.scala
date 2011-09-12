@@ -19,6 +19,7 @@ object Main {
 
   def runTests(tests: PerformanceTest*) {
     for (test <- tests) {
+     println("Starting "+test.name)
       val context = new sperformance.HistoricalRunContext(outputDirectory, new XmlStoreResults(_), new XmlLoadResults(_))
       test.runTest(context)
 

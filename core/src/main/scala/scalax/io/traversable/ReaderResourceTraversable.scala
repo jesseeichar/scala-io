@@ -9,7 +9,7 @@ import scalax.io.OpenedResource
 
 class ReaderResourceTraversable (
   resourceOpener: => OpenedResource[Reader],
-  bufferFactory: => Array[Char] = new Array[Char](Constants.BufferSize),
+  bufferFactory: => Array[Char],
   val start:Long,
   val end:Long)
   extends LongTraversable[Char]

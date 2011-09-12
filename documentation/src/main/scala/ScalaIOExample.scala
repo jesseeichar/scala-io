@@ -1,5 +1,5 @@
 import java.net.URL
-import scalax.io.Input.asInputConverter
+import scalax.io.JavaConverters._
 import scalax.file.Path
 
 object ScalaIOExample extends App {

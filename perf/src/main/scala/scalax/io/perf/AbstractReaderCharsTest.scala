@@ -1,5 +1,6 @@
 package scalax.io.perf
 
+import Utils._
 import scalax.io._
 import JavaConverters._
 import sperformance.Keys
@@ -25,6 +26,7 @@ abstract class AbstractReaderCharsTest extends PerformanceDSLTest {
   def Inc:Int
   def From:Int
   def WarmUpRuns:Int
+  def WarmUpRunsForLines:Int
 
   /**
    * Return a Function that will create an input stream for testing
@@ -38,12 +40,6 @@ abstract class AbstractReaderCharsTest extends PerformanceDSLTest {
     val in = newIn(size, lines, term)
     fromReader(in())
     
-  }
-  def generateTestData(size: Int, lines: Int = 2, term: String = NewLine.sep) = {
-    val lineStrings = 1 to lines map { _ =>
-      nextString(size).replaceAll("\n", " ")
-    }
-    lineStrings mkString term
   }
   
   def withSizeDef[U](f: Int => U) = withSize from(From) upTo MaxSize by Inc withSetup (f)
@@ -96,6 +92,8 @@ abstract class AbstractReaderCharsTest extends PerformanceDSLTest {
           }
         }
       }
+    }
+    having attribute (Keys.WarmupRuns -> WarmUpRuns) in {
       measure method "lines newline" in {
         having attribute ("version", "Apache IOUtils line") in {
           withSizeDef { size =>

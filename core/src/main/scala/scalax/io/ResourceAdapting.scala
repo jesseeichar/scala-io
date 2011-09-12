@@ -146,7 +146,7 @@ protected[io] object ResourceAdapting {
     override def close = out.close()
     override def flush = out.flush()
     override def write(p1: Array[Byte], p2: Int, p3: Int) = out.write(p1,p2,p3)
-    override def write(p1: Array[Byte]) = write(p1)
+    override def write(p1: Array[Byte]) = out.write(p1)
   }
 
 }

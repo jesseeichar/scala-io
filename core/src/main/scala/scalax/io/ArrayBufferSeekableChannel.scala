@@ -15,8 +15,8 @@ import scalax.io.StandardOpenOption._
 
 class ArrayBufferSeekableChannel(data:ArrayBuffer[Byte],
                                  openOptions: OpenOption*)
-                                (forceDeleteAction: =>Unit,
-                                 closeAction: => Unit) extends SeekableByteChannel {
+                                (forceDeleteAction: (ArrayBufferSeekableChannel)=>Unit,
+                                 closeAction:(ArrayBufferSeekableChannel) => Unit) extends SeekableByteChannel {
 
   var closed = false
   var position = 0L
@@ -66,7 +66,8 @@ class ArrayBufferSeekableChannel(data:ArrayBuffer[Byte],
 
   override def close() = {
     closed = true
-    if(openOptions contains DeleteOnClose) forceDeleteAction
+    if(openOptions contains DeleteOnClose) forceDeleteAction(this)
+    closeAction(this)
   }
   override def isOpen() = !closed
 

@@ -10,15 +10,15 @@ import java.nio.{ ByteBuffer => NioByteBuffer }
 
 class ReadableByteChannelTraversable(
   resourceOpener: => OpenedResource[ReadableByteChannel],
-  byteBufferFactory: => NioByteBuffer = NioByteBuffer.allocate(Constants.BufferSize),
+  byteBufferFactory: (ReadableByteChannel) => NioByteBuffer,
   val start: Long,
   val end: Long)
   extends LongTraversable[Byte]
   with LongTraversableLike[Byte, LongTraversable[Byte]] {
 
   protected[io] def iterator: CloseableIterator[Byte] = {
-    val buffer = byteBufferFactory
     val resource = resourceOpener
+    val buffer = byteBufferFactory(resource.get)
     resource.get match {
       case seekable:SeekableByteChannel => 
         new SeekableByteChannelIterator(buffer,resource.asInstanceOf[OpenedResource[SeekableByteChannel]],start,end)
@@ -34,24 +34,25 @@ private[traversable] class ReadableByteChannelIterator(
   openResource: OpenedResource[ReadableByteChannel],
   startIndex: Long,
   endIndex: Long) extends CloseableIterator[Byte] {
-  val inConcrete = openResource.get
+  private final val inConcrete = openResource.get
 
   skip(startIndex)
 
-  var read = inConcrete.read(buffer)
-  var i = 0
+  private final var read = inConcrete.read(buffer)
+  private final var i = 0
   @inline
-  def hasNext = {
+  final def hasNext = {
     if (i < read) true
     else {
       i = 0
+      buffer.clear()
       read = inConcrete.read(buffer)
       i < read
     }
   }
   @inline
   @specialized(Byte)
-  def next = {
+  final def next = {
     i += 1
     buffer.get(i - 1)
   }
@@ -75,11 +76,11 @@ private[traversable] class SeekableByteChannelIterator(
   openResource: OpenedResource[SeekableByteChannel],
   startIndex: Long,
   endIndex: Long) extends CloseableIterator[Byte] {
-  val channel = openResource.get
+  private final val channel = openResource.get
   channel.position(startIndex)
   channel.read(buffer)
   buffer.flip
-  var position = startIndex
+ private final  var position = startIndex
   
   @inline
   def hasNext = {
@@ -87,7 +88,7 @@ private[traversable] class SeekableByteChannelIterator(
     else {
       channel.position(position)
       buffer.clear
-      position += (channel read buffer)
+      (channel read buffer)
       buffer.flip
       buffer.hasRemaining()
     }

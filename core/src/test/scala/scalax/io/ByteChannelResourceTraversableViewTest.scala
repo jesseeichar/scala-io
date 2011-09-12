@@ -50,7 +50,7 @@ class ByteChannelResourceInputTest extends InputTest {
 class SeekableByteChannelResourceInputTest extends InputTest {
   
   def wrap(data:Array[Byte]) = Resource.fromSeekableByteChannel(
-    new ArrayBufferSeekableChannel(ArrayBuffer.apply(data:_*),StandardOpenOption.ReadWrite:_*)((),())
+    new ArrayBufferSeekableChannel(ArrayBuffer.apply(data:_*),StandardOpenOption.ReadWrite:_*)(_=>(),_=>())
   )
   protected override def input(t: Type):Input = t match {
     case t@TextNewLine => wrap(text(t.sep))

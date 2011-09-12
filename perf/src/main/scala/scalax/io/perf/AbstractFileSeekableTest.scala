@@ -1,5 +1,5 @@
 package scalax.io.perf
-import util.Random._
+import Utils._
 import sperformance.dsl.PerformanceDSLTest
 import sperformance.Keys
 import scalax.io.Input
@@ -21,7 +21,15 @@ trait AbstractFileSeekableTest extends AbstractSeekableTest {
   def Inc: Int
   def From: Int
   def WarmUpRuns: Int
-
+  override type Source = DefaultPath
+  override def setup(size:Int, 
+      lines: Int = 2, 
+      term: String = NewLine.sep):Source = {
+    val path = FileSystem.default.createTempFile().asInstanceOf[DefaultPath]
+    path.write(generateTestData(size, lines, term))
+    path
+  }
+  
   /**
    * Return a Function that will create an input stream for testing
    * The function should not take very much time since it will be called during the test
@@ -29,33 +37,40 @@ trait AbstractFileSeekableTest extends AbstractSeekableTest {
    *
    * For example newIn could create a file and the function would simply open a stream to the file
    */
-  override def newIn(size: Int, lines: Int = 2, term: String = NewLine.sep, openOptions: Seq[OpenOption] = ReadWrite) = () => {
-    val path = FileSystem.default.createTempFile()
-    path.write(generateTestData(size, lines, term))
-    FileUtils.openChannel(path.asInstanceOf[DefaultPath].jfile, openOptions)
+  def newIn(source:Source, 
+      openOptions: Seq[OpenOption] = ReadWrite):() => SeekableByteChannel = () => {
+    FileUtils.openChannel(source.jfile, openOptions)
   }
 
-  def nioInsert(data: Array[Byte], pos: Int, chanFunc: () => SeekableFileChannel) = {
+  def nioInsert(data: Array[Byte], pos: Int, size:Int) = {
+    val source = setup(size)
+    val chanFunc = newIn(source)
     val chan = chanFunc()
     chan.position(pos)
-    val buffer = ByteBuffer.allocateDirect(data.length)
+    val buffer = ByteBuffer.allocateDirect(chan.size - pos toInt)
     chan.read(buffer)
     buffer.flip()
-    chan.position(chan.size)
-    chan.write(buffer)
     chan.position(pos)
     chan.write(ByteBuffer.wrap(data))
+    chan.write(buffer)
+    chan.close()
   }
-  def nioPatch(data: Array[Byte], pos: Int, chanFunc: () => SeekableFileChannel) = {
+  def nioPatch(data: Array[Byte], pos: Int, size:Int) = {
+    val source = setup(size)
+    val chanFunc = newIn(source)
     val chan = chanFunc()
     chan.position(pos)
     val buffer = ByteBuffer.wrap(data)
     chan.write(buffer)
+    chan.close
   }
-  def nioAppend(data: Array[Byte], chanFunc: () => SeekableFileChannel) = {
+  def nioAppend(data: Array[Byte], size:Int) = {
+    val source = setup(size)
+    val chanFunc = newIn(source, openOptions = Seq(Create, Append))
     val chan = chanFunc()
     val buffer = ByteBuffer.wrap(data)
     chan.write(buffer)
+    chan.close
   }
 
   performance of "Seekable" in {
@@ -63,11 +78,11 @@ trait AbstractFileSeekableTest extends AbstractSeekableTest {
       measure method "patch strings" in {
         having attribute ("version", "std nio") in {
           withSizeDef { size =>
-            (size / 2, generateTestData(size, 1), newIn(size))
+            (size, size / 2, generateTestData(size, 1))
           } run {
-            case (pos, data, channelFun) =>
+            case (size, pos, data) =>
               val array = data.getBytes(Codec.ISO8859.name)
-              nioPatch(array, pos, channelFun)
+              nioPatch(array, pos, size)
           }
         }
       }
@@ -75,10 +90,10 @@ trait AbstractFileSeekableTest extends AbstractSeekableTest {
         having attribute ("version", "std nio") in {
           withSizeDef { size =>
             val data = generateTestData(size, 1).getBytes(Codec.UTF8.name)
-            (data.length, data, newIn(size))
+            (size, data.length, data)
           } run {
-            case (pos, data, channelFun) =>
-              nioPatch(data, pos, channelFun)
+            case (size, pos, data) =>
+              nioPatch(data, pos, size)
           }
         }
       }
@@ -86,20 +101,20 @@ trait AbstractFileSeekableTest extends AbstractSeekableTest {
         having attribute ("version", "std nio") in {
           withSizeDef { size =>
             val data = generateTestData(size, 1).getBytes(Codec.UTF8.name)
-            (data.length, data.toList, newIn(size))
+            (size, data.length, data.toList)
           } run {
-            case (pos, data, channelFun) =>
-              nioPatch(data.toArray, pos, channelFun)
+            case (size, pos, data) =>
+              nioPatch(data.toArray, pos, size)
           }
         }
       }
       measure method "append strings" in {
         having attribute ("version", "std nio") in {
           withSizeDef { size =>
-            (generateTestData(size, 1), newIn(size, openOptions = Seq(Create, Append)))
+            (size, generateTestData(size, 1))
           } run {
-            case (data, channelFun) =>
-              nioAppend(data.getBytes(Codec.UTF8.name), channelFun)
+            case (size, data) =>
+              nioAppend(data.getBytes(Codec.UTF8.name),size)
           }
         }
       }
@@ -107,10 +122,10 @@ trait AbstractFileSeekableTest extends AbstractSeekableTest {
         having attribute ("version", "std nio") in {
           withSizeDef { size =>
             val data = generateTestData(size, 1).getBytes(Codec.UTF8.name)
-            (data, newIn(size, openOptions = Seq(Create, Append)))
+            (size, data)
           } run {
-            case (data, channelFun) =>
-              nioAppend(data, channelFun)
+            case (size, data) =>
+              nioAppend(data, size)
           }
         }
       }
@@ -118,10 +133,10 @@ trait AbstractFileSeekableTest extends AbstractSeekableTest {
         having attribute ("version", "std nio") in {
           withSizeDef { size =>
             val data = generateTestData(size, 1).getBytes(Codec.UTF8.name).toList
-            (data, newIn(size, openOptions = Seq(Create, Append)))
+            (size, data)
           } run {
-            case (data, channelFun) =>
-              nioAppend(data.toArray, channelFun)
+            case (size, data) =>
+              nioAppend(data.toArray, size)
           }
         }
       }
@@ -129,10 +144,10 @@ trait AbstractFileSeekableTest extends AbstractSeekableTest {
         having attribute ("version", "std nio") in {
           withSizeDef { size =>
             val data = generateTestData(size, 1)
-            (data.length, data, newIn(size))
+            (size, data.length, data)
           } run {
-            case (pos, data, channelFun) =>
-              nioInsert(data.getBytes(Codec.UTF8.name), pos, channelFun)
+            case (size, pos, data) =>
+              nioInsert(data.getBytes(Codec.UTF8.name), pos, size)
           }
         }
       }
@@ -140,10 +155,10 @@ trait AbstractFileSeekableTest extends AbstractSeekableTest {
         having attribute ("version", "std nio") in {
           withSizeDef { size =>
             val data = generateTestData(size, 1).getBytes(Codec.UTF8.name)
-            (data.length / 2, data, newIn(size))
+            (size, data.length / 2, data)
           } run {
-            case (pos, data, channelFun) =>
-              nioInsert(data, pos, channelFun)
+            case (size, pos, data) =>
+              nioInsert(data, pos, size)
           }
         }
       }
@@ -151,10 +166,10 @@ trait AbstractFileSeekableTest extends AbstractSeekableTest {
         having attribute ("version", "std nio") in {
           withSizeDef { size =>
             val data = generateTestData(size, 1).getBytes(Codec.UTF8.name).toList
-            (data.length / 2, data, newIn(size))
+            (size, data.length / 2, data)
           } run {
-            case (pos, data, channelFun) =>
-              nioInsert(data.toArray, pos, channelFun)
+            case (size, pos, data) =>
+              nioInsert(data.toArray, pos, size)
           }
         }
       }

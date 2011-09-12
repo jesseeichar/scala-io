@@ -13,6 +13,7 @@ import java.io.{
 }
 import java.nio.{ByteBuffer => NioByteBuffer}
 import java.nio.channels.ReadableByteChannel
+import java.nio.ByteBuffer
 
 /**
  * A way of abstracting over the source Resource's type
@@ -54,11 +55,11 @@ private[io] trait ResourceTraversable[A] extends LongTraversable[A]
     private val openedSource = source
     openedSource.skip(start)
 
-    var nextEl:Iterator[SourceOut] = null
-    var c = start
+    private var nextEl:Iterator[SourceOut] = null
+    private var c = start
 
-    @inline @specialized(Byte,Int,Float,Double,Long)
-    def next(): A = {
+    @specialized(Byte,Int,Float,Double,Long)
+    final def next(): A = {
       val n = nextEl.next()
       c += 1
 
@@ -68,8 +69,7 @@ private[io] trait ResourceTraversable[A] extends LongTraversable[A]
       conv(n)
     }
 
-    @inline
-    def hasNext: Boolean = {
+    final def hasNext: Boolean = {
       if(c >= end) return false
 
       if(nextEl == null) {
@@ -132,17 +132,19 @@ private[io] trait ResourceTraversable[A] extends LongTraversable[A]
 class ArrayIterator[A](var a:Array[A],var end:Int) extends Iterator[A]{
   var start=0
   var now=0
-  def hasNext = now < end
-  @specialized(Byte,Char)
-  def next = {
+  @inline
+  final def hasNext = now < end
+  @specialized(Byte,Char) @inline
+  final def next = {
     now += 1
     a(now - 1)
   }
 }
 class NioByteBufferIterator(var buffer: NioByteBuffer) extends Iterator[Byte] {
-  def hasNext = buffer.hasRemaining()
-  @specialized(Byte)
-  def next = buffer.get()
+  @inline
+  final def hasNext = buffer.hasRemaining()
+  @inline @specialized(Byte)
+  final def next = buffer.get()
 }
 
 
@@ -188,7 +190,7 @@ private[io] object ResourceTraversable {
   val IdentityByteConversion = identity[Byte]_
   def streamBased[A,B]
 		  (opener : => OpenedResource[InputStream],
-          bufferFactory : => Array[Byte] = new Array[Byte](Constants.BufferSize),
+          bufferFactory : => Array[Byte] = Buffers.inputStreamBuffer,
           parser : InputParser[A,Array[Byte]] = DefaultByteParser,
           initialConv: A => B = IdentityByteConversion,
           startIndex : Long = 0,
@@ -235,7 +237,7 @@ private[io] object ResourceTraversable {
   }
   val IdentityCharConversion = identity[Char]_
   def readerBased[A](opener : => OpenedResource[Reader],
-                  bufferFactory : => Array[Char] = new Array[Char](Constants.BufferSize),
+                  bufferFactory : => Array[Char] = Buffers.readerBuffer,
                   parser : InputParser[Char,Array[Char]] = DefaultCharParser,
                   initialConv: Char => A = IdentityCharConversion,
                   startIndex : Long = 0,
@@ -277,9 +279,9 @@ private[io] object ResourceTraversable {
     def iterator(input:NioByteBuffer) = new NioByteBufferIterator(input)
     def apply(iter: NioByteBufferIterator, length: Int) = iter
   }
-
+    
   def byteChannelBased[A,B](opener : => OpenedResource[ReadableByteChannel],
-                          byteBufferFactory : => NioByteBuffer = NioByteBuffer.allocate(Constants.BufferSize),
+                          byteBufferFactory : ReadableByteChannel => NioByteBuffer = Buffers.byteBuffer,
                           parser : InputParser[A,NioByteBuffer] = DefaultByteBufferParser,
                           initialConv: A => B = IdentityByteConversion,
                           startIndex : Long = 0,
@@ -292,11 +294,11 @@ private[io] object ResourceTraversable {
         type SourceOut = A
 
         def source = new TraversableSource[ReadableByteChannel, A] {
-          val buffer = byteBufferFactory
-          val iter = parser.iterator(buffer)
+          private final val openedResource = opener
+          private final val channel = openedResource.get
+          private final val buffer = byteBufferFactory(channel)
+          private final val iter = parser.iterator(buffer)
           
-          val openedResource = opener
-          val channel = openedResource.get
           def read() = {
             buffer.clear
             val read = channel read buffer
@@ -327,8 +329,9 @@ private[io] object ResourceTraversable {
       }
     }
   }
+  
   def seekableByteChannelBased[A,B](opener : => OpenedResource[SeekableByteChannel],
-                          byteBufferFactory : => NioByteBuffer = NioByteBuffer.allocate(Constants.BufferSize),
+                          byteBufferFactory : ReadableByteChannel => NioByteBuffer = Buffers.byteBuffer,
                           parser : InputParser[A,NioByteBuffer] = DefaultByteBufferParser,
                           initialConv: A => B = IdentityByteConversion,
                           startIndex : Long = 0,
@@ -341,21 +344,22 @@ private[io] object ResourceTraversable {
           type SourceOut = A
     
           def source = new TraversableSource[SeekableByteChannel, A] {
-            val buffer = byteBufferFactory
-            val iter = parser.iterator(buffer)
-            val openedResource = opener
-            val channel = openedResource.get
+            private final val openedResource = opener
+            private final val channel = openedResource.get
+            private final val buffer = byteBufferFactory(channel)
+            private final val iter = parser.iterator(buffer)
     
             var position = 0L
     
-            def read() = {
+            @inline
+            final def read() = {
               channel.position(position)
               buffer.clear
               position += (channel read buffer)
               buffer.flip
               parser(iter,0) // length is ignored so just pass 0
             }
-    
+            
             def initializePosition(pos: Long) = {
               position = pos
               channel.position(pos)

@@ -27,7 +27,7 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
 
 
   val patchParams =
-    ("replaced is MaxValue", 2, "ア", Some(Int.MaxValue)) ::
+   /* ("replaced is MaxValue", 2, "ア", Some(Int.MaxValue)) ::
       ("too large max", 2, "ア", Some(8)) ::
       ("basic", 2, "ア", None) ::
       ("insert", 2, "ア", Some(-1)) ::
@@ -35,7 +35,8 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
       ("to large position", 199, "ア", None) ::
       ("very large patch", 2, (1 to 100 mkString ""), None) ::
       ("0 length", 2, "ア", Some(0)) ::
-      ("partial overwite", 2, "its a long one!", Some(3)) ::
+      ("partial overwite", 2, "its a long one!", Some(3)) ::*/
+      ("overwite All at a far position", 10, "\u2248\u2248", None) ::
       Nil
 
   @Test //@Ignore
@@ -114,6 +115,7 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
       test("Iterator: " + msg, _.insert(pos, bytes.toIterator), pos, bytes)
       test("List: "+msg,_.insert(pos,bytes.toList), pos, bytes)
       test("String: "+msg,_.insert(pos,data), pos, bytes)
+      test("noDefinateSize: "+msg,_.insert(pos,data), pos, bytes)
     }
 
     val func = Function tupled (run _)
@@ -331,6 +333,5 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
 
     seekable.open(perform(_, "opened seekable"))
   }
-
 
 }

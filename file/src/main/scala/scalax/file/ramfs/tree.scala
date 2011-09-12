@@ -72,7 +72,7 @@ private[ramfs] class FileNode(var name:String) extends Node {
     }
 
     def channel(owner:RamPath, openOptions: OpenOption*) = {
-      def newchannel = new ArrayBufferSeekableChannel(this.data,openOptions:_*)(owner.delete(force=true), ())
+      def newchannel = new ArrayBufferSeekableChannel(this.data,openOptions:_*)(_ => owner.delete(force=true), _ => ())
       Resource.fromSeekableByteChannel(newchannel)
     }
   }

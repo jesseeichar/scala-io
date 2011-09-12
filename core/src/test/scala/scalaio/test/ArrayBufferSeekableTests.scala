@@ -8,7 +8,7 @@ class OpenableArrayBufferSeekableTest extends AbstractSeekableTests {
   def open(data: String) = {
     val buffer = ArrayBuffer[Byte]()
     buffer ++= data.getBytes(Codec.UTF8.charSet)
-    Resource.fromSeekableByteChannel(options => new ArrayBufferSeekableChannel(buffer,options:_*)((),()))
+    Resource.fromSeekableByteChannel(options => new ArrayBufferSeekableChannel(buffer,options:_*)(_=>(),_=>()))
   }
 }
 
@@ -16,6 +16,6 @@ class SeekableArrayBufferSeekableTest extends AbstractSeekableTests {
   def open(data: String): Seekable = {
     val buffer = ArrayBuffer[Byte]()
     buffer ++= data.getBytes(Codec.UTF8.charSet)
-    Resource.fromSeekableByteChannel(new ArrayBufferSeekableChannel(buffer,ReadWrite:_*)((),()))
+    Resource.fromSeekableByteChannel(new ArrayBufferSeekableChannel(buffer,ReadWrite:_*)(_=>(),_=>()))
   }
 }

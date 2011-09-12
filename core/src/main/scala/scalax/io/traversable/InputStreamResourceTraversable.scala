@@ -4,7 +4,7 @@ import java.io.InputStream
 
 class InputStreamResourceTraversable(
   resourceOpener: => OpenedResource[InputStream],
-  bufferFactory: => Array[Byte] = new Array[Byte](Constants.BufferSize),
+  bufferFactory: => Array[Byte],
   val start:Long,
   val end:Long)
   extends LongTraversable[Byte]

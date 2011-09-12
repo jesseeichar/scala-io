@@ -10,6 +10,7 @@ package scalaio.test.fs
 
 import scalax.io._
 import scalaio.test.AbstractSeekableTests
+import org.junit.Test
 
 
 abstract class FsSeekableTests extends AbstractSeekableTests with Fixture {
@@ -18,4 +19,5 @@ abstract class FsSeekableTests extends AbstractSeekableTests with Fixture {
     path write data
     path
   }
+  
 }

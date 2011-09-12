@@ -363,7 +363,10 @@ object Resource {
    */
   def fromByteChannel[A <: ByteChannel](opener: => A) : ByteChannelResource[A] = new ByteChannelResource[A](opener,Noop, () => None)
 
-  private def seekablesizeFunction(resource:SeekableByteChannel)= () => try{Some(resource.size)}finally{resource.close()}
+  private def seekablesizeFunction(resource: => SeekableByteChannel)= () => {
+    var r = resource
+    try{Some(r.size)}finally{r.close()}
+  }
   /**
    * Create an Input/Output/Seekable Resource instance from a SeekableByteChannel.
    *

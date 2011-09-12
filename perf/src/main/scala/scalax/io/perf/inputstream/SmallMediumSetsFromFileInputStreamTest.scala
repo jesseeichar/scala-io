@@ -1,6 +1,7 @@
 package scalax.io.perf
 package inputstream
 
+import Utils._
 import scalax.io._
 import sperformance.Keys.WarmupRuns
 import sperformance.dsl._
@@ -22,7 +23,8 @@ object SmallMediumSetsFromFileInputStreamTest extends AbstractInputTest {
   val MaxSize = 15000
   val Inc = 5000
   val From = 5000
-  val WarmUpRuns = 100
+  val WarmUpRuns = 1000
+  val WarmUpRunsForLines = 100
 
   def newIn(size: Int, lines: Int = 2, term: String = NewLine.sep) = {
     val data = generateTestData(size, lines, term)

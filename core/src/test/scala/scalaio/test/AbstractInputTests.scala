@@ -25,7 +25,7 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
   sealed trait Type
 
   case object Image extends Type
-
+  
   abstract class Text(val sep: String) extends Type
 
   case object TextNewLine extends Text(NewLine.sep)
@@ -232,6 +232,15 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
     val expected = TEXT_VALUE
 
     assertEquals(expected, new String(outStream.toByteArray,"UTF-8"))
+  }
+
+  @Test//(timeout = 3000) //@Ignore
+  def byteCountForLargeInput(): Unit = {
+    val text = (1 to Buffers.BufferSize flatMap { _ => TEXT_VALUE }).mkString
+    val in = input(TextCustomData("\n", text))
+
+
+    assertEquals(text.getBytes("UTF-8").length, in.bytes.size)
   }
 
 

@@ -1,6 +1,7 @@
 package scalax.io.perf
 package channel
 
+import Utils._
 import scalax.io._
 import sperformance.Keys.WarmupRuns
 import sperformance.dsl._
@@ -22,11 +23,13 @@ object SmallMediumSetsFromFileReadableByteChannelTest extends AbstractReadableBy
   val MaxSize = 15000
   val Inc = 5000
   val From = 5000
-  val WarmUpRuns = 100
+  val WarmUpRuns = 1000
+  val WarmUpRunsForLines = 100
+
+  lazy val file = File.createTempFile(getClass().getSimpleName(), "txt")
 
   def newIn(size: Int, lines: Int = 2, term: String = NewLine.sep) = {
     val data = generateTestData(size, lines, term)
-    val file = File.createTempFile(getClass().getSimpleName(), "txt")
     FileUtils.writeStringToFile(file, data, "UTF-8")
     () => new FileInputStream(file).getChannel()
   }

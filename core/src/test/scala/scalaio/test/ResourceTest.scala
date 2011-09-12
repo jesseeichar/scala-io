@@ -9,6 +9,7 @@ import java.nio.channels.ByteChannel
 import java.io._
 import actors.Futures
 import java.net._
+import scala.collection.mutable.ArrayBuffer
 
 class ResourceTest {
 
@@ -168,5 +169,25 @@ class ResourceTest {
     assertEquals(Some(1000),positiveSize.asInput.size)
   }
 
+  @Test
+  def seekable_size_leaves_open_resource {
+    var open = Set[ArrayBufferSeekableChannel]()
+    def opener = {
+      var chan = new ArrayBufferSeekableChannel(ArrayBuffer[Byte]())(_ => (), c => open -= c)
+      open += chan
+      chan
+    }
+    
+    Resource.fromSeekableByteChannel(opener).size
+    assertTrue(open.isEmpty)
+    
+    Resource.fromByteChannel(opener).size
+    assertTrue(open.isEmpty)
+    
+    Resource.fromReadableByteChannel(opener).size
+    assertTrue(open.isEmpty)
+    
+    
+  }
 
 }

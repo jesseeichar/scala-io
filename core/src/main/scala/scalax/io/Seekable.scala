@@ -11,7 +11,6 @@ package scalax.io
 import java.nio.{ByteBuffer, CharBuffer}
 import nio.SeekableFileChannel
 import scalax.io._
-import Constants.BufferSize
 import scala.collection.Traversable
 import scala.annotation._
 import collection.mutable.{ArrayOps, WrappedArray}
@@ -98,7 +97,7 @@ case class OverwriteSome(replacementLength:Long) extends Overwrite {
 trait Seekable extends Input with Output {
   self =>
 
-  private final val MaxPermittedInMemory = 50 * BufferSize
+  private final val MaxPermittedInMemory = 10 * 1024 * 1024
 
   private final val OVERWRITE_CODE = Long.MinValue
 
@@ -205,6 +204,7 @@ trait Seekable extends Input with Output {
       val bytes = string.getBytes(codec.name)
 
       // this is very inefficient.  The file is opened 3 times.
+      // I want to find startPos and replacedInBytes in a single request.
       val posInBytes = charCountToByteCount(0, position)
       if(overwrite.exists{_ < 0}) {
         insert(posInBytes, bytes)
@@ -241,6 +241,7 @@ trait Seekable extends Input with Output {
   def patch[T](position: Long,
             data: T,
             overwrite : Overwrite)(implicit converter:OutputConverter[T]): Unit = {
+    require(position >= 0, "The patch starting position must be greater than or equal 0")
     val bytes = converter.toBytes(data)
     val actualPosition = converter.sizeInBytes * position
     require(actualPosition >= 0, "The patch starting position must be greater than or equal 0")
@@ -315,7 +316,8 @@ trait Seekable extends Input with Output {
   private def insertDataInMemory(position : Long, bytes : TraversableOnce[Byte]) = {
     readWriteChannel { channel =>
       channel position position
-      var buffers = (ByteBuffer allocateDirect MaxPermittedInMemory, ByteBuffer allocateDirect MaxPermittedInMemory)
+      val dataToMove = (channel.size - position) min MaxPermittedInMemory toInt
+      var buffers = (ByteBuffer allocateDirect dataToMove, ByteBuffer allocateDirect dataToMove)
 
       channel read buffers._1
       buffers._1.flip
@@ -347,20 +349,22 @@ trait Seekable extends Input with Output {
     Resource.fromFile(file)
   }
 
-  private def insertDataTmpFile(position : Long, bytes : TraversableOnce[Byte]) = {
-      val tmp = tempFile()
+  private def insertDataTmpFile(position : Long, insertBytes : TraversableOnce[Byte]) = {
+    val tmp = tempFile()
 
-      tmp write (this.bytes ldrop position)
+    val bytes = (this.bytes ldrop position).toList
+    tmp write (this.bytes ldrop position)
 
-      readWriteChannel {channel =>
-           channel position  position
-           writeTo(channel, bytes, -1)
-           writeTo(channel, tmp.bytes, tmp.size.get)
-      }
+    readWriteChannel { channel =>
+      channel position position
+      writeTo(channel, insertBytes, -1)
+      writeTo(channel, tmp.bytes, tmp.size.get)
+    }
   }
 
   private def overwriteFileData(position : Long, bytes : TraversableOnce[Byte], replaced : Long) = {
       readWriteChannel {channel =>
+
         channel.position(position)
 //            println("byte size,replaced",bytes.size,replaced)
           val (wrote, earlyTermination) = writeTo(channel,bytes, replaced)
@@ -392,10 +396,10 @@ trait Seekable extends Input with Output {
 
 //      println("copySlice(srcIndex, destIndex, length)", srcIndex, destIndex, length)
 
-      val buf = ByteBuffer.allocate(BufferSize.min(length))
+      val buf = Buffers.byteBuffer(channel)
       def write(done : Int) = {
 //        println("copySlice:write(done)", done)
-        if(length < done + BufferSize) buf.limit((length - done).toInt)
+        if(length < done + buf.capacity()) buf.limit((length - done).toInt)
 
         buf.clear()
         val read = channel.read(buf, srcIndex + done)
@@ -403,7 +407,7 @@ trait Seekable extends Input with Output {
         val written = channel.write(buf, destIndex + done)
       }
 
-      (0 to length by BufferSize) foreach write
+      (0 to length by buf.capacity) foreach write
   }
 
 
@@ -450,14 +454,14 @@ trait Seekable extends Input with Output {
           // TODO user hasDefinitateSize to improve performance
           // if the size is small enough we can probably open a memory mapped buffer
           // or at least copy to a buffer in one go.
-            val buf = ByteBuffer.allocateDirect(if(length > 0) length min BufferSize toInt else BufferSize)
+            val buf = Buffers.byteBuffer(length)
             var earlyTermination = false
 
             @tailrec
             def write(written : Long, data:TraversableOnce[Byte], acc:Long) : Long = {
                 val numBytes = length match {
-                    case -1 | OVERWRITE_CODE => BufferSize
-                    case _ => (length - written).min(BufferSize).toInt
+                    case -1 | OVERWRITE_CODE => buf.capacity()
+                    case _ => (length - written).min(buf.capacity()).toInt
                 }
 
                 val (toWrite, remaining) = TraversableOnceOps.splitAt(data, numBytes)
@@ -465,8 +469,16 @@ trait Seekable extends Input with Output {
               if(!(numBytes > 0 || remaining.nonEmpty)) {
                 assert(numBytes > 0 || remaining.nonEmpty)
             }
-
-                toWrite foreach buf.put
+                
+                buf.clear()
+                toWrite foreach { b =>
+                  try {
+                	  buf.put(b)
+                  } catch {
+                    case _ =>
+                      println("hi")
+                  }
+                }
                 buf.flip
                 val currentWrite : Long = c write buf
                 earlyTermination = length <= written + numBytes && remaining.nonEmpty
@@ -556,36 +568,19 @@ trait Seekable extends Input with Output {
 
   private def charCountToByteCount(start:Long, end:Long)(implicit codec:Codec) = {
     val encoder = codec.encoder
-    val byteBuffer = ByteBuffer.allocateDirect(encoder.maxBytesPerChar.toInt)
     val charBuffer = CharBuffer.allocate(1)
-
-    def sizeInBytes(c : Char) = {
-      c.toString.getBytes(codec.name).size // this is very inefficient
-
-      /* TODO There is a bug in this implementation when encoding certain characters like \n
-
-      encoder.reset
-      byteBuffer.clear()
-      charBuffer.put(0,c)
-      charBuffer.position(0)
-      val result = encoder.encode(charBuffer, byteBuffer, true)
-
-      assert(!result.isUnderflow, "Attempted to encode "+c+" in charset "+codec.name+" but got an underflow error")
-      assert(!result.isOverflow, "Attempted to encode "+c+" in charset "+codec.name+" but got an overflow error")
-      assert(!result.isError, "Attempted to encode "+c+" in charset "+codec.name+" but got an error")
-
-      println("sizeInBytes of '"+c+"' is "+byteBuffer.position)
-
-      byteBuffer.position
-      */
-    }
-
+    
     val resource = underlyingChannel(false)
     val chars = Resource.fromByteChannel(resource.get).appendCloseAction(_ => resource.close()).chars(codec)
     val segment = chars.lslice(start, end)
 
-    (0L /: segment ) { (replacedInBytes, nextChar) =>
-          replacedInBytes + sizeInBytes(nextChar)
+    (0L /: segment) { (replacedInBytes, nextChar) =>
+      charBuffer.clear()
+      charBuffer.put(nextChar)
+      charBuffer.flip()
+      val encoded = encoder.encode(charBuffer)
+      val size = nextChar.toString.getBytes(codec.name).size
+      replacedInBytes + encoded.limit()
     }
   }
 }

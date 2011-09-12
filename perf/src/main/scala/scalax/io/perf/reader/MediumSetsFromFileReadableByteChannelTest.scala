@@ -1,6 +1,7 @@
 package scalax.io.perf
 package reader
 
+import Utils._
 import scalax.io._
 import sperformance.Keys.WarmupRuns
 import sperformance.dsl._
@@ -24,6 +25,7 @@ object MediumSetsFromFileReaderCharsTest extends AbstractReaderCharsTest {
   val Inc = 250000
   val From = 250000
   val WarmUpRuns = 1
+  val WarmUpRunsForLines = 1
 
   def newIn(size: Int, lines: Int = 2, term: String = NewLine.sep) = {
     val largeFile = LargeResource.largeResource(getClass.getSimpleName + size + lines + term) { writer =>
