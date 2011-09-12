@@ -27,9 +27,9 @@ abstract class AbstractSeekableTest extends PerformanceDSLTest {
   def WarmUpRuns: Int
 
   type Source
-  def setup(size:Int, 
-      lines: Int = 2, 
-      term: String = NewLine.sep):Source
+  def setup(size: Int,
+    lines: Int = 2,
+    term: String = NewLine.sep): Source
   /**
    * Return a Function that will create an input stream for testing
    * The function should not take very much time since it will be called during the test
@@ -37,11 +37,11 @@ abstract class AbstractSeekableTest extends PerformanceDSLTest {
    *
    * For example newIn could create a file and the function would simply open a stream to the file
    */
-  def newIn(source:Source, 
-      openOptions: Seq[OpenOption] = ReadWrite):() => SeekableByteChannel
-      
-  def newInResource(source:Source, openOptions: Seq[OpenOption] = ReadWrite): Seekable = {
-    val seekable = newIn(source,openOptions)
+  def newIn(source: Source,
+    openOptions: Seq[OpenOption] = ReadWrite): () => SeekableByteChannel
+
+  def newInResource(source: Source, openOptions: Seq[OpenOption] = ReadWrite): Seekable = {
+    val seekable = newIn(source, openOptions)
     fromSeekableByteChannel(seekable())
 
   }
@@ -55,7 +55,7 @@ abstract class AbstractSeekableTest extends PerformanceDSLTest {
           (size, size / 2, generateTestData(size, 1))
         } run {
           case (size, pos, data) =>
-          	val source = setup(size)
+            val source = setup(size)
             val seekable = newInResource(source)
             seekable.patch(pos, data, OverwriteAll)
         }
@@ -66,7 +66,7 @@ abstract class AbstractSeekableTest extends PerformanceDSLTest {
           (size, data.length, data)
         } run {
           case (size, pos, data) =>
-          	val source = setup(size)
+            val source = setup(size)
             val seekable = newInResource(source)
             seekable.patch(pos, data, OverwriteAll)
         }
@@ -77,7 +77,7 @@ abstract class AbstractSeekableTest extends PerformanceDSLTest {
           (size, data.length, data.toList)
         } run {
           case (size, pos, data) =>
-          	val source = setup(size)
+            val source = setup(size)
             val seekable = newInResource(source)
             seekable.patch(pos, data, OverwriteAll)
         }
@@ -87,7 +87,7 @@ abstract class AbstractSeekableTest extends PerformanceDSLTest {
           (size, generateTestData(size, 1))
         } run {
           case (size, data) =>
-          	val source = setup(size)
+            val source = setup(size)
             val seekable = newInResource(source)
             seekable.append(data)
         }
@@ -98,7 +98,7 @@ abstract class AbstractSeekableTest extends PerformanceDSLTest {
           (size, data)
         } run {
           case (size, data) =>
-          	val source = setup(size)
+            val source = setup(size)
             val seekable = newInResource(source)
             seekable.append(data)
         }
@@ -109,7 +109,7 @@ abstract class AbstractSeekableTest extends PerformanceDSLTest {
           (size, data.toList)
         } run {
           case (size, data) =>
-          	val source = setup(size)
+            val source = setup(size)
             val seekable = newInResource(source)
             seekable.append(data)
         }
@@ -119,7 +119,7 @@ abstract class AbstractSeekableTest extends PerformanceDSLTest {
           (size, size / 2, generateTestData(size, 1))
         } run {
           case (size, pos, data) =>
-          	val source = setup(size)
+            val source = setup(size)
             val seekable = newInResource(source)
             seekable.insert(pos, data)
         }
@@ -130,7 +130,7 @@ abstract class AbstractSeekableTest extends PerformanceDSLTest {
           (size, data.length / 2, data)
         } run {
           case (size, pos, data) =>
-          	val source = setup(size)
+            val source = setup(size)
             val seekable = newInResource(source)
             seekable.insert(pos, data)
         }
@@ -141,9 +141,65 @@ abstract class AbstractSeekableTest extends PerformanceDSLTest {
           (size, data.length / 2, data.toList)
         } run {
           case (size, pos, data) =>
-          	val source = setup(size)
+            val source = setup(size)
             val seekable = newInResource(source)
             seekable.insert(pos, data)
+        }
+      }
+      measure method "bytes drop" in {
+        withSizeDef { size =>
+          (size)
+        } run {
+          case (size) =>
+            val source = setup(size)
+            val seekable = newInResource(source)
+            seekable.bytes.drop(size / 2).size
+        }
+      }
+      measure method "bytes take" in {
+        withSizeDef { size =>
+          (size)
+        } run {
+          case (size) =>
+            val source = setup(size)
+            val seekable = newInResource(source)
+            seekable.bytes.take(size / 2).size
+        }
+      }
+      measure method "bytes zip" in {
+        withSizeDef { size =>
+          val data = generateTestData(size).getBytes(Codec.UTF8.name)
+          (size, data.toList)
+        } run {
+          case (size, data) =>
+            val source = setup(size)
+            val seekable = newInResource(source)
+            seekable.bytes.zip(data).size
+        }
+      }
+      measure method "bytes limitFold" in {
+        withSizeDef { size =>
+          val data = generateTestData(size).getBytes(Codec.UTF8.name)
+          (size, data.toList)
+        } run {
+          case (size, data) =>
+            val source = setup(size)
+            val seekable = newInResource(source)
+            seekable.bytes.limitFold(0) { (acc, next) =>
+              if (acc < size / 2) Continue(acc + 1)
+              else End(acc)
+            }
+        }
+      }
+      measure method "bytes apply" in {
+        having attribute ("version", "std nio") in {
+          withSizeDef { size =>
+            size
+          } run { size =>
+            val source = setup(size)
+            val seekable = newInResource(source)
+            seekable.bytes(0)
+          }
         }
       }
     }

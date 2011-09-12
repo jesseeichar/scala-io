@@ -17,22 +17,15 @@ import java.io.InputStreamReader
 import java.nio.charset.Charset
 import java.io.File
 import java.io.FileInputStream
+import java.io.FileOutputStream
 
-object SmallMediumSetsFromFileReadableByteChannelTest extends AbstractReadableByteChannelInputTest {
+object SmallMediumSetsFromFileReadableByteChannelTest extends Base {
 
   val MaxSize = 15000
   val Inc = 5000
   val From = 5000
   val WarmUpRuns = 1000
   val WarmUpRunsForLines = 100
-
-  lazy val file = File.createTempFile(getClass().getSimpleName(), "txt")
-
-  def newIn(size: Int, lines: Int = 2, term: String = NewLine.sep) = {
-    val data = generateTestData(size, lines, term)
-    FileUtils.writeStringToFile(file, data, "UTF-8")
-    () => new FileInputStream(file).getChannel()
-  }
 
   def main(args: Array[String]) {
     Main.runTests(this)

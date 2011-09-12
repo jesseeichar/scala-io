@@ -11,6 +11,7 @@ package scalax.io
 import collection.immutable.{StringOps, WrappedString}
 import java.io.{OutputStream, OutputStreamWriter}
 import java.nio.ByteBuffer
+import java.nio.channels.Channels
 
 /**
  * Functions used by Seekable and Output to either convert data to bytes for writing
@@ -108,6 +109,11 @@ object OutputConverter {
   implicit object ByteConverter extends NonTraversableAdapter(TraversableByteConverter)
   implicit object ByteArrayConverter extends ArrayAdapter(TraversableByteConverter) {
     override def apply(out: OutputStream, bytes:Array[Byte]) = if(bytes.length > 0) out.write(bytes)
+  }
+  implicit object ByteBufferConverter extends OutputConverter[ByteBuffer] {
+	  override def apply(out: OutputStream, bytes:ByteBuffer) = Channels.newChannel(out).write(bytes)
+      def toBytes(data: ByteBuffer) = new nio.ByteBuffer(data)
+      def sizeInBytes = 1	  
   }
   implicit object TraversableByteConverter extends OutputConverter[TraversableOnce[Byte]] {
     override def apply(out: OutputStream, bytes:TraversableOnce[Byte]) = {

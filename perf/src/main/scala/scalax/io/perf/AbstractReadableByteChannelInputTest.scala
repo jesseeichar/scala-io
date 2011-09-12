@@ -19,32 +19,31 @@ import java.nio.channels.ReadableByteChannel
 import java.nio.ByteBuffer
 import java.nio.channels.Channels
 
-
 abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
   implicit val codec = Codec.UTF8
 
-  def MaxSize:Int
-  def Inc:Int
-  def From:Int
-  def WarmUpRuns:Int
-  def WarmUpRunsForLines:Int
+  def MaxSize: Int
+  def Inc: Int
+  def From: Int
+  def WarmUpRuns: Int
+  def WarmUpRunsForLines: Int
 
   /**
    * Return a Function that will create an input stream for testing
    * The function should not take very much time since it will be called during the test
    * and if it does it could interfere with what the test measures.
-   * 
+   *
    * For example newIn could create a file and the function would simply open a stream to the file
    */
-  def newIn(size: Int, lines: Int = 2, term: String = NewLine.sep):() => ReadableByteChannel
-  def newInResource(size: Int, lines: Int = 2, term: String = NewLine.sep):Input = {
+  def newIn(size: Int, lines: Int = 2, term: String = NewLine.sep): () => ReadableByteChannel
+  def newInResource(size: Int, lines: Int = 2, term: String = NewLine.sep): Input = {
     val in = newIn(size, lines, term)
     fromReadableByteChannel(in())
-    
+
   }
-  
-  def withSizeDef[U](f: Int => U) = withSize from(From) upTo MaxSize by Inc withSetup (f)
-  
+
+  def withSizeDef[U](f: Int => U) = withSize from (From) upTo MaxSize by Inc withSetup (f)
+
   performance of "Input" in {
     having attribute (Keys.WarmupRuns -> WarmUpRuns) in {
       measure method "bytes" in {
@@ -94,7 +93,7 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
               var read = in.read(buffer)
               while (read > -1) {
                 var i = 0
-                while(i<read) {
+                while (i < read) {
                   buffer.get(i).toInt
                   i += 1
                 }
@@ -146,7 +145,7 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
               IOUtils.copy(inStream, out)
               inStream.close()
               in.close()
-              
+
           }
         }
       }
@@ -169,7 +168,7 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
 
               do {
                 read = reader.read(buffer)
-                var i=0
+                var i = 0
                 while (i < read) {
                   buffer(i)
                   i += 1
@@ -199,7 +198,7 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
         having attribute ("version", "io.Source.getLines") in {
           withSizeDef { size =>
             val in = newIn(5, size, NewLine.sep)
-            () => scala.io.Source.fromInputStream(Channels.newInputStream(in()),"UTF-8")
+            () => scala.io.Source.fromInputStream(Channels.newInputStream(in()), "UTF-8")
           } run { source =>
             source().getLines().size
           }
@@ -223,7 +222,7 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
         having attribute ("version", "io.Source.getLines") in {
           withSizeDef { size =>
             val in = newIn(5, size, NewLine.sep)
-            () => scala.io.Source.fromInputStream(Channels.newInputStream(in()),"UTF-8")
+            () => scala.io.Source.fromInputStream(Channels.newInputStream(in()), "UTF-8")
           } run { source =>
             source().getLines().size
           }
@@ -254,7 +253,7 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
         having attribute ("version", "io.Source.getLines") in {
           withSizeDef { size =>
             val in = newIn(5, size, NewLine.sep)
-            () => scala.io.Source.fromInputStream(Channels.newInputStream(in()),"UTF-8")
+            () => scala.io.Source.fromInputStream(Channels.newInputStream(in()), "UTF-8")
           } run { source =>
             source().getLines().size
           }
@@ -278,14 +277,14 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
         withSizeDef { size =>
           newInResource(5, size, RNPair.sep)
         } run { in =>
-          assert(in.lines(RNPair).forall{_.last != '\n'})
+          assert(in.lines(RNPair).forall { _.last != '\n' })
         }
       }
       measure method "lines RN" in {
         having attribute ("version", "io.Source.getLines") in {
           withSizeDef { size =>
             val in = newIn(5, size, NewLine.sep)
-            () => scala.io.Source.fromInputStream(Channels.newInputStream(in()),"UTF-8")
+            () => scala.io.Source.fromInputStream(Channels.newInputStream(in()), "UTF-8")
           } run { source =>
             source().getLines().size
           }
@@ -297,7 +296,7 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
             newIn(5, size, RNPair.sep)
           } run { inFunc =>
             val in = inFunc()
-            IOUtils.toString(Channels.newInputStream(in),"UTF-8").split("\r\n")
+            IOUtils.toString(Channels.newInputStream(in), "UTF-8").split("\r\n")
             in.close()
           }
         }
@@ -317,6 +316,67 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
             val in = inFunc()
             IOUtils.toString(Channels.newInputStream(in), "UTF-8").split("\\*\\*")
             in.close()
+          }
+        }
+      }
+            measure method "bytes drop" in {
+        withSizeDef { size =>
+          (size / 2, newInResource(size))
+        } run {
+          case (toDrop, in) =>
+            in.bytes.drop(toDrop).size
+        }
+      }
+      measure method "bytes drop" in {
+        having attribute ("version", "java.io while loop with buffer") in {
+          withSizeDef { size =>
+            (size, newIn(size))
+          } run {
+            case (size, inFunc) =>
+              val in = inFunc()
+
+              val buffer = ByteBuffer.allocateDirect(size)
+              buffer.clear.limit(size / 2)
+              in.read(buffer)
+              buffer.clear
+              var read = in.read(buffer)
+              while (read > 0) {
+                var i = 0
+                while (i < read) {
+                  buffer.get(i)
+                  i += 1
+                }
+                buffer.clear()
+                read = in.read(buffer)
+              }
+              in.close
+          }
+        }
+      }
+      measure method "bytes take" in {
+        withSizeDef { size =>
+          (size / 2, newInResource(size))
+        } run {
+          case (toTake, in) =>
+            in.bytes.take(toTake).size
+        }
+      }
+      measure method "bytes take" in {
+        having attribute ("version", "java.io while loop with buffer") in {
+          withSizeDef { size =>
+            (size, newIn(size))
+          } run {
+            case (size, inFunc) =>
+              val in = inFunc()
+
+              val buffer = ByteBuffer.allocateDirect(size / 2)
+              in.read(buffer)
+              var i = 0
+              while (buffer.hasRemaining()) {
+                buffer.get(i)
+                i += 1
+              }
+              in.close
           }
         }
       }

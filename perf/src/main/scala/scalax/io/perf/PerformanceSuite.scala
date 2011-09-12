@@ -4,6 +4,7 @@ import inputstream._
 import channel._
 import reader._
 import seekable._
+import scalax.io.perf.file.HardDriveScan
 
 /**
  * Run all performance tests
@@ -27,7 +28,8 @@ object PerformanceSuite {
         SmallMediumSetFileSeekable,
         SmallSetFileSeekable,
         SmallMediumSetMemorySeekable,
-        SmallSetMemorySeekable
+        SmallSetMemorySeekable,
+        HardDriveScan
         )
   }
 }

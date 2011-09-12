@@ -233,6 +233,63 @@ abstract class AbstractReaderCharsTest extends PerformanceDSLTest {
           }
         }
       }
+        measure method "bytes drop" in {
+          withSizeDef { size =>
+            (size / 2, newInResource(size))
+          } run {
+            case (toDrop, in) =>
+              in.chars.drop(toDrop).size
+          }
+        }
+        measure method "bytes drop" in {
+          having attribute ("version", "java.io while loop with buffer") in {
+            withSizeDef { size =>
+              (size, newIn(size))
+            } run {
+              case (size, inFunc) =>
+                val in = inFunc()
+                in.skip(size/2)
+                val buffer = new Array[Char](size)
+                var read = in.read(buffer)
+                while (read > 0) {
+                  var i = 0
+                  while (i < read) {
+                    buffer(i)
+                    i += 1
+                  }
+                  read = in.read(buffer)
+                }
+                in.close
+            }
+          }
+        }
+        measure method "bytes take" in {
+          withSizeDef { size =>
+            (size / 2, newInResource(size))
+          } run {
+            case (toTake, in) =>
+              in.chars.take(toTake).size
+          }
+        }
+        measure method "bytes take" in {
+          having attribute ("version", "java.io while loop with buffer") in {
+            withSizeDef { size =>
+              (size, newIn(size))
+            } run {
+              case (size, inFunc) =>
+                val in = inFunc()
+
+                val buffer = new Array[Char](size)
+                val read = in.read(buffer)
+                var i = 0
+                while (i < read) {
+                  buffer(i)
+                  i += 1
+                }
+                in.close
+            }
+          }
+        }
     }
   }
 

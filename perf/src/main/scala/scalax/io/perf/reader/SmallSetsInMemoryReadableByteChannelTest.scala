@@ -16,7 +16,7 @@ import java.io.BufferedOutputStream
 import java.io.InputStreamReader
 import java.nio.charset.Charset
 
-object SmallSetsInMemoryReaderCharsTest extends AbstractReaderCharsTest {
+object SmallSetsInMemoryReaderCharsTest extends Base {
 
   val MaxSize = 50
   val Inc = 25
@@ -24,11 +24,6 @@ object SmallSetsInMemoryReaderCharsTest extends AbstractReaderCharsTest {
   val WarmUpRuns = 5000
   val WarmUpRunsForLines = 1000
   
-  def newIn(size: Int, lines: Int = 2, term: String = NewLine.sep) = {
-    val data = generateTestData(size, lines, term)
-    () => new InputStreamReader(new ByteArrayInputStream(data.getBytes), "UTF-8")
-  }
-
   def main(args: Array[String]) {
     Main.runTests(this)
   }

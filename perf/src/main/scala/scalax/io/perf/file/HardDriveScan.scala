@@ -26,7 +26,7 @@ object HardDriveScan extends PerformanceDSLTest {
   performance of "Path" in {
     having attribute (Keys.WarmupRuns -> 1) in {
       measure method "**" in {
-        withSize from (10) upTo 10000 by 200 withSetup { i =>
+        withSize from (1000) upTo 10000 by 5000 withSetup { i =>
           i
         } run { max =>
           val iter = (root ** "*.*").iterator
@@ -37,35 +37,9 @@ object HardDriveScan extends PerformanceDSLTest {
           }
         }
       }
-      measure method "**" in {
-        having attribute ("version", "java.io while loop") in {
-          withSize from (10) upTo 10000 by 200 withSetup { i =>
-            var jroot = File.listRoots().find(_.getName == root.name).get
-            (i, jroot)
-          } run {
-            case (max, jroot) =>
-              var iter: Iterator[File] = Iterator.empty
-              var waiting = Seq(jroot).iterator
-              var i = 0
-              while (waiting.hasNext && i < max) {
-                iter = waiting
-                waiting = Iterator.empty
-                while (iter.hasNext || i < max) {
-                  val current = iter.next
-                  val children = current.listFiles
-                  if (children != null) waiting ++= children.iterator
-
-                  if (current.getName contains '.') {
-                    i += 1
-                  }
-                }
-              }
-          }
-        }
-      }
     }
   }
- def main(args: Array[String]) {
+  def main(args: Array[String]) {
     Main.runTests(this)
   }
 

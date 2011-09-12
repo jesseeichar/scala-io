@@ -18,18 +18,13 @@ import java.nio.charset.Charset
 import java.io.File
 import java.io.FileInputStream
 
-object SmallMediumSetsFromMemoryInputStreamTest extends AbstractInputTest {
+object SmallMediumSetsFromMemoryInputStreamTest extends Base {
 
   val MaxSize = 15000
   val Inc = 5000
   val From = 5000
   val WarmUpRuns = 1000
   val WarmUpRunsForLines = 100
-
-  def newIn(size: Int, lines: Int = 2, term: String = NewLine.sep) = {
-    val data = generateTestData(size, lines, term)
-    () => new ByteArrayInputStream(data.getBytes)
-  }
 
   def main(args: Array[String]) {
     Main.runTests(this)

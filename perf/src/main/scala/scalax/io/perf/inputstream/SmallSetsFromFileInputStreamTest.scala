@@ -18,20 +18,13 @@ import java.nio.charset.Charset
 import java.io.File
 import java.io.FileInputStream
 
-object SmallSetsFromFileInputStreamTest extends AbstractInputTest {
+object SmallSetsFromFileInputStreamTest extends Base {
 
   val MaxSize = 50
   val Inc = 25
   val From = 1
   val WarmUpRuns = 5000
   val WarmUpRunsForLines = 1000
-
-  def newIn(size: Int, lines: Int = 2, term: String = NewLine.sep) = {
-    val data = generateTestData(size, lines, term)
-    val file = File.createTempFile(getClass().getSimpleName(), "txt")
-    FileUtils.writeStringToFile(file, data, "UTF-8")
-    () => new FileInputStream(file)
-  }
 
   def main(args: Array[String]) {
     Main.runTests(this)
