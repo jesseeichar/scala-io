@@ -20,14 +20,12 @@ import java.nio.ByteBuffer
 import java.nio.channels.Channels
 import java.nio.channels.WritableByteChannel
 
-trait AbstractWritableByteChannelOutputTest extends PerformanceDSLTest {
+abstract class AbstractWritableByteChannelOutputTest extends PerformanceDSLTest {
 
-  self : AbstractReadableByteChannelInputTest =>
-  
   def MaxSize: Int
   def Inc: Int
   def From: Int
-  def WriteWarmUpRuns: Int
+  def WarmUpRuns: Int
 
   /**
    * Return a Function that will create an input stream for testing
@@ -42,9 +40,10 @@ trait AbstractWritableByteChannelOutputTest extends PerformanceDSLTest {
     val out = newOut
     fromWritableByteChannel(out())
   }
+  def withSizeDef[U](f: Int => U) = withSize from (From) upTo MaxSize by Inc withSetup (f)
 
   performance of "Output" in {
-    having attribute (Keys.WarmupRuns -> WriteWarmUpRuns) in {
+    having attribute (Keys.WarmupRuns -> WarmUpRuns) in {
       measure method "write byte array" in {
         withSizeDef { size =>
           (size, generateTestData(size, 1).getBytes("UTF-8"))

@@ -16,7 +16,9 @@ import java.io.BufferedOutputStream
 import java.io.InputStreamReader
 import java.nio.charset.Charset
 
-class SmallSetsInMemoryReadCharsTest extends Base {
+class SmallSetsInMemoryReadCharsTest 
+	extends AbstractReadCharsTest 
+	with MemoryBase {
 
   val MaxSize = 50
   val Inc = 25

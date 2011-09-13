@@ -10,7 +10,7 @@ import java.nio.{ ByteBuffer => NioByteBuffer }
 
 class ReadableByteChannelTraversable(
   resourceOpener: => OpenedResource[ReadableByteChannel],
-  byteBufferFactory: (ReadableByteChannel) => NioByteBuffer,
+  sizeFunc: () => Option[Long],
   val start: Long,
   val end: Long)
   extends LongTraversable[Byte]
@@ -18,14 +18,24 @@ class ReadableByteChannelTraversable(
 
   protected[io] def iterator: CloseableIterator[Byte] = {
     val resource = resourceOpener
-    val buffer = byteBufferFactory(resource.get)
+    val buffer = resource.get match {
+      case seekable: SeekableByteChannel => Buffers.nioDirectBuffer(Some(seekable.size))
+      case _ => Buffers.nioDirectBuffer(sizeFunc())
+    }
     resource.get match {
-      case seekable:SeekableByteChannel => 
-        new SeekableByteChannelIterator(buffer,resource.asInstanceOf[OpenedResource[SeekableByteChannel]],start,end)
-      case _ => 
-        new ReadableByteChannelIterator(buffer,resource,start,end)
+      case seekable: SeekableByteChannel =>
+        new SeekableByteChannelIterator(buffer, resource.asInstanceOf[OpenedResource[SeekableByteChannel]], start, end)
+      case _ =>
+        new ReadableByteChannelIterator(buffer, resource, start, end)
     }
   }
+
+  override lazy val hasDefiniteSize = sizeFunc().nonEmpty
+  override def lsize = sizeFunc() match {
+    case Some(size) => size
+    case None => super.size
+  }
+  override def size = lsize.toInt
 
 }
 
@@ -80,8 +90,8 @@ private[traversable] class SeekableByteChannelIterator(
   channel.position(startIndex)
   channel.read(buffer)
   buffer.flip
- private final  var position = startIndex
-  
+  private final var position = startIndex
+
   @inline
   def hasNext = {
     if (buffer.hasRemaining) true

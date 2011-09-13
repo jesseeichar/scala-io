@@ -22,8 +22,7 @@ import java.nio.channels.WritableByteChannel
 import java.io.Writer
 import java.io.BufferedWriter
 
-trait AbstractWriteCharsTest extends PerformanceDSLTest {
-  self : AbstractReaderCharsTest =>
+abstract class AbstractWriteCharsTest extends PerformanceDSLTest {
 
   def MaxSize: Int
   def Inc: Int
@@ -43,7 +42,8 @@ trait AbstractWriteCharsTest extends PerformanceDSLTest {
     val out = newOut
     fromWriter(out())
   }
-
+  def withSizeDef[U](f: Int => U) = withSize from (From) upTo MaxSize by Inc withSetup (f)
+  
   performance of "WriteChars" in {
     having attribute (Keys.WarmupRuns -> WarmUpRuns) in {
 

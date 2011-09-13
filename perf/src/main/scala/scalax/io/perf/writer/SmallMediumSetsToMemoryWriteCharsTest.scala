@@ -1,5 +1,5 @@
 package scalax.io.perf
-package reader
+package writer
 
 import Utils._
 import scalax.io._
@@ -18,9 +18,9 @@ import java.nio.charset.Charset
 import java.io.File
 import java.io.FileInputStream
 
-class SmallMediumSetsFromFileReadCharsTest 
-	extends AbstractReadCharsTest 
-	with FileBase {
+class SmallMediumSetsInMemoryWriteCharsTest 
+	extends AbstractWriteCharsTest
+	with MemoryBase {
 
   val MaxSize = 15000
   val Inc = 5000
@@ -30,8 +30,8 @@ class SmallMediumSetsFromFileReadCharsTest
 
 }
 
-object SmallMediumSetsFromFileReadCharsTest {
+object SmallMediumSetsInMemoryWriteCharsTest {
   def main(args: Array[String]) {
-    Main.runTests(() => new SmallMediumSetsFromFileReadCharsTest)
+    Main.runTests(() => new SmallMediumSetsInMemoryWriteCharsTest)
   }
 }

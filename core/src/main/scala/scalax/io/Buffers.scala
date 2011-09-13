@@ -9,6 +9,7 @@ package scalax.io
 import java.io.InputStream
 import java.nio.channels.ReadableByteChannel
 import java.nio.ByteBuffer
+import java.io.Closeable
 
 /**
  * Not public API.  I don't think I like the idea of having constants
@@ -16,20 +17,32 @@ import java.nio.ByteBuffer
  * override the default values.
  */
 object Buffers {
-  final val BufferSize = 8 * 1024
+  final val BufferSize = 4 * 1024
   final val CharBufferSize = 1024
   
-  def inputStreamBuffer = new Array[Byte](BufferSize)
-  def readerBuffer = new Array[Char](BufferSize)
+  def arrayBuffer(size:Option[Long]) = {
+    size match {
+      case Some(size) => new Array[Byte](bufferSize(size,0))
+      case _ => new Array[Byte](BufferSize)
+    }
+  }
+  def nioDirectBuffer(size:Option[Long]) = {
+	  size match {
+	  case Some(size) => ByteBuffer.allocateDirect(bufferSize(size,0))
+	  case _ => ByteBuffer.allocateDirect(BufferSize)
+	  }
+  }
   def byteBuffer(c:ReadableByteChannel):ByteBuffer = c match {
     case s:SeekableByteChannel => 
       byteBuffer(s.size)
     case _ => ByteBuffer.allocateDirect(BufferSize)
   }
   def byteBuffer(size:Long, min:Int = 0):ByteBuffer = { 
-	  val finalSize = if(size < BufferSize && size > min) size.toInt
-	  else BufferSize
-	  ByteBuffer.allocateDirect(finalSize)
+	  ByteBuffer.allocateDirect(bufferSize(size,min))
   }
-	
+  def readerBuffer = new Array[Char](CharBufferSize)
+  private def bufferSize(size:Long, min:Int) = {
+	  if(size < BufferSize && size > min) size.toInt
+	  else BufferSize
+  }
 }

@@ -1,5 +1,6 @@
 package scalax.io.perf
-package reader
+package channel
+package input
 
 import Utils._
 import scalax.io._
@@ -17,21 +18,22 @@ import java.io.InputStreamReader
 import java.nio.charset.Charset
 import java.io.File
 import java.io.FileInputStream
+import java.io.FileOutputStream
 
-class SmallMediumSetsFromFileReadCharsTest 
-	extends AbstractReadCharsTest 
-	with FileBase {
+class SmallMediumSetsFromFileReadableByteChannelTest 
+	extends AbstractReadableByteChannelInputTest 
+	with SeekableBase {
 
   val MaxSize = 15000
   val Inc = 5000
   val From = 5000
   val WarmUpRuns = 100
-  val WarmUpRunsForLines = 50
+  val WarmUpRunsForLines = 100
 
 }
 
-object SmallMediumSetsFromFileReadCharsTest {
+object SmallMediumSetsFromFileReadableByteChannelTest {
   def main(args: Array[String]) {
-    Main.runTests(() => new SmallMediumSetsFromFileReadCharsTest)
+    Main.runTests(() => new SmallMediumSetsFromFileReadableByteChannelTest)
   }
 }

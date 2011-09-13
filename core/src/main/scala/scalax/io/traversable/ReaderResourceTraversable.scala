@@ -9,14 +9,13 @@ import scalax.io.OpenedResource
 
 class ReaderResourceTraversable (
   resourceOpener: => OpenedResource[Reader],
-  bufferFactory: => Array[Char],
   val start:Long,
   val end:Long)
   extends LongTraversable[Char]
   with LongTraversableLike[Char, LongTraversable[Char]] {
 
   protected[io] def iterator: CloseableIterator[Char] = new CloseableIterator[Char] {
-    val buffer = bufferFactory
+    val buffer = Buffers.readerBuffer
     val openResource = resourceOpener
     val inConcrete = openResource.get
     inConcrete.skip(start)

@@ -11,6 +11,8 @@ package scalax.io.nio
 import scalax.io.SeekableByteChannel
 import java.nio.{ByteBuffer => JByteBuffer}
 import java.nio.channels.FileChannel
+import java.nio.channels.ReadableByteChannel
+import java.nio.channels.WritableByteChannel
 
 
 class SeekableFileChannel(val self : FileChannel) extends SeekableByteChannel with Proxy {
@@ -22,6 +24,10 @@ class SeekableFileChannel(val self : FileChannel) extends SeekableByteChannel wi
   def position = self.position
   def close = self.close
   def isOpen = self.isOpen
+  def transferFrom(channel:ReadableByteChannel,position:Long,count:Long) = 
+    self.transferFrom(channel,position,count)
+    def transferTo(position:Long,count:Long, channel:WritableByteChannel) = 
+    	self.transferTo(position,count,channel)
 
   override def write(src : JByteBuffer, pos:Long) = self.write(src, pos)
   override def read(dst : JByteBuffer, pos:Long) = self.read(dst, pos)

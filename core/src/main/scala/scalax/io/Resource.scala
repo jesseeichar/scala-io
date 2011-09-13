@@ -20,6 +20,7 @@ import scalax.io.CloseAction._
 import StandardOpenOption._
 import collection.immutable.List._
 import util.control.Exception
+import java.nio.ByteBuffer
 
 trait OpenedResource[+R] {
   def get:R
@@ -175,7 +176,31 @@ trait InputResource[+R <: Closeable] extends Resource[R] with Input with Resourc
      *
      * @return the [[scalax.io.InputStreamResource]](typically) version of this object.
      */
-    def inputStream: InputResource[InputStream]
+    def inputStreamResource: InputResource[InputStream]
+
+  override def copyData(output: Output): Unit =
+    output match {
+      case outR: OutputResource[_] =>
+        for {
+          outChan <- outR.writableByteChannelResource
+          inChan <- readableByteChannelResource
+        } {
+          (outChan, inChan) match {
+            case (file: SeekableFileChannel, _) =>
+              file.transferFrom(inChan, 0, Long.MaxValue)
+            case (_, file: SeekableFileChannel) =>
+              file.transferTo(0, Long.MaxValue, outChan)
+            case _ =>
+              val buf = ByteBuffer.allocateDirect(Buffers.BufferSize)
+              var read = inChan.read(buf)
+              while (read != -1) {
+                if (read > 0) outChan.write(buf)
+                read = inChan.read(buf)
+              }
+          }
+        }
+      case _ => super.copyData(output)
+    }
 
     /**
      * Obtain the [[scalax.io.ReadCharsResource]] version of this object.

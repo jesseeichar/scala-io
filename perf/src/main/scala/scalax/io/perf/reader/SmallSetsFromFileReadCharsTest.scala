@@ -18,7 +18,9 @@ import java.nio.charset.Charset
 import java.io.File
 import java.io.FileInputStream
 
-class SmallSetsFromFileReadCharsTest extends Base {
+class SmallSetsFromFileReadCharsTest  
+	extends AbstractReadCharsTest 
+	with FileBase {
 
   val MaxSize = 50
   val Inc = 25

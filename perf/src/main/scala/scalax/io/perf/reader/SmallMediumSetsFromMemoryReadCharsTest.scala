@@ -18,7 +18,9 @@ import java.nio.charset.Charset
 import java.io.File
 import java.io.FileInputStream
 
-class SmallMediumSetsFromMemoryReadCharsTest extends Base {
+class SmallMediumSetsFromMemoryReadCharsTest 
+	extends AbstractReadCharsTest 
+	with MemoryBase {
 
   val MaxSize = 15000
   val Inc = 5000

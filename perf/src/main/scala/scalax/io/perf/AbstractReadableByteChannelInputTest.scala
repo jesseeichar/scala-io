@@ -18,6 +18,7 @@ import java.io.InputStream
 import java.nio.channels.ReadableByteChannel
 import java.nio.ByteBuffer
 import java.nio.channels.Channels
+import scalax.file.Path
 
 abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
   implicit val codec = Codec.UTF8
@@ -39,7 +40,6 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
   def newInResource(size: Int, lines: Int = 2, term: String = NewLine.sep): Input = {
     val in = newIn(size, lines, term)
     fromReadableByteChannel(in())
-
   }
 
   def withSizeDef[U](f: Int => U) = withSize from (From) upTo MaxSize by Inc withSetup (f)
@@ -122,6 +122,33 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
           }
         }
       }
+      measure method "copy to File" in {
+        withSizeDef { size =>
+          val in = newInResource(size)
+          val out = Path.createTempFile(getClass.getSimpleName)
+          (in, out)
+        } run {
+          case (in, out) =>
+            in.copyData(out)
+        }
+      }
+      measure method "copy to File" in {
+        having attribute ("version", "Apache IO copy bytes") in {
+          withSizeDef { size =>
+            val in = newIn(size)
+            val out = Path.createTempFile(getClass.getSimpleName).channel().open().get
+            (in, out)
+          } run {
+            case (inFunc, out) =>
+              val in = inFunc()
+              val inStream = Channels.newInputStream(in)
+              IOUtils.copy(inStream, Channels.newOutputStream(out))
+              inStream.close()
+              in.close()
+              out.close()
+          }
+        }
+      }
       measure method "copyData" in {
         withSizeDef { size =>
           val in = newInResource(size)
@@ -145,7 +172,6 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
               IOUtils.copy(inStream, out)
               inStream.close()
               in.close()
-
           }
         }
       }

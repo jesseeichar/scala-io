@@ -190,20 +190,20 @@ private[io] object ResourceTraversable {
   val IdentityByteConversion = identity[Byte]_
   def streamBased[A,B]
 		  (opener : => OpenedResource[InputStream],
-          bufferFactory : => Array[Byte] = Buffers.inputStreamBuffer,
-          parser : InputParser[A,Array[Byte]] = DefaultByteParser,
-          initialConv: A => B = IdentityByteConversion,
-          startIndex : Long = 0,
-          endIndex: Long = Long.MaxValue) = {
+		   sizeFunc:() => Option[Long],
+           parser : InputParser[A,Array[Byte]] = DefaultByteParser,
+           initialConv: A => B = IdentityByteConversion,
+           startIndex : Long = 0,
+           endIndex: Long = Long.MaxValue) = {
     if (parser == DefaultByteParser && initialConv == IdentityByteConversion) {
-      new traversable.InputStreamResourceTraversable(opener,bufferFactory,startIndex,endIndex).asInstanceOf[LongTraversable[B]]
+      new traversable.InputStreamResourceTraversable(opener,sizeFunc, startIndex,endIndex).asInstanceOf[LongTraversable[B]]
     } else {
       new ResourceTraversable[B] {
         type In = InputStream
         type SourceOut = A
 
         def source = new TraversableSource[InputStream, A] {
-          val buffer = bufferFactory
+          val buffer = Buffers.arrayBuffer(sizeFunc())
           val iter = parser.iterator(buffer)
           val openedResource = opener
           val stream = openedResource.get
@@ -222,6 +222,14 @@ private[io] object ResourceTraversable {
         protected val conv = initialConv
         protected val start = startIndex
         protected val end = endIndex
+
+        override def hasDefiniteSize = sizeFunc().nonEmpty
+        override def lsize = sizeFunc() match {
+          case Some(size) => size
+          case None => super.size
+        }
+        override def size = lsize.toInt
+
       }
     }
   }
@@ -237,21 +245,20 @@ private[io] object ResourceTraversable {
   }
   val IdentityCharConversion = identity[Char]_
   def readerBased[A](opener : => OpenedResource[Reader],
-                  bufferFactory : => Array[Char] = Buffers.readerBuffer,
-                  parser : InputParser[Char,Array[Char]] = DefaultCharParser,
-                  initialConv: Char => A = IdentityCharConversion,
-                  startIndex : Long = 0,
-                  endIndex: Long = Long.MaxValue) = {
+				    parser : InputParser[Char,Array[Char]] = DefaultCharParser,
+                    initialConv: Char => A = IdentityCharConversion,
+                    startIndex : Long = 0,
+                    endIndex: Long = Long.MaxValue) = {
 
     if (parser == DefaultCharParser && initialConv == IdentityCharConversion) {
-    	new traversable.ReaderResourceTraversable(opener, bufferFactory, startIndex, endIndex).asInstanceOf[LongTraversable[A]]
+    	new traversable.ReaderResourceTraversable(opener, startIndex, endIndex).asInstanceOf[LongTraversable[A]]
     } else {
       new ResourceTraversable[A] {
         type In = Reader
         type SourceOut = Char
 
         def source = new TraversableSource[Reader, Char] {
-          val buffer = bufferFactory
+          val buffer = Buffers.readerBuffer
           val iter = parser.iterator(buffer)
           val openedResource = opener
           val stream = openedResource.get
@@ -281,13 +288,13 @@ private[io] object ResourceTraversable {
   }
     
   def byteChannelBased[A,B](opener : => OpenedResource[ReadableByteChannel],
-                          byteBufferFactory : ReadableByteChannel => NioByteBuffer = Buffers.byteBuffer,
-                          parser : InputParser[A,NioByteBuffer] = DefaultByteBufferParser,
-                          initialConv: A => B = IdentityByteConversion,
-                          startIndex : Long = 0,
-                          endIndex : Long = Long.MaxValue):LongTraversable[B] = {
+		  					sizeFunc:() => Option[Long],
+                            parser : InputParser[A,NioByteBuffer] = DefaultByteBufferParser,
+                            initialConv: A => B = IdentityByteConversion,
+                            startIndex : Long = 0,
+                            endIndex : Long = Long.MaxValue):LongTraversable[B] = {
     if (parser == DefaultByteBufferParser && initialConv == IdentityByteConversion) {
-      new traversable.ReadableByteChannelTraversable(opener, byteBufferFactory, startIndex, endIndex).asInstanceOf[LongTraversable[B]]
+      new traversable.ReadableByteChannelTraversable(opener, sizeFunc, startIndex, endIndex).asInstanceOf[LongTraversable[B]]
     } else {
       new ResourceTraversable[B] {
         type In = ReadableByteChannel
@@ -296,7 +303,7 @@ private[io] object ResourceTraversable {
         def source = new TraversableSource[ReadableByteChannel, A] {
           private final val openedResource = opener
           private final val channel = openedResource.get
-          private final val buffer = byteBufferFactory(channel)
+          private final val buffer = Buffers.nioDirectBuffer(sizeFunc())
           private final val iter = parser.iterator(buffer)
           
           def read() = {
@@ -326,18 +333,26 @@ private[io] object ResourceTraversable {
         protected val conv = initialConv
         protected val start = startIndex
         protected val end = endIndex
+        
+        override lazy val hasDefiniteSize= sizeFunc().nonEmpty
+        override def lsize = sizeFunc() match {
+          case Some(size) => size
+          case None => super.size
+        }
+        override def size = lsize.toInt
+
       }
     }
   }
   
   def seekableByteChannelBased[A,B](opener : => OpenedResource[SeekableByteChannel],
-                          byteBufferFactory : ReadableByteChannel => NioByteBuffer = Buffers.byteBuffer,
+                          sizeFunc:() => Option[Long],
                           parser : InputParser[A,NioByteBuffer] = DefaultByteBufferParser,
                           initialConv: A => B = IdentityByteConversion,
                           startIndex : Long = 0,
                           endIndex : Long = Long.MaxValue):LongTraversable[B] = {
     if (parser == DefaultByteBufferParser && initialConv == IdentityByteConversion) {
-      new traversable.ReadableByteChannelTraversable(opener, byteBufferFactory, startIndex, endIndex).asInstanceOf[LongTraversable[B]]
+      new traversable.ReadableByteChannelTraversable(opener, sizeFunc, startIndex, endIndex).asInstanceOf[LongTraversable[B]]
     } else {
         new ResourceTraversable[B] {
           type In = SeekableByteChannel
@@ -346,7 +361,7 @@ private[io] object ResourceTraversable {
           def source = new TraversableSource[SeekableByteChannel, A] {
             private final val openedResource = opener
             private final val channel = openedResource.get
-            private final val buffer = byteBufferFactory(channel)
+            private final val buffer = Buffers.nioDirectBuffer(Some(channel.size))
             private final val iter = parser.iterator(buffer)
     
             var position = 0L
@@ -378,6 +393,13 @@ private[io] object ResourceTraversable {
           protected val conv = initialConv
           protected val start = startIndex
           protected val end = endIndex
+          
+          override lazy val hasDefiniteSize= sizeFunc().nonEmpty
+          override def lsize = sizeFunc() match {
+            case Some(size) => size
+            case None => super.size
+          }
+          override def size = lsize.toInt
         }
       }
   }
