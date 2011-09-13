@@ -7,18 +7,19 @@ import sperformance.store.XmlStoreResults
 import sperformance.PerformanceTest
 
 /**
- * This object is meant to be the final runner of the SPerformance test framework.
+ * This class is meant to be the final runner of the SPerformance test framework.
  */
 object Main {
   var outputDirectory = new File("results")
 
   def runTestsReflectively(tests: Class[_ <: PerformanceTest]*) {
     //TODO - ClassLoader magic....
-    runTests(tests.map(_.newInstance): _*)
+    runTests(tests.map(t => () => t.newInstance): _*)
   }
 
-  def runTests(tests: PerformanceTest*) {
-    for (test <- tests) {
+  def runTests(tests: (() => PerformanceTest)*) {
+    for (testFactory <- tests) {
+      val test = testFactory()
      println("Starting "+test.name)
       val context = new sperformance.HistoricalRunContext(outputDirectory, new XmlStoreResults(_), new XmlLoadResults(_))
       test.runTest(context)

@@ -13,23 +13,23 @@ object PerformanceSuite {
 
   def main(args: Array[String]): Unit = {  
     Main.runTests(
-        SmallSetsInMemoryInputStreamTest,
-        SmallSetsInMemoryReadableByteChannelTest,
-        SmallSetsInMemoryReaderCharsTest,
-        SmallSetsFromFileInputStreamTest,
-        SmallSetsFromFileReadableByteChannelTest,
-        SmallSetsFromFileReaderCharsTest,
-        SmallMediumSetsFromMemoryInputStreamTest,
-        SmallMediumSetsFromMemoryReadableByteChannelTest,
-        SmallMediumSetsFromMemoryReaderCharsTest,
-        SmallMediumSetsFromFileInputStreamTest,
-        SmallMediumSetsFromFileReadableByteChannelTest,
-        SmallMediumSetsFromFileReaderCharsTest,
-        SmallMediumSetFileSeekable,
-        SmallSetFileSeekable,
-        SmallMediumSetMemorySeekable,
-        SmallSetMemorySeekable,
-        HardDriveScan
+        () => new SmallSetsInMemoryInputStreamTest,
+        () => new SmallSetsInMemoryReadableByteChannelTest,
+        () => new SmallSetsInMemoryReadCharsTest,
+        () => new SmallSetsFromFileInputStreamTest,
+        () => new SmallSetsFromFileReadableByteChannelTest,
+        () => new SmallSetsFromFileReadCharsTest,
+        () => new SmallMediumSetsFromMemoryInputStreamTest,
+        () => new SmallMediumSetsFromMemoryReadableByteChannelTest,
+        () => new SmallMediumSetsFromMemoryReadCharsTest,
+        () => new SmallMediumSetsFromFileInputStreamTest,
+        () => new SmallMediumSetsFromFileReadableByteChannelTest,
+        () => new SmallMediumSetsFromFileReadCharsTest,
+        () => new SmallMediumSetFileSeekable,
+        () => new SmallSetFileSeekable,
+        () => new SmallMediumSetMemorySeekable,
+        () => new SmallSetMemorySeekable,
+        () => new HardDriveScan
         )
   }
 }

@@ -27,7 +27,7 @@ trait AbstractWritableByteChannelOutputTest extends PerformanceDSLTest {
   def MaxSize: Int
   def Inc: Int
   def From: Int
-  def WarmUpRuns: Int
+  def WriteWarmUpRuns: Int
 
   /**
    * Return a Function that will create an input stream for testing
@@ -43,8 +43,8 @@ trait AbstractWritableByteChannelOutputTest extends PerformanceDSLTest {
     fromWritableByteChannel(out())
   }
 
-  performance of "Seekable" in {
-    having attribute (Keys.WarmupRuns -> WarmUpRuns) in {
+  performance of "Output" in {
+    having attribute (Keys.WarmupRuns -> WriteWarmUpRuns) in {
       measure method "write byte array" in {
         withSizeDef { size =>
           (size, generateTestData(size, 1).getBytes("UTF-8"))

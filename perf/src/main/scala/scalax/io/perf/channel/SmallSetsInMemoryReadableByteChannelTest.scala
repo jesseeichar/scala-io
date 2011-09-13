@@ -17,16 +17,18 @@ import java.io.InputStreamReader
 import java.nio.charset.Charset
 import java.nio.channels.Channels
 
-object SmallSetsInMemoryReadableByteChannelTest extends Base {
+class SmallSetsInMemoryReadableByteChannelTest extends Base {
 
   val MaxSize = 50
   val Inc = 25
   val From = 1
-  val WarmUpRuns = 5000
-  val WarmUpRunsForLines = 1000
+  val WarmUpRuns = 100
+  val WarmUpRunsForLines = 100
 
+}
+
+object SmallSetsInMemoryReadableByteChannelTest {
   def main(args: Array[String]) {
-    Main.runTests(this)
+    Main.runTests(() => new SmallSetsInMemoryReadableByteChannelTest)
   }
-
 }

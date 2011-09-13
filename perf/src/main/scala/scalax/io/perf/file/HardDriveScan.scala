@@ -20,7 +20,7 @@ import scalax.test.sugar._
 import sperformance.Keys
 import scalax.file.Path
 
-object HardDriveScan extends PerformanceDSLTest {
+class HardDriveScan extends PerformanceDSLTest {
   val root = Path.roots.head
 
   performance of "Path" in {
@@ -39,8 +39,11 @@ object HardDriveScan extends PerformanceDSLTest {
       }
     }
   }
-  def main(args: Array[String]) {
-    Main.runTests(this)
-  }
 
+}
+
+object HardDriveScan {
+  def main(args: Array[String]) {
+    Main.runTests(() => new HardDriveScan)
+  }
 }

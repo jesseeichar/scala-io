@@ -49,7 +49,7 @@ class ArrayBufferSeekableChannel(data:ArrayBuffer[Byte],
   override def size = data.size
   override def read (dst: java.nio.ByteBuffer):Int = {
     if(position.toInt < data.size) {
-      val toRead = data.view.slice(position.toInt, min(position.toInt + dst.limit, data.size))
+      val toRead = data.view.slice(position.toInt, min(position.toInt + dst.limit-dst.position, data.size))
       toRead foreach {b => dst.put(b)}
       position += toRead.size
       toRead.size

@@ -19,16 +19,19 @@ import java.io.File
 import java.io.FileInputStream
 import java.nio.channels.Channels
 
-object SmallMediumSetsFromMemoryReadableByteChannelTest extends Base {
+class SmallMediumSetsFromMemoryReadableByteChannelTest extends Base {
 
   val MaxSize = 15000
   val Inc = 5000
   val From = 5000
-  val WarmUpRuns = 1000
+  val WarmUpRuns = 100
   val WarmUpRunsForLines = 100
 
-  def main(args: Array[String]) {
-    Main.runTests(this)
-  }
+}
 
+
+object SmallMediumSetsFromMemoryReadableByteChannelTest {
+  def main(args: Array[String]) {
+    Main.runTests(() => new SmallMediumSetsFromMemoryReadableByteChannelTest)
+  }
 }

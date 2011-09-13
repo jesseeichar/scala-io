@@ -11,7 +11,7 @@ import Utils._
 import scalax.io.Line.Terminators.NewLine
 
 abstract class Base extends AbstractReaderCharsTest with AbstractWriteCharsTest {
-
+  val WriteWarmUpRuns = WarmUpRuns
   def newIn(size: Int, lines: Int = 2, term: String = NewLine.sep) = {
     val file = File.createTempFile(getClass().getSimpleName(), "txt")
     val data = generateTestData(size, lines, term)

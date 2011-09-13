@@ -39,6 +39,8 @@ class WebsiteModel(
     println("Building website at "+Dir.app)
     
     IO.delete(Dir.app)
+    indexDir.listFiles.filter(f => f.isDirectory && f.getName.endsWith("-SNAPSHOT")).
+      foreach (IO.delete)
     Dir.app.mkdirs
     
     websiteResources.listFiles foreach {

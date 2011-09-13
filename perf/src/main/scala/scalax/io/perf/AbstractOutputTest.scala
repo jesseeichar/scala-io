@@ -41,7 +41,7 @@ trait AbstractOutputTest extends PerformanceDSLTest {
     fromOutputStream(out())
   }
 
-  performance of "Seekable" in {
+  performance of "Output" in {
     having attribute (Keys.WarmupRuns -> WarmUpRuns) in {
       measure method "write byte array" in {
         withSizeDef { size =>

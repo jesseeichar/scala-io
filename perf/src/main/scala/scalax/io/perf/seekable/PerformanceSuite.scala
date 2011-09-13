@@ -8,10 +8,10 @@ object SeekablePerformanceSuite {
 
   def main(args: Array[String]): Unit = {  
     Main.runTests(
-        SmallMediumSetFileSeekable,
-        SmallSetFileSeekable,
-        SmallMediumSetMemorySeekable,
-        SmallSetMemorySeekable
+        () => new SmallMediumSetFileSeekable,
+        () => new SmallSetFileSeekable,
+        () => new SmallMediumSetMemorySeekable,
+        () => new SmallSetMemorySeekable
         )
   }
 }

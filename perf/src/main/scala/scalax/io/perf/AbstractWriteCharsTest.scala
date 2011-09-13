@@ -44,7 +44,7 @@ trait AbstractWriteCharsTest extends PerformanceDSLTest {
     fromWriter(out())
   }
 
-  performance of "Seekable" in {
+  performance of "WriteChars" in {
     having attribute (Keys.WarmupRuns -> WarmUpRuns) in {
 
       measure method "write string" in {

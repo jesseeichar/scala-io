@@ -18,16 +18,18 @@ import java.nio.charset.Charset
 import java.io.File
 import java.io.FileInputStream
 
-object SmallMediumSetsFromFileInputStreamTest extends Base {
+class SmallMediumSetsFromFileInputStreamTest extends Base {
 
   val MaxSize = 15000
   val Inc = 5000
   val From = 5000
-  val WarmUpRuns = 1000
-  val WarmUpRunsForLines = 100
+  val WarmUpRuns = 10
+  val WarmUpRunsForLines = 10
 
+}
+
+object SmallMediumSetsFromFileInputStreamTest {
   def main(args: Array[String]) {
-    Main.runTests(this)
+    Main.runTests(() => new SmallMediumSetsFromFileInputStreamTest)
   }
-
 }
