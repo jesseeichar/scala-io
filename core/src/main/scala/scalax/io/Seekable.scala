@@ -111,11 +111,6 @@ trait Seekable extends Input with Output {
   protected def appendChannel[U](f:SeekableByteChannel => U) : U =
     underlyingChannel(true).toSingleUseResource.acquireAndGet(f)
 
-  type OpenSeekable = Seekable {
-    def position:Long
-    def position_=(position:Long):Unit
-  }
-
   /**
    * Execute the function 'f' passing an Seekable instance that performs all operations
    * on a single opened connection to the underlying resource. Typically each call to

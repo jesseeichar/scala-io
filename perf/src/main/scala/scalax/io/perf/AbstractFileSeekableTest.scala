@@ -20,7 +20,7 @@ trait AbstractFileSeekableTest extends AbstractSeekableTest {
   def MaxSize: Int
   def Inc: Int
   def From: Int
-  def WarmUpRuns: Int
+
   override type Source = DefaultPath
   override def setup(size: Int,
     lines: Int = 2,
@@ -74,7 +74,7 @@ trait AbstractFileSeekableTest extends AbstractSeekableTest {
   }
 
   performance of "Seekable" in {
-    having attribute (Keys.WarmupRuns -> WarmUpRuns) in {
+    having attribute (Keys.WarmupRuns -> 1) in {
       measure method "patch bytes array" in {
         having attribute ("version", "std nio") in {
           withSizeDef { size =>

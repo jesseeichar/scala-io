@@ -11,4 +11,8 @@ package object io {
    * is to make the type signatures easier to read
    */
   type ResourceView[A] = LongTraversableView[A,LongTraversable[A]]
+   type OpenSeekable = Seekable {
+    def position:Long
+    def position_=(position:Long):Unit
+  }
 }

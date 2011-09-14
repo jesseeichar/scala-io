@@ -23,7 +23,6 @@ abstract class AbstractOutputTest extends PerformanceDSLTest {
   val MaxSize:Int
   val Inc:Int
   val From:Int
-  val WarmUpRuns:Int
   
   def newOut:() => OutputStream
   def newOutResource = {
@@ -33,7 +32,7 @@ abstract class AbstractOutputTest extends PerformanceDSLTest {
   def withSizeDef[U](f: Int => U) = withSize from (From) upTo MaxSize by Inc withSetup (f)
 
 	performance of "Output" in {
-	  having attribute (Keys.WarmupRuns -> WarmUpRuns) in {
+	  having attribute (Keys.WarmupRuns -> 1) in {
 	    measure method "write byte array" in {
 	      withSizeDef { size =>
 	        (size, generateTestData(size, 1).getBytes("UTF-8"))

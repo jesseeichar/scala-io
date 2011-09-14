@@ -22,8 +22,6 @@ trait AbstractInputTest extends PerformanceDSLTest {
   def MaxSize: Int
   def Inc: Int
   def From: Int
-  def WarmUpRuns: Int
-  def WarmUpRunsForLines: Int
 
   /**
    * Return a Function that will create an input stream for testing
@@ -42,7 +40,7 @@ trait AbstractInputTest extends PerformanceDSLTest {
   def withSizeDef[U](f: Int => U) = withSize from (From) upTo MaxSize by Inc withSetup (f)
 
   performance of "Input" in {
-    having attribute (Keys.WarmupRuns -> WarmUpRuns) in {
+    having attribute (Keys.WarmupRuns -> 1) in {
       measure method "bytes" in {
         withSizeDef { size =>
           newInResource(size)
@@ -168,8 +166,6 @@ trait AbstractInputTest extends PerformanceDSLTest {
           }
         }
       }
-    }
-    having attribute (Keys.WarmupRuns -> WarmUpRunsForLines) in {
       measure method "lines newline" in {
         having attribute ("version", "Apache IOUtils line") in {
           withSizeDef { size =>
@@ -338,7 +334,7 @@ trait AbstractInputTest extends PerformanceDSLTest {
             } run {
               case (size, inFunc) =>
                 val in = inFunc()
-                in.skip(size/2)
+                in.skip(size / 2)
                 val buffer = new Array[Byte](size)
                 var read = in.read(buffer)
                 while (read > 0) {

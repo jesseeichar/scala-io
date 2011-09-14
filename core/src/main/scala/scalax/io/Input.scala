@@ -80,9 +80,7 @@ trait Input {
  *
  * @param output output sink to copy the data to
  */
-  def copyData(output:Output): Unit = {
-    output.write(bytes)
-  }
+  def copyData(output:Output): Unit = output.copyFrom(this)
 
   /**
    * The characters in the object.$
@@ -133,4 +131,5 @@ trait Input {
    *          The codec representing the desired encoding of the characters
    */
   def slurpString(implicit codec: Codec = Codec.default) = chars(codec).mkString
+  
 }

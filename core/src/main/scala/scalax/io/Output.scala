@@ -136,5 +136,12 @@ trait Output {
   def writeStrings(strings: Traversable[String], separator:String = "")(implicit codec: Codec = Codec.default): Unit = {
       underlyingOutput.writer.writeStrings(strings,separator)
   }
+  
+  /**
+   * Copy data from an input to this output.  Input will call this method from copyData if
+   * it does not know how to efficiently copy the data.  This method thus will copy as effiently as
+   * possible and if all else fails simply write the bytes
+   */
+  protected[io] def copyFrom(source:Input):Unit = write (source.bytes)
 }
 

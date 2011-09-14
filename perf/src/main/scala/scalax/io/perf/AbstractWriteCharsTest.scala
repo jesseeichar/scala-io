@@ -27,7 +27,6 @@ abstract class AbstractWriteCharsTest extends PerformanceDSLTest {
   def MaxSize: Int
   def Inc: Int
   def From: Int
-  def WarmUpRuns: Int
 
   /**
    * Return a Function that will create an input stream for testing
@@ -45,7 +44,7 @@ abstract class AbstractWriteCharsTest extends PerformanceDSLTest {
   def withSizeDef[U](f: Int => U) = withSize from (From) upTo MaxSize by Inc withSetup (f)
   
   performance of "WriteChars" in {
-    having attribute (Keys.WarmupRuns -> WarmUpRuns) in {
+    having attribute (Keys.WarmupRuns -> 1) in {
 
       measure method "write string" in {
         withSizeDef { size =>

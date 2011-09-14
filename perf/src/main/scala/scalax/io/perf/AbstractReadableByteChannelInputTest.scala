@@ -26,8 +26,6 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
   def MaxSize: Int
   def Inc: Int
   def From: Int
-  def WarmUpRuns: Int
-  def WarmUpRunsForLines: Int
 
   /**
    * Return a Function that will create an input stream for testing
@@ -45,7 +43,7 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
   def withSizeDef[U](f: Int => U) = withSize from (From) upTo MaxSize by Inc withSetup (f)
 
   performance of "Input" in {
-    having attribute (Keys.WarmupRuns -> WarmUpRuns) in {
+    having attribute (Keys.WarmupRuns -> 1) in {
       measure method "bytes" in {
         withSizeDef { size =>
           newInResource(size)
@@ -136,11 +134,12 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
         having attribute ("version", "Apache IO copy bytes") in {
           withSizeDef { size =>
             val in = newIn(size)
-            val out = Path.createTempFile(getClass.getSimpleName).channel().open().get
+            val out = () => Path.createTempFile(getClass.getSimpleName).channel().open().get
             (in, out)
           } run {
-            case (inFunc, out) =>
+            case (inFunc, outFunc) =>
               val in = inFunc()
+              val out = outFunc()
               val inStream = Channels.newInputStream(in)
               IOUtils.copy(inStream, Channels.newOutputStream(out))
               inStream.close()
@@ -163,11 +162,12 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
         having attribute ("version", "Apache IO copy bytes") in {
           withSizeDef { size =>
             val in = newIn(size)
-            val out = new ByteArrayOutputStream()
+            val out = () => new ByteArrayOutputStream()
             (in, out)
           } run {
-            case (inFunc, out) =>
+            case (inFunc, outFunc) =>
               val in = inFunc()
+              val out = outFunc()
               val inStream = Channels.newInputStream(in)
               IOUtils.copy(inStream, out)
               inStream.close()
@@ -204,8 +204,6 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
           }
         }
       }
-    }
-    having attribute (Keys.WarmupRuns -> WarmUpRunsForLines) in {
       measure method "lines newline" in {
         having attribute ("version", "Apache IOUtils line") in {
           withSizeDef { size =>
@@ -319,7 +317,8 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
       measure method "lines RN" in {
         having attribute ("version", "toString split on terminator") in {
           withSizeDef { size =>
-            newIn(5, size, RNPair.sep)
+
+            newIn(5, 2 * size / 5, RNPair.sep)
           } run { inFunc =>
             val in = inFunc()
             IOUtils.toString(Channels.newInputStream(in), "UTF-8").split("\r\n")
@@ -329,7 +328,7 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
       }
       measure method "lines Custom" in {
         withSizeDef { size =>
-          newInResource(5, size, "**")
+          newInResource(5, 2 * size / 5, "**")
         } run { in =>
           in.lines(Custom("**")).size
         }
@@ -337,7 +336,7 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
       measure method "lines Custom" in {
         having attribute ("version", "java.io Reader") in {
           withSizeDef { size =>
-            newIn(5, size, "**")
+            newIn(5, 2 * size / 5, "**")
           } run { inFunc =>
             val in = inFunc()
             IOUtils.toString(Channels.newInputStream(in), "UTF-8").split("\\*\\*")
@@ -345,7 +344,7 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
           }
         }
       }
-            measure method "bytes drop" in {
+      measure method "bytes drop" in {
         withSizeDef { size =>
           (size / 2, newInResource(size))
         } run {

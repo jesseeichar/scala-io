@@ -176,14 +176,14 @@ trait InputResource[+R <: Closeable] extends Resource[R] with Input with Resourc
      *
      * @return the [[scalax.io.InputStreamResource]](typically) version of this object.
      */
-    def inputStreamResource: InputResource[InputStream]
+    def inputStream: InputResource[InputStream]
 
   override def copyData(output: Output): Unit =
     output match {
       case outR: OutputResource[_] =>
         for {
-          outChan <- outR.writableByteChannelResource
-          inChan <- readableByteChannelResource
+          outChan <- outR.writableByteChannel
+          inChan <- readableByteChannel
         } {
           (outChan, inChan) match {
             case (file: SeekableFileChannel, _) =>

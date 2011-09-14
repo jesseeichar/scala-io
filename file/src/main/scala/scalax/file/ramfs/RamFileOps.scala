@@ -9,6 +9,7 @@
 package scalax.file
 package ramfs
 
+import scalax.io.OpenSeekable
 import scalax.io.StandardOpenOption.{Create,CreateFull,Read,Write,Truncate,DeleteOnClose,WriteTruncate,Append,CreateNew}
 import scalax.io.ByteChannelResource
 import java.nio.channels.FileChannel

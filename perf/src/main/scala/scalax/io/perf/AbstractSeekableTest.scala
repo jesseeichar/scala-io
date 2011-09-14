@@ -24,7 +24,6 @@ abstract class AbstractSeekableTest extends PerformanceDSLTest {
   def MaxSize: Int
   def Inc: Int
   def From: Int
-  def WarmUpRuns: Int
 
   type Source
   def setup(size: Int,
@@ -49,7 +48,7 @@ abstract class AbstractSeekableTest extends PerformanceDSLTest {
   def withSizeDef[U](f: Int => U) = withSize from (From) upTo MaxSize by Inc withSetup (f)
 
   performance of "Seekable" in {
-    having attribute (Keys.WarmupRuns -> WarmUpRuns) in {
+    having attribute (Keys.WarmupRuns -> 1) in {
       measure method "patch strings" in {
         withSizeDef { size =>
           (size, size / 2, generateTestData(size, 1))
