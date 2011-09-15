@@ -8,6 +8,7 @@ import scalax.io.nio.SeekableFileChannel
 import java.nio.channels.FileChannel
 import java.io.RandomAccessFile
 import java.io.Writer
+import java.nio.channels.WritableByteChannel
 
 object JavaConverters {
   class AsInput(op: => Input) {
@@ -149,8 +150,13 @@ object JavaConverters {
     implicit object OutputStreamConverter extends AsOutputConverter[OutputStream]{
       def toOutput(out: OutputStream) = Resource.fromOutputStream(out)
     }
+  /**
+   * Converts a WritableByteChannel to an Output object
+   */
+  implicit object WritableByteChannelConverter extends AsOutputConverter[WritableByteChannel]{
+	  def toOutput(chan: WritableByteChannel) = Resource.fromWritableByteChannel(chan)
   }
-
+}
   
   class AsBinaryReadChars(op: Codec => ReadChars) {
     /** An object to an ReadChars object */

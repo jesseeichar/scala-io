@@ -9,16 +9,18 @@ package scalaio.test
 \*                                                                      */
 
 import scalax.io._
+import JavaConverters._
 import Codec.UTF8
 import Line.Terminators._
-
 import org.junit.Assert._
 import org.junit.{
 Test, Ignore
 }
-
 import Constants.TEXT_VALUE
 import java.io.{ByteArrayOutputStream, ByteArrayInputStream}
+import java.nio.channels.Channels
+import java.io.File
+import java.io.FileOutputStream
 
 abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
 
@@ -223,9 +225,8 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
     assertFalse(read contains textExpected)
   }
 
-  @Test(timeout = 3000) //@Ignore
-  def copyTo(): Unit = {
-    import JavaConverters.asOutputConverter
+  @Test//(timeout = 3000) //@Ignore
+  def copyDataTo(): Unit = {
     val outStream = new ByteArrayOutputStream()
     input(TextNewLine).copyDataTo(outStream.asOutput)
 
@@ -235,6 +236,26 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
   }
 
   @Test//(timeout = 3000) //@Ignore
+  def copyDataToWithChannel(): Unit = {
+    val outStream = new ByteArrayOutputStream()
+    val outChan = Channels.newChannel(outStream)
+    input(TextNewLine).copyDataTo(outChan.asOutput)
+
+    val expected = TEXT_VALUE
+
+    assertEquals(expected, new String(outStream.toByteArray,"UTF-8"))
+  }
+  def copyDataToFile(): Unit = {
+    val file = File.createTempFile(getClass.getSimpleName(),"tmp")
+    val outChan = Channels.newChannel(new FileOutputStream(file))
+    input(TextNewLine).copyDataTo(outChan.asOutput)
+
+    val expected = TEXT_VALUE
+    
+    assertEquals(expected, new String(Resource.fromFile(file).byteArray,"UTF-8"))
+  }
+
+  @Test(timeout = 3000) //@Ignore
   def byteCountForLargeInput(): Unit = {
     val text = (1 to Buffers.BufferSize flatMap { _ => TEXT_VALUE }).mkString
     val in = input(TextCustomData("\n", text))

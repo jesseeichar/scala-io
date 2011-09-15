@@ -184,13 +184,15 @@ trait InputResource[+R <: Closeable] extends Resource[R] with Input with Resourc
   override def copyDataTo(output: Output,finalize:Boolean): Unit =
     output  match {
       case outR: OutputResource[_] =>
+        var failedToCopy = false
         for {
         	inChan <- this
         	outChan <- outR
         } {
-          val failureCase:PartialFunction[Any, Unit] = {case _ => super.copyDataTo(output,finalize)}
-          FileUtils.tryCopy.orElse(failureCase)(outChan, inChan)
+          FileUtils.tryCopy(failedToCopy=true)(inChan, outChan)
         }
+        if(failedToCopy) 
+          super.copyDataTo(output,finalize)
       case _ => super.copyDataTo(output,finalize)
     }
 
@@ -259,13 +261,15 @@ trait OutputResource[+R <: Closeable] extends Resource[R] with Output with Resou
       
     input match {
       case inR: InputResource[_] =>
+        var failedToCopy = false
         for {
         	inChan <- inR
             outChan <- this
         } {
-          val failureCase:PartialFunction[Any, Unit] = {case _ => super.copyDataFrom(input,finalize)}
-          FileUtils.tryCopy.orElse(failureCase)(outChan, inChan)
+          FileUtils.tryCopy(failedToCopy=true)(inChan, outChan)
         }
+        if(failedToCopy) 
+          super.copyDataFrom(input,finalize)
       case _ => super.copyDataFrom(input,finalize)
     }
 
