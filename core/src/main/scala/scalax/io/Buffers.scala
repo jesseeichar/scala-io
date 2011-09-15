@@ -29,16 +29,16 @@ object Buffers {
   def nioDirectBuffer(size:Option[Long]) = {
 	  size match {
 	  case Some(size) => ByteBuffer.allocateDirect(bufferSize(size,0))
-	  case _ => ByteBuffer.allocateDirect(BufferSize)
+	  case _ => ByteBuffer.allocate(BufferSize)
 	  }
   }
   def byteBuffer(c:ReadableByteChannel):ByteBuffer = c match {
     case s:SeekableByteChannel => 
       byteBuffer(s.size)
-    case _ => ByteBuffer.allocateDirect(BufferSize)
+    case _ => ByteBuffer.allocate(BufferSize)
   }
   def byteBuffer(size:Long, min:Int = 0):ByteBuffer = { 
-	  ByteBuffer.allocateDirect(bufferSize(size,min))
+	  ByteBuffer.allocate(bufferSize(size,min))
   }
   def readerBuffer = new Array[Char](CharBufferSize)
   private def bufferSize(size:Long, min:Int) = {

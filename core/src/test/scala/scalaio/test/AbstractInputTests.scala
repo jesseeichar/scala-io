@@ -224,10 +224,10 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
   }
 
   @Test(timeout = 3000) //@Ignore
-  def copyData(): Unit = {
+  def copyTo(): Unit = {
     import JavaConverters.asOutputConverter
     val outStream = new ByteArrayOutputStream()
-    input(TextNewLine).copyData(outStream.asOutput)
+    input(TextNewLine).copyDataTo(outStream.asOutput)
 
     val expected = TEXT_VALUE
 

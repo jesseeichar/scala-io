@@ -138,10 +138,22 @@ trait Output {
   }
   
   /**
-   * Copy data from an input to this output.  Input will call this method from copyData if
+   * Copy data from an input to this output.  Input will call this method from copyTo if
    * it does not know how to efficiently copy the data.  This method thus will copy as effiently as
    * possible and if all else fails simply write the bytes
+   * 
+   * @param input the source to read data from
+   * @param finalize do not forward request to input's copyTo method.  
+   * 				 Often only one end of the transaction will know how to efficiently transfer
+   * 				 data so a common pattern is to check the input and see if the
+   * 				 type of the Input object is a known type.  If not then the
+   * 				 input object will be sent the request.  However, to prevent
+   * 				 an infinite loop the finalize will be set to true so the request
+   * 				 is not then forwarded back to copyFrom  
    */
-  protected[io] def copyFrom(source:Input):Unit = write (source.bytes)
+  def copyDataFrom(input:Input, finalize:Boolean=false):Unit = finalize match {
+    case true => write (input.bytes)
+    case false => input.copyDataTo(this,true)
+  }
 }
 

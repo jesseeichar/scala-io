@@ -7,7 +7,7 @@ import sperformance.dsl._
 import util.Random._
 import Resource._
 import Line.Terminators._
-import java.io.{ ByteArrayOutputStream, ByteArrayInputStream }
+import java.io.ByteArrayInputStream
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.IOUtils
 import java.io.BufferedInputStream
@@ -127,7 +127,7 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
           (in, out)
         } run {
           case (in, out) =>
-            in.copyData(out)
+            in.copyDataTo(out)
         }
       }
       measure method "copy to File" in {
@@ -148,28 +148,26 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
           }
         }
       }
-      measure method "copyData" in {
+      measure method "copyDataTo" in {
         withSizeDef { size =>
           val in = newInResource(size)
-          val out = fromOutputStream(new ByteArrayOutputStream())
+          val out = fromOutputStream(NullOutputStream)
           (in, out)
         } run {
           case (in, out) =>
-            in.copyData(out)
+            in.copyDataTo(out)
         }
       }
-      measure method "copyData" in {
+      measure method "copyDataTo" in {
         having attribute ("version", "Apache IO copy bytes") in {
           withSizeDef { size =>
             val in = newIn(size)
-            val out = () => new ByteArrayOutputStream()
-            (in, out)
+            in
           } run {
-            case (inFunc, outFunc) =>
+            case inFunc =>
               val in = inFunc()
-              val out = outFunc()
               val inStream = Channels.newInputStream(in)
-              IOUtils.copy(inStream, out)
+              IOUtils.copy(inStream, NullOutputStream)
               inStream.close()
               in.close()
           }

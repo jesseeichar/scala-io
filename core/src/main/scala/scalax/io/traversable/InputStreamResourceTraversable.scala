@@ -17,7 +17,6 @@ class InputStreamResourceTraversable(
     inConcrete.skip(start)
     var read = inConcrete.read(buffer)
     var i = 0
-    @inline
     def hasNext = {
       if (i < read) true
       else {
@@ -26,7 +25,6 @@ class InputStreamResourceTraversable(
         i < read
       }
     }
-    @inline
     @specialized(Byte)
     def next = {
       i += 1

@@ -50,7 +50,6 @@ private[traversable] class ReadableByteChannelIterator(
 
   private final var read = inConcrete.read(buffer)
   private final var i = 0
-  @inline
   final def hasNext = {
     if (i < read) true
     else {
@@ -60,7 +59,6 @@ private[traversable] class ReadableByteChannelIterator(
       i < read
     }
   }
-  @inline
   @specialized(Byte)
   final def next = {
     i += 1
@@ -92,7 +90,6 @@ private[traversable] class SeekableByteChannelIterator(
   buffer.flip
   private final var position = startIndex
 
-  @inline
   def hasNext = {
     if (buffer.hasRemaining) true
     else {
@@ -103,7 +100,6 @@ private[traversable] class SeekableByteChannelIterator(
       buffer.hasRemaining()
     }
   }
-  @inline
   @specialized(Byte)
   def next = {
     position += 1

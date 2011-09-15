@@ -13,6 +13,11 @@ import java.io.{IOException, File => JFile}
 import java.net.{ URI, URL }
 import collection.{ Traversable }
 import java.util.regex.Pattern
+import Path.AccessModes._
+import Path.fail
+import scalax.io.Output
+import scalax.io.StandardOpenOption
+import scalax.io.Input
 
 /**
  * The object for constructing Path objects and for containing implicits from strings and
@@ -187,8 +192,7 @@ object Path
   private[file] def fail(msg: String) = throw new IOException(msg)
 }
 
-import Path.AccessModes._
-import Path.fail
+
 
 /**
  *  A file reference that locates a file using a system independent path.
@@ -1199,5 +1203,6 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
   // Optimization for Seekable
 
   override protected def tempFile() : Path = fileSystem.createTempFile()
-
+  override def copyDataTo(output: Output,finalize:Boolean): Unit = channel(StandardOpenOption.Read).copyDataTo(output,finalize)
+  override def copyDataFrom(input:Input,finalize:Boolean): Unit = channel(StandardOpenOption.WriteTruncate:_*).copyDataFrom(input,finalize)
 }

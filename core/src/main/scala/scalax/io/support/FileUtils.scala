@@ -5,6 +5,14 @@ import StandardOpenOption._
 import java.nio.channels.FileChannel
 import nio.SeekableFileChannel
 import java.io.{IOException, FileOutputStream, RandomAccessFile, File}
+import java.nio.channels.ReadableByteChannel
+import java.nio.channels.WritableByteChannel
+import java.io.InputStream
+import java.io.OutputStream
+import scalax.io.extractor.ReadableByteChannelExtractor
+import scalax.io.extractor.WritableByteChannelExtractor
+import scalax.io.extractor.FileChannelExtractor
+import scalax.io.extractor.InputStreamExtractor
 
 object FileUtils {
   def openOutputStream(jfile:File, openOptions: Seq[OpenOption]) = {
@@ -90,5 +98,46 @@ object FileUtils {
     } else {
       new RandomAccessFile(jfile, 'r' + chars.mkString)
     }
+  }
+  
+  def copy(in:InputStream, out:OutputStream) = {
+    val buf = Buffers.arrayBuffer(None)
+    var read = in.read(buf)
+    while(read > -1) {
+      if(read == 0) Thread.sleep(100)
+      else {
+        out.write(buf)
+      }
+      read = in.read(buf)
+    }
+  }
+  
+  def copy(in:ReadableByteChannel, out:WritableByteChannel) = {
+    val buf = Buffers.byteBuffer(Buffers.BufferSize)
+    var read = in.read(buf)
+    while(read > -1) {
+      if(read == 0) Thread.sleep(100)
+      else {
+    	buf.flip()
+        out.write(buf)
+      }
+      buf.clear()
+      read = in.read(buf)
+    }
+  }
+
+  def tryCopy: PartialFunction[Any, Unit] = {
+    case (FileChannelExtractor(out), FileChannelExtractor(in)) =>
+      out.transferFrom(in, 0, Long.MaxValue)
+    case (out: OutputStream, in: InputStream) =>
+      FileUtils.copy(in, out)
+    case (FileChannelExtractor(fileChan), ReadableByteChannelExtractor(in)) =>
+      fileChan.transferFrom(in, 0, Long.MaxValue)
+    case (WritableByteChannelExtractor(out), FileChannelExtractor(file)) =>
+      file.transferTo(0, Long.MaxValue, out)
+    case (out: OutputStream, InputStreamExtractor(in)) =>
+      FileUtils.copy(in, out)
+    case (out: WritableByteChannel, ReadableByteChannelExtractor(in)) =>
+      FileUtils.copy(in, out)
   }
 }

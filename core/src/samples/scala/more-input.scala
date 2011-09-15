@@ -55,13 +55,13 @@ object MoreInputExamples {
   }
 
   /**
-   * copyData can be used to copy data from one Input object to another Output object
+   * copyTo can be used to copy data from one Input object to another Output object
    * as efficiently as possible.
    */
-  def copyData {
+  def copyTo {
     import scalax.io._
     import Resource._
 
-    fromFile("in") copyData fromFile("out")
+    fromFile("in") copyDataTo fromFile("out")
   }
 }

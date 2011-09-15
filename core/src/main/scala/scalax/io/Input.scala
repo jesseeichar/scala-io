@@ -74,16 +74,27 @@ trait Input {
     case None => bytes.toArray
   }
 
-/**
- * Copy all data from this Input object to the Output object
- * as efficiently as possible.
- *
- * @param output output sink to copy the data to
- */
-  def copyData(output:Output): Unit = output.copyFrom(this)
+  /**
+   * Copy all data from this Input object to the Output object
+   * as efficiently as possible.
+   *
+   *
+   * @param output output sink to copy the data to
+   * @param finalize do not forward request to output's copyFrom method.  
+   * 				 Often only one end of the transaction will know how to efficiently transfer
+   * 				 data so a common pattern is to check the output and see if the
+   * 				 type of the Output object is a known type.  If not then the
+   * 				 output object will be sent the request.  However, to prevent
+   * 				 an infinite loop the finalize will be set to true so the request
+   * 				 is not then forwarded back to copyTo  
+   */
+  def copyDataTo(output:Output, finalize:Boolean=false): Unit = finalize match {
+    case true => output.write(this.bytes)
+    case false => output.copyDataFrom(this,true)
+  }
 
   /**
-   * The characters in the object.$
+   * The characters in the object.
    *
    * If the codec is not the same as the source codec (the codec of
    * the underlying data) then the characters will converted to the

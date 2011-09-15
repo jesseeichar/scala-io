@@ -44,7 +44,7 @@ object ScalaIoBuild extends Build {
     organization := BuildConstants.organization,
     version := BuildConstants.version,
     maxErrors := 20,
-    scalacOptions += "-deprecation",
+    scalacOptions ++= Seq("-optimize","-deprecation"),
     offline := false,
     scalaVersion := BuildConstants.scalaVersion,
     publishToSettings,

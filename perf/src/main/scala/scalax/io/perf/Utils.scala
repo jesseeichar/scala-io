@@ -3,9 +3,10 @@ import scalax.io.Line.Terminators.NewLine
 import util.Random._
 object Utils {
   def generateTestData(size: Int, lines: Int = 2, term: String = NewLine.sep) = {
-    val lineStrings = 1 to lines map { _ =>
-      nextString(size).replaceAll("\n", " ")
+    val data = new StringBuilder()
+    1 to lines foreach { _ =>
+      1 to size foreach { _ => data.append(util.Random.alphanumeric.head) }
     }
-    lineStrings mkString term
+    data.toString
   }
 }

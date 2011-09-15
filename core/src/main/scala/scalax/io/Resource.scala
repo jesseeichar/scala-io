@@ -21,6 +21,9 @@ import StandardOpenOption._
 import collection.immutable.List._
 import util.control.Exception
 import java.nio.ByteBuffer
+import java.nio.channels.FileChannel
+import scalax.io.extractor._
+import scalax.io.support.FileUtils
 
 trait OpenedResource[+R] {
   def get:R
@@ -178,28 +181,17 @@ trait InputResource[+R <: Closeable] extends Resource[R] with Input with Resourc
      */
     def inputStream: InputResource[InputStream]
 
-  override def copyData(output: Output): Unit =
-    output match {
+  override def copyDataTo(output: Output,finalize:Boolean): Unit =
+    output  match {
       case outR: OutputResource[_] =>
         for {
-          outChan <- outR.writableByteChannel
-          inChan <- readableByteChannel
+        	inChan <- this
+        	outChan <- outR
         } {
-          (outChan, inChan) match {
-            case (file: SeekableFileChannel, _) =>
-              file.transferFrom(inChan, 0, Long.MaxValue)
-            case (_, file: SeekableFileChannel) =>
-              file.transferTo(0, Long.MaxValue, outChan)
-            case _ =>
-              val buf = ByteBuffer.allocateDirect(Buffers.BufferSize)
-              var read = inChan.read(buf)
-              while (read != -1) {
-                if (read > 0) outChan.write(buf)
-                read = inChan.read(buf)
-              }
-          }
+          val failureCase:PartialFunction[Any, Unit] = {case _ => super.copyDataTo(output,finalize)}
+          FileUtils.tryCopy.orElse(failureCase)(outChan, inChan)
         }
-      case _ => super.copyData(output)
+      case _ => super.copyDataTo(output,finalize)
     }
 
     /**
@@ -262,6 +254,21 @@ trait OutputResource[+R <: Closeable] extends Resource[R] with Output with Resou
    * @return the [[scalax.io.WritableByteChannel]](typically) version of this object.
    */
   def writableByteChannel: OutputResource[WritableByteChannel]
+  
+    override def copyDataFrom(input: Input,finalize:Boolean): Unit =
+      
+    input match {
+      case inR: InputResource[_] =>
+        for {
+        	inChan <- inR
+            outChan <- this
+        } {
+          val failureCase:PartialFunction[Any, Unit] = {case _ => super.copyDataFrom(input,finalize)}
+          FileUtils.tryCopy.orElse(failureCase)(outChan, inChan)
+        }
+      case _ => super.copyDataFrom(input,finalize)
+    }
+
 }
 
 /**

@@ -10,11 +10,9 @@ trait CloseableIterator[+A] extends Iterator[A] with Closeable {
   self =>
   val creationPoint = new Exception();
 
-  @inline
   @specialized(Byte, Int, Float, Double, Long)
   def next(): A
   
-  @inline
   def hasNext: Boolean
   
   final def close() {
@@ -24,10 +22,9 @@ trait CloseableIterator[+A] extends Iterator[A] with Closeable {
   protected def doClose():Unit
 
   class Proxy[+B,C <: Iterator[B]](protected val wrapped:C,otherComposingIterators:CloseableIterator[_]*) extends CloseableIterator[B] {
-    @inline @specialized(Byte,Int,Float,Double,Long)
-    def next() = wrapped.next
-    @inline
-    def hasNext: Boolean = wrapped.hasNext
+    @specialized(Byte,Int,Float,Double,Long)
+    final def next() = wrapped.next
+    final def hasNext: Boolean = wrapped.hasNext
     def doClose() = {
       safeClose(self)
       otherComposingIterators.foreach(safeClose)
@@ -99,17 +96,15 @@ trait CloseableIterator[+A] extends Iterator[A] with Closeable {
 
 object CloseableIterator {
   def apply[A](iter:Iterator[A]) = new CloseableIterator[A]{
-    @inline @specialized(Byte,Int,Float,Double,Long)
-    def next(): A = iter.next
-    @inline
-    def hasNext: Boolean = iter.hasNext
+    @specialized(Byte,Int,Float,Double,Long)
+    final def next(): A = iter.next
+    final def hasNext: Boolean = iter.hasNext
     def doClose() {}
   }
   def selfClosing[A](wrapped: CloseableIterator[A]) = new CloseableIterator[A] {
-    @inline @specialized(Byte,Int,Float,Double,Long,Char)
-    def next(): A = wrapped.next
-    @inline
-    def hasNext: Boolean = {
+    @specialized(Byte,Int,Float,Double,Long,Char)
+    final def next(): A = wrapped.next
+    final def hasNext: Boolean = {
       val next = wrapped.hasNext
       if(!next) close()
       next
