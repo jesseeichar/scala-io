@@ -39,5 +39,19 @@ class InputStreamResourceTraversable(
     case None => super.size
   }
   override def size = lsize.toInt
+/*   override def view =
+    {
+      println("a resource view is created")
+      new ResourceTraversableView[Byte, LongTraversable[Byte]] {
+        protected lazy val underlying = self.repr
+
+        type In = self.In
+        type SourceOut = self.SourceOut
+        def source = self.source
+        def conv = self.conv
+        def start = self.start
+        def end = self.end
+      }
+    }*/
 
 }

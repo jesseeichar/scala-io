@@ -8,10 +8,10 @@ import org.junit.Assert._
 import org.junit.{
 Test, Before, After, Rule, Ignore
 }
-
-class LongTraversableTest {
+class LongTraversableTest extends DataIndependentLongTraversableTest[Int]{
   implicit val codec = Codec.UTF8
-
+  
+  def independentTraversable():LongTraversable[Int] = traversable()
   val identity = (i:Int) => i
   def traversable[U,A](tsize:Int = 100,
                      callback:(Int)=>U = (_:Int) => (),
@@ -36,67 +36,16 @@ class LongTraversableTest {
     else lt.asInstanceOf[LongTraversable[A]]
   }
 
-
   val sample = Array(111,222)
 
+  def independentExpectedData = expectedData()
   protected def expectedData(tsize:Int=100,
                              dataFunc: (Int) => Seq[Int] = (i:Int) => 1 to i)
     = dataFunc(tsize)
 
-  @Test //@Ignore
-  def should_handle_append = assertSizeAndType(traversable(), _ ++ sample)
-
-  @Test //@Ignore
-  def size_should_work_like_lists = {
-    val traversable2 = traversable()
-
-    assertSizeAndType(traversable2, t => t.slice(-1,300))
-    assertSizeAndType(traversable2, t => t.slice(0,0))
-    assertSizeAndType(traversable2, t => t.drop(300))
-    assertSizeAndType(traversable2, t => t.drop(-1))
-    assertSizeAndType(traversable2, t => t)
-    assertSizeAndType(traversable2, t => t.drop(0))
-    assertSizeAndType(traversable2, t => t.drop(0))
-    assertSizeAndType(traversable2, t => t.drop(2))
-    assertSizeAndType(traversable2, t => t.slice(2,10))
-    assertSizeAndType(traversable2, t => t.map{_.toChar}.slice(2,10))
-    assertSizeAndType(traversable2, t => t.take(10).drop(5))
-    assertSizeAndType(traversable2, t => t.take(10).drop(5).take(2))
-    assertSizeAndType(traversable2, t => t.drop(10).take(5).drop(20))
-    assertSizeAndType(traversable2, t => t.drop(10).drop(5).drop(20))
-    assertSizeAndType(traversable2, t => t.slice(2,10).slice(1,5))
-    assertSizeAndType(traversable2, t => t.slice(2,10).drop(5))
-  }
-
-  @Test //@Ignore
-  def should_handle_map = assertSizeAndType(traversable(), _ map {i => (i * -1).toString})
-
-  @Test //@Ignore
-  def should_handle_several_ops = assertSizeAndType(traversable(), t => t ++ List(1,2) map {_.toString})
-
-  @Test //@Ignore
-  def should_handle_++ = assertSizeAndType(traversable(), _ ++ List(1,2))
-
-  @Test //@Ignore
-  def should_handle_drop = assertSizeAndType(traversable(), _ drop 2)
-
-  @Test //@Ignore
-  def should_handle_drop_tomany = assertSizeAndType(traversable(), _ drop 10000)
-
-  @Test //@Ignore
-  def should_handle_scanLeft_Right = {
-    val r = traversable()
-    assertSizeAndType(r, _.scanLeft(2){_ + _})
-    assertSizeAndType(r, _.scanRight(2){_ + _})
-  }
-
-  @Test //@Ignore
-  def should_handle_collect = {
-    val r = traversable()
-    assertSizeAndType(r, _ collect {case i if i < 3 => i+1})
-    assertSizeAndType(r, _ collect {case i if i < 3 => "a"+i})
-  }
-
+  def times(t1:Int, t2:Int) = t1 * t2
+  def lessThan(t:Int, i:Int):Boolean = t < i
+  def scanSeed = 2
   @Test //@Ignore
   def should_handle_flatMap = assertSizeAndType(traversable(), _ flatMap {i => 1 to 3 map {i + _}})
 
@@ -110,59 +59,6 @@ class LongTraversableTest {
   }
 
   @Test //@Ignore
-  def should_handle_dropWhile = assertSizeAndType(traversable(), _ dropWhile {_ < 55})
-
-  @Test //@Ignore
-  def should_handle_filter = assertSizeAndType(traversable(), _ filter {_ > 55})
-
-  @Test //@Ignore
-  def should_handle_filterNot = assertSizeAndType(traversable(), _ filterNot {_ > 55})
-
-  @Test //@Ignore
-  def should_handle_groupBy = {
-    def f(t : Traversable[Int]) = t groupBy {_.toString()(0)}
-    val list = f(expectedData() toList)
-    val applied = f(traversable()) map {case (k,v) => (k,v.toList)}
-
-    assertEquals (list.size, applied.size)
-    assertEquals (list.toList, applied.toList)
-  }
-
-  @Test //@Ignore
-  def should_handle_init = assertSizeAndType(traversable(), _ init, false)
-
-  @Test //@Ignore
-  def should_handle_slice = assertSizeAndType(traversable(), _ slice(3,10))
-
-  //@Test //@Ignore
-  //def should_handle_zip = assertSizeAndType(traversable(), _ zip (101 to 200))
-
-  @Test //@Ignore
-  def should_handle_tail = assertSizeAndType(traversable(), _ tail)
-
-  @Test //@Ignore
-  def should_handle_take = {
-    assertSizeAndType(traversable(), _ take(10))
-    assertSizeAndType(traversable(), _ take(-1))
-    assertSizeAndType(traversable(), _ take(30000))
-  }
-
-  @Test //@Ignore
-  def should_handle_takeWhile = assertSizeAndType(traversable(), _ takeWhile {_ < 23})
-
-  @Test //@Ignore
-  def should_handle_partition = {
-    assertProductSizeAndType (traversable(), _ span {_ < 30})
-    assertProductSizeAndType (traversable(), _ span {_ < -1})
-  }
-  @Test //@Ignore
-  def should_handle_splitAt = {
-    assertProductSizeAndType (traversable(), _ splitAt 13,false)
-    assertProductSizeAndType (traversable(), _ splitAt -1,false)
-    assertProductSizeAndType (traversable(), _ splitAt 50000,false)
-  }
-
-  @Test //@Ignore
   def should_handle_transpose = {
     val expected = (expectedData().toList).map (i => List(i,i+2,i+3)).transpose
     val actual = traversable(conv = i => List(i,i+2,i+3)).transpose
@@ -172,84 +68,6 @@ class LongTraversableTest {
         assertEquals (expected.size, actual.size)
         assertEquals (expected.toList, actual.toList)
     }
-  }
-
-  @Test //@Ignore
-  def should_handle_unzip = assertProductSizeAndType (traversable(), _.unzip(i => (1,i)))
-
-  @Test //@Ignore
-  def flatmap_then_slice = assertSizeAndType(traversable(), t => t.flatMap{"x" + _}.slice(2,10))
-
-  @Test //@Ignore
-  def map_then_slice = assertSizeAndType(traversable(), _ map {i => (i * -1).toString} slice (2,10))
-
-  @Test //@Ignore
-  def map_then_take = assertSizeAndType(traversable(), _ map {i => (i * -1).toString} take 10)
-
-  @Test //@Ignore
-  def drop_then_slice = assertSizeAndType(traversable(), _ map {i => (i * -1).toString} drop 3 slice (2,10))
-
-  @Test //@Ignore
-  def filter_then_slice = assertSizeAndType(traversable(), _ filter {_ < 45} slice (2,10))
-
-  @Test //@Ignore
-  def filter_then_take = assertSizeAndType(traversable(), _ filter {_ < 45} take 10)
-
-  @Test //@Ignore
-  def filter_then_drop = assertSizeAndType(traversable(), _ filter {_ < 45} drop 10)
-
-  @Test //@Ignore
-  def drop_then_take = assertSizeAndType(traversable(), _ drop 10 take 10)
-
-  @Test //@Ignore
-  def drop_then_drop = assertSizeAndType(traversable(), _ drop 45 drop 10)
-
-  @Test //@Ignore
-  def drop_then_append = assertSizeAndType(traversable(), t => (t drop 45) ++ List(1,2,3))
-
-  @Test //@Ignore
-  def drop_to_many = assertSizeAndType(traversable(), t => (t drop 1000))
-
-  @Test //@Ignore
-  def slice_to_0 = assertSizeAndType(traversable(), t => (t slice (5,10) slice (0,-3)))
-
-  @Test //@Ignore
-  def slice_then_unzip = assertProductSizeAndType (traversable(), _ slice (3,10) unzip {i => (1,i)} )
-
-  @Test //@Ignore
-  def append_then_drop =
-    assertSizeAndType(traversable(), t => t ++ sample drop 98 )
-
-    @Test //@Ignore
-    def size = assertFalse(traversable().hasDefiniteSize)
-
-  private def assertProductSizeAndType(traversable : Traversable[Int], f : Traversable[Int] => Product, areLongTraversable:Boolean = true) = {
-    val list = f(expectedData() toList)
-    val applied = f(traversable)
-    if(areLongTraversable) {
-      applied.productIterator foreach {t => assert(t.isInstanceOf[LongTraversable[_]], "new traversable is not a LongTraversable: "+applied.getClass.getName)}
-    }
-    assertEquals (list.productArity, applied.productArity)
-
-    list.productIterator.zipWithIndex zip applied.productIterator foreach {
-      case ((expected:Traversable[_], index),actual:Traversable[_]) =>
-        assertEquals (expected.size, actual.size)
-        assertEquals (expected.toList, actual.toList)
-    }
-  }
-
-  private def assertSizeAndType[A](traversable : Traversable[Int], f : Traversable[Int] => Traversable[A], isLongTraversable:Boolean = true) = {
-    val list = f(expectedData().toList)
-    val applied = f(traversable)
-    if(isLongTraversable)
-      assert(applied.isInstanceOf[LongTraversable[_]], "new traversable is not a LongTraversable: "+applied.getClass.getName)
-    assertEquals (list.size, applied.size)
-
-    assertEquals (list.toList, applied.toList)
-  }
-
-  def traversable_should_be_LongTraversable = {
-    traversable().ltake(3L)  // if this compiles it passes the test
   }
 
   @Test
@@ -285,37 +103,6 @@ class LongTraversableTest {
   }
 
   @Test
-  def apply{
-    val input = traversable()
-    val expected = expectedData()
-    0 until expected.size foreach { i =>
-      assertEquals(expected(i),input(i))
-    }
-  }
-
-  @Test
-  def ldrop{
-    val input = traversable()
-    val expected = expectedData()
-    assertEquals(expected.drop(10).size,input.ldrop(10).size)
-  }
-  @Test
-  def ltake{
-    val input = traversable()
-    val expected = expectedData()
-    assertEquals((expected take 10).size,input.ltake(10).size)
-  }
-  @Test
-  def lslice{
-    val input = traversable()
-    val expected = expectedData()
-    assertEquals(expected.slice(2,10).size,input.lslice(2,10).size)
-    assertEquals(expected.slice(11,10).size,input.lslice(11,10).size)
-    assertEquals(expected.take(10).size,input.lslice(-1,10).size)
-    assertEquals(expected.take(10).size,input.lslice(-1,10).lslice(-1,10).size)
-    assertEquals(expected.slice(2,Int.MaxValue).size,input.lslice(2,Long.MaxValue).size)
-  }
-  @Test
   def corresponds{
     val input = traversable()
     assertTrue(input.corresponds(expectedData())( _ == _))
@@ -338,23 +125,6 @@ class LongTraversableTest {
     assertEquals(expected.indexWhere(_ > 3, 6),input.indexWhere(_ > 3, 6))
     assertEquals(expected.indexWhere(_ > 300),input.indexWhere(_ > 300))
   }
-  @Test
-  def isDefinedAt{
-    val input = traversable()
-    assertTrue(input.isDefinedAt(5))
-    assertFalse(input.isDefinedAt(-1))
-    assertFalse(input.isDefinedAt(300))
-  }
-
-  @Test
-  def indexOf{
-    val input = traversable()
-    val expected = expectedData()
-    assertEquals(expected.indexOf(200), input.indexOf(200))
-    assertEquals(expected.indexOf(2,4), input.indexOf(2,4))
-    assertEquals(expected.indexOf(2), input.indexOf(2))
-  }
-  @Test
   def lastIndexOf{
     val func = (_:Int) => List(1,2,3,4,4,3,2,1)
     val input = traversable(tsize=0,callback=_ => (), dataFunc= func)
@@ -365,6 +135,7 @@ class LongTraversableTest {
     assertEquals(expected.lastIndexOf(3,2), input.lastIndexOf(3,2))
     assertEquals(expected.lastIndexOf(4), input.lastIndexOf(4))
   }
+
   @Test
   def lastIndexWhere{
     val input = traversable()
@@ -374,28 +145,7 @@ class LongTraversableTest {
     assertEquals(expected.lastIndexWhere(1000 <), input.lastIndexWhere(1000 <))
     assertEquals(expected.lastIndexWhere(2 ==), input.lastIndexWhere(2 ==))
   }
-  @Test
-  def segmentLength{
-    val input = traversable()
-    val expected = expectedData()
-    assertEquals(expected.segmentLength(10 >,0), input.segmentLength(10 >))
-    assertEquals(expected.segmentLength(10 >,3), input.segmentLength(10 >,3))
-    assertEquals(expected.segmentLength(100 <,0), input.segmentLength(100 <))
-  }
-  @Test
-  def prefixLength{
-    val input = traversable()
-    val expected = expectedData()
-    assertEquals(expected.prefixLength(10 >), input.prefixLength(10 >))
-    assertEquals(expected.prefixLength(100 <), input.prefixLength(100 <))
-  }
-  @Test
-  def startsWith {
-    val input = traversable()
-    val expected = expectedData()
-    assertTrue(input.startsWith(expected.take(55)))
-    assertFalse(input.startsWith(0 to 55))
-  }
+  
   @Test
   def indexOfSlice{
     val input = traversable()
@@ -419,6 +169,18 @@ class LongTraversableTest {
     assertTrue(input.containsSlice(expected slice (39,55),30))
     assertFalse(input.containsSlice(expected take 55,30))
     assertFalse(input.containsSlice(expected,0))
+  }
+  @Test
+  def segmentLength2{
+    val input = traversable()
+    val expected = expectedData()
+    assertEquals(expected.segmentLength(100 <,0), input.segmentLength(100 <))
+  }
+  @Test
+  def prefixLength2{
+    val input = traversable()
+    val expected = expectedData()
+    assertEquals(expected.prefixLength(100 <), input.prefixLength(100 <))
   }
   @Test
   def sameContents {
@@ -487,14 +249,6 @@ class LongTraversableTest {
     input.zipAll(traversable(130),2,3)
     assertEquals(0,count)
   }
-
-  @Test
-  def zipWithIndex {
-    val input = traversable()
-    val expected = expectedData()
-
-    assertEquals(expected.zipWithIndex.toList, input.zipWithIndex.toList)
-  }
   @Test
   def zipWithIndex_is_lazy {
     var count = 0
@@ -503,32 +257,12 @@ class LongTraversableTest {
     input.zipWithIndex
     assertEquals(0,count)
   }
-
-  @Test
-  def sliding {
-    val input = traversable()
-    val expected = expectedData()
-
-    val basicsliding = input.sliding(10)
-    assertEquals(expected.sliding(10).size,basicsliding.size)
-    basicsliding.zip(expected.sliding(10).toSeq).forall{
-      case (actual,expected) =>
-        actual.toList == expected.toList
-    }
-
-    val skipsliding = input.sliding(10,3)
-    assertEquals(expected.sliding(10,3).size,skipsliding.size)
-    skipsliding.zip(expected.sliding(10,3).toSeq).forall{
-      case (actual,expected) =>
-        actual.toList == expected.toList
-    }
-  }
   @Test
   def sliding_is_lazy {
     var count = 0
     val input = traversable(callback = _ => count += 1).view
 
-    input.sliding(10)
+    input.sliding(10,1)
     assertEquals(0,count)
   }
   @Test

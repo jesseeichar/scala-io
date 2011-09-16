@@ -8,12 +8,23 @@
 
 package scalax.io
 
-import java.io.{
-  InputStream, Reader, Closeable
-}
-import java.nio.{ByteBuffer => NioByteBuffer}
+import java.io.Closeable
+import java.io.InputStream
+import java.io.Reader
 import java.nio.channels.ReadableByteChannel
-import java.nio.ByteBuffer
+import java.nio.{ByteBuffer => NioByteBuffer}
+
+import scala.Option.option2Iterable
+
+import scalax.io.support.ArrayIterator
+import scalax.io.support.NioByteBufferIterator
+import scalax.io.CloseableIterator
+import scalax.io.LongTraversable
+import scalax.io.LongTraversableLike
+import scalax.io.OpenedResource
+import scalax.io.ResourceTraversable
+import scalax.io.ResourceTraversableView
+import scalax.io.TraversableSource
 
 /**
  * A way of abstracting over the source Resource's type
@@ -105,17 +116,16 @@ private[io] trait ResourceTraversable[A] extends LongTraversable[A]
       else sum
     }
 
-   override def view = new ResourceTraversableView[A, LongTraversable[A]] {
-      protected lazy val underlying = self.repr
+  override def view = new ResourceTraversableView[A, LongTraversable[A]] {
+    protected lazy val underlying = self.repr
 
-      type In = self.In
-      type SourceOut = self.SourceOut
-      def source = self.source
-      def conv = self.conv
-      def start = self.start
-      def end = self.end
-    }
-   override def view(from: Int, until: Int) = view.slice(from, until);
+    type In = self.In
+    type SourceOut = self.SourceOut
+    def source = self.source
+    def conv = self.conv
+    def start = self.start
+    def end = self.end
+  }
 
    private def copy[B](_conv : this.SourceOut => B = conv, _start : Long = start, _end : Long = end) : LongTraversable[B] = {
      new ResourceTraversable[B] {
@@ -128,25 +138,6 @@ private[io] trait ResourceTraversable[A] extends LongTraversable[A]
      }
    }
 }
-
-class ArrayIterator[A](var a:Array[A],var end:Int) extends Iterator[A]{
-  var start=0
-  var now=0
-  @inline
-  final def hasNext = now < end
-  @specialized(Byte,Char) @inline
-  final def next = {
-    now += 1
-    a(now - 1)
-  }
-}
-class NioByteBufferIterator(var buffer: NioByteBuffer) extends Iterator[Byte] {
-  @inline
-  final def hasNext = buffer.hasRemaining()
-  @inline @specialized(Byte)
-  final def next = buffer.get()
-}
-
 
 private[io] object ResourceTraversable {
   /**

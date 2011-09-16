@@ -44,7 +44,7 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
 
   performance of "Input" in {
     having attribute (Keys.WarmupRuns -> 1) in {
-      measure method "bytes" in {
+     /* measure method "bytes" in {
         withSizeDef { size =>
           newInResource(size)
         } run { in =>
@@ -375,7 +375,7 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
               in.close
           }
         }
-      }
+      }*/
       measure method "bytes take" in {
         withSizeDef { size =>
           (size / 2, newInResource(size))

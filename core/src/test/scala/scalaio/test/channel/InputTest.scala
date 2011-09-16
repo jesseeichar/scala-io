@@ -16,8 +16,22 @@ import org.junit.Test
 import org.junit.Assert._
 import java.lang.String
 import java.nio.channels.Channels
+import scalaio.test.LongTraversableTest
+import scalax.io.LongTraversable
 
-class InputTest extends AbstractInputTests {
+class InputTest extends AbstractInputTests with DataIndependentLongTraversableTest[Byte] {
+  implicit val codec = Codec.UTF8
+  def independentTraversable = {
+    val data = (1 to 100).map(_ => '1').mkString
+    val size = data.getBytes(Codec.UTF8.charSet).size
+    val resource = input(TextCustomData("",data))
+    resource.bytes
+  }
+  val sample = Array[Byte](1,3,4)
+  val independentExpectedData:Seq[Byte] = (1 to 100).map(_ => 49.toByte)
+  def times(t1:Byte, t2:Byte):Byte = (t1 * t2).toByte
+  def lessThan(t:Byte,i:Int):Boolean = t < i
+  def scanSeed = 2.toByte
   protected def stringBasedStream(sep: String) =
     Channels.newChannel(new java.io.ByteArrayInputStream(text(sep)))
   protected def text(sep: String) = {
@@ -45,8 +59,8 @@ class InputTest extends AbstractInputTests {
     val file = largeResource(Key.TEXT)
     
     val start = System.currentTimeMillis
-    val fromFile = Resource.fromFile(file).lines(NewLine)(codec=Codec.UTF8)
-    val fromString = Resource.fromFile(file.getAbsolutePath).lines(NewLine)(codec=Codec.UTF8)
+    val fromFile = Resource.fromFile(file).lines(NewLine)
+    val fromString = Resource.fromFile(file.getAbsolutePath).lines(NewLine)
     fromString.toString
     fromFile.toString
     val end = System.currentTimeMillis

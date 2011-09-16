@@ -8,27 +8,6 @@
 
 package scalax.io
 
-import scala.collection._
-import scala.collection.generic._
-import TraversableView.NoBuilder
-import java.io.Closeable
-
-/**
- * A LongTraversableView that is uses a Resource as its underpinnings
- */
-private[io] trait ResourceTraversableView[A, +Coll] extends ResourceTraversableViewLike[A, Coll, ResourceTraversableView[A, Coll]]
-
-/**
- * The required methods by the Scala collections design
- */
-private[io] object ResourceTraversableView {
-  type Coll = TraversableView[_, C] forSome {type C <: Traversable[_]}
-  implicit def canBuildFrom[A]: CanBuildFrom[Coll, A, ResourceTraversableView[A, ResourceTraversable[_]]] =
-    new CanBuildFrom[Coll, A, ResourceTraversableView[A, ResourceTraversable[_]]] {
-      def apply(from: Coll) = new NoBuilder
-      def apply() = new NoBuilder
-    }
-}
 
 /**
  * The actual implementation of the View optimized for working on Resources
@@ -105,4 +84,3 @@ private[io] trait ResourceTraversableViewLike[A, +Coll, +This <: ResourceTravers
   trait Filtered extends Identity with super.Filtered
 */
 }
-

@@ -14,33 +14,6 @@ import TraversableView.NoBuilder
 import java.util.NoSuchElementException
 
 /**
- * The view object associated with LongTraversable.  If you are nor familiar with the pattern essentially a view allows
- * the data to be loaded lazily and only as necessary.  So you can perform slices and maps without loading any data.
- * Only when the data is pulled will it actually be loaded.
- *
- * The behaviour is the essentially the same as for
- * [[http://www.scala-lang.org/api/current/scala/collection/TraversableView.html]] except adding the LongTraversable
- * methods
- */
-trait LongTraversableView[+A, +Coll] extends LongTraversableViewLike[A, Coll, LongTraversableView[A, Coll]] {
-  override def toString() = "LongTraversableView(...)"
-}
-
-/**
- * Defines the required canBuildFrom and Type definitions.  These are required by the collections framework.
- *
- * Probably not interesting API
- */
-object LongTraversableView {
-  type Coll = TraversableView[_, C] forSome {type C <: Traversable[_]}
-  implicit def canBuildFrom[A]: CanBuildFrom[Coll, A, LongTraversableView[A, LongTraversable[_]]] =
-    new CanBuildFrom[Coll, A, LongTraversableView[A, LongTraversable[_]]] {
-      def apply(from: Coll) = new NoBuilder
-      def apply() = new NoBuilder
-    }
-}
-
-/**
  * The actual [[scalax.io.LongTraversableView]] implementations.  Not interesting API beyond what is exposed in
  * [[scalax.io.LongTraversableView]] and [[scalax.io.LongTraversable]]
  */
