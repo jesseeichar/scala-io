@@ -43,6 +43,7 @@ class ByteChannelResource[+A <: ByteChannel] (
   def writableByteChannel = Resource.fromWritableByteChannel(opener).appendCloseAction(closeAction)
   def readableByteChannel = Resource.fromReadableByteChannel(opener).appendCloseAction(closeAction)
 
-  def bytesAsInts = inputStream.bytesAsInts // TODO optimize for byteChannel
+  override def bytesAsInts = ResourceTraversable.byteChannelBased[Byte,Int](this.open, sizeFunc, initialConv = ResourceTraversable.toIntConv).view
+  override def bytes = ResourceTraversable.byteChannelBased[Byte,Byte](this.open, sizeFunc).view
   def chars(implicit codec: Codec) = reader(codec).chars  // TODO optimize for byteChannel
 }

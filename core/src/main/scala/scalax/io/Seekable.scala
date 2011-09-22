@@ -557,10 +557,18 @@ trait Seekable extends Input with Output {
       r.get.position(0)
       r
     }
-    Resource.fromByteChannel(resource.get).appendCloseAction(_ => resource.close()).bytesAsInts
+    Resource.fromSeekableByteChannel(resource.get).appendCloseAction(_ => resource.close()).bytesAsInts
+  }
+  def bytes = {
+    def resource = {
+      val r = underlyingChannel(false)
+      r.get.position(0)
+      r
+    }
+    Resource.fromSeekableByteChannel(resource.get).appendCloseAction(_ => resource.close()).bytes
   }
 
-  private def charCountToByteCount(start:Long, end:Long)(implicit codec:Codec) = {
+  private def charCountToByteCount(start: Long, end: Long)(implicit codec: Codec) = {
     val encoder = codec.encoder
     val charBuffer = CharBuffer.allocate(1)
     

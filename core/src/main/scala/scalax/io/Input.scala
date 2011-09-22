@@ -48,14 +48,14 @@ trait Input {
   *
   * @return an non-strict traversable over all the bytes
   */
-  def bytes : ResourceView[Byte] = (bytesAsInts map {_.toByte}).asInstanceOf[ResourceView[Byte]]    // TODO this is broken
+  def bytes : ResourceView[Byte]
 
   /**
   * Obtains a Traversable for conveniently processing the file as Ints.
   *
   * @return an non-strict traversable over all the bytes with the bytes being represented as Ints
   */
-  def bytesAsInts: ResourceView[Int]
+  def bytesAsInts: ResourceView[Int] = bytes.map(_.toInt).asInstanceOf[ResourceView[Int]]
 
   /**
   * This method aspires to be the fastest way to read

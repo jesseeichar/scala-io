@@ -1,14 +1,17 @@
 package scalax.io
 import java.io.File
-import java.net.URL
 import java.io.InputStream
 import java.io.OutputStream
-import java.io.Reader
-import scalax.io.nio.SeekableFileChannel
-import java.nio.channels.FileChannel
 import java.io.RandomAccessFile
+import java.io.Reader
 import java.io.Writer
+import java.net.URL
+import java.nio.channels.FileChannel
 import java.nio.channels.WritableByteChannel
+
+import scalax.io.nio.SeekableFileChannel
+import scalax.io.CloseableIterator
+import scalax.io.LongTraversable
 
 object JavaConverters {
   class AsInput(op: => Input) {
@@ -73,6 +76,15 @@ object JavaConverters {
             var iter = OutputConverter.TraversableIntConverter.toBytes(t)
 
             final def next() = iter.next.toInt
+            final def hasNext: Boolean = iter.hasNext
+            def doClose() {}
+          }
+        }.view
+        def bytes = new LongTraversable[Byte]{
+          def iterator = new CloseableIterator[Byte] {
+            var iter = OutputConverter.TraversableIntConverter.toBytes(t)
+
+            final def next() = iter.next
             final def hasNext: Boolean = iter.hasNext
             def doClose() {}
           }
