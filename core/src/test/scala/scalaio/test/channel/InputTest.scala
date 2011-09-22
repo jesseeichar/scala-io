@@ -18,12 +18,14 @@ import java.lang.String
 import java.nio.channels.Channels
 import scalaio.test.LongTraversableTest
 import scalax.io.LongTraversable
+import scalax.io.Input
 
 class InputTest extends AbstractInputTests with DataIndependentLongTraversableTest[Byte] {
   implicit val codec = Codec.UTF8
   def independentTraversable = {
     val data = (1 to 100).map(_ => '1').mkString
-    val size = data.getBytes(Codec.UTF8.charSet).size
+    val bytes = data.getBytes(Codec.UTF8.charSet)
+    val size = bytes.size
     val resource = input(TextCustomData("",data))
     resource.bytes
   }
@@ -32,22 +34,28 @@ class InputTest extends AbstractInputTests with DataIndependentLongTraversableTe
   def times(t1:Byte, t2:Byte):Byte = (t1 * t2).toByte
   def lessThan(t:Byte,i:Int):Boolean = t < i
   def scanSeed = 2.toByte
-  protected def stringBasedStream(sep: String) =
-    Channels.newChannel(new java.io.ByteArrayInputStream(text(sep)))
+  
+  protected def textResource(sep: String):Input =
+    fromReadableByteChannel(Channels.newChannel(new java.io.ByteArrayInputStream(text(sep))))
   protected def text(sep: String) = {
     val finalText: String = Constants.TEXT_VALUE.replaceAll("""\n""", sep)
     finalText.getBytes(Codec.UTF8.charSet)
   }
-
-  protected def input(t: Type) = t match {
-    case t@TextNewLine => fromReadableByteChannel(stringBasedStream(t.sep))
-    case t@TextPair => fromReadableByteChannel(stringBasedStream(t.sep))
-    case t@TextCarriageReturn => fromReadableByteChannel(stringBasedStream(t.sep))
-    case TextCustom(sep) => fromReadableByteChannel(stringBasedStream(sep))
-    case TextCustomData(sep, data) => fromReadableByteChannel(
+  protected def customDataResource(data:String):Input = {
+    fromReadableByteChannel(
       Channels.newChannel(new ByteArrayInputStream(data.getBytes(Codec.UTF8.charSet)))
     )
-    case Image => fromReadableByteChannel(Channels.newChannel(Constants.IMAGE.openStream()))
+  }
+  protected def imageResource:Input= {
+    fromReadableByteChannel(Channels.newChannel(Constants.IMAGE.openStream()))
+  }
+  protected def input(t: Type) = t match {
+    case t@TextNewLine => textResource(t.sep)
+    case t@TextPair => textResource(t.sep)
+    case t@TextCarriageReturn => textResource(t.sep)
+    case TextCustom(sep) => textResource(sep)
+    case TextCustomData(sep, data) => customDataResource(data)
+    case Image => imageResource
   }
 
   override protected def sizeIsDefined = false

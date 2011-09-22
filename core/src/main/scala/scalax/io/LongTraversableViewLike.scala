@@ -20,7 +20,7 @@ import java.util.NoSuchElementException
 trait LongTraversableViewLike[+A, +Coll, +This <: LongTraversableView[A,Coll] with LongTraversableViewLike[A,Coll, This]]
       extends LongTraversable[A] with LongTraversableLike[A, This] with TraversableView[A,Coll] with TraversableViewLike[A,Coll,This]{
   self =>
-
+    
   trait Transformed[+B] extends LongTraversableView[B, Coll] with super.Transformed[B]{
     protected[io] def iterator:CloseableIterator[B]
     override def foreach[U](f: (B) => U) = {
@@ -110,13 +110,16 @@ trait LongTraversableViewLike[+A, +Coll, +This <: LongTraversableView[A,Coll] wi
   protected override def newDroppedWhile(p: A => Boolean): Transformed[A] = new { val pred = p } with  DroppedWhile
   protected override def newTakenWhile(p: A => Boolean): Transformed[A] = new { val pred = p } with TakenWhile
 
-  override def drop(n: Int): This = newLSliced(n max 0, Long.MaxValue).asInstanceOf[This]
+  override def drop(n: Int): This = ldrop(n)
   override def ldrop(n: Long): This = newLSliced(n max 0, Long.MaxValue).asInstanceOf[This]
 
-  override def take(n: Int): This = newLSliced(0, n).asInstanceOf[This]
+  override def take(n: Int): This = ltake(n)
   override def ltake(n: Long): This = newLSliced(0, n).asInstanceOf[This]
-
+  override def lslice(from:Long, until: Long): This = newLSliced(from, until).asInstanceOf[This]
   override def slice(from: Int, until: Int) = newLSliced(from,until).asInstanceOf[This]
+
+  override def span(p: A => Boolean): (This, This) = (takeWhile(p), dropWhile(p))
+  override def splitAt(n: Int): (This, This) = (take(n), drop(n))
 
   override def stringPrefix = "LongTraversableView"
 

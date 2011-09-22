@@ -27,7 +27,7 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
 
 
   val patchParams =
-   /* ("replaced is MaxValue", 2, "ア", Some(Int.MaxValue)) ::
+    ("replaced is MaxValue", 2, "ア", Some(Int.MaxValue)) ::
       ("too large max", 2, "ア", Some(8)) ::
       ("basic", 2, "ア", None) ::
       ("insert", 2, "ア", Some(-1)) ::
@@ -35,7 +35,7 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
       ("to large position", 199, "ア", None) ::
       ("very large patch", 2, (1 to 100 mkString ""), None) ::
       ("0 length", 2, "ア", Some(0)) ::
-      ("partial overwite", 2, "its a long one!", Some(3)) ::*/
+      ("partial overwite", 2, "its a long one!", Some(3)) ::
       ("overwite All at a far position", 10, "\u2248\u2248", None) ::
       Nil
 
@@ -101,7 +101,7 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
         f(seekable)
       } catch {
         case e =>
-          val error = new Error(msg + " failed due to: " + e)
+          val error = new Error(msg + " failed due to: " + e, e)
           error.setStackTrace(e.getStackTrace)
           throw error
       }
@@ -111,7 +111,7 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
     }
     def run[T](msg: String, pos: Int, data: String) {
       val bytes = data.getBytes(UTF8.name)
-      test("Array: "+msg, _.insert(pos,bytes), pos, bytes)
+    //  test("Array: "+msg, _.insert(pos,bytes), pos, bytes)
       test("Iterator: " + msg, _.insert(pos, bytes.toIterator), pos, bytes)
       test("List: "+msg,_.insert(pos,bytes.toList), pos, bytes)
       test("String: "+msg,_.insert(pos,data), pos, bytes)

@@ -7,7 +7,7 @@ import sperformance.dsl._
 import util.Random._
 import Resource._
 import Line.Terminators._
-import java.io.{ByteArrayInputStream }
+import java.io.{ ByteArrayInputStream }
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.IOUtils
 import java.io.BufferedInputStream
@@ -45,7 +45,8 @@ trait AbstractInputTest extends PerformanceDSLTest {
         withSizeDef { size =>
           newInResource(size)
         } run { in =>
-          in.bytes.size
+          var i = 0
+          in.bytes.foreach(b => i += 1)
         }
       }
       measure method "bytes" in {
@@ -73,7 +74,8 @@ trait AbstractInputTest extends PerformanceDSLTest {
         withSizeDef { size =>
           newInResource(size)
         } run { in =>
-          in.bytesAsInts.size
+          var i = 0
+          in.bytesAsInts.foreach(b => i += 1)
         }
       }
       measure method "bytesAsInts" in {
@@ -140,7 +142,8 @@ trait AbstractInputTest extends PerformanceDSLTest {
         withSizeDef { size =>
           newInResource(size)
         } run { in =>
-          in.chars.size
+          var i = 0
+          in.chars.foreach(b => i += 1)
         }
       }
       measure method "chars" in {
@@ -186,7 +189,8 @@ trait AbstractInputTest extends PerformanceDSLTest {
             val in = newIn(5, size, NewLine.sep)
             () => scala.io.Source.fromInputStream(in(), "UTF-8")
           } run { source =>
-            source().getLines().size
+            var i = 0
+            source().getLines().foreach(b => i += 1)
           }
         }
       }
@@ -194,14 +198,16 @@ trait AbstractInputTest extends PerformanceDSLTest {
         withSizeDef { size =>
           newInResource(5, size, NewLine.sep)
         } run { in =>
-          in.lines(Line.Terminators.NewLine).size
+          var i = 0
+          in.lines(Line.Terminators.NewLine).foreach(b => i += 1)
         }
       }
       measure method "lines Auto" in {
         withSizeDef { size =>
           newInResource(5, size, NewLine.sep)
         } run { in =>
-          in.lines(Line.Terminators.Auto).size
+          var i = 0
+          in.lines(Line.Terminators.Auto).foreach(b => i += 1)
         }
       }
       measure method "lines Auto" in {
@@ -211,7 +217,8 @@ trait AbstractInputTest extends PerformanceDSLTest {
             val in = newIn(5, size, NewLine.sep)
             () => scala.io.Source.fromInputStream(in(), "UTF-8")
           } run { source =>
-            source().getLines().size
+            var i = 0
+            source().getLines().foreach(b => i += 1)
           }
         }
       }
@@ -233,7 +240,8 @@ trait AbstractInputTest extends PerformanceDSLTest {
         withSizeDef { size =>
           newInResource(5, size, CarriageReturn.sep)
         } run { in =>
-          in.lines(CarriageReturn).size
+          var i = 0
+          in.lines(Line.Terminators.CarriageReturn).foreach(b => i += 1)
         }
       }
       measure method "lines CR" in {
@@ -242,7 +250,8 @@ trait AbstractInputTest extends PerformanceDSLTest {
             val in = newIn(5, size, CarriageReturn.sep)
             () => scala.io.Source.fromInputStream(in(), "UTF-8")
           } run { source =>
-            source().getLines().size
+            var i = 0
+            source().getLines().foreach(b => i += 1)
           }
         }
       }
@@ -264,7 +273,8 @@ trait AbstractInputTest extends PerformanceDSLTest {
         withSizeDef { size =>
           newInResource(5, size, RNPair.sep)
         } run { in =>
-          in.lines(RNPair).size
+                    var i = 0
+          in.lines(Line.Terminators.RNPair).foreach(b => i += 1)
         }
       }
       measure method "lines RN" in {
@@ -287,7 +297,8 @@ trait AbstractInputTest extends PerformanceDSLTest {
             val in = newIn(5, size, RNPair.sep)
             () => scala.io.Source.fromInputStream(in(), "UTF-8")
           } run { source =>
-            source().getLines().size
+            var i = 0
+            source().getLines().foreach(b => i += 1)
           }
         }
       }
@@ -306,7 +317,8 @@ trait AbstractInputTest extends PerformanceDSLTest {
         withSizeDef { size =>
           newInResource(5, size, "**")
         } run { in =>
-          in.lines(Custom("**")).size
+          var i = 0
+          in.lines(Custom("**")).foreach(b => i += 1)
         }
       }
       measure method "lines Custom" in {
@@ -324,7 +336,8 @@ trait AbstractInputTest extends PerformanceDSLTest {
             (size / 2, newInResource(size))
           } run {
             case (toDrop, in) =>
-              in.bytes.drop(toDrop).size
+          var i = 0
+          in.bytes.drop(toDrop).foreach(b => i += 1)
           }
         }
         measure method "bytes drop" in {
@@ -354,7 +367,8 @@ trait AbstractInputTest extends PerformanceDSLTest {
             (size / 2, newInResource(size))
           } run {
             case (toTake, in) =>
-              in.bytes.take(toTake).size
+          var i = 0
+          in.bytes.take(toTake).foreach(b => i += 1)
           }
         }
         measure method "bytes take" in {
@@ -374,6 +388,49 @@ trait AbstractInputTest extends PerformanceDSLTest {
                 }
                 in.close
             }
+          }
+        }
+      }
+      measure method "bytes apply" in {
+        withSizeDef { size =>
+          (size / 4, newInResource(size))
+        } run {
+          case (pos, in) =>
+            in.bytes.apply(pos)
+        }
+      }
+      measure method "bytes apply" in {
+        having attribute ("version", "java.io while loop with buffer") in {
+          withSizeDef { size =>
+            (size / 4, newIn(size))
+          } run {
+            case (pos, inFunc) =>
+              val in = inFunc()
+              in.skip(pos)
+              in read ()
+              in.close
+          }
+        }
+      }
+      measure method "bytes head" in {
+        withSizeDef { size =>
+          newInResource(size)
+        } run {
+          case in =>
+            in.bytes.head
+        }
+      }
+      measure method "bytes head" in {
+        having attribute ("version", "java.io") in {
+          withSizeDef { size =>
+            newIn(size)
+          } run {
+            case inFunc =>
+              val in = inFunc()
+              val buffer = Buffers.arrayBuffer(Some(1))
+              in read buffer
+              buffer(0)
+              in.close
           }
         }
       }

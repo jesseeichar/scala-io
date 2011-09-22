@@ -152,7 +152,8 @@ abstract class AbstractSeekableTest extends PerformanceDSLTest {
           case (size) =>
             val source = setup(size)
             val seekable = newInResource(source)
-            seekable.bytes.drop(size / 2).size
+            var i = 0
+            seekable.bytes.drop(size / 2).foreach(b => i += 1)
         }
       }
       measure method "bytes take" in {
@@ -162,7 +163,8 @@ abstract class AbstractSeekableTest extends PerformanceDSLTest {
           case (size) =>
             val source = setup(size)
             val seekable = newInResource(source)
-            seekable.bytes.take(size / 2).size
+            var i = 0
+            seekable.bytes.take(size / 2).foreach(b => i += 1)
         }
       }
       measure method "bytes zip" in {
@@ -173,7 +175,8 @@ abstract class AbstractSeekableTest extends PerformanceDSLTest {
           case (size, data) =>
             val source = setup(size)
             val seekable = newInResource(source)
-            seekable.bytes.zip(data).size
+            var i = 0
+            seekable.bytes.zip(data).foreach(b => i += 1)
         }
       }
       measure method "bytes limitFold" in {

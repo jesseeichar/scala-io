@@ -1,8 +1,8 @@
 package scalax.io.perf
 
 trait SmallMediumDataSet {
-  val MaxSize = 300000
-  val Inc = 100000
-  val From = 100000
+  val MaxSize = 1000000
+  val Inc = 500000
+  val From = 250000
 
 }

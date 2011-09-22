@@ -20,17 +20,17 @@ import CloseableIterator.managed
  * @param result the value to either return from method to to the next stage of the fold
  * @tparam A the type of Traversable this FoldResult can be used with
  */
-sealed abstract class FoldResult[+A](val result:A)
+sealed abstract class FoldResult[+A](val result: A)
 
 /**
  * Signal indicating that the fold should continue to process another value
  */
-case class Continue[+A](currentResult:A) extends FoldResult(currentResult)
+case class Continue[+A](currentResult: A) extends FoldResult(currentResult)
 
 /**
  * Signal indicating that the fold should stop and return the contained result
  */
-case class End[+A](endResult:A) extends FoldResult(endResult)
+case class End[+A](endResult: A) extends FoldResult(endResult)
 
 /**
  * A traversable for use on very large datasets which cannot be indexed with Ints but instead
@@ -38,12 +38,23 @@ case class End[+A](endResult:A) extends FoldResult(endResult)
  *
  * This trait adds methods for accessing the extra portions of the dataset.
  */
-trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends TraversableLike[A, Repr] {
+trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A, Repr]] extends TraversableLike[A, Repr] {
   self =>
 
   override protected[this] def thisCollection: LongTraversable[A] = this.asInstanceOf[LongTraversable[A]]
   override protected[this] def toCollection(repr: Repr): LongTraversable[A] = repr.asInstanceOf[LongTraversable[A]]
-  override def toArray[B >: A : ClassManifest] = toBuffer.toArray
+  override def toArray[B >: A: ClassManifest] = 
+    if(hasDefiniteSize && size <= Int.MaxValue) { 
+      val array = new Array[B](size.toInt)
+      var i = 0
+      foreach { a => 
+        array(i) = a
+        i += 1
+      }
+      array
+    } else {
+      super.toArray
+  }
 
   /**
    * A foldLeft operation that can be terminated without processing the entire collection.
@@ -60,12 +71,11 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
    *           process should continue to next element or terminate, returning the value contained in the result object
    * @return the last value contained in the [[scalax.io.FoldResult]] which was returned by op
    */
-  def limitFold[U](init:U)(op:(U,A) => FoldResult[U]):U = {
-    case class FoldTerminator(v:U) extends RuntimeException
-
+  def limitFold[U](init: U)(op: (U, A) => FoldResult[U]): U = {
+    case class FoldTerminator(v: U) extends RuntimeException
     try {
-      foldLeft(init){ (acc,next) =>
-        op(acc,next) match {
+      foldLeft(init) { (acc, next) =>
+        op(acc, next) match {
           case Continue(result) => result
           case End(result) => throw new FoldTerminator(result)
         }
@@ -75,41 +85,53 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
     }
   }
 
-  protected[io] def iterator:CloseableIterator[A]
+  protected[io] def iterator: CloseableIterator[A]
 
   def foreach[U](f: (A) => U) {
     val iter = iterator
-    try {
-      while (iter.hasNext) {
-        f(iter.next)
-      }
-    } finally {
-      iter.close()
-    }
+    try iter.foreach(f)
+    finally iter.close()
   }
 
-  override def slice(from: Int, until: Int) = lslice(from,until)
+  override def head = {
+    val iter = iterator.take(1)
+    try {
+      if(iter.hasNext) iter.next()
+      else throw new java.util.NoSuchElementException("head of an empty traversable")
+    }
+    finally iter.close
+  }
+  override def headOption = {
+    val iter = iterator.take(1)
+    try {
+      if (iter.hasNext) Some(iter.next())
+      else None
+
+    } finally iter.close
+  }
+  override def slice(from: Int, until: Int) = lslice(from, until)
 
   def lcount(p: A => Boolean): Long = {
-      var cnt = 0L
-      for (x : A <- this) if (p(x)) cnt += 1
-      cnt
+    var cnt = 0L
+    for (x: A <- this) if (p(x)) cnt += 1
+    cnt
   }
 
   /**
    * The long equivalent of Traversable.drop
    */
-  def ldrop(n: Long) : Repr = {
-    def doDrop(remaining : Long, t : LongTraversableLike[A,Repr]) : LongTraversableLike[A,Repr] = {
-      if(remaining < Int.MaxValue) t.drop(remaining.toInt)
+  def ldrop(n: Long): Repr = {
+    def doDrop(remaining: Long, t: LongTraversableLike[A, Repr]): LongTraversableLike[A, Repr] = {
+      if (remaining < Int.MaxValue) t.drop(remaining.toInt)
       else doDrop(remaining - Int.MaxValue, t.drop(Int.MaxValue))
     }
     val b = newBuilder
-    b ++= doDrop(n,this)
+    b ++= doDrop(n, this)
     b.result
   }
 
-  /** Returns a $coll formed from this $coll and another iterable collection
+  /**
+   * Returns a $coll formed from this $coll and another iterable collection
    *  by combining corresponding elements in pairs.
    *  If one of the two collections is longer than the other, its remaining elements are ignored.
    *
@@ -135,7 +157,8 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
   def zip[A1 >: A, B, That](that: Iterable[B])(implicit bf: CanBuildFrom[Repr, (A1, B), That]): That =
     doZip(that.iterator)
 
-  /** Returns a $coll formed from this $coll and another iterable collection
+  /**
+   * Returns a $coll formed from this $coll and another iterable collection
    *  by combining corresponding elements in pairs.
    *  If one of the two collections is longer than the other, its remaining elements are ignored.
    *
@@ -163,15 +186,15 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
   private def doZip[A1 >: A, B, That](those: Iterator[B])(implicit bf: CanBuildFrom[Repr, (A1, B), That]): That = {
     val b = bf(repr)
     val these = this.iterator
-    managed(this.iterator).acquireAndGet{these =>
+    managed(this.iterator).acquireAndGet { these =>
       while (these.hasNext && those.hasNext)
         b += ((these.next, those.next))
       b.result
     }
   }
 
-
-  /** Returns a $coll formed from this $coll and another iterable collection
+  /**
+   * Returns a $coll formed from this $coll and another iterable collection
    *  by combining corresponding elements in pairs.
    *  If one of the two collections is shorter than the other,
    *  placeholder elements are used to extend the shorter collection to the length of the longer.
@@ -200,9 +223,10 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
    *                 If `that` is shorter than this $coll, `thatElem` values are used to pad the result.
    */
   def zipAll[B, A1 >: A, That](that: Iterable[B], thisElem: A1, thatElem: B)(implicit bf: CanBuildFrom[Repr, (A1, B), That]): That =
-    doZipAll(that.iterator,thisElem,thatElem)
+    doZipAll(that.iterator, thisElem, thatElem)
 
-  /** Returns a $coll formed from this $coll and another iterable collection
+  /**
+   * Returns a $coll formed from this $coll and another iterable collection
    *  by combining corresponding elements in pairs.
    *  If one of the two collections is shorter than the other,
    *  placeholder elements are used to extend the shorter collection to the length of the longer.
@@ -231,11 +255,11 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
    *                 If `that` is shorter than this $coll, `thatElem` values are used to pad the result.
    */
   def zipAll[B, A1 >: A, That](that: LongTraversable[B], thisElem: A1, thatElem: B)(implicit bf: CanBuildFrom[Repr, (A1, B), That]): That =
-    managed(that.iterator).acquireAndGet(those => doZipAll(those,thisElem,thatElem))
+    managed(that.iterator).acquireAndGet(those => doZipAll(those, thisElem, thatElem))
 
   private def doZipAll[B, A1 >: A, That](those: Iterator[B], thisElem: A1, thatElem: B)(implicit bf: CanBuildFrom[Repr, (A1, B), That]): That = {
     val b = bf(repr)
-    managed(this.iterator).acquireAndGet{ these =>
+    managed(this.iterator).acquireAndGet { these =>
       while (these.hasNext && those.hasNext)
         b += ((these.next, those.next))
       while (these.hasNext)
@@ -246,7 +270,8 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
     }
   }
 
-  /** Zips this $coll with its indices.
+  /**
+   * Zips this $coll with its indices.
    *
    *  $orderDependent
    *
@@ -276,7 +301,7 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
     var i = 0
     for (x <- this) {
       b += ((x, i))
-      i +=1
+      i += 1
     }
     b.result
   }
@@ -287,7 +312,9 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
    *
    * NOT recommended for use since it might trigger a full traversal of the traversable
    */
-  def lsize: Long = foldLeft(0L){(c,_) => c + 1}
+  def lsize: Long = foldLeft(0L) { (c, _) => c + 1 }
+  override def size = lsize min Integer.MAX_VALUE toInt
+
   /**
    * The long equivalent of Traversable.slice
    */
@@ -299,9 +326,9 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
   /**
    * The long equivalent of Traversable.take
    */
-  def ltake(n: Long) : Repr = {
+  def ltake(n: Long): Repr = {
     val b = newBuilder
-    managed(iterator).acquireAndGet{iter =>
+    managed(iterator).acquireAndGet { iter =>
       var c = 0L
       while (c < n && iter.hasNext) {
         b += iter.next()
@@ -311,7 +338,7 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
     b.result
   }
 
-  override def view = new LongTraversableView[A,Repr] {
+  override def view = new LongTraversableView[A, Repr] {
     protected lazy val underlying = self.repr
 
     protected[io] def iterator = self.iterator
@@ -320,30 +347,31 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
   /**
    * The long equivalent of Traversable.view(from,to)
    */
-  def lview(from: Long, until: Long) : LongTraversableView[A,Repr] = this.view.lslice(from, until)
+  def lview(from: Long, until: Long): LongTraversableView[A, Repr] = this.view.lslice(from, until)
 
-
-  def sameElements[B >: A](that:Iterable[B]):Boolean =
+  def sameElements[B >: A](that: Iterable[B]): Boolean =
     managed(iterator).acquireAndGet(_.sameElements(that.iterator))
 
-  def sameElements[B >: A](that:LongTraversable[B]):Boolean = {
-    managed(iterator).acquireAndGet {these =>
-      managed(that.iterator).acquireAndGet{ those =>
+  def sameElements[B >: A](that: LongTraversable[B]): Boolean = {
+    managed(iterator).acquireAndGet { these =>
+      managed(that.iterator).acquireAndGet { those =>
         these.sameElements(those)
       }
     }
   }
 
-
-  /** Selects an element by its index in the $coll.
+  /**
+   * Selects an element by its index in the $coll.
    *
    *  @param  idx  The index to select.
    *  @return the element of this $coll at index `idx`, where `0` indicates the first element.
    *  @throws `IndexOutOfBoundsException` if `idx` does not satisfy `0 <= idx < length`.
    */
-  def apply (idx: Long):A = ldrop(idx).head
+  def apply(idx: Long): A = 
+    ldrop(idx).head
 
-  /** Tests whether every element of this $coll relates to the
+  /**
+   * Tests whether every element of this $coll relates to the
    *  corresponding element of another sequence by satisfying a test predicate.
    *
    *  @param   that  the other sequence
@@ -353,11 +381,12 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
    *                  `p(x, y)` is `true` for all corresponding elements `x` of this $coll
    *                  and `y` of `that`, otherwise `false`.
    */
-  def corresponds[B](that: Seq[B])(p: (A,B) => Boolean): Boolean = {
-    doCorresponds(that.iterator,p)
+  def corresponds[B](that: Seq[B])(p: (A, B) => Boolean): Boolean = {
+    doCorresponds(that.iterator, p)
   }
 
-  /** Tests whether every element of this $coll relates to the
+  /**
+   * Tests whether every element of this $coll relates to the
    *  corresponding element of another sequence by satisfying a test predicate.
    *
    *  @param   that  the other sequence
@@ -367,12 +396,12 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
    *                  `p(x, y)` is `true` for all corresponding elements `x` of this $coll
    *                  and `y` of `that`, otherwise `false`.
    */
-  def corresponds[B](that: LongTraversable[B])(p: (A,B) => Boolean): Boolean = {
+  def corresponds[B](that: LongTraversable[B])(p: (A, B) => Boolean): Boolean = {
     val iter = that.iterator
-    try doCorresponds(iter,p)
+    try doCorresponds(iter, p)
     finally iter.close()
   }
-  private def doCorresponds[B](j: Iterator[B],p: (A,B) => Boolean): Boolean = {
+  private def doCorresponds[B](j: Iterator[B], p: (A, B) => Boolean): Boolean = {
     val i = this.iterator
     try {
       while (i.hasNext && j.hasNext)
@@ -388,7 +417,8 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
 
   def indexWhere(p: A => Boolean): Long = indexWhere(p, 0)
 
-  /** Finds index of the first element satisfying some predicate after or at some start index.
+  /**
+   * Finds index of the first element satisfying some predicate after or at some start index.
    *
    *  $mayNotTerminateInf
    *
@@ -405,15 +435,16 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
         if (p(it.next())) return i
         else i += 1
       }
-    }finally {
+    } finally {
       it.close()
     }
 
     -1
   }
 
-  def isDefinedAt ( idx : Long ) : Boolean = (idx >= 0) && (idx < lsize)
-  /** Finds index of first occurrence of some value in this $coll.
+  def isDefinedAt(idx: Long): Boolean = (idx >= 0) && (idx < lsize)
+  /**
+   * Finds index of first occurrence of some value in this $coll.
    *
    *  $mayNotTerminateInf
    *
@@ -426,7 +457,8 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
    */
   def indexOf[B >: A](elem: B): Long = indexOf(elem, 0)
 
-  /** Finds index of first occurrence of some value in this $coll after or at some start index.
+  /**
+   * Finds index of first occurrence of some value in this $coll after or at some start index.
    *
    *  $mayNotTerminateInf
    *
@@ -440,7 +472,8 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
    */
   def indexOf[B >: A](elem: B, from: Long): Long = indexWhere(elem ==, from)
 
-  /** Finds index of last occurrence of some value in this $coll.
+  /**
+   * Finds index of last occurrence of some value in this $coll.
    *
    *  $willNotTerminateInf
    *
@@ -453,7 +486,8 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
    */
   def lastIndexOf[B >: A](elem: B): Long = lastIndexWhere(elem ==)
 
-  /** Finds index of last occurrence of some value in this $coll before or at a given end index.
+  /**
+   * Finds index of last occurrence of some value in this $coll before or at a given end index.
    *
    *  @param   elem   the element value to search for.
    *  @param   end    the end index.
@@ -465,7 +499,8 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
    */
   def lastIndexOf[B >: A](elem: B, end: Long): Long = lastIndexWhere(elem ==, end)
 
-  /** Finds index of last element satisfying some predicate.
+  /**
+   * Finds index of last element satisfying some predicate.
    *
    *  $willNotTerminateInf
    *
@@ -473,9 +508,10 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
    *  @return  the index of the last element of this $coll that satisfies the predicate `p`,
    *           or `-1`, if none exists.
    */
-  def lastIndexWhere(p: A => Boolean): Long = lastIndexWhere(p, - 1)
+  def lastIndexWhere(p: A => Boolean): Long = lastIndexWhere(p, -1)
 
-  /** Finds index of last element satisfying some predicate before or at given end index.
+  /**
+   * Finds index of last element satisfying some predicate before or at given end index.
    *
    * Always takes linear time and traverses entire traversal
    *
@@ -486,29 +522,31 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
   def lastIndexWhere(p: A => Boolean, end: Long): Long = {
     var last = -1L
     var i = 0L;
-    breakable{
-      foreach{next =>
-        if(end > 0 && i > end) break
-        if(p(next)) last = i
+    breakable {
+      foreach { next =>
+        if (end > 0 && i > end) break
+        if (p(next)) last = i
         i += 1
       }
     }
     last
   }
-  /** Computes length of longest segment whose elements all satisfy some predicate.
+  /**
+   * Computes length of longest segment whose elements all satisfy some predicate.
    *
    *  @param   p     the predicate used to test elements.
    *  @param   from  the index where the search starts.
    *  @return  the length of the longest segment of this $coll starting from index `from`
    *           such that every element of the segment satisfies the predicate `p`.
    */
-  def segmentLength ( p : (A) => Boolean , from : Long = 0 ) : Long =
-    ldrop(from).limitFold(0){
-      case (acc,next) if p(next) => Continue(acc + 1)
-      case (acc,next) => End(acc)
+  def segmentLength(p: (A) => Boolean, from: Long = 0): Long =
+    ldrop(from).limitFold(0) {
+      case (acc, next) if p(next) => Continue(acc + 1)
+      case (acc, next) => End(acc)
     }
 
-  /** Returns the length of the longest prefix whose elements all satisfy some predicate.
+  /**
+   * Returns the length of the longest prefix whose elements all satisfy some predicate.
    *
    *  @param   p     the predicate used to test elements.
    *  @return  the length of the longest prefix of this $coll
@@ -516,16 +554,17 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
    */
   def prefixLength(p: A => Boolean) = segmentLength(p, 0)
 
-  private def doStartsWith[B](those:Iterator[B],offset:Long) = {
-    breakable{
-      ldrop(offset) foreach {next =>
-        if(!those.hasNext || those.next != next) break
+  private def doStartsWith[B](those: Iterator[B], offset: Long) = {
+    breakable {
+      ldrop(offset) foreach { next =>
+        if (!those.hasNext || those.next != next) break
       }
     }
     !those.hasNext
   }
 
-  /** Tests whether this $coll contains the given sequence at a given index.
+  /**
+   * Tests whether this $coll contains the given sequence at a given index.
    *
    * If the both the receiver object, <code>this</code> and
    * the argument, <code>that</code> are infinite sequences
@@ -537,16 +576,18 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
    *         otherwise `false`.
    */
   def startsWith[B](that: LongTraversable[B], offset: Long): Boolean =
-    managed(that.iterator).acquireAndGet(i => doStartsWith(i,offset))
+    managed(that.iterator).acquireAndGet(i => doStartsWith(i, offset))
 
-  /** Tests whether this $coll starts with the given sequence.
+  /**
+   * Tests whether this $coll starts with the given sequence.
    *
    * @param  that    the sequence to test
    * @return `true` if this collection has `that` as a prefix, `false` otherwise.
    */
   def startsWith[B](that: LongTraversable[B]): Boolean = startsWith(that, 0)
 
-  /** Tests whether this $coll contains the given sequence at a given index.
+  /**
+   * Tests whether this $coll contains the given sequence at a given index.
    *
    * If the both the receiver object, <code>this</code> and
    * the argument, <code>that</code> are infinite sequences
@@ -557,17 +598,18 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
    * @return `true` if the sequence `that` is contained in this $coll at index `offset`,
    *         otherwise `false`.
    */
-  def startsWith[B](that: Seq[B], offset: Long): Boolean = doStartsWith(that.iterator,offset)
+  def startsWith[B](that: Seq[B], offset: Long): Boolean = doStartsWith(that.iterator, offset)
 
-  /** Tests whether this $coll starts with the given sequence.
+  /**
+   * Tests whether this $coll starts with the given sequence.
    *
    * @param  that    the sequence to test
    * @return `true` if this collection has `that` as a prefix, `false` otherwise.
    */
   def startsWith[B](that: Seq[B]): Boolean = startsWith(that, 0)
 
-
-  /** Finds first index where this $coll contains a given sequence as a slice.
+  /**
+   * Finds first index where this $coll contains a given sequence as a slice.
    *  $mayNotTerminateInf
    *  @param  that    the sequence to test
    *  @return  the first index such that the elements of this $coll starting at this index
@@ -575,7 +617,8 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
    */
   def indexOfSlice[B >: A](that: Seq[B]): Long = indexOfSlice(that, 0)
 
-  /** Finds first index after or at a start index where this $coll contains a given sequence as a slice.
+  /**
+   * Finds first index after or at a start index where this $coll contains a given sequence as a slice.
    *  $mayNotTerminateInf
    *  @param  that    the sequence to test
    *  @param  from    the start index
@@ -583,26 +626,27 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
    *           match the elements of sequence `that`, or `-1` of no such subsequence exists.
    */
   def indexOfSlice[B >: A](that: Seq[B], from: Long): Long =
-  if(that.isEmpty) from
-  else {
-    if (this.hasDefiniteSize && that.hasDefiniteSize)
-      LongTraversableLike.indexOf(thisCollection, 0L, lsize, that, 0, that.length, from)
+    if (that.isEmpty) from
     else {
-      var i = from
+      if (this.hasDefiniteSize && that.hasDefiniteSize)
+        LongTraversableLike.indexOf(thisCollection, 0L, lsize, that, 0, that.length, from)
+      else {
+        var i = from
 
-      var s: LongTraversable[A] = thisCollection ldrop i
-      while (s.nonEmpty) {
-        if (s startsWith that)
-          return i
+        var s: LongTraversable[A] = thisCollection ldrop i
+        while (s.nonEmpty) {
+          if (s startsWith that)
+            return i
 
-        i += 1
-        s = s.tail
+          i += 1
+          s = s.tail
+        }
+        -1
       }
-      -1
     }
-  }
 
-  /** Tests whether this $coll contains a given sequence as a slice.
+  /**
+   * Tests whether this $coll contains a given sequence as a slice.
    *  $mayNotTerminateInf
    *  @param  that    the sequence to test
    *  @return  `true` if this $coll contains a slice with the same elements
@@ -610,15 +654,17 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
    */
   def containsSlice[B](that: Seq[B]): Boolean = indexOfSlice(that) != -1
 
-  /** Tests whether this $coll contains a given sequence as a slice.
+  /**
+   * Tests whether this $coll contains a given sequence as a slice.
    *  $mayNotTerminateInf
    *  @param  that    the sequence to test
    *  @return  `true` if this $coll contains a slice with the same elements
    *           as `that`, otherwise `false`.
    */
-  def containsSlice[B](that: Seq[B],start:Long): Boolean = indexOfSlice(that,start) != -1
+  def containsSlice[B](that: Seq[B], start: Long): Boolean = indexOfSlice(that, start) != -1
 
-  /** Groups elements in fixed size blocks by passing a "sliding window"
+  /**
+   * Groups elements in fixed size blocks by passing a "sliding window"
    *  over them.
    *
    *  This is based on Iterator#sliding but does not return an iterator
@@ -631,11 +677,11 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
    *          last and the only element will be truncated if there are
    *          fewer elements than size.
    */
-  def sliding(size: Int, step: Int=1): LongTraversable[Seq[A]] = {
-    val data:Seq[Seq[A]] = self.iterator.modifiedSliding(size,step).toSeq
+  def sliding(size: Int, step: Int = 1): LongTraversable[Seq[A]] = {
+    val data: Seq[Seq[A]] = self.iterator.modifiedSliding(size, step).toSeq
     LongTraversable[Seq[A]](
       CloseableIterator(data.iterator),
-      "Sliding("+size+","+step+" LongTraversable(...)")
+      "Sliding(" + size + "," + step + " LongTraversable(...)")
   }
 
   /**
@@ -646,7 +692,7 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
    *          last and the only element will be truncated if there are
    *          fewer elements than size.
    */
-  def grouped(size:Int) = sliding(size,size)
+  def grouped(size: Int) = sliding(size, size)
 
   /*
   Probably can be done but requires more work than I have time for
@@ -665,7 +711,8 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A,Repr]] extends Trav
 }
 
 object LongTraversableLike {
-    /**  A KMP implementation, based on the undoubtedly reliable wikipedia entry.
+  /**
+   * A KMP implementation, based on the undoubtedly reliable wikipedia entry.
    *
    *  @author paulp
    *  @since  2.8
@@ -675,7 +722,7 @@ object LongTraversableLike {
     if (W.isEmpty) return Some(0)
     else if (W drop 1 isEmpty) return (S indexOf W(0)) match {
       case -1 => None
-      case x  => Some(x)
+      case x => Some(x)
     }
 
     val T: Array[Int] = {
@@ -689,11 +736,9 @@ object LongTraversableLike {
           arr(pos) = cnd + 1
           pos += 1
           cnd += 1
-        }
-        else if (cnd > 0) {
+        } else if (cnd > 0) {
           cnd = arr(cnd)
-        }
-        else {
+        } else {
           arr(pos) = 0
           pos += 1
         }
@@ -709,8 +754,7 @@ object LongTraversableLike {
         i += 1
         if (i == W.size)
           return Some(m)
-      }
-      else {
+      } else {
         m = mi - T(i)
         if (i > 0)
           i = T(i)
@@ -719,7 +763,8 @@ object LongTraversableLike {
     None
   }
 
-  /** Finds a particular index at which one sequence occurs in another sequence.
+  /**
+   * Finds a particular index at which one sequence occurs in another sequence.
    *  Both the source sequence and the target sequence are expressed in terms
    *  other sequences S' and T' with offset and length parameters.  This
    *  function is designed to wrap the KMP machinery in a sufficiently general
@@ -741,14 +786,14 @@ object LongTraversableLike {
     source: LongTraversable[B], sourceOffset: Long, sourceCount: Long,
     target: Seq[B], targetOffset: Int, targetCount: Int,
     fromIndex: Long): Long = {
-      val toDrop = fromIndex max 0
-      val src = (source.lslice(sourceOffset, sourceCount) ldrop toDrop).toSeq
-      val tgt = target.slice(targetOffset, targetCount)
+    val toDrop = fromIndex max 0
+    val src = (source.lslice(sourceOffset, sourceCount) ldrop toDrop).toSeq
+    val tgt = target.slice(targetOffset, targetCount)
 
-      KMP(src, tgt) match {
-        case None    => -1
-        case Some(x) => x.toLong + toDrop
-      }
+    KMP(src, tgt) match {
+      case None => -1
+      case Some(x) => x.toLong + toDrop
+    }
   }
 
 }

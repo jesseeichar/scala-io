@@ -8,6 +8,7 @@
 
 package scalax.io
 
+import support.Misc.safeSum
 import java.io.Closeable
 import java.io.InputStream
 import java.io.Reader
@@ -16,15 +17,8 @@ import java.nio.{ByteBuffer => NioByteBuffer}
 
 import scala.Option.option2Iterable
 
-import scalax.io.support.ArrayIterator
-import scalax.io.support.NioByteBufferIterator
-import scalax.io.CloseableIterator
-import scalax.io.LongTraversable
-import scalax.io.LongTraversableLike
-import scalax.io.OpenedResource
-import scalax.io.ResourceTraversable
-import scalax.io.ResourceTraversableView
-import scalax.io.TraversableSource
+import support.ArrayIterator
+import support.NioByteBufferIterator
 
 /**
  * A way of abstracting over the source Resource's type
@@ -69,7 +63,6 @@ private[io] trait ResourceTraversable[A] extends LongTraversable[A]
     private var nextEl:Iterator[SourceOut] = null
     private var c = start
 
-    @specialized(Byte,Int,Float,Double,Long)
     final def next(): A = {
       val n = nextEl.next()
       c += 1
@@ -108,13 +101,6 @@ private[io] trait ResourceTraversable[A] extends LongTraversable[A]
     copy(_start = newStart, _end = newEnd)
   }
   override def slice(_start : Int, _end : Int) = lslice(_start.toLong,_end.toLong)
-
-  // make sure that when adding 2 number it doesn't overflow to a lower number
-  protected def safeSum(numbers : Long*) = (0L /: numbers) { (next,acc) =>
-      val sum = acc + next
-      if(sum < acc) Long.MaxValue
-      else sum
-    }
 
   override def view = new ResourceTraversableView[A, LongTraversable[A]] {
     protected lazy val underlying = self.repr
@@ -187,7 +173,7 @@ private[io] object ResourceTraversable {
            startIndex : Long = 0,
            endIndex: Long = Long.MaxValue) = {
     if (parser == DefaultByteParser && initialConv == IdentityByteConversion) {
-      new traversable.InputStreamResourceTraversable(opener,sizeFunc, startIndex,endIndex).asInstanceOf[LongTraversable[B]]
+      new traversable.ByteResourceTraversable(opener,sizeFunc, startIndex,endIndex).asInstanceOf[LongTraversable[B]]
     } else {
       new ResourceTraversable[B] {
         type In = InputStream
@@ -217,7 +203,7 @@ private[io] object ResourceTraversable {
         override def hasDefiniteSize = sizeFunc().nonEmpty
         override def lsize = sizeFunc() match {
           case Some(size) => size
-          case None => super.size
+          case None => super.lsize
         }
         override def size = lsize.toInt
 
@@ -285,7 +271,7 @@ private[io] object ResourceTraversable {
                             startIndex : Long = 0,
                             endIndex : Long = Long.MaxValue):LongTraversable[B] = {
     if (parser == DefaultByteBufferParser && initialConv == IdentityByteConversion) {
-      new traversable.ReadableByteChannelTraversable(opener, sizeFunc, startIndex, endIndex).asInstanceOf[LongTraversable[B]]
+      new traversable.ByteResourceTraversable(opener, sizeFunc, startIndex, endIndex).asInstanceOf[LongTraversable[B]]
     } else {
       new ResourceTraversable[B] {
         type In = ReadableByteChannel
@@ -343,7 +329,7 @@ private[io] object ResourceTraversable {
                           startIndex : Long = 0,
                           endIndex : Long = Long.MaxValue):LongTraversable[B] = {
     if (parser == DefaultByteBufferParser && initialConv == IdentityByteConversion) {
-      new traversable.ReadableByteChannelTraversable(opener, sizeFunc, startIndex, endIndex).asInstanceOf[LongTraversable[B]]
+      new traversable.ByteResourceTraversable(opener, sizeFunc, startIndex, endIndex).asInstanceOf[LongTraversable[B]]
     } else {
         new ResourceTraversable[B] {
           type In = SeekableByteChannel

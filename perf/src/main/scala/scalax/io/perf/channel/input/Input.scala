@@ -22,10 +22,10 @@ import java.io.FileOutputStream
 
 // ----------------------------------------------------------------
 
-class SmallMediumSetsFromFileReadableByteChannelTest 
-	extends AbstractReadableByteChannelInputTest 
-	with FileBase with SmallMediumDataSet
-	
+class SmallMediumSetsFromFileReadableByteChannelTest
+  extends AbstractReadableByteChannelInputTest
+  with FileBase with SmallMediumDataSet
+
 object SmallMediumSetsFromFileReadableByteChannelRunner {
   def main(args: Array[String]) {
     Main.runTests(() => new SmallMediumSetsFromFileReadableByteChannelTest)
@@ -34,10 +34,10 @@ object SmallMediumSetsFromFileReadableByteChannelRunner {
 
 // ----------------------------------------------------------------
 
-class SmallMediumSetsFromFileSeekableByteChannelTest 
-	extends AbstractReadableByteChannelInputTest 
-	with SeekableBase with SmallMediumDataSet {
-
+class SmallMediumSetsFromFileSeekableByteChannelTest
+  extends AbstractReadableByteChannelInputTest
+  with SeekableBase with SmallMediumDataSet {
+  override def allowRandomAccess = true
   override def newInResource(size: Int, lines: Int = 2, term: String = NewLine.sep): Input = {
     val in = newIn(size, lines, term)
     Resource.fromSeekableByteChannel(in())
@@ -52,9 +52,9 @@ object SmallMediumSetsFromFileSeekableByteChannelRunner {
 
 // ----------------------------------------------------------------
 
-class SmallMediumSetsFromMemoryReadableByteChannelTest 
-	extends AbstractReadableByteChannelInputTest 
-	with MemoryBase  with SmallMediumDataSet
+class SmallMediumSetsFromMemoryReadableByteChannelTest
+  extends AbstractReadableByteChannelInputTest
+  with MemoryBase with SmallMediumDataSet
 
 object SmallMediumSetsFromMemoryReadableByteChannelRunner {
   def main(args: Array[String]) {
@@ -64,9 +64,9 @@ object SmallMediumSetsFromMemoryReadableByteChannelRunner {
 
 // ----------------------------------------------------------------
 
-class SmallSetsFromFileReadableByteChannelTest  
-	extends AbstractReadableByteChannelInputTest 
-	with FileBase with SmallDataSet 
+class SmallSetsFromFileReadableByteChannelTest
+  extends AbstractReadableByteChannelInputTest
+  with FileBase with SmallDataSet
 
 object SmallSetsFromFileReadableByteChannelRunner {
   def main(args: Array[String]) {
@@ -76,10 +76,10 @@ object SmallSetsFromFileReadableByteChannelRunner {
 
 // ----------------------------------------------------------------
 
-class SmallSetsFromFileSeekableByteChannelTest 
-	extends AbstractReadableByteChannelInputTest 
-	with SeekableBase with SmallDataSet {
-
+class SmallSetsFromFileSeekableByteChannelTest
+  extends AbstractReadableByteChannelInputTest
+  with SeekableBase with SmallDataSet {
+  override def allowRandomAccess = true
   override def newInResource(size: Int, lines: Int = 2, term: String = NewLine.sep): Input = {
     val in = newIn(size, lines, term)
     Resource.fromSeekableByteChannel(in())
@@ -94,10 +94,10 @@ object SmallSetsFromFileSeekableByteChannelRunner {
 
 // ----------------------------------------------------------------
 
-class SmallSetsInMemoryReadableByteChannelTest 
-	extends AbstractReadableByteChannelInputTest 
-	with MemoryBase with SmallDataSet
-	
+class SmallSetsInMemoryReadableByteChannelTest
+  extends AbstractReadableByteChannelInputTest
+  with MemoryBase with SmallDataSet
+
 object SmallSetsInMemoryReadableByteChannelTest {
   def main(args: Array[String]) {
     Main.runTests(() => new SmallSetsInMemoryReadableByteChannelTest)

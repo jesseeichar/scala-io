@@ -1,57 +1,54 @@
 package scalax.io
 package traversable
 import java.io.InputStream
+import scalax.io.support.FileUtils
+import java.io.ByteArrayOutputStream
+import java.io.Closeable
 
-class InputStreamResourceTraversable(
-  resourceOpener: => OpenedResource[InputStream],
-  sizeFunc: () => Option[Long],
-  val start: Long,
-  val end: Long)
-  extends LongTraversable[Byte]
-  with LongTraversableLike[Byte, LongTraversable[Byte]] {
+private[traversable] class InputStreamIterator(
+  protected val sizeFunc: () => Option[Long],
+  protected val getIn: InputStream,
+  protected val openResource: OpenedResource[Closeable],
+  protected val start: Long,
+  protected val end: Long) extends Sliceable {
 
-  protected[io] def iterator: CloseableIterator[Byte] = new CloseableIterator[Byte] {
-    val buffer = Buffers.arrayBuffer(sizeFunc())
-    val openResource = resourceOpener
-    val inConcrete = openResource.get
-    inConcrete.skip(start)
-    var read = inConcrete.read(buffer)
-    var i = 0
-    def hasNext = {
-      if (i < read) true
-      else {
-        i = 0
-        read = inConcrete.read(buffer)
-        i < read
-      }
-    }
-    @specialized(Byte)
-    def next = {
-      i += 1
-      buffer(i - 1)
-    }
-    def doClose() = openResource.close()
+  private[this] var inConcrete: InputStream = null
+  private[this] var buffer: Array[Byte] = _
+
+  private[this] val startIndex = start
+  private[this] val endIndex = end
+
+  private[this] var read = Integer.MIN_VALUE
+  private[this] var i = 0
+  private[this] var pos = start
+  @inline
+  final def init() = if (inConcrete == null) {
+    val sliceLength: Long = (end - start) min Int.MaxValue
+    buffer = Buffers.arrayBuffer(sizeFunc().map(_ min (sliceLength)).orElse(Some(sliceLength)))
+    inConcrete = getIn
+    inConcrete.skip(startIndex)
   }
 
-  override lazy val hasDefiniteSize= sizeFunc().nonEmpty
-  override def lsize = sizeFunc() match {
-    case Some(size) => size
-    case None => super.size
+  final def hasNext = {
+    if (pos < endIndex && i < read) true
+    else if (pos >= endIndex) {
+      false
+    } else {
+      init()
+      i = 0
+      read = inConcrete.read(buffer)
+      i < read
+    }
   }
-  override def size = lsize.toInt
-/*   override def view =
-    {
-      println("a resource view is created")
-      new ResourceTraversableView[Byte, LongTraversable[Byte]] {
-        protected lazy val underlying = self.repr
+  final def next = {
+    i += 1
+    pos += 1
+    buffer(i - 1)
+  }
+  def doClose() = {
+    pos = endIndex
+    openResource.close()
+  }
 
-        type In = self.In
-        type SourceOut = self.SourceOut
-        def source = self.source
-        def conv = self.conv
-        def start = self.start
-        def end = self.end
-      }
-    }*/
-
+  def create(start: Long, end: Long) = new InputStreamIterator(sizeFunc, getIn, openResource, start, end)
 }

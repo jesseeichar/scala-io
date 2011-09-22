@@ -14,6 +14,7 @@ import _root_.scalax.io.Resource
 import _root_.scalax.io.nio.SeekableFileChannel
 
 trait SeekableBase {
+
   def newIn(size: Int, lines: Int = 2, term: String = NewLine.sep) = {
     val file = File.createTempFile(getClass().getSimpleName(), "txt")
     val data = generateTestData(size, lines, term)

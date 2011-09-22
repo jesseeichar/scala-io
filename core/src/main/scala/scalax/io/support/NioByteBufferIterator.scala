@@ -13,7 +13,7 @@ import java.nio.ByteBuffer
 class NioByteBufferIterator(var buffer: ByteBuffer) extends Iterator[Byte] {
   @inline
   final def hasNext = buffer.hasRemaining()
-  @inline @specialized(Byte)
+  @inline
   final def next = buffer.get()
 }
 

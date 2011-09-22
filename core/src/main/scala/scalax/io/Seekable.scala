@@ -347,7 +347,6 @@ trait Seekable extends Input with Output {
   private def insertDataTmpFile(position : Long, insertBytes : TraversableOnce[Byte]) = {
     val tmp = tempFile()
 
-    val bytes = (this.bytes ldrop position).toList
     tmp write (this.bytes ldrop position)
 
     readWriteChannel { channel =>

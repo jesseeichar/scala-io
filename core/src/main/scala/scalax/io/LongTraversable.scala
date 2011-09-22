@@ -18,7 +18,7 @@ import scala.collection.mutable.{ Builder, ListBuffer }
  * require Longs for indexing.  This trait adds methods for accessing the extra portions
  * of the dataset.
  */
-trait LongTraversable[+A] extends Traversable[A]
+trait LongTraversable[@specialized(Byte) +A] extends Traversable[A]
                             with GenericTraversableTemplate[A, LongTraversable]
                             with LongTraversableLike[A, LongTraversable[A]] {
   override def companion : GenericCompanion[LongTraversable] = LongTraversable

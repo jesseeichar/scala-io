@@ -61,18 +61,7 @@ trait Input {
   * This method aspires to be the fastest way to read
   * a stream of known length into memory.
   */
-  def byteArray: Array[Byte] = 
-    size match {
-    case Some(size) if (size<=Int.MaxValue) => 
-      val array = new Array[Byte](size.toInt)
-      var i = 0
-      bytes.foreach { b => 
-        array(i) = b
-        i += 1
-      }
-      array
-    case None => bytes.toArray
-  }
+  def byteArray: Array[Byte] = bytes.toArray
 
   /**
    * Copy all data from this Input object to the Output object

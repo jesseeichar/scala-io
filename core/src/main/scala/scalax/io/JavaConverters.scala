@@ -72,7 +72,6 @@ object JavaConverters {
           def iterator = new CloseableIterator[Int] {
             var iter = OutputConverter.TraversableIntConverter.toBytes(t)
 
-            @specialized(Int)
             final def next() = iter.next.toInt
             final def hasNext: Boolean = iter.hasNext
             def doClose() {}

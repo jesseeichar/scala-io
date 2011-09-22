@@ -14,6 +14,7 @@ import org.junit.{
   Ignore
 }
 import java.io.ByteArrayInputStream
+import java.io.InputStream
 class ResourceTraversableViewTest extends ResourceTraversableTest {
 
   override def traversable[U, A](tsize: Int,
@@ -56,10 +57,20 @@ class ResourceTraversableViewTest extends ResourceTraversableTest {
 
   @Test
   def bytes_of_a_Resource_must_be_a_ResourceTraversableView {
-    val resource = Resource.fromInputStream(new ByteArrayInputStream("SOME_DATA".getBytes()))
+    var count = 0
+    val tmpIn = new InputStream(){
+      var p = 10
+      def read = {
+        count += 1
+        p -= 1
+        p
+      }
+    }
+    val resource = Resource.fromInputStream(tmpIn)
     val bytes = resource.bytes
-    val view = bytes.view
-    assertTrue("Expected the view to be a ResourceTraversableView but was a "+view.getClass(), view.isInstanceOf[ResourceTraversableView[_, _]])
+    
+    assertEquals(9,bytes.head)
+    assertEquals(1,count)
   }
 
   /*

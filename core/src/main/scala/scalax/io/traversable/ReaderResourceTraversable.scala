@@ -7,7 +7,7 @@ import scalax.io.LongTraversable
 import scalax.io.LongTraversableLike
 import scalax.io.OpenedResource
 
-class ReaderResourceTraversable (
+private[io] class ReaderResourceTraversable (
   resourceOpener: => OpenedResource[Reader],
   val start:Long,
   val end:Long)
@@ -30,7 +30,6 @@ class ReaderResourceTraversable (
         i < read
       }
     }
-    @specialized(Char)
     def next = {
       i += 1
       buffer(i-1)

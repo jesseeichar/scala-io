@@ -39,7 +39,8 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
         withSizeDef { size =>
           newInResource(size)
         } run { in =>
-          in.chars.size
+          var i = 0
+          in.chars.foreach(b => i += 1)
         }
       }
       measure method "chars" in {
@@ -79,7 +80,8 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
             val in = newIn(5, size, NewLine.sep)().asReadChars.chars.mkString
             scala.io.Source.fromString(in)
           } run { source =>
-            source.getLines().size
+            var i = 0
+          source.getLines().foreach(b => i += 1)
           }
         }
       }
@@ -87,14 +89,16 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
         withSizeDef { size =>
           newInResource(5, size, NewLine.sep)
         } run { in =>
-          in.lines(NewLine).size
+          var i = 0
+          in.lines(NewLine).foreach(b => i += 1)
         }
       }
       measure method "lines Auto" in {
         withSizeDef { size =>
           newInResource(5, size, NewLine.sep)
         } run { in =>
-          in.lines(Auto).size
+          var i = 0
+          in.lines(Auto).foreach(b => i += 1)
         }
       }
       measure method "lines Auto" in {
@@ -103,7 +107,8 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
             val in = newIn(5, size, NewLine.sep)().asReadChars.chars.mkString
             scala.io.Source.fromString(in)
           } run { source =>
-            source.getLines().size
+            var i = 0
+          source.getLines().foreach(b => i += 1)
           }
         }
       }
@@ -125,7 +130,8 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
         withSizeDef { size =>
           newInResource(5, size, CarriageReturn.sep)
         } run { in =>
-          in.lines(CarriageReturn).size
+          var i = 0
+          in.lines(CarriageReturn).foreach(b => i += 1)
         }
       }
       measure method "lines CR" in {
@@ -134,7 +140,8 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
             val in = newIn(5, size, NewLine.sep)().asReadChars.chars.mkString
             scala.io.Source.fromString(in)
           } run { source =>
-            source.getLines().size
+            var i = 0
+          source.getLines().foreach(b => i += 1)
           }
         }
       }
@@ -165,7 +172,8 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
             val in = newIn(5, size, NewLine.sep)().asReadChars.chars.mkString
             scala.io.Source.fromString(in)
           } run { source =>
-            source.getLines().size
+            var i = 0
+          source.getLines().foreach(b => i += 1)
           }
         }
       }
@@ -184,7 +192,8 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
         withSizeDef { size =>
           newInResource(5, size, "**")
         } run { in =>
-          in.lines(Custom("**")).size
+          var i = 0
+          in.lines(Custom("**")).foreach(b => i += 1)
         }
       }
       measure method "lines Custom" in {
@@ -198,15 +207,16 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
           }
         }
       }
-      measure method "bytes drop" in {
+      measure method "chars drop" in {
         withSizeDef { size =>
           (size / 2, newInResource(size))
         } run {
           case (toDrop, in) =>
-            in.chars.drop(toDrop).size
+          var i = 0
+          in.chars.drop(toDrop).foreach(b => i += 1)
         }
       }
-      measure method "bytes drop" in {
+      measure method "chars drop" in {
         having attribute ("version", "java.io while loop with buffer") in {
           withSizeDef { size =>
             (size, newIn(size))
@@ -228,15 +238,16 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
           }
         }
       }
-      measure method "bytes take" in {
+      measure method "chars take" in {
         withSizeDef { size =>
           (size / 2, newInResource(size))
         } run {
           case (toTake, in) =>
-            in.chars.take(toTake).size
+          var i = 0
+          in.chars.take(toTake).foreach(b => i += 1)
         }
       }
-      measure method "bytes take" in {
+      measure method "chars take" in {
         having attribute ("version", "java.io while loop with buffer") in {
           withSizeDef { size =>
             (size, newIn(size))

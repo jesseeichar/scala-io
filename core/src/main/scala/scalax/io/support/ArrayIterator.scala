@@ -13,7 +13,7 @@ class ArrayIterator[A](var a:Array[A],var end:Int) extends Iterator[A]{
   var now=0
   @inline
   final def hasNext = now < end
-  @specialized(Byte,Char) @inline
+  @inline
   final def next = {
     now += 1
     a(now - 1)

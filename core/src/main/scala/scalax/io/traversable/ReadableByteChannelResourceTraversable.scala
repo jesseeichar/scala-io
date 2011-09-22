@@ -7,66 +7,64 @@ import scalax.io.LongTraversableLike
 import scalax.io.OpenedResource
 import java.nio.channels.ReadableByteChannel
 import java.nio.{ ByteBuffer => NioByteBuffer }
-
-class ReadableByteChannelTraversable(
-  resourceOpener: => OpenedResource[ReadableByteChannel],
-  sizeFunc: () => Option[Long],
-  val start: Long,
-  val end: Long)
-  extends LongTraversable[Byte]
-  with LongTraversableLike[Byte, LongTraversable[Byte]] {
-
-  protected[io] def iterator: CloseableIterator[Byte] = {
-    val resource = resourceOpener
-    val buffer = resource.get match {
-      case seekable: SeekableByteChannel => Buffers.nioDirectBuffer(Some(seekable.size))
-      case _ => Buffers.nioDirectBuffer(sizeFunc())
-    }
-    resource.get match {
-      case seekable: SeekableByteChannel =>
-        new SeekableByteChannelIterator(buffer, resource.asInstanceOf[OpenedResource[SeekableByteChannel]], start, end)
-      case _ =>
-        new ReadableByteChannelIterator(buffer, resource, start, end)
-    }
-  }
-
-  override lazy val hasDefiniteSize = sizeFunc().nonEmpty
-  override def lsize = sizeFunc() match {
-    case Some(size) => size
-    case None => super.size
-  }
-  override def size = lsize.toInt
-
-}
+import java.nio.ByteBuffer
+import scala.annotation.tailrec
+import scalax.io.extractor.FileChannelExtractor
+import scalax.io.nio.SeekableFileChannel
+import java.io.Closeable
+import scalax.io.support.FileUtils
+import java.nio.channels.Channels
+import java.io.ByteArrayOutputStream
+import scalax.io.extractor.FileChannelExtractor
 
 private[traversable] class ReadableByteChannelIterator(
-  buffer: NioByteBuffer,
-  openResource: OpenedResource[ReadableByteChannel],
-  startIndex: Long,
-  endIndex: Long) extends CloseableIterator[Byte] {
-  private final val inConcrete = openResource.get
+  protected val sizeFunc: () => Option[Long],
+  protected val getIn: ReadableByteChannel,
+  protected val openResource: OpenedResource[Closeable],
+  protected val start: Long,
+  protected val end: Long) extends Sliceable {
 
-  skip(startIndex)
+  private[this] var buffer: NioByteBuffer = ByteBuffer.allocate(0)
+  private[this] var inConcrete: ReadableByteChannel = _
 
-  private final var read = inConcrete.read(buffer)
-  private final var i = 0
+  private[this] val startIndex = start
+  private[this] val endIndex = end
+
+  private[this] var read = 0
+  private[this] var i = 0
+  private[this] var pos = start
+
+  @inline
+  final def init() = if (inConcrete == null) {
+    val sliceLength: Long = (end - start) min Int.MaxValue
+    buffer = Buffers.nioByteBuffer(sizeFunc().map(_ min (sliceLength)).orElse(Some(sliceLength)))
+    inConcrete = getIn
+    skip(startIndex)
+  }
   final def hasNext = {
-    if (i < read) true
-    else {
+    if (pos < endIndex && i < read) true
+    else if (pos >= endIndex) {
+      false
+    } else {
+      init()
       i = 0
       buffer.clear()
       read = inConcrete.read(buffer)
       i < read
     }
   }
-  @specialized(Byte)
   final def next = {
     i += 1
+    pos += 1
     buffer.get(i - 1)
   }
-  def doClose() = openResource.close()
+  def doClose() = {
+    pos = end;
+    openResource.close()
+  }
 
-  def skip(count: Long) {
+  @tailrec
+  private final def skip(count: Long) {
     if (count > 0) {
       val toRead = (buffer.capacity.toLong min count).toInt
 
@@ -77,22 +75,36 @@ private[traversable] class ReadableByteChannelIterator(
       if (read > -1) skip(count - read)
     }
   }
+
+  def create(start: Long, end: Long) =
+    new ReadableByteChannelIterator(sizeFunc, getIn, openResource, start, end)
 }
 
 private[traversable] class SeekableByteChannelIterator(
-  buffer: NioByteBuffer,
-  openResource: OpenedResource[SeekableByteChannel],
-  startIndex: Long,
-  endIndex: Long) extends CloseableIterator[Byte] {
-  private final val channel = openResource.get
-  channel.position(startIndex)
-  channel.read(buffer)
-  buffer.flip
-  private final var position = startIndex
+  val sizeFunc: () => Option[Long],
+  val getIn: SeekableByteChannel,
+  val openResource: OpenedResource[Closeable],
+  val start: Long,
+  val end: Long) extends Sliceable {
+  private[this] val startIndex = start
+  private[this] val endIndex = end
+  private[this] var isInitialized = false
+  private[this] var position = startIndex
+  private[this] var buffer: NioByteBuffer = ByteBuffer.allocate(0)
+  private[this] val channel = getIn
+  @inline
+  final def init() = if (!isInitialized) {
+    val sliceLength: Long = (end - start) min Int.MaxValue
+    buffer = Buffers.nioDirectBuffer(sizeFunc().map(_ min (sliceLength)).orElse(Some(sliceLength)))
+    isInitialized = true
+  }
 
   def hasNext = {
-    if (buffer.hasRemaining) true
-    else {
+    if (position < endIndex && buffer.hasRemaining) true
+    else if (position >= endIndex) {
+      false
+    } else {
+      init()
       channel.position(position)
       buffer.clear
       (channel read buffer)
@@ -100,10 +112,16 @@ private[traversable] class SeekableByteChannelIterator(
       buffer.hasRemaining()
     }
   }
-  @specialized(Byte)
   def next = {
     position += 1
     buffer.get()
   }
-  def doClose() = openResource.close()
+  def doClose() = {
+    position = end;
+    openResource.close()
+  }
+
+  def create(start: Long, end: Long) =
+    new SeekableByteChannelIterator(sizeFunc, getIn, openResource, start, end)
+
 }

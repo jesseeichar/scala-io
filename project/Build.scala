@@ -41,6 +41,7 @@ object ScalaIoBuild extends Build {
     </licenses>
 
   val sharedSettings = Seq[Setting[_]](
+ 	scalaHome := Some(file("/Volumes/Box/ScalaProject/scala-full/dists/scala-2.9.2.r25667-b20110921211926")),
     organization := BuildConstants.organization,
     version := BuildConstants.version,
     maxErrors := 20,

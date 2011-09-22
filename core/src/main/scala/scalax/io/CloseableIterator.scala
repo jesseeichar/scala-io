@@ -4,13 +4,12 @@ import java.io.Closeable
 import resource.{AbstractManagedResource, ManagedResourceOperations}
 import collection.{GenTraversableOnce, Iterator, TraversableOnce}
 import java.util.concurrent.locks.ReentrantLock
-import scala.concurrent.SyncVar
 
 trait CloseableIterator[+A] extends Iterator[A] with Closeable {
   self =>
   val creationPoint = new Exception();
 
-  @specialized(Byte, Int, Float, Double, Long)
+  
   def next(): A
   
   def hasNext: Boolean
@@ -22,7 +21,6 @@ trait CloseableIterator[+A] extends Iterator[A] with Closeable {
   protected def doClose():Unit
 
   class Proxy[+B,C <: Iterator[B]](protected val wrapped:C,otherComposingIterators:CloseableIterator[_]*) extends CloseableIterator[B] {
-    @specialized(Byte,Int,Float,Double,Long)
     final def next() = wrapped.next
     final def hasNext: Boolean = wrapped.hasNext
     def doClose() = {
@@ -38,6 +36,7 @@ trait CloseableIterator[+A] extends Iterator[A] with Closeable {
     def apply[B](wrapped:Iterator[B]):CloseableIterator[B] = new Proxy[B,Iterator[B]](wrapped)
   }
 
+  override def take(i:Int) = lslice(0,1)
   override def zipAll[B, A1 >: A, B1 >: B](that: Iterator[B], thisElem: A1, thatElem: B1): CloseableIterator[(A1, B1)] =
     Proxy(super.zipAll(that,thisElem,thatElem))
   override def zipWithIndex: CloseableIterator[(A, Int)] {var idx: Int} =
@@ -64,7 +63,7 @@ trait CloseableIterator[+A] extends Iterator[A] with Closeable {
     }
 
   def lslice(from:Long,until:Long) = Proxy[A](new Iterator[A]{
-      private var count = from
+      private var count = from max 0
       private val iter = {
         var toDrop = from
         var iter:Iterator[A] = self
@@ -97,13 +96,11 @@ trait CloseableIterator[+A] extends Iterator[A] with Closeable {
 
 object CloseableIterator {
   def apply[A](iter:Iterator[A]) = new CloseableIterator[A]{
-    @specialized(Byte,Int,Float,Double,Long)
     final def next(): A = iter.next
     final def hasNext: Boolean = iter.hasNext
     def doClose() {}
   }
   def selfClosing[A](wrapped: CloseableIterator[A]) = new CloseableIterator[A] {
-    @specialized(Byte,Int,Float,Double,Long,Char)
     final def next(): A = wrapped.next
     final def hasNext: Boolean = {
       val next = wrapped.hasNext

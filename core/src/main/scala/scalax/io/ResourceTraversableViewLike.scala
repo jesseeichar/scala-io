@@ -8,6 +8,7 @@
 
 package scalax.io
 
+import support.Misc.safeSum
 
 /**
  * The actual implementation of the View optimized for working on Resources
