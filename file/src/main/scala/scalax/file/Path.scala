@@ -206,6 +206,8 @@ object Path
 abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder[Path] with Ordered[Path]
 {
   self =>
+    
+  protected def assertExists = if(!exists) throw new java.io.FileNotFoundException(path+" does not exist")
 
   /**
    * The path segment separator string for

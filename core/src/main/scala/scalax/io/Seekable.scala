@@ -126,7 +126,8 @@ trait Seekable extends Input with Output {
    */
   def open[U](f: OpenSeekable => U):U = {
     readWriteChannel{ out =>
-      val nonCloseable = new SeekableByteChannel{
+      val nonCloseable = new SeekableByteChannel with Adapter[SeekableByteChannel]{
+        def src = out
         def close() {}
         def isOpen: Boolean = true
         def write(src: ByteBuffer): Int = out.write(src)
@@ -551,7 +552,7 @@ trait Seekable extends Input with Output {
     Resource.fromByteChannel(resource.get).appendCloseAction(_ => resource.close()).chars(codec)
   }
 
-  def bytesAsInts = {
+  override def bytesAsInts: ResourceView[Int] = {
     def resource = {
       val r = underlyingChannel(false)
       r.get.position(0)
@@ -559,7 +560,8 @@ trait Seekable extends Input with Output {
     }
     Resource.fromSeekableByteChannel(resource.get).appendCloseAction(_ => resource.close()).bytesAsInts
   }
-  def bytes = {
+
+  def bytes: ResourceView[Byte] = {
     def resource = {
       val r = underlyingChannel(false)
       r.get.position(0)

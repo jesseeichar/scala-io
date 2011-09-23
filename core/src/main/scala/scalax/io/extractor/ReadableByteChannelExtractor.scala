@@ -5,7 +5,7 @@ import java.io.FileInputStream
 import java.nio.channels.Channels
 import java.io.InputStream
 import java.nio.channels.ReadableByteChannel
-import scalax.io.ResourceAdapting.Adapter
+import scalax.io.Adapter
 
 object ReadableByteChannelExtractor {
 	def unapply(obj:Any):Option[ReadableByteChannel] = obj match {

@@ -53,7 +53,8 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
           newInResource(size)
         } run { in =>
           var i = 0
-          in.bytes.foreach(b => i += 1)
+          val f: Byte => Unit = (b: Byte) => i += 1
+          in.bytes.foreach(f)
         }
       }
       measure method "bytes" in {
@@ -83,7 +84,8 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
           newInResource(size)
         } run { in =>
           var i = 0
-          in.bytesAsInts.foreach(b => i += 1)
+          val f: Int => Unit = (b: Int) => i += 1
+          in.bytesAsInts.foreach(f)
         }
       }
       measure method "bytesAsInts" in {
@@ -184,7 +186,8 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
           newInResource(size)
         } run { in =>
           var i = 0
-          in.chars.foreach(b => i += 1)
+          val f: Char => Unit = (b: Char) => i += 1
+          in.chars.foreach(f)
         }
       }
       measure method "chars" in {
@@ -214,7 +217,8 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
           newInResource(5, size, NewLine.sep)
         } run { in =>
           var i = 0
-          in.lines(Line.Terminators.NewLine).foreach(b => i += 1)
+          val f: String => Unit = (b: String) => i += 1
+          in.lines(Line.Terminators.NewLine).foreach(f)
         }
       }
       measure method "lines newline" in {
@@ -238,7 +242,8 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
             () => scala.io.Source.fromInputStream(Channels.newInputStream(in()), "UTF-8")
           } run { source =>
             var i = 0
-            source().getLines().foreach(b => i += 1)
+            val f: String => Unit = (b: String) => i += 1
+            source().getLines().foreach(f)
           }
         }
       }
@@ -247,7 +252,8 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
           newInResource(5, size, NewLine.sep)
         } run { in =>
           var i = 0
-          in.lines(Line.Terminators.Auto).foreach(b => i += 1)
+          val f: String => Unit = (b: String) => i += 1
+          in.lines(Line.Terminators.Auto).foreach(f)
         }
       }
       measure method "lines Auto" in {
@@ -256,8 +262,9 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
             val in = newIn(5, size, NewLine.sep)
             () => scala.io.Source.fromInputStream(Channels.newInputStream(in()), "UTF-8")
           } run { source =>
-          var i = 0
-          source().getLines().foreach(b => i += 1)
+            var i = 0
+            val f: String => Unit = (b: String) => i += 1
+            source().getLines().foreach(f)
           }
         }
       }
@@ -280,7 +287,8 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
           newInResource(5, size, CarriageReturn.sep)
         } run { in =>
           var i = 0
-          in.lines(Line.Terminators.CarriageReturn).foreach(b => i += 1)
+          val f: String => Unit = (b: String) => i += 1
+          in.lines(Line.Terminators.CarriageReturn).foreach(f)
         }
       }
       measure method "lines CR" in {
@@ -289,8 +297,9 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
             val in = newIn(5, size, NewLine.sep)
             () => scala.io.Source.fromInputStream(Channels.newInputStream(in()), "UTF-8")
           } run { source =>
-          var i = 0
-          source().getLines().foreach(b => i += 1)
+            var i = 0
+            val f: String => Unit = (b: String) => i += 1
+            source().getLines().foreach(f)
           }
         }
       }
@@ -321,8 +330,9 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
             val in = newIn(5, size, NewLine.sep)
             () => scala.io.Source.fromInputStream(Channels.newInputStream(in()), "UTF-8")
           } run { source =>
-          var i = 0
-          source().getLines().foreach(b => i += 1)
+            var i = 0
+            val f: String => Unit = (b: String) => i += 1
+            source().getLines().foreach(f)
           }
         }
       }
@@ -343,7 +353,8 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
           newInResource(5, 2 * size / 5, "**")
         } run { in =>
           var i = 0
-          in.lines(Custom("**")).foreach(b => i += 1)
+          val f: String => Unit = (b: String) => i += 1
+          in.lines(Custom("**")).foreach(f)
         }
       }
       measure method "lines Custom" in {
@@ -362,8 +373,9 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
           (size / 2, newInResource(size))
         } run {
           case (toDrop, in) =>
-          var i = 0
-          in.bytes.drop(toDrop).foreach(b => i += 1)
+            var i = 0
+            val f: Byte => Unit = (b: Byte) => i += 1
+            in.bytes.drop(toDrop).foreach(f)
         }
       }
       measure method "bytes drop" in {
@@ -397,8 +409,9 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
           (size / 2, newInResource(size))
         } run {
           case (toTake, in) =>
-          var i = 0
-          in.bytes.take(toTake).foreach(b => i += 1)
+            var i = 0
+            val f: Byte => Unit = (b: Byte) => i += 1
+            in.bytes.take(toTake).foreach(f)
         }
       }
       measure method "bytes take" in {

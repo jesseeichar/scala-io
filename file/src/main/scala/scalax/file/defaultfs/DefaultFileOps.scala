@@ -12,13 +12,12 @@ package defaultfs
 import scalax.io._
 import StandardOpenOption._
 import scalax.io.nio.SeekableFileChannel
-
-
 import scalax.io.support.DeletingFileOutputStream
 import scalax.io.support.FileUtils._
 import java.io.{OutputStream, FileInputStream, FileOutputStream, File => JFile, RandomAccessFile}
 import java.nio.channels.Channels
 import scalax.io.CloseAction.Noop
+import scalax.io.Adapter
 
 /**
  * <b>Not part of API.</b>
@@ -60,7 +59,8 @@ private[file] trait DefaultFileOps {
         if(append) {
           c.self.position(c.self.size())
         }
-        val get = new SeekableFileChannel(c.self){
+        val get = new SeekableFileChannel(c.self) with Adapter[SeekableFileChannel]{
+          def src = c
           override def close = {}
         }
 

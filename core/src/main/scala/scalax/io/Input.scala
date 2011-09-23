@@ -123,13 +123,9 @@ trait Input {
    * Loads all the characters into memory. There is no protection against
    * loading very large files/amounts of data.
    *
-   * If the codec is not the same as the source codec (the codec of
-   * the underlying data) then the characters will converted to the
-   * desired codec.
-   *
    * @param codec
    *          The codec representing the desired encoding of the characters
    */
-  def slurpString(implicit codec: Codec = Codec.default) = chars(codec).mkString
+  def slurpString(implicit codec: Codec = Codec.default) = new String(byteArray, codec.name)
   
 }

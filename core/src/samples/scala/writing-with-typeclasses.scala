@@ -148,7 +148,7 @@ object OutputAndTypeClasses {
       def toBytes(data: Date) = LongConverter.toBytes(data.getTime)
     }
 
-    out.write(new Date(2012,01,01))
+    out.write(java.util.Calendar.getInstance().getTime())
 
     // write, append, patch and insert all follow the same pattern
     out.append(3)

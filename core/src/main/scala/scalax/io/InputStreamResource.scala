@@ -29,7 +29,7 @@ class InputStreamResource[+A <: InputStream] (
   def reader(implicit sourceCodec: Codec): ReaderResource[Reader] = {
     def nResource = {
       val a = open()
-      new InputStreamReader(a.get) with ResourceAdapting.Adapter[A] {
+      new InputStreamReader(a.get) with Adapter[A] {
         def src = a.get
       }
     }
@@ -45,6 +45,6 @@ class InputStreamResource[+A <: InputStream] (
   }
   def chars(implicit codec: Codec) = reader(codec).chars
 
-  def bytesAsInts : ResourceView[Int] = ResourceTraversable.streamBased[Byte,Int](this.open, sizeFunc,initialConv = ResourceTraversable.toIntConv).view
+  override def bytesAsInts : ResourceView[Int] = ResourceTraversable.streamBased[Byte,Int](this.open, sizeFunc,initialConv = ResourceTraversable.toIntConv).view
   override def bytes : ResourceView[Byte] = ResourceTraversable.streamBased[Byte,Byte](this.open, sizeFunc).view
 }

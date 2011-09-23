@@ -5,7 +5,7 @@ import java.io.OutputStream
 import java.nio.channels.Channels
 import java.nio.channels.WritableByteChannel
 
-import scalax.io.ResourceAdapting.Adapter
+import scalax.io.Adapter
 
 object WritableByteChannelExtractor {
 	def unapply(obj:Any):Option[WritableByteChannel] = obj match {

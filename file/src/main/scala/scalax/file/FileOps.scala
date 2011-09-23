@@ -167,8 +167,28 @@ abstract class FileOps extends Seekable {
   // required for path
 
   // required methods for Input trait
-  override def chars(implicit codec: Codec): ResourceView[Char] = inputStream.reader(codec).chars
-  override def bytesAsInts:ResourceView[Int] = inputStream.bytesAsInts
+  override def chars(implicit codec: Codec): ResourceView[Char] = inputStream().chars(codec)
+  /*  protected def assertExists:Unit
+  override def bytesAsInts:ResourceView[Int] = {assertExists; super[Seekable].bytesAsInts}
+  override def bytes:ResourceView[Byte] = {assertExists; super[Seekable].bytes}*/
+
+  override def bytesAsInts: ResourceView[Int] = {
+    def resource = {
+      val r = channel(Read).open
+      r.get.position(0)
+      r
+    }
+    Resource.fromSeekableByteChannel(resource.get).appendCloseAction(_ => resource.close()).bytesAsInts
+  }
+
+  override def bytes: ResourceView[Byte] = {
+    def resource = {
+      val r = channel(Read).open
+      r.get.position(0)
+      r
+    }
+    Resource.fromSeekableByteChannel(resource.get).appendCloseAction(_ => resource.close()).bytes
+  }
 
   // required method for Output trait
   override protected def underlyingOutput = outputStream()

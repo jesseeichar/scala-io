@@ -97,6 +97,7 @@ private[traversable] class SeekableByteChannelIterator(
     val sliceLength: Long = (end - start) min Int.MaxValue
     buffer = Buffers.nioDirectBuffer(sizeFunc().map(_ min (sliceLength)).orElse(Some(sliceLength)))
     isInitialized = true
+    channel.position(position)
   }
 
   def hasNext = {

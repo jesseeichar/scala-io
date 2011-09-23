@@ -6,6 +6,22 @@ import java.io._
 import java.lang.String
 
 /**
+ * Supporting classes for converting between resource types.  For example if you want to convert an InputStream
+ * to a Reader you need to use a InputStreamReader but the Closeactions for the InputStream still need to be
+ * executed on close.  So a reference to the InputStream must be kept.  The solution is to create an
+ * `InputStreamReader with ResourceAdapting.Adapter`  The resource adapter will keep the reference to the underlying
+ * Resource and a new CloseAction can be created that takes a ResourceAdapter and the original CloseAction and
+ * executes the CloseAction on the referenced resource from the ResourceAdapter
+ *
+ * '''Not part of the API.'''
+ *
+ * @tparam S the type of the object before adapting to another type
+ */
+trait Adapter[+S] {
+  def src: S
+}
+
+/**
  * Contains a method
  *
  *
@@ -18,7 +34,7 @@ protected[io] object ResourceAdapting {
    * based on Resource[S] to so it works work on a Resource[C] that is
    * also a ResourceAdapting.Adapter[S]
    *
-   * @see [scalax.io.ResourceAdapting.Adapter]
+   * @see [scalax.io.Adapter]
    */
   def closeAction[A](src:CloseAction[A]):CloseAction[Adapter[A]]  = {
     src match {
@@ -27,22 +43,6 @@ protected[io] object ResourceAdapting {
       case _ =>
         CloseAction((in:Adapter[A]) => src(in.src))
     }
-  }
-
-  /**
-   * Supporting classes for converting between resource types.  For example if you want to convert an InputStream
-   * to a Reader you need to use a InputStreamReader but the Closeactions for the InputStream still need to be
-   * executed on close.  So a reference to the InputStream must be kept.  The solution is to create an
-   * `InputStreamReader with ResourceAdapting.Adapter`  The resource adapter will keep the reference to the underlying
-   * Resource and a new CloseAction can be created that takes a ResourceAdapter and the original CloseAction and
-   * executes the CloseAction on the referenced resource from the ResourceAdapter
-   *
-   * '''Not part of the API.'''
-   *
-   * @tparam S the type of the object before adapting to another type
-   */
-  protected[io] trait Adapter[+S] {
-    def src:S
   }
 
   /**

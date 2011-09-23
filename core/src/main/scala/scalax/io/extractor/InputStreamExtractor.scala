@@ -1,7 +1,7 @@
 package scalax.io.extractor
 
 import java.io.InputStream
-import scalax.io.ResourceAdapting.Adapter
+import scalax.io.Adapter
 import java.nio.channels.Channels
 import java.nio.channels.ReadableByteChannel
 

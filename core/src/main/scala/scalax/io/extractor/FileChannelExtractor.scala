@@ -3,7 +3,7 @@ package scalax.io.extractor
 import java.nio.channels.FileChannel
 import java.io.FileInputStream
 import scalax.io.nio.SeekableFileChannel
-import scalax.io.ResourceAdapting.Adapter
+import scalax.io.Adapter
 
 object FileChannelExtractor {
 	def unapply(obj:Any):Option[FileChannel] = 

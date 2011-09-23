@@ -10,8 +10,6 @@ import java.nio.channels.FileChannel
 import java.nio.channels.WritableByteChannel
 
 import scalax.io.nio.SeekableFileChannel
-import scalax.io.CloseableIterator
-import scalax.io.LongTraversable
 
 object JavaConverters {
   class AsInput(op: => Input) {
@@ -71,7 +69,7 @@ object JavaConverters {
           def iterator: CloseableIterator[Char] = CloseableIterator(chars.iterator)
         }.view
 
-        def bytesAsInts = new LongTraversable[Int]{
+        override def bytesAsInts = new LongTraversable[Int]{
           def iterator = new CloseableIterator[Int] {
             var iter = OutputConverter.TraversableIntConverter.toBytes(t)
 
@@ -106,7 +104,7 @@ object JavaConverters {
           def iterator: CloseableIterator[Char] = CloseableIterator(chars.iterator)
         }.view
 
-        def bytesAsInts = new LongTraversable[Int]{
+        override def bytesAsInts = new LongTraversable[Int]{
 
           def iterator: CloseableIterator[Int] = CloseableIterator(t.toIterator.map(_.toInt))
         }.view
