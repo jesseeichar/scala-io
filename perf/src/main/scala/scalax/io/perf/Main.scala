@@ -10,7 +10,8 @@ import sperformance.PerformanceTest
  * This class is meant to be the final runner of the SPerformance test framework.
  */
 object Main {
-  var outputDirectory = new File("results")
+  var outputDirectory = if(new File("perf").exists) new File("perf","results")
+      else new File("results")
 
   def runTestsReflectively(tests: Class[_ <: PerformanceTest]*) {
     //TODO - ClassLoader magic....

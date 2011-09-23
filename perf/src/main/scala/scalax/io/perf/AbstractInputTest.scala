@@ -40,7 +40,7 @@ trait AbstractInputTest extends PerformanceDSLTest {
   def withSizeDef[U](f: Int => U) = withSize from (From) upTo MaxSize by Inc withSetup (f)
 
   performance of "Input" in {
-    having attribute (Keys.WarmupRuns -> 1) in {
+    having attribute (Keys.WarmupRuns -> 10) in {
       measure method "bytes" in {
         withSizeDef { size =>
           newInResource(size)

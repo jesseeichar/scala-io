@@ -74,7 +74,7 @@ trait AbstractFileSeekableTest extends AbstractSeekableTest {
   }
 
   performance of "Seekable" in {
-    having attribute (Keys.WarmupRuns -> 1) in {
+    having attribute (Keys.WarmupRuns -> 10) in {
       measure method "patch bytes array" in {
         having attribute ("version", "std nio") in {
           withSizeDef { size =>

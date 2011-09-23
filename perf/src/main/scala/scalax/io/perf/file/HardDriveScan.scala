@@ -24,7 +24,7 @@ class HardDriveScan extends PerformanceDSLTest {
   val root = Path.roots.head
 
   performance of "Path" in {
-    having attribute (Keys.WarmupRuns -> 1) in {
+    having attribute (Keys.WarmupRuns -> 10) in {
       measure method "**" in {
         withSize from (1000) upTo 10000 by 5000 withSetup { i =>
           i

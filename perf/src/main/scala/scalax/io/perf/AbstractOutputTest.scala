@@ -32,7 +32,7 @@ abstract class AbstractOutputTest extends PerformanceDSLTest {
   def withSizeDef[U](f: Int => U) = withSize from (From) upTo MaxSize by Inc withSetup (f)
 
 	performance of "Output" in {
-	  having attribute (Keys.WarmupRuns -> 1) in {
+	  having attribute (Keys.WarmupRuns -> 10) in {
 	    measure method "write byte array" in {
 	      withSizeDef { size =>
 	        (size, generateTestData(size, 1).getBytes("UTF-8"))
