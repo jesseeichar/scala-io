@@ -5,6 +5,7 @@ import java.nio.charset.Charset
 object PerformanceReport {
   val utf8 = Charset.forName("UTF-8")
   def buildSite(outDir:File, inDir:File):Seq[Keyword] = {
+	assert(inDir.listFiles != null, inDir+" does not have any performance reports")
     val reportDirs = inDir.listFiles.filter(_.isDirectory)
     reportDirs.zipWithIndex flatMap { case (reportDir,i) =>
       val name = {
