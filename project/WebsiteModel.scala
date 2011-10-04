@@ -57,7 +57,7 @@ class WebsiteModel(
     val corePages = pages(new File("core"))
     val filePages = pages(new File("file"))
     val performanceKeywords = Keyword.performance +: PerformanceReport.buildSite(Dir.performance,new File("perf/results/graphs"))
-    val keywords = List(Keyword.overview, Keyword.gettingStarted, Keyword.roadmap) ++ (Keyword.core +: corePages.map(_.keyword)) ++ (Keyword.file +: filePages.map(_.keyword)) ++ performanceKeywords
+    val keywords = List(Keyword.overview, Keyword.gettingStarted, Keyword.releaseNotes, Keyword.roadmap) ++ (Keyword.core +: corePages.map(_.keyword)) ++ (Keyword.file +: filePages.map(_.keyword)) ++ performanceKeywords
     val keywordJSON = keywords.mkString("IO_PAGES=[",",\n\t","]")
     write(new File(Dir.js,"keywords.js"), keywordJSON)
     

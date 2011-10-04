@@ -552,7 +552,7 @@ trait Seekable extends Input with Output {
     Resource.fromByteChannel(resource.get).appendCloseAction(_ => resource.close()).chars(codec)
   }
 
-  override def bytesAsInts: ResourceView[Int] = {
+  override def bytesAsInts: LongTraversable[Int] = {
     def resource = {
       val r = underlyingChannel(false)
       r.get.position(0)
@@ -561,7 +561,7 @@ trait Seekable extends Input with Output {
     Resource.fromSeekableByteChannel(resource.get).appendCloseAction(_ => resource.close()).bytesAsInts
   }
 
-  def bytes: ResourceView[Byte] = {
+  def bytes: LongTraversable[Byte] = {
     def resource = {
       val r = underlyingChannel(false)
       r.get.position(0)

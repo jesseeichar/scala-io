@@ -67,8 +67,8 @@ class SeekableByteChannelResource[+A <: SeekableByteChannel] (
   protected override def underlyingOutput: OutputResource[OutputStream] = outputStream
 
 
-  override def bytesAsInts:ResourceView[Int] = ResourceTraversable.seekableByteChannelBased[Byte,Int](this.open, sizeFunc, initialConv = ResourceTraversable.toIntConv).view
-  override def bytes:ResourceView[Byte] = ResourceTraversable.seekableByteChannelBased[Byte,Byte](this.open, sizeFunc).view
+  override def bytesAsInts:LongTraversable[Int] = ResourceTraversable.seekableByteChannelBased[Byte,Int](this.open, sizeFunc, initialConv = ResourceTraversable.toIntConv)
+  override def bytes:LongTraversable[Byte] = ResourceTraversable.seekableByteChannelBased[Byte,Byte](this.open, sizeFunc)
 
   override def toString: String = "SeekableByteChannelResource("+descName.name+")"
 }

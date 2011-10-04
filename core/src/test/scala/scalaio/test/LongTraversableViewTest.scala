@@ -7,5 +7,5 @@ class LongTraversableViewTest extends LongTraversableTest{
                                  callback: (Int) => U,
                                  dataFunc: (Int) => Traversable[Int],
                                  conv: (Int) => A): LongTraversable[A] =
-    super.traversable(tsize,callback,dataFunc,conv).view
+    super.traversable(tsize,callback,dataFunc,conv)
 }

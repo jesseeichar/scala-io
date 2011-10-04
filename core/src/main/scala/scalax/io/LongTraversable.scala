@@ -23,6 +23,15 @@ trait LongTraversable[@specialized(Byte) +A] extends Traversable[A]
                             with LongTraversableLike[A, LongTraversable[A]] {
   override def companion : GenericCompanion[LongTraversable] = LongTraversable
 
+  def force:LongTraversable[A] = {
+    val b = new ListBuffer[A] mapResult (x => new LongTraversableImpl[A](x))
+    b ++= iterator
+    b.result()
+  }
+  
+  protected def proxy[B >: A](newIter: => CloseableIterator[B]) = new LongTraversable[A] {
+    def iterator = newIter.asInstanceOf[CloseableIterator[A]]
+  }
   override def toString() = "LongTraversable(...)"
 }
 

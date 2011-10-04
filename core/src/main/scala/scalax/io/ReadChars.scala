@@ -40,7 +40,7 @@ trait ReadChars {
    * @return
    *          an traversable of all the characters
    */
-  def chars: ResourceView[Char]
+  def chars: LongTraversable[Char]
   /**
    * Obtain an non-strict traversable for iterating through the lines in the object
    *
@@ -55,8 +55,8 @@ trait ReadChars {
    *          a non-strict traversable for iterating through all the lines
    */
   def lines(terminator: Terminators.Terminator = Terminators.Auto,
-            includeTerminator: Boolean = false): ResourceView[String] = {
-             new LineTraversable(chars.iterator, terminator, includeTerminator).view
+            includeTerminator: Boolean = false): LongTraversable[String] = {
+             new LineTraversable(chars.iterator, terminator, includeTerminator)
         }
   /**
    * Loads all the characters into memory. There is no protection against

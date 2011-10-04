@@ -36,8 +36,7 @@ protected[io] trait TraversableSource[In <: Closeable, A] {
  * A Resource based implementation of a LongTraversable.  Optimized to only read the
  * required data from a stream
  */
-private[io] trait ResourceTraversable[A] extends LongTraversable[A]
-                             with LongTraversableLike[A, LongTraversable[A]] {
+private[io] trait ResourceTraversable[A] extends LongTraversable[A] {
   self =>
 
   type In <: java.io.Closeable
@@ -102,18 +101,7 @@ private[io] trait ResourceTraversable[A] extends LongTraversable[A]
   }
   override def slice(_start : Int, _end : Int) = lslice(_start.toLong,_end.toLong)
 
-  override def view = new ResourceTraversableView[A, LongTraversable[A]] {
-    protected lazy val underlying = self.repr
-
-    type In = self.In
-    type SourceOut = self.SourceOut
-    def source = self.source
-    def conv = self.conv
-    def start = self.start
-    def end = self.end
-  }
-
-   private def copy[B](_conv : this.SourceOut => B = conv, _start : Long = start, _end : Long = end) : LongTraversable[B] = {
+  private def copy[B](_conv: this.SourceOut => B = conv, _start: Long = start, _end: Long = end): LongTraversable[B] = {
      new ResourceTraversable[B] {
        type In = self.In
        type SourceOut = self.SourceOut

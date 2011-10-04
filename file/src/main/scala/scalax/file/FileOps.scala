@@ -18,7 +18,7 @@ import scalax.io._
 import scala.collection.Traversable
 import scalax.io.StandardOpenOption._
 import Resource._
-import scalax.io.{Codec, SeekableByteChannel, OpenOption, Seekable, ResourceView}
+import scalax.io.{Codec, SeekableByteChannel, OpenOption, Seekable, LongTraversable}
 
 /**
  * An object for reading and writing files.  FileOps provides
@@ -167,12 +167,12 @@ abstract class FileOps extends Seekable {
   // required for path
 
   // required methods for Input trait
-  override def chars(implicit codec: Codec): ResourceView[Char] = inputStream().chars(codec)
+  override def chars(implicit codec: Codec): LongTraversable[Char] = inputStream().chars(codec)
   /*  protected def assertExists:Unit
   override def bytesAsInts:ResourceView[Int] = {assertExists; super[Seekable].bytesAsInts}
   override def bytes:ResourceView[Byte] = {assertExists; super[Seekable].bytes}*/
 
-  override def bytesAsInts: ResourceView[Int] = {
+  override def bytesAsInts: LongTraversable[Int] = {
     def resource = {
       val r = channel(Read).open
       r.get.position(0)
@@ -181,7 +181,7 @@ abstract class FileOps extends Seekable {
     Resource.fromSeekableByteChannel(resource.get).appendCloseAction(_ => resource.close()).bytesAsInts
   }
 
-  override def bytes: ResourceView[Byte] = {
+  override def bytes: LongTraversable[Byte] = {
     def resource = {
       val r = channel(Read).open
       r.get.position(0)

@@ -12,6 +12,7 @@ object Keyword {
   val performance = Keyword("performance","index","Performance Test Reports",0,"Performance","overview", Set("performance"))
   val core = Keyword("core","index","Scala IO Core API",0,"Core API","overview", Set("core"))
   val file = Keyword("file","index","Scala IO File API",0,"File API","overview", Set("file"))
+  val releaseNotes = Keyword("overview","releaseNotes","Release Notes for "+BuildConstants.version,0,"Release Notes","overview", Set("release notes"))
   
   def split(text:String):Set[String] = {
     val words = text.split("""\s+""").filter(_.trim.nonEmpty).toSet

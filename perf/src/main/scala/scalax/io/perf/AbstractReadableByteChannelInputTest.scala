@@ -52,8 +52,10 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
         withSizeDef { size =>
           newInResource(size)
         } run { in =>
-          var i = 0
-          val f: Byte => Unit = (b: Byte) => i += 1
+          val f = new Function1[Byte, Unit] {
+            var i = 0
+            def apply(b: Byte) = i += 1
+          }
           in.bytes.foreach(f)
         }
       }
@@ -83,8 +85,10 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
         withSizeDef { size =>
           newInResource(size)
         } run { in =>
-          var i = 0
-          val f: Int => Unit = (b: Int) => i += 1
+          val f = new Function1[Int, Unit] {
+            var i = 0
+            def apply(b: Int) = i += 1
+          }
           in.bytesAsInts.foreach(f)
         }
       }
@@ -109,7 +113,7 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
               in.close
           }
         }
-      }
+      } /*
       measure method "byteArray" in {
         withSizeDef { size =>
           newInResource(size)
@@ -367,14 +371,16 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
             in.close()
           }
         }
-      }
+      }*/
       measure method "bytes drop" in {
         withSizeDef { size =>
           (size / 2, newInResource(size))
         } run {
           case (toDrop, in) =>
-            var i = 0
-            val f: Byte => Unit = (b: Byte) => i += 1
+            val f = new Function1[Byte, Unit] {
+              var i = 0
+              def apply(b: Byte) = i += 1
+            }
             in.bytes.drop(toDrop).foreach(f)
         }
       }
@@ -409,8 +415,10 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
           (size / 2, newInResource(size))
         } run {
           case (toTake, in) =>
-            var i = 0
-            val f: Byte => Unit = (b: Byte) => i += 1
+            val f = new Function1[Byte, Unit] {
+              var i = 0
+              def apply(b: Byte) = i += 1
+            }
             in.bytes.take(toTake).foreach(f)
         }
       }

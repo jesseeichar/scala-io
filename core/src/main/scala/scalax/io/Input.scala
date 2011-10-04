@@ -48,14 +48,14 @@ trait Input {
   *
   * @return an non-strict traversable over all the bytes
   */
-  def bytes : ResourceView[Byte]
+  def bytes : LongTraversable[Byte]
 
   /**
   * Obtains a Traversable for conveniently processing the file as Ints.
   *
   * @return an non-strict traversable over all the bytes with the bytes being represented as Ints
   */
-  def bytesAsInts: ResourceView[Int] = bytes.map(_.toInt).asInstanceOf[ResourceView[Int]]
+  def bytesAsInts: LongTraversable[Int] = bytes.map(_.toInt).asInstanceOf[LongTraversable[Int]]
 
   /**
   * This method aspires to be the fastest way to read
@@ -94,7 +94,7 @@ trait Input {
    * @return
    *          an traversable of all the characters
    */
-  def chars(implicit codec: Codec = Codec.default): ResourceView[Char]
+  def chars(implicit codec: Codec = Codec.default): LongTraversable[Char]
 
   /**
    * Obtain an non-strict traversable for iterating through the lines in the object
@@ -116,8 +116,8 @@ trait Input {
    *          a non-strict traversable for iterating through all the lines
    */
   def lines(terminator: Terminators.Terminator = Terminators.Auto,
-            includeTerminator: Boolean = false)(implicit codec: Codec = Codec.default): ResourceView[String] = {
-    new LineTraversable(chars(codec).iterator, terminator, includeTerminator).view
+            includeTerminator: Boolean = false)(implicit codec: Codec = Codec.default): LongTraversable[String] = {
+    new LineTraversable(chars(codec).iterator, terminator, includeTerminator)
   }
   /**
    * Loads all the characters into memory. There is no protection against

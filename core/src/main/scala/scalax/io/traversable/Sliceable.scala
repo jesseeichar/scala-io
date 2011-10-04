@@ -32,8 +32,6 @@ private[io] abstract class Sliceable extends CloseableIterator[Byte] {
     create(newStart, newEnd)
   }
 
-  override def foreach[U](f:Byte => U) = while(hasNext) f(next)
-  
   protected def sizeFunc: () => Option[Long]
   /** Return the underlying ReadableByteChannel or InputStream.  any other object is an error*/
   protected def getIn: Any

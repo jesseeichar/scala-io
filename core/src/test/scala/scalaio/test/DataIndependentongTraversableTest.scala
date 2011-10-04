@@ -101,7 +101,8 @@ trait DataIndependentLongTraversableTest[T] {
   }
 
   @Test //@Ignore
-  def should_handle_init = assertSizeAndType(independentTraversable(), _ init, false)
+  def should_handle_init = 
+    assertSizeAndType(independentTraversable(), _ init, false)
 
   @Test //@Ignore
   def should_handle_slice = assertSizeAndType(independentTraversable(), _ slice (3, 10))

@@ -7,7 +7,6 @@ import scalax.io.extractor.FileChannelExtractor
 import java.io.Closeable
 import scalax.io.nio.SeekableFileChannel
 import scalax.io.SeekableByteChannel
-import scalax.io.LongTraversableView
 import java.io.InputStream
 
 /**
@@ -49,14 +48,6 @@ protected[io] class ByteResourceTraversable(
     val iter = iterator
     try iter.toArray
     finally iter.close
-  }
-
-  override def view = new LongTraversableView[Byte, LongTraversable[Byte]] {
-    protected lazy val underlying = self.repr
-
-    protected[io] def iterator = self.iterator
-    override def toArray[B >: Byte: ClassManifest] = self.toArray
-    override def lsize = self.lsize
   }
 
 }

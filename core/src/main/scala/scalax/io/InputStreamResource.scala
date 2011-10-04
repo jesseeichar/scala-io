@@ -45,6 +45,6 @@ class InputStreamResource[+A <: InputStream] (
   }
   def chars(implicit codec: Codec) = reader(codec).chars
 
-  override def bytesAsInts : ResourceView[Int] = ResourceTraversable.streamBased[Byte,Int](this.open, sizeFunc,initialConv = ResourceTraversable.toIntConv).view
-  override def bytes : ResourceView[Byte] = ResourceTraversable.streamBased[Byte,Byte](this.open, sizeFunc).view
+  override def bytesAsInts : LongTraversable[Int] = ResourceTraversable.streamBased[Byte,Int](this.open, sizeFunc,initialConv = ResourceTraversable.toIntConv)
+  override def bytes : LongTraversable[Byte] = ResourceTraversable.streamBased[Byte,Byte](this.open, sizeFunc)
 }

@@ -20,17 +20,17 @@ import CloseableIterator.managed
  * @param result the value to either return from method to to the next stage of the fold
  * @tparam A the type of Traversable this FoldResult can be used with
  */
-sealed abstract class FoldResult[+A](val result: A)
+sealed abstract class FoldResult[@specialized(Byte) +A](val result: A)
 
 /**
  * Signal indicating that the fold should continue to process another value
  */
-case class Continue[+A](currentResult: A) extends FoldResult(currentResult)
+case class Continue[@specialized(Byte) +A](currentResult: A) extends FoldResult(currentResult)
 
 /**
  * Signal indicating that the fold should stop and return the contained result
  */
-case class End[+A](endResult: A) extends FoldResult(endResult)
+case class End[@specialized(Byte) +A](endResult: A) extends FoldResult(endResult)
 
 /**
  * A traversable for use on very large datasets which cannot be indexed with Ints but instead
@@ -38,7 +38,7 @@ case class End[+A](endResult: A) extends FoldResult(endResult)
  *
  * This trait adds methods for accessing the extra portions of the dataset.
  */
-trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A, Repr]] extends TraversableLike[A, Repr] {
+trait LongTraversableLike[@specialized(Byte) +A, +Repr <: LongTraversableLike[A, Repr]] extends TraversableLike[A, Repr] {
   self =>
 
   override protected[this] def thisCollection: LongTraversable[A] = this.asInstanceOf[LongTraversable[A]]
@@ -53,7 +53,7 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A, Repr]] extends Tra
       }
       array
     } else {
-      super.toArray
+      toBuffer.toArray
   }
 
   /**
@@ -72,7 +72,7 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A, Repr]] extends Tra
    * @return the last value contained in the [[scalax.io.FoldResult]] which was returned by op
    */
   def limitFold[U](init: U)(op: (U, A) => FoldResult[U]): U = {
-    case class FoldTerminator(v: U) extends RuntimeException
+    class FoldTerminator(val value: U) extends RuntimeException
     try {
       foldLeft(init) { (acc, next) =>
         op(acc, next) match {
@@ -81,20 +81,20 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A, Repr]] extends Tra
         }
       }
     } catch {
-      case FoldTerminator(v) => v
+      case ft:FoldTerminator => ft.value
     }
   }
 
   protected[io] def iterator: CloseableIterator[A]
 
-  def foreach[U](f: (A) => U) {
+  def foreach[@specialized(Unit) U](f: (A) => U) {
     val iter = iterator
     try iter.foreach(f)
     finally iter.close()
   }
 
   override def head = {
-    val iter = iterator.take(1)
+    val iter = CloseableIteratorOps(iterator).take(1)
     try {
       if(iter.hasNext) iter.next()
       else throw new java.util.NoSuchElementException("head of an empty traversable")
@@ -102,7 +102,7 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A, Repr]] extends Tra
     finally iter.close
   }
   override def headOption = {
-    val iter = iterator.take(1)
+    val iter = CloseableIteratorOps(iterator).take(1)
     try {
       if (iter.hasNext) Some(iter.next())
       else None
@@ -337,17 +337,6 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A, Repr]] extends Tra
     }
     b.result
   }
-
-  override def view = new LongTraversableView[A, Repr] {
-    protected lazy val underlying = self.repr
-
-    protected[io] def iterator = self.iterator
-  }
-  override def view(from: Int, until: Int) = view.slice(from, until)
-  /**
-   * The long equivalent of Traversable.view(from,to)
-   */
-  def lview(from: Long, until: Long): LongTraversableView[A, Repr] = this.view.lslice(from, until)
 
   def sameElements[B >: A](that: Iterable[B]): Boolean =
     managed(iterator).acquireAndGet(_.sameElements(that.iterator))
@@ -678,7 +667,7 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A, Repr]] extends Tra
    *          fewer elements than size.
    */
   def sliding(size: Int, step: Int = 1): LongTraversable[Seq[A]] = {
-    val data: Seq[Seq[A]] = self.iterator.modifiedSliding(size, step).toSeq
+    val data: Seq[Seq[A]] = CloseableIteratorOps(self.iterator).modifiedSliding(size, step).toSeq
     LongTraversable[Seq[A]](
       CloseableIterator(data.iterator),
       "Sliding(" + size + "," + step + " LongTraversable(...)")
@@ -707,6 +696,20 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A, Repr]] extends Tra
   def distinct : Repr
   def intersect [B >: A] ( that : Seq[B] ) : Repr
    */
+  
+  override def init = proxy(CloseableIteratorOps(iterator).init)
+  
+  protected def proxy[B >: A](newIter: => CloseableIterator[B]):Repr
+  def force:Repr
+
+  /**
+   * LongTraversable is a view so this method is not necessary
+   */
+//  override def view = super.view
+  /**
+   * LongTraversable is a view so this method is not necessary
+   */
+//  override def view(from: Int, until: Int) = view.slice(from, until)
 
 }
 

@@ -67,7 +67,7 @@ object JavaConverters {
           val maxChars = codec.encoder.maxBytesPerChar
           lazy val chars = codec.decode(t.view.map{_.toByte}.toArray)
           def iterator: CloseableIterator[Char] = CloseableIterator(chars.iterator)
-        }.view
+        }
 
         override def bytesAsInts = new LongTraversable[Int]{
           def iterator = new CloseableIterator[Int] {
@@ -77,7 +77,7 @@ object JavaConverters {
             final def hasNext: Boolean = iter.hasNext
             def doClose() {}
           }
-        }.view
+        }
         def bytes = new LongTraversable[Byte]{
           def iterator = new CloseableIterator[Byte] {
             var iter = OutputConverter.TraversableIntConverter.toBytes(t)
@@ -86,7 +86,7 @@ object JavaConverters {
             final def hasNext: Boolean = iter.hasNext
             def doClose() {}
           }
-        }.view
+        }
 
         def size = Some(t.size * 4)
       }
@@ -102,17 +102,17 @@ object JavaConverters {
           lazy val chars = codec.decode(t.toArray)
 
           def iterator: CloseableIterator[Char] = CloseableIterator(chars.iterator)
-        }.view
+        }
 
         override def bytesAsInts = new LongTraversable[Int]{
 
           def iterator: CloseableIterator[Int] = CloseableIterator(t.toIterator.map(_.toInt))
-        }.view
+        }
 
 
         override def bytes = new LongTraversable[Byte]{
           def iterator: CloseableIterator[Byte] = CloseableIterator(t.toIterator)
-        }.view
+        }
 
         def size = Some(t.size)
       }
@@ -256,10 +256,10 @@ object JavaConverters {
      */
     implicit object TraversableCharConverter extends AsReadCharsConverter[Traversable[Char]]{
       def toReadChars(t: Traversable[Char]): ReadChars = new ReadChars {
-        def chars: ResourceView[Char] = new LongTraversable[Char] {
+        def chars: LongTraversable[Char] = new LongTraversable[Char] {
 
           protected[io] def iterator: CloseableIterator[Char] = CloseableIterator(t.toIterator)
-        }.view
+        }
       }
     }
   }

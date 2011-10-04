@@ -57,7 +57,9 @@ object PerformanceSuite {
         () => new seekable.SmallMediumSetMemorySeekable,
         () => new seekable.SmallSetMemorySeekable,
         
-        () => new file.HardDriveScan
+        // -----  Miscellaneous Tests
+        () => new file.HardDriveScan,
+        () => new iterator.CloseableIteratorPerformanceTest
         )
   }
 }

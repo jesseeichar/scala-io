@@ -12,6 +12,7 @@ import sperformance.PerformanceTest
 object Main {
   var outputDirectory = if(new File("perf").exists) new File("perf","results")
       else new File("results")
+  outputDirectory.mkdirs()
 
   def runTestsReflectively(tests: Class[_ <: PerformanceTest]*) {
     //TODO - ClassLoader magic....

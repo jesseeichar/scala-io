@@ -68,15 +68,15 @@ object BasicIO {
     val input:Input = Resource.fromInputStream(url.openStream())
 
     // The simplest way to read data is to read bytes from an Input object
-    val bytes: ResourceView[Byte] = input.bytes
+    val bytes: LongTraversable[Byte] = input.bytes
 
     // you can also get the characters and strings from an Input object but you need a codec for decoding the bytes
-    val chars: ResourceView[Char] = input.chars(Codec.UTF8)
+    val chars: LongTraversable[Char] = input.chars(Codec.UTF8)
 
     implicit val defaultCodec: Codec = Codec.UTF8
 
     // by declaring an _implicit_ codec I do not need to declare the codec explicitly in the next examples
-    val chars2: ResourceView[Char] = input.chars
+    val chars2: LongTraversable[Char] = input.chars
 
     // TODO make Lines return a ResourceView[String]
     // one can also iterate across all lines.  The line ending can be autodetected or can be explicitly declared
@@ -156,18 +156,18 @@ object BasicIO {
 
     // declare the Codec explicitly
     val string:String = in.slurpString(Codec.UTF8)
-    val chars: ResourceView[Char] = in.chars(Codec("UTF8"))
+    val chars: LongTraversable[Char] = in.chars(Codec("UTF8"))
 
     // create a ReadChars so that Codec only needs to be specified once
     val readChars: ReaderResource[Reader] = in.reader(Codec.ISO8859)
     val string2:String = readChars.slurpString
-    val chars2: ResourceView[Char] = readChars.chars
+    val chars2: LongTraversable[Char] = readChars.chars
 
     // Finally you can delcare an implicit val once and all calls will implicitly use that codec
     implicit val codec = Codec.UTF8
 
     val string3:String = in.slurpString
-    val chars3: ResourceView[Char] = in.chars
+    val chars3: LongTraversable[Char] = in.chars
     val readChars2: ReaderResource[Reader] = in.reader
 
   }
