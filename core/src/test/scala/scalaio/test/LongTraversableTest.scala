@@ -220,7 +220,8 @@ class LongTraversableTest extends DataIndependentLongTraversableTest[Int]{
     var count = 0
     val input = traversable(callback = _ => count += 1)
 
-    input.zip(1 to 100)
+    val range = 1 to 100
+    input.zip(range)
     assertEquals(0,count)
 
     input.zip(traversable(100))

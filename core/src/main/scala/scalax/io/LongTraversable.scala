@@ -21,6 +21,7 @@ import scala.collection.mutable.{ Builder, ListBuffer }
 trait LongTraversable[@specialized(Byte) +A] extends Traversable[A]
                             with GenericTraversableTemplate[A, LongTraversable]
                             with LongTraversableLike[A, LongTraversable[A]] {
+  self =>
   override def companion : GenericCompanion[LongTraversable] = LongTraversable
 
   def force:LongTraversable[A] = {
@@ -29,9 +30,9 @@ trait LongTraversable[@specialized(Byte) +A] extends Traversable[A]
     b.result()
   }
   
-  protected def proxy[B >: A](newIter: => CloseableIterator[B]) = new LongTraversable[A] {
-    def iterator = newIter.asInstanceOf[CloseableIterator[A]]
-  }
+  override protected def doInit = 
+    new LongTraversableBuilderImpl[A]().fromIterator(CloseableIteratorOps(self.iterator).init)
+  
   override def toString() = "LongTraversable(...)"
 }
 
@@ -42,7 +43,6 @@ trait LongTraversable[@specialized(Byte) +A] extends Traversable[A]
  */
 object LongTraversable extends TraversableFactory[LongTraversable] {
   implicit def canBuildFrom[A]: CanBuildFrom[Coll, A, LongTraversable[A]] = new GenericCanBuildFrom[A]
-
   // TODO consider a correct implementation
   def newBuilder[A]: Builder[A, LongTraversable[A]] = new ListBuffer[A] mapResult (x => new LongTraversableImpl[A](x))
 
@@ -56,5 +56,11 @@ private class LongTraversableImpl[A](contained:Traversable[A]) extends LongTrave
   protected[io] def iterator: CloseableIterator[A] = contained match {
     case c:LongTraversable[A] => c.iterator
     case _ => CloseableIterator(contained.toIterator)
+  }
+}
+
+private class LongTraversableBuilderImpl[A]() extends LongTraversableBuilder[A,LongTraversable[A]] {
+  def fromIterator(iter: =>CloseableIterator[A]):LongTraversable[A] = new LongTraversable[A] {
+    def iterator = iter
   }
 }
