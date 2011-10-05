@@ -5,8 +5,8 @@
     <ol>
       <li>Add core or file dependency to you project definition
           <pre>
-val core = "{{props.groupId}}" %% "core" % "{{props.version}}"
-val file = "{{props.groupId}}" %% "file" % "{{props.version}}"
+val core = "{{props.groupId}}" %% "scala-io-core" % "{{props.version}}"
+val file = "{{props.groupId}}" %% "scala-io-core" % "{{props.version}}"
           </pre>
       </li>
       <li>update your SBT project to download the dependencies
@@ -29,14 +29,14 @@ val file = "{{props.groupId}}" %% "file" % "{{props.version}}"
 &lt;!-- Core -->
 &lt;dependency>
  &lt;groupId>{{props.groupId}}&lt;/groupId>
- &lt;artifactId>core_{{props.scalaVersion}}&lt;/artifactId>
+ &lt;artifactId>scala-io-core_{{props.scalaVersion}}&lt;/artifactId>
  &lt;version>{{props.version}}&lt;/version>
 &lt;/dependency>
 
 &lt;!-- File -->
 &lt;dependency>
  &lt;groupId>{{props.groupId}}&lt;/groupId>
- &lt;artifactId>file_{{props.scalaVersion}}&lt;/artifactId>
+ &lt;artifactId>scala-io-file_{{props.scalaVersion}}&lt;/artifactId>
  &lt;version>{{props.version}}&lt;/version>
 &lt;/dependency>
       </pre></div>
@@ -76,10 +76,10 @@ val file = "{{props.groupId}}" %% "file" % "{{props.version}}"
         <a href="http://scala-tools.org/repo-releases/com/github/jsuereth/scala-arm/scala-arm_{{props.scalaVersion}}/{{props.armVersion}}/scala-arm_{{props.scalaVersion}}-{{props.armVersion}}.jar">Scala ARM</a>
       </li>
       <li>
-        <a href="http://scala-tools.org/repo-releases/{{props.ioMavenPath}}/core_{{props.scalaVersion}}/{{props.version}}/core_{{props.scalaVersion}}-{{props.version}}.jar">Scala Core</a>
+        <a href="http://scala-tools.org/repo-releases/{{props.ioMavenPath}}/scala-io-core_{{props.scalaVersion}}/{{props.version}}/core_{{props.scalaVersion}}-{{props.version}}.jar">Scala Core</a>
       </li>
       <li>
-        <a href="http://scala-tools.org/repo-releases/{{props.ioMavenPath}}/file_{{props.scalaVersion}}/{{props.version}}/core_{{props.scalaVersion}}-{{props.version}}.jar">Scala File (Optional)</a>
+        <a href="http://scala-tools.org/repo-releases/{{props.ioMavenPath}}/scala-io-file_{{props.scalaVersion}}/{{props.version}}/core_{{props.scalaVersion}}-{{props.version}}.jar">Scala File (Optional)</a>
       </li>
     </ul>
   </p>
