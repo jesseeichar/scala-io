@@ -15,8 +15,9 @@ import scala.collection.Seq
 import scala.collection.TraversableLike
 import scala.util.control.Breaks.break
 import scala.util.control.Breaks.breakable
-
 import CloseableIterator.managed
+import scala.collection.mutable.Builder
+import scala.collection.GenTraversableOnce
 /**
  * The control signals for the limitFold method in [[scalax.io.LongTraversable]].
  *
@@ -25,17 +26,17 @@ import CloseableIterator.managed
  * @param result the value to either return from method to to the next stage of the fold
  * @tparam A the type of Traversable this FoldResult can be used with
  */
-sealed abstract class FoldResult[@specialized(Byte) +A](val result: A)
+sealed trait FoldResult[@specialized(Byte) +A]{def result: A}
 
 /**
  * Signal indicating that the fold should continue to process another value
  */
-case class Continue[@specialized(Byte) +A](currentResult: A) extends FoldResult(currentResult)
+case class Continue[@specialized(Byte) +A](result: A) extends FoldResult[A]
 
 /**
  * Signal indicating that the fold should stop and return the contained result
  */
-case class End[@specialized(Byte) +A](endResult: A) extends FoldResult(endResult)
+case class End[@specialized(Byte) +A](result: A) extends FoldResult[A]
 
 /**
  * A traversable for use on very large datasets which cannot be indexed with Ints but instead
@@ -114,7 +115,6 @@ trait LongTraversableLike[@specialized(Byte) +A, +Repr <: LongTraversableLike[A,
 
     } finally iter.close
   }
-  override def slice(from: Int, until: Int) = lslice(from, until)
 
   def lcount(p: A => Boolean): Long = {
     var cnt = 0L
@@ -122,20 +122,76 @@ trait LongTraversableLike[@specialized(Byte) +A, +Repr <: LongTraversableLike[A,
     cnt
   }
 
-  /**
-   * The long equivalent of Traversable.drop
-   */
-  def ldrop(n: Long): Repr = {
-    def doDrop(remaining: Long, t: LongTraversableLike[A, Repr]): LongTraversableLike[A, Repr] = {
-      if (remaining < Int.MaxValue) t.drop(remaining.toInt)
-      else doDrop(remaining - Int.MaxValue, t.drop(Int.MaxValue))
-    }
-    val b = newBuilder
-    b ++= doDrop(n, this)
-    b.result
+  private def build[B >: A](f: CloseableIteratorOps[A] => CloseableIterator[B]) : Repr = newBuilder match {
+    case ltf:LongTraversableBuilder[A,Repr] => ltf.fromIterator(f(CloseableIteratorOps(iterator)).asInstanceOf[CloseableIterator[A]])
+    case b => 
+      b ++= managed(iterator).acquireAndGet(iter => f(CloseableIteratorOps(iter)).asInstanceOf[CloseableIterator[A]])
+      b.result()
   }
 
   /**
+   * The long equivalent of Traversable.drop
+   */
+  def ldrop(n: Long): Repr = lslice(n,Long.MaxValue)
+  override /*TraversableLike*/ def drop(n: Int): Repr = ldrop(n)
+  override /*TraversableLike*/ def dropWhile(p: A => Boolean): Repr = build(_.dropWhile(p))
+  override /*TraversableLike*/ def takeWhile(p: A => Boolean): Repr = build(_.takeWhile(p))
+  
+  /**
+   * The long equivalent of Traversable.take
+   */
+  def ltake(n: Long): Repr =  lslice(0, n)
+  override /*TraversableLike*/ def take(n: Int): Repr = ltake(n)
+  
+  def lslice(from: Long, until:Long): Repr = build(_.lslice(from,until))
+  override /*TraversableLike*/ def slice(from:Int, until:Int) = lslice(from,until)
+  
+
+  override /*TraversableLike*/ def forall(p: A => Boolean): Boolean = 
+    managed(iterator).acquireAndGet(_ forall p)
+  override /*TraversableLike*/ def exists(p: A => Boolean): Boolean = 
+    managed(iterator).acquireAndGet(_ exists p)
+  override /*TraversableLike*/ def find(p: A => Boolean): Option[A] = 
+    managed(iterator).acquireAndGet(_ find p)
+  override /*TraversableLike*/ def isEmpty: Boolean = 
+    !managed(iterator).acquireAndGet(_.hasNext)
+    
+  override /*TraversableLike*/ def foldRight[B](z: B)(op: (A, B) => B): B =
+    managed(iterator).acquireAndGet(_.foldRight(z)(op))
+  override /*TraversableLike*/ def reduceRight[B >: A](op: (A, B) => B): B = 
+    managed(iterator).acquireAndGet(_.reduceRight(op))
+    
+  override /*TraversableLike*/ def filter(p: A => Boolean): Repr = build(_ filter p)
+  override /*TraversableLike*/ def map[B, That](f: A => B)(implicit bf: CanBuildFrom[Repr, B, That]): That = bf(repr) match {
+    case ltf:LongTraversableBuilder[B,That] => ltf.fromIterator(CloseableIteratorOps(iterator).map(f))
+    case b => 
+      b ++= managed(iterator).acquireAndGet(_.map(f))
+      b.result()
+  }
+    override /*TraversableLike*/ def ++:[B >: A, That](that: Traversable[B])(implicit bf: CanBuildFrom[Repr, B, That]): That = 
+    bf(repr) match {
+	    case ltf:LongTraversableBuilder[B,That] => ltf.fromIterator(CloseableIteratorOps(iterator) ++ that)
+	    case b => 
+	      managed(iterator).acquireAndGet(it => b ++= it)
+	      b ++= that
+	      b.result()      
+	    }
+override /*TraversableLike*/ def flatMap[B, That](f: A => GenTraversableOnce[B])(implicit bf: CanBuildFrom[Repr, B, That]): That = 
+  bf(repr) match {
+    case ltf:LongTraversableBuilder[B,That] => ltf.fromIterator(CloseableIteratorOps(iterator).flatMap(f))
+    case b => 
+      b ++= managed(iterator).acquireAndGet(_.flatMap(f))
+      b.result()
+  }
+  override /*TraversableLike*/ def collect[B, That](pf: PartialFunction[A, B])(implicit bf: CanBuildFrom[Repr, B, That]): That =  
+  bf(repr) match {
+    case ltf:LongTraversableBuilder[B,That] => ltf.fromIterator(CloseableIteratorOps(iterator).collect(pf))
+    case b => 
+      b ++= managed(iterator).acquireAndGet(_.collect(pf))
+      b.result()
+  } 
+
+    /**
    * Returns a $coll formed from this $coll and another iterable collection
    *  by combining corresponding elements in pairs.
    *  If one of the two collections is longer than the other, its remaining elements are ignored.
@@ -251,29 +307,11 @@ trait LongTraversableLike[@specialized(Byte) +A, +Repr <: LongTraversableLike[A,
    */
   def lsize: Long = foldLeft(0L) { (c, _) => c + 1 }
   override def size = lsize min Integer.MAX_VALUE toInt
-
-  /**
-   * The long equivalent of Traversable.slice
-   */
-  def lslice(from: Long, until: Long): Repr = ldrop(from).ltake(0L max (until - (0L max from)))
   /**
    * The long equivalent of Traversable.splitAt
    */
   def lsplitAt(n: Long): (Repr, Repr) = (ltake(n), ldrop(n))
-  /**
-   * The long equivalent of Traversable.take
-   */
-  def ltake(n: Long): Repr = {
-    val b = newBuilder
-    managed(iterator).acquireAndGet { iter =>
-      var c = 0L
-      while (c < n && iter.hasNext) {
-        b += iter.next()
-        c += 1
-      }
-    }
-    b.result
-  }
+    
 
   def sameElements[B >: A](that: Iterable[B]): Boolean =
     managed(iterator).acquireAndGet(_.sameElements(that.iterator))
@@ -603,13 +641,12 @@ trait LongTraversableLike[@specialized(Byte) +A, +Repr <: LongTraversableLike[A,
    *          last and the only element will be truncated if there are
    *          fewer elements than size.
    */
-  def sliding(size: Int, step: Int = 1): LongTraversable[Seq[A]] = {
-    val data: Seq[Seq[A]] = CloseableIteratorOps(self.iterator).modifiedSliding(size, step).toSeq
-    LongTraversable[Seq[A]](
-      CloseableIterator(data.iterator),
-      "Sliding(" + size + "," + step + " LongTraversable(...)")
+  def sliding[That](size: Int, step: Int = 1)(implicit bf: CanBuildFrom[Repr, Seq[A], That]): That = bf(repr) match {
+    case ltf:LongTraversableBuilder[Seq[A],That] => ltf.fromIterator(CloseableIteratorOps(iterator).modifiedSliding(size,step))
+    case b => 
+      b ++= managed(iterator).acquireAndGet(iter => CloseableIteratorOps(iter).modifiedSliding(size,step))
+      b.result()
   }
-
   /**
    * Partitions the data into fixed size blocks (same as sliding(size,size).
    *
@@ -618,7 +655,10 @@ trait LongTraversableLike[@specialized(Byte) +A, +Repr <: LongTraversableLike[A,
    *          last and the only element will be truncated if there are
    *          fewer elements than size.
    */
-  def grouped(size: Int) = sliding(size, size)
+  def grouped[That](size: Int)(implicit bf: CanBuildFrom[Repr, Seq[A], That]) = sliding(size, size)
+  override /*TraversableLike*/ def partition(p: A => Boolean)= (filter(p), filterNot(p))
+  override /*TraversableLike*/ def splitAt(n:Int): (Repr, Repr) = lsplitAt(n)
+  override /*TraversableLike*/ def span(p: A => Boolean) = (takeWhile(p), dropWhile(p))
 
   /*
   Probably can be done but requires more work than I have time for
@@ -634,9 +674,7 @@ trait LongTraversableLike[@specialized(Byte) +A, +Repr <: LongTraversableLike[A,
   def intersect [B >: A] ( that : Seq[B] ) : Repr
    */
   
-  override def init = doInit
-  
-  protected def doInit:Repr
+  override def init = build(_.init)
   
   def force:Repr
 
@@ -656,7 +694,7 @@ object LongTraversableBuilder {
 			new LongTraversableBuilderImpl()
 
 }
-trait LongTraversableBuilder[-A,+Repr] {
+trait LongTraversableBuilder[-A,+Repr] extends Builder[A, Repr] {
   def fromIterator(iterator: =>CloseableIterator[A]):Repr
 }
 

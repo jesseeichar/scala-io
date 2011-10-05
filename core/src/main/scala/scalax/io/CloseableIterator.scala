@@ -20,6 +20,8 @@ trait CloseableIterator[@specialized(Byte) +A] extends Iterator[A] with Closeabl
   }
   
   override def take(i: Int) = lslice(0, i)
+  def ltake(i: Long) = lslice(0, i)
+  def ldrop(i: Long) = lslice(i,Long.MaxValue)
   def lslice(from: Long, until: Long) = {
     var toDrop = from
     while (toDrop > 0) {
@@ -50,11 +52,13 @@ trait CloseableIterator[@specialized(Byte) +A] extends Iterator[A] with Closeabl
 }
 
 private[io] object CloseableIteratorOps { def apply[A](iter: CloseableIterator[A]) = new CloseableIteratorOps(iter) } 
-private[io] class CloseableIteratorOps[A](iter: CloseableIterator[A]) {
+private[io] class CloseableIteratorOps[+A](val iter: CloseableIterator[A]) {
+  def collect[B, That](pf: PartialFunction[A, B]) = Proxy(iter.collect(pf)) 
   def map[B](f: A => B) = Proxy(iter.map(f))
   def flatMap[B](f: (A) => GenTraversableOnce[B]) = Proxy(iter.flatMap(f))
   def dropWhile(p: (A) => Boolean) = Proxy(iter.dropWhile(p))
   def filter(p: (A) => Boolean) = Proxy(iter.filter(p))
+  def filterNot(p: (A) => Boolean) = Proxy(iter.filterNot(p))
   def takeWhile(p: A => Boolean) = Proxy(iter.takeWhile(p))
   def init = new InitIterator(iter)
   def ++[B >: A](that: => GenTraversableOnce[B]): CloseableIterator[B] = {
@@ -85,17 +89,13 @@ private[io] class CloseableIteratorOps[A](iter: CloseableIterator[A]) {
   def take(i: Int) = iter.lslice(0, i)
   def drop(i: Int) = iter.lslice(i, Long.MaxValue)
   def lslice(from: Long, until: Long) = iter.lslice(from,until)
-  
+  import CloseableIterator.safeClose
   class Proxy[+B, C <: Iterator[B]](private[this] val wrapped: C, otherComposingIterators: Iterator[_]*) extends CloseableIterator[B] {
     final def next() = wrapped.next
     final def hasNext: Boolean = wrapped.hasNext
     def doClose() = {
       safeClose(iter)
       otherComposingIterators.foreach(safeClose)
-    }
-    private def safeClose(iter: Iterator[_]) = iter match {
-      case ci: CloseableIterator[_] => ci.close()
-      case _ => ()
     }
   }
   object Proxy {
@@ -104,11 +104,16 @@ private[io] class CloseableIteratorOps[A](iter: CloseableIterator[A]) {
 }
 
 object CloseableIterator {
-  def apply[A](iter:Iterator[A]) = new CloseableIterator[A]{
+  def safeClose(iter: Iterator[_]) = iter match {
+    case ci: CloseableIterator[_] => ci.close()
+    case _ => ()
+  }
+  def apply[A](iter: Iterator[A]) = new CloseableIterator[A] {
     final def next(): A = iter.next
     final def hasNext: Boolean = iter.hasNext
     def doClose() {}
   }
+  def empty[A] = apply(Iterator.empty)
   def selfClosing[A](wrapped: CloseableIterator[A]) = new CloseableIterator[A] {
     final def next(): A = wrapped.next
     final def hasNext: Boolean = {
@@ -128,8 +133,8 @@ object CloseableIterator {
     }
 }
 
-private[io] class InitIterator[@specialized(Byte) A](iter:CloseableIterator[A]) extends CloseableIterator[A] {
-    var nextEl:A = _
+private[io] class InitIterator[@specialized(Byte) +A](iter:CloseableIterator[A]) extends CloseableIterator[A] {
+    private[this] var nextEl:A = _
 
     if(iter.hasNext) {
       nextEl = iter.next()
