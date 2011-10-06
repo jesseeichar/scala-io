@@ -30,4 +30,5 @@ class ResourceTraversableTest extends LongTraversableTest {
     }
     ResourceTraversable.streamBased(resource, () => None, initialConv = callBackAndConv)
   }
+
 }

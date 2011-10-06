@@ -27,7 +27,7 @@ trait LongTraversable[@specialized(Byte) +A] extends Traversable[A]
   protected[this] override def newBuilder = LongTraversable.newBuilder
   def force: LongTraversable[A] = {
     val b = new ListBuffer[A] mapResult (x => new LongTraversableImpl[A](x))
-    b ++= iterator
+    CloseableIterator.managed(iterator).foreach(b ++= _) 
     b.result()
   }
 

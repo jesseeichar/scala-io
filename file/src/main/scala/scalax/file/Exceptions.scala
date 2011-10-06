@@ -33,7 +33,9 @@ import java.io.IOException
  * @author  Jesse Eichar
  * @since   1.0
  */
-case class NotFileException() extends IOException with ControlThrowable
+case class NotFileException(path:String) extends IOException with ControlThrowable {
+  override lazy val toString = path + "is not a file"  
+}
 
 /**
  * This is a control exception that indicates the underlying filesystem object either does not exist or is not a Directory
@@ -54,4 +56,6 @@ case class NotFileException() extends IOException with ControlThrowable
  * @author  Jesse Eichar
  * @since   1.0
  */
-case class NotDirectoryException() extends IOException with ControlThrowable
+case class NotDirectoryException(path:String) extends IOException with ControlThrowable{
+  override lazy val toString = path + "is not a directory"  
+}

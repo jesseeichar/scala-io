@@ -30,8 +30,29 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
   }
   def fspath(name:Path) = fixture.fs.fromSeq(name.segments)
 
+  @Test //@Ignore
+  def can_copy_empty_file : Unit = {
+     val tree = fixture.tree(3)._1
+     val out = fixture.path(1).createDirectory(true,false)
+     tree.**((_:Path).isFile).foreach { p => 
+       val to = out / p.relativize(tree)
+       p.copyTo(to)
+     }
+  }
 
-
+  @Test //@Ignore
+  def can_copy_directory_tree_with_copyTo: Unit = {
+    val tree = fixture.tree(3)._1
+    val out = fixture.path(1)
+    
+    tree.copyTo(out)
+    
+    val copiedFiles = out.***.toList.map((_:Path).relativize(out))
+    val treeFiles = tree.***.map((_:Path).relativize(tree))
+    assertTrue(treeFiles.size == copiedFiles.size)
+    assertTrue(treeFiles.forall(p => copiedFiles.contains(p)))
+  }
+  
   @Test //@Ignore
   def two_paths_are_equal_if_from_same_filesystem : Unit = {
     val path = fixture.path
@@ -627,7 +648,22 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
     assertTrue(f1.exists)
     assertTrue("canExecute was not copied when it should not have", f2.canExecute)
 
-    f2.delete()
+    if(f2.isDirectory) {
+	    if(f2.children().nonEmpty) {
+	      try {
+	        f2.delete()
+	        fail("Expected an exception because delete is not intended to delete recursively")
+	      } catch {
+	        case e:IOException => assertFalse("Error should be a known error and have good message", e.getMessage().contains("unknown"))
+	      }
+	    }
+    } else {
+      intercept[NotDirectoryException]{
+        // can't call children on a file
+        f2.children()
+      }
+    }
+    f2.deleteRecursively(force=true)
     assertTrue("failed to delete f2", f2.nonExistent)
     f1.lastModified = 10000
     f1.access(Path.AccessModes.Execute) = true

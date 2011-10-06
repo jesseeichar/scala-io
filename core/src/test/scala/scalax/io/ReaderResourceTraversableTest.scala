@@ -9,7 +9,7 @@
 package scalax.io
 
 
-class ReaderResourceTraversableViewTest extends ResourceTraversableViewTest {
+class ReaderResourceTraversableTest extends ResourceTraversableTest {
 
   protected override def expectedData(tsize:Int,
                              dataFunc: (Int) => Seq[Int]) =

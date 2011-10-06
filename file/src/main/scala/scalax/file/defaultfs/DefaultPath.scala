@@ -17,6 +17,7 @@ import collection.Traversable
 import scalax.io._
 import Path._
 import Path.AccessModes._
+import java.io.FileFilter
 
 
 /**
@@ -78,33 +79,12 @@ class DefaultPath private[file] (val jfile: JFile, override val fileSystem: Defa
       if (force) access_= (access + Write)
 
       if(!canWrite) fail("File is not writeable so the file cannot be deleted")
-      if(!jfile.delete) fail("Unable to delete file for unknown reason")
+      if(!jfile.delete) {
+        if(children().nonEmpty) fail("use deleteRecursively if you want to delete directory and descendants")
+        else fail("Unable to delete file for unknown reason")
+      }
     }
     this
-  }
-
-  protected def copyFile(dest: Path): Path = {
-    val FIFTY_MB = 1024 * 1024 * 50   // TODO extract this out into a constants file for easy adjustment
-    assert(isFile, "Source %s is not a valid file." format name)
-
-// TODO ARM this
-    import scalax.io.StandardOpenOption.{Create,Truncate,Write,Read}
-    for {inResource <- fileChannel(Read)
-         in <- inResource
-         out <- dest.channel(Create, Truncate, Write)
-    } {
-      var pos, count = 0L
-      while (size exists {pos < _}) {
-        count = (size.get - pos) min FIFTY_MB
-        val prepos = pos
-        pos += in.self.transferTo(pos, count, out)
-        if(prepos == pos) fail("no data can be copied for unknown reason!")
-      }
-      if (this.size != dest.size)
-        fail("Failed to completely copy %s to %s".format(name, dest.name))
-
-    }
-    dest
   }
 
   protected def moveFile(target: Path, atomicMove:Boolean) : Unit = {
@@ -135,10 +115,15 @@ class DefaultPath private[file] (val jfile: JFile, override val fileSystem: Defa
 
   override def toString() = "Path(%s)".format(path)
   def descendants[U >: Path, F](filter:F, depth:Int, options:Traversable[LinkOption])(implicit factory:PathMatcherFactory[F]) = {
-    new BasicPathSet[DefaultPath](this, factory(filter), depth, false, { path:DefaultPath =>
-      val listOption = Option((path).jfile.listFiles)
-      val list = listOption.map(_.view).getOrElse(Nil.view) 
-      list.map (fileSystem.apply).toList
+    if (!isDirectory) throw new NotDirectoryException(this + " is not a directory so descendants can not be called on it")
+
+    new BasicPathSet[DefaultPath](this, factory(filter), depth, false, { (p:PathMatcher, path:DefaultPath) =>
+      val fileFilter = new FileFilter() {
+        def accept(f: JFile) = f.isDirectory() || p(fileSystem(f))
+      }
+      val listOption = Option((path).jfile.listFiles(fileFilter))
+      val files = listOption.map(_.toIterator).getOrElse(Iterator.empty) 
+      files.map (fileSystem.apply)
     })
   }
 }

@@ -96,7 +96,6 @@ trait PathSet[+T] extends Iterable[T] with PathFinder[T] {
   def \(literal: String) = /(literal)
 }
 
-
 /**
  * Directory stream implementation to assist in implementing
  * DirectoryStreams that are based on Paths.
@@ -116,13 +115,13 @@ final class BasicPathSet[+T <: Path](srcFiles: Iterable[T],
                                pathFilter : PathMatcher,
                                depth:Int,
                                self:Boolean,
-                               children : T => List[T]) extends PathSet[T] {
+                               children : (PathMatcher,T) => Iterator[T]) extends PathSet[T] {
 
   def this (parent : T,
             pathFilter : PathMatcher,
             depth:Int,
             self:Boolean,
-            children : T => List[T]) = this(List(parent), pathFilter, depth, self, children)
+            children : (PathMatcher,T) => Iterator[T]) = this(List(parent), pathFilter, depth, self, children)
 
     def **[U >: T, F](filter: F)(implicit factory:PathMatcherFactory[F]): PathSet[U] = {
       val nextFilter = factory(filter)
@@ -144,16 +143,16 @@ final class BasicPathSet[+T <: Path](srcFiles: Iterable[T],
     def ---[U >: T](excludes: PathFinder[U]): PathSet[U] = new SubtractivePathSet[U](this,excludes)
 
   def iterator: Iterator[T] = new Iterator[T] {
-    val roots = srcFiles.toSet
-    var toVisit = if(self) roots.toList else {roots.toList flatMap children}
-    var nextElem : Option[T] = None
+    private[this] val roots = srcFiles.toSet
+    private[this] val toVisit = if(self) new PathsToVisit(roots.toIterator) else new PathsToVisit(roots.flatMap {p => children(pathFilter,p)}.toIterator)
+    private[this] var nextElem : Option[T] = None
 
-    def root(p:Path) = p.parents.foldRight (None:Option[Path]){
+    private[this] def root(p:Path) = p.parents.foldRight (None:Option[Path]){
       case (_, found @ Some(_)) => found
       case (prevParent, _) => roots.find{_ == prevParent}
     }
 
-    def currentDepth(p:Path, root:Option[Path]) = {
+    private[this] def currentDepth(p:Path, root:Option[Path]) = {
       val basicDepth = root.map {r => p.relativize(r).segments.size} getOrElse Int.MaxValue
       if(self) basicDepth - 1 else basicDepth
     }
@@ -165,19 +164,16 @@ final class BasicPathSet[+T <: Path](srcFiles: Iterable[T],
                     }
 
     @tailrec
-    def loadNext() : Option[T] = {
-      toVisit match {
-        case Nil => None
-        case path :: _ if path.isDirectory =>
-
-          if(depth < 0 || depth > currentDepth(path, root(path)))
-            toVisit = children(path) ::: toVisit.tail
-          else
-            toVisit = toVisit.tail
-          if (pathFilter(path)) Some(path) else loadNext
-        case file :: _ =>
-          toVisit = toVisit.tail
-          if (pathFilter(file)) Some(file) else loadNext
+    private[this] def loadNext() : Option[T] = {
+      if(toVisit.isEmpty) None
+      else if(toVisit.head.isDirectory) {
+        val path = toVisit.next()
+        if(depth < 0 || depth > currentDepth(path, root(path)))
+          toVisit.prepend(children(pathFilter,path))
+        if (pathFilter(path)) Some(path) else loadNext
+      }else {
+        val file = toVisit.next()
+        if (pathFilter(file)) Some(file) else loadNext
       }
     }
 
@@ -197,6 +193,27 @@ final class BasicPathSet[+T <: Path](srcFiles: Iterable[T],
   override def toString(): String = getClass().getSimpleName+"(...)"
 }
 
+private class PathsToVisit[T](startingIter:Iterator[T]) {
+  private[this] var curr = startingIter.buffered
+  private[this] var iterators:List[Iterator[T]] = Nil
+  def head = curr.head
+  def isEmpty = !hasNext
+  @tailrec
+  final def hasNext:Boolean = 
+    if(curr.hasNext) true
+    else if(iterators.isEmpty) false
+    else {
+      curr = iterators.head.buffered
+      iterators = iterators.tail
+      hasNext
+  }
+  
+  final def next() = curr.next()
+  
+  final def prepend(iter:Iterator[T]) = {
+    iterators = iter :: curr :: iterators
+  }
+}
 
 private trait SourceBasedPathSet[+T] {
   self:PathSet[T] =>

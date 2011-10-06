@@ -114,17 +114,6 @@ class RamPath(relativeTo: String, val path: String, override val fileSystem: Ram
     this
   }
 
-  protected def copyFile(dest: Path): Path = {
-    dest match {
-      case dest: RamPath => node.foreach {
-        case node: FileNode => fileSystem.copyFile(this, node, dest)
-      }
-      case dest =>
-        dest.write(bytes)
-    }
-    dest
-  }
-
   protected def moveFile(target: Path, atomicMove: Boolean): Unit = fileSystem.move(this, target.asInstanceOf[RamPath])
 
   protected def moveDirectory(target: Path, atomicMove: Boolean): Unit = fileSystem.move(this, target.asInstanceOf[RamPath])
@@ -132,13 +121,15 @@ class RamPath(relativeTo: String, val path: String, override val fileSystem: Ram
   override def toString() = "RamPath(%s)".format(path)
 
   def descendants[U >: Path, F](filter: F, depth: Int, options: Traversable[LinkOption])(implicit factory: PathMatcherFactory[F]) = {
-    new BasicPathSet[RamPath](this, factory(filter), depth, false, (parent: RamPath) => {
+    if (!isDirectory) throw new NotDirectoryException(this + " is not a directory so descendants can not be called on it")
+    
+    new BasicPathSet[RamPath](this, factory(filter), depth, false, (pathFilter: PathMatcher, parent: RamPath) => {
       parent.node.collect {
         case d: DirNode =>
           d.children.map(n => parent / n.name)
-        case _ =>
-          throw new AssertionError("This method should only be called on directories")
-      }.flatten.toList
+        case p =>
+          throw new NotDirectoryException(p+" is not a directory so descendants can not be called on it")
+      }.flatten.toIterator
     })
   }
 

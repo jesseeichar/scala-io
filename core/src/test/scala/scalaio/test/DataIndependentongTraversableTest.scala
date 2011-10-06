@@ -4,6 +4,7 @@ import org.junit.Test
 import org.junit.Assert._
 
 trait DataIndependentLongTraversableTest[T] {
+  protected def sizeIsDefined = false
   def independentTraversable(): LongTraversable[T]
   def sample: Array[T]
   def times(t1: T, t2: T): T
@@ -197,7 +198,9 @@ trait DataIndependentLongTraversableTest[T] {
     assertSizeAndType(independentTraversable(), t => t ++ sample drop 98)
 
   @Test //@Ignore
-  def size = assertFalse(independentTraversable().hasDefiniteSize)
+  def size = {
+    assertEquals(sizeIsDefined, independentTraversable().hasDefiniteSize)
+  }
 
   def traversable_should_be_LongTraversable = {
     independentTraversable().ltake(3L) // if this compiles it passes the test

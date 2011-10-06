@@ -122,7 +122,7 @@ private[ramfs] class DirNode(var name:String) extends Node {
     case Seq(s, rest @ _*) =>
       children.find {_.name == path.head} match {
         case Some(f:FileNode) =>
-           throw new NotDirectoryException()
+           throw new NotDirectoryException(f.name)
         case Some (d:DirNode) =>
           d.create(rest, fac)
         case None =>

@@ -15,7 +15,7 @@ import scalaio.test.AbstractInputTests
 import scalaio.test.stream.InputTest
 import collection.mutable.ArrayBuffer
 
-class ByteChannelResourceTraversableViewTest extends ResourceTraversableViewTest {
+class ByteChannelResourceTraversableTest extends ResourceTraversableTest {
             /*
   override def traversable[U, A](tsize: Int,
                                  callback: (Int) => U,

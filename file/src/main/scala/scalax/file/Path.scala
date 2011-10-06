@@ -363,7 +363,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
     }else if(segments startsWith other.segments){
       fileSystem.fromSeq(segments.drop(other.segments.size))
     } else {
-      null // TODO do we want to relativize this?
+      null // TODO what to do?
     }
   }
 
@@ -900,14 +900,15 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    *           if true then copy the File attributes of the object
    *           as well as the data.  True by default
    *  @param depth
-   *           The depth of the copy if the path is a Directory.
+   *           The depth of the copy if the path is a Directory. 
+   *           A depth of 0 means only the current Path is copied
+   *           A depth of 1 means all children are copied as well, etc...
    *           default is entire tree
    *  @param replaceExisting
    *           if true then replace any existing target object
    *           unless it is a non-empty directory in which case
    *           an IOException is thrown.
    *           False by default
-   *
    *  @return
    *           the path to the new copy
    *  @throws IOException
@@ -917,7 +918,8 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
   def copyTo[P <: Path](target: P,
              createParents : Boolean=true,
              copyAttributes : Boolean=true,
-             replaceExisting : Boolean=false): P = {
+             replaceExisting : Boolean=false,
+             depth:Int = Int.MaxValue): P = {
 
   	if (this.normalize == target.normalize) return target
 
@@ -928,12 +930,20 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
     if (replaceExisting) target.deleteIfExists()
 
 
-    if (isDirectory) target.createDirectory(createParents, false)
+    if (isDirectory) {
+      target.createDirectory(createParents, false)
+      if(depth > 0) {
+        descendants(depth=depth).foreach{p =>
+          val to = target / p.relativize(self)
+          p.copyTo(to, depth=0)
+        }
+      }
+    }
     else {
       if(createParents) {
         target.parent.foreach{_.createDirectory(true,false)}
       }
-      copyFile(target)
+      copyDataTo(target)
     }
 
     if(copyAttributes) {
@@ -941,14 +951,6 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
     }
     target
   }
-
-  /**
-   * Copy a the contents of a Path representing a file to a new destination
-   * a check has been performed that the file exists, so barring a race condition with
-   * another thread or process this path does exist and is a file.
-   * Dest will not exist at the time of this call.
-   */
-  protected def copyFile(dest: Path): Path
 
   /**
    *  Move the underlying object if it exists to the target location.

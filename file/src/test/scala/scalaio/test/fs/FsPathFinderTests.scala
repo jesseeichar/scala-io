@@ -23,7 +23,8 @@ abstract class FsPathFinderTests extends scalax.test.sugar.AssertionSugar with F
   }
 
   def assertSameContents(x1:TraversableOnce[Path], x2:TraversableOnce[Path]) = {
-    val (list1,list2) = (x1 toList, x2 toList)
+    val list1 = x1 toList
+    val list2 = x2 toList
 
     def relativize(l:List[Path]) = l.map{_.relativize(fixture.root)}
 

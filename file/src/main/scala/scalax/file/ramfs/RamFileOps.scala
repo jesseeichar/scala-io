@@ -46,8 +46,8 @@ private[file] trait RamFileOps {
     nodeOption match {
       case Some(file:FileNode) =>
         toResource(file)
-      case Some(_) =>
-        throw new NotFileException()
+      case Some(d) =>
+        throw new NotFileException(d.toString)
       case None if options exists {e => List(CreateNew, Create) contains e} =>
         createFile(false)
         fileSystem.lookup(this).collect {case f:FileNode => toResource(f)}.getOrElse {sys.error("file should have been created")}
