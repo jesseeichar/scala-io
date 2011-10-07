@@ -65,7 +65,8 @@ class RamFileSystem(val id : RamFileSystem.RamFsId = RamFileSystem.RamFsId(), va
     if(newpath == root) root
     else newpath
   }
-  def roots:List[RamPath] = List (root)
+  override def roots:Set[Path] = Set (root)
+  
   def createTempFile(prefix: String = randomPrefix,
                    suffix: String = null,
                    dir: String = null,

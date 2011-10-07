@@ -20,7 +20,7 @@ private[file] class DefaultFileSystem extends FileSystem {
   def separator: String = JFile.separator
   def fromString(path: String): DefaultPath = apply (new JFile (path))
   def apply(path: JFile): DefaultPath = new DefaultPath (path, this)
-  def roots = JFile.listRoots().toList map {f=> fromString (f.getPath)}
+  def roots = JFile.listRoots().toSet.map {(f:JFile) => fromString (f.getPath)}
   def createTempFile(prefix: String = randomPrefix,
                    suffix: String = null,
                    dir: String = null,

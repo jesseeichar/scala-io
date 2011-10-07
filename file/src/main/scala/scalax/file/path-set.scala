@@ -122,9 +122,32 @@ final class BasicPathSet[+T <: Path](srcFiles: Iterable[T],
             depth:Int,
             self:Boolean,
             children : (PathMatcher,T) => Iterator[T]) = this(List(parent), pathFilter, depth, self, children)
+     
+  private def childSet(nextFilter: PathMatcher, additionalDepth: Int) = {
+    val canCompose = pathFilter == PathMatcher.All
+    val newSrcFiles =
+      if (canCompose) {
+        srcFiles
+      } else {
+        this
+      }
 
+    val newDepth =
+      if (canCompose) {
+        if (additionalDepth == -1) depth
+        else depth + additionalDepth
+      } else {
+        additionalDepth
+      }
+
+    val newSelf =
+      if (canCompose) self
+      else false
+
+    new BasicPathSet(newSrcFiles, nextFilter, newDepth, newSelf, children)
+  }
     def **[U >: T, F](filter: F)(implicit factory:PathMatcherFactory[F]): PathSet[U] = {
-      val nextFilter = factory(filter)
+	  val nextFilter = factory(filter)
       new BasicPathSet(this, nextFilter, -1, false, children)
     }
 
@@ -147,17 +170,14 @@ final class BasicPathSet[+T <: Path](srcFiles: Iterable[T],
     private[this] val toVisit = if(self) new PathsToVisit(roots.toIterator) else new PathsToVisit(roots.flatMap {p => children(pathFilter,p)}.toIterator)
     private[this] var nextElem : Option[T] = None
 
-    private[this] def root(p:Path) = p.parents.foldRight (None:Option[Path]){
-      case (_, found @ Some(_)) => found
-      case (prevParent, _) => roots.find{_ == prevParent}
-    }
+    private[this] def root(p:T) = p.parents.find(p => roots.exists(_.path == p.path))
 
     private[this] def currentDepth(p:Path, root:Option[Path]) = {
       val basicDepth = root.map {r => p.relativize(r).segments.size} getOrElse Int.MaxValue
       if(self) basicDepth - 1 else basicDepth
     }
 
-    def hasNext() = if(nextElem.nonEmpty) true
+    def hasNext() = if(nextElem.isDefined) true
                     else {
                       nextElem = loadNext()
                       nextElem.nonEmpty
@@ -168,7 +188,8 @@ final class BasicPathSet[+T <: Path](srcFiles: Iterable[T],
       if(toVisit.isEmpty) None
       else if(toVisit.head.isDirectory) {
         val path = toVisit.next()
-        if(depth < 0 || depth > currentDepth(path, root(path)))
+        val currDepth = currentDepth(path, root(path))
+        if(depth < 0 || depth > currDepth)
           toVisit.prepend(children(pathFilter,path))
         if (pathFilter(path)) Some(path) else loadNext
       }else {
@@ -193,7 +214,7 @@ final class BasicPathSet[+T <: Path](srcFiles: Iterable[T],
   override def toString(): String = getClass().getSimpleName+"(...)"
 }
 
-private class PathsToVisit[T](startingIter:Iterator[T]) {
+private class PathsToVisit[T <: Path](startingIter:Iterator[T]) {
   private[this] var curr = startingIter.buffered
   private[this] var iterators:List[Iterator[T]] = Nil
   def head = curr.head

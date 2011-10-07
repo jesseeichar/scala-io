@@ -53,7 +53,7 @@ object Path
   /**
    * Lists the roots of the default filesystem
    */
-  def roots: List[Path] = FileSystem.default.roots
+  def roots: Set[Path] = FileSystem.default.roots
 
   /**
    * Create a Path from a string
@@ -358,10 +358,12 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    */
   def relativize(other: Path): Path = {
 
-    if(other.fileSystem != fileSystem || other.root != root) {
+    if(other.fileSystem != fileSystem) {
       other
-    }else if(segments startsWith other.segments){
+    }else if(startsWith(other)){
       fileSystem.fromSeq(segments.drop(other.segments.size))
+    } else if (other.root != root) {
+      other
     } else {
       null // TODO what to do?
     }
@@ -373,7 +375,10 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    *
    * @return the root of the file system
    */
-  def root: Option[Path] = fileSystem.roots find (this.toAbsolute startsWith _)
+  def root: Option[Path] = {
+    val absolute = toAbsolute // cache so don't need to recalculate
+    fileSystem.roots find (absolute startsWith _)
+  }
   /**
    * The segments in the path including the current element of the path.  If the
    * the path is relative only the segments defined are returned... NOT the absolute
@@ -382,9 +387,9 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    *
    * @return the segments in the path
    */
-  def segments: List[String] = parent match {
+  lazy val segments: Seq[String] = parent match {
     case Some(path) => path.segments :+ name
-    case None => List(path)
+    case None => Vector(path)
   }
   /**
    * The parent path segment if it is possible (for example a root will not have a parent)
@@ -398,9 +403,9 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    * @return The path segments of the path excluding the current path segment
    * @see segments
    */
-  def parents: List[Path] = parent match {
+  lazy val parents: Seq[Path] = parent match {
     case None     => Nil
-    case Some(p)  => p :: p.parents
+    case Some(p)  => p +: p.parents
   }
   /**
    * The extension of the name of the path, if it exists. if name ends with an
@@ -408,7 +413,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    *
    * @return the extension of the path
    */
-  def extension: Option[String] =
+  lazy val extension: Option[String] =
     name.lastIndexWhere (_ == '.') match {
       case idx if idx != -1 => Some(name.drop(idx + 1))
       case _ =>None
@@ -1030,9 +1035,13 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
   override def toString() = "Path(%s)".format(path)
   override def equals(other: Any) = other match {
     case x : Path =>
-      val u1 = toURI
-      val u2 = x.toURI
-      toURI == x.toURI
+      def toConsistentURI(path:Path) = path.toURI.toString match {
+        case u if u.endsWith(separator) => u.dropRight(separator.size)
+        case u => u
+      }
+      val u1 = toConsistentURI(this) 
+      val u2 = toConsistentURI(x)
+      u1 == u2
     case _        => false
   }
   override def hashCode() = toURI.hashCode()

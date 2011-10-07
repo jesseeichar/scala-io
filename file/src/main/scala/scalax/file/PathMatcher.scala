@@ -92,7 +92,7 @@ object PathMatcher {
     def apply(accessModes: Path.AccessModes.AccessMode*) = new AccessMatcher(accessModes:_*)
   }
 
-  class FunctionMatcher(f:Path => Boolean, name:String = "") extends PathMatcher {
+  class FunctionMatcher(f: Path => Boolean, name:String = "") extends PathMatcher {
     def apply(path: Path) = f(path)
     override def toString = "FunctionMatcher: "+ (if (name == "") f.toString else name)
   }

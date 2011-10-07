@@ -20,7 +20,7 @@ class CopyFilesPerformanceTest extends PerformanceDSLTest with DefaultFixture{
   val root = Path.roots.head
   before() // setup fixture
   println("CopyFilesPerformanceTest: setting up test")
-  val fromPath = fixture.tree(NumFiles)._1
+  val fromPath = fixture.tree(NumFiles,5)._1
   val text = util.Random.nextString(50)
   fromPath.***.filter (_.isFile).foreach(f => f.write(text))
   val copyPath = fixture.path(1)

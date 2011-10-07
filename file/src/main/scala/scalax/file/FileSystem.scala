@@ -64,7 +64,7 @@ abstract class FileSystem {
   /**
    * Returns the list of roots for this filesystem
    */
-  def roots: List[Path]
+  def roots: Set[Path]
   /**
    * Creates a function that returns true if parameter matches the
    * pattern used to create the function.

@@ -44,7 +44,7 @@ object StdPathOps {
 
     // Parent paths and root of the current path
     val parent: Option[Path] = path.parent
-    val parents: List[Path] = path.parents
+    val parents: Seq[Path] = path.parents
     val root: Option[Path] = path.root
   }
 
@@ -62,7 +62,7 @@ object StdPathOps {
     val absolute: Boolean = path.isAbsolute
     val absolutePath: Path = path.toAbsolute
 
-    val pathSegments: List[String] = path.segments
+    val pathSegments: Seq[String] = path.segments
   }
 
   /**

@@ -622,7 +622,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
 
 
     intercept[IOException] {
-      fixture.fs.roots(0) moveTo fixture.path
+      fixture.fs.roots.head moveTo fixture.path
     }
 
     // TODO test moving between filesystems

@@ -63,14 +63,14 @@ abstract class FileSystemFixture(val fs : FileSystem, rnd : Random) {
    * have the same structure.  The nodes have the same names and subtree
    * as the equivalent path
    */
-  def tree(depth : Int = rndInt(5)+2) : (Path, Node) = {
+  def tree(depth : Int = rndInt(5)+2, filesPerLevel:Int = rndInt(5)) : (Path, Node) = {
 
     val newRoot = path(1)
     newRoot.createDirectory(true)
 
     val structure = Node((newRoot.segments mkString Node.Sep).replaceAll(Node.Sep+"+",Node.Sep), None)
       for (d <- 1 until depth;
-           files <- 0 until rndInt(5)) {
+           files <- 0 until filesPerLevel) {
           val p = path(d, newRoot).createFile(failIfExists = false)
 
           p.relativize(root).segments.drop(1).foldLeft (structure){

@@ -18,6 +18,7 @@ import scalax.io._
 import Path._
 import Path.AccessModes._
 import java.io.FileFilter
+import scala.annotation.tailrec
 
 
 /**
@@ -41,13 +42,25 @@ class DefaultPath private[file] (val jfile: JFile, override val fileSystem: Defa
   def name: String = jfile.getName()
   def path: String = jfile.getPath()
   override lazy val normalize = super.normalize.asInstanceOf[DefaultPath]
-  def parent: Option[DefaultPath] = Option(jfile.getParent()) map fileSystem.fromString
+  def parent: Option[DefaultPath] = Option(jfile.getParentFile()) map (jf => new DefaultPath(jf,fileSystem))
   def checkAccess(modes: AccessMode*): Boolean = {
     modes forall {
       case Execute  => jfile.canExecute()
       case Read     => jfile.canRead()
       case Write    => jfile.canWrite()
     }
+  }
+  override lazy val segments = {
+    @tailrec
+    def fileSegments(f:JFile, acc:Seq[String]):Seq[String] = {
+      val parent = f.getParentFile()
+      if (parent == null) {
+        acc
+      } else {
+        fileSegments(parent, f.name +: acc)
+      }
+    }
+    fileSegments(jfile, Vector.empty[String])
   }
   override def canWrite  = jfile.canWrite
   override def canRead = jfile.canRead
