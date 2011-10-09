@@ -1,7 +1,9 @@
 import java.nio.charset.Charset
 import sbt.{IO,ExactFilter,PathFinder,PatternFilter}
+import sbt.Path.richFile
 import xml.Node
 import java.io.File
+import File.{separator=>sep}
 
 object C {
   val utf8 = Charset.forName("UTF-8")
@@ -16,6 +18,7 @@ class WebsiteModel(
     docDirectory:File,
     indexDir:File) {
       
+println("SourcePath = "+sourcePath)
 
   val version = BuildConstants.version
   val organization = BuildConstants.organization
@@ -23,6 +26,7 @@ class WebsiteModel(
   val self = this
   object Dir {
     val app = new File(indexDir,version)
+	val examples = new File(app, "example_projects")
     val js = new File(app,"js")
     val core = new File(app,"core")
     val file = new File(app,"file")
@@ -42,7 +46,9 @@ class WebsiteModel(
     indexDir.listFiles.filter(f => f.isDirectory && f.getName.endsWith("-SNAPSHOT")).
       foreach (IO.delete)
     Dir.app.mkdirs
-    
+
+    ExampleProjects.prepare(new File(sourcePath, "src"+sep+"main"+sep+Dir.examples.name), Dir.examples)
+
     websiteResources.listFiles foreach {
       case r if r.getName == "app" => 
         IO.copyDirectory(r,Dir.app)
