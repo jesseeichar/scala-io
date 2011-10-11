@@ -113,7 +113,7 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
               in.close
           }
         }
-      } /*
+      } 
       measure method "byteArray" in {
         withSizeDef { size =>
           newInResource(size)
@@ -371,7 +371,7 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
             in.close()
           }
         }
-      }*/
+      }
       measure method "bytes drop" in {
         withSizeDef { size =>
           (size / 2, newInResource(size))

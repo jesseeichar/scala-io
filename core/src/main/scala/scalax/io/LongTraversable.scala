@@ -42,7 +42,14 @@ trait LongTraversable[@specialized(Byte) +A] extends Traversable[A]
 object LongTraversable extends TraversableFactory[LongTraversable] {
   implicit def canBuildFrom[A]: CanBuildFrom[Coll, A, LongTraversable[A]] = new GenericCanBuildFrom[A]
   // TODO consider a correct implementation
-  def newBuilder[A]: Builder[A, LongTraversable[A]] = new LongTraversableBuilderImpl[A]
+  def newBuilder[A]: LongTraversableBuilder[A, LongTraversable[A]] =
+    new AbstractLazyIteratorBasedBuilder[A, LongTraversable[A]] with LongTraversableBuilder[A, LongTraversable[A]] {
+      override def result() = new CompositeIterable[A](builderIterators) with LongTraversable[A]
+      def fromIterator(iter: => CloseableIterator[A]): LongTraversable[A] = new LongTraversable[A] {
+        def iterator = iter
+      }
+
+    }
 
   def apply[A](iteratorImpl: => CloseableIterator[A], toStringImpl: String = "LongTraversable(...)") = new LongTraversable[A] {
     protected[io] def iterator: CloseableIterator[A] = iteratorImpl
@@ -54,71 +61,5 @@ private class LongTraversableImpl[A](contained: Traversable[A]) extends LongTrav
   protected[io] def iterator: CloseableIterator[A] = contained match {
     case c: LongTraversable[A] => c.iterator
     case _ => CloseableIterator(contained.toIterator)
-  }
-}
-
-private class LongTraversableBuilderImpl[A]()
-  extends LongTraversableBuilder[A, LongTraversable[A]] {
-  def fromIterator(iter: => CloseableIterator[A]): LongTraversable[A] = new LongTraversable[A] {
-    def iterator = iter
-  }
-  val builderIterators: Queue[() => Iterator[A]] = Queue.empty
-  override def clear() = builderIterators.clear()
-  override def result() = new CompositeIteratorLongTraversable[A](builderIterators)
-
-  private def addCollector(xs: TraversableOnce[A]) {
-    val collector = new Collector
-    collector.elements ++= xs
-    builderIterators += collector
-  }
-  override def +=(elem: A): this.type = {
-    builderIterators match {
-      case bi if bi.nonEmpty && bi.last.isInstanceOf[Collector] =>
-        bi.last.asInstanceOf[Collector].elements += elem
-      case _ => addCollector(Iterator.single(elem))
-    }
-    this
-  }
-  override def ++=(xs: TraversableOnce[A]): this.type = {
-    xs match {
-      case lt: LongTraversableLike[_, _] => builderIterators += (() => lt.iterator)
-      case xs if xs.isTraversableAgain => builderIterators += (() => xs.toIterator)
-      case xs if builderIterators.nonEmpty && builderIterators.last.isInstanceOf[Collector] =>
-        builderIterators.last.asInstanceOf[Collector].elements ++= xs
-      case xs => {
-        addCollector(xs)
-      }
-    }
-    this
-  }
-  class Collector extends Function0[Iterator[A]] {
-    val elements = Queue.empty[A]
-    def apply() = elements.toIterator
-  }
-}
-private class CompositeIteratorLongTraversable[A](builderIterators: Seq[() => Iterator[A]]) extends LongTraversable[A] {
-  def iterator = {
-    val iterators = Queue(builderIterators: _*)
-    if (iterators.isEmpty) CloseableIterator.empty[A]
-    else new CloseableIterator[A] {
-      val toClose = Queue.empty[Iterator[A]]
-      var now = iterators.dequeue.apply()
-      def next = now.next
-      def hasNext = {
-        if (now.hasNext) true
-        else if (iterators.isEmpty) false
-        else {
-          toClose += now
-          now = iterators.dequeue().apply()
-          hasNext
-        }
-      }
-      def doClose = {
-        import CloseableIterator.safeClose
-        safeClose(now)
-        toClose.foreach(safeClose)
-        iterators.map(_.apply()).foreach(safeClose)
-      }
-    }
   }
 }

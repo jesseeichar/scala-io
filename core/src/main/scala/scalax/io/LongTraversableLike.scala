@@ -691,7 +691,7 @@ override /*TraversableLike*/ def flatMap[B, That](f: A => GenTraversableOnce[B])
 
 object LongTraversableBuilder {
 	implicit def longTraversableBuilder[A]:LongTraversableBuilder[A,LongTraversable[A]] = 
-			new LongTraversableBuilderImpl()
+			LongTraversable.newBuilder[A]
 
 }
 trait LongTraversableBuilder[-A,+Repr] extends Builder[A, Repr] {

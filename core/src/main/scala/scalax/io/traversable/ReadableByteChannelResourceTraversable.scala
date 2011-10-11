@@ -99,6 +99,8 @@ private[traversable] class SeekableByteChannelIterator(
     isInitialized = true
     channel.position(position)
   }
+  final override def foreach[@specialized(Unit) U](f: Byte => U) =
+    while (hasNext) f(next)
 
   def hasNext = {
     if (position < endIndex && buffer.hasRemaining) true
@@ -106,7 +108,7 @@ private[traversable] class SeekableByteChannelIterator(
       false
     } else {
       init()
-      channel.position(position)
+//      channel.position(position)
       buffer.clear
       (channel read buffer)
       buffer.flip

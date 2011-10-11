@@ -1,0 +1,8 @@
+<ul>
+	<li>Performance enhancement for reading from Input objects.  Another approximately 4x speed increase</li>
+	<li>Discarded LongTraversableView in favor for a lazy implementation of LongTraversable.  This is potentially backward breaking although all methods are the same</li>
+	<li>Changed type signature of PathSet so type inference works better</li>
+	<li>Performance tuning of Path-sets so that directory tree searching is more efficient.  About 8x improvement</li>
+	<li>Made Path-sets lazy.  <em>Warning:</em> side-effects in methods like map, collect, filter will not have an effect until a foreach or force are called</li>
+	<li>added performance tests for directory traversal</li>
+</ul>

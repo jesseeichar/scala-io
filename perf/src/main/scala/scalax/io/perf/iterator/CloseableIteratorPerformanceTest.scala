@@ -76,7 +76,8 @@ class CloseableIteratorPerformanceTest extends PerformanceDSLTest {
 
           val byteFunc: Function1[Byte, Unit] = new Function1[Byte, Unit] {
             private[this] var i = 0
-            def apply(b: Byte) = b + 1
+            def apply(b: Byte) = 
+              b + 1
           }
 
           iter.foreach(byteFunc)
@@ -124,7 +125,10 @@ import CloseableIteratorPerformanceTest._
 
 class ByteIter(max: Int) extends CloseableIterator[Byte] {
   var c = 0
-  def next() = {
+  override def foreach[@specialized(Unit) U](f: Byte => U) =
+    while (hasNext) f(next)
+
+    def next() = {
     c += 1
     byte
   }

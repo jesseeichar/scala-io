@@ -36,39 +36,39 @@ import collection.mutable.ConcurrentMap
  * @author  Jesse Eichar
  * @since   1.0
  */
-abstract class PathMatcher extends Function[Path,Boolean] {
-  def unapply(path: Path) = if(apply(path)) Some(path) else None
+abstract class PathMatcher[-T<:Path] extends Function[T,Boolean] {
+  def unapply[U <: T](path: U) = if(apply(path)) Some(path) else None
 
-  def || (filter: PathMatcher): PathMatcher = new FunctionMatcher( path => apply(path) || filter(path), this + " || " + filter)
-  def && (filter: PathMatcher): PathMatcher = new FunctionMatcher( path => apply(path) && filter(path), this + " && " + filter)
-  def -- (filter: PathMatcher): PathMatcher = new FunctionMatcher( path => apply(path) && !filter(path), this + " -- " + filter)
-  def unary_- : PathMatcher = new FunctionMatcher( path => !apply(path), "not (" + this +")")
+  def || [U <: T](filter: PathMatcher[U]): PathMatcher[U] = new FunctionMatcher[U]( path => apply(path) || filter(path), this + " || " + filter)
+  def && [U <: T](filter: PathMatcher[U]): PathMatcher[U] = new FunctionMatcher[U]( path => apply(path) && filter(path), this + " && " + filter)
+  def -- [U <: T](filter: PathMatcher[U]): PathMatcher[U] = new FunctionMatcher[U]( path => apply(path) && !filter(path), this + " -- " + filter)
+  def unary_- : PathMatcher[T] = new FunctionMatcher( path => !apply(path), "not (" + this +")")
 }
 
 object PathMatcher {
 
   /** matches all paths*/
-  object All extends PathMatcher {
+  object All extends PathMatcher[Path] {
     def apply(path:Path) = true
     override def toString = "All Matcher"
   }
   /** matches a path if it is a file (and exists)*/
-  object IsFile extends PathMatcher {
+  object IsFile extends PathMatcher[Path] {
     def apply(path:Path) = path.isFile
     override def toString = "IsFile Matcher"
   }
   /** matches a path if it is a Directory (and exists)*/
-  object IsDirectory extends PathMatcher {
+  object IsDirectory extends PathMatcher[Path] {
     def apply(path:Path) = path.isDirectory
     override def toString = "IsDirectory Matcher"
   }
   /** matches a path if it is Exists */
-  object Exists extends PathMatcher {
+  object Exists extends PathMatcher[Path] {
     def apply(path:Path) = path.exists
     override def toString = "Exists Matcher"
   }
   /** matches a path if it does not Exist */
-  object NonExistent extends PathMatcher {
+  object NonExistent extends PathMatcher[Path] {
     def apply(path:Path) = path.nonExistent
     override def toString = "NonExistent Matcher"
   }
@@ -83,7 +83,7 @@ object PathMatcher {
    *          the access modes that must be applicable
    *          on the path object.
    */
-  final class AccessMatcher (accessModes: Path.AccessModes.AccessMode*) extends PathMatcher {
+  final class AccessMatcher (accessModes: Path.AccessModes.AccessMode*) extends PathMatcher[Path] {
     val accessModeSet = Set(accessModes:_*)
     def apply(path:Path) = accessModeSet.intersect(path.access).size == accessModeSet.size
     override def toString = "AccessMatcher: "+(accessModeSet mkString ",")
@@ -92,15 +92,15 @@ object PathMatcher {
     def apply(accessModes: Path.AccessModes.AccessMode*) = new AccessMatcher(accessModes:_*)
   }
 
-  class FunctionMatcher(f: Path => Boolean, name:String = "") extends PathMatcher {
-    def apply(path: Path) = f(path)
+  class FunctionMatcher[T <: Path](f: T => Boolean, name:String = "") extends PathMatcher[T] {
+    def apply(path: T) = f(path)
     override def toString = "FunctionMatcher: "+ (if (name == "") f.toString else name)
   }
-  final case class NameIs(name:String) extends FunctionMatcher(_.name == name) {
+  final case class NameIs(name:String) extends FunctionMatcher[Path](_.name == name) {
     override def toString = "NameIs: "+name
   }
 
-  final class RegexPathMatcher(pattern:String, flags:Int = 0) extends PathMatcher {
+  final class RegexPathMatcher(pattern:String, flags:Int = 0) extends PathMatcher[Path] {
     var patternMap = Map[String,Pattern]()
     patternMap = patternMap.updated("/", Pattern.compile(pattern,flags))
 
@@ -130,7 +130,7 @@ object PathMatcher {
     def apply(query:String, flags:Int = 0) = new RegexPathMatcher(query)
   }
 
-  final class RegexNameMatcher(pattern:Pattern) extends PathMatcher {
+  final class RegexNameMatcher(pattern:Pattern) extends PathMatcher[Path] {
     def apply(path: Path): Boolean = pattern.matcher(path.name).matches
     override def toString = "RegexNameMatcher: "+pattern
   }
@@ -140,7 +140,7 @@ object PathMatcher {
     def apply(query:String, flags:Int = 0) = new RegexNameMatcher(Pattern.compile(query, flags))
   }
 
-  final class GlobPathMatcher(query:String) extends PathMatcher {
+  final class GlobPathMatcher(query:String) extends PathMatcher[Path] {
     def apply(path: Path): Boolean = {
 
       val parsedQuery = new GlobParser(path.fileSystem)(query)

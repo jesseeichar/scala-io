@@ -12,7 +12,7 @@ trait CloseableIterator[@specialized(Byte) +A] extends Iterator[A] with Closeabl
   def hasNext: Boolean
   protected def doClose(): Unit
 
-  final override def foreach[@specialized(Unit) U](f: A => U) =
+  override def foreach[@specialized(Unit) U](f: A => U) =
     while (hasNext) f(next)
 
   final def close() {

@@ -55,9 +55,9 @@ class DefaultPath private[file] (val jfile: JFile, override val fileSystem: Defa
     def fileSegments(f:JFile, acc:Seq[String]):Seq[String] = {
       val parent = f.getParentFile()
       if (parent == null) {
-        acc
+        f.getPath() +: acc
       } else {
-        fileSegments(parent, f.name +: acc)
+        fileSegments(parent, f.getName +: acc)
       }
     }
     fileSegments(jfile, Vector.empty[String])
@@ -130,13 +130,16 @@ class DefaultPath private[file] (val jfile: JFile, override val fileSystem: Defa
   def descendants[U >: Path, F](filter:F, depth:Int, options:Traversable[LinkOption])(implicit factory:PathMatcherFactory[F]) = {
     if (!isDirectory) throw new NotDirectoryException(this + " is not a directory so descendants can not be called on it")
 
-    new BasicPathSet[DefaultPath](this, factory(filter), depth, false, { (p:PathMatcher, path:DefaultPath) =>
-      val fileFilter = new FileFilter() {
-        def accept(f: JFile) = f.isDirectory() || p(fileSystem(f))
+    new BasicPathSet[DefaultPath](this, factory(filter), depth, false, { (p:PathMatcher[DefaultPath], path:DefaultPath) =>
+      val files = if(p == PathMatcher.All) path.jfile.listFiles
+      else {
+        val fileFilter = new FileFilter() {
+	        def accept(f: JFile) = f.isDirectory() || p(fileSystem(f))
+	      }
+	      path.jfile.listFiles(fileFilter)
       }
-      val listOption = Option((path).jfile.listFiles(fileFilter))
-      val files = listOption.map(_.toIterator).getOrElse(Iterator.empty) 
-      files.map (fileSystem.apply)
+      if(files == null) Iterator.empty
+      else files.toIterator.map (fileSystem.apply)
     })
   }
 }

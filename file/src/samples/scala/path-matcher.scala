@@ -73,21 +73,21 @@ object PathMatcherSamples {
     // FileSystem.matcher
 
     // default type of matcher created is a glob matcher
-    val InTmpDir: PathMatcher = Path("/tmp/file").matcher("/tmp/**")
+    val InTmpDir: PathMatcher[Path] = Path("/tmp/file").matcher("/tmp/**")
 
     // If you can also create through the FileSystem
-    val InBinDir: PathMatcher = FileSystem.default.matcher("/bin/*")
+    val InBinDir: PathMatcher[Path] = FileSystem.default.matcher("/bin/*")
 
     // you can explicitly declare the GLOB matcher
     import PathMatcher.StandardSyntax.GLOB
-    val StartsWithH: PathMatcher = FileSystem.default.matcher("**/H*", GLOB)
+    val StartsWithH: PathMatcher[Path] = FileSystem.default.matcher("**/H*", GLOB)
 
     // a Regex matcher is also available
     import PathMatcher.StandardSyntax.REGEX
-    val ContainsVowel: PathMatcher = FileSystem.default.matcher(".*[aeiou].*", REGEX)
+    val ContainsVowel: PathMatcher[Path] = FileSystem.default.matcher(".*[aeiou].*", REGEX)
 
     // If a filesystem supports a filesystem specific sytax you can declare that
-    val CustomSyntaxMatcher: PathMatcher = FileSystem.default.matcher("/tmp/@123", "customSyntax")
+    val CustomSyntaxMatcher: PathMatcher[Path] = FileSystem.default.matcher("/tmp/@123", "customSyntax")
 
     // now demonstrate use
     // See FileSystem.matcher for details on creating a matcher

@@ -30,7 +30,7 @@ object Children {
       import scalax.file.PathMatcher._
 
       val path:Path = Path("/tmp/")
-      val ContainsSpace:PathMatcher = path.matcher ("* *")
+      val ContainsSpace:PathMatcher[Path] = path.matcher ("* *")
       path.children ().collect {case ContainsSpace (path) => path.moveTo (Path (path.name.filter (_ != ' ')))}
     }
 
@@ -59,7 +59,7 @@ object Children {
       import scalax.file.PathMatcher._
 
       val path:Path = Path("/tmp/")
-      val matcher: PathMatcher = path.matcher("S*")
+      val matcher: PathMatcher[Path] = path.matcher("S*")
       path.children (matcher).foreach (println _)
 
       path.children(IsFile).foreach (println _)

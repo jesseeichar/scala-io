@@ -10,22 +10,22 @@ import java.util.regex.Pattern
  * Date: Oct 1, 2010
  * Time: 8:23:16 AM
  */
-trait PathMatcherFactory[-T] extends Function1[T,PathMatcher]
+trait PathMatcherFactory[-T] extends Function1[T,PathMatcher[Path]]
 
 object PathMatcherFactory {
   implicit object FunctionToMatcher extends PathMatcherFactory[Function1[Path,Boolean]] {
-    def apply(f: (Path) => Boolean): PathMatcher = f match {
-    case m:PathMatcher => m
+    def apply(f: (Path) => Boolean): PathMatcher[Path] = f match {
+    case m:PathMatcher[Path] => m
     case f => new FunctionMatcher(f)
   }
   }
   implicit object GlobToMatcher extends PathMatcherFactory[String] {
-    def apply(f: String): PathMatcher = GlobNameMatcher(f)
+    def apply(f: String): PathMatcher[Path] = GlobNameMatcher(f)
   }
   implicit object RegexToMatcher extends PathMatcherFactory[Regex] {
-    def apply(f: Regex): PathMatcher = RegexNameMatcher(f)
+    def apply(f: Regex): PathMatcher[Path] = RegexNameMatcher(f)
   }
   implicit object PatternToMatcher extends PathMatcherFactory[Pattern] {
-    def apply(f: Pattern): PathMatcher = RegexNameMatcher(f)
+    def apply(f: Pattern): PathMatcher[Path] = RegexNameMatcher(f)
   }
 }

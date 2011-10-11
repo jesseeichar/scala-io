@@ -79,7 +79,7 @@ object ScalaIoBuild extends Build {
   // ----------------------- Performace Project ---------------------//
   
   val perfSettings: Seq[Setting[_]] = Seq(
-    name := "scala-io-performace",
+    name := "scala-io-performance",
     libraryDependencies += "com.github.jsuereth" %% "sperformance" % "0.1",
     publishArtifact in Test := false
   )

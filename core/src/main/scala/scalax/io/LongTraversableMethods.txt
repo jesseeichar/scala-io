@@ -1,0 +1,8 @@
+
+
+  override /*TraversableLike*/ def scanLeft[B, That](z: B)(op: (B, A) => B)(implicit bf: CanBuildFrom[Repr, B, That]): That = {}
+  override /*TraversableLike*/ def scanRight[B, That](z: B)(op: (A, B) => B)(implicit bf: CanBuildFrom[Repr, B, That]): That = {}
+  
+  override /*TraversableLike*/ def span(p: A => Boolean): (Repr, Repr) = {}
+  
+  

@@ -11,6 +11,7 @@ import java.io.Closeable
 import java.nio.channels.ByteChannel
 import collection.{Iterator, IterableView}
 import annotation.tailrec
+import scala.collection.generic.CanBuildFrom
 
 trait PathFinder[+T] {
   /**The union of the paths found by this <code>PathSet</code> with the paths found by 'paths'.*/
@@ -22,14 +23,14 @@ trait PathFinder[+T] {
   /**Constructs a new finder that selects all paths with a name that matches <code>filter</code> and are
    * descendants of paths selected by this finder.
    */
-  def **[U >: T, F](filter: F)(implicit factory:PathMatcherFactory[F]): PathFinder[U]
+  def **[F](filter: F)(implicit factory:PathMatcherFactory[F]): PathFinder[T]
 
-  def ***[U >: T] : PathFinder[U]
+  def *** : PathFinder[T]
 
   /**Constructs a new finder that selects all paths with a name that matches <code>filter</code> and are
    * immediate children of paths selected by this finder.
    */
-  def *[U >: T, F](filter: F)(implicit factory:PathMatcherFactory[F]): PathFinder[U]
+  def *[F](filter: F)(implicit factory:PathMatcherFactory[F]): PathFinder[T]
 
   /**Constructs a new finder that selects all paths with name <code>literal</code> that are immediate children
    * of paths selected by this finder.
@@ -76,14 +77,14 @@ trait PathSet[+T] extends Iterable[T] with PathFinder[T] {
   /**Constructs a new finder that selects all paths with a name that matches <code>filter</code> and are
    * descendants of paths selected by this finder.
    */
-  def **[U >: T, F](filter: F)(implicit factory:PathMatcherFactory[F]): PathSet[U]
+  def **[F](filter: F)(implicit factory:PathMatcherFactory[F]): PathSet[T]
 
-  def ***[U >: T] : PathSet[U]
+  def *** : PathSet[T]
 
   /**Constructs a new finder that selects all paths with a name that matches <code>filter</code> and are
    * immediate children of paths selected by this finder.
    */
-  def *[U >: T, F](filter: F)(implicit factory:PathMatcherFactory[F]): PathSet[U]
+  def *[F](filter: F)(implicit factory:PathMatcherFactory[F]): PathSet[T]
 
   /**Constructs a new finder that selects all paths with name <code>literal</code> that are immediate children
    * of paths selected by this finder.
@@ -112,18 +113,29 @@ trait PathSet[+T] extends Iterable[T] with PathFinder[T] {
  *          This method is used to retrieve the children of each directory
  */
 final class BasicPathSet[+T <: Path](srcFiles: Iterable[T],
-                               pathFilter : PathMatcher,
+                               pathFilter : PathMatcher[T],
                                depth:Int,
                                self:Boolean,
-                               children : (PathMatcher,T) => Iterator[T]) extends PathSet[T] {
+                               children : (PathMatcher[T],T) => Iterator[T]) 
+  extends PathSet[T] {
 
   def this (parent : T,
-            pathFilter : PathMatcher,
+            pathFilter : PathMatcher[T],
             depth:Int,
             self:Boolean,
-            children : (PathMatcher,T) => Iterator[T]) = this(List(parent), pathFilter, depth, self, children)
-     
-  private def childSet(nextFilter: PathMatcher, additionalDepth: Int) = {
+            children : (PathMatcher[T],T) => Iterator[T]) = this(List(parent), pathFilter, depth, self, children)
+  override def filter(f: T => Boolean) = {
+    if(pathFilter == PathMatcher.All) {
+      val newFilter = new PathMatcher.FunctionMatcher(f)
+      new BasicPathSet[T](srcFiles,newFilter,depth,self,children)
+    } else {
+      super.filter(f)
+    }
+  }
+  override def collect [B, That] (pf: PartialFunction[T, B])(implicit bf: CanBuildFrom[Iterable[T], B, That]): That = {
+    filter(pf.isDefinedAt).collect(pf)
+  }
+  private def childSet(nextFilter: PathMatcher[T], additionalDepth: Int) = {
     val canCompose = pathFilter == PathMatcher.All
     val newSrcFiles =
       if (canCompose) {
@@ -146,16 +158,16 @@ final class BasicPathSet[+T <: Path](srcFiles: Iterable[T],
 
     new BasicPathSet(newSrcFiles, nextFilter, newDepth, newSelf, children)
   }
-    def **[U >: T, F](filter: F)(implicit factory:PathMatcherFactory[F]): PathSet[U] = {
+    def **[F](filter: F)(implicit factory:PathMatcherFactory[F]): PathSet[T] = {
 	  val nextFilter = factory(filter)
       new BasicPathSet(this, nextFilter, -1, false, children)
     }
 
-    def *[U >: T, F](filter: F)(implicit factory:PathMatcherFactory[F]): PathSet[U] = {
+    def *[F](filter: F)(implicit factory:PathMatcherFactory[F]): PathSet[T] = {
       val nextFilter = factory(filter)
       new BasicPathSet(this, nextFilter, 1, false, children)
     }
-    def ***[U >: T] : PathSet[U] = ** (PathMatcher.All)
+    def *** = ** (PathMatcher.All)
 
     def / (literal: String): PathSet[T] = new BasicPathSet(this, new PathMatcher.NameIs(literal), 1, false, children)
 
@@ -173,14 +185,16 @@ final class BasicPathSet[+T <: Path](srcFiles: Iterable[T],
     private[this] def root(p:T) = p.parents.find(p => roots.exists(_.path == p.path))
 
     private[this] def currentDepth(p:Path, root:Option[Path]) = {
-      val basicDepth = root.map {r => p.relativize(r).segments.size} getOrElse Int.MaxValue
+      val basicDepth = root.map {r => 
+        p.relativize(r).segments.size
+        } getOrElse Int.MaxValue
       if(self) basicDepth - 1 else basicDepth
     }
 
     def hasNext() = if(nextElem.isDefined) true
                     else {
                       nextElem = loadNext()
-                      nextElem.nonEmpty
+                      nextElem.isDefined
                     }
 
     @tailrec
@@ -218,7 +232,8 @@ private class PathsToVisit[T <: Path](startingIter:Iterator[T]) {
   private[this] var curr = startingIter.buffered
   private[this] var iterators:List[Iterator[T]] = Nil
   def head = curr.head
-  def isEmpty = !hasNext
+  @inline
+  final def isEmpty = !hasNext
   @tailrec
   final def hasNext:Boolean = 
     if(curr.hasNext) true
@@ -232,7 +247,10 @@ private class PathsToVisit[T <: Path](startingIter:Iterator[T]) {
   final def next() = curr.next()
   
   final def prepend(iter:Iterator[T]) = {
-    iterators = iter :: curr :: iterators
+    val tmp = curr
+    curr = iter.buffered
+    if(tmp.hasNext)
+      iterators = tmp :: iterators
   }
 }
 
@@ -241,11 +259,11 @@ private trait SourceBasedPathSet[+T] {
 
   def /(literal: String): PathSet[T] = mapSources{_ / literal}
 
-  def *[U >: T, F](filter: F)(implicit factory: PathMatcherFactory[F]): PathSet[U] = mapSources{_ * factory(filter)}
+  def *[F](filter: F)(implicit factory: PathMatcherFactory[F]): PathSet[T] = mapSources{_ * factory(filter)}
 
-  def ***[U >: T]: PathSet[U] = mapSources{_ ***}
+  def ***  = mapSources{_ ***}
 
-  def **[U >: T, F](filter: F)(implicit factory: PathMatcherFactory[F]): PathSet[U] = mapSources{_ ** factory(filter)}
+  def **[F](filter: F)(implicit factory: PathMatcherFactory[F]): PathSet[T] = mapSources{_ ** factory(filter)}
 
   def ---[U >: T](excludes: PathFinder[U]): PathSet[U] = new SubtractivePathSet[U](this,excludes)
 

@@ -28,6 +28,8 @@ private[traversable] class InputStreamIterator(
     inConcrete = getIn
     inConcrete.skip(startIndex)
   }
+  final override def foreach[@specialized(Unit) U](f: Byte => U) =
+    while (hasNext) f(next)
 
   final def hasNext = {
     if (pos < endIndex && i < read) true

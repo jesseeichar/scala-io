@@ -189,7 +189,8 @@ object Path
     try target.close() catch { case e: IOException => }
   }
 
-  private[file] def fail(msg: String) = throw new IOException(msg)
+  private[file] def fail(msg: String) = 
+    throw new IOException(msg)
 }
 
 
@@ -940,7 +941,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
       if(depth > 0) {
         descendants(depth=depth).foreach{p =>
           val to = target / p.relativize(self)
-          p.copyTo(to, depth=0)
+          p.copyTo(to, depth=0, replaceExisting=replaceExisting)
         }
       }
     }
@@ -1035,13 +1036,9 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
   override def toString() = "Path(%s)".format(path)
   override def equals(other: Any) = other match {
     case x : Path =>
-      def toConsistentURI(path:Path) = path.toURI.toString match {
-        case u if u.endsWith(separator) => u.dropRight(separator.size)
-        case u => u
-      }
-      val u1 = toConsistentURI(this) 
-      val u2 = toConsistentURI(x)
-      u1 == u2
+      val eqFS = fileSystem == x.fileSystem
+      val eqSeg = segments == x.segments
+      eqFS && eqSeg
     case _        => false
   }
   override def hashCode() = toURI.hashCode()
@@ -1078,7 +1075,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    def children[U >: Path, F](filter:F = PathMatcher.All, options:Traversable[LinkOption]=Nil)(implicit factory:PathMatcherFactory[F]) : PathSet[Path] =
           descendants(filter, depth=1, options)
 
-   def *[U >: Path, F](filter: F)(implicit factory:PathMatcherFactory[F]): PathSet[U] = {
+   def *[F](filter: F)(implicit factory:PathMatcherFactory[F]): PathSet[Path] = {
      children(factory(filter))
    }
 
@@ -1124,10 +1121,10 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
   def descendants[U >: Path, F](filter:F = PathMatcher.All,
            depth:Int = -1, options:Traversable[LinkOption]=Nil)(implicit factory:PathMatcherFactory[F]): PathSet[Path]
 
-  def **[U >: Path, F](filter: F)(implicit factory:PathMatcherFactory[F]): PathSet[U] = {
+  def **[F](filter: F)(implicit factory:PathMatcherFactory[F]): PathSet[Path] = {
     descendants(factory(filter))
   }
-  def ***[U >: Path] : PathSet[U] = descendants()
+  def *** : PathSet[Path] = descendants()
 
   def +++[U >: Path](includes: PathFinder[U]): PathSet[U] = new AdditivePathSet(this,includes)
   def ---[U >: Path](excludes: PathFinder[U]): PathSet[U] = new SubtractivePathSet(this,excludes)

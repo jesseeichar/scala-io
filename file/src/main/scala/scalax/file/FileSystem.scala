@@ -114,7 +114,7 @@ abstract class FileSystem {
    *
    * @see Path#contents
    */
-  def matcher(pattern:String, syntax:String = PathMatcher.StandardSyntax.GLOB): PathMatcher = {
+  def matcher(pattern:String, syntax:String = PathMatcher.StandardSyntax.GLOB): PathMatcher[Path] = {
     syntax match {
       case PathMatcher.StandardSyntax.GLOB => GlobPathMatcher(pattern)
       case PathMatcher.StandardSyntax.REGEX => RegexPathMatcher(pattern)
