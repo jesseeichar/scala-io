@@ -6,4 +6,4 @@ The implementation will work with Java 6+ and will depend on scala-arm but not o
 
 There are two main components to the API.  Core and File.  Core deals with obtaining data from streams, channels, etc...  Basically adapting the IO object of the underlying platform (JVM, CLR) to be more idiomatic Scala.  
 
-For details see [http://jesseeichar.github.com/scala-io/](http://jesseeichar.github.com/scala-io/).
+For details see [http://jesseeichar.github.com/scala-io-doc/](http://jesseeichar.github.com/scala-io-doc/).
