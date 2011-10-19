@@ -56,8 +56,8 @@ abstract class FileSystemFixture(val fs : FileSystem, rnd : Random) {
     file(seg)
   }
 
-  def path(segments : Int, root : Path = root) : Path = root \ file(segments)
-  def path : Path = root \ file
+  def path(segments : Int, root : Path = root) : Path = root \ fs.fromString(file(segments))
+  def path : Path = root \ fs.fromString(file)
 
   /* Returns a Path and a Node.  Both the Node and the Path
    * have the same structure.  The nodes have the same names and subtree

@@ -3,10 +3,10 @@
     <em>{{props.SNAPSHOT_BLURB}}</em>
     <h3>SBT Example</h3>
     <ol>
-      <li>Add core or file dependency to you project definition
+      <li>Add core or file dependency to your build.sbt or project settings
           <pre>
-val core = "{{props.groupId}}" %% "scala-io-core" % "{{props.version}}"
-val file = "{{props.groupId}}" %% "scala-io-core" % "{{props.version}}"
+libraryDependencies += "{{props.groupId}}" %% "scala-io-core" % "{{props.version}}"
+libraryDependencies += "{{props.groupId}}" %% "scala-io-file" % "{{props.version}}"
           </pre>
       </li>
       <li>update your SBT project to download the dependencies

@@ -18,6 +18,20 @@ import java.io.{File=>JFile}
 private[file] class DefaultFileSystem extends FileSystem {
   val name = "Default"
   def separator: String = JFile.separator
+  def updateSlash(segment:String) = separator match {
+    case "/" => segment.replace("/","⁄")
+    case _ => segment
+  }
+  override def fromSeq(segments: Seq[String]): Path = {
+    val updatedSegments = if(JFile.listRoots().exists(f => segments.headOption.exists(_ == f.getPath())) ) {
+      segments.head +: segments.drop(1).map(updateSlash)      
+    } else {
+      segments.map(updateSlash)
+    }
+    
+    fromString(updatedSegments.filterNot{_.isEmpty} mkString separator)
+  }
+
   def fromString(path: String): DefaultPath = apply (new JFile (path))
   def apply(path: JFile): DefaultPath = new DefaultPath (path, this)
   def roots = JFile.listRoots().toSet.map {(f:JFile) => fromString (f.getPath)}

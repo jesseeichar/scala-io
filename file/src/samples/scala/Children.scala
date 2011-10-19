@@ -3,50 +3,35 @@
  */
 object Children {
 
-    /**
-     * Operate on all children
-     */
-    def children {
-      import scalax.file.{Path, PathMatcher}
-      import scalax.file.PathMatcher._
+  /**
+   * Remove spaces from names of paths
+   * renaming with this method can be dangerous because
+   * the stream may be calculated lazily on some filesystems
+   * and the renamed file could also be processed resulting
+   * in a infinite loop
+   */
+  def removeSpaces {
+    import scalax.file.{ Path, PathMatcher }
+    import scalax.file.PathMatcher._
 
-      val path:Path = Path("/tmp/")
-      // print the name of each object in the directory
-      path.children ().collect {case path => println (path.name)}
+    val path: Path = Path("/tmp/")
+    val ContainsSpace: PathMatcher[Path] = path.matcher("* *")
+    path.children(ContainsSpace).foreach { path => path.moveTo(Path(path.name.filter(_ != ' '))) }
+  }
 
-      // Now print names of each directory
-      path.children ().collect {case IsFile(file) => println (file.name)}
-    }
-
-    /**
-     * Remove spaces from names of paths
-     * renaming with this method can be dangerous because
-     * the stream may be calculated lazily on some filesystems
-     * and the renamed file could also be processed resulting
-     * in a infinite loop
-     */
-    def removeSpaces {
-      import scalax.file.{Path, PathMatcher}
-      import scalax.file.PathMatcher._
-
-      val path:Path = Path("/tmp/")
-      val ContainsSpace:PathMatcher[Path] = path.matcher ("* *")
-      path.children ().collect {case ContainsSpace (path) => path.moveTo (Path (path.name.filter (_ != ' ')))}
-    }
-
-    /*
+  /*
      * Count the number of directories
      */
-    def countDirectories {
-      import scalax.file.{Path, PathMatcher}
-      import scalax.file.PathMatcher._
+  def countDirectories {
+    import scalax.file.{ Path, PathMatcher }
+    import scalax.file.PathMatcher._
 
-      val path:Path = Path("/tmp/")
-      val fileCount: Int = path.children ().collect{case IsFile (f)=> f}.foldLeft (0){(count, _) => count+1}
-    }
+    val path: Path = Path("/tmp/")
+    val fileCount: Int = path.children(IsFile).size
+  }
 
-    /*
-     * A directory stream can also be constructed with a filter
+  /*
+     * A PathSet can also be constructed with a filter
      * this is sometime preferable because using a PathMatcher as a filter may offer operating system
      * native support for filtering
      * obviously useful when processing directories with many file (millions perhaps)
@@ -54,16 +39,16 @@ object Children {
      * directoryStream that traverses many levels of the filesystem tree and the filter
      * function allows a new Matcher to be defined at each level of the tree
      */
-    def filterContents {
-      import scalax.file.{Path, PathMatcher}
-      import scalax.file.PathMatcher._
+  def filterContents {
+    import scalax.file.{ Path, PathMatcher }
+    import scalax.file.PathMatcher._
 
-      val path:Path = Path("/tmp/")
-      val matcher: PathMatcher[Path] = path.matcher("S*")
-      path.children (matcher).foreach (println _)
+    val path: Path = Path("/tmp/")
+    val matcher: PathMatcher[Path] = path.matcher("S*")
+    path.children(matcher).foreach(println _)
 
-      path.children(IsFile).foreach (println _)
-    }
+    path.children(IsFile).foreach(println _)
+  }
 
   /**
    * All operations/filters that can be also performed on all descendants
@@ -73,17 +58,20 @@ object Children {
   def descendantProcessing {
     import scalax.file.Path
 
-    val path:Path = Path("/tmp/")
+    val path: Path = Path("/tmp/")
 
     // by default only the files contained in the current path are returned but if depth
     // is set (<0 will traverse entire tree) then the stream will visit subdirectories in
     // pre-order traversal
 
     // search for a .gitignore file down to a depth of 4
-    val gitIgnoreRestrictedTree: Option[Path] = path.descendants (depth=4).find (_.name == ".gitignore")
+    val gitIgnoreRestrictedTree: Option[Path] = path.descendants(depth = 4).find(_.name == ".gitignore")
 
     // search for a .gitignore in the entire subtree
-    val gitIgnoreFullTree: Option[Path] = path.descendants ().find (_.name == ".gitignore")
+    val gitIgnoreFullTree: Option[Path] = path.descendants().find(_.name == ".gitignore")
+
+    // A (slightly) more efficient version.
+    val gitIgnoreFullTreeUsingFilter: Option[Path] = path.descendants((_:Path).name == ".gitignore").headOption
   }
 
   /**
@@ -96,13 +84,50 @@ object Children {
   def descendantsUsingPathSets {
     import scalax.file.Path
 
-    val path:Path = Path("/tmp/")
+    val path: Path = Path("/tmp/")
 
-    path / "src" / "main" **  "s*.scala" foreach (println)
+    path / "src" / "main" ** "s*.scala" foreach (println)
 
   }
 
-/*
+  /**
+   * Operate on all children
+   */
+  def children {
+    import scalax.file.{Path, PathMatcher }
+    import scalax.file.PathMatcher._
+
+    val path: Path = Path("/tmp/")
+    
+    // print name of all files and directories that are children of path 
+    path.children().foreach { path => println(path.name) }
+
+    // Print only the files
+    path.children().filter(IsFile).foreach(path => println(path.name))
+  }
+
+  def laziness {
+    import scalax.file.{Path, PathMatcher }
+    import scalax.file.PathMatcher._
+
+    val path: Path = Path("/tmp/")
+    
+    // all children of path.  the filesystem is not read touched
+    val allChildren = path.children()
+    
+    // all files of children.  Still no filesystem access
+    val files = allChildren.filter(IsFile)
+
+    // all files smaller than 1000 bytes.  Still no filesystem access
+    val smallFiles = files.filter(_.size.forall(_ < 1000))
+    
+    // sizes of files.  still not filesystem access
+    val sizes = smallFiles.flatMap(_.size)
+    
+    //val actualSizes = sizes.force
+    
+  }
+  /*
  * Disabled until Java 7 version because implementation is impossible until then
     // Also you can attempt to perform atomic operations on a PathSet
     // Since not all filesystems support atomic operations (Non in the pre java 7 implementation)

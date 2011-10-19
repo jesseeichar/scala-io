@@ -19,6 +19,7 @@ abstract class AbstractLazyIteratorBasedBuilder[A, +Repr] extends Builder[A, Rep
     }
     this
   }
+  def addIter(iter: () => Iterator[A]) = builderIterators += iter
   override def ++=(xs: TraversableOnce[A]): this.type = {
     xs match {
       case lt: LongTraversableLike[_, _] => builderIterators += (() => lt.iterator)

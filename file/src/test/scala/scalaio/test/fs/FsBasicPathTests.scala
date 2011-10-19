@@ -227,11 +227,6 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
     assertEquals(2, (p relativize fixture.root).segments.size)
   }
   @Test //@Ignore
-  def slash_method_should_split_on_separator = {
-    val p = fixture.root \ ("c1"+fixture.fs.separator+"c2")
-    assertEquals(2, (p relativize fixture.root).segments.size)
-  }
-  @Test //@Ignore
   def path_should_support_standard_comparisons() : Unit = {
     check (false, standardPathComparisions _)
   }
@@ -572,10 +567,16 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
     assertEquals(Some(fspath("/a/b/c")), fspath("/a/b/c/d").parent)
   }
 
-
   @Test //@Ignore
   def segments_should_return_parts_of_path() {
     assertEquals(List("a","b","c",".","..","d"), fspath("a/b//c/./../d").segments.toList)
+  }
+  
+  @Test //@Ignore
+  def forward_slash_works_on_linux() {
+	  // no exception is good
+	  val path = fixture.fs.apply("with","a","/","does","it","work","?")
+	  assertEquals(7,path.segments.size)
   }
 
   def check = fixture.check _

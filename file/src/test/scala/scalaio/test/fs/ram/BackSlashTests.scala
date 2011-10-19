@@ -18,5 +18,5 @@ class BackSlashSeekableTest extends scalaio.test.fs.FsSeekableTests with BackSla
 class BackSlashBasicPathTest extends scalaio.test.fs.FsBasicPathTests with BackSlashRamFixture
 class BackSlashAccessSetTest extends scalaio.test.fs.FsAccessSetTests with BackSlashRamFixture
 class BackSlashPathObjectTest extends scalaio.test.fs.FsPathObjectTests with BackSlashRamFixture
-class BackSlashPathFinderTest extends scalaio.test.fs.FsPathFinderTests with BackSlashRamFixture
+class BackSlashPathSetTest extends scalaio.test.fs.FsPathSetTests with BackSlashRamFixture
 

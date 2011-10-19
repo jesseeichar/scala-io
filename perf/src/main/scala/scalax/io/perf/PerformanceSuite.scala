@@ -59,6 +59,7 @@ object PerformanceSuite {
         
         // -----  Miscellaneous Tests
         () => new file.HardDriveScan,
+        () => new file.TraverseDirTreePerformanceTest,
         () => new iterator.CloseableIteratorPerformanceTest
         )
   }

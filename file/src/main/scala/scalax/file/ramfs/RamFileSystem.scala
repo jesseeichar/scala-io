@@ -53,6 +53,19 @@ class RamFileSystem(val id : RamFileSystem.RamFsId = RamFileSystem.RamFsId(), va
   }
 
   def apply(relativeTo:String, segments: Seq[String]): RamPath = fromStrings(relativeTo,segments.filterNot{_.isEmpty} mkString separator)
+  def updateSlash(segment:String) = separator match {
+    case "/" => segment.replace("/","⁄")
+    case _ => segment
+  }
+  override def fromSeq(segments: Seq[String]): Path = {
+    val updatedSegments = if(segments.headOption.exists(_ == separator)) {
+      segments.head +: segments.drop(1).map(updateSlash)      
+    } else {
+      segments.map(updateSlash)
+    }
+    
+    fromString(updatedSegments.filterNot{_.isEmpty} mkString separator)
+  }
 
   protected[ramfs] def fromStrings(relativeTo:String , path: String): RamPath = {
     def process(path:String) = {

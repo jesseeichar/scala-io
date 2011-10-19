@@ -38,7 +38,10 @@ class DefaultPath private[file] (val jfile: JFile, override val fileSystem: Defa
 
   def toAbsolute: Path = if (isAbsolute) this else fileSystem.fromString(jfile.getAbsolutePath())
   def toURI: URI = jfile.toURI()
-  def /(child: String): DefaultPath = fileSystem(new JFile(jfile, child)) // TODO check if directory is absolute
+  def /(child: String): DefaultPath = {
+    val newChild = fileSystem.updateSlash(child) 
+    fileSystem(new JFile(jfile, newChild)) // TODO check if directory is absolute
+  }
   def name: String = jfile.getName()
   def path: String = jfile.getPath()
   override lazy val normalize = super.normalize.asInstanceOf[DefaultPath]
@@ -131,13 +134,13 @@ class DefaultPath private[file] (val jfile: JFile, override val fileSystem: Defa
     if (!isDirectory) throw new NotDirectoryException(this + " is not a directory so descendants can not be called on it")
 
     new BasicPathSet[DefaultPath](this, factory(filter), depth, false, { (p:PathMatcher[DefaultPath], path:DefaultPath) =>
-      val files = if(p == PathMatcher.All) path.jfile.listFiles
+      val files = path.jfile.listFiles/*if(p == PathMatcher.All) path.jfile.listFiles
       else {
         val fileFilter = new FileFilter() {
 	        def accept(f: JFile) = f.isDirectory() || p(fileSystem(f))
 	      }
 	      path.jfile.listFiles(fileFilter)
-      }
+      }*/
       if(files == null) Iterator.empty
       else files.toIterator.map (fileSystem.apply)
     })

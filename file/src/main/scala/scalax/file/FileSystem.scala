@@ -60,7 +60,7 @@ abstract class FileSystem {
    * Create a path object for the filesystem from the path segments
    */
   def fromSeq(segments: Seq[String]): Path = fromString(segments.filterNot{_.isEmpty} mkString separator)
-  def apply(segments: String*): Path = fromString(segments.filterNot{_.isEmpty} mkString separator)
+  def apply(segments: String*): Path = fromSeq(segments)
   /**
    * Returns the list of roots for this filesystem
    */

@@ -243,24 +243,28 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    * If child is relative, creates a new Path based on the current path with the
    * child appended. If child is absolute the child is returned
    *
+   *<
    * <ul>
    * <li>if other is null return this</li>
    * <li>if other is absolute return other</li>
    * <li>if other is not absolute the return this append other</li>
    * </ul>
-   *
+   * <strong>@note child is a single child if it contains a path separator it will NOT be considered a separator character</strong>
+   * 
    * <p>Examples include:
    * <pre><code>
    * path / "child" / "grandchild"
-   * path / "child/grandchild"
    * path / ".." / "sibling"
+   * </code></pre>
+   * </p><p>
+   * Illegal examples include;
+   * <pre><code>
+   * path / "child/grandchild"
    * path / "../sibling"
    * </code></pre>
-   * <p>
-   * @note This is a duplicate when the implicit string2Path is imported
-   *       But using the implicit makes the API less discoverable so I have
-   *       added this method.
+   * In these cases the / will be encoded.
    * </p>
+   * 
    * @return A new path with the specified path appended
    *
    * @see #\(String)
@@ -279,7 +283,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    * @return A new path with the specified path appended
    * @see #/(String)
    */
-  final def /(child: Path): Path = /(child.path)
+  final def /(child: Path): Path = child.segments.foldLeft(this){(acc,nextChild) => acc/(nextChild)}
 
   /**
    * Alias for /(Path)
@@ -1126,8 +1130,8 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
   }
   def *** : PathSet[Path] = descendants()
 
-  def +++[U >: Path](includes: PathFinder[U]): PathSet[U] = new AdditivePathSet(this,includes)
-  def ---[U >: Path](excludes: PathFinder[U]): PathSet[U] = new SubtractivePathSet(this,excludes)
+  def +++[U >: Path](includes: PathFinder[U]): PathSet[U] =  new IterablePathSet[U](iterator) +++ includes
+  def ---[U >: Path](excludes: PathFinder[U]): PathSet[Path] = new IterablePathSet[Path](iterator) --- excludes
 
   def iterator : Iterator[Path] = Iterator(this)
 
