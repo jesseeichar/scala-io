@@ -42,5 +42,25 @@ object ReadWriteFiles {
       case Right(data) => println (data)
     }
   }
-
+  /**
+   * Demonstrate ways to control how the a path is opened for write. 
+   * <p>Typically a write will overwrite an existing file. The seekable interface 
+   * can be used for some control (patch, insert append) but there are more options 
+   * like failing to write if file exists or open in append mode, etc...</p> 
+   */
+  def controlledPathOpen {
+    import scalax.file.Path
+    import scalax.io.StandardOpenOption._
+    // open the file for appending,  it will fail if file does not exist and 
+    // it will delete the file after editing the file
+    Path("someFile").open(Seq(DeleteOnClose)) { out =>
+      // any number of Seekable actions can be performed 
+      out.append(" an ending")
+      out.chars.takeWhile(_ != '.')
+    }
+    
+    Path("someFile").outputStream(WriteAppend:_*).write("appending")
+    Path("someFile").outputStream(WriteTruncate:_*).write("replace all data with this")
+    Path("someFile").outputStream(Write).write("just replace beginning of file with this")
+  }
 }
