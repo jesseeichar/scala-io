@@ -1217,6 +1217,6 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
   // Optimization for Seekable
 
   override protected def tempFile() : Path = fileSystem.createTempFile()
-  override def copyDataTo(output: Output,finalize:Boolean): Unit = channel(StandardOpenOption.Read).copyDataTo(output,finalize)
-  override def copyDataFrom(input:Input,finalize:Boolean): Unit = channel(StandardOpenOption.WriteTruncate:_*).copyDataFrom(input,finalize)
+  override def copyDataTo(output: Output): Unit = channel(StandardOpenOption.Read).copyDataTo(output)
+  override def doCopyFrom(input:Input): Unit = channel(StandardOpenOption.WriteTruncate:_*).doCopyFrom(input)
 }

@@ -77,10 +77,7 @@ trait Input {
    * 				 an infinite loop the finalize will be set to true so the request
    * 				 is not then forwarded back to copyTo  
    */
-  def copyDataTo(output:Output, finalize:Boolean=false): Unit = finalize match {
-    case true => output.write(this.bytes)
-    case false => output.copyDataFrom(this,true)
-  }
+  def copyDataTo(output:Output): Unit = output.copyDataFrom(this)
 
   /**
    * The characters in the object.

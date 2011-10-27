@@ -93,6 +93,9 @@ trait LongTraversableLike[@specialized(Byte) +A, +Repr <: LongTraversableLike[A,
 
   protected[io] def iterator: CloseableIterator[A]
 
+  /*def byteForEach[A](f:ByteFunc) {
+    i
+  }*/
   def foreach[@specialized(Unit) U](f: (A) => U) {
     val iter = iterator
     try iter.foreach(f)

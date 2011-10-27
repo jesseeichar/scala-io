@@ -181,7 +181,7 @@ trait InputResource[+R <: Closeable] extends Resource[R] with Input with Resourc
      */
     def inputStream: InputResource[InputStream]
 
-  override def copyDataTo(output: Output,finalize:Boolean): Unit =
+  override def copyDataTo(output: Output): Unit =
     output  match {
       case outR: OutputResource[_] =>
         var failedToCopy = false
@@ -192,8 +192,8 @@ trait InputResource[+R <: Closeable] extends Resource[R] with Input with Resourc
           FileUtils.tryCopy(failedToCopy=true)(inChan, outChan)
         }
         if(failedToCopy) 
-          super.copyDataTo(output,finalize)
-      case _ => super.copyDataTo(output,finalize)
+          super.copyDataTo(output)
+      case _ => super.copyDataTo(output)
     }
 
     /**
@@ -257,7 +257,7 @@ trait OutputResource[+R <: Closeable] extends Resource[R] with Output with Resou
    */
   def writableByteChannel: OutputResource[WritableByteChannel]
   
-    override def copyDataFrom(input: Input,finalize:Boolean): Unit =
+    override def doCopyFrom(input: Input): Unit =
       
     input match {
       case inR: InputResource[_] =>
@@ -269,8 +269,8 @@ trait OutputResource[+R <: Closeable] extends Resource[R] with Output with Resou
           FileUtils.tryCopy(failedToCopy=true)(inChan, outChan)
         }
         if(failedToCopy) 
-          super.copyDataFrom(input,finalize)
-      case _ => super.copyDataFrom(input,finalize)
+          super.doCopyFrom(input)
+      case _ => super.doCopyFrom(input)
     }
 
 }

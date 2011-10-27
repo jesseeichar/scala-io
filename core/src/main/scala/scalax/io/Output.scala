@@ -143,17 +143,13 @@ trait Output {
    * possible and if all else fails simply write the bytes
    * 
    * @param input the source to read data from
-   * @param finalize do not forward request to input's copyTo method.  
-   * 				 Often only one end of the transaction will know how to efficiently transfer
-   * 				 data so a common pattern is to check the input and see if the
-   * 				 type of the Input object is a known type.  If not then the
-   * 				 input object will be sent the request.  However, to prevent
-   * 				 an infinite loop the finalize will be set to true so the request
-   * 				 is not then forwarded back to copyFrom  
    */
-  def copyDataFrom(input:Input, finalize:Boolean=false):Unit = finalize match {
-    case true => write (input.bytes)
-    case false => input.copyDataTo(this,true)
-  }
+  private[io] final def copyDataFrom(input:Input):Unit = doCopyFrom(input)
+
+  /**
+   * If possible efficiently copy data from input.  It MUST NOT forward request to
+   * input's copyTo method because that could trigger an infinate loop
+   */
+  protected def doCopyFrom(input:Input) = write (input.bytes)
 }
 
