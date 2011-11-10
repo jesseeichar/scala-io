@@ -9,9 +9,9 @@
 package scalax.file
 
 import java.net.URLStreamHandler
-import PathMatcher.{GlobPathMatcher, RegexPathMatcher}
+import PathMatcher.{ GlobPathMatcher, RegexPathMatcher }
 import util.Random.nextInt
-import java.io.{IOException, File => JFile}
+import java.io.{ IOException, File => JFile }
 
 /**
  * Factory object for obtaining filesystem objects
@@ -29,6 +29,7 @@ object FileSystem {
    *  java.file.File objects</p>
    */
   val default: FileSystem = new scalax.file.defaultfs.DefaultFileSystem()
+
 }
 
 /**
@@ -41,15 +42,15 @@ object FileSystem {
  */
 abstract class FileSystem {
 
-  protected val legalChars = ('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9') ++ List('_','-','+','.') toList
+  protected val legalChars = ('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9') ++ List('_', '-', '+', '.') toList
   def randomPrefix = {
-    val seg = 1 to (nextInt(5)+2) map {_=> legalChars(nextInt(legalChars.size))}
+    val seg = 1 to (nextInt(5) + 2) map { _ => legalChars(nextInt(legalChars.size)) }
     val lastChar = legalChars(nextInt(legalChars.size - 1))
     seg :+ lastChar mkString ""
   }
 
   /** A name identifying the filesystem */
-  def name : String
+  def name: String
   /** The path segment separator string for the filesystem */
   def separator: String
   /**
@@ -59,7 +60,16 @@ abstract class FileSystem {
   /**
    * Create a path object for the filesystem from the path segments
    */
-  def fromSeq(segments: Seq[String]): Path = fromString(segments.filterNot{_.isEmpty} mkString separator)
+  def fromSeq(segments: Seq[String]): Path = {
+    val head = segments.headOption getOrElse "."
+    if (head == separator && roots.exists(_.path == head)) {
+      segments.drop(1).foreach(checkSegmentForSeparators)
+    } else {
+      segments.foreach(checkSegmentForSeparators)
+    }
+    fromString(segments.filterNot { _.isEmpty } mkString separator)
+  }
+
   def apply(segments: String*): Path = fromSeq(segments)
   /**
    * Returns the list of roots for this filesystem
@@ -114,11 +124,11 @@ abstract class FileSystem {
    *
    * @see Path#contents
    */
-  def matcher(pattern:String, syntax:String = PathMatcher.StandardSyntax.GLOB): PathMatcher[Path] = {
+  def matcher(pattern: String, syntax: String = PathMatcher.StandardSyntax.GLOB): PathMatcher[Path] = {
     syntax match {
       case PathMatcher.StandardSyntax.GLOB => GlobPathMatcher(pattern)
       case PathMatcher.StandardSyntax.REGEX => RegexPathMatcher(pattern)
-      case _ => throw new IOException(syntax+" is not a recognized syntax for the "+name+" filesystem")
+      case _ => throw new IOException(syntax + " is not a recognized syntax for the " + name + " filesystem")
     }
   }
   /**
@@ -149,10 +159,9 @@ abstract class FileSystem {
    *          If the filesystem does not support temporary files
    */
   def createTempFile(prefix: String = randomPrefix,
-                   suffix: String = null,
-                   dir: String = null,
-                   deleteOnExit : Boolean = true
-                   /*attributes:List[FileAttributes] TODO */ ) : Path
+    suffix: String = null,
+    dir: String = null,
+    deleteOnExit: Boolean = true /*attributes:List[FileAttributes] TODO */ ): Path
   /**
    * Creates an empty directory in the provided directory with the provided prefix and suffixes, if the filesystem
    * supports it.  If not then a UnsupportedOperationException is thrown.
@@ -182,16 +191,61 @@ abstract class FileSystem {
    *          If the filesystem does not support temporary files
    */
   def createTempDirectory(prefix: String = randomPrefix,
-                        suffix: String = null,
-                        dir: String = null,
-                        deleteOnExit : Boolean = true
-                        /*attributes:List[FileAttributes] TODO */) : Path
+    suffix: String = null,
+    dir: String = null,
+    deleteOnExit: Boolean = true /*attributes:List[FileAttributes] TODO */ ): Path
 
   /**
    * Returns a URLStreamHandler if the protocol in the URI is not supported by default JAVA.
    * This handler is used to construct URLs for the Paths as well as by scalax.file.PathURLStreamHandlerFactory
    * The default behavoir is to return None this assumes that the default protocol handlers can handle the protocol
    */
-  def urlStreamHandler : Option[URLStreamHandler] = None
+  def urlStreamHandler: Option[URLStreamHandler] = None
+
+  /**
+   * Checks if the separator or a "Common" separator is in the segment.
+   *   
+   * If the separator is found the an IllegalArgumentException is thrown.  
+   * If a common separator is found (/ or \) then a warning is logged and the stack trace is logged if fine 
+   * is enabled for the filesystem's logger. 
+   * 
+   * @throws IllegalArgumentException If the separator is found the an IllegalArgumentException is thrown
+   */
+  def checkSegmentForSeparators(segment: String): Unit = {
+    val CommonSeparators = Set('/', '\\')
+    sealed trait SeparatorContainment
+    case class Separator(sep: String) extends SeparatorContainment
+    case class CommonSeparator(sep: Char) extends SeparatorContainment
+    case object NoSeparator extends SeparatorContainment
+
+    def findSingleCharSep(seps: Set[Char]): Option[Char] = segment.find(sep => seps contains sep)
+    val result = {
+      if (separator.size == 1) {
+        findSingleCharSep(CommonSeparators + separator(0)).map {
+          case sep if separator(0) == sep => Separator(separator)
+          case sep => CommonSeparator(sep)
+        } getOrElse NoSeparator
+      } else {
+        if (segment contains separator) Separator(separator)
+        else findSingleCharSep(CommonSeparators).map(CommonSeparator.apply) getOrElse NoSeparator
+      }
+    }
+
+    result match {
+      case Separator(sep) => 
+        throw new IllegalArgumentException(sep + " is not permitted as a path segment for this filesystem")
+      case CommonSeparator(sep) => {
+         logger.warning(sep + " should not be used as a character in a path segment because it is a commonly used path separator on many filesystems")
+         if(logger.isLoggable(java.util.logging.Level.FINE)) {
+           val stacktrace = new Exception("Not real exception, just method for obtaining stacktrace").getStackTraceString
+           logger.fine("Location where path was created was: ===========\n"+stacktrace+"\n===============================")
+         }
+      }
+      case _ => ()
+    }
+  }
+
+  protected lazy val logger = java.util.logging.Logger.getLogger(getClass.getPackage().getName())
 
 }
+

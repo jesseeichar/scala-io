@@ -17,13 +17,15 @@ import scalax.io.Resource
 import org.junit.Assert._
 import org.junit.Test
 import java.io.{OutputStream, IOException}
+import java.util.regex.Pattern
 
 abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with Fixture {
   implicit val codec = Codec.UTF8
 
   // test lastmodified
 
-  def fspath(name:String) = {
+  def fspath(_name:String) = {
+    val name = _name.replaceAll(Pattern.quote(fixture.fs.separator),"/")
     val mainParts = (name split "/").toList
     val all = if(name startsWith "/") (fixture.fs.separator +: mainParts) else mainParts
     fixture.fs.fromSeq(all)
@@ -573,10 +575,17 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
   }
   
   @Test //@Ignore
-  def forward_slash_works_on_linux() {
-	  // no exception is good
-	  val path = fixture.fs.apply("with","a","/","does","it","work","?")
-	  assertEquals(7,path.segments.size)
+  def path_separator_in_path_segment_throws_exception() {
+	  val sep = fixture.fs.separator
+    intercept[IllegalArgumentException] {
+	  fixture.fs.apply("with","a",""+sep,"does","it","work","?")
+    }
+    intercept[IllegalArgumentException] {
+	  fixture.fs.apply("with","a") \ sep 
+    }
+    intercept[IllegalArgumentException] {
+    	fixture.fs.fromSeq(Seq("with","a",""+sep,"does","it","work","?"))
+    }
   }
 
   def check = fixture.check _

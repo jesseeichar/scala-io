@@ -105,10 +105,10 @@ object ScalaIoBuild extends Build {
   }
   lazy val Docs = config("docs") extend (Compile)
   val docsSettings = inConfig(Docs)(Defaults.configSettings) ++ Seq[Setting[_]](
-      scaladocOptions in Docs ++= Seq("-doc-title", "Scala IO"),//, "–doc-source-url", "https://raw.github.com/jesseeichar/scala-io/master/core/src/main/scala/"),
+      scalacOptions in Docs ++= Seq("-doc-title", "Scala IO"),//, "–doc-source-url", "https://raw.github.com/jesseeichar/scala-io/master/core/src/main/scala/"),
       resourceDirectory := new File("documentation/src/main/resources"),
-      //siteDir <<= baseDirectory map { base => new File(base, "target/website") },
-      siteDir := new File("/Users/jeichar/Sites/scala-io-doc/"),
+      siteDir <<= baseDirectory map { base => new File(base, "target/website") },
+      //siteDir := new File("/Users/jeichar/Sites/scala-io-doc/"),
       SiteTask,
       site in Docs <<= (site in Docs).dependsOn(doc in Docs),
       sources in Docs <<=

@@ -21,7 +21,10 @@ class RamPath(relativeTo: String, val path: String, override val fileSystem: Ram
   lazy val toAbsolute: RamPath = fileSystem.fromStrings("", relativeTo + separator + path)
   lazy val toURI: URI = fileSystem.uri(this)
 
-  def /(child: String): RamPath = fileSystem.fromStrings(relativeTo, path + separator + fileSystem.updateSlash(child))
+  def /(child: String): RamPath = {
+    fileSystem.checkSegmentForSeparators(child)
+    fileSystem.fromStrings(relativeTo, path + separator + child) 
+  }
 
   lazy val name: String = path.split(Pattern.quote(separator)).lastOption getOrElse (path)
   override lazy val normalize = super.normalize.asInstanceOf[RamPath]
