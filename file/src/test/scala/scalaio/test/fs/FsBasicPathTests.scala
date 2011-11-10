@@ -572,6 +572,14 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
   @Test //@Ignore
   def segments_should_return_parts_of_path() {
     assertEquals(List("a","b","c",".","..","d"), fspath("a/b//c/./../d").segments.toList)
+    assertEquals(List("a","b","c",".","..","d"), fspath("a/b//c/./../d/").segments.toList)
+    assertEquals(List("a","b","c",".","..","d"), fspath("a/b//c/./../d//").segments.toList)
+  }
+  @Test //@Ignore
+  def creating_path_from_string_should_clean_path() {
+	  assertEquals(fspath("a/b/c/./../d").path, fspath("a/b//c/./../d").path)
+	  assertEquals(fspath("a/b/c/./../d").path, fspath("a/b//c/./../d/").path)
+	  assertEquals(fspath("a/b/c/./../d").path, fspath("a/b//c/./../d//").path)
   }
   
   @Test //@Ignore

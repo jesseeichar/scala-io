@@ -4,7 +4,7 @@ import Keys._
 object BuildConstants {
   val organization = "com.github.scala-incubator.io"
   val version = "0.3.0-SNAPSHOT"
-  val armVersion = "0.3"
+  val armVersion = "1.0"
   val scalaVersion = "2.9.1"
 }
 
