@@ -160,6 +160,30 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
     assertEquals(fspath("xx").toURL.toString, fspath("xx").toURI.toString)
   }
 
+  
+  @Test //@Ignore
+  def write_will_create_Path_as_needed= {
+     val xx = fixture.path / fixture.segment
+     xx.write("testing")
+     
+     assertTrue(xx.exists)
+     assertEquals(xx.slurpString, "testing")
+     
+     xx.write("newData")
+     assertEquals(xx.slurpString, "newData")
+  }
+  @Test //@Ignore
+  def will_create_path_when_relative_parent_does_not_exist = {
+    val path = fixture.fs("xx")
+    try {
+      path.write("testing")
+      
+      assertTrue(path.exists)
+      assertEquals(path.slurpString, "testing")
+    } finally {
+      path.deleteIfExists(true)
+    }
+  }
   @Test //@Ignore
   def open_stream_on_url = {
     val xx = fixture.path

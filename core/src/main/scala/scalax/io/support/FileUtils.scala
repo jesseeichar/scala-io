@@ -55,7 +55,8 @@ object FileUtils {
         case Create if !jfile.exists =>
           jfile.createNewFile()
         case CreateFull if !jfile.exists =>
-          jfile.getParentFile.mkdirs()
+          var parent = Option(jfile.getParentFile) orElse Option(jfile.getAbsoluteFile().getParentFile())
+          parent.getOrElse(throw new IOException("unable to get parent file of"+jfile)).mkdirs()
           jfile.createNewFile()
         case CreateNew =>
           if (jfile.exists) throw new IOException(jfile+" already exists, openOption "+CreateNew+" cannot be used with an existing file")

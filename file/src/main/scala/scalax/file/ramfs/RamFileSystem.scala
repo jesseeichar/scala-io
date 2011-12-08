@@ -88,23 +88,28 @@ class RamFileSystem(val id : RamFileSystem.RamFsId = RamFileSystem.RamFsId(), va
     fsTree.lookup(absolutePath)
   }
   private[ramfs] def create(path:RamPath, fac:NodeFac, createParents:Boolean = true) : Boolean = {
-    val absolute = path.toAbsolute
-    absolute.parent match {
-      case Some(p) if p.nonExistent && !createParents =>
-        throw new FileNotFoundException("Parent directory "+p+" does not exist")
-      case _ => ()
+    if (path == root) {
+      true
+    } else {
+      val absolute = path.toAbsolute
+      absolute.parent match {
+        case Some(p) if p.nonExistent && !createParents =>
+          throw new FileNotFoundException("Parent directory " + p + " does not exist")
+        case _ => ()
+      }
+
+      val x = fsTree.create(absolute.segments.drop(1), fac)
+
+      true
     }
-
-    val x = fsTree.create(absolute.segments.drop(1),fac)
-
-    true
   }
   private[ramfs] def delete(path:RamPath, force:Boolean) : Boolean = {
     if(path.exists) {
       def delete(p:Path) = force || (p.canWrite && p.parent.forall {_.canWrite})
 
       if(delete(path) && path != root) {
-        val deletions = for { parent <- path.parent
+        val parentPath = path.toAbsolute.parent
+        val deletions = for { parent <- path.toAbsolute.parent
               parentNode <- parent.node
               node <- path.node
             } yield {
