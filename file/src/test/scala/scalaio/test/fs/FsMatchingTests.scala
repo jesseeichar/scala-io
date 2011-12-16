@@ -12,9 +12,10 @@ import scalax.io._
 import scalax.file._
 import PathMatcher._
 import Path.AccessModes._
-
 import org.junit.Test
+import org.junit.Assert._
 import ramfs.RamFileSystem
+import scalax.file.attributes._
 
 abstract class FsMatchingTests extends scalax.test.sugar.AssertionSugar with Fixture {
   implicit val codec = Codec.UTF8
@@ -75,6 +76,22 @@ abstract class FsMatchingTests extends scalax.test.sugar.AssertionSugar with Fix
       val a = permissions(m:_*)
       test(a,modes -- a)
     }
+  }
+  @Test //@Ignore
+  def attributeMatcher = {
+    val path = fixture.path
+    path.createFile()
+    def test (value:FileAttribute[_]) = {
+      path.attributes = List(value)
+      assertTrue(path.attributes exists {_ == value})
+    }
+    test(WriteAccessAttribute(true))
+    test(WriteAccessAttribute(false))
+    test(ExecuteAccessAttribute(true))
+    test(ExecuteAccessAttribute(true))
+    test(ReadAccessAttribute(true))
+    test(ReadAccessAttribute(true))
+    test(LastModifiedAttribute(1324046126000L))
   }
 
   def assertMatch(exp:String)(implicit path:Path, syntax:String) = {

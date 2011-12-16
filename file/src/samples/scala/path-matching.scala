@@ -1,8 +1,8 @@
 /**
- * Examples of using path matchers, such as IsFile, to select/match
- * files and directories
+ * Using path matchers to inspect files
  */
-object PathMatcherSamples {
+object PathMatching {
+
   /**
    * Match a Path against the full path as a string
    */
@@ -99,4 +99,5 @@ object PathMatcherSamples {
       case CustomSyntaxMatcher(path) => println("CustomMatcher matched")
     }
   }
+
 }

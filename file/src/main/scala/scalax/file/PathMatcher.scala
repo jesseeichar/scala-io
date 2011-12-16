@@ -91,6 +91,27 @@ object PathMatcher {
   object AccessMatcher {
     def apply(accessModes: Path.AccessModes.AccessMode*) = new AccessMatcher(accessModes:_*)
   }
+  /**
+   * Matches a path if the attributes have the same values
+   * for the file.
+   * <p>
+   * If the file does not exist this matcher will not match
+   * </p>
+   *
+   * @param accessModes
+   *          the access modes that must be applicable
+   *          on the path object.
+   */
+  final class AttributeMatcher (attributes: scalax.file.attributes.FileAttribute[_]*) extends PathMatcher[Path] {
+    def apply(path: Path) = {
+      val currentAttributes = path.attributes
+      attributes.forall {att => currentAttributes exists{_ == att}}
+    }
+    override def toString = "AttributeMatcher: " + (attributes mkString ",")
+  }
+  object AttributeMatcher {
+      def apply(attributes: scalax.file.attributes.FileAttribute[_]*) = new AttributeMatcher(attributes:_*)
+  }
 
   class FunctionMatcher[T <: Path](f: T => Boolean, name:String = "") extends PathMatcher[T] {
     def apply(path: T) = f(path)

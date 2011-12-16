@@ -1,7 +1,7 @@
 /**
  * Search the contents of a directory and perform operations on the objects encountered
  */
-object Children {
+object UsingPathSets {
 
   /**
    * Remove spaces from names of paths

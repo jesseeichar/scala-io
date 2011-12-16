@@ -621,23 +621,31 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    */
   def access : AccessSet = new AccessSet(this)
 
-  def attributes : Iterable[FileAttribute[_]] = {
-    List(LastModifiedAttribute(lastModified),
+  def attributes : Set[FileAttribute[_]] = {
+    Set(LastModifiedAttribute(lastModified),
          ReadAccessAttribute(canRead),
          WriteAccessAttribute(canWrite),
          ExecuteAccessAttribute(canExecute))
 
   }
   def attributes_= (attrs:Iterable[FileAttribute[_]]) = {
-    access = attrs.foldLeft(List[AccessMode]()) {
+    var timeStamp:Option[Long] = None
+    
+    val newAccess = attrs.foldLeft(access.toSet) {
       case (modes, LastModifiedAttribute(newLastModified)) =>
-        lastModified = newLastModified
+        timeStamp = Some(newLastModified)
         modes
-      case (modes, ReadAccessAttribute(true)) => Read :: modes
-      case (modes, WriteAccessAttribute(true)) => Write :: modes
-      case (modes, ExecuteAccessAttribute(true)) => Execute :: modes
-      case (modes, _) => modes
+      case (modes, ReadAccessAttribute(true)) => modes + Read
+      case (modes, ReadAccessAttribute(false)) => modes - Read
+      case (modes, WriteAccessAttribute(true)) => modes + Write
+      case (modes, WriteAccessAttribute(false)) => modes - Write
+      case (modes, ExecuteAccessAttribute(true)) => modes + Execute
+      case (modes, ExecuteAccessAttribute(false)) => modes - Execute
+      case (modes, att) => throw new IllegalArgumentException(att+" is not a supported FileAttribute for "+fileSystem+" file system")
     }
+    
+    if(newAccess != access) access = newAccess
+    timeStamp.foreach(t => lastModified = t)
   }
 
   // creations
