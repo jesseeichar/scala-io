@@ -18,7 +18,10 @@ object PathFinder {
   def empty = new BasicPathSet[Nothing](Nil,PathMatcher.All, -1,false, (_:PathMatcher[Nothing],_:Nothing) => Iterator.empty)
 }
 trait PathFinder[+T] {
-  /**The union of the paths found by this <code>PathSet</code> with the paths found by 'paths'.*/
+  /**The union of the paths found by this <code>PathSet</code> with the paths found by 'paths'.
+   * Note that if the same element is added twice it will be present twice in the PathFinder 
+   * (in most implementations).  Consider: (Path("a") +++ Path("a")).iterator.  the iterator 
+   * will return Path("a") twice. */
   def +++[U >: T](includes: PathFinder[U]): PathFinder[U]
 
   /**Excludes all paths from <code>excludes</code> from the paths selected by this <code>PathSet</code>.*/

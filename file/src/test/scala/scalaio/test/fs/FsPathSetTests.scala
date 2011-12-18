@@ -14,6 +14,7 @@ import org.junit.Test
 import scalax.file.ramfs.RamFileSystem
 import scalaio.test.Node
 import scalaio.test.AbstractPathSetTests
+import scalax.file.PathSet
 
 abstract class FsPathSetTests extends scalax.test.sugar.AssertionSugar with AbstractPathSetTests with Fixture {
     protected def fixtures(depth:Int=4) : (Path, Node) = fixture.tree(depth)
@@ -177,13 +178,24 @@ abstract class FsPathSetTests extends scalax.test.sugar.AssertionSugar with Abst
     collected.size
     assertEquals(size,i)
   }
-  /*
+  
   @Test //@Ignore
-  def`asBase allows relative copying of path sets`{
+  def a_PathSet_can_be_made_from_a_collection_of_paths {
     val root = mkTree
-
-    assertEquals("b"/"c"/"d.scala",((root / "a"/"b" asBase) ** "*.scala").head.path)
-    assertEquals("b"/"c"/"d.scala",((root ** "b" asBase) ** "*.scala").head.path)
+    val set = PathSet(root / "a",root / "a" / "b", root / "z")
+    
+    val andChildren = set * "*" toList
+    
+    val pathJoin = (root / "a") +++ (root / "a" / "b") +++ (root / "z")
+    val pathJoinChildren = (pathJoin * "*").toList
+    
+    assertEquals(pathJoinChildren.size, andChildren.size)
+    pathJoinChildren.foreach(p => assertTrue(andChildren contains p))
+    
+    assertEquals(3, andChildren.size)
+    assertTrue(andChildren contains (root / "a" / "b"))
+    assertTrue(andChildren contains (root / "a" / "b" / "c"))
+    assertTrue(andChildren contains (root / "z" / "y"))
   }
-  */
+  
 }

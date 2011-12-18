@@ -13,11 +13,11 @@ import java.util.regex.Pattern
 trait PathMatcherFactory[-T] extends Function1[T,PathMatcher[Path]]
 
 object PathMatcherFactory {
-  implicit object FunctionToMatcher extends PathMatcherFactory[Function1[Path,Boolean]] {
+  implicit object FunctionToMatcher extends PathMatcherFactory[Function1[Path, Boolean]] {
     def apply(f: (Path) => Boolean): PathMatcher[Path] = f match {
-    case m:PathMatcher[Path] => m
-    case f => new FunctionMatcher(f)
-  }
+      case m: PathMatcher[Path] => m
+      case f => new FunctionMatcher(f)
+    }
   }
   implicit object GlobToMatcher extends PathMatcherFactory[String] {
     def apply(f: String): PathMatcher[Path] = GlobNameMatcher(f)
