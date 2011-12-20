@@ -26,17 +26,17 @@ import scala.collection.GenTraversableOnce
  * @param result the value to either return from method to to the next stage of the fold
  * @tparam A the type of Traversable this FoldResult can be used with
  */
-sealed trait FoldResult[@specialized(Byte) +A]{def result: A}
+sealed trait FoldResult[@specialized(Byte,Char) +A]{def result: A}
 
 /**
  * Signal indicating that the fold should continue to process another value
  */
-case class Continue[@specialized(Byte) +A](result: A) extends FoldResult[A]
+case class Continue[@specialized(Byte,Char) +A](result: A) extends FoldResult[A]
 
 /**
  * Signal indicating that the fold should stop and return the contained result
  */
-case class End[@specialized(Byte) +A](result: A) extends FoldResult[A]
+case class End[@specialized(Byte,Char) +A](result: A) extends FoldResult[A]
 
 /**
  * A traversable for use on very large datasets which cannot be indexed with Ints but instead
@@ -44,7 +44,7 @@ case class End[@specialized(Byte) +A](result: A) extends FoldResult[A]
  *
  * This trait adds methods for accessing the extra portions of the dataset.
  */
-trait LongTraversableLike[@specialized(Byte) +A, +Repr <: LongTraversableLike[A, Repr]] extends TraversableLike[A, Repr] {
+trait LongTraversableLike[@specialized(Byte,Char) +A, +Repr <: LongTraversableLike[A, Repr]] extends TraversableLike[A, Repr] {
   self =>
 
   override protected[this] def thisCollection: LongTraversable[A] = this.asInstanceOf[LongTraversable[A]]

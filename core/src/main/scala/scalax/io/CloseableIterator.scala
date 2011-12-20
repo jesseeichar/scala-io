@@ -4,7 +4,7 @@ import java.io.Closeable
 import resource.{AbstractManagedResource, ManagedResourceOperations}
 import collection.{GenTraversableOnce, Iterator, TraversableOnce}
 import java.util.concurrent.locks.ReentrantLock
-trait CloseableIterator[@specialized(Byte) +A] extends Iterator[A] with Closeable {
+trait CloseableIterator[@specialized(Byte,Char) +A] extends Iterator[A] with Closeable {
   self =>
   val creationPoint = new Exception();
 

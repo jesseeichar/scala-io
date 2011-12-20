@@ -18,7 +18,7 @@ import scala.collection.mutable.Queue
  * require Longs for indexing.  This trait adds methods for accessing the extra portions
  * of the dataset.
  */
-trait LongTraversable[@specialized(Byte) +A] extends Traversable[A]
+trait LongTraversable[@specialized(Byte,Char) +A] extends Traversable[A]
   with GenericTraversableTemplate[A, LongTraversable]
   with LongTraversableLike[A, LongTraversable[A]] {
   self =>

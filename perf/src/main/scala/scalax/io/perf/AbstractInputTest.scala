@@ -165,6 +165,19 @@ trait AbstractInputTest extends PerformanceDSLTest {
         }
       }
       measure method "chars" in {
+        having attribute ("version", "io.Source") in {
+          withSizeDef { size =>
+            newIn(size)
+          } run { in =>
+            val f = new Function1[Char, Unit] {
+              var i = 0
+              def apply(b: Char) = i += 1
+            }
+            io.Source.fromInputStream(in(), "UTF-8").foreach(f)
+          }
+        }
+      }
+      measure method "chars" in {
         having attribute ("version", "java.io read chars with InputStreamReader") in {
           withSizeDef { size =>
             (size, newIn(size))

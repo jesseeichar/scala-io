@@ -208,9 +208,24 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
         withSizeDef { size =>
           newInResource(size)
         } run { in =>
-          var i = 0
-          val f: Char => Unit = (b: Char) => i += 1
+          val f = new Function1[Char, Unit] {
+            var i = 0
+            def apply(b: Char) = i += 1
+          }
           in.chars.foreach(f)
+        }
+      }
+      measure method "chars" in {
+        having attribute ("version", "io.Source") in {
+          withSizeDef { size =>
+            newIn(size)
+          } run { in =>
+            val f = new Function1[Char, Unit] {
+              var i = 0
+              def apply(b: Char) = i += 1
+            }
+            io.Source.fromInputStream(Channels.newInputStream(in()), "UTF-8").foreach(f)
+          }
         }
       }
       measure method "chars" in {
@@ -219,7 +234,7 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
             (size, newIn(size))
           } run {
             case (size, in) =>
-              val buffer = new Array[Char](size * 2)
+              val buffer = new Array[Char](2048)
               val reader = Channels.newReader(in(), "UTF-8")
               var read = 0
 
