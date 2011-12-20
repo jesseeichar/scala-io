@@ -39,10 +39,10 @@ class InputStreamResource[+A <: InputStream] (
 
   }
 
-  def readableByteChannel = {
-    val nResource = new ReadableChannelAdapter(opener)
+  lazy val readableByteChannel = {
+    def nResource = new ReadableChannelAdapter(opener)
     val closer = ResourceAdapting.closeAction(closeAction)
-    Resource.fromReadableByteChannel(nResource).appendCloseAction(closer)
+    new ReadableByteChannelResource(nResource, closer, sizeFunc,descName)
   }
   def chars(implicit codec: Codec) = reader(codec).chars
   override def blocks(blockSize: Option[Int] = None): LongTraversable[ByteBlock] = {
@@ -53,6 +53,6 @@ class InputStreamResource[+A <: InputStream] (
     new traversable.ChannelBlockLongTraversable(blockSize orElse sizeFunc().map{Buffers.bufferSize(_,0)}, toChannelOpen)
   }
 
-  override def bytesAsInts : LongTraversable[Int] = ResourceTraversable.streamBased[Byte,Int](this.open, sizeFunc,initialConv = ResourceTraversable.toIntConv)
-  override def bytes : LongTraversable[Byte] = ResourceTraversable.streamBased[Byte,Byte](this.open, sizeFunc)
+  override def bytesAsInts : LongTraversable[Int] = readableByteChannel.bytesAsInts
+  override def bytes : LongTraversable[Byte] = readableByteChannel.bytes
 }

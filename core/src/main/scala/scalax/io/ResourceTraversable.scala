@@ -153,51 +153,7 @@ private[io] object ResourceTraversable {
     }
   }
   val IdentityByteConversion = identity[Byte]_
-  def streamBased[A,B]
-		  (opener : => OpenedResource[InputStream],
-		   sizeFunc:() => Option[Long],
-           parser : InputParser[A,Array[Byte]] = DefaultByteParser,
-           initialConv: A => B = IdentityByteConversion,
-           startIndex : Long = 0,
-           endIndex: Long = Long.MaxValue) = {
-    if (parser == DefaultByteParser && initialConv == IdentityByteConversion) {
-      new traversable.ByteResourceTraversable(opener,sizeFunc, startIndex,endIndex).asInstanceOf[LongTraversable[B]]
-    } else {
-      new ResourceTraversable[B] {
-        type In = InputStream
-        type SourceOut = A
-
-        def source = new TraversableSource[InputStream, A] {
-          val buffer = Buffers.arrayBuffer(sizeFunc())
-          val iter = parser.iterator(buffer)
-          val openedResource = opener
-          val stream = openedResource.get
-          def read() = {
-            val read = stream.read(buffer)
-            parser(iter, read)
-          }
-
-          def initializePosition(pos: Long) = skip(pos)
-
-          def skip(count: Long) = stream.skip(count)
-
-          def close(): List[Throwable] = openedResource.close()
-        }
-
-        protected val conv = initialConv
-        protected val start = startIndex
-        protected val end = endIndex
-
-        override def hasDefiniteSize = sizeFunc().nonEmpty
-        override def lsize = sizeFunc() match {
-          case Some(size) => size
-          case None => super.lsize
-        }
-        override def size = lsize.toInt
-
-      }
-    }
-  }
+  
   val DefaultCharParser = new InputParser[Char,Array[Char]] {
     type I = ArrayIterator[Char]
     def iterator(input:Array[Char]) = new ArrayIterator(input,0)
@@ -302,7 +258,7 @@ private[io] object ResourceTraversable {
         override lazy val hasDefiniteSize= sizeFunc().nonEmpty
         override def lsize = sizeFunc() match {
           case Some(size) => size
-          case None => super.size
+          case None => super.lsize
         }
         override def size = lsize.toInt
 

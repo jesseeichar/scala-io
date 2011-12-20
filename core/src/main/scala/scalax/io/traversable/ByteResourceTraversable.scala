@@ -8,6 +8,7 @@ import java.io.Closeable
 import scalax.io.nio.SeekableFileChannel
 import scalax.io.SeekableByteChannel
 import java.io.InputStream
+import java.nio.channels.Channels
 
 /**
  * resourceOpener must either be a InputStream or a ReadableByteChannel (or subclass).  Anything else will throw an exception
@@ -29,7 +30,7 @@ protected[io] class ByteResourceTraversable(
       case seekable: SeekableByteChannel =>
         new SeekableByteChannelIterator(sizeFunc, seekable, resource, start, end)
       case stream: InputStream =>
-        new InputStreamIterator(sizeFunc, stream, resource, start, end)
+        new ReadableByteChannelIterator(sizeFunc, Channels.newChannel(stream), resource, start, end)
       case rbc: ReadableByteChannel =>
         new ReadableByteChannelIterator(sizeFunc, rbc, resource, start, end)
       case _ =>

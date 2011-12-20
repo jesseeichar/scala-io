@@ -35,7 +35,6 @@ trait AbstractInputTest extends PerformanceDSLTest {
   def newInResource(size: Int, lines: Int = 2, term: String = NewLine.sep): Input = {
     val in = newIn(size, lines, term)
     fromInputStream(in())
-
   }
 
   def withSizeDef[U](f: Int => U) = withSize from (From) upTo MaxSize by Inc withSetup (f)
@@ -57,8 +56,8 @@ trait AbstractInputTest extends PerformanceDSLTest {
           } run { in =>
             val f = new Function1[ByteBlock, Unit] {
               def apply(b: ByteBlock) = {
-                var i = b.size                
-                while(i > 0) {
+                var i = b.size
+                while (i > 0) {
                   i -= 1
                   b(i)
                 }
@@ -292,7 +291,7 @@ trait AbstractInputTest extends PerformanceDSLTest {
         withSizeDef { size =>
           newInResource(5, size, RNPair.sep)
         } run { in =>
-                    var i = 0
+          var i = 0
           in.lines(Line.Terminators.RNPair).foreach(b => i += 1)
         }
       }
@@ -350,63 +349,63 @@ trait AbstractInputTest extends PerformanceDSLTest {
             in.close()
           }
         }
-        measure method "bytes drop" in {
+      }
+      measure method "bytes drop" in {
+        withSizeDef { size =>
+          (size / 2, newInResource(size))
+        } run {
+          case (toDrop, in) =>
+            var i = 0
+            in.bytes.drop(toDrop).foreach(b => i += 1)
+        }
+      }
+      measure method "bytes drop" in {
+        having attribute ("version", "java.io while loop with buffer") in {
           withSizeDef { size =>
-            (size / 2, newInResource(size))
+            (size, newIn(size))
           } run {
-            case (toDrop, in) =>
-          var i = 0
-          in.bytes.drop(toDrop).foreach(b => i += 1)
-          }
-        }
-        measure method "bytes drop" in {
-          having attribute ("version", "java.io while loop with buffer") in {
-            withSizeDef { size =>
-              (size, newIn(size))
-            } run {
-              case (size, inFunc) =>
-                val in = inFunc()
-                in.skip(size / 2)
-                val buffer = new Array[Byte](size)
-                var read = in.read(buffer)
-                while (read > 0) {
-                  var i = 0
-                  while (i < read) {
-                    buffer(i)
-                    i += 1
-                  }
-                  read = in.read(buffer)
-                }
-                in.close
-            }
-          }
-        }
-        measure method "bytes take" in {
-          withSizeDef { size =>
-            (size / 2, newInResource(size))
-          } run {
-            case (toTake, in) =>
-          var i = 0
-          in.bytes.take(toTake).foreach(b => i += 1)
-          }
-        }
-        measure method "bytes take" in {
-          having attribute ("version", "java.io while loop with buffer") in {
-            withSizeDef { size =>
-              (size, newIn(size))
-            } run {
-              case (size, inFunc) =>
-                val in = inFunc()
-
-                val buffer = new Array[Byte](size)
-                val read = in.read(buffer)
+            case (size, inFunc) =>
+              val in = inFunc()
+              in.skip(size / 2)
+              val buffer = new Array[Byte](size)
+              var read = in.read(buffer)
+              while (read > 0) {
                 var i = 0
                 while (i < read) {
                   buffer(i)
                   i += 1
                 }
-                in.close
-            }
+                read = in.read(buffer)
+              }
+              in.close
+          }
+        }
+      }
+      measure method "bytes take" in {
+        withSizeDef { size =>
+          (size / 2, newInResource(size))
+        } run {
+          case (toTake, in) =>
+            var i = 0
+            in.bytes.take(toTake).foreach(b => i += 1)
+        }
+      }
+      measure method "bytes take" in {
+        having attribute ("version", "java.io while loop with buffer") in {
+          withSizeDef { size =>
+            (size, newIn(size))
+          } run {
+            case (size, inFunc) =>
+              val in = inFunc()
+
+              val buffer = new Array[Byte](size)
+              val read = in.read(buffer)
+              var i = 0
+              while (i < read) {
+                buffer(i)
+                i += 1
+              }
+              in.close
           }
         }
       }
