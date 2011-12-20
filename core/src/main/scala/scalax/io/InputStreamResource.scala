@@ -5,6 +5,7 @@ import java.nio.channels.Channels
 import scalax.io.ResourceAdapting.ReadableChannelAdapter
 import java.lang.String
 import java.nio.ByteBuffer
+import java.nio.channels.ReadableByteChannel
 
 /**
  * A ManagedResource for accessing and using InputStreams.  Class can be created using the [[scalax.io.Resource]] object.
@@ -44,6 +45,13 @@ class InputStreamResource[+A <: InputStream] (
     Resource.fromReadableByteChannel(nResource).appendCloseAction(closer)
   }
   def chars(implicit codec: Codec) = reader(codec).chars
+  override def blocks(blockSize: Option[Int] = None): LongTraversable[ByteBlock] = {
+    def toChannelOpen = {
+      val opened = open
+      new CloseableOpenedResource (Channels.newChannel(opened.get), CloseAction((_:ReadableByteChannel) => opened.close()))
+    }
+    new traversable.ChannelBlockLongTraversable(blockSize orElse sizeFunc().map{Buffers.bufferSize(_,0)}, toChannelOpen)
+  }
 
   override def bytesAsInts : LongTraversable[Int] = ResourceTraversable.streamBased[Byte,Int](this.open, sizeFunc,initialConv = ResourceTraversable.toIntConv)
   override def bytes : LongTraversable[Byte] = ResourceTraversable.streamBased[Byte,Byte](this.open, sizeFunc)

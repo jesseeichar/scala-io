@@ -65,7 +65,8 @@ class SeekableByteChannelResource[+A <: SeekableByteChannel] (
   }
 
   protected override def underlyingOutput: OutputResource[OutputStream] = outputStream
-
+  override def blocks(blockSize: Option[Int] = None):LongTraversable[ByteBlock] = 
+    new traversable.ChannelBlockLongTraversable(blockSize orElse sizeFunc().map{Buffers.bufferSize(_,0)}, open)
 
   override def bytesAsInts:LongTraversable[Int] = ResourceTraversable.seekableByteChannelBased[Byte,Int](this.open, sizeFunc, initialConv = ResourceTraversable.toIntConv)
   override def bytes:LongTraversable[Byte] = ResourceTraversable.seekableByteChannelBased[Byte,Byte](this.open, sizeFunc)

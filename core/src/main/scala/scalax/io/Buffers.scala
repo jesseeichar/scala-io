@@ -48,7 +48,7 @@ object Buffers {
     ByteBuffer.allocate(bufferSize(size, min))
   }
   def readerBuffer = new Array[Char](CharBufferSize)
-  private def bufferSize(size: Long, min: Int) = {
+  def bufferSize(size: Long, min: Int) = {
     if (size < BufferSize && size > min) size.toInt
     else BufferSize
   }

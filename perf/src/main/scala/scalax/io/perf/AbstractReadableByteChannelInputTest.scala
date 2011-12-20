@@ -60,15 +60,34 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
         }
       }
       measure method "bytes" in {
+        having attribute ("version", "scala.io block read") in {
+          withSizeDef { size =>
+            newInResource(size)
+          } run { in =>
+            val f = new Function1[ByteBlock, Unit] {
+              def apply(b: ByteBlock) = {
+                var i = b.size                
+                while(i > 0) {
+                  i -= 1
+                  b(i)
+                }
+              }
+            }
+            in.blocks().foreach(f)
+          }
+        }
+      }
+      measure method "bytes" in {
         having attribute ("version", "java.io while loop with buffer") in {
           withSizeDef { size =>
             (size, newIn(size))
           } run {
             case (size, inFunc) =>
               val in = inFunc()
-              val buffer = ByteBuffer.allocateDirect(size * 2)
+              val buffer = ByteBuffer.allocateDirect(Buffers.BufferSize)
               var read = in.read(buffer)
               while (read > 0) {
+                buffer.flip()
                 var i = 0
                 while (i < read) {
                   buffer.get(i)

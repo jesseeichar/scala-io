@@ -189,6 +189,14 @@ abstract class FileOps extends Seekable {
     }
     Resource.fromSeekableByteChannel(resource.get).appendCloseAction(_ => resource.close()).bytes
   }
+  override def blocks(blockSize: Option[Int] = None) =  {
+    def resource = {
+      val r = channel(Read).open
+      r.get.position(0)
+      r
+    }
+    Resource.fromSeekableByteChannel(resource.get).appendCloseAction(_ => resource.close()).blocks(blockSize)
+  }
 
   // required method for Output trait
   override protected def underlyingOutput = outputStream()

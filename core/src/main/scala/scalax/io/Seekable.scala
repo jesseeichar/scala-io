@@ -570,6 +570,15 @@ trait Seekable extends Input with Output {
     Resource.fromSeekableByteChannel(resource.get).appendCloseAction(_ => resource.close()).bytes
   }
 
+  def blocks(blockSize: Option[Int] = None):LongTraversable[ByteBlock] =  {
+    def resource = {
+      val r = underlyingChannel(false)
+      r.get.position(0)
+      r
+    }
+    Resource.fromSeekableByteChannel(resource.get).appendCloseAction(_ => resource.close()).blocks(blockSize)
+  }
+  
   private def charCountToByteCount(start: Long, end: Long)(implicit codec: Codec) = {
     val encoder = codec.encoder
     val charBuffer = CharBuffer.allocate(1)

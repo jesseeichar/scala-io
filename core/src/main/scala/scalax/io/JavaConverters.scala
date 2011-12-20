@@ -68,6 +68,24 @@ object JavaConverters {
           lazy val chars = codec.decode(t.view.map{_.toByte}.toArray)
           def iterator: CloseableIterator[Char] = CloseableIterator(chars.iterator)
         }
+        def blocks(blockSize: Option[Int] = None) = new LongTraversable[ByteBlock] {
+          val concreteBlockSize = blockSize match {
+            case Some(size) => size
+            case None if t.hasDefiniteSize => t.size
+            case None => Buffers.BufferSize
+          }
+          def iterator: CloseableIterator[ByteBlock] = {
+            val sliding: Iterator[Seq[Int]] = t.toIterator.sliding(concreteBlockSize, concreteBlockSize)
+            val blockIter = sliding.map { block =>
+              new ByteBlock {
+                private[this] val data = block
+                def apply(i: Int) = data(i).toByte
+                def size = data.size
+              }
+            }
+            CloseableIterator(blockIter)
+          }
+        }
 
         override def bytesAsInts = new LongTraversable[Int]{
           def iterator = new CloseableIterator[Int] {
@@ -103,9 +121,26 @@ object JavaConverters {
 
           def iterator: CloseableIterator[Char] = CloseableIterator(chars.iterator)
         }
+        def blocks(blockSize: Option[Int] = None) = new LongTraversable[ByteBlock] {
+          val concreteBlockSize = blockSize match {
+            case Some(size) => size
+            case None if t.hasDefiniteSize => t.size
+            case None => Buffers.BufferSize
+          }
+          def iterator: CloseableIterator[ByteBlock] = {
+            val sliding: Iterator[Seq[Byte]] = t.toIterator.sliding(concreteBlockSize, concreteBlockSize)
+            val blockIter = sliding.map { block =>
+              new ByteBlock {
+                private[this] val data = block
+                def apply(i: Int) = data(i)
+                def size = data.size
+              }
+            }
+            CloseableIterator(blockIter)
+          }
+        }
 
         override def bytesAsInts = new LongTraversable[Int]{
-
           def iterator: CloseableIterator[Int] = CloseableIterator(t.toIterator.map(_.toInt))
         }
 

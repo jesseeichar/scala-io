@@ -15,6 +15,7 @@ import java.io.BufferedOutputStream
 import java.io.InputStreamReader
 import java.nio.charset.Charset
 import java.io.InputStream
+import java.nio.channels.Channels
 
 trait AbstractInputTest extends PerformanceDSLTest {
   implicit val codec = Codec.UTF8
@@ -47,6 +48,24 @@ trait AbstractInputTest extends PerformanceDSLTest {
         } run { in =>
           var i = 0
           in.bytes.foreach(b => i += 1)
+        }
+      }
+      measure method "bytes" in {
+        having attribute ("version", "scala.io block read") in {
+          withSizeDef { size =>
+            newInResource(size)
+          } run { in =>
+            val f = new Function1[ByteBlock, Unit] {
+              def apply(b: ByteBlock) = {
+                var i = b.size                
+                while(i > 0) {
+                  i -= 1
+                  b(i)
+                }
+              }
+            }
+            in.blocks().foreach(f)
+          }
         }
       }
       measure method "bytes" in {

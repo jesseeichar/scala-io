@@ -62,6 +62,15 @@ class InputTest extends AbstractInputTests with DataIndependentLongTraversableTe
     val end = System.currentTimeMillis
     assertTrue(end-start < 500)
   }
-
+  
+  @Test
+  def blocksObtainsSameBytesAsBytes = {
+    val data = (65 to 122).map(_.toChar).mkString
+    val resource = input(TextCustomData("", data))
+    
+    val bytes = resource.bytes.toList.map(_.toChar)
+    val blockBytes = resource.blocks().force.flatten(_.toIterator).toList.map(_.toChar)
+    assertEquals(bytes, blockBytes)
+  } 
 }
 
