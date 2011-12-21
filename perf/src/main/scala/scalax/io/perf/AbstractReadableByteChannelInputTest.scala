@@ -52,10 +52,7 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
         withSizeDef { size =>
           newInResource(size)
         } run { in =>
-          val f = new Function1[Byte, Unit] {
-            var i = 0
-            def apply(b: Byte) = i += 1
-          }
+          val f = new CountFunction[Byte]
           in.bytes.foreach(f)
         }
       }
@@ -66,8 +63,8 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
           } run { in =>
             val f = new Function1[ByteBlock, Unit] {
               def apply(b: ByteBlock) = {
-                var i = b.size                
-                while(i > 0) {
+                var i = b.size
+                while (i > 0) {
                   i -= 1
                   b(i)
                 }
@@ -104,10 +101,7 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
         withSizeDef { size =>
           newInResource(size)
         } run { in =>
-          val f = new Function1[Int, Unit] {
-            var i = 0
-            def apply(b: Int) = i += 1
-          }
+          val f = new CountFunction[Int]
           in.bytesAsInts.foreach(f)
         }
       }
@@ -208,10 +202,7 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
         withSizeDef { size =>
           newInResource(size)
         } run { in =>
-          val f = new Function1[Char, Unit] {
-            var i = 0
-            def apply(b: Char) = i += 1
-          }
+          val f = new CountFunction[Char]
           in.chars.foreach(f)
         }
       }
@@ -220,10 +211,7 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
           withSizeDef { size =>
             newIn(size)
           } run { in =>
-            val f = new Function1[Char, Unit] {
-              var i = 0
-              def apply(b: Char) = i += 1
-            }
+            val f = new CountFunction[Char]
             io.Source.fromInputStream(Channels.newInputStream(in()), "UTF-8").foreach(f)
           }
         }
@@ -252,22 +240,23 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
       }
       measure method "lines newline" in {
         withSizeDef { size =>
-          newInResource(5, size, NewLine.sep)
+          newInResource(5, 2 * size / 5, NewLine.sep)
         } run { in =>
-          var i = 0
-          val f: String => Unit = (b: String) => i += 1
+          val f = new CountFunction[String]
           in.lines(Line.Terminators.NewLine).foreach(f)
         }
       }
       measure method "lines newline" in {
         having attribute ("version", "Apache IOUtils line") in {
           withSizeDef { size =>
-            newIn(5, size, NewLine.sep)
+            newIn(5, 2 * size / 5, NewLine.sep)
           } run { inFunc =>
             val in = inFunc()
             val iter = IOUtils.lineIterator(Channels.newInputStream(in), "UTF-8")
+            var i = 0
             while (iter.hasNext()) {
               iter.next()
+              i += 1
             }
             in.close()
           }
@@ -276,32 +265,29 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
       measure method "lines newline" in {
         having attribute ("version", "io.Source.getLines") in {
           withSizeDef { size =>
-            val in = newIn(5, size, NewLine.sep)
+            val in = newIn(5, 2 * size / 5, NewLine.sep)
             () => scala.io.Source.fromInputStream(Channels.newInputStream(in()), "UTF-8")
           } run { source =>
-            var i = 0
-            val f: String => Unit = (b: String) => i += 1
+            val f = new CountFunction[String]
             source().getLines().foreach(f)
           }
         }
       }
       measure method "lines Auto" in {
         withSizeDef { size =>
-          newInResource(5, size, NewLine.sep)
+          newInResource(5, 2 * size / 5, NewLine.sep)
         } run { in =>
-          var i = 0
-          val f: String => Unit = (b: String) => i += 1
+          val f = new CountFunction[String]
           in.lines(Line.Terminators.Auto).foreach(f)
         }
       }
       measure method "lines Auto" in {
         having attribute ("version", "io.Source.getLines") in {
           withSizeDef { size =>
-            val in = newIn(5, size, NewLine.sep)
+            val in = newIn(5, 2 * size / 5, NewLine.sep)
             () => scala.io.Source.fromInputStream(Channels.newInputStream(in()), "UTF-8")
           } run { source =>
-            var i = 0
-            val f: String => Unit = (b: String) => i += 1
+            val f = new CountFunction[String]
             source().getLines().foreach(f)
           }
         }
@@ -309,12 +295,14 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
       measure method "lines Auto" in {
         having attribute ("version", "Apache IOUtils line") in {
           withSizeDef { size =>
-            newIn(5, size, NewLine.sep)
+            newIn(5, 2 * size / 5, NewLine.sep)
           } run { inFunc =>
             val in = inFunc()
             val iter = IOUtils.lineIterator(Channels.newInputStream(in), "UTF-8")
+            var i = 0
             while (iter.hasNext()) {
               iter.next()
+              i += 1
             }
             in.close()
           }
@@ -322,21 +310,19 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
       }
       measure method "lines CR" in {
         withSizeDef { size =>
-          newInResource(5, size, CarriageReturn.sep)
+          newInResource(5, 2 * size / 5, CarriageReturn.sep)
         } run { in =>
-          var i = 0
-          val f: String => Unit = (b: String) => i += 1
+          val f = new CountFunction[String]
           in.lines(Line.Terminators.CarriageReturn).foreach(f)
         }
       }
       measure method "lines CR" in {
         having attribute ("version", "io.Source.getLines") in {
           withSizeDef { size =>
-            val in = newIn(5, size, NewLine.sep)
+            val in = newIn(5, 2 * size / 5, NewLine.sep)
             () => scala.io.Source.fromInputStream(Channels.newInputStream(in()), "UTF-8")
           } run { source =>
-            var i = 0
-            val f: String => Unit = (b: String) => i += 1
+            val f = new CountFunction[String]
             source().getLines().foreach(f)
           }
         }
@@ -344,12 +330,14 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
       measure method "lines CR" in {
         having attribute ("version", "Apache IOUtils line") in {
           withSizeDef { size =>
-            newIn(5, size, CarriageReturn.sep)
+            newIn(5, 2 * size / 5, CarriageReturn.sep)
           } run { inFunc =>
             val in = inFunc()
             val iter = IOUtils.lineIterator(Channels.newInputStream(in), "UTF-8")
+            var i = 0
             while (iter.hasNext()) {
               iter.next()
+              i += 1
             }
             in.close()
           }
@@ -357,19 +345,19 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
       }
       measure method "lines RN" in {
         withSizeDef { size =>
-          newInResource(5, size, RNPair.sep)
+          newInResource(5, 2 * size / 5, RNPair.sep)
         } run { in =>
-          assert(in.lines(RNPair).forall { _.last != '\n' })
+          val f = new CountFunction[String]
+          in.lines(RNPair).foreach(f)
         }
       }
       measure method "lines RN" in {
         having attribute ("version", "io.Source.getLines") in {
           withSizeDef { size =>
-            val in = newIn(5, size, NewLine.sep)
+            val in = newIn(5, 2 * size / 5, NewLine.sep)
             () => scala.io.Source.fromInputStream(Channels.newInputStream(in()), "UTF-8")
           } run { source =>
-            var i = 0
-            val f: String => Unit = (b: String) => i += 1
+            val f = new CountFunction[String]
             source().getLines().foreach(f)
           }
         }
@@ -386,16 +374,34 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
           }
         }
       }
-      measure method "lines Custom" in {
+      measure method "lines Single Custom" in {
+        withSizeDef { size =>
+          newInResource(5, 2 * size / 5, "%")
+        } run { in =>
+          val f = new CountFunction[String]
+          in.lines(Custom("%")).foreach(f)
+        }
+      }
+      measure method "lines Single Custom" in {
+        having attribute ("version", "java.io Reader") in {
+          withSizeDef { size =>
+            newIn(5, 2 * size / 5, "%")
+          } run { inFunc =>
+            val in = inFunc()
+            IOUtils.toString(Channels.newInputStream(in), "UTF-8").split("%%")
+            in.close()
+          }
+        }
+      }
+      measure method "lines Multi Custom" in {
         withSizeDef { size =>
           newInResource(5, 2 * size / 5, "**")
         } run { in =>
-          var i = 0
-          val f: String => Unit = (b: String) => i += 1
+          val f = new CountFunction[String]
           in.lines(Custom("**")).foreach(f)
         }
       }
-      measure method "lines Custom" in {
+      measure method "lines Multi Custom" in {
         having attribute ("version", "java.io Reader") in {
           withSizeDef { size =>
             newIn(5, 2 * size / 5, "**")
@@ -411,10 +417,7 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
           (size / 2, newInResource(size))
         } run {
           case (toDrop, in) =>
-            val f = new Function1[Byte, Unit] {
-              var i = 0
-              def apply(b: Byte) = i += 1
-            }
+            val f = new CountFunction[Byte]
             in.bytes.drop(toDrop).foreach(f)
         }
       }
@@ -449,10 +452,7 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
           (size / 2, newInResource(size))
         } run {
           case (toTake, in) =>
-            val f = new Function1[Byte, Unit] {
-              var i = 0
-              def apply(b: Byte) = i += 1
-            }
+            val f = new CountFunction[Byte]
             in.bytes.take(toTake).foreach(f)
         }
       }

@@ -15,12 +15,12 @@ private[io] class ReaderResourceTraversable (
   with LongTraversableLike[Char, LongTraversable[Char]] {
 
   protected[io] def iterator: CloseableIterator[Char] = new CloseableIterator[Char] {
-    val buffer = Buffers.readerBuffer
-    val openResource = resourceOpener
-    val inConcrete = openResource.get
+    private[this] val buffer = Buffers.readerBuffer
+    private[this] val openResource = resourceOpener
+    private[this] val inConcrete = openResource.get
     inConcrete.skip(start)
-    var read = inConcrete.read(buffer)
-    var i = 0
+    private[this] var read = inConcrete.read(buffer)
+    private[this] var i = 0
 
     def hasNext = {
       if(i < read) true

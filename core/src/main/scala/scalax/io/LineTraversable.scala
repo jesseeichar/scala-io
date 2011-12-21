@@ -27,14 +27,15 @@ class LineTraversable(source: => CloseableIterator[Char], terminator: Terminator
     case t:SimpleTerminator if t.sep.size == 1 => new SingleCharIter(source, t.sep.head, includeTerminator) 
     case t:SimpleTerminator => new MultiCharIter(source, t.sep, includeTerminator) 
   }
-    
-
 }
 
-private[io] class SingleCharIter(sourceIter: CloseableIterator[Char], term:Char, includeTerm:Boolean) extends CloseableIterator[String] {
+private[io] class SingleCharIter(private[this] val sourceIter: CloseableIterator[Char], 
+                                 private[this] val term:Char, 
+                                 private[this] val includeTerm:Boolean) extends CloseableIterator[String] {
   private[this] val sb = new StringBuilder
 
-  def getc() = sourceIter.hasNext && {
+  @inline
+  final def getc() = sourceIter.hasNext && {
     val ch = sourceIter.next
     if (ch == term) false
     else {
@@ -53,33 +54,39 @@ private[io] class SingleCharIter(sourceIter: CloseableIterator[Char], term:Char,
   def doClose = sourceIter.close()
 }
 
-private[io] class MultiCharIter(sourceIter: CloseableIterator[Char], term:String, includeTerm:Boolean) extends CloseableIterator[String] {
+private[io] class MultiCharIter(private[this] val sourceIter: CloseableIterator[Char], 
+                                private[this] val term:String, 
+                                private[this] val includeTerm:Boolean) extends CloseableIterator[String] {
   private[this] val sb = new StringBuilder
 
-  def getc() = sourceIter.hasNext && {
-    sb append sourceIter.next
-    
-    if (sb.endsWith(term)) false
-    else {
-      true
-    }
-  }
   def hasNext = sourceIter.hasNext
   def next = {
     sb.clear
-    while (getc()) { }
-    if(includeTerm) sb.toString
-    else sb.substring(0,sb.length-term.length).toString
+    var continue = true
+    while (continue) {
+      continue = sourceIter.hasNext && {
+        sb append sourceIter.next
+
+        if (sb.endsWith(term)) false
+        else {
+          true
+        }
+      }
+    }
+    if (includeTerm) sb.toString
+    else sb.substring(0, sb.length - term.length).toString
   }
   def doClose = sourceIter.close()
 }
 
-private[io] class AutoCharIter(sourceIter: CloseableIterator[Char], includeTerm:Boolean) extends CloseableIterator[String] {
+private[io] class AutoCharIter(private[this] val sourceIter: CloseableIterator[Char], 
+                               private[this] val includeTerm:Boolean) extends CloseableIterator[String] {
+
   private[this] val sb = new StringBuilder
+  private[this] val iter = new CharBufferedIterator(sourceIter) 
   
-  val iter = sourceIter.buffered
-  
-  def getc() = {
+  @inline
+  private[this] final def getc() = {
     if(iter.hasNext) {
         val ch = iter.next
         if (ch == '\n') "\n"
@@ -110,4 +117,26 @@ private[io] class AutoCharIter(sourceIter: CloseableIterator[Char], includeTerm:
     sb.toString
   }
   def doClose = sourceIter.close()
+}
+
+private class CharBufferedIterator(private[this] val sourceIter: CloseableIterator[Char]) {
+  private[this] var hd: Char = _
+  private[this] var hdDefined: Boolean = false
+
+  final def head: Char = {
+    if (!hdDefined) {
+      hd = next()
+      hdDefined = true
+    }
+    hd
+  }
+
+  final def hasNext =
+    hdDefined || sourceIter.hasNext
+
+  final def next() =
+    if (hdDefined) {
+      hdDefined = false
+      hd
+    } else sourceIter.next()
 }

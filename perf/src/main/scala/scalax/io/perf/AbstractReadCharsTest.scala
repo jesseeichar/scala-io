@@ -39,8 +39,8 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
         withSizeDef { size =>
           newInResource(size)
         } run { in =>
-          var i = 0
-          in.chars.foreach(b => i += 1)
+          val f = new CountFunction[Char]
+          in.chars.foreach(f)
         }
       }
       measure method "chars" in {
@@ -52,8 +52,9 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
               val reader = in()
               val buffer = new Array[Char](size * 2)
               var read = 0
-
+              var i = 0
               do {
+                i += 1
                 read = reader.read(buffer)
               } while (read > 0)
               reader.close()
@@ -67,7 +68,9 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
           } run { inFunc =>
             val in = inFunc()
             val iter = IOUtils.lineIterator(in)
+            var i = 0
             while (iter.hasNext()) {
+              i += 1
               iter.next()
             }
             in.close()
@@ -80,8 +83,8 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
             val in = newIn(5, size, NewLine.sep)().asReadChars.chars.mkString
             scala.io.Source.fromString(in)
           } run { source =>
-            var i = 0
-          source.getLines().foreach(b => i += 1)
+          val f = new CountFunction[String]
+          source.getLines().foreach(f)
           }
         }
       }
@@ -89,16 +92,16 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
         withSizeDef { size =>
           newInResource(5, size, NewLine.sep)
         } run { in =>
-          var i = 0
-          in.lines(NewLine).foreach(b => i += 1)
+          val f = new CountFunction[String]
+          in.lines(NewLine).foreach(f)
         }
       }
       measure method "lines Auto" in {
         withSizeDef { size =>
           newInResource(5, size, NewLine.sep)
         } run { in =>
-          var i = 0
-          in.lines(Auto).foreach(b => i += 1)
+          val f = new CountFunction[String]
+          in.lines(Auto).foreach(f)
         }
       }
       measure method "lines Auto" in {
@@ -107,8 +110,8 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
             val in = newIn(5, size, NewLine.sep)().asReadChars.chars.mkString
             scala.io.Source.fromString(in)
           } run { source =>
-            var i = 0
-          source.getLines().foreach(b => i += 1)
+          val f = new CountFunction[String]
+          source.getLines().foreach(f)
           }
         }
       }
@@ -119,7 +122,9 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
           } run { inFunc =>
             val in = inFunc()
             val iter = IOUtils.lineIterator(in)
+            var i = 0
             while (iter.hasNext()) {
+              i += 1
               iter.next()
             }
             in.close()
@@ -130,8 +135,8 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
         withSizeDef { size =>
           newInResource(5, size, CarriageReturn.sep)
         } run { in =>
-          var i = 0
-          in.lines(CarriageReturn).foreach(b => i += 1)
+          val f = new CountFunction[String]
+          in.lines(CarriageReturn).foreach(f)
         }
       }
       measure method "lines CR" in {
@@ -140,8 +145,8 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
             val in = newIn(5, size, NewLine.sep)().asReadChars.chars.mkString
             scala.io.Source.fromString(in)
           } run { source =>
-            var i = 0
-          source.getLines().foreach(b => i += 1)
+          val f = new CountFunction[String]
+          source.getLines().foreach(f)
           }
         }
       }
@@ -152,7 +157,9 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
           } run { inFunc =>
             val in = inFunc()
             val iter = IOUtils.lineIterator(in)
+            var i = 0
             while (iter.hasNext()) {
+              i += 1
               iter.next()
             }
             in.close()
@@ -172,8 +179,8 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
             val in = newIn(5, size, NewLine.sep)().asReadChars.chars.mkString
             scala.io.Source.fromString(in)
           } run { source =>
-            var i = 0
-          source.getLines().foreach(b => i += 1)
+          val f = new CountFunction[String]
+          source.getLines().foreach(f)
           }
         }
       }
@@ -192,8 +199,8 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
         withSizeDef { size =>
           newInResource(5, size, "**")
         } run { in =>
-          var i = 0
-          in.lines(Custom("**")).foreach(b => i += 1)
+          val f = new CountFunction[String]
+          in.lines(Custom("**")).foreach(f)
         }
       }
       measure method "lines Custom" in {
@@ -212,8 +219,8 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
           (size / 2, newInResource(size))
         } run {
           case (toDrop, in) =>
-          var i = 0
-          in.chars.drop(toDrop).foreach(b => i += 1)
+          val f = new CountFunction[Char]
+          in.chars.drop(toDrop).foreach(f)
         }
       }
       measure method "chars drop" in {
@@ -243,8 +250,8 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
           (size / 2, newInResource(size))
         } run {
           case (toTake, in) =>
-          var i = 0
-          in.chars.take(toTake).foreach(b => i += 1)
+          val f = new CountFunction[Char]
+          in.chars.take(toTake).foreach(f)
         }
       }
       measure method "chars take" in {

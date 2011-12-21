@@ -32,6 +32,14 @@ class InputStreamResourceTest extends AssertionSugar with IOSugar {
     assertEquals(source, new String(byteArray,codec.charSet))
   }
 
+  
+  @Test
+  def bytesAsInts_and_bytes_should_have_same_elements_after_simple_map = {
+    
+    assertEquals(resource.bytes.map(_.toInt).toList, resource.bytesAsInts.toList)
+  }
+
+  
   @Test
   def size_should_return_None = assertEquals(None, resource.size)
 
