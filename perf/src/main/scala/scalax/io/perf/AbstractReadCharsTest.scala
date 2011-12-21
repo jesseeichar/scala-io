@@ -44,7 +44,8 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
         }
       }
       measure method "chars" in {
-        having attribute ("version", "java.io read chars with InputStreamReader") in {
+        having attribute ("baseline", "") in {
+          having attribute ("version", "java.io read chars with InputStreamReader") in {
           withSizeDef { size =>
             (size, newIn(size))
           } run {
@@ -58,11 +59,12 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
                 read = reader.read(buffer)
               } while (read > 0)
               reader.close()
-          }
+          }}
         }
       }
       measure method "lines newline" in {
-        having attribute ("version", "Apache IOUtils line") in {
+        having attribute ("baseline", "") in {
+          having attribute ("version", "Apache IOUtils line") in {
           withSizeDef { size =>
             newIn(5, size, NewLine.sep)
           } run { inFunc =>
@@ -75,7 +77,7 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
             }
             in.close()
           }
-        }
+        }}
       }
       measure method "lines newline" in {
         having attribute ("version", "io.Source.getLines") in {
@@ -105,7 +107,8 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
         }
       }
       measure method "lines Auto" in {
-        having attribute ("version", "io.Source.getLines") in {
+        having attribute ("baseline", "") in {
+          having attribute ("version", "io.Source.getLines") in {
           withSizeDef { size =>
             val in = newIn(5, size, NewLine.sep)().asReadChars.chars.mkString
             scala.io.Source.fromString(in)
@@ -113,10 +116,11 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
           val f = new CountFunction[String]
           source.getLines().foreach(f)
           }
-        }
+        }}
       }
       measure method "lines Auto" in {
-        having attribute ("version", "Apache IOUtils line") in {
+        having attribute ("baseline", "") in {
+          having attribute ("version", "Apache IOUtils line") in {
           withSizeDef { size =>
             newIn(5, size, NewLine.sep)
           } run { inFunc =>
@@ -128,7 +132,7 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
               iter.next()
             }
             in.close()
-          }
+          }}
         }
       }
       measure method "lines CR" in {
@@ -151,7 +155,8 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
         }
       }
       measure method "lines CR" in {
-        having attribute ("version", "Apache IOUtils line") in {
+        having attribute ("baseline", "") in {
+          having attribute ("version", "Apache IOUtils line") in {
           withSizeDef { size =>
             newIn(5, size, CarriageReturn.sep)
           } run { inFunc =>
@@ -163,7 +168,7 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
               iter.next()
             }
             in.close()
-          }
+          }}
         }
       }
       measure method "lines RN" in {
@@ -174,7 +179,8 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
         }
       }
       measure method "lines RN" in {
-        having attribute ("version", "io.Source.getLines") in {
+        having attribute ("baseline", "") in {
+          having attribute ("version", "io.Source.getLines") in {
           withSizeDef { size =>
             val in = newIn(5, size, NewLine.sep)().asReadChars.chars.mkString
             scala.io.Source.fromString(in)
@@ -182,7 +188,7 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
           val f = new CountFunction[String]
           source.getLines().foreach(f)
           }
-        }
+        }}
       }
       measure method "lines RN" in {
         having attribute ("version", "toString split on terminator") in {
@@ -195,24 +201,45 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
           }
         }
       }
-      measure method "lines Custom" in {
+      measure method "lines Single Custom" in {
         withSizeDef { size =>
-          newInResource(5, size, "**")
+          newInResource(5, size, "*")
         } run { in =>
           val f = new CountFunction[String]
-          in.lines(Custom("**")).foreach(f)
+          in.lines(Custom("*")).foreach(f)
         }
       }
-      measure method "lines Custom" in {
-        having attribute ("version", "java.io Reader") in {
+      measure method "lines Single Custom" in {
+        having attribute ("baseline", "") in {
+          having attribute ("version", "toString split") in {
           withSizeDef { size =>
-            newIn(5, size, "**")
+            newIn(5, size, "*")
           } run { inFunc =>
             val in = inFunc()
-            IOUtils.toString(in).split("\\*\\*")
+            IOUtils.toString(in).split("\\*")
             in.close()
           }
-        }
+        }}
+      }
+      measure method "lines Multi Custom" in {
+          withSizeDef { size =>
+          newInResource(5, size, "**")
+          } run { in =>
+          val f = new CountFunction[String]
+                  in.lines(Custom("**")).foreach(f)
+          }
+      }
+      measure method "lines Multi Custom" in {
+          having attribute ("baseline", "") in {
+              having attribute ("version", "toString split") in {
+                  withSizeDef { size =>
+                  newIn(5, size, "**")
+                  } run { inFunc =>
+                  val in = inFunc()
+                  IOUtils.toString(in).split("\\*\\*")
+                  in.close()
+                  }
+              }}
       }
       measure method "chars drop" in {
         withSizeDef { size =>
@@ -224,7 +251,8 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
         }
       }
       measure method "chars drop" in {
-        having attribute ("version", "java.io while loop with buffer") in {
+        having attribute ("baseline", "") in {
+          having attribute ("version", "java.io while loop with buffer") in {
           withSizeDef { size =>
             (size, newIn(size))
           } run {
@@ -242,7 +270,7 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
                 read = in.read(buffer)
               }
               in.close
-          }
+          }}
         }
       }
       measure method "chars take" in {
@@ -255,7 +283,8 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
         }
       }
       measure method "chars take" in {
-        having attribute ("version", "java.io while loop with buffer") in {
+        having attribute ("baseline", "") in {
+          having attribute ("version", "java.io while loop with buffer") in {
           withSizeDef { size =>
             (size, newIn(size))
           } run {
@@ -271,7 +300,7 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
               }
               in.close
           }
-        }
+        }}
       }
     }
   }

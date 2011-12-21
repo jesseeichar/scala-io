@@ -42,7 +42,7 @@ abstract class AbstractWriteCharsTest extends PerformanceDSLTest {
     fromWriter(out())
   }
   def withSizeDef[U](f: Int => U) = withSize from (From) upTo MaxSize by Inc withSetup (f)
-  
+
   performance of "WriteChars" in {
     having attribute (Keys.WarmupRuns -> 10) in {
 
@@ -56,14 +56,16 @@ abstract class AbstractWriteCharsTest extends PerformanceDSLTest {
         }
       }
       measure method "write string" in {
-        having attribute ("version", "java writer") in {
-          withSizeDef { size =>
-            (size, generateTestData(size, 1))
-          } run {
-            case (size, data) =>
-              val out = newOut()
-              out.write(data)
-              out.close()
+        having attribute ("baseline", "") in {
+          having attribute ("version", "java writer") in {
+            withSizeDef { size =>
+              (size, generateTestData(size, 1))
+            } run {
+              case (size, data) =>
+                val out = newOut()
+                out.write(data)
+                out.close()
+            }
           }
         }
       }
@@ -89,14 +91,16 @@ abstract class AbstractWriteCharsTest extends PerformanceDSLTest {
         }
       }
       measure method "write strings" in {
-        having attribute ("version", "java writer") in {
-          withSizeDef { size =>
-            (size, generateTestData(size, 3).split("\n"))
-          } run {
-            case (size, data) =>
-              val out = newOut()
-              data.foreach(out.write(_))
-              out.close()
+        having attribute ("baseline", "") in {
+          having attribute ("version", "java writer") in {
+            withSizeDef { size =>
+              (size, generateTestData(size, 3).split("\n"))
+            } run {
+              case (size, data) =>
+                val out = newOut()
+                data.foreach(out.write(_))
+                out.close()
+            }
           }
         }
       }
@@ -122,14 +126,16 @@ abstract class AbstractWriteCharsTest extends PerformanceDSLTest {
         }
       }
       measure method "write char array" in {
-        having attribute ("version", "java writer") in {
-          withSizeDef { size =>
-            (size, generateTestData(size, 3).toArray)
-          } run {
-            case (size, data) =>
-              val out = newOut()
-              out.write(data)
-              out.close()
+        having attribute ("baseline", "") in {
+          having attribute ("version", "java writer") in {
+            withSizeDef { size =>
+              (size, generateTestData(size, 3).toArray)
+            } run {
+              case (size, data) =>
+                val out = newOut()
+                out.write(data)
+                out.close()
+            }
           }
         }
         measure method "write char array" in {

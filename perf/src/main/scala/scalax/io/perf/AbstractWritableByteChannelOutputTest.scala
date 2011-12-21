@@ -53,14 +53,16 @@ abstract class AbstractWritableByteChannelOutputTest extends PerformanceDSLTest 
         }
       }
       measure method "write byte array" in {
-        having attribute ("version", "std java io") in {
-          withSizeDef { size =>
-            (size, generateTestData(size, 1).getBytes("UTF-8"))
-          } run {
-            case (size, data) =>
-              val out = newOut()
-              out.write(ByteBuffer.wrap(data))
-              out.close()
+        having attribute ("baseline", "") in {
+          having attribute ("version", "std java io") in {
+            withSizeDef { size =>
+              (size, generateTestData(size, 1).getBytes("UTF-8"))
+            } run {
+              case (size, data) =>
+                val out = newOut()
+                out.write(ByteBuffer.wrap(data))
+                out.close()
+            }
           }
         }
       }
@@ -74,14 +76,16 @@ abstract class AbstractWritableByteChannelOutputTest extends PerformanceDSLTest 
         }
       }
       measure method "write byte buffer" in {
-        having attribute ("version", "std nio") in {
-          withSizeDef { size =>
-            (size, ByteBuffer.wrap(generateTestData(size, 1).getBytes("UTF-8")))
-          } run {
-            case (size, data) =>
-              val out = newOut()
-              out.write(data)
-              out.close()
+        having attribute ("baseline", "") in {
+          having attribute ("version", "std nio") in {
+            withSizeDef { size =>
+              (size, ByteBuffer.wrap(generateTestData(size, 1).getBytes("UTF-8")))
+            } run {
+              case (size, data) =>
+                val out = newOut()
+                out.write(data)
+                out.close()
+            }
           }
         }
       }
@@ -95,17 +99,19 @@ abstract class AbstractWritableByteChannelOutputTest extends PerformanceDSLTest 
         }
       }
       measure method "write partial byte array" in {
-        having attribute ("version", "std java io") in {
-          withSizeDef { size =>
-            (size, generateTestData(size, 1).getBytes("UTF-8"))
-          } run {
-            case (size, data) =>
-              val out = newOut()
-              val buffer = ByteBuffer.wrap(data)
-              buffer.limit(size - size/4)
-              buffer.position(size/4)
-              out.write(buffer)
-              out.close()
+        having attribute ("baseline", "") in {
+          having attribute ("version", "std java io") in {
+            withSizeDef { size =>
+              (size, generateTestData(size, 1).getBytes("UTF-8"))
+            } run {
+              case (size, data) =>
+                val out = newOut()
+                val buffer = ByteBuffer.wrap(data)
+                buffer.limit(size - size / 4)
+                buffer.position(size / 4)
+                out.write(buffer)
+                out.close()
+            }
           }
         }
       }
@@ -119,14 +125,16 @@ abstract class AbstractWritableByteChannelOutputTest extends PerformanceDSLTest 
         }
       }
       measure method "write string" in {
-        having attribute ("version", "apache ioutils") in {
-          withSizeDef { size =>
-            (size, generateTestData(size, 1))
-          } run {
-            case (size, data) =>
-              val out = Channels.newOutputStream(newOut())
-              IOUtils.write(data, out, "UTF-8")
-              out.close()
+        having attribute ("baseline", "") in {
+          having attribute ("version", "apache ioutils") in {
+            withSizeDef { size =>
+              (size, generateTestData(size, 1))
+            } run {
+              case (size, data) =>
+                val out = Channels.newOutputStream(newOut())
+                IOUtils.write(data, out, "UTF-8")
+                out.close()
+            }
           }
         }
       }
@@ -140,14 +148,16 @@ abstract class AbstractWritableByteChannelOutputTest extends PerformanceDSLTest 
         }
       }
       measure method "write strings" in {
-        having attribute ("version", "apache ioutils") in {
-          withSizeDef { size =>
-            (size, generateTestData(size, 3).split("\n"))
-          } run {
-            case (size, data) =>
-              val out = Channels.newOutputStream(newOut())
-              data.foreach(IOUtils.write(_, out, "UTF-8"))
-              out.close()
+        having attribute ("baseline", "") in {
+          having attribute ("version", "apache ioutils") in {
+            withSizeDef { size =>
+              (size, generateTestData(size, 3).split("\n"))
+            } run {
+              case (size, data) =>
+                val out = Channels.newOutputStream(newOut())
+                data.foreach(IOUtils.write(_, out, "UTF-8"))
+                out.close()
+            }
           }
         }
       }
@@ -161,14 +171,16 @@ abstract class AbstractWritableByteChannelOutputTest extends PerformanceDSLTest 
         }
       }
       measure method "write char array" in {
-        having attribute ("version", "apache ioutils") in {
-          withSizeDef { size =>
-            (size, generateTestData(size, 3).toArray)
-          } run {
-            case (size, data) =>
-              val out = Channels.newOutputStream(newOut())
-              IOUtils.write(data,out,"UTF-8")
-              out.close()
+        having attribute ("baseline", "") in {
+          having attribute ("version", "apache ioutils") in {
+            withSizeDef { size =>
+              (size, generateTestData(size, 3).toArray)
+            } run {
+              case (size, data) =>
+                val out = Channels.newOutputStream(newOut())
+                IOUtils.write(data, out, "UTF-8")
+                out.close()
+            }
           }
         }
       }

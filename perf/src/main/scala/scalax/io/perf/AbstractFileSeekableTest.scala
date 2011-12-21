@@ -76,185 +76,209 @@ trait AbstractFileSeekableTest extends AbstractSeekableTest {
   performance of "Seekable" in {
     having attribute (Keys.WarmupRuns -> 10) in {
       measure method "patch bytes array" in {
-        having attribute ("version", "std nio") in {
-          withSizeDef { size =>
-            val data = generateTestData(size, 1).getBytes(Codec.UTF8.name)
-            (size, data.length, data)
-          } run {
-            case (size, pos, data) =>
-              nioPatch(data, pos, size)
+        having attribute ("baseline", "") in {
+          having attribute ("version", "std nio") in {
+            withSizeDef { size =>
+              val data = generateTestData(size, 1).getBytes(Codec.UTF8.name)
+              (size, data.length, data)
+            } run {
+              case (size, pos, data) =>
+                nioPatch(data, pos, size)
+            }
           }
         }
       }
       measure method "patch bytes list" in {
-        having attribute ("version", "std nio") in {
-          withSizeDef { size =>
-            val data = generateTestData(size, 1).getBytes(Codec.UTF8.name)
-            (size, data.length, data.toList)
-          } run {
-            case (size, pos, data) =>
-              nioPatch(data.toArray, pos, size)
+        having attribute ("baseline", "") in {
+          having attribute ("version", "std nio") in {
+            withSizeDef { size =>
+              val data = generateTestData(size, 1).getBytes(Codec.UTF8.name)
+              (size, data.length, data.toList)
+            } run {
+              case (size, pos, data) =>
+                nioPatch(data.toArray, pos, size)
+            }
           }
         }
       }
       measure method "append strings" in {
-        having attribute ("version", "std nio") in {
-          withSizeDef { size =>
-            (size, generateTestData(size, 1))
-          } run {
-            case (size, data) =>
-              nioAppend(data.getBytes(Codec.UTF8.name), size)
+        having attribute ("baseline", "") in {
+          having attribute ("version", "std nio") in {
+            withSizeDef { size =>
+              (size, generateTestData(size, 1))
+            } run {
+              case (size, data) =>
+                nioAppend(data.getBytes(Codec.UTF8.name), size)
+            }
           }
         }
       }
       measure method "append bytes array" in {
-        having attribute ("version", "std nio") in {
-          withSizeDef { size =>
-            val data = generateTestData(size, 1).getBytes(Codec.UTF8.name)
-            (size, data)
-          } run {
-            case (size, data) =>
-              nioAppend(data, size)
+        having attribute ("baseline", "") in {
+          having attribute ("version", "std nio") in {
+            withSizeDef { size =>
+              val data = generateTestData(size, 1).getBytes(Codec.UTF8.name)
+              (size, data)
+            } run {
+              case (size, data) =>
+                nioAppend(data, size)
+            }
           }
         }
       }
       measure method "append bytes list" in {
-        having attribute ("version", "std nio") in {
-          withSizeDef { size =>
-            val data = generateTestData(size, 1).getBytes(Codec.UTF8.name).toList
-            (size, data)
-          } run {
-            case (size, data) =>
-              nioAppend(data.toArray, size)
+        having attribute ("baseline", "") in {
+          having attribute ("version", "std nio") in {
+            withSizeDef { size =>
+              val data = generateTestData(size, 1).getBytes(Codec.UTF8.name).toList
+              (size, data)
+            } run {
+              case (size, data) =>
+                nioAppend(data.toArray, size)
+            }
           }
         }
       }
       measure method "insert bytes array" in {
-        having attribute ("version", "std nio") in {
-          withSizeDef { size =>
-            val data = generateTestData(size, 1).getBytes(Codec.UTF8.name)
-            (size, data.length / 2, data)
-          } run {
-            case (size, pos, data) =>
-              nioInsert(data, pos, size)
+        having attribute ("baseline", "") in {
+          having attribute ("version", "std nio") in {
+            withSizeDef { size =>
+              val data = generateTestData(size, 1).getBytes(Codec.UTF8.name)
+              (size, data.length / 2, data)
+            } run {
+              case (size, pos, data) =>
+                nioInsert(data, pos, size)
+            }
           }
         }
       }
       measure method "insert bytes list" in {
-        having attribute ("version", "std nio") in {
-          withSizeDef { size =>
-            val data = generateTestData(size, 1).getBytes(Codec.UTF8.name).toList
-            (size, data.length / 2, data)
-          } run {
-            case (size, pos, data) =>
-              nioInsert(data.toArray, pos, size)
+        having attribute ("baseline", "") in {
+          having attribute ("version", "std nio") in {
+            withSizeDef { size =>
+              val data = generateTestData(size, 1).getBytes(Codec.UTF8.name).toList
+              (size, data.length / 2, data)
+            } run {
+              case (size, pos, data) =>
+                nioInsert(data.toArray, pos, size)
+            }
           }
         }
       }
       measure method "bytes drop" in {
-        having attribute ("version", "std nio") in {
-          withSizeDef { size =>
-            (size)
-          } run {
-            case (size) =>
-              val source = setup(size)
-              val seekable = newIn(source)()
+        having attribute ("baseline", "") in {
+          having attribute ("version", "std nio") in {
+            withSizeDef { size =>
+              (size)
+            } run {
+              case (size) =>
+                val source = setup(size)
+                val seekable = newIn(source)()
 
-              val buffer = ByteBuffer.allocateDirect(size)
-              seekable.position(size / 2)
+                val buffer = ByteBuffer.allocateDirect(size)
+                seekable.position(size / 2)
 
-              var read = seekable.read(buffer)
-              while (read > 0) {
-                var i = 0
-                while (i < read) {
-                  buffer.get(i)
-                  i += 1
+                var read = seekable.read(buffer)
+                while (read > 0) {
+                  var i = 0
+                  while (i < read) {
+                    buffer.get(i)
+                    i += 1
+                  }
+                  buffer.clear()
+                  read = seekable.read(buffer)
                 }
-                buffer.clear()
-                read = seekable.read(buffer)
-              }
-              seekable.close
+                seekable.close
+            }
           }
         }
       }
       measure method "bytes take" in {
-        having attribute ("version", "std nio") in {
-          withSizeDef { size =>
-            (size)
-          } run {
-            case (size) =>
-              val source = setup(size)
-              val seekable = newIn(source)()
-              val buffer = ByteBuffer.allocateDirect(size / 2)
-              seekable.read(buffer)
-              var i = 0
-              while (buffer.hasRemaining()) {
-                buffer.get(i)
-                i += 1
-              }
-              seekable.close
+        having attribute ("baseline", "") in {
+          having attribute ("version", "std nio") in {
+            withSizeDef { size =>
+              (size)
+            } run {
+              case (size) =>
+                val source = setup(size)
+                val seekable = newIn(source)()
+                val buffer = ByteBuffer.allocateDirect(size / 2)
+                seekable.read(buffer)
+                var i = 0
+                while (buffer.hasRemaining()) {
+                  buffer.get(i)
+                  i += 1
+                }
+                seekable.close
+            }
           }
         }
       }
       measure method "bytes zip" in {
-        having attribute ("version", "std nio") in {
-          withSizeDef { size =>
-            val data = generateTestData(size).getBytes(Codec.UTF8.name)
-            (size, data.toList)
-          } run {
-            case (size, data) =>
-              val source = setup(size)
-              val seekable = newIn(source)()
+        having attribute ("baseline", "") in {
+          having attribute ("version", "std nio") in {
+            withSizeDef { size =>
+              val data = generateTestData(size).getBytes(Codec.UTF8.name)
+              (size, data.toList)
+            } run {
+              case (size, data) =>
+                val source = setup(size)
+                val seekable = newIn(source)()
 
-              val buffer = ByteBuffer.allocateDirect(size)
-              seekable.position(size / 2)
+                val buffer = ByteBuffer.allocateDirect(size)
+                seekable.position(size / 2)
 
-              var read = seekable.read(buffer)
-              while (read > 0) {
-                var i = 0
-                while (i < read) {
-                  (buffer.get(i), data(i))
-                  i += 1
+                var read = seekable.read(buffer)
+                while (read > 0) {
+                  var i = 0
+                  while (i < read) {
+                    (buffer.get(i), data(i))
+                    i += 1
+                  }
+                  buffer.clear()
+                  read = seekable.read(buffer)
                 }
-                buffer.clear()
-                read = seekable.read(buffer)
-              }
-              seekable.close
+                seekable.close
+            }
           }
         }
       }
       measure method "bytes limitFold" in {
-        having attribute ("version", "std nio") in {
-          withSizeDef { size =>
-            val data = generateTestData(size).getBytes(Codec.UTF8.name)
-            (size, data.toList)
-          } run {
-            case (size, data) =>
-              val source = setup(size)
-              val seekable = newIn(source)()
-              val buffer = ByteBuffer.allocateDirect(size / 2)
-              seekable.read(buffer)
-              var i = 0
-              while (i < size / 2) {
-                buffer.get(i)
-                i += 1
-              }
-              seekable.close
+        having attribute ("baseline", "") in {
+          having attribute ("version", "std nio") in {
+            withSizeDef { size =>
+              val data = generateTestData(size).getBytes(Codec.UTF8.name)
+              (size, data.toList)
+            } run {
+              case (size, data) =>
+                val source = setup(size)
+                val seekable = newIn(source)()
+                val buffer = ByteBuffer.allocateDirect(size / 2)
+                seekable.read(buffer)
+                var i = 0
+                while (i < size / 2) {
+                  buffer.get(i)
+                  i += 1
+                }
+                seekable.close
+            }
           }
         }
       }
       measure method "bytes apply" in {
-        having attribute ("version", "std nio") in {
-          withSizeDef { size =>
-            size
-          } run { size =>
-            val source = setup(size)
-            val seekable = newIn(source)()
-            val buffer = ByteBuffer.allocateDirect(1)
-            seekable.position(size / 2)
-            seekable.read(buffer)
-            buffer.get(0)
-            seekable.close
+        having attribute ("baseline", "") in {
+          having attribute ("version", "std nio") in {
+            withSizeDef { size =>
+              size
+            } run { size =>
+              val source = setup(size)
+              val seekable = newIn(source)()
+              val buffer = ByteBuffer.allocateDirect(1)
+              seekable.position(size / 2)
+              seekable.read(buffer)
+              buffer.get(0)
+              seekable.close
+            }
           }
         }
       }

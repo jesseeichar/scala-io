@@ -211,7 +211,7 @@ trait AbstractInputTest extends PerformanceDSLTest {
         having attribute ("baseline", "") in {
           having attribute ("version", "Apache IOUtils line") in {
             withSizeDef { size =>
-              newIn(5, 2 * size / 5, NewLine.sep)
+              newIn(5, size, NewLine.sep)
             } run { inFunc =>
               val in = inFunc()
               val iter = IOUtils.lineIterator(in, "UTF-8")
@@ -228,7 +228,7 @@ trait AbstractInputTest extends PerformanceDSLTest {
       measure method "lines newline" in {
         having attribute ("version", "io.Source.getLines") in {
           withSizeDef { size =>
-            val in = newIn(5, 2 * size / 5, NewLine.sep)
+            val in = newIn(5, size, NewLine.sep)
             () => scala.io.Source.fromInputStream(in(), "UTF-8")
           } run { source =>
             val f = new CountFunction[String]
@@ -238,7 +238,7 @@ trait AbstractInputTest extends PerformanceDSLTest {
       }
       measure method "lines newline" in {
         withSizeDef { size =>
-          newInResource(5, 2 * size / 5, NewLine.sep)
+          newInResource(5, size, NewLine.sep)
         } run { in =>
           val f = new CountFunction[String]
           in.lines(Line.Terminators.NewLine).foreach(f)
@@ -246,7 +246,7 @@ trait AbstractInputTest extends PerformanceDSLTest {
       }
       measure method "lines Auto" in {
         withSizeDef { size =>
-          newInResource(5, 2 * size / 5, NewLine.sep)
+          newInResource(5, size, NewLine.sep)
         } run { in =>
           val f = new CountFunction[String]
           in.lines(Line.Terminators.Auto).foreach(f)
@@ -256,7 +256,7 @@ trait AbstractInputTest extends PerformanceDSLTest {
         having attribute ("version", "io.Source.getLines") in {
           withSizeDef { size =>
             import JavaConverters._
-            val in = newIn(5, 2 * size / 5, NewLine.sep)
+            val in = newIn(5, size, NewLine.sep)
             () => scala.io.Source.fromInputStream(in(), "UTF-8")
           } run { source =>
             val f = new CountFunction[String]
@@ -268,7 +268,7 @@ trait AbstractInputTest extends PerformanceDSLTest {
         having attribute ("baseline", "") in {
           having attribute ("version", "Apache IOUtils line") in {
             withSizeDef { size =>
-              newIn(5, 2 * size / 5, NewLine.sep)
+              newIn(5, size, NewLine.sep)
             } run { inFunc =>
               val in = inFunc()
               val iter = IOUtils.lineIterator(in, "UTF-8")
@@ -282,7 +282,7 @@ trait AbstractInputTest extends PerformanceDSLTest {
       }
       measure method "lines CR" in {
         withSizeDef { size =>
-          newInResource(5, 2 * size / 5, CarriageReturn.sep)
+          newInResource(5, size, CarriageReturn.sep)
         } run { in =>
           val f = new CountFunction[String]
           in.lines(Line.Terminators.CarriageReturn).foreach(f)
@@ -292,7 +292,7 @@ trait AbstractInputTest extends PerformanceDSLTest {
         having attribute ("baseline", "") in {
           having attribute ("version", "io.Source.getLines") in {
             withSizeDef { size =>
-              val in = newIn(5, 2 * size / 5, CarriageReturn.sep)
+              val in = newIn(5, size, CarriageReturn.sep)
               () => scala.io.Source.fromInputStream(in(), "UTF-8")
             } run { source =>
               val f = new CountFunction[String]
@@ -305,7 +305,7 @@ trait AbstractInputTest extends PerformanceDSLTest {
         having attribute ("baseline", "") in {
           having attribute ("version", "Apache IOUtils line") in {
             withSizeDef { size =>
-              newIn(5, 2 * size / 5, CarriageReturn.sep)
+              newIn(5, size, CarriageReturn.sep)
             } run { inFunc =>
               val in = inFunc()
               val iter = IOUtils.lineIterator(in, "UTF-8")
@@ -319,7 +319,7 @@ trait AbstractInputTest extends PerformanceDSLTest {
       }
       measure method "lines RN" in {
         withSizeDef { size =>
-          newInResource(5, 2 * size / 5, RNPair.sep)
+          newInResource(5, size, RNPair.sep)
         } run { in =>
           val f = new CountFunction[String]
           in.lines(Line.Terminators.RNPair).foreach(f)
@@ -329,7 +329,7 @@ trait AbstractInputTest extends PerformanceDSLTest {
         having attribute ("baseline", "") in {
           having attribute ("version", "Apache IOUtils line") in {
             withSizeDef { size =>
-              newIn(5, 2 * size / 5, NewLine.sep)
+              newIn(5, size, NewLine.sep)
             } run { inFunc =>
               val in = inFunc()
               val iter = IOUtils.lineIterator(in, "UTF-8")
@@ -344,7 +344,7 @@ trait AbstractInputTest extends PerformanceDSLTest {
       measure method "lines RN" in {
         having attribute ("version", "io.Source.getLines") in {
           withSizeDef { size =>
-            val in = newIn(5, 2 * size / 5, RNPair.sep)
+            val in = newIn(5, size, RNPair.sep)
             () => scala.io.Source.fromInputStream(in(), "UTF-8")
           } run { source =>
             val f = new CountFunction[String]
@@ -355,7 +355,7 @@ trait AbstractInputTest extends PerformanceDSLTest {
       measure method "lines RN" in {
         having attribute ("version", "toString split on terminator") in {
           withSizeDef { size =>
-            newIn(5, 2 * size / 5, RNPair.sep)
+            newIn(5, size, RNPair.sep)
           } run { inFunc =>
             val in = inFunc()
             IOUtils.toString(in, "UTF-8").split("\r\n")
@@ -365,7 +365,7 @@ trait AbstractInputTest extends PerformanceDSLTest {
       }
       measure method "lines Single Custom" in {
         withSizeDef { size =>
-          newInResource(5, 2 * size / 5, "%")
+          newInResource(5, size, "%")
         } run { in =>
           val f = new CountFunction[String]
           in.lines(Custom("%")).foreach(f)
@@ -375,7 +375,7 @@ trait AbstractInputTest extends PerformanceDSLTest {
         having attribute ("baseline", "") in {
           having attribute ("version", "tiString split") in {
             withSizeDef { size =>
-              newIn(5, 2 * size / 5, "%")
+              newIn(5, size, "%")
             } run { inFunc =>
               val in = inFunc()
               IOUtils.toString(in, "UTF-8").split("%")
@@ -386,7 +386,7 @@ trait AbstractInputTest extends PerformanceDSLTest {
       }
       measure method "lines Multi Custom" in {
         withSizeDef { size =>
-          newInResource(5, 2 * size / 5, "**")
+          newInResource(5, size, "**")
         } run { in =>
           val f = new CountFunction[String]
           in.lines(Custom("**")).foreach(f)
@@ -395,7 +395,7 @@ trait AbstractInputTest extends PerformanceDSLTest {
       measure method "lines Multi Custom" in {
         having attribute ("version", "toString split") in {
           withSizeDef { size =>
-            newIn(5, 2 * size / 5, "**")
+            newIn(5, size, "**")
           } run { inFunc =>
             val in = inFunc()
             IOUtils.toString(in, "UTF-8").split("\\*\\*")
