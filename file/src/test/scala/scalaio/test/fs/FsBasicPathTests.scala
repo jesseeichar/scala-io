@@ -27,7 +27,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
   def fspath(_name:String) = {
     val name = _name.replaceAll(Pattern.quote(fixture.fs.separator),"/")
     val mainParts = (name split "/").toList
-    val all = if(name startsWith "/") (fixture.fs.separator +: mainParts) else mainParts
+    val all = if(name startsWith "/") (fixture.fs.roots.head.path +: mainParts) else mainParts
     fixture.fs.fromSeq(all)
   }
   def fspath(name:Path) = fixture.fs.fromSeq(name.segments)
