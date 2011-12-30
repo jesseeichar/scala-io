@@ -4,7 +4,7 @@ import java.io.Closeable
 import resource.{AbstractManagedResource, ManagedResourceOperations}
 import collection.{GenTraversableOnce, Iterator, TraversableOnce}
 import java.util.concurrent.locks.ReentrantLock
-trait CloseableIterator[@specialized(Byte,Char) +A] extends Iterator[A] with Closeable {
+trait CloseableIterator[@specialized(Byte,Char) +A] extends LongIterator[A] with Closeable {
   self =>
   val creationPoint = new Exception();
 
@@ -20,9 +20,9 @@ trait CloseableIterator[@specialized(Byte,Char) +A] extends Iterator[A] with Clo
   }
   
   override def take(i: Int) = lslice(0, i)
-  def ltake(i: Long) = lslice(0, i)
-  def ldrop(i: Long) = lslice(i,Long.MaxValue)
-  def lslice(from: Long, until: Long) = {
+  override def ltake(i: Long) = lslice(0, i)
+  override def ldrop(i: Long) = lslice(i,Long.MaxValue)
+  override def lslice(from: Long, until: Long):CloseableIterator[A] = {
     var toDrop = from
     while (toDrop > 0) {
       if (toDrop > Int.MaxValue) {

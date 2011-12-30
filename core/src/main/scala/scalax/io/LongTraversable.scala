@@ -30,6 +30,7 @@ trait LongTraversable[@specialized(Byte,Char) +A] extends Traversable[A]
     CloseableIterator.managed(iterator).foreach(b ++= _) 
     b.result()
   }
+  def open = new OpenedLongTraversable(this)
 
   override def toString() = "LongTraversable(...)"
 }

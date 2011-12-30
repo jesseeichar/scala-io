@@ -30,14 +30,19 @@ sealed trait FoldResult[@specialized(Byte,Char) +A]{def result: A}
 
 /**
  * Signal indicating that the fold should continue to process another value
+ * 
+ * @param skip the number of bytes to skip before processing a byte.  
+ * IE if skip == 3 then the next 3 bytes will be skipped 
  */
-case class Continue[@specialized(Byte,Char) +A](result: A) extends FoldResult[A]
+case class Continue[@specialized(Byte,Char) +A](result: A,skip:Long = 0L) extends FoldResult[A]
 
 /**
  * Signal indicating that the fold should stop and return the contained result
  */
 case class End[@specialized(Byte,Char) +A](result: A) extends FoldResult[A]
-
+/*
+case class SizeBlockMapResult[B,U](value:U,nextBlockSize:Int,skip:Long = 0)(val nextFunction:Seq[B] => SizeBlockMapResult[B,U])
+*/
 /**
  * A traversable for use on very large datasets which cannot be indexed with Ints but instead
  * require Longs for indexing.
@@ -80,17 +85,41 @@ trait LongTraversableLike[@specialized(Byte,Char) +A, +Repr <: LongTraversableLi
   def limitFold[U](init: U)(op: (U, A) => FoldResult[U]): U = {
     class FoldTerminator(val value: U) extends RuntimeException
     try {
-      foldLeft(init) { (acc, next) =>
-        op(acc, next) match {
-          case Continue(result) => result
-          case End(result) => throw new FoldTerminator(result)
+      val result = foldLeft((init,0L)) { (acc, next) =>
+        if(acc._2 > 0 ) (acc._1, acc._2 - 1)
+        else {
+	        op(acc._1, next) match {
+	          case Continue(result,skip) => (result,skip)
+	          case End(result) => throw new FoldTerminator(result)
+	        }
         }
       }
+      result._1
     } catch {
       case ft:FoldTerminator => ft.value
     }
   }
-
+/*
+  def variableSliding[B >: A,U](initBlock:Int)(f: Seq[B] => SizeBlockMapResult[B,U]):LongTraversable[U] = new LongTraversable[U]{
+    def iterator = new CloseableIterator[U] {
+	    private[this] val iter = self.iterator
+	    private[this] var nextSize = initBlock
+	    private[this] var function = f
+	    
+	    override final def hasNext = iter.hasNext
+	    override final def next = {
+	      val seq = iter.take(nextSize).toSeq
+			val result = f(seq)
+			nextSize = result.nextBlockSize
+			function = result.nextFunction
+			iterator.ldrop(result.skip)
+			result.value
+	    }
+	    
+	    override final protected def doClose() = iter.close()
+    }
+  }*/
+  
   protected[io] def iterator: CloseableIterator[A]
 
   /*def byteForEach[A](f:ByteFunc) {
