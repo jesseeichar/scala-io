@@ -99,6 +99,12 @@ trait LongTraversableLike[@specialized(Byte,Char) +A, +Repr <: LongTraversableLi
       case ft:FoldTerminator => ft.value
     }
   }
+  
+  def withIterator[U](f: LongIterator[A] => U) = {
+    val iter = iterator
+    try f(iter)
+    finally iter.close()
+  }
 /*
   def variableSliding[B >: A,U](initBlock:Int)(f: Seq[B] => SizeBlockMapResult[B,U]):LongTraversable[U] = new LongTraversable[U]{
     def iterator = new CloseableIterator[U] {

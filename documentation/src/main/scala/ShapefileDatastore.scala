@@ -31,13 +31,15 @@ class ShapefileDatastore(val csvFile: Path, val shapefile: Path) {
   def shpRecords = for {
     shpFileIO <- shapefile.bytes.drop(100).open
     csvFileIO <- csvFile.lines().zipWithIndex.open
-    recordHeader = shpFileIO.take(8).toSeq
-    recordNumber = recordHeader(0)
-    geometry <- shpFileIO.take(recordHeader(4).toInt)
-    shapeType = Shapetype(geometry(0))
-    attributes <- nextCsvRecord(csvFileIO)
-  } yield ShapefileRecord(recordNumber, geometry.drop(1), attributes)  
-  
+  } yield {
+    val recordHeader = shpFileIO.take(8).toSeq
+    val recordNumber = recordHeader(0)
+    val geometry = shpFileIO.take(recordHeader(4).toInt).toSeq
+    val shapeType = Shapetype(geometry(0))
+    val attributes = nextCsvRecord(recordNumber, csvFileIO)
+
+    ShapefileRecord(recordNumber, geometry.drop(1), attributes)
+  }
 }
 
 case class ShapefileRecord(num:Int, data:Seq[Byte], attributes:Seq[String])
