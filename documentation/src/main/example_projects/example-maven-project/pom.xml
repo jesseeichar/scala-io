@@ -5,7 +5,7 @@
   <version>1.0</version>
   <inceptionYear>2008</inceptionYear>
   <properties>
-    <scala.version>2.9.1</scala.version>
+    <scala.version>@SCALA_VERSION@</scala.version>
   </properties>
 
   <repositories>
@@ -27,8 +27,8 @@
   <dependencies>
     <dependency>
       <groupId>com.github.scala-incubator.io</groupId>
-      <artifactId>scala-io-core_2.9.1</artifactId>
-      <version>0.2.0</version>
+      <artifactId>scala-io-core_${scala.version}</artifactId>
+      <version>@IO_VERSION@</version>
     </dependency>
 
   </dependencies>

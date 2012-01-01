@@ -9,8 +9,8 @@ libraryDependencies += "{{props.groupId}}" %% "scala-io-core" % "{{props.version
 libraryDependencies += "{{props.groupId}}" %% "scala-io-file" % "{{props.version}}"
           </pre>
       </li>
-      <li>update your SBT project to download the dependencies
-        <pre>sbt update</pre>
+      <li>build project if you are ready
+        <pre>sbt compile</pre>
       </li>
     </ol>
 
@@ -19,7 +19,7 @@ libraryDependencies += "{{props.groupId}}" %% "scala-io-file" % "{{props.version
 > curl -L http://jesseeichar.github.com/scala-io-doc/{{props.version}}/example_projects/example-sbt-project.zip > \
     tmp.zip &amp;&amp; unzip tmp.zip &amp;&amp; rm tmp.zip
 > cd example-sbt-project
-> sbt update run</pre>
+> sbt run</pre>
   </p>
   <p>
     <h3>Maven Example</h3>
@@ -60,7 +60,7 @@ libraryDependencies += "{{props.groupId}}" %% "scala-io-file" % "{{props.version
 > curl -L http://jesseeichar.github.com/scala-io-doc/{{props.version}}/example_projects/example-maven-project.zip > \
     tmp.zip &amp;&amp; unzip tmp.zip &amp;&amp; rm tmp.zip
 > cd example-maven-project
-> mvn compile exec:java -Dexec.mainClass="Main" ]]>
+> mvn compile exec:java -Dexec.mainClass="Main"
     </pre>
   </p>
   http://groups.google.com/group/scala-incubator

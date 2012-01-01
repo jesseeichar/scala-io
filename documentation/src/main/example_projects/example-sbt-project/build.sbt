@@ -1,5 +1,5 @@
-libraryDependencies += "com.github.scala-incubator.io" %% "scala-io-core" % "0.2.0"
+libraryDependencies += "com.github.scala-incubator.io" %% "scala-io-core" % "@IO_VERSION@"
 
 mainClass := Some("Main")
 
-scalaVersion := "2.9.1"
+scalaVersion := "@SCALA_VERSION@"

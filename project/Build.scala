@@ -62,7 +62,7 @@ object ScalaIoBuild extends Build {
   // ----------------------- Core Project ----------------------- //
   val coreSettings = Seq[Setting[_]](
     name := "scala-io-core",
-    libraryDependencies += "com.github.jsuereth.scala-arm" %% "scala-arm" % BuildConstants.armVersion withSources()
+    libraryDependencies += "com.github.jsuereth.scala-arm" %% "scala-arm" % BuildConstants.armVersion
   )
 	lazy val coreProject = Project("core", file("core")).
     configs(Samples).
@@ -107,8 +107,8 @@ object ScalaIoBuild extends Build {
   val docsSettings = inConfig(Docs)(Defaults.configSettings) ++ Seq[Setting[_]](
       scalacOptions in Docs ++= Seq("-doc-title", "Scala IO"),//, "–doc-source-url", "https://raw.github.com/jesseeichar/scala-io/master/core/src/main/scala/"),
       resourceDirectory := new File("documentation/src/main/resources"),
-      siteDir <<= baseDirectory map { base => new File(base, "target/website") },
-      //siteDir := new File("/Users/jeichar/Sites/scala-io-doc/"),
+      //siteDir <<= baseDirectory map { base => new File(base, "target/website") },
+      siteDir := new File("/Users/jeichar/Sites/scala-io-doc/"),
       SiteTask,
       site in Docs <<= (site in Docs).dependsOn(doc in Docs),
       sources in Docs <<=
