@@ -1,0 +1,3 @@
+The main issues addressed in this release were bug fixes and performance related to PathFinder/PathSets and more performance improvements related to reading data from streams.
+
+The extended release notes are available at: [http://jesseeichar.github.com/scala-io-doc/0.3.0/index.html#!/releaseNotes/index](http://jesseeichar.github.com/scala-io-doc/0.3.0/index.html#!/releaseNotes/index)

@@ -84,8 +84,17 @@ println("SourcePath = "+sourcePath)
   
   def writeIndexjson() = {
     val names = indexDir.listFiles.toSeq.filter(_.isDirectory).filterNot(_.getName startsWith ".").map(f => "\""+f.getName+"\"")
-    val json = names.sorted.reverse.mkString("[",",","]")
+    val sortedNames = names.sorted.reverse
+    val json = sortedNames.mkString("[",",","]")
     IO.write(new File(indexDir,"version-index.json"), json, utf8)
+    
+    val html = 
+    <html>
+      <head><meta http-equiv="REFRESH" content={"0;url="+sortedNames(0)+"/index.html"}/></head>
+      <body>Redirecting to <a href={sortedNames(0)+"/index.html"}>documentation for latest version</a></body>
+    </html>
+    
+    IO.write(new File(indexDir, "latest.html"), html.toString, utf8)
   }
 
   def read(name:String) = {

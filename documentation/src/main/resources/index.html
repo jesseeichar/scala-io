@@ -9,6 +9,7 @@
     
   Find Version: <input name="query"/>
   <ul>
+    <li><a href="{{latestVersion}}/index.html">Latest</a></li>
     <li ng:repeat="version in versions.$filter(query)">
       <a href="{{version}}/index.html">Scala IO version {{version}}</a>
     </li>

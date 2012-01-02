@@ -3,7 +3,7 @@ import Keys._
 
 object BuildConstants {
   val organization = "com.github.scala-incubator.io"
-  val version = "0.4-SNAPSHOT"
+  val version = "0.3.0"
   val armVersion = "1.1"
   val scalaVersion = "2.9.1"
 }
@@ -13,7 +13,7 @@ object ScalaIoBuild extends Build {
 
 	lazy val root:Project = Project("root", file(".")).
     aggregate(coreProject,fileProject,perfProject,webSiteProject).
-    settings(sharedSettings ++ Seq(publishArtifact := false) :_*)
+    settings(sharedSettings ++ Seq(publishArtifact := false, name := "Scala IO") :_*)
 
   // ----------------------- Samples Settings ----------------------- //
 
@@ -89,9 +89,9 @@ object ScalaIoBuild extends Build {
   
 
   // ------------------------------ Docs Project ------------------------------ //
-  lazy val site = TaskKey[Unit]("site","Generate documentation web-site")
+  lazy val docsSite = TaskKey[Unit]("docs-site","Generate documentation web-site")
   lazy val siteDir = TaskKey[File]("site-dir","Directory of the generated website")
-  lazy val SiteTask = site in Docs <<= (siteDir,baseDirectory,scalaVersion,resourceDirectory,docDirectory in Docs) map {
+  lazy val SiteTask = docsSite in Docs <<= (siteDir,baseDirectory,scalaVersion,resourceDirectory,docDirectory in Docs) map {
     (out,baseDirectory,scalaVersion,resourceDirectory,docDirectory) =>
 
     val model = new WebsiteModel(
@@ -110,7 +110,7 @@ object ScalaIoBuild extends Build {
       //siteDir <<= baseDirectory map { base => new File(base, "target/website") },
       siteDir := new File("/Users/jeichar/Sites/scala-io-doc/"),
       SiteTask,
-      site in Docs <<= (site in Docs).dependsOn(doc in Docs),
+      docsSite in Docs <<= (docsSite in Docs).dependsOn(doc in Docs),
       sources in Docs <<=
         (sources in (coreProject,Compile),
         sources in (fileProject,Compile)) map { _ ++ _ }
@@ -118,4 +118,5 @@ object ScalaIoBuild extends Build {
   lazy val webSiteProject:Project = Project("documentation", file("documentation")).
     dependsOn(fileProject, fileProject % "docs->compile").
     settings(sharedSettings ++ docsSettings :_*)
+    
 }
