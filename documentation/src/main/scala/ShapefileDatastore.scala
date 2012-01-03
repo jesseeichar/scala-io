@@ -28,17 +28,20 @@ class ShapefileDatastore(val csvFile: Path, val shapefile: Path) {
         record.split(",")
       }
   }
-  def shpRecords = for {
-    shpFileIO <- shapefile.bytes.drop(100).open
-    csvFileIO <- csvFile.lines().zipWithIndex.open
-  } yield {
-    val recordHeader = shpFileIO.take(8).toSeq
-    val recordNumber = recordHeader(0)
-    val geometry = shpFileIO.take(recordHeader(4).toInt).toSeq
-    val shapeType = ShapeType(geometry(0))
-    val attributes = nextCsvRecord(recordNumber, csvFileIO)
+  def shpRecords = {
+    val transformation = for {
+      shpFileIO <- shapefile.bytes.drop(100).open
+      csvFileIO <- csvFile.lines().zipWithIndex.open
+    } yield {
+      val recordHeader = shpFileIO.take(8).toSeq
+      val recordNumber = recordHeader(0)
+      val geometry = shpFileIO.take(recordHeader(4).toInt).toSeq
+      val shapeType = ShapeType(geometry(0))
+      val attributes = nextCsvRecord(recordNumber, csvFileIO)
 
-    ShapefileRecord(recordNumber, geometry.drop(1), attributes)
+      ShapefileRecord(recordNumber, geometry.drop(1), attributes)
+    }
+    transformation.traversable
   }
 }
 

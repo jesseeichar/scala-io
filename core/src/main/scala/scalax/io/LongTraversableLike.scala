@@ -39,9 +39,7 @@ case class Continue[@specialized(Byte,Char) +A](result: A,skip:Long = 0L) extend
  * Signal indicating that the fold should stop and return the contained result
  */
 case class End[@specialized(Byte,Char) +A](result: A) extends FoldResult[A]
-/*
-case class SizeBlockMapResult[B,U](value:U,nextBlockSize:Int,skip:Long = 0)(val nextFunction:Seq[B] => SizeBlockMapResult[B,U])
-*/
+
 /**
  * A traversable for use on very large datasets which cannot be indexed with Ints but instead
  * require Longs for indexing.
@@ -99,6 +97,11 @@ trait LongTraversableLike[@specialized(Byte,Char) +A, +Repr <: LongTraversableLi
     }
   }
   
+  /**
+   * Use the underlying iterator for this traversable.  However the iterator must not escape
+   * this method (by returning it for example) because it will have been closed and any further uses
+   * will result in an exception.
+   */
   def withIterator[U](f: CloseableIterator[A] => U) = {
     val iter = iterator
     try f(iter)
