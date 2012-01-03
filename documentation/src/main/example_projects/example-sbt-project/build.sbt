@@ -1,4 +1,4 @@
-libraryDependencies += "com.github.scala-incubator.io" %% "scala-io-core" % "@IO_VERSION@"
+libraryDependencies += "com.github.scala-incubator.io" %% "scala-io-file" % "@IO_VERSION@"
 
 mainClass := Some("Main")
 
