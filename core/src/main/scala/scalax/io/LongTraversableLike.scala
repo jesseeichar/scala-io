@@ -15,7 +15,6 @@ import scala.collection.Seq
 import scala.collection.TraversableLike
 import scala.util.control.Breaks.break
 import scala.util.control.Breaks.breakable
-import CloseableIterator.managed
 import scala.collection.mutable.Builder
 import scala.collection.GenTraversableOnce
 /**
@@ -100,70 +99,32 @@ trait LongTraversableLike[@specialized(Byte,Char) +A, +Repr <: LongTraversableLi
     }
   }
   
-  def withIterator[U](f: LongIterator[A] => U) = {
+  def withIterator[U](f: CloseableIterator[A] => U) = {
     val iter = iterator
     try f(iter)
     finally iter.close()
   }
-/*
-  def variableSliding[B >: A,U](initBlock:Int)(f: Seq[B] => SizeBlockMapResult[B,U]):LongTraversable[U] = new LongTraversable[U]{
-    def iterator = new CloseableIterator[U] {
-	    private[this] val iter = self.iterator
-	    private[this] var nextSize = initBlock
-	    private[this] var function = f
-	    
-	    override final def hasNext = iter.hasNext
-	    override final def next = {
-	      val seq = iter.take(nextSize).toSeq
-			val result = f(seq)
-			nextSize = result.nextBlockSize
-			function = result.nextFunction
-			iterator.ldrop(result.skip)
-			result.value
-	    }
-	    
-	    override final protected def doClose() = iter.close()
-    }
-  }*/
   
   protected[io] def iterator: CloseableIterator[A]
 
-  /*def byteForEach[A](f:ByteFunc) {
-    i
-  }*/
-  def foreach[@specialized(Unit) U](f: (A) => U) {
-    val iter = iterator
-    try iter.foreach(f)
-    finally iter.close()
-  }
+  def foreach[@specialized(Unit) U](f: (A) => U) = withIterator { _.foreach(f) }
 
-  override def head = {
+  override def head = headOption.getOrElse (throw new java.util.NoSuchElementException("head of an empty traversable"))
+  override def headOption = withIterator { iterator =>
     val iter = CloseableIteratorOps(iterator).take(1)
-    try {
-      if(iter.hasNext) iter.next()
-      else throw new java.util.NoSuchElementException("head of an empty traversable")
-    }
-    finally iter.close
-  }
-  override def headOption = {
-    val iter = CloseableIteratorOps(iterator).take(1)
-    try {
-      if (iter.hasNext) Some(iter.next())
-      else None
-
-    } finally iter.close
+    if (iter.hasNext) Some(iter.next()) else None
   }
 
-  def lcount(p: A => Boolean): Long = {
+  def lcount(p: A => Boolean): Long = withIterator { iter =>
     var cnt = 0L
-    for (x: A <- this) if (p(x)) cnt += 1
+    while(iter.hasNext) if (p(iter.next)) cnt += 1
     cnt
   }
 
   private def build[B >: A](f: CloseableIteratorOps[A] => CloseableIterator[B]) : Repr = newBuilder match {
     case ltf:LongTraversableBuilder[A,Repr] => ltf.fromIterator(f(CloseableIteratorOps(iterator)).asInstanceOf[CloseableIterator[A]])
     case b => 
-      b ++= managed(iterator).acquireAndGet(iter => f(CloseableIteratorOps(iter)).asInstanceOf[CloseableIterator[A]])
+      withIterator(iter => b ++= f(CloseableIteratorOps(iter)).asInstanceOf[CloseableIterator[A]])
       b.result()
   }
 
@@ -186,31 +147,31 @@ trait LongTraversableLike[@specialized(Byte,Char) +A, +Repr <: LongTraversableLi
   
 
   override /*TraversableLike*/ def forall(p: A => Boolean): Boolean = 
-    managed(iterator).acquireAndGet(_ forall p)
+    withIterator(_ forall p)
   override /*TraversableLike*/ def exists(p: A => Boolean): Boolean = 
-    managed(iterator).acquireAndGet(_ exists p)
+    withIterator(_ exists p)
   override /*TraversableLike*/ def find(p: A => Boolean): Option[A] = 
-    managed(iterator).acquireAndGet(_ find p)
+    withIterator(_ find p)
   override /*TraversableLike*/ def isEmpty: Boolean = 
-    !managed(iterator).acquireAndGet(_.hasNext)
+    !withIterator(_.hasNext)
     
   override /*TraversableLike*/ def foldRight[B](z: B)(op: (A, B) => B): B =
-    managed(iterator).acquireAndGet(_.foldRight(z)(op))
+    withIterator(_.foldRight(z)(op))
   override /*TraversableLike*/ def reduceRight[B >: A](op: (A, B) => B): B = 
-    managed(iterator).acquireAndGet(_.reduceRight(op))
+    withIterator(_.reduceRight(op))
     
   override /*TraversableLike*/ def filter(p: A => Boolean): Repr = build(_ filter p)
   override /*TraversableLike*/ def map[B, That](f: A => B)(implicit bf: CanBuildFrom[Repr, B, That]): That = bf(repr) match {
     case ltf:LongTraversableBuilder[B,That] => ltf.fromIterator(CloseableIteratorOps(iterator).map(f))
     case b => 
-      b ++= managed(iterator).acquireAndGet(_.map(f))
+      withIterator(i => b++= i.map(f))
       b.result()
   }
     override /*TraversableLike*/ def ++:[B >: A, That](that: Traversable[B])(implicit bf: CanBuildFrom[Repr, B, That]): That = 
     bf(repr) match {
 	    case ltf:LongTraversableBuilder[B,That] => ltf.fromIterator(CloseableIteratorOps(iterator) ++ that)
 	    case b => 
-	      managed(iterator).acquireAndGet(it => b ++= it)
+	      withIterator(it => b ++= it)
 	      b ++= that
 	      b.result()      
 	    }
@@ -218,14 +179,15 @@ override /*TraversableLike*/ def flatMap[B, That](f: A => GenTraversableOnce[B])
   bf(repr) match {
     case ltf:LongTraversableBuilder[B,That] => ltf.fromIterator(CloseableIteratorOps(iterator).flatMap(f))
     case b => 
-      b ++= managed(iterator).acquireAndGet(_.flatMap(f))
+      withIterator(i => b ++= i.flatMap(f))
       b.result()
   }
   override /*TraversableLike*/ def collect[B, That](pf: PartialFunction[A, B])(implicit bf: CanBuildFrom[Repr, B, That]): That =  
   bf(repr) match {
     case ltf:LongTraversableBuilder[B,That] => ltf.fromIterator(CloseableIteratorOps(iterator).collect(pf))
     case b => 
-      b ++= managed(iterator).acquireAndGet(_.collect(pf))
+      
+withIterator(i => b ++= i.collect(pf))
       b.result()
   } 
 
@@ -343,7 +305,14 @@ override /*TraversableLike*/ def flatMap[B, That](f: A => GenTraversableOnce[B])
    *
    * NOT recommended for use since it might trigger a full traversal of the traversable
    */
-  def lsize: Long = foldLeft(0L) { (c, _) => c + 1 }
+  def lsize: Long = withIterator{iter =>
+    var c = 0L
+    while(iter.hasNext) {
+     iter.next
+     c += 1
+    }
+    c
+  }
   override def size = lsize min Integer.MAX_VALUE toInt
   /**
    * The long equivalent of Traversable.splitAt
@@ -352,13 +321,11 @@ override /*TraversableLike*/ def flatMap[B, That](f: A => GenTraversableOnce[B])
     
 
   def sameElements[B >: A](that: Iterable[B]): Boolean =
-    managed(iterator).acquireAndGet(_.sameElements(that.iterator))
+    withIterator(_.sameElements(that.iterator))
 
-  def sameElements[B >: A](that: LongTraversable[B]): Boolean = {
-    managed(iterator).acquireAndGet { these =>
-      managed(that.iterator).acquireAndGet { those =>
-        these.sameElements(those)
-      }
+  def sameElements[B >: A](that: LongTraversable[B]): Boolean = withIterator { these =>
+    that.withIterator { those =>
+      these.sameElements(those)
     }
   }
 
@@ -398,23 +365,15 @@ override /*TraversableLike*/ def flatMap[B, That](f: A => GenTraversableOnce[B])
    *                  `p(x, y)` is `true` for all corresponding elements `x` of this $coll
    *                  and `y` of `that`, otherwise `false`.
    */
-  def corresponds[B](that: LongTraversable[B])(p: (A, B) => Boolean): Boolean = {
-    val iter = that.iterator
+  def corresponds[B](that: LongTraversable[B])(p: (A, B) => Boolean): Boolean = that.withIterator {iter =>
     try doCorresponds(iter, p)
     finally iter.close()
   }
-  private def doCorresponds[B](j: Iterator[B], p: (A, B) => Boolean): Boolean = {
-    val i = this.iterator
-    try {
+  private def doCorresponds[B](j: Iterator[B], p: (A, B) => Boolean): Boolean = withIterator { i =>
       while (i.hasNext && j.hasNext)
         if (!p(i.next(), j.next))
           return false
-
       !i.hasNext && !j.hasNext
-    } finally {
-      i.close()
-    }
-
   }
 
   def indexWhere(p: A => Boolean): Long = indexWhere(p, 0)
@@ -429,20 +388,15 @@ override /*TraversableLike*/ def flatMap[B, That](f: A => GenTraversableOnce[B])
    *  @return  the index `>= from` of the first element of this $coll that satisfies the predicate `p`,
    *           or `-1`, if none exists.
    */
-  def indexWhere(p: A => Boolean, from: Long): Long = {
-    var i = from
-    var it = ldrop(from).iterator
-    try {
+  def indexWhere(p: A => Boolean, from: Long): Long = 
+    ldrop(from).withIterator { it =>
+      var i = from
       while (it.hasNext) {
         if (p(it.next())) return i
         else i += 1
       }
-    } finally {
-      it.close()
+      -1
     }
-
-    -1
-  }
 
   def isDefinedAt(idx: Long): Boolean = (idx >= 0) && (idx < lsize)
   /**
@@ -522,16 +476,16 @@ override /*TraversableLike*/ def flatMap[B, That](f: A => GenTraversableOnce[B])
    *           or `-1`, if none exists.
    */
   def lastIndexWhere(p: A => Boolean, end: Long): Long = {
-    var last = -1L
-    var i = 0L;
-    breakable {
-      foreach { next =>
-        if (end > 0 && i > end) break
-        if (p(next)) last = i
+    
+    (if(end<0) this else ltake(end+1)).withIterator { iter =>
+      var last = -1L
+      var i = 0L;
+      while (iter.hasNext) {
+        if (p(iter.next)) last = i
         i += 1
       }
+      last
     }
-    last
   }
   /**
    * Computes length of longest segment whose elements all satisfy some predicate.
@@ -578,7 +532,7 @@ override /*TraversableLike*/ def flatMap[B, That](f: A => GenTraversableOnce[B])
    *         otherwise `false`.
    */
   def startsWith[B](that: LongTraversable[B], offset: Long): Boolean =
-    managed(that.iterator).acquireAndGet(i => doStartsWith(i, offset))
+    that.withIterator(i => doStartsWith(i, offset))
 
   /**
    * Tests whether this $coll starts with the given sequence.
@@ -682,7 +636,7 @@ override /*TraversableLike*/ def flatMap[B, That](f: A => GenTraversableOnce[B])
   def sliding[That](size: Int, step: Int = 1)(implicit bf: CanBuildFrom[Repr, Seq[A], That]): That = bf(repr) match {
     case ltf:LongTraversableBuilder[Seq[A],That] => ltf.fromIterator(CloseableIteratorOps(iterator).modifiedSliding(size,step))
     case b => 
-      b ++= managed(iterator).acquireAndGet(iter => CloseableIteratorOps(iter).modifiedSliding(size,step))
+      b ++= withIterator(iter => CloseableIteratorOps(iter).modifiedSliding(size,step))
       b.result()
   }
   /**

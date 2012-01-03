@@ -35,7 +35,7 @@ class ShapefileDatastore(val csvFile: Path, val shapefile: Path) {
     val recordHeader = shpFileIO.take(8).toSeq
     val recordNumber = recordHeader(0)
     val geometry = shpFileIO.take(recordHeader(4).toInt).toSeq
-    val shapeType = Shapetype(geometry(0))
+    val shapeType = ShapeType(geometry(0))
     val attributes = nextCsvRecord(recordNumber, csvFileIO)
 
     ShapefileRecord(recordNumber, geometry.drop(1), attributes)
@@ -66,7 +66,7 @@ object PolygonZ
 object PolygonM
 object MultiPatch
 
-object Shapetype {
+object ShapeType {
   def apply(byte: Byte) = {
     byte match {
       case 0 => NullShape

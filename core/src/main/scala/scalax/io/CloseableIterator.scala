@@ -123,14 +123,6 @@ object CloseableIterator {
     }
     def doClose = wrapped.close
   }
-  implicit object ManagedResource extends resource.Resource[CloseableIterator[_]] {
-    def close(r: CloseableIterator[_]) = r.close()
-  }
-  def managed[A](iter: => CloseableIterator[A]):ManagedResourceOperations[CloseableIterator[A]] =
-    new AbstractManagedResource[CloseableIterator[A]] {
-      protected def unsafeClose(handle: CloseableIterator[A]) = handle.close()
-      protected def open: CloseableIterator[A] = iter
-    }
 }
 
 private[io] class InitIterator[@specialized(Byte) +A](iter:CloseableIterator[A]) extends CloseableIterator[A] {

@@ -84,7 +84,7 @@ private[io] trait ResourceTraversable[A] extends LongTraversable[A] {
     def doClose() = source.close()
   }
 
-  override def isEmpty: Boolean = CloseableIterator.managed(iterator).acquireAndGet(_.isEmpty)
+  override def isEmpty: Boolean = withIterator(_.isEmpty)
 
   override def ldrop(length : Long) : LongTraversable[A] = lslice(length,Long.MaxValue)
   override def drop(length : Int) = ldrop(length.toLong)
