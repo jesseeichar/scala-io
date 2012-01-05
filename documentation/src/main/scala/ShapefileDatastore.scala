@@ -29,9 +29,10 @@ class ShapefileDatastore(val csvFile: Path, val shapefile: Path) {
       }
   }
   def shpRecords = {
+    val shpFileIO = shapefile.bytes.drop(100).transformer
+    val csvFileIO = csvFile.lines().zipWithIndex.transformer
     val transformation = for {
-      shpFileIO <- shapefile.bytes.drop(100).open
-      csvFileIO <- csvFile.lines().zipWithIndex.open
+      recordHeader <- shpFileIO.take(8).toSeq
     } yield {
       val recordHeader = shpFileIO.take(8).toSeq
       val recordNumber = recordHeader(0)

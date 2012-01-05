@@ -98,13 +98,21 @@ trait LongTraversableLike[@specialized(Byte,Char) +A, +Repr <: LongTraversableLi
   }
   
   /**
-   * Use the underlying iterator for this traversable.  However the iterator must not escape
-   * this method (by returning it for example) because it will have been closed and any further uses
-   * will result in an exception.
+   * Use the underlying iterator for this traversable.  
+   * 
+   * Note:  If the iterator is returned from this block an exception will be thrown 
+   * because the iterator is invalid outside of this block and the behaviour is undefined
+   * 
+   * @throws AssertionError if the iterator is returned
    */
   def withIterator[U](f: CloseableIterator[A] => U) = {
     val iter = iterator
-    try f(iter)
+    try {
+      val result = f(iter)
+      assert(System.identityHashCode(result) != System.identityHashCode(iter), 
+          "the iterator may not escape the bounds of this block")
+      result
+    }
     finally iter.close()
   }
   

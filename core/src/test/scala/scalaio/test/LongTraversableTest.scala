@@ -7,7 +7,7 @@ import scalax.io.JavaConverters._
 import scalax.io._
 import scalax.test.sugar._
 
-class LongTraversableTest extends DataIndependentLongTraversableTest[Int] {
+class LongTraversableTest extends DataIndependentLongTraversableTest[Int] with TransformationTest with AssertionSugar {
   implicit val codec = Codec.UTF8
 
   def independentTraversable(): LongTraversable[Int] = traversable()
@@ -350,39 +350,11 @@ class LongTraversableTest extends DataIndependentLongTraversableTest[Int] {
 
     assertEquals(expectedCount, count)
   }
-
-  /*
-  TODO right now flatMap, append and filter are not optimized for laziness so all
-  elements in traversable will be visited when a drop/slice/take are performed after
-  one of those operations
-
-    @Test //@Ignore
-    def forcing_flatMap_should_trigger_resolution_and_skip_dropped_elements = {
-      var count = 0
-      newResource().flatMap{i => count += 1; i.toString}.drop(5).force
-      assertEquals(95, count)
+   @Test
+  def exception_thrown_if_iterator_escapes_withIterator {
+    intercept[AssertionError] {
+      traversable().withIterator { i => i }
     }
-
-    @Test //@Ignore
-    def append_then_drop_should_skip_dropped_elements = {
-      var count = 0
-      ((newResource() map{i => count += 1; i}) ++ List(1,2,3) drop (5) force)
-      assertEquals(95, count)
-    }
-
-
-  @Test //@Ignore
-  def filter_then_drop_should_skip_dropped_elements = {
-    var count = 0
-    (newResource() map{i => count += 1; i} filter {_ <= 10} drop (5)).force
-    assertEquals(5, count)
   }
-
-  @Test //@Ignore
-  def dropWhile_then_drop_should_skip_dropped_elements = {
-    var count = 0
-    (newResource() map{i => count += 1; i} dropWhile {_ <= 10} drop (5)).force
-    assertEquals(5, count)
-  }
-*/
+ 
 }
