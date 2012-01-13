@@ -63,6 +63,7 @@ trait LongTraversableLike[@specialized(Byte,Char) +A, +Repr <: LongTraversableLi
     } else {
       toBuffer.toArray
   }
+  def processor = new processing.CloseableIteratorProcessor(iterator)
 
   /**
    * A foldLeft operation that can be terminated without processing the entire collection.

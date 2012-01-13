@@ -20,20 +20,25 @@ object LongTraversableTransformations {
 
     // drop the header because we are not interested in it now
     val bytes = Resource.fromFile("somefile").bytes.drop(100)
-    val rowTransformer = for (iter <- bytes.transformer) yield {
+    val rowTransformer = for {
+        processor <- bytes.processor
+        // repeat the following process until all bytes are consumed
+        _ <- processor.repeatUntilEmpty()
       // this block is called as long as the data remains
       // get one byte.  This is the row header (and indicates the amount of row data)
-      val rowLength = iter.next.toInt
-      // read the row data
-      val rowData = iter.take(rowLength)
+        rowLength <- processor.next
+        // read the row data
+        rowData <- processor.take(rowLength.toInt)
+      } yield {
       // Convert the rows data to a string
       new String(rowData.toArray, Codec.UTF8.charSet)
     }
     
+      import scalax.io.processing.ProcessorTransformer._
     // rowTranformer is designed to be used to define the structure of a file or other data
     // it does not actually process the file.
     // At this point the file has not been opened yet
-    val rowTraversable:LongTraversable[String] = rowTransformer.traversable
+    val rowTraversable:LongTraversable[String] = rowTransformer.traversable[String]
     
     // Since LongTraversable's are lazy, the file still has not been opened
     // only the actual calling of foreach (next line) will trigger the file read.
@@ -62,12 +67,14 @@ object LongTraversableTransformations {
     case class Record(id:Int, title:String, attributes:Iterable[String])
 
     val recordTransformer = for{
-        titles <- Resource.fromFile("file.titles.csv").lines().transformer
-        atts <- Resource.fromFile("file.atts.csv").lines().transformer
-      } yield {
+        titles <- Resource.fromFile("file.titles.csv").lines().processor
+        atts <- Resource.fromFile("file.atts.csv").lines().processor
+        _ <- titles.repeatUntilEmpty(atts)
+        titleLine <- titles.next
         // assuming "," is separator
-        val Array(title,id) = titles.next.split(",")
-        val attributes = atts.takeWhile(_.split(",").head == id)
+        Array(title,id) = titleLine.split(",")
+        attributes <- atts.takeWhile(_.split(",").head == id)
+      } yield {
         Record(id.toInt, title, attributes.toSeq)
       }
       

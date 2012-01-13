@@ -30,7 +30,6 @@ trait LongTraversable[@specialized(Byte,Char) +A] extends Traversable[A]
     withIterator{b ++= _} 
     b.result()
   }
-  def transformer = new LongTraversableTransformer(this)
 
   override def toString() = "LongTraversable(...)"
 }
