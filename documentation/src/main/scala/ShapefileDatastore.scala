@@ -1,6 +1,7 @@
 import scalax.file.Path
 import scalax.io.LongTraversable
-import scalax.io.LongIterator
+import scalax.io.processing.Processor
+import scalax.io.processing.ProcessorAPI
 
 /**
  * Assumption is that csv and shp file are in sync and therefore 
@@ -21,23 +22,22 @@ class ShapefileDatastore(val csvFile: Path, val shapefile: Path) {
   def shpRecords = shapefile.channel().bytes.drop(100).blockMap(8){ bytes => 
     
   }*/
-  private def correctRecord(recordNum:Int)(iter:LongIterator[(String,Int)]):Option[Seq[String]] = {
-    val (record, num) = iter.next
-      if(num < recordNum)  None
-      else if(num == recordNum) Some(record.split(","))
-      else Some(Seq.empty)
+  private def correctRecord(recordNum:Int, api:ProcessorAPI[(String,Int)]):Processor[Seq[String]] = {
+    for((record, num) <- api.next) yield {
+      if(num == recordNum) record.split(",")
+      else Seq.empty
+    }
   }
   val shpRecords = {
-    val shpProcessor = shapefile.bytes.drop(100).processor
-    val csvProcessor = csvFile.lines().zipWithIndex.processor
-    
     val process = for {
-      _ <- Processing(shpProcessor, csvProcessor)
-      recordHeader <- shpFileIO.take(8)
-      recordNumber <- recordHeader(0)
-      geometry <- shpFileIO.take(recordHeader(4).toInt)
-      shapeType <- ShapeType(geometry(0))
-      attributes <- csv.find(correctRecord(recordNumber))
+      shpProcessor <- shapefile.bytes.drop(100).processor
+      csvProcessor <- csvFile.lines().zipWithIndex.processor
+      _ <- shpProcessor.repeatUntilEmpty()
+      recordHeader <- shpProcessor.take(8)
+      recordNumber = recordHeader(0)
+      geometry <- shpProcessor.take(recordHeader(4).toInt)
+      shapeType = ShapeType(geometry(0))
+      attributes <- correctRecord(recordNumber,csvProcessor)
     } yield {
       ShapefileRecord(recordNumber, geometry.drop(1), attributes)
     }

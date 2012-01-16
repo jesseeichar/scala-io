@@ -7,6 +7,7 @@
 \*                                                                      */
 
 package scalax.io
+import java.io.Reader
 
 
 class ReaderResourceTraversableTest extends ResourceTraversableTest {
@@ -18,14 +19,15 @@ class ReaderResourceTraversableTest extends ResourceTraversableTest {
   override def traversable[U, A](tsize: Int,
                                  callback: (Int) => U,
                                  dataFunc: (Int) => Traversable[Int],
-                                 conv: (Int) => A) = {
+                                 conv: (Int) => A,
+                                 closeFunction: () => Unit = () => ()) = {
     val callBackAndConv = (c:Char) => {
       val i = c.toInt
       callback(i)
       conv(i)
     }
-    val data = dataFunc(tsize) mkString ""
-    def resource = Resource.fromReader(new java.io.StringReader(data))
+    val closeAction = CloseAction((_:Reader) => closeFunction())
+    def resource = Resource.fromReader(new java.io.StringReader(dataFunc(tsize) mkString "")).appendCloseAction(closeAction)
     ResourceTraversable.readerBased(resource.open,initialConv = callBackAndConv)
   }
 

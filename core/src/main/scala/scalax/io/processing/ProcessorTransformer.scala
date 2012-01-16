@@ -10,24 +10,27 @@ object ProcessorTransformer {
       def iterator = {
         val opened = from.init
         new CloseableIterator[A] {
-          private[this] val wrapped = opened.execute()
-          def hasNext = wrapped.hasNext
-          def next = wrapped.next
+          private[this] val wrapped = opened.execute.orNull
+          /* A currently stupid implementation of WithFilter returns null if the element is filtered
+             out so nextElem finds the next non-null element or is null */
+          private[this] var nextElem:A = null.asInstanceOf[A]
+          def hasNext = {
+            if(wrapped == null) false
+            else if(nextElem != null) true
+            else if(!wrapped.hasNext) false
+            else {
+              nextElem = wrapped.next
+              hasNext
+            }
+          }
+          def next = {
+            val n = nextElem
+            nextElem = null.asInstanceOf[A]
+            n
+          }
           def doClose = opened.cleanUp
         }
       }
     }
-  }/*
-  implicit def resourceTransformer[A] = new ProcessorTransformer[A, A, resource.ManagedResource[A]] {
-    def transform(from: Processor[A]) = new resource.ManagedResourceOperations[A] {
-      def acquireFor[U](f:A => U):Either[List[Throwable],U] = {
-        val created = from.init
-        var errors:List[Throwable] = Nil
-        
-        val result = util.control.Exception.allCatch[U].either(f(created.execute()))
-          f()
-        }
-      }
-    }
-  }*/
+  }
 }

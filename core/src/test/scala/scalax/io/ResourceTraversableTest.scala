@@ -16,14 +16,16 @@ import java.io._
 import scalaio.test.LongTraversableTest
 import scalax.io.CloseAction.Noop
 import java.nio.channels.Channels
+import java.nio.channels.ReadableByteChannel
 
 class ResourceTraversableTest extends LongTraversableTest {
   override def traversable[U, A](tsize: Int,
                                  callback: (Int) => U,
                                  dataFunc: (Int) => Traversable[Int],
-                                 conv: (Int) => A):LongTraversable[A] = {
+                                 conv: (Int) => A,
+                                 closeFunction: () => Unit = () => ()):LongTraversable[A] = {
     def stream = Channels.newChannel(new ByteArrayInputStream(dataFunc(tsize) map {_.toByte} toArray))
-    def resource = new CloseableOpenedResource(stream,Noop)
+    def resource = new CloseableOpenedResource(stream,CloseAction((_:ReadableByteChannel) => closeFunction()))
     val callBackAndConv = (i:Byte) => {
       callback(i.toInt)
       conv(i.toInt)

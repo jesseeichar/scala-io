@@ -7,7 +7,7 @@ import scalax.io.JavaConverters._
 import scalax.io._
 import scalax.test.sugar._
 
-class LongTraversableTest extends DataIndependentLongTraversableTest[Int] with TransformationTest with AssertionSugar {
+class LongTraversableTest extends DataIndependentLongTraversableTest[Int] with ProcessorTest with AssertionSugar {
   implicit val codec = Codec.UTF8
 
   def independentTraversable(): LongTraversable[Int] = traversable()
@@ -15,11 +15,12 @@ class LongTraversableTest extends DataIndependentLongTraversableTest[Int] with T
   def traversable[U, A](tsize: Int = 100,
     callback: (Int) => U = (_: Int) => (),
     dataFunc: (Int) => Traversable[Int] = (i: Int) => 1 to i,
-    conv: Int => A = identity): LongTraversable[A] = {
+    conv: Int => A = identity,
+    closeFunction: () => Unit = () => ()): LongTraversable[A] = {
     val lt = new LongTraversable[Int] {
-      val data = dataFunc(tsize)
 
       def iterator: CloseableIterator[Int] = new CloseableIterator[Int] {
+        val data = dataFunc(tsize)
         val iter = data.toIterator
         def next(): Int = {
           val i = iter.next()
@@ -27,7 +28,7 @@ class LongTraversableTest extends DataIndependentLongTraversableTest[Int] with T
           i
         }
         def hasNext: Boolean = iter.hasNext
-        def doClose() {}
+        def doClose() = closeFunction()
       }
     }
     if (conv != identity) lt.map(conv)

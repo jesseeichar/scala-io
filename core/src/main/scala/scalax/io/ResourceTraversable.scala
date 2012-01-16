@@ -81,7 +81,7 @@ private[io] trait ResourceTraversable[A] extends LongTraversable[A] {
       nextEl.nonEmpty
     }
 
-    def doClose() = source.close()
+    def doClose() = openedSource.close()
   }
 
   override def isEmpty: Boolean = withIterator(_.isEmpty)

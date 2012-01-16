@@ -6,8 +6,6 @@ import collection.{GenTraversableOnce, Iterator, TraversableOnce}
 import java.util.concurrent.locks.ReentrantLock
 trait CloseableIterator[@specialized(Byte,Char) +A] extends Iterator[A] with Closeable {
   self =>
-  val creationPoint = new Exception();
-
   def next(): A
   def hasNext: Boolean
   protected def doClose(): Unit
