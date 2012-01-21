@@ -17,7 +17,8 @@ trait ProcessorTest extends AssertionSugar {
         _ => callback,
         (i: Int) => {
           opened += 1;
-          1 to i },
+          1 to i
+        },
         closeFunction = () => closed += 1)
       def assertOpenedClosed(times: Int) = {
         assertEquals(times, opened)
@@ -31,7 +32,7 @@ trait ProcessorTest extends AssertionSugar {
     var visitedElements = 0
     var loopCount = 0
     val prepared = processorTraversable(100, visitedElements += 1)
-    
+
     for {
       iter <- prepared.traversable.processor
       _ <- iter.repeatUntilEmpty()
@@ -221,6 +222,34 @@ trait ProcessorTest extends AssertionSugar {
   }
 
   @Test
+  def processor_takeWhile {
+    var visitedElements = 0
+    var loops = 0
+    val prepared = processorTraversable(100, visitedElements += 1)
+
+    val cutOff = prepared.testData.drop(4).head
+    val traversable1 = prepared.traversable
+
+    val mappedprocessor: Processor[(Seq[Int],Int)] = for {
+      t1 <- traversable1.processor
+      taken <- t1.takeWhile(_ != cutOff)
+      next <- t1.next
+    } yield {
+      loops += 1
+      (taken,next)
+    }
+    assertEquals(0, loops)
+    assertEquals(0, visitedElements)
+    mappedprocessor.acquireAndGet{data => 
+      assertEquals(prepared.testData.take(4).toList, data._1.toList)
+      assertEquals(cutOff, data._2)
+    }
+    assertEquals(1, loops)
+    assertEquals(5, visitedElements)
+    prepared.assertOpenedClosed(1)
+  }
+
+  @Test
   def processor_drop {
     var visitedElements = 0
     var loops = 0
@@ -283,7 +312,7 @@ trait ProcessorTest extends AssertionSugar {
       t1 <- traversable1.processor
       i <- t1.repeatUntilEmpty()
       next <- t1.next
-      _ <- t1.endWhen(i == repeats - 1)
+      _ <- t1.endIf(i == repeats - 1)
     } yield {
       loops += 1
       next.toString
@@ -420,7 +449,7 @@ trait ProcessorTest extends AssertionSugar {
       t2 <- traversable2.processor
       _ <- t1.repeatUntilEmpty()
       next <- t1.next
-      doubled <- for{
+      doubled <- for {
         _ <- t2.repeat(2)
         next <- t2.next
       } yield next
@@ -433,11 +462,101 @@ trait ProcessorTest extends AssertionSugar {
     prepared.assertOpenedClosed(0)
 
     val iter = prepared2.testData.iterator
-    assertEquals(prepared.testData map (i => List(iter.next,iter.next)) toList,  mappedprocessor.traversable.toList)
+    assertEquals(prepared.testData map (i => List(iter.next, iter.next)) toList, mappedprocessor.traversable.toList)
     assertEquals(prepared.testData.size, loops)
     assertEquals(prepared.testData.size, visitedElements)
     assertEquals(prepared.testData.size * 2, visitedElements2)
     prepared.assertOpenedClosed(1)
     prepared2.assertOpenedClosed(1)
+  }
+
+  @Test
+  def processor_assignment {
+    var visitedElements = 0
+    var loops = 0
+    val prepared = processorTraversable(100, visitedElements += 1)
+
+    val traversable1 = prepared.traversable
+    val mappedprocessor: Processor[Iterator[Int]] = for {
+      t1 <- traversable1.processor
+      _ <- t1.repeatUntilEmpty()
+      next <- t1.next
+      nextPlusOne = next + 1
+    } yield {
+      loops += 1
+      nextPlusOne
+    }
+    assertEquals(0, loops)
+    assertEquals(0, visitedElements)
+    prepared.assertOpenedClosed(0)
+
+    assertEquals(prepared.testData.map(_ + 1).toList, mappedprocessor.traversable.toList)
+    assertEquals(prepared.testData.size, loops)
+    assertEquals(prepared.testData.size, visitedElements)
+    prepared.assertOpenedClosed(1)
+
+  }
+  @Test
+  def processor_extractor {
+    var visitedElements = 0
+    var loops = 0
+    val prepared = processorTraversable(100, visitedElements += 1)
+
+    val traversable1 = prepared.traversable.zipWithIndex
+    val mappedprocessor: Processor[Iterator[Int]] = for {
+      t1 <- traversable1.processor
+      _ <- t1.repeatUntilEmpty()
+      (next, index) <- t1.next
+    } yield {
+      loops += 1
+      index
+    }
+    assertEquals(0, loops)
+    assertEquals(0, visitedElements)
+    prepared.assertOpenedClosed(0)
+
+    assertEquals(prepared.testData.zipWithIndex.map(_._2).toList, mappedprocessor.traversable.toList)
+    assertEquals(prepared.testData.size, loops)
+    assertEquals(prepared.testData.size, visitedElements)
+    prepared.assertOpenedClosed(1)
+  }
+
+  @Test
+  def processor_nextOption {
+    var visitedElements = 0
+    var loops = 0
+    val prepared = processorTraversable(1, visitedElements += 1)
+
+    val traversable1 = prepared.traversable.take(1)
+    val mappedprocessor: Processor[Iterator[Option[Int]]] = for {
+      t1 <- traversable1.processor
+      _ <- t1.repeat(2)
+      next1 <- t1.nextOption
+    } yield {
+      loops += 1
+      next1
+    }
+    assertEquals(0, loops)
+    assertEquals(0, visitedElements)
+    prepared.assertOpenedClosed(0)
+
+    assertEquals(List(Some(prepared.testData.head),None), mappedprocessor.traversable.toList)
+    assertEquals(2, loops)
+    assertEquals(1, visitedElements)
+    prepared.assertOpenedClosed(1)
+  }
+
+  @Test
+  def processor_LongTraversableFromIterable {
+    val prepared = processorTraversable(1, ())
+
+    val traversable = prepared.traversable
+    
+    val result: Processor[Seq[Int]] = for {
+      api <- traversable.processor
+      seq <- api.take(5)
+    } yield seq
+    
+    assertEquals(prepared.testData.take(5).toList, result.traversable.toList)
   }
 }

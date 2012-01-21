@@ -34,7 +34,6 @@ object LongTraversableTransformations {
       new String(rowData.toArray, Codec.UTF8.charSet)
     }
     
-      import scalax.io.processing.ProcessorTransformer._
     // rowTranformer is designed to be used to define the structure of a file or other data
     // it does not actually process the file.
     // At this point the file has not been opened yet

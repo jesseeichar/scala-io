@@ -60,14 +60,10 @@ object Path
    *
    * @param path
    *          the string to use for creating the Path
-   * @param filesystem
-   *          the filesystem that the path is valid for/will be
-   *          used for creating the Path object
-   *          Default is the default filesystem
-   *          This is an implicit parameter
    */
-  def fromString(path: String)(implicit fileSystem: FileSystem = FileSystem.default): Path = fileSystem.fromString(path)
-  def apply(path: String*)(implicit fileSystem: FileSystem = FileSystem.default): Path = fileSystem(path:_*)
+  def fromString(path: String): Path = FileSystem.default.fromString(path)
+  def apply(path: String*): Path = FileSystem.default(path:_*)
+  def apply(pathRepresentation: String, separator:Char): Path = FileSystem.default(pathRepresentation, separator)
 
   /**
    * Create a Path from a URI.
@@ -121,17 +117,13 @@ object Path
    * @param attributes
    *          The attributes to create on the file.
    *          Default is Nil(default system file attributes)
-   * @param fileSystem
-   *          the filesystem that will create the temporary object
-   *          Default is the default filesystem
    */
   def createTempFile(prefix: String = FileSystem.default.randomPrefix,
                    suffix: String = null,
                    dir: String = null,
                    deleteOnExit : Boolean = true,
-                   attributes:Iterable[FileAttribute[_]] = Nil )
-                  (implicit fileSystem: FileSystem = FileSystem.default) : Path = {
-    fileSystem.createTempFile(prefix,suffix,dir,deleteOnExit)
+                   attributes:Iterable[FileAttribute[_]] = Nil ) : Path = {
+    FileSystem.default.createTempFile(prefix,suffix,dir,deleteOnExit)
   }
 
 
@@ -163,9 +155,8 @@ object Path
                         suffix: String = null,
                         dir: String = null,
                         deleteOnExit : Boolean = true,
-                        attributes:Iterable[FileAttribute[_]] = Nil)
-                       (implicit fileSystem: FileSystem = FileSystem.default) : Path = {
-    fileSystem.createTempDirectory(prefix,suffix,dir,deleteOnExit)
+                        attributes:Iterable[FileAttribute[_]] = Nil): Path = {
+    FileSystem.default.createTempDirectory(prefix,suffix,dir,deleteOnExit)
   }
 
   /**
@@ -250,7 +241,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    * <li>if other is not absolute the return this append other</li>
    * </ul>
    * <strong>@note child is a single child if it contains a path separator it will NOT be considered a separator character</strong>
-   * 
+   *
    * <p>Examples include:
    * <pre><code>
    * path / "child" / "grandchild"
@@ -262,9 +253,9 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    * path / "child/grandchild"
    * path / "../sibling"
    * </code></pre>
-   * In these cases the / will be encoded.
+   * In these cases an exception will be thrown
    * </p>
-   * 
+   *
    * @return A new path with the specified path appended
    *
    * @see #\(String)
@@ -272,11 +263,29 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
   def /(child: String): Path
 
   /**
-   * Alias for #/(String)
+   * Add several children to this path.  The sep character will be used to split the path string,
+   * A path will be created from the resulting sequence and finally all children will be added to this path.
    *
-   * @see #/(String)
+   * Examples:
+   *
+   * {{{
+   * path / ("a,c,d,e", ',') // results in path / a / c / d / e
+   * path / ("/a/b/c/d/", '/') // results in path / a / b / c / d
+   * path / ("//../a","/") // results in path / .. / a
+   *
+   * path / ("/a",',') // results in an exception if / == Path.separator
+   * path / ("//",'/') // returns same Path
+   * }}}
+   */
+  def /(pathRepresentation: String, separator:Char): Path = resolve(fileSystem(path, separator))
+
+  /**
+   * Alias for /(String)
+   *
+   * @see /(String)
    */
   def \(child: String): Path = /(child)
+  def \(path: String, separator:Char): Path = /(path,separator)
   /**
    * Alias for /(child.name)
    *
@@ -346,10 +355,16 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    *
    */
   def resolve(other: Path): Path = \(other)
+
   /**
    * Constructs a path from other using the same file system as this
    * path and resolves the this and other in the same manner as
    * {@link Path#resolve(Path)}
+   *
+   * Examples (path separator assumed to be /):
+   * {{{
+   * path resolve "a/b/c" // result is Path / a / b / c
+   * path resolve "//..//b//" // result is Path / .. / b
    *
    */
   def resolve(other: String): Path = resolve(fileSystem.fromString(other))

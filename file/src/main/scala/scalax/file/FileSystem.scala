@@ -71,6 +71,7 @@ abstract class FileSystem {
   }
 
   def apply(segments: String*): Path = fromSeq(segments)
+  def apply(pathRepresentation: String, separator:Char): Path = fromSeq(pathRepresentation.split(separator))
   /**
    * Returns the list of roots for this filesystem
    */
@@ -152,9 +153,6 @@ abstract class FileSystem {
    * @param deleteOnExit
    *          If true then the file will be deleted when the JVM is shutdown
    *          Default is true
-   * @param attributes
-   *          The attributes to create on the file.
-   *          Default is Nil(default system file attributes)
    * @throws java.lang.UnsupportedOperationException
    *          If the filesystem does not support temporary files
    */
@@ -183,9 +181,6 @@ abstract class FileSystem {
    *          If true then the directory and all contained folders will be deleted
    *          when the JVM is shutdown.
    *          Default is true
-   * @param attributes
-   *          The attributes to create on the file.
-   *          Default is Nil(default system file attributes)
    *
    * @throws java.lang.UnsupportedOperationException
    *          If the filesystem does not support temporary files
@@ -233,9 +228,9 @@ abstract class FileSystem {
 
     result match {
       case Separator(sep) => 
-        throw new IllegalArgumentException(sep + " is not permitted as a path segment for this filesystem")
+        throw new IllegalArgumentException(sep + " is not permitted as a path segment for this filesystem.  Segment in question: "+segment)
       case CommonSeparator(sep) => {
-         logger.warning(sep + " should not be used as a character in a path segment because it is a commonly used path separator on many filesystems")
+         logger.warning(sep + " should not be used as a character in a path segment because it is a commonly used path separator on many filesystems.  Segment in question: "+segment)
          if(logger.isLoggable(java.util.logging.Level.FINE)) {
            val stacktrace = new Exception("Not real exception, just method for obtaining stacktrace").getStackTraceString
            logger.fine("Location where path was created was: ===========\n"+stacktrace+"\n===============================")

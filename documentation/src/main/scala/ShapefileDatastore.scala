@@ -22,12 +22,12 @@ class ShapefileDatastore(val csvFile: Path, val shapefile: Path) {
   def shpRecords = shapefile.channel().bytes.drop(100).blockMap(8){ bytes => 
     
   }*/
-  private def correctRecord(recordNum:Int, api:ProcessorAPI[(String,Int)]):Processor[Seq[String]] = {
+  private def correctRecord(recordNum:Int, api:ProcessorAPI[(String,Int)]):Processor[Seq[String]] =
     for((record, num) <- api.next) yield {
       if(num == recordNum) record.split(",")
       else Seq.empty
     }
-  }
+
   val shpRecords = {
     val process = for {
       shpProcessor <- shapefile.bytes.drop(100).processor

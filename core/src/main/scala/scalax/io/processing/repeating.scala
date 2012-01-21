@@ -17,8 +17,8 @@ private[processing] case class RepeatUntilEmpty(ProcessorAPIs: ProcessorAPI[_]*)
   })
 
   def foreach[U](f: Int => U) = iter.iter foreach f
-  def flatMap[U](f: Int => Processor[U]) = Processor[CloseableIterator[U]](Some(iter.flatMap(i => f(i).init.execute)))
-  def map[U](f: Int => U) = Processor[CloseableIterator[U]](Some(iter map f))
+  def flatMap[U](f: Int => Processor[U]) = Processor[Iterator[U]](Some(iter.flatMap(i => f(i).init.execute)))
+  def map[U](f: Int => U) = Processor[Iterator[U]](Some(iter map f))
 }
 
 private[processing] case class Repeat(times: Int) {

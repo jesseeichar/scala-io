@@ -1,11 +1,15 @@
 package scalax.io
 package processing
 
-trait ProcessorTransformer[+A, -From, +To] {
+
+sealed trait ProcessorTransformer[+A, -From, +To] {
   def transform(from: Processor[From]): To
 }
-object ProcessorTransformer {
-  implicit def longTraversableTransformer[A] = new ProcessorTransformer[A, Iterator[A], LongTraversable[A]] {
+private[this] object ProcessorTransformer {
+  implicit def iterableToLongTraversableTransformer[A] = new ProcessorTransformer[A, Iterable[A], LongTraversable[A]] {
+    def transform(from: Processor[Iterable[A]]) = iteratorToLongTraverableTransformer[A].transform(from.map(_.iterator))
+  }
+  implicit def iteratorToLongTraverableTransformer[A] = new ProcessorTransformer[A, Iterator[A], LongTraversable[A]] {
     def transform(from: Processor[Iterator[A]]) = new LongTraversable[A] {
       def iterator = {
         val opened = from.init

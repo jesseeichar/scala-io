@@ -605,7 +605,24 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
 	  assertEquals(fspath("a/b/c/./../d").path, fspath("a/b//c/./../d/").path)
 	  assertEquals(fspath("a/b/c/./../d").path, fspath("a/b//c/./../d//").path)
   }
-  
+
+  @Test //@Ignore
+  def creating_paths() {
+    assertEquals("a" :: "b" :: "c" :: Nil, fixture.fs("a","b","c").segments.toList)
+    assertEquals(fspath("a/b").path, fixture.fs.fromString(fspath("a/b").path).path)
+    assertEquals(fspath("a/b").path, fixture.fs("a-b",'-').path)
+    assertEquals(fspath("a/b/c").path, fspath("a") / "b" / "c" path)
+    assertEquals(fspath("a/b/c").path, fspath("a") / ("b,c",',') path)
+    assertEquals(fspath("a/b/c").path, fspath("a") / (",,b,,c,",',') path)
+    assertEquals(fspath("a/b/c").path, fspath("a") / (",,b,,c,",',') path)
+    assertEquals(fspath("a/b/c").path, fspath("a") \ (",,b,,c,",',') path)
+    assertEquals(fspath("a/b/c").path, (fspath("a") resolve fspath("b/c").path).path)
+    val path = fspath("a")
+    assertSame(path, path \ ".")
+    assertSame(path, path \ fixture.fs.separator)
+    assertSame(path, path resolve ".")
+  }
+
   @Test //@Ignore
   def path_separator_in_path_segment_throws_exception() {
 	  val sep = fixture.fs.separator
