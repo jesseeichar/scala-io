@@ -165,7 +165,7 @@ class ProcessorAPI[+A](private[this] var iter: CloseableIterator[A]) {
    *   } yield seq
    * }}}
    *
-   * Example takes 5 elements from the input stream until it contains the value 1 then it ends the repeating and returns
+   * Example takes 5 elements from the input source until it contains the value 1 then it ends the repeating and returns
    * the seq.
    *
    * The resulting Processor will be of type Processor[Iterator[Seq[A] ] ], even though there can only be one element, thus
@@ -175,6 +175,8 @@ class ProcessorAPI[+A](private[this] var iter: CloseableIterator[A]) {
    *   This could be done with a LongTraversable with:  traversable.sliding(5,5).filter(_ contains 1).headOption
    *   Note that you need to use headOption because you don't know if there are any elements in the resulting traversable,
    *   however the LongTraversable API would be difficult to use if you want to processes multiple input objects together
+   *
+   * @return a Processor[Unit] and therefore the result can normally be ignored
    */
   def end() = createSideEffect(doEnd())
 
@@ -193,11 +195,23 @@ class ProcessorAPI[+A](private[this] var iter: CloseableIterator[A]) {
    * The Example takes 5 elements of the input until one of the sequences contains the number 25.
    *
    * As a side note:
-   *   This could be done using the LongTraversable API: traversable.sliding(5,5).takeWhile(
+   *   This could be done using the LongTraversable API: traversable.sliding(5,5).takeWhile(i => !(i contains 25))
+   *   While this example can be done with the normal traversable API, this API is typically preferred when
+   *   reading data from multiple interdependent sources.
+   *
+   * @param f the predi
+   * @return a Processor[Unit] and therefore the result can normally be ignored
    */
   def endIf(f: => Boolean) = createSideEffect(if(f) doEnd())
-  def next = Processor(if(iter.hasNext) Some(iter.next) else None)
-  def nextOption = Processor[Option[A]](Some(if (iter.hasNext) Some(iter.next) else None))
+
+  /**
+   * Read the next element in the input source if possible.
+   *
+   * If there is an element left in the input source a Processor containing that element will be returned, otherwise
+   * the returned processor will be empty.
+   */
+  def next:Processor[A] = Processor(if(iter.hasNext) Some(iter.next) else None)
+  def nextOption:Processor[Option[A]] = Processor(Some(if (iter.hasNext) Some(iter.next) else None))
   def repeatUntilEmpty(otherProcessorAPIs: ProcessorAPI[_]*) = RepeatUntilEmpty((this +: otherProcessorAPIs): _*)
   def repeat(times: Int) = Repeat(times)
 
