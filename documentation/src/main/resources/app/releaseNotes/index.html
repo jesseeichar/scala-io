@@ -1,17 +1,5 @@
 <ul>
-	<li>Performance enhancement for reading from Input objects.  Another approximately 4x speed increase</li>
-	<li>Discarded LongTraversableView in favor for a lazy implementation of LongTraversable.  This is potentially backward breaking although all methods are the same</li>
-	<li>Changed type signature of PathSet so type inference works better</li>
-	<li>Performance tuning of Path-sets so that directory tree searching is more efficient.  About 8x improvement</li>
-	<li>Made Path-sets lazy.  <em>Warning:</em> side-effects in methods like map, collect, filter will not have an effect until a foreach or force are called</li>
-	<li>added performance tests for directory traversal</li>
-	<li>Performance enhancements for directory traversal some 10-20x speed improvements there</li>
-	<li>PathSet/PathFinder Bug fixes</li>
-	<li>Added option to use a PathMatcher as a parameter to ** and *</li>
-	<li>Added PathSet factory method that takes a collection of Paths</li>
-	<li>Quadruple performance of reading a file's characters</li>
-	<li>Triple performance of Input lines (when auto detecting line endings)</li>
-	<li>remove some unused classes</li>
-	<li>Only have ReadableFileChannel implementation (API still works with In and Outputstreams but implementation is reduced in size thanks to this change)</li>
-	<li>update to scala-arm 1.1</li>
+	<li>New options for creating paths to reduce verbosity.  Now:  Path("a/b/c",'/') will create a path by splitting the string with the separator and using the resulting parts as path segments</li>
+	<li>New API for processing Input objects.</li>
+	<li>Options to create Resources that don't close underlying resource.  For example if Standard In is to be processed, the stream should not be closed</li>
 </ul>

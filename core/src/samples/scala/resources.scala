@@ -123,6 +123,24 @@ object Resources {
   }
 
   /**
+   * Create persistent resources.
+   *
+   * <p>It is not the common case but sometimes one wants to use the scala-io API on resources that
+   * that should not be closed like Standard in/out/err.  Resource has factory methods for creating Resources
+   * that will not be closed when an action is finished.  All methods that do not close the resource contain
+   * the term Peristent.  For example fromPersistentStream</p>
+   */
+  def createResourcesThatArentClosed {
+    import scalax.io.{Resource, InputStreamResource, OutputStreamResource, WriterResource}
+    import java.io.{InputStream, OutputStream, OutputStreamWriter, Writer}
+    
+    val stdIn:InputStreamResource[InputStream] = Resource.fromPersistentInputStream(System.in)
+    val stdOut:OutputStreamResource[OutputStream] = Resource.fromPersistentOutputStream(System.out)
+    val stdErr:WriterResource[Writer] = Resource.fromPersistentWriter(new OutputStreamWriter(System.err))
+
+  }
+
+  /**
    * Perform additional actions when a resource is closed. One of the important features of the Scala IO is that resources are cleaned up
    * automatically.  However occasionally one would like to perform an action on close in addition to
    * the default closing/flushing of the resource.  When a resource is created additional close actions can be added
@@ -130,7 +148,6 @@ object Resources {
    */
   def performAdditionalActionOnClose {
     import scalax.io._
-    import nio.SeekableFileChannel
 
     // a close action can be created by passing a function to execute
     // to the Closer object's apply method

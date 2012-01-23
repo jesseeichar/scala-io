@@ -1,5 +1,3 @@
-import java.io.StringWriter
-
 /**
  * Examples for creating Output/Input/ReadChars/WriteChars/etc using the asFooConverter pattern.
  * 
@@ -51,7 +49,8 @@ object AsFooConverter {
   def asWriteChars {
     import scalax.io.Codec
     import scalax.io.JavaConverters._
-    
+    import java.io.StringWriter
+
     new java.io.File("io").asBinaryWriteChars(Codec.UTF8).write("This is a message in UTF8")
     new StringWriter().asWriteChars
   }
@@ -64,7 +63,26 @@ object AsFooConverter {
     import JavaConverters._
 
     val lines:Traversable[String] = new java.io.File("io").asBinaryReadChars(Codec.UTF8).lines()
-    val webpage:String = new java.io.StringReader("hello").asReadChars.slurpString
+    val hello:String = new java.io.StringReader("hello").asReadChars.slurpString
     val wrapTraversable: LongTraversable[String] = "hello".asReadChars.lines(Custom(";"))
+  }
+
+  /**
+   * Convert persistent resources to Input/Output/ReadChars etc...
+   * <p>
+   * Some resources should not be closed.  These examples show how to construct
+   * scala-io objects from those resources in such a way that the underlying resources
+   * won't be closed as they are with the normal implementations
+   * </p>
+   */
+  def asPersistenFoo {
+    import scalax.io.JavaConverters._
+    import scalax.io.{Output, LongTraversable, WriteChars}
+    
+    val hi:String = new java.io.StringReader("hi").asPersistentReadChars.slurpString
+    val bytes:LongTraversable[Byte] = System.in.asPersistentInput.bytes
+    val lines:LongTraversable[String] = System.in.asPersistentReadChars.lines()
+    val out:Output = System.out.asPersistentOutput 
+    val writeChars:WriteChars = System.out.asPersistentWriteChars 
   }
 }
