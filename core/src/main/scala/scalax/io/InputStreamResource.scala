@@ -19,6 +19,10 @@ class InputStreamResource[+A <: InputStream] (
   with ResourceOps[A, InputStreamResource[A]] {
 
   def open():OpenedResource[A] = new CloseableOpenedResource(opener,closeAction)
+  def unmanaged = new InputStreamResource[A](opener, closeAction, sizeFunc, descName) {
+    private[this] val resource = opener
+    override def open = new UnmanagedOpenedResource(resource, closeAction)
+  }
 
   def prependCloseAction[B >: A](newAction: CloseAction[B]) = new InputStreamResource[A](opener,newAction :+ closeAction,sizeFunc,descName)
   def appendCloseAction[B >: A](newAction: CloseAction[B]) = new InputStreamResource[A](opener,closeAction +: newAction,sizeFunc,descName)

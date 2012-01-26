@@ -68,7 +68,7 @@ object AsFooConverter {
   }
 
   /**
-   * Convert persistent resources to Input/Output/ReadChars etc...
+   * Convert Unmanaged resources to Input/Output/ReadChars etc...
    * <p>
    * Some resources should not be closed.  These examples show how to construct
    * scala-io objects from those resources in such a way that the underlying resources
@@ -79,10 +79,10 @@ object AsFooConverter {
     import scalax.io.JavaConverters._
     import scalax.io.{Output, LongTraversable, WriteChars}
     
-    val hi:String = new java.io.StringReader("hi").asPersistentReadChars.slurpString
-    val bytes:LongTraversable[Byte] = System.in.asPersistentInput.bytes
-    val lines:LongTraversable[String] = System.in.asPersistentReadChars.lines()
-    val out:Output = System.out.asPersistentOutput 
-    val writeChars:WriteChars = System.out.asPersistentWriteChars 
+    val hi:String = new java.io.StringReader("hi").asUnmanagedReadChars.slurpString
+    val bytes:LongTraversable[Byte] = System.in.asUnmanagedInput.bytes
+    val lines:LongTraversable[String] = System.in.asUnmanagedBinaryReadChars.lines()
+    val out:Output = System.out.asUnmanagedOutput 
+    val writeChars:WriteChars = System.out.asUnmanagedBinaryWriteChars
   }
 }

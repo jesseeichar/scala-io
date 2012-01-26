@@ -25,7 +25,7 @@ package processing
  *   api2 <- input2.bytes.processor
  *   header1 <- api.take(100)
  *   header2 <- api2.take(100)
- *  } yield new Header(header1,header2)
+ * } yield new Header(header1,header2)
  *
  * headerProcessor.acquireAndGet(header => /* do something with header */)
  * }}}
@@ -113,7 +113,8 @@ package processing
  *
  * All the normal behaviour of for-comprehensions are supported as well, including guards, pattern matching etc...
  */
-class ProcessorAPI[+A](private[this] var iter: CloseableIterator[A]) {
+class ProcessorAPI[+A](private[this] val iter: CloseableIterator[A]) {
+  
   /**
    * Construct a sequence by taking elements from the input source until the function returns false or
    * there are no more elements in the input source.
@@ -122,7 +123,7 @@ class ProcessorAPI[+A](private[this] var iter: CloseableIterator[A]) {
    *
    * @return a Seq[A] consisting of the elements taken from the input source
    */
-  def takeWhile(f: A => Boolean) = createSeq[A](iter takeWhile f)
+  def takeWhile(f: A => Boolean) = Processor(Some(bufferedIter takeWhile f))
 
   /**
    * Construct a sequence by taking up to i elements from the input source
@@ -131,7 +132,7 @@ class ProcessorAPI[+A](private[this] var iter: CloseableIterator[A]) {
    *
    * @return a Seq[A] consisting of the elements taken from the input source
    */
-  def take(i: Int) = createSeq[A](iter take i)
+  def take(i: Int) = Processor(Some(bufferedIter take i))
 
   /**
    * Drop/skip the next i elements in the input source if possible.
@@ -139,30 +140,30 @@ class ProcessorAPI[+A](private[this] var iter: CloseableIterator[A]) {
    * Since dropping results in nothing the result can be ignored.
    *
    * {{{
-   *     // results in a Processor[Seq[<type of processor>]]
-   *     for {
-   *       api <- input.processor
-   *       _ <- api.drop(10)
-   *       seq <- api.take(5)
-   *     } yield seq
+   * // results in a Processor[Seq[<type of processor>]]
+   * for {
+   *   api <- input.processor
+   *   _ <- api.drop(10)
+   *   seq <- api.take(5)
+   * } yield seq
    * }}}
    *
    * @param i the number of elements to skip
    * @return the returned Processor can typically be ignored since it is a unit processor.
    */
-  def drop(i: Int) = createSideEffect(updateIter(ops.drop(i)))
+  def drop(i: Int) = Processor(Some(bufferedIter drop i))
 
   /**
    * Ends the ProcessAPI.  Any attempts to take or drop will have no effect after the process is ended.
    *
    * {{{
-   *   for {
-   *     api <- input.processor
-   *     _ <- repeatUntilEmpty
-   *     seq <- api.take(5)
-   *     if(seq contains 1)
-   *     _ <- api.end
-   *   } yield seq
+   * for {
+   *   api <- input.processor
+   *   _ <- repeatUntilEmpty
+   *   seq <- api.take(5)
+   *   if(seq contains 1)
+   *   _ <- api.end
+   * } yield seq
    * }}}
    *
    * Example takes 5 elements from the input source until it contains the value 1 then it ends the repeating and returns
@@ -184,12 +185,12 @@ class ProcessorAPI[+A](private[this] var iter: CloseableIterator[A]) {
    * End the processes if the predicate return true.  Any attempts to take or drop will have no effect after the process is ended.
    *
    * {{{
-   *     for {
-   *       api <- input.processor
-   *       _ <- repeatUntilEmpty()
-   *       seq <- input.take(5)
-   *       _ <- input.endIf(_ contains 25)
-   *    } yield seq
+   * for {
+   *   api <- input.processor
+   *   _ <- repeatUntilEmpty()
+   *   seq <- input.take(5)
+   *   _ <- input.endIf(_ contains 25)
+   * } yield seq
    * }}}
    *
    * The Example takes 5 elements of the input until one of the sequences contains the number 25.
@@ -209,19 +210,149 @@ class ProcessorAPI[+A](private[this] var iter: CloseableIterator[A]) {
    *
    * If there is an element left in the input source a Processor containing that element will be returned, otherwise
    * the returned processor will be empty.
+   *
+   * The key differentiator between next and nextOption is that next in a for-comprehension will no yield a value where
+   * nextOption will always contain a value, Some or None, so nextOption can be used if the element is optional to the process
+   * but next will stop the process at that point.
+   *
+   * Example:
+   * {{{
+   * for {
+   *   api1 <- input1.bytes.processor
+   *   api2 <- input2.bytes.processor
+   *   _ <- api1.repeatUntilEmpty()
+   *   api1Next <- api.next
+   *   next <- api2.next
+   * } println(api1Next)
+   *
+   * for {
+   *   api1 <- input1.bytes.processor
+   *   api2 <- input2.bytes.processor
+   *   _ <- api1.repeatUntilEmpty()
+   *   api1Next <- api.next
+   *   nextOption <- api2.nextOption
+   * } println(api1Next)
+   * }}}
+   *
+   * The two examples appear similar.  The first example will print the bytes from input1 until input2 is empty.  Where
+   * as in example 2 will print all of api1 irregardless of whether api2 is empty or not.
+   *
+   * The reason is that in example 1 (next), next returns an empty processor when input2 is empty and thus the println
+   * is not executed.  In example 2 the Processor is never empty it is either Some or None.
+   * 
+   * @note if the process has a repeatUntilEmpty() method call, nextOption should be preferred over next.  
+   *       See repeatUntilEmpty for why
+   *
+   * @return An empty processor if there are no more elements in the input source or a processor containing the next element
+   *        in the input source.
    */
-  def next:Processor[A] = Processor(if(iter.hasNext) Some(iter.next) else None)
-  def nextOption:Processor[Option[A]] = Processor(Some(if (iter.hasNext) Some(iter.next) else None))
-  def repeatUntilEmpty(otherProcessorAPIs: ProcessorAPI[_]*) = RepeatUntilEmpty((this +: otherProcessorAPIs): _*)
-  def repeat(times: Int) = Repeat(times)
+  def next:Processor[A] = Processor(if(bufferedIter.hasNext) Some(bufferedIter.next) else None)
+
+  /**
+   * Read the next element in the input source and return Some(element) if there is a next element or None otherwise.
+   *
+   * See the documentation of next for details on how this method differs from next.
+   *
+   * @return a Processor containing Some(nextElement) if the input source is not empty or None if the input source if empty
+   */
+  def nextOption:Processor[Option[A]] = Processor(Some(if (bufferedIter.hasNext) Some(bufferedIter.next) else None))
+
+  /**
+   * Read the sequence of characters from the current element in the input source if A are Char.
+   *
+   * In practical terms the implicit portion of the method signature can be ignored.  It is required to make the method
+   * type safe so that a method call to the method will only compile when the type of A is Char
+   *
+   * @param includeTerminator flag to indicate whether the terminator should be discarded or kept
+   * @param lineTerminator the method to use for determine where the line ends
+   * @param lineParser a case class to ensure this method can only be called when A are Chars
+   *
+   * @return a Processor containing the sequence of characters from the current element in the input source
+   */
+  def line[B >: A](includeTerminator:Boolean = false, lineTerminator:Line.Terminators.Terminator = Line.Terminators.Auto)(implicit lineParser:LineParser[B]) =
+    Processor(Some(lineParser.nextLine(includeTerminator, lineTerminator, bufferedIter)))
+  /**
+   * Create a Processor that simply repeats until this processor and all of the other input sources that are passed
+   * in are empty or ended.  Each repetition generates an integer that can be used to count the number of repetitions
+   * if desired. 
+   * 
+   * @note repeatUntilEmpty can very easily result in infinite loops because it depends on the following components
+   * of the process/workflow correctly retrieving elements from the input source so that it eventually empties
+   * 
+   * The following examples are ways that one can create infinite loops (or loops that last up to Long.MaxValue):
+   * 
+   * {{{
+   * for {
+   *   processor1 <- input.bytes.processor
+   *   processor2 <- input.bytes.processor
+   *   processor1Loops <- processor1.repeatUntilEmpty()
+   *     // if processor2 is emptied before processor1 there is an infinite loop because
+   *     // this section will be the loop and since processor1 is not accessed here we have a loop
+   *     // to be safer next1 should be in this section  
+   *   processor2Loops <- processor2.repeatUntilEmpty()
+   *   next1 <- processor1.nextOption
+   *   next2 <- processor2.nextOption
+   * } yield (next1, next2)
+   * }}}
+   * 
+   * {{{
+   * for {
+   *   processor1 <- input.bytes.processor
+   *   processor2 <- input.bytes.processor
+   *   processor1Loops <- processor1.repeatUntilEmpty(processor2)
+   *   next1 <- processor1.next  // nextOption should be used here because this can cause
+   *                             // an infinite loop.  if processor1 is empty and processor2 is not
+   *                             // next produces an empty processor so the next line will not be executed
+   *                             // nextOption would always produce an non-empty Processor and therefore
+   *                             // should be preferred over next
+   *   next2 <- processor2.next
+   * } yield (next1, next2)
+   * }}}
+   * 
+   * {{{
+   * for {
+   *   processor1 <- input.bytes.processor
+   *   processor2 <- input.bytes.processor
+   *   loops <- processor1.repeatUntilEmpty(processor2)
+   *   if loops < 100  // this guard is dangerous because if there are more than 100 elements in either
+   *                   // processor1 or processor2 there is an infinite loop because next1 and next2 never get called
+   *   next1 <- processor1.nextOption
+   *   next2 <- processor2.nextOption
+   * } yield (next1, next2)
+   * }}}
+   *
+   * A safe implementation using repeatUntilEmpty should only execute methods that produce non-empty Processors
+   * or should be done with extreme care.
+   * 
+   * for {
+   *   processor1 <- input.bytes.processor
+   *   processor2 <- input.bytes.processor
+   *   processor1Loops <- processor1.repeatUntilEmpty(processor2)
+   *   option1 <- processor1.nextOption
+   *   option2 <- processor2.nextOption
+   *   next1 <- option1
+   *   next2 <- option2
+   * } yield (next1, next2)
+   * }}}
+
+   * @param otherProcessorAPIs other processors to empty (in addition to this) before ending the loop
+   * 
+   * @return A Processor containing a sequence of whatever elements are returned by the for-comprehension
+   */
+  def repeatUntilEmpty(otherProcessorAPIs: ProcessorAPI[_]*) = new RepeatUntilEmpty(Long.MaxValue, (this +: otherProcessorAPIs): _*)
+  
+  /**
+   * Loops n times or until the provided input sources are all empty.
+   * 
+   * This method is similar to repeatUntilEmpty except it limits the number of repetitions that can be performed.
+   * 
+   * @param times the maximum number of loops
+   * @param otherProcessorAPIs other input sources to monitor for empty before prematurely ending the loop.  
+   *                           If this and otherProcessorAPIs are all empty then the looping will be ended
+   */
+  def repeat(times: Int, otherProcessorAPIs: ProcessorAPI[_]*) = new RepeatUntilEmpty(times, (this +: otherProcessorAPIs): _*)
 
   // private methods follow
-  private[this] var ops = CloseableIteratorOps(iter)
-  private[this] def updateIter(f: => CloseableIterator[A]) = {
-    iter = f
-    ops = CloseableIteratorOps(iter)
-  }
-  private[processing] def iterator = iter
   private[this] def createSideEffect(f: => Unit) = new Processor[Unit] {
     private[processing] def init = new Opened[Unit] {
       def cleanUp() = ()
@@ -234,6 +365,8 @@ class ProcessorAPI[+A](private[this] var iter: CloseableIterator[A]) {
     builder ++= f
     Some(builder.result())
   })
-  private[this] def doEnd() = iter = iter.take(0)
+  private[this] def doEnd() = bufferedIter.end()
+  private[this] var bufferedIter = new SpecializedBufferedIterator(iter)
+  private[processing] val iterator = bufferedIter
 
 }

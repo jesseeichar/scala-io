@@ -14,6 +14,10 @@ class WritableByteChannelResource[+A <: WritableByteChannel] (
   with ResourceOps[A, WritableByteChannelResource[A]]  {
 
   def open():OpenedResource[A] = new CloseableOpenedResource(opener,closeAction)
+  def unmanaged = new WritableByteChannelResource[A](opener, closeAction) {
+    private[this] val resource = opener
+    override def open = new UnmanagedOpenedResource(resource, closeAction)
+  }
 
   def prependCloseAction[B >: A](newAction: CloseAction[B]) = new WritableByteChannelResource(opener,newAction :+ closeAction)
   def appendCloseAction[B >: A](newAction: CloseAction[B]) = new WritableByteChannelResource(opener,closeAction +: newAction)

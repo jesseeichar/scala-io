@@ -1,7 +1,7 @@
 /**
- * Processing LongTraverables using the transformation API
+ * Processing LongTraverables using the Processor API
  */
-object LongTraversableTransformations {
+object LongTraversableProcssing {
   /**
    * Parse a binary file
    * Consider a file that contains data with the following organization (the | are for visual representation only):
@@ -68,7 +68,7 @@ object LongTraversableTransformations {
     val recordTransformer = for{
         titles <- Resource.fromFile("file.titles.csv").lines().processor
         atts <- Resource.fromFile("file.atts.csv").lines().processor
-        _ <- titles.repeatUntilEmpty(atts)
+        _ <- titles.repeatUntilEmpty()
         titleLine <- titles.next
         // assuming "," is separator
         Array(title,id) = titleLine.split(",")
@@ -82,6 +82,4 @@ object LongTraversableTransformations {
     // now do something with the records.  remember the files have not
     // yet been opened and won't be until the LongTraversable is used
   }
-  
-  
 }

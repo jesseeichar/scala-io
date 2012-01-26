@@ -11,6 +11,10 @@ class WriterResource[+A <: Writer] (
   with ResourceOps[A, WriterResource[A]]  {
 
   def open():OpenedResource[A] = new CloseableOpenedResource(opener,closeAction)
+  def unmanaged = new WriterResource[A](opener, closeAction) {
+    private[this] val resource = opener
+    override def open = new UnmanagedOpenedResource(resource, closeAction)
+  }
 
   def prependCloseAction[B >: A](newAction: CloseAction[B]) = new WriterResource(opener,newAction :+ closeAction)
   def appendCloseAction[B >: A](newAction: CloseAction[B]) = new WriterResource(opener,closeAction +: newAction)

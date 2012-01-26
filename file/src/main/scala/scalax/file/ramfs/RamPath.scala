@@ -28,6 +28,7 @@ class RamPath(relativeTo: String, val path: String, override val fileSystem: Ram
 
   lazy val name: String = path.split(Pattern.quote(separator)).lastOption getOrElse (path)
   override lazy val normalize = super.normalize.asInstanceOf[RamPath]
+  def toRealPath(linkOptions:LinkOption*) = toAbsolute.normalize
   lazy val parent: Option[RamPath] = {
     val segs = {
       val raw = path.split(Pattern quote separator).toList

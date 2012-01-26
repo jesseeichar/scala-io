@@ -123,20 +123,20 @@ object Resources {
   }
 
   /**
-   * Create persistent resources.
+   * Create Unmanaged resources.
    *
    * <p>It is not the common case but sometimes one wants to use the scala-io API on resources that
    * that should not be closed like Standard in/out/err.  Resource has factory methods for creating Resources
    * that will not be closed when an action is finished.  All methods that do not close the resource contain
-   * the term Peristent.  For example fromPersistentStream</p>
+   * the term Peristent.  For example fromUnmanagedStream</p>
    */
   def createResourcesThatArentClosed {
     import scalax.io.{Resource, InputStreamResource, OutputStreamResource, WriterResource}
     import java.io.{InputStream, OutputStream, OutputStreamWriter, Writer}
     
-    val stdIn:InputStreamResource[InputStream] = Resource.fromPersistentInputStream(System.in)
-    val stdOut:OutputStreamResource[OutputStream] = Resource.fromPersistentOutputStream(System.out)
-    val stdErr:WriterResource[Writer] = Resource.fromPersistentWriter(new OutputStreamWriter(System.err))
+    val stdIn:InputStreamResource[InputStream] = Resource.fromInputStream(System.in).unmanaged
+    val stdOut:OutputStreamResource[OutputStream] = Resource.fromOutputStream(System.out).unmanaged
+    val stdErr:WriterResource[Writer] = Resource.fromWriter(new OutputStreamWriter(System.err)).unmanaged
 
   }
 

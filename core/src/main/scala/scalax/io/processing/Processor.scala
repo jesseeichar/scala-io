@@ -5,7 +5,7 @@ package processing;
  * A point or step in a IO process workflow.
  *
  * The processing API is declarative way to process several input streams together.  The allows much more powerful
- * options beyond what is available using the normal collections-like API available in LongTraversable.
+ * options beyond what is available using the normal collections-like API available in [[scalax.io.LongTraversable]].
  *
  * {{{
  * val firstElems = for {

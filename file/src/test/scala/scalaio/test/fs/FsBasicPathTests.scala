@@ -33,6 +33,25 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
   def fspath(name:Path) = fixture.fs.fromSeq(name.segments)
 
   @Test //@Ignore
+  def recreating_pwd_with_segments_strings_etc : Unit = {
+    val absolutePathToPwd = fixture.fs(".").toAbsolute
+
+    assertEquals(absolutePathToPwd, fixture.fs.fromString(absolutePathToPwd.path))
+    assertEquals(absolutePathToPwd, fixture.fs.fromSeq(absolutePathToPwd.segments))
+    assertEquals(absolutePathToPwd, fixture.fs(absolutePathToPwd.segments:_*))
+    assertEquals(absolutePathToPwd, fixture.fs(absolutePathToPwd.path, fixture.fs.separator.charAt(0)))
+  }
+  @Test //@Ignore
+  def path_starting_with_fileSeparator_is_from_root_of_same_root_as_pwd : Unit = {
+    val absolutePathToPwd = fixture.fs(".").toAbsolute
+    val fs = fixture.fs
+    import fs.{separator => sep}
+    
+    assertEquals(absolutePathToPwd.root.get / "a", fixture.fs(sep,"a"))
+    assertEquals(absolutePathToPwd.root.get / "a", fixture.fs.fromString(sep+"a"))
+    assertEquals(absolutePathToPwd.root.get / "a", fixture.fs(sep+"a",fs.separator.charAt(0)))
+  }
+  @Test //@Ignore
   def can_copy_empty_file : Unit = {
      val tree = fixture.tree(3)._1
      val out = fixture.path(1).createDirectory(true,false)
@@ -618,9 +637,11 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
     assertEquals(fspath("a/b/c").path, fspath("a") \ (",,b,,c,",',') path)
     assertEquals(fspath("a/b/c").path, (fspath("a") resolve fspath("b/c").path).path)
     val path = fspath("a")
-    assertSame(path, path \ ".")
-    assertSame(path, path \ fixture.fs.separator)
-    assertSame(path, path resolve ".")
+    assertEquals(path toRealPath(), path \ "." toRealPath())
+    assertEquals(path toRealPath(), path resolve "." toRealPath())
+    intercept[IllegalArgumentException] {
+          path \ fixture.fs.separator
+    }
   }
 
   @Test //@Ignore

@@ -15,7 +15,10 @@ class ByteChannelResource[+A <: ByteChannel] (
   with ResourceOps[A, ByteChannelResource[A]] {
 
   def open():OpenedResource[A] = new CloseableOpenedResource(opener,closeAction)
-
+  def unmanaged = new ByteChannelResource[A](opener, closeAction, sizeFunc) {
+    private[this] val resource = opener
+    override def open = new UnmanagedOpenedResource(resource, closeAction)
+  }
   def prependCloseAction[B >: A](newAction: CloseAction[B]) = new ByteChannelResource(opener,newAction :+ closeAction,sizeFunc)
   def appendCloseAction[B >: A](newAction: CloseAction[B]) = new ByteChannelResource(opener,closeAction +: newAction,sizeFunc)
 

@@ -13,6 +13,10 @@ class ReaderResource[+A <: Reader] (
   with ResourceOps[A, ReaderResource[A]] {
 
   def open():OpenedResource[A] = new CloseableOpenedResource(opener,closeAction)
+  def unmanaged = new ReaderResource[A](opener, closeAction, descName) {
+    private[this] val resource = opener
+    override def open = new UnmanagedOpenedResource(resource, closeAction)
+  }
 
   def prependCloseAction[B >: A](newAction: CloseAction[B]) = new ReaderResource(opener,newAction :+ closeAction,descName)
   def appendCloseAction[B >: A](newAction: CloseAction[B]) = new ReaderResource(opener,closeAction +: newAction,descName)

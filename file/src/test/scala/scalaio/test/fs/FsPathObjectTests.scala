@@ -43,8 +43,6 @@ abstract class FsPathObjectTests extends Fixture {
   @Test
   def path_object_should_create_paths_from_a_string() : Unit = {
     assertSame(FileSystem.default, Path("nonsense path").fileSystem)
-    implicit val fs = fixture.fs
-    assertSame(fs, Path("path").fileSystem)
   }
 
   @Test

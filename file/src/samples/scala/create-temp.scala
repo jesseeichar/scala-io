@@ -19,16 +19,10 @@ object CreateTemporary {
     val tmpFile2: Path = Path.createTempFile(prefix = "tmpFile",
       suffix = "tmp",
       dir = "/tmp",
-      deleteOnExit = false)(FileSystem.default)
-
-    // Using the same pattern as Path you can can use implicits
-    // to declare the FileSystem that is used by make temp file
-    implicit val fs = FileSystem.default
-    // fs will now be used by createTempFile
-    val tmpFile3: Path = Path.createTempFile()
+      deleteOnExit = false)
 
     // a file system can also be used to create temporary files/directories
-    fs.createTempFile()
+    FileSystem.default.createTempFile()
   }
 
   def createTempDirectories {
@@ -48,16 +42,10 @@ object CreateTemporary {
     val tmpFile2: Path = Path.createTempDirectory(prefix = "tmpFile",
       suffix = "tmp",
       dir = "/tmp",
-      deleteOnExit = false)(FileSystem.default)
-
-    // Using the same pattern as Path you can can use implicits
-    // to declare the FileSystem that is used by make temp directory
-    implicit val fs = FileSystem.default
-    // fs will now be used by createTempDirectory
-    val tmpFile3: Path = Path.createTempDirectory()
+      deleteOnExit = false)
 
     // a file system can also be used to create temporary files/directories
-    fs.createTempFile()
+    FileSystem.default.createTempFile()
   }
 
 }

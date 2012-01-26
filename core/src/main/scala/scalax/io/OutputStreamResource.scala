@@ -14,6 +14,10 @@ class OutputStreamResource[+A <: OutputStream] (
   with ResourceOps[A, OutputStreamResource[A]] {
 
   def open(): OpenedResource[A] = new CloseableOpenedResource(opener,closeAction)
+  def unmanaged = new OutputStreamResource[A](opener, closeAction) {
+    private[this] val resource = opener
+    override def open = new UnmanagedOpenedResource(resource, closeAction)
+  }
   def prependCloseAction[B >: A](newAction: CloseAction[B]) = new OutputStreamResource(opener,newAction :+ closeAction)
   def appendCloseAction[B >: A](newAction: CloseAction[B]) = new OutputStreamResource(opener,closeAction +: newAction)
 

@@ -1,8 +1,11 @@
 package scalax.io
 package processing
 
-
-sealed trait ProcessorTransformer[+A, -From, +To] {
+/**
+ * Case class to ensure control conversion of a Processor to other objects happens in a type safe way so
+ * that resources do not escape and create a resource leak
+ */
+private[processing] sealed trait ProcessorTransformer[+A, -From, +To] {
   def transform(from: Processor[From]): To
 }
 private[this] object ProcessorTransformer {

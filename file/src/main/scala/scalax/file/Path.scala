@@ -219,6 +219,26 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    */
   def toAbsolute: Path
   /**
+   * The true/real representation of the current path.
+   * 
+   * The full and true path of this path will be resolved, links will be handled according to the link options
+   * . and .. etc... will be resolved and if this path is relative it will be made absolute.  
+   * 
+   * If no linkOptions are supplied this method will follow links
+   * 
+   * @note in Java 6 linkOptions are ignored because only Java.io.File apis are used but in Java 7 linkOptions are
+   * correctly handled
+   * 
+   * @param linkOptions How to handle link options
+   * 
+   * @return the ''real'' path
+   */
+  def toRealPath(linkOptions:LinkOption*): Path
+  /**
+   * Return a java.io.File if possible
+   */
+  def toFile:Option[java.io.File] = None
+  /**
    * Creates a URI from the path.
    * @see java.file.File#toURI
    */
@@ -277,7 +297,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    * path / ("//",'/') // returns same Path
    * }}}
    */
-  def /(pathRepresentation: String, separator:Char): Path = resolve(fileSystem(path, separator))
+  def /(pathRepresentation: String, separator:Char): Path = /(fileSystem.fromSeq(pathRepresentation.split(separator)))
 
   /**
    * Alias for /(String)
@@ -285,7 +305,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    * @see /(String)
    */
   def \(child: String): Path = /(child)
-  def \(path: String, separator:Char): Path = /(path,separator)
+  def \(pathRepresentation: String, separator:Char): Path = /(pathRepresentation,separator)
   /**
    * Alias for /(child.name)
    *
@@ -321,7 +341,8 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    * Returns the related Path that starts at a root of the file system and is the direct
    * path with all relative segments are resolved.
    *
-   * For example /home/user/../another is <em>not</em> a valid canonical path.
+   * For example /home/user/../another is <em>not</em> a valid normalized path.
+   * 
    * @see #toAbsolute
    * @see java.file.File#toCanonical
    */
@@ -332,16 +353,14 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
        case (Empty,"..") => Empty
        case (path,"..") => path dropRight 1
        case (path,seg) => path :+ seg
-     } mkString separator
-     val prefix = if(isAbsolute) root.map{_.path}.getOrElse("")
-                  else ""
-// TODO use apply instead of fromString
-
-     if(reversedNormalizedPath startsWith prefix) {
-       fileSystem.fromString(reversedNormalizedPath)
-     } else {
-       fileSystem.fromString(prefix + reversedNormalizedPath)
      }
+/*     val prefix = if(isAbsolute) root.map{_.path}.getOrElse("")
+                  else ""
+     if(reversedNormalizedPath startsWith prefix) {*/
+       fileSystem.fromSeq(reversedNormalizedPath)
+     /*} else {
+       fileSystem.fromSeq(prefix +: reversedNormalizedPath)
+     }*/
    }
   /**
    * Resolve this path with other.  In the simplest case
@@ -1068,7 +1087,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
       eqFS && eqSeg
     case _        => false
   }
-  override def hashCode() = toURI.hashCode()
+  override def hashCode() = (7 + segments.hashCode()) * 37 + fileSystem.hashCode()
 
   /**
    * Create a matcher from this path's filesystem

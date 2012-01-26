@@ -18,6 +18,10 @@ class SeekableByteChannelResource[+A <: SeekableByteChannel] (
 
   private def rawOpen() = opener(openOptions getOrElse ReadWrite)
   def open():OpenedResource[A] = new CloseableOpenedResource(rawOpen(),closeAction)
+  def unmanaged = new SeekableByteChannelResource[A](opener, closeAction, sizeFunc, descName, openOptions) {
+    private[this] val resource = opener(openOptions.getOrElse(StandardOpenOption.ReadWrite))
+    override def open = new UnmanagedOpenedResource(resource, closeAction)
+  }
 
   def prependCloseAction[B >: A](newAction: CloseAction[B]) = new SeekableByteChannelResource(opener,newAction :+ closeAction,sizeFunc,descName,openOptions)
   def appendCloseAction[B >: A](newAction: CloseAction[B]) = new SeekableByteChannelResource(opener,closeAction +: newAction,sizeFunc,descName,openOptions)

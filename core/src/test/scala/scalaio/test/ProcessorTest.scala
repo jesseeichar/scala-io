@@ -240,7 +240,7 @@ trait ProcessorTest extends AssertionSugar {
     }
     assertEquals(0, loops)
     assertEquals(0, visitedElements)
-    mappedprocessor.acquireAndGet{data => 
+    mappedprocessor.acquireAndGet{data =>
       assertEquals(prepared.testData.take(4).toList, data._1.toList)
       assertEquals(cutOff, data._2)
     }
@@ -301,7 +301,7 @@ trait ProcessorTest extends AssertionSugar {
   }
 
   @Test
-  def processor_repeat_until {
+  def processor_repeatUntilEmpty_endIf {
     var visitedElements = 0
     var loops = 0
     val prepared = processorTraversable(100, visitedElements += 1)
@@ -528,27 +528,27 @@ trait ProcessorTest extends AssertionSugar {
     val prepared = processorTraversable(1, visitedElements += 1)
 
     val traversable1 = prepared.traversable.take(1)
-    val mappedprocessor: Processor[Iterator[Option[Int]]] = for {
+    val mappedprocessor: Processor[(Option[Int],Option[Int])] = for {
       t1 <- traversable1.processor
-      _ <- t1.repeat(2)
       next1 <- t1.nextOption
+      next2 <- t1.nextOption
     } yield {
       loops += 1
-      next1
+      (next1,next2)
     }
     assertEquals(0, loops)
     assertEquals(0, visitedElements)
     prepared.assertOpenedClosed(0)
 
-    assertEquals(List(Some(prepared.testData.head),None), mappedprocessor.traversable.toList)
-    assertEquals(2, loops)
+    mappedprocessor.acquireAndGet(assertEquals((Some(prepared.testData.head),None), _))
+    assertEquals(1, loops)
     assertEquals(1, visitedElements)
     prepared.assertOpenedClosed(1)
   }
 
   @Test
   def processor_LongTraversableFromIterable {
-    val prepared = processorTraversable(1, ())
+    val prepared = processorTraversable(100, ())
 
     val traversable = prepared.traversable
     
@@ -558,5 +558,19 @@ trait ProcessorTest extends AssertionSugar {
     } yield seq
     
     assertEquals(prepared.testData.take(5).toList, result.traversable.toList)
+  }
+
+  @Test
+  def processor_lines {
+    val prepared = processorTraversable(100, ())
+
+    val traversable = prepared.traversable.map(i => if(i == 9) '\n' else i.toString.charAt(0))
+    
+    val result: Processor[Seq[Char]] = for {
+      api <- traversable.processor
+      line <- api.line()
+    } yield line
+    
+    assertEquals(prepared.testData.takeWhile(_ != 9).map(_.toString.charAt(0)).toList, result.traversable.toList)
   }
 }

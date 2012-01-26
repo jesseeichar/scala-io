@@ -71,7 +71,10 @@ abstract class FileSystem {
   }
 
   def apply(segments: String*): Path = fromSeq(segments)
-  def apply(pathRepresentation: String, separator:Char): Path = fromSeq(pathRepresentation.split(separator))
+  def apply(pathRepresentation: String, separator:Char): Path = {
+    val segments = (if(pathRepresentation.charAt(0) == separator) List(this.separator) else Nil) ++ pathRepresentation.split(separator)
+    fromSeq(segments)
+  }
   /**
    * Returns the list of roots for this filesystem
    */

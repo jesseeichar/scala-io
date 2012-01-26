@@ -41,6 +41,9 @@ trait OpenedResource[+R] {
 class CloseableOpenedResource[+R <: Closeable](val get:R,closeAction:CloseAction[R]) extends OpenedResource[R]{
   def close():List[Throwable] = (closeAction :+ CloseAction ((_:R).close()))(get)
 }
+class UnmanagedOpenedResource[+R](val get:R,closeAction:CloseAction[R]) extends OpenedResource[R]{
+  def close():List[Throwable] = closeAction(get)
+}
 
 /**
  * A trait allowing adding close actions to a Resource.  The purpose of this trait
@@ -139,6 +142,25 @@ trait Resource[+R <: Closeable] extends ManagedResourceOperations[R] with Resour
    * @return the actual resource that has been opened
    */
     def open(): OpenedResource[R]
+    
+    /**
+     * Create a new instance of this resource that will not close the resource after each operation.
+     * Create a Resource that will not close the stream.  The same stream will be reused for each request an never closed.  Use with care.
+     *
+     * The use case would be to read from standard in:
+     *
+     * {{{
+     *    val in = Resource.fromInputStream(System.in).unmanaged.bytes
+     *    val first5 = in.take(5)
+     *    val second5 = in.take(5)
+     * }}}
+     *
+     * If the example was a managed resource Standard in would be closed after first5
+     *
+     * @return return an instance of the same type that is not managed
+     */
+    def unmanaged:Resource[R]
+    
     def acquireFor[B](f : R => B) : Either[List[Throwable], B] ={
       val resource = open()
 
@@ -158,7 +180,6 @@ trait Resource[+R <: Closeable] extends ManagedResourceOperations[R] with Resour
           case None => Left(exceptions)
       }
     }
-
 }
 
 /**
@@ -332,28 +353,6 @@ object Resource {
    * @return an InputStreamResource
    */
   def fromInputStream[A <: InputStream](opener: => A): InputStreamResource[A] = new InputStreamResource[A](opener, Noop, () => None,UnknownName())
-
-  /**
-   * Create a Resource that will not close the stream.  The same stream will be reused for each request an never closed.  Use with care.
-   *
-   * The use case would be to read from standard in:
-   *
-   * {{{
-   *    val in = Resource.fromPersistentInputStream(System.in).bytes
-   *    val first5 = in.take(5)
-   *    val second5 = in.take(5)
-   * }}}
-   *
-   * @param stream the stream to use for each request.
-   *
-   * @return an InputStreamResource that will not close the stream
-   */
-  def fromPersistentInputStream[A <: InputStream](stream: A): InputStreamResource[A] = new InputStreamResource[A](stream, Noop, () => None,UnknownName()) {
-    override def open:OpenedResource[A] = new OpenedResource[A] {
-      def get = stream
-      def close = Nil
-    }
-  }
   /**
    * Create an Output Resource instance from an OutputStream.
    *
@@ -366,28 +365,6 @@ object Resource {
    * @return an OutputStreamResource
    */
   def fromOutputStream[A <: OutputStream](opener: => A) : OutputStreamResource[A] = new OutputStreamResource[A](opener,Noop)
-
-  /**
-   * Create a Resource that will not close the stream.  The same stream will be reused for each request an never closed.  Use with care.
-   *
-   * The use case would be to write to standard Out:
-   *
-   * {{{
-   *    val out = Resource.fromPersistentOutputStream(System.Out)
-   *    out.write(5)
-   *    out.write(5)
-   * }}}
-   *
-   * @param stream the stream to use for each request.
-   *
-   * @return an OutputStreamResource that will not close the stream
-   */
-  def fromPersistentOutputStream[A <: OutputStream](stream: A): OutputStreamResource[A] = new OutputStreamResource[A](stream, Noop) {
-    override def open:OpenedResource[A] = new OpenedResource[A] {
-      def get = stream
-      def close = Nil
-    }
-  }
   // Reader factory methods
   /**
    * Create an ReadChars Resource instance from an Reader.
@@ -399,29 +376,6 @@ object Resource {
    * @return an ReaderResource
    */
   def fromReader[A <: Reader](opener: => A) : ReaderResource[A] = new ReaderResource[A](opener, Noop,UnknownName())
-
-  /**
-   * Create a Resource that will not close the reader.  The same reader will be reused for each request an never closed.  Use with care.
-   *
-   * The use case would be to read from standard in:
-   *
-   * {{{
-   *    val in = Resource.fromPersistentReader(new InputStreamReader(System.in)).chars
-   *    val first5 = in.take(5)
-   *    val second5 = in.take(5)
-   * }}}
-   *
-   * @param reader the reader to use for each request.
-   *
-   * @return an ReaderResource that will not close the reader
-   */
-  def fromPersistentReader[A <: Reader](reader: A): ReaderResource[A] = new ReaderResource[A](reader, Noop,UnknownName()) {
-    override def open:OpenedResource[A] = new OpenedResource[A] {
-      def get = reader
-      def close = Nil
-    }
-  }
-
   // Writer factory methods
   /**
    * Create an WriteChars Resource instance with conversion traits from an Writer.
@@ -433,22 +387,6 @@ object Resource {
    * @return an WriterResource
    */
   def fromWriter[A <: Writer](opener: => A) : WriterResource[A] = new WriterResource[A](opener,Noop)
-  /**
-   * Create a Resource that will not close the writer.  The same writer will be reused for each request an never closed.  Use with care.
-   *
-   * @param writer the writer to use for each request.
-   *
-   * @return an WriterResource that will not close the writer
-   */
-  def fromPersistentWriter[A <: Writer](writer: A): WriterResource[A] = {
-    val ioWriter = writer
-    new WriterResource[A](writer, Noop) {
-      override def open:OpenedResource[A] = new OpenedResource[A] {
-        def get = ioWriter
-        def close = Nil
-      }
-    }
-  }
   // Channel factory methods
   /**
    * Create an Input Resource instance from an ReadableByteChannel.
@@ -461,27 +399,6 @@ object Resource {
    */
   def fromReadableByteChannel[A <: ReadableByteChannel](opener: => A) : ReadableByteChannelResource[A] = new ReadableByteChannelResource[A](opener, Noop, () => None,UnknownName())
   /**
-   * Create a Resource that will not close the channel.  The same channel will be reused for each request an never closed.  Use with care.
-   *
-   * The use case would be to read from standard in:
-   *
-   * {{{
-   *    val in = Resource.fromPersistentChannel(Channels.newChannel(System.in)).chars
-   *    val first5 = in.take(5)
-   *    val second5 = in.take(5)
-   * }}}
-   *
-   * @param channel the channel to use for each request.
-   *
-   * @return an ReadableByteChannelResource that will not close the channel
-   */
-  def fromPersistentReadableByteChannel[A <: ReadableByteChannel](channel: A): ReadableByteChannelResource[A] = new ReadableByteChannelResource[A](channel, Noop, () => None,UnknownName()) {
-    override def open:OpenedResource[A] = new OpenedResource[A] {
-      def get = channel
-      def close = Nil
-    }
-  }
-  /**
    * Create an Output Resource instance from an WritableByteChannel.
    *
    * $openDisclaimer
@@ -492,19 +409,6 @@ object Resource {
    */
   def fromWritableByteChannel[A <: WritableByteChannel](opener: => A) : WritableByteChannelResource[A] = new WritableByteChannelResource[A](opener,Noop)
   /**
-   * Create a Resource that will not close the channel.  The same channel will be reused for each request an never closed.  Use with care.
-   *
-   * @param channel the channel to use for each request.
-   *
-   * @return an WritableByteChannelResource that will not close the channel
-   */
-  def fromPersistentWritableByteChannel[A <: WritableByteChannel](channel: A): WritableByteChannelResource[A] = new WritableByteChannelResource[A](channel, Noop) {
-    override def open:OpenedResource[A] = new OpenedResource[A] {
-      def get = channel
-      def close = Nil
-    }
-  }
-  /**
    * Create an Input/Output Resource instance from a ByteChannel.
    *
    * $openDisclaimer
@@ -514,20 +418,6 @@ object Resource {
    * @return a ByteChannelResource
    */
   def fromByteChannel[A <: ByteChannel](opener: => A) : ByteChannelResource[A] = new ByteChannelResource[A](opener,Noop, () => None)
-  /**
-   * Create a Resource that will not close the channel.  The same channel will be reused for each request an never closed.  Use with care.
-   *
-   * @param channel the channel to use for each request.
-   *
-   * @return an WritableByteChannelResource that will not close the channel
-   */
-  def fromPersistentByteChannel[A <: ByteChannel](channel: A): ByteChannelResource[A] = new ByteChannelResource[A](channel, Noop, () => None) {
-    override def open:OpenedResource[A] = new OpenedResource[A] {
-      def get = channel
-      def close = Nil
-    }
-  }
-
   /**
    * Create an Input/Output/Seekable Resource instance from a SeekableByteChannel.
    *
@@ -553,23 +443,6 @@ object Resource {
    */
   def fromSeekableByteChannel[A <: SeekableByteChannel](opener: Seq[OpenOption] => A) : SeekableByteChannelResource[A] = {
     new SeekableByteChannelResource[A](opener,Noop, seekablesizeFunction(opener(Read :: Nil)),UnknownName(), Some(ReadWrite))
-  }
-
-  /**
-   * Create a Resource that will not close the channel.  The same channel will be reused for each request an never closed.  Use with care.
-   *
-   * @param channel the channel to use for each request.
-   *
-   * @return a SeekableByteChannelResource that will not close the channel
-   */
-  def fromPersistentSeekableByteChannel[A <: SeekableByteChannel](channel: A) : SeekableByteChannelResource[A] = {
-    val ioChannel = channel
-    new SeekableByteChannelResource[A](_ => channel,Noop, () => Some(channel.size),UnknownName(), Some(ReadWrite)) {
-      override def open:OpenedResource[A] = new OpenedResource[A] {
-        def get = ioChannel
-        def close = Nil
-      }
-    }
   }
 
   private def seekablesizeFunction(resource: => SeekableByteChannel)= () => {
