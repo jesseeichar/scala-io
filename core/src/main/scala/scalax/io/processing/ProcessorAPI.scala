@@ -2,9 +2,11 @@ package scalax.io
 package processing
 
 /**
- * The Main API for declaring a process workflow on an Input object.  This class contains all the operations
+ * The Common API for declaring a process workflow on an Input object.  This class contains all the operations
  * that can performed.  A ProcessorAPI object essentially wraps a data source/resource that provides
  * elements of type A, the methods allow the developer to read and skip over the elements as needed.
+ *
+ * '''Also see the section below about data specific APIs'''
  *
  * The processing package contains classes for processing and the ProcessorAPI is the core of 
  * the Processing API.
@@ -112,6 +114,13 @@ package processing
  * it is empty.  If it is then the api2 will be created again and the process will be repeated until api2 is again empty. etc...
  *
  * All the normal behaviour of for-comprehensions are supported as well, including guards, pattern matching etc...
+ * 
+ * In addition to this class, one can wrap this API with a type Specific API for a particular type a.  For example
+ * support A is bytes, ByteProcessorAPI can be used to gain access to APIs that are specific to working with Bytes.
+ * 
+ * @see scalax.io.processing.SpecificApiFactory
+ * @see scalax.io.processing.ProcessorAPI
+ * @see scalax.io.processing.CharProcessorAPI
  */
 class ProcessorAPI[+A](private[this] val iter: CloseableIterator[A]) {
   
@@ -211,9 +220,9 @@ class ProcessorAPI[+A](private[this] val iter: CloseableIterator[A]) {
    * If there is an element left in the input source a Processor containing that element will be returned, otherwise
    * the returned processor will be empty.
    *
-   * The key differentiator between next and nextOption is that next in a for-comprehension will no yield a value where
-   * nextOption will always contain a value, Some or None, so nextOption can be used if the element is optional to the process
-   * but next will stop the process at that point.
+   * Since next will return an empty processor it will terminate the looping in a for-comprehension and the resulting Processor 
+   * could be an empty processor.  This can be a problem when reading from multiple input sources.  the opt method can be used to
+   * modify the returned processor so that it returns a Processor[Option[_]] that is never empty.  COnsider the following examples
    *
    * Example:
    * {{{
@@ -230,7 +239,7 @@ class ProcessorAPI[+A](private[this] val iter: CloseableIterator[A]) {
    *   api2 <- input2.bytes.processor
    *   _ <- api1.repeatUntilEmpty()
    *   api1Next <- api.next
-   *   nextOption <- api2.nextOption
+   *   nextOpt <- api2.next.opt
    * } println(api1Next)
    * }}}
    *
@@ -240,37 +249,14 @@ class ProcessorAPI[+A](private[this] val iter: CloseableIterator[A]) {
    * The reason is that in example 1 (next), next returns an empty processor when input2 is empty and thus the println
    * is not executed.  In example 2 the Processor is never empty it is either Some or None.
    * 
-   * @note if the process has a repeatUntilEmpty() method call, nextOption should be preferred over next.  
-   *       See repeatUntilEmpty for why
+   * @note if the process has a repeatUntilEmpty() method call, next.opt should be preferred over next.  
+   *       See repeatUntilEmpty for a more detailed description of why
    *
    * @return An empty processor if there are no more elements in the input source or a processor containing the next element
    *        in the input source.
    */
   def next:Processor[A] = Processor(if(bufferedIter.hasNext) Some(bufferedIter.next) else None)
 
-  /**
-   * Read the next element in the input source and return Some(element) if there is a next element or None otherwise.
-   *
-   * See the documentation of next for details on how this method differs from next.
-   *
-   * @return a Processor containing Some(nextElement) if the input source is not empty or None if the input source if empty
-   */
-  def nextOption:Processor[Option[A]] = Processor(Some(if (bufferedIter.hasNext) Some(bufferedIter.next) else None))
-
-  /**
-   * Read the sequence of characters from the current element in the input source if A are Char.
-   *
-   * In practical terms the implicit portion of the method signature can be ignored.  It is required to make the method
-   * type safe so that a method call to the method will only compile when the type of A is Char
-   *
-   * @param includeTerminator flag to indicate whether the terminator should be discarded or kept
-   * @param lineTerminator the method to use for determine where the line ends
-   * @param lineParser a case class to ensure this method can only be called when A are Chars
-   *
-   * @return a Processor containing the sequence of characters from the current element in the input source
-   */
-  def line[B >: A](includeTerminator:Boolean = false, lineTerminator:Line.Terminators.Terminator = Line.Terminators.Auto)(implicit lineParser:LineParser[B]) =
-    Processor(Some(lineParser.nextLine(includeTerminator, lineTerminator, bufferedIter)))
   /**
    * Create a Processor that simply repeats until this processor and all of the other input sources that are passed
    * in are empty or ended.  Each repetition generates an integer that can be used to count the number of repetitions
@@ -290,8 +276,8 @@ class ProcessorAPI[+A](private[this] val iter: CloseableIterator[A]) {
    *     // this section will be the loop and since processor1 is not accessed here we have a loop
    *     // to be safer next1 should be in this section  
    *   processor2Loops <- processor2.repeatUntilEmpty()
-   *   next1 <- processor1.nextOption
-   *   next2 <- processor2.nextOption
+   *   next1 <- processor1.next.opt
+   *   next2 <- processor2.next.opt
    * } yield (next1, next2)
    * }}}
    * 
@@ -300,10 +286,10 @@ class ProcessorAPI[+A](private[this] val iter: CloseableIterator[A]) {
    *   processor1 <- input.bytes.processor
    *   processor2 <- input.bytes.processor
    *   processor1Loops <- processor1.repeatUntilEmpty(processor2)
-   *   next1 <- processor1.next  // nextOption should be used here because this can cause
+   *   next1 <- processor1.next  // next.opt should be used here because this can cause
    *                             // an infinite loop.  if processor1 is empty and processor2 is not
    *                             // next produces an empty processor so the next line will not be executed
-   *                             // nextOption would always produce an non-empty Processor and therefore
+   *                             // next.opt would always produce an non-empty Processor and therefore
    *                             // should be preferred over next
    *   next2 <- processor2.next
    * } yield (next1, next2)
@@ -316,8 +302,8 @@ class ProcessorAPI[+A](private[this] val iter: CloseableIterator[A]) {
    *   loops <- processor1.repeatUntilEmpty(processor2)
    *   if loops < 100  // this guard is dangerous because if there are more than 100 elements in either
    *                   // processor1 or processor2 there is an infinite loop because next1 and next2 never get called
-   *   next1 <- processor1.nextOption
-   *   next2 <- processor2.nextOption
+   *   next1 <- processor1.next.opt
+   *   next2 <- processor2.next.opt
    * } yield (next1, next2)
    * }}}
    *
@@ -328,8 +314,8 @@ class ProcessorAPI[+A](private[this] val iter: CloseableIterator[A]) {
    *   processor1 <- input.bytes.processor
    *   processor2 <- input.bytes.processor
    *   processor1Loops <- processor1.repeatUntilEmpty(processor2)
-   *   option1 <- processor1.nextOption
-   *   option2 <- processor2.nextOption
+   *   option1 <- processor1.next.opt
+   *   option2 <- processor2.next.opt
    *   next1 <- option1
    *   next2 <- option2
    * } yield (next1, next2)
@@ -366,7 +352,7 @@ class ProcessorAPI[+A](private[this] val iter: CloseableIterator[A]) {
     Some(builder.result())
   })
   private[this] def doEnd() = bufferedIter.end()
-  private[this] var bufferedIter = new SpecializedBufferedIterator(iter)
+  private[this] val bufferedIter = new SpecializedBufferedIterator(iter)
   private[processing] val iterator = bufferedIter
 
 }

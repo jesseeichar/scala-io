@@ -4,6 +4,19 @@ import scalax.io.processing.Processor
 import scalax.io.processing.ProcessorAPI
 
 /**
+ * Read the Shapefile and println one attribute from each record
+ * 
+ * param 1 == path to shapefile to read
+ * param 2 == index of attribute to print
+ */
+object ShapefileReader extends App{
+  val shpFile = Path.fromString(args(0))
+  val csvFile = shpFile / ".." / (shpFile.simpleName + ".csv")
+  val ds = new ShapefileDatastore(shpFile, csvFile)
+  ds.shpRecords.map (_.attributes(args(1).toInt)).foreach(println)
+}
+
+/**
  * Assumption is that csv and shp file are in sync and therefore 
  * there are the same number of records
  */

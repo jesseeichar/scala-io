@@ -71,6 +71,32 @@ trait Processor[+A] {
     finally initialized.cleanUp
   }
 
+  /**
+   * Convert this Processor to a Processor containing an Option.  Methods such as next return a potentially empty Processor which will, 
+   * when in a for comprehension, will stop the process at that point.  Converting the processor to an option allows the process handle
+   * continue and simply handle the possibility of one input source being empty while other continue to provide data.
+   * 
+   * Consider the following example:
+   * {{{
+   * for {
+   *   idsIn <- ids.bytesAsInts.processor
+   *   attributes <- in.lines().processor
+   *   _ <- idsIn.repeatUntilEmpty(attributes)
+   *   id <- ids.next.opt.orElse(NoId)
+   *   attr <- attributes.next.opt.orElse("")
+   * } yield new Record(id,attr)
+   * }}}
+   * 
+   * The above example processes the streams completely even if one ends prematurely.
+   */
+  def opt = new Processor[Option[A]] {
+    private[processing] def init = new Opened[Option[A]] {
+      private[this] val outer = self.init
+      def execute = Some(outer.execute)
+      def cleanUp() = outer.cleanUp
+    }
+  }
+
   /* opens the resource if necessary and allows the processor to be executed */
   private[processing] def init: Opened[A]
 
@@ -171,10 +197,10 @@ object Processor {
 /**
  * An internal implementation Processor containing a ProcessorAPI.
  */
-private[io] class CloseableIteratorProcessor[+A](private[processing] iter: => CloseableIterator[A]) extends Processor[ProcessorAPI[A]] {
+private[io] class CloseableIteratorProcessor[+A](private[processing] val iter: () => CloseableIterator[A]) extends Processor[ProcessorAPI[A]] {
   private[processing] def init = {
-    val iterInstance = iter
-    val processorAPI = new ProcessorAPI(iterInstance)
+    val iterInstance = iter()
+    val processorAPI = new ProcessorAPI[A](iterInstance)
     new Opened[ProcessorAPI[A]] {
       def execute() = Some(processorAPI)
       def cleanUp() = iterInstance.close()

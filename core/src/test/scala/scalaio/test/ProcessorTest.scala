@@ -4,6 +4,10 @@ import org.junit.Assert._
 import scalax.test.sugar.AssertionSugar
 import scalax.io.processing.Processor
 import scalax.io.LongTraversable
+import scalax.io.processing.CharProcessor
+import scalax.io.processing.ByteProcessor
+import java.io.DataInputStream
+import java.io.ByteArrayInputStream
 
 trait ProcessorTest extends AssertionSugar {
   self: LongTraversableTest =>
@@ -96,9 +100,9 @@ trait ProcessorTest extends AssertionSugar {
       t2 <- traversable2.processor
       t3 <- traversable3.processor
       _ <- t1.repeatUntilEmpty(t2, t3)
-      _ <- t1.nextOption
-      _ <- t2.nextOption
-      _ <- t3.nextOption
+      _ <- t1.next.opt
+      _ <- t2.next.opt
+      _ <- t3.next.opt
     } yield {
       loopCount += 1
       loopCount
@@ -142,10 +146,10 @@ trait ProcessorTest extends AssertionSugar {
       t3 <- traversable3.processor
       t4 <- traversable4.processor
       _ <- t1.repeatUntilEmpty(t2, t3, t4)
-      _ <- t1.nextOption
-      _ <- t2.nextOption
-      _ <- t3.nextOption
-      _ <- t4.nextOption
+      _ <- t1.next.opt
+      _ <- t2.next.opt
+      _ <- t3.next.opt
+      _ <- t4.next.opt
     } yield {
       loopCount += 1
       loopCount
@@ -522,7 +526,7 @@ trait ProcessorTest extends AssertionSugar {
   }
 
   @Test
-  def processor_nextOption {
+  def processor_next_opt {
     var visitedElements = 0
     var loops = 0
     val prepared = processorTraversable(1, visitedElements += 1)
@@ -530,8 +534,8 @@ trait ProcessorTest extends AssertionSugar {
     val traversable1 = prepared.traversable.take(1)
     val mappedprocessor: Processor[(Option[Int],Option[Int])] = for {
       t1 <- traversable1.processor
-      next1 <- t1.nextOption
-      next2 <- t1.nextOption
+      next1 <- t1.next.opt
+      next2 <- t1.next.opt
     } yield {
       loops += 1
       (next1,next2)
@@ -567,10 +571,110 @@ trait ProcessorTest extends AssertionSugar {
     val traversable = prepared.traversable.map(i => if(i == 9) '\n' else i.toString.charAt(0))
     
     val result: Processor[Seq[Char]] = for {
-      api <- traversable.processor
+      api <- CharProcessor(traversable.processor)
       line <- api.line()
     } yield line
     
     assertEquals(prepared.testData.takeWhile(_ != 9).map(_.toString.charAt(0)).toList, result.traversable.toList)
   }
+  
+  
+  @Test
+  def processor_byte_processor {
+    val prepared = processorTraversable(100, ())
+
+    val dataFunction = (i:Int) => i.toByte
+    val traversable = prepared.traversable.map(dataFunction)
+    val testData = prepared.testData.map(dataFunction).toArray
+    
+    val result = for {
+      api <- ByteProcessor(traversable.processor)
+      short <- api.nextShort
+      int <- api.nextInt
+      long <- api.nextLong
+    } yield (short, int,long)
+    val dataIn = new DataInputStream(new ByteArrayInputStream(testData))
+    val expectedShort = dataIn.readShort()
+    val expectedInt = dataIn.readInt()
+    val expectedLong = dataIn.readLong()
+    result.acquireAndGet{
+      case (short, int,long) => 
+      assertEquals(expectedShort,short)
+        assertEquals(expectedInt,int)
+        assertEquals(expectedLong,long)
+    }
+  }
+  
+  object ByteConverter {
+    def swap(value: Short) = {
+      val b1 = value & 0xff;
+      val b2 = (value >> 8) & 0xff;
+
+      (b1 << 8 | b2 << 0).asInstanceOf[Short];
+    }
+
+    def swap(value: Int) = {
+      val b1 = (value >> 0) & 0xff;
+      val b2 = (value >> 8) & 0xff;
+      val b3 = (value >> 16) & 0xff;
+      val b4 = (value >> 24) & 0xff;
+
+      b1 << 24 | b2 << 16 | b3 << 8 | b4 << 0;
+    }
+
+    def swap(value: Long): Long = {
+      val b1 = ((value >> 0) & 0xff).asInstanceOf[Long];
+      val b2 = ((value >> 8) & 0xff).asInstanceOf[Long];
+      val b3 = ((value >> 16) & 0xff).asInstanceOf[Long];
+      val b4 = ((value >> 24) & 0xff).asInstanceOf[Long];
+      val b5 = ((value >> 32) & 0xff).asInstanceOf[Long];
+      val b6 = ((value >> 40) & 0xff).asInstanceOf[Long];
+      val b7 = ((value >> 48) & 0xff).asInstanceOf[Long];
+      val b8 = ((value >> 56) & 0xff).asInstanceOf[Long];
+
+      b1 << 56 | b2 << 48 | b3 << 40 | b4 << 32 | b5 << 24 | b6 << 16 | b7 << 8 | b8 << 0;
+    }
+
+    def swap(value: Float): Float = {
+      val intValue = swap(java.lang.Float.floatToIntBits(value));
+
+      java.lang.Float.intBitsToFloat(intValue);
+    }
+
+    def swap(value: Double): Double = {
+      val longValue = swap(java.lang.Double.doubleToLongBits(value));
+      return java.lang.Double.longBitsToDouble(longValue);
+    }
+
+  }
+  
+  @Test
+  def processor_little_endian_byte_processor {
+    val prepared = processorTraversable(100, ())
+
+    val dataFunction = (i: Int) => i.toByte
+    val traversable = prepared.traversable.map(dataFunction)
+    val testData = prepared.testData.map(dataFunction).toArray
+
+    val result = for {
+      api <- ByteProcessor(traversable.processor)
+      littleEndianAPI = api.littleEndianAPI
+      short <- littleEndianAPI.nextShort
+      int <- littleEndianAPI.nextInt
+      long <- littleEndianAPI.nextLong
+    } yield (short, int, long)
+
+    val dataIn = new DataInputStream(new ByteArrayInputStream(testData))
+    val expectedShort = ByteConverter.swap(dataIn.readShort())
+    val expectedInt = ByteConverter.swap(dataIn.readInt())
+    val expectedLong = ByteConverter.swap(dataIn.readLong())
+    result.acquireAndGet {
+      case (short, int, long) =>
+        assertEquals(expectedShort, short)
+        assertEquals(expectedInt, int)
+        assertEquals(expectedLong, long)
+    }
+  }
+  
+  
 }

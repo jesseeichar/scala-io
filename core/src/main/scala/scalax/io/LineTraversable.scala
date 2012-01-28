@@ -83,7 +83,7 @@ private[io] class AutoCharIter(private[this] val sourceIter: CloseableIterator[C
                                private[this] val includeTerm:Boolean) extends CloseableIterator[String] {
 
   private[this] val sb = new StringBuilder
-  private[this] val iter = new SpecializedBufferedIterator(sourceIter) 
+  private[this] val iter = new CharBufferedIterator(sourceIter) 
   
   @inline
   private[this] final def getc() = {
@@ -117,4 +117,26 @@ private[io] class AutoCharIter(private[this] val sourceIter: CloseableIterator[C
     sb.toString
   }
   def doClose = sourceIter.close()
+}
+
+private class CharBufferedIterator(private[this] val sourceIter: CloseableIterator[Char]) {
+  private[this] var hd: Char = _
+  private[this] var hdDefined: Boolean = false
+
+  final def head: Char = {
+    if (!hdDefined) {
+      hd = next()
+      hdDefined = true
+    }
+    hd
+  }
+
+  final def hasNext =
+    hdDefined || sourceIter.hasNext
+
+  final def next() =
+    if (hdDefined) {
+      hdDefined = false
+      hd
+    } else sourceIter.next()
 }
