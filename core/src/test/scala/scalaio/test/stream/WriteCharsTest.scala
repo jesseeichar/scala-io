@@ -9,20 +9,20 @@
 package scalaio.test.stream
 
 import scalaio.test._
-
 import scalax.io._
 import org.junit.Test
 import org.junit.Assert._
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, PipedInputStream, PipedOutputStream}
+import java.io.OutputStreamWriter
 
 class WriteCharsTest extends AbstractWriteCharsTests {
-  def open() = {
+  def open(ca:CloseAction[java.io.Writer] = CloseAction.Noop) = {
 
     val out = new ByteArrayOutputStream()
     def in = new ByteArrayInputStream(out.toByteArray)
 
     val inResource = Resource.fromInputStream(in).reader(Codec.UTF8)
-    val outResource = Resource.fromOutputStream(out).writer(Codec.UTF8)
+    val outResource = new WriterResource(new OutputStreamWriter(out, Codec.UTF8.name), ca)
 
     (inResource, outResource)
   }

@@ -40,8 +40,11 @@ class ChannelBlockLongTraversable(blockSize: Option[Int], opener: => OpenedResou
   }
 
   override def force = new LongTraversable[ByteBlock] {
-    val data = self.iterator.foldLeft(Vector[ByteBlock]()) { (acc, next) =>
-      acc :+ next.force
+    
+    private[this] val data = self.withIterator {
+       _.foldLeft(Vector[ByteBlock]()) { (acc, next) =>
+          acc :+ next.force
+        }
     }
     
     def iterator = CloseableIterator(data.iterator)

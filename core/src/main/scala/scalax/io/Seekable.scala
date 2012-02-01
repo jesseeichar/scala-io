@@ -296,7 +296,7 @@ trait Seekable extends Input with Output {
    */
   def insert[T](position : Long, data : T)(implicit converter:OutputConverter[T]) = {
     val bytes = converter.toBytes(data)
-    if(size.forall(_ <= position)) {
+    if(position > -1 && size.forall(_ <= position)) {
       append(bytes)
     } else if (bytes.hasDefiniteSize && bytes.size <= MaxPermittedInMemory) {
         insertDataInMemory(position max 0, bytes)
@@ -540,61 +540,46 @@ trait Seekable extends Input with Output {
 
   protected def underlyingOutput: OutputResource[OutputStream] = {
     val resource = underlyingChannel(false)
-    Resource.fromOutputStream(new ChannelOutputStreamAdapter(resource.get)).appendCloseAction(_ => resource.close())
+    new OutputStreamResource(new ChannelOutputStreamAdapter(resource.get, true), CloseAction((_:Any) => resource.close()))
   }
 
-  def chars(implicit codec: Codec) = {
+  /**
+   * Open a seekableByteChannelResource to use for creating other long traversables like chars or bytes as its.
+   * 
+   * Main feature is it sets position to 0 each call so the resource will always read from 0
+   */
+  protected def toByteChannelResource(append:Boolean) = {
     def resource = {
-      val r = underlyingChannel(false)
+      val r = underlyingChannel(append)
       r.get.position(0)
       r
     }
-    Resource.fromByteChannel(resource.get).appendCloseAction(_ => resource.close()).chars(codec)
-  }
-
-  override def bytesAsInts: LongTraversable[Int] = {
-    def resource = {
-      val r = underlyingChannel(false)
-      r.get.position(0)
-      r
-    }
-    Resource.fromSeekableByteChannel(resource.get).appendCloseAction(_ => resource.close()).bytesAsInts
-  }
-
-  def bytes: LongTraversable[Byte] = {
-    def resource = {
-      val r = underlyingChannel(false)
-      r.get.position(0)
-      r
-    }
-    Resource.fromSeekableByteChannel(resource.get).appendCloseAction(_ => resource.close()).bytes
-  }
-
-  def blocks(blockSize: Option[Int] = None):LongTraversable[ByteBlock] =  {
-    def resource = {
-      val r = underlyingChannel(false)
-      r.get.position(0)
-      r
-    }
-    Resource.fromSeekableByteChannel(resource.get).appendCloseAction(_ => resource.close()).blocks(blockSize)
+    def closeAction = CloseAction((r:ByteChannel) => resource.closeAction(r))
+    new ByteChannelResource(resource.get,closeAction,() => Some(resource.get.size))
   }
   
+  override def chars(implicit codec: Codec) = toByteChannelResource(false).chars(codec)
+  override def bytesAsInts: LongTraversable[Int] = toByteChannelResource(false).bytesAsInts
+  override def bytes: LongTraversable[Byte] = toByteChannelResource(false).bytes
+  override def blocks(blockSize: Option[Int] = None):LongTraversable[ByteBlock] =  toByteChannelResource(false).blocks(blockSize)
   private def charCountToByteCount(start: Long, end: Long)(implicit codec: Codec) = {
     val encoder = codec.encoder
     val charBuffer = CharBuffer.allocate(1)
     
     val resource = underlyingChannel(false)
-    val chars = Resource.fromByteChannel(resource.get).appendCloseAction(_ => resource.close()).chars(codec)
-    val segment = chars.lslice(start, end)
+    try {
+      val chars = new SeekableByteChannelResource((_: Seq[OpenOption]) => resource.get, CloseAction.Noop, () => Some(resource.get.size), UnknownName(), None).chars(codec)
+      val segment = chars.lslice(start, end)
 
-    (0L /: segment) { (replacedInBytes, nextChar) =>
-      charBuffer.clear()
-      charBuffer.put(nextChar)
-      charBuffer.flip()
-      val encoded = encoder.encode(charBuffer)
-      val size = nextChar.toString.getBytes(codec.name).size
-      replacedInBytes + encoded.limit()
-    }
+      (0L /: segment) { (replacedInBytes, nextChar) =>
+        charBuffer.clear()
+        charBuffer.put(nextChar)
+        charBuffer.flip()
+        val encoded = encoder.encode(charBuffer)
+        val size = nextChar.toString.getBytes(codec.name).size
+        replacedInBytes + encoded.limit()
+      }
+    } finally resource.close()
   }
 }
 

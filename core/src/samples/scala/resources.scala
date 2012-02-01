@@ -6,6 +6,7 @@
  * .Net IO objects.
  * </p>
  */
+import java.io.FileInputStream
 object Resources {
 
   /**
@@ -54,7 +55,7 @@ object Resources {
     val inputStream: InputStream = new URL("http://someurl.com").openStream
     val in: InputStreamResource[InputStream] = Resource.fromInputStream(inputStream)
     val readableChannel: Resource[ReadableByteChannel] = in.readableByteChannel
-    val reader: ReaderResource[Reader] = in.reader
+    val reader: ReadCharsResource [Reader] = in.reader
 
     // get various output streams and channels
     val outputStream: FileOutputStream = new FileOutputStream("file")
@@ -104,7 +105,7 @@ object Resources {
     val resource = Resource.fromInputStream(new FileInputStream("file"))
 
     // The Resource objects have methods for converting between the common types
-    val readChars: ReaderResource[Reader] = resource.reader(Codec.UTF8)
+    val readChars: ReadCharsResource[Reader] = resource.reader(Codec.UTF8)
     val readableByteChannel: ReadableByteChannelResource[ReadableByteChannel] =
               resource.readableByteChannel
 
@@ -142,9 +143,10 @@ object Resources {
 
   /**
    * Perform additional actions when a resource is closed. One of the important features of the Scala IO is that resources are cleaned up
-   * automatically.  However occasionally one would like to perform an action on close in addition to
-   * the default closing/flushing of the resource.  When a resource is created additional close actions can be added
-   * and they will be executed just before the resource is closed.
+   * automatically.  
+   * 
+   * However occasionally one would like to perform an action on close in addition to
+   * the default closing/flushing of the resource.
    */
   def performAdditionalActionOnClose {
     import scalax.io._
@@ -174,19 +176,12 @@ object Resources {
     // we can then create a resource and pass it to the closer parameter
     // now each time resource is used (and closed) the closer will also be executed
     // just before the actual closing.
-    val resource = Resource.fromFile("file").appendCloseAction(closer)
-
-    // closeActions can also be added to an existing resource
-    // NOTE: Appended actions still are performed BEFORE
-    // resource is closed
-    resource.appendCloseAction(closerThenCloser2)
-    resource.prependCloseAction(closer2)
-
-    // The following are equivalent
-    Resource.fromFile("file").appendCloseAction(closer :+ closer2)
-    Resource.fromFile("file").appendCloseAction(closer).appendCloseAction(closer2)
-    Resource.fromFile("file").appendCloseAction (closer :+ closer2)
-
+    // <p>
+    // The normal resource factory methods do not support the close actions because
+    // closeactions is has not been shown to be a common use-case.  The correct 
+    // resource object needs to be created.
+    // </p>
+    val resource = new InputStreamResource(new FileInputStream("file"), closer)
   }
 
   /**
@@ -215,7 +210,7 @@ object Resources {
     val closeAction:CloseAction[InputStream] = CloseAction{in:InputStream => println(in.available)}
 
     //Given the previous declarations it should be obvious that the following works
-    val updatedResource:Resource[InputStream] = resource.appendCloseAction(closeAction)
+    val updatedResource:Resource[InputStream] = new InputStreamResource(new FileInputStream("file"),closeAction)
 
     // However since resource2 is a Resource[Closeable] it should be obvious that one cannot
     // add a closeAction that requires an InputStream.  so the following would fail to compile

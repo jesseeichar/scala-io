@@ -11,13 +11,15 @@ package scalaio.test.fs
 import scalax.io._
 import scalaio.test.AbstractSeekableTests
 import org.junit.Test
+import scalax.file.Path
 
-
-abstract class FsSeekableTests extends AbstractSeekableTests with Fixture {
-  def open(data : String) : Seekable = {
+abstract class FsSeekableTests extends AbstractSeekableTests[Path] with Fixture {
+  def open(data : String, closeAction:CloseAction[Path]) : Seekable = {
     val path = fixture.path
     path write data
     path
   }
+  // can't do the close action for paths so... 
+  override def correctly_closes_resources = ()
   
 }

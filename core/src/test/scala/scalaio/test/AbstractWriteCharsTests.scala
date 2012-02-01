@@ -13,13 +13,13 @@ import org.junit.Assert._
 import org.junit.{
 Test, Ignore
 }
-
 import Constants.TEXT_VALUE
+import java.io.Writer
 
 abstract class AbstractWriteCharsTests extends scalax.test.sugar.AssertionSugar {
   private final val DEFAULT_DATA = "default data"
 
-  def open(): (ReadChars, WriteChars)
+  def open(outCloser:CloseAction[Writer] = CloseAction.Noop): (ReadChars, WriteChars)
 
   @Test(timeout = 3000)
   def write_string(): Unit = {
@@ -46,11 +46,10 @@ abstract class AbstractWriteCharsTests extends scalax.test.sugar.AssertionSugar 
 
   @Test //@Ignore
   def openOutput: Unit = {
-    val (in,out0) = open()
+    var closes = 0;
+    val (in,out0) = open(outCloser = CloseAction((_:Any) => closes += 1))
     out0 match {
-      case out0:WriteCharsResource[_] =>
-        var closes = 0;
-        val out = out0.appendCloseAction(_ => closes += 1)
+      case out:WriteCharsResource[_] =>
 
         assertEquals(0,closes)
         out.write("whoop!")

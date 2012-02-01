@@ -11,18 +11,17 @@ package scalaio.test.fs
 import scalax.io._
 import org.junit.Assert._
 import org.junit.Test
-
 import scalaio.test._
-
 import java.io.{
     DataInputStream, DataOutputStream
 }
+import scalax.file.Path
 
-abstract class FsOutputTests extends AbstractOutputTests with Fixture {
+abstract class FsOutputTests extends AbstractOutputTests[Path,Path] with Fixture {
 
     final val DEFAULT_DATA = "to be overwritten"
 
-    def open() : (Input, Output) = {
+    def open(closeAction:CloseAction[Path]) : (Input, Output) = {
         val path = fixture.path
         (path, path)
     }

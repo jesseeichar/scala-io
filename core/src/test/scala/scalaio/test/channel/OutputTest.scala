@@ -16,17 +16,18 @@ import org.junit.Test
 import org.junit.Assert._
 import scalax.io._
 import java.sql.Date
-import java.nio.channels.Channels
+import java.nio.channels._
+import java.io._
 
-class OutputTest extends AbstractOutputTests {
-  def open() = {
+class OutputTest extends AbstractOutputTests[ReadableByteChannel, WritableByteChannel] {
+  def open(closeAction:CloseAction[WritableByteChannel] = CloseAction.Noop) = {
     val cache = new Array[Byte](1000)
     val oStream = new ByteArrayOutputStream()
     val out = Channels.newChannel(oStream)
     def in = Channels.newChannel(new ByteArrayInputStream(oStream.toByteArray))
 
     val inResource = Resource.fromReadableByteChannel(in)
-    val outResource = Resource.fromWritableByteChannel(out)
+    val outResource = new WritableByteChannelResource(out, closeAction)
 
     (inResource, outResource)
   }

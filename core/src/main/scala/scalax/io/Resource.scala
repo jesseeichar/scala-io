@@ -27,7 +27,8 @@ import scalax.io.support.FileUtils
 
 trait OpenedResource[+R] {
   def get:R
-  def close():List[Throwable]
+  def close():List[Throwable] = closeAction(get) 
+  def closeAction[U >: R]:CloseAction[U]
   def toSingleUseResource = new ManagedResourceOperations[R] {
     def acquireFor[B](f: (R) => B): Either[List[Throwable], B] = {
       val result = f(get)
@@ -38,11 +39,22 @@ trait OpenedResource[+R] {
     }
   }
 }
-class CloseableOpenedResource[+R <: Closeable](val get:R,closeAction:CloseAction[R]) extends OpenedResource[R]{
-  def close():List[Throwable] = (closeAction :+ CloseAction ((_:R).close()))(get)
+class CloseableOpenedResource[+R <: Closeable](val get:R,mainCloseAction:CloseAction[R]) extends OpenedResource[R]{
+  def closeAction[U >: R] = (mainCloseAction :+ CloseAction ((_:R).close())).asInstanceOf[CloseAction[U]]
 }
-class UnmanagedOpenedResource[+R](val get:R,closeAction:CloseAction[R]) extends OpenedResource[R]{
-  def close():List[Throwable] = closeAction(get)
+class UnmanagedOpenedResource[+R](val get:R) extends OpenedResource[R]{
+  def closeAction[U >: R] = CloseAction.Noop
+}
+
+/**
+ * A flag trait that all UnmanagedResources will be tagged with to differentiate from '''normal''' 
+ * Resources
+ */
+trait UnmanagedResource {
+  /**
+   * Close the resource. Since the resource is unmanaged it may need to be manually closed.
+   */
+  def close():List[Throwable]
 }
 
 /**
@@ -57,38 +69,41 @@ class UnmanagedOpenedResource[+R](val get:R,closeAction:CloseAction[R]) extends 
  * @tparam R The type of object that is managed by this resource
  * @tparam Repr The actual type of the concrete subclass
  */
-trait ResourceOps[+R, +Repr] {
+trait ResourceOps[+R, +Repr <: ResourceOps[R,Repr]] {
+   self:Repr => 
   /**
-   * Add a [[scalax.io.CloseAction]] to the front of the CloseAction queue.
+   * Create a new instance of this resource that will not close the resource after each operation.
+   * Create a Resource that will not close the stream.  The same stream will be reused for each request an never closed.  Use with care.
    *
-   * @param newAction The new action to prepend
-   * @return a new instance with the added [[scalax.io.CloseAction]]
+   * The use case would be to read from standard in:
+   *
+   * {{{
+   *    val in = Resource.fromInputStream(System.in).unmanaged.bytes
+   *    val first5 = in.take(5)
+   *    val second5 = in.take(5)
+   * }}}
+   *
+   * If the example was a managed resource Standard in would be closed after first5
+   *
+   * @return return an instance of the same type that is not managed
    */
-  def prependCloseAction[B >: R](newAction: CloseAction[B]):Repr
+  def unmanaged: Repr with UnmanagedResource
+  
+  def isManaged = !isInstanceOf[UnmanagedResource]
   /**
-   * Add a [[scalax.io.CloseAction]] to the end of the [[scalax.io.CloseAction]] queue (the last action executed).
-   *
-   * @note the actual closing of the resource is always performed after the last  action is executed
-   *
-   * @param newAction The new action to append
-   * @return a new instance with the added [[scalax.io.CloseAction]]
+   * Trait to assist converting Resource objects from one type to another
+   * 
+   * Should be used in a block as follows:
+   * 
+   * {{{
+   * if(isManaged) new OutputStreamResource(nResource,closer)
+   * else new OutputStreamResource(nResource,closer) with UnmanagedResourceAdapter
+   * }}}
    */
-  def appendCloseAction[B >: R](newAction: CloseAction[B]):Repr
+  protected trait UnmanagedResourceAdapter extends UnmanagedResource {
+      def close() = self.asInstanceOf[UnmanagedResource].close()
+    }
 
-  /**
-   * Creates a [[scalax.io.CloseAction]] from the function and passes it to prependCloseAction(CloseAction)
-   *
-   * @param newAction The new action to prepend
-   * @return a new instance with the added [[scalax.io.CloseAction]]
-   */
-  def prependCloseAction[B >: R](newAction: B => Unit):Repr = prependCloseAction(CloseAction(newAction))
-  /**
-   * Creates a [[scalax.io.CloseAction]] from the function and passes it to appendCloseAction(CloseAction)
-   *
-   * @param newAction The new action to append
-   * @return a new instance with the added [[scalax.io.CloseAction]]
-   */
-  def appendCloseAction[B >: R](newAction: B => Unit):Repr = appendCloseAction(CloseAction(newAction))
 }
 /**
  * A Resource that can be used to do IO.  Primarily it wraps objects from the java io and makes
@@ -142,25 +157,7 @@ trait Resource[+R <: Closeable] extends ManagedResourceOperations[R] with Resour
    * @return the actual resource that has been opened
    */
     def open(): OpenedResource[R]
-    
-    /**
-     * Create a new instance of this resource that will not close the resource after each operation.
-     * Create a Resource that will not close the stream.  The same stream will be reused for each request an never closed.  Use with care.
-     *
-     * The use case would be to read from standard in:
-     *
-     * {{{
-     *    val in = Resource.fromInputStream(System.in).unmanaged.bytes
-     *    val first5 = in.take(5)
-     *    val second5 = in.take(5)
-     * }}}
-     *
-     * If the example was a managed resource Standard in would be closed after first5
-     *
-     * @return return an instance of the same type that is not managed
-     */
-    def unmanaged:Resource[R]
-    
+        
     def acquireFor[B](f : R => B) : Either[List[Throwable], B] ={
       val resource = open()
 
@@ -201,7 +198,6 @@ trait InputResource[+R <: Closeable] extends Resource[R] with Input with Resourc
      * @return the [[scalax.io.InputStreamResource]](typically) version of this object.
      */
     def inputStream: InputResource[InputStream]
-
   override def copyDataTo(output: Output): Unit =
     output  match {
       case outR: OutputResource[_] =>
@@ -234,7 +230,6 @@ trait InputResource[+R <: Closeable] extends Resource[R] with Input with Resourc
     final def size : Option[Long] = sizeFunc()
     protected def sizeFunc: () => Option[Long]
 }
-
 /**
  * An object that in addition to being a resource is also a [[scalax.io.ReadChars]] Resource.
  *
@@ -277,7 +272,6 @@ trait OutputResource[+R <: Closeable] extends Resource[R] with Output with Resou
    * @return the [[scalax.io.WritableByteChannel]](typically) version of this object.
    */
   def writableByteChannel: OutputResource[WritableByteChannel]
-  
     override def doCopyFrom(input: Input): Unit =
       
     input match {
@@ -295,7 +289,6 @@ trait OutputResource[+R <: Closeable] extends Resource[R] with Output with Resou
     }
 
 }
-
 /**
  * An object that can be viewed as a Seekable object. For example
  * a FileChannel.

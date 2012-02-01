@@ -17,14 +17,14 @@ import org.junit.Assert._
 import scalax.io._
 import java.sql.Date
 
-class OutputTest extends AbstractOutputTests {
-  def open() = {
+class OutputTest extends AbstractOutputTests[ByteArrayInputStream,ByteArrayOutputStream] {
+  def open(closeAction:CloseAction[ByteArrayOutputStream] = CloseAction.Noop) = {
     val cache = new Array[Byte](1000)
     val out = new ByteArrayOutputStream()
     def in = new ByteArrayInputStream(out.toByteArray)
 
     val inResource = Resource.fromInputStream(in)
-    val outResource = Resource.fromOutputStream(out)
+    val outResource = new OutputStreamResource(out, closeAction)
 
     (inResource, outResource)
   }

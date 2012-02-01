@@ -8,7 +8,7 @@
 
 package scalax.io
 
-import java.io.Closeable
+import java.io.{Closeable, RandomAccessFile}
 import java.nio.ByteBuffer
 import java.nio.channels.{
   ByteChannel, Channel, ReadableByteChannel, WritableByteChannel
@@ -70,4 +70,11 @@ trait SeekableByteChannel extends ByteChannel
     position(mark)
     result
   }
+}
+
+object SeekableByteChannel {
+  /**
+   * Create a SeekableByteChannel from a file.  
+   */
+  def fromFile(path:String) = (opts:Seq[OpenOption]) => support.FileUtils.openChannel(new java.io.File(path), opts)
 }

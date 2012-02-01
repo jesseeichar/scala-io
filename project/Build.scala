@@ -55,7 +55,7 @@ object ScalaIoBuild extends Build {
       val mapfishRepoUrl = new java.net.URL("http://dev.mapfish.org/ivy2")
       Resolver.url("Mapfish Ivy Repository", mapfishRepoUrl)(Resolver.ivyStylePatterns)
     },
-    libraryDependencies += "com.novocode" % "junit-interface" % "0.7" % "test->default",
+    libraryDependencies += "com.novocode" % "junit-interface" % "0.8" % "test->default",
     publishArtifact in Test := true
   )
 

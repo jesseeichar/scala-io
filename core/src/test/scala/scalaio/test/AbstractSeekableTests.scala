@@ -17,13 +17,13 @@ Test, Ignore
 import Constants.TEXT_VALUE
 import org.junit.Assert._
 
-abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
+abstract class AbstractSeekableTests[Resource] extends scalax.test.sugar.AssertionSugar {
   implicit val codec = Codec.UTF8
 
   /**
    * Seekable containing TEXT_VALUE, otherwise
    */
-  def open(data: String = TEXT_VALUE): Seekable
+  def open(data: String = TEXT_VALUE, closeAction:CloseAction[Resource] = CloseAction.Noop): Seekable
 
 
   val patchParams =
@@ -243,10 +243,11 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
 
   @Test //@Ignore
   def openSeekable: Unit = {
-    var closes = 0;
-    val seekable = open() match {
+    var closes = 0
+    val seekable = open(closeAction = CloseAction((_:Any) => closes += 1)) match {
       case raw:SeekableResource[_] =>
-        val seekable = raw.appendCloseAction(_ => closes += 1)
+        closes = 0 // set to 0 because open could call closes if it seeds the resource with data using output API
+        val seekable = raw
         assertEquals(0,closes)
         seekable.write("whoop!")
         assertEquals(1, closes)
@@ -267,10 +268,12 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
   @Test //@Ignore
   def openSeekableReadAndWrite: Unit = {
     var closes = 0;
-    val seekable = open() match {
-      case raw:SeekableResource[_] =>
-        val seekable = raw.appendCloseAction(_ => closes += 1)
-
+    val ca = CloseAction{(_:Any) => 
+      closes += 1
+    }
+    val seekable = open(closeAction = ca) match {
+      case seekable:SeekableResource[_] =>
+        closes = 0 // reset here because open could increment closes 
         val data = "it is a wonderful world"
         val expectedEnd = "it is a fantastic place to be"
 
@@ -334,4 +337,51 @@ abstract class AbstractSeekableTests extends scalax.test.sugar.AssertionSugar {
     seekable.open(perform(_, "opened seekable"))
   }
 
+  @Test
+  def correctly_closes_resources {
+    var closes = 0
+    val seekable = open(closeAction = CloseAction((_:Any) => closes += 1))
+    assertEquals(0, closes)
+
+    val taken = seekable.bytes.take(1)
+    assertEquals(0, closes)
+    taken.force
+    
+    closes = 0
+    val chars = seekable.chars()
+    assertEquals(0, closes)
+    chars.force
+    chars.force
+    assertEquals(2, closes)
+    
+    closes = 0
+    val ints = seekable.bytesAsInts
+    assertEquals(0, closes)
+    ints.force
+    assertEquals(1, closes)
+    
+    closes = 0
+    seekable.byteArray
+    assertEquals(1, closes)
+    
+    closes = 0
+    val lines = seekable.lines()
+    assertEquals(0, closes)
+    lines.force
+    assertEquals(1, closes)
+    
+    closes = 0
+    val string = seekable.slurpString()
+    assertEquals(1, closes)
+
+    closes = 0
+    seekable.write("hi")
+    assertEquals(1, closes)
+    
+    closes = 0
+    val blocks = seekable.blocks()
+    assertEquals(0, closes)
+    blocks.force
+    assertEquals(1, closes)
+  }
 }

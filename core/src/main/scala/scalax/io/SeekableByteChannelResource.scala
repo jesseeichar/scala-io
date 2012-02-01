@@ -1,7 +1,8 @@
 package scalax.io
 
 import scalax.io.ResourceAdapting.{ChannelInputStreamAdapter, ChannelWriterAdapter, ChannelReaderAdapter, ChannelOutputStreamAdapter}
-import java.io.OutputStream
+import java.io.{OutputStream, Reader, Writer, InputStream}
+import java.nio.channels.{ReadableByteChannel, WritableByteChannel}
 import StandardOpenOption._
 
 /**
@@ -9,47 +10,53 @@ import StandardOpenOption._
  */
 class SeekableByteChannelResource[+A <: SeekableByteChannel] (
     opener: (Seq[OpenOption])=> A,
-    closeAction:CloseAction[A],
-    protected val sizeFunc:() => Option[Long],
-    descName:ResourceDescName,
-    protected val openOptions:Option[Seq[OpenOption]])
+    closeAction:CloseAction[A] = CloseAction.Noop,
+    protected val sizeFunc:() => Option[Long] = () => None,
+    descName:ResourceDescName = UnknownName(),
+    protected val openOptions:Option[Seq[OpenOption]] = None)
   extends SeekableResource[A]
   with ResourceOps[A, SeekableByteChannelResource[A]]  {
-
+  
+  self => 
   private def rawOpen() = opener(openOptions getOrElse ReadWrite)
   def open():OpenedResource[A] = new CloseableOpenedResource(rawOpen(),closeAction)
-  def unmanaged = new SeekableByteChannelResource[A](opener, closeAction, sizeFunc, descName, openOptions) {
-    private[this] val resource = opener(openOptions.getOrElse(StandardOpenOption.ReadWrite))
-    override def open = new UnmanagedOpenedResource(resource, closeAction)
+  def unmanaged = new SeekableByteChannelResource[A](opener, CloseAction.Noop, sizeFunc, descName, openOptions) with UnmanagedResource {
+    private[this] val resource = self.open()
+    override def open = new UnmanagedOpenedResource(resource.get)
+    def close = resource.close()
   }
-
-  def prependCloseAction[B >: A](newAction: CloseAction[B]) = new SeekableByteChannelResource(opener,newAction :+ closeAction,sizeFunc,descName,openOptions)
-  def appendCloseAction[B >: A](newAction: CloseAction[B]) = new SeekableByteChannelResource(opener,closeAction +: newAction,sizeFunc,descName,openOptions)
 
   def inputStream = {
-    def nResource = new ChannelInputStreamAdapter(rawOpen())
+    def nResource = new ChannelInputStreamAdapter(rawOpen(), isManaged)
     val closer = ResourceAdapting.closeAction(closeAction)
-    new InputStreamResource(nResource,closer,sizeFunc,descName)
+    if(isManaged) new InputStreamResource(nResource,closer,sizeFunc,descName)
+    else new InputStreamResource(nResource,closer,sizeFunc,descName) with UnmanagedResourceAdapter
   }
   def outputStream = {
-    def nResource = new ChannelOutputStreamAdapter(rawOpen())
+    def nResource = new ChannelOutputStreamAdapter(rawOpen(), isManaged)
     val closer = ResourceAdapting.closeAction(closeAction)
-    Resource.fromOutputStream(nResource).appendCloseAction(closer)
+    new OutputStreamResource(nResource, closer)
   }
   def reader(implicit sourceCodec: Codec) = {
-    def nResource = new ChannelReaderAdapter(rawOpen(),sourceCodec)
+    def nResource = new ChannelReaderAdapter(rawOpen(),sourceCodec, isManaged)
     val closer = ResourceAdapting.closeAction(closeAction)
-    Resource.fromReader(nResource).appendCloseAction(closer)
+    if(isManaged) new ReaderResource(nResource, closer)
+    else new ReaderResource(nResource, closer) with UnmanagedResourceAdapter
   }
   def writer(implicit sourceCodec: Codec) = {
-    def nResource = new ChannelWriterAdapter(rawOpen(),sourceCodec)
+    def nResource = new ChannelWriterAdapter(rawOpen(),sourceCodec, isManaged)
     val closer = ResourceAdapting.closeAction(closeAction)
-    Resource.fromWriter(nResource).appendCloseAction(closer)
+    if(isManaged) new WriterResource(nResource, closer)
+    else new WriterResource(nResource, closer) with UnmanagedResourceAdapter
   }
-  def writableByteChannel = Resource.fromWritableByteChannel(rawOpen()).appendCloseAction(closeAction)
-  def readableByteChannel = new ReadableByteChannelResource(rawOpen(),closeAction,sizeFunc,descName)
-  def byteChannel = new ByteChannelResource(rawOpen(),closeAction,sizeFunc)
-
+  def writableByteChannel = 
+    if(isManaged) new WritableByteChannelResource(rawOpen(), closeAction)
+    else new WritableByteChannelResource(rawOpen(), closeAction) with UnmanagedResourceAdapter
+    
+  def readableByteChannel = 
+    if(isManaged) new ReadableByteChannelResource(rawOpen(),closeAction,sizeFunc,descName)
+    else new ReadableByteChannelResource(rawOpen(),closeAction,sizeFunc,descName) with UnmanagedResourceAdapter
+  
   protected override def underlyingChannel(append:Boolean) = {
     val resource:A = append match {
       case true =>

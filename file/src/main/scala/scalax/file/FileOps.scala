@@ -168,34 +168,15 @@ abstract class FileOps extends Seekable {
 
   // required methods for Input trait
   override def chars(implicit codec: Codec): LongTraversable[Char] = inputStream().chars(codec)
-  /*  protected def assertExists:Unit
-  override def bytesAsInts:ResourceView[Int] = {assertExists; super[Seekable].bytesAsInts}
-  override def bytes:ResourceView[Byte] = {assertExists; super[Seekable].bytes}*/
 
-  override def bytesAsInts: LongTraversable[Int] = {
+  override protected def toByteChannelResource(append:Boolean) = {
     def resource = {
       val r = channel(Read).open
       r.get.position(0)
       r
     }
-    Resource.fromSeekableByteChannel(resource.get).appendCloseAction(_ => resource.close()).bytesAsInts
-  }
-
-  override def bytes: LongTraversable[Byte] = {
-    def resource = {
-      val r = channel(Read).open
-      r.get.position(0)
-      r
-    }
-    Resource.fromSeekableByteChannel(resource.get).appendCloseAction(_ => resource.close()).bytes
-  }
-  override def blocks(blockSize: Option[Int] = None) =  {
-    def resource = {
-      val r = channel(Read).open
-      r.get.position(0)
-      r
-    }
-    Resource.fromSeekableByteChannel(resource.get).appendCloseAction(_ => resource.close()).blocks(blockSize)
+    def closeAction = CloseAction((r:ByteChannel) => resource.closeAction(r))
+    new ByteChannelResource(resource.get,closeAction,() => Some(resource.get.size))    
   }
 
   // required method for Output trait

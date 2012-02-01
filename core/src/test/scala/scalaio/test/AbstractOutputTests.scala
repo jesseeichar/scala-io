@@ -16,11 +16,11 @@ Test, Ignore
 
 import Constants.TEXT_VALUE
 
-abstract class AbstractOutputTests extends scalax.test.sugar.AssertionSugar {
+abstract class AbstractOutputTests[InResource, OutResource] extends scalax.test.sugar.AssertionSugar {
   private final val DEFAULT_DATA = "default data"
   implicit val codec = Codec.UTF8
 
-  def open(): (Input, Output)
+  def open(closeAction:CloseAction[OutResource] = CloseAction.Noop): (Input, Output)
 
   @Test //@Ignore
   def write_bytes(): Unit = {
@@ -78,12 +78,14 @@ abstract class AbstractOutputTests extends scalax.test.sugar.AssertionSugar {
     assertEquals(DEFAULT_DATA + "-" + DEFAULT_DATA + "-" + DEFAULT_DATA, input2.slurpString)
   }
 
-  @Test(timeout=3000L)
+  @Test//(timeout=3000L)
   def open_multiple_writes {
     val (input, output) = open()
     val line1 = "line1"
     val line2 = "line2"
-    output.openOutput{ out =>
+    for{
+      out <- output.outputProcessor
+    } {
       out.write(line1)
       out.write(line2)
     }
@@ -92,21 +94,20 @@ abstract class AbstractOutputTests extends scalax.test.sugar.AssertionSugar {
 
   @Test //@Ignore
   def openOutput: Unit = {
-    val (in,out0) = open()
-    out0 match {
-      case out0:OutputResource[_] =>
-        var closes = 0;
-        val out = out0.appendCloseAction(_ => closes += 1)
+          var closes = 0;
+    val (in,out) = open(CloseAction((c:Any) => closes += 1))
+    out match {
+      case out:OutputResource[_] =>
 
         assertEquals(0,closes)
         out.write("whoop!")
         assertEquals(1,closes)
 
-        out.openOutput(opened => {
+        for (opened <- out.outputProcessor) {
           opened.write("hello")
           opened.write(" ")
           opened.write("world")
-        })
+        }
         assertEquals(2,closes)
         assertEquals("whoop!hello world",in.slurpString)
       case _ => ()

@@ -64,7 +64,7 @@ private[file] trait DefaultFileOps {
           override def close = {}
         }
 
-        def close(): List[Throwable] = Nil
+        override def closeAction[U >: SeekableFileChannel]:CloseAction[U] = CloseAction.Noop
       }
 
     }

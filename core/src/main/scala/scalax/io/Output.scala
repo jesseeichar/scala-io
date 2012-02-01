@@ -48,7 +48,8 @@ trait Output {
    * @param f the function to execute on the new Output instance (which uses a single connection)
    * @return the result of the function
    */
-  def openOutput[U](f:Output=> U):U = {
+  def outputProcessor = new processing.OutputProcessor(underlyingOutput)
+  /*def openOutput[U](f:Output=> U):U = {
     underlyingOutput.acquireAndGet {out =>
       val nonClosingOutput:Output = new OutputStreamResource[OutputStream](null,Noop) {
         val instance = new OpenedResource[OutputStream]{
@@ -61,7 +62,7 @@ trait Output {
       }
       f(nonClosingOutput)
     }
-  }
+  }*/
 
   /**
    * Write data to the underlying object.  Each time write is called the resource is reopened, in the case of a

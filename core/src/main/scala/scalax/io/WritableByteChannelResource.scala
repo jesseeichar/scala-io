@@ -9,29 +9,30 @@ import scalax.io.ResourceAdapting.{ChannelOutputStreamAdapter, ChannelWriterAdap
  */
 class WritableByteChannelResource[+A <: WritableByteChannel] (
     opener: => A,
-    closeAction:CloseAction[A])
+    closeAction:CloseAction[A] = CloseAction.Noop)
   extends OutputResource[A]
   with ResourceOps[A, WritableByteChannelResource[A]]  {
 
+  self =>
   def open():OpenedResource[A] = new CloseableOpenedResource(opener,closeAction)
-  def unmanaged = new WritableByteChannelResource[A](opener, closeAction) {
-    private[this] val resource = opener
-    override def open = new UnmanagedOpenedResource(resource, closeAction)
+  def unmanaged = new WritableByteChannelResource[A](opener, CloseAction.Noop)  with UnmanagedResource {
+    private[this] val resource = self.open
+    override def open = new UnmanagedOpenedResource(resource.get)
+    def close() = resource.close()
   }
 
-  def prependCloseAction[B >: A](newAction: CloseAction[B]) = new WritableByteChannelResource(opener,newAction :+ closeAction)
-  def appendCloseAction[B >: A](newAction: CloseAction[B]) = new WritableByteChannelResource(opener,closeAction +: newAction)
-
   def outputStream = {
-    def nResource = new ChannelOutputStreamAdapter(opener)
+    def nResource = new ChannelOutputStreamAdapter(opener, isManaged)
     val closer = ResourceAdapting.closeAction(closeAction)
-    Resource.fromOutputStream(nResource).appendCloseAction(closer)
+    if(isManaged) new OutputStreamResource(nResource, closer)
+    else new OutputStreamResource(nResource, closer) with UnmanagedResourceAdapter
   }
   def underlyingOutput = outputStream
   def writer(implicit sourceCodec: Codec) = {
-    def nResource = new ChannelWriterAdapter(opener,sourceCodec)
+    def nResource = new ChannelWriterAdapter(opener,sourceCodec, isManaged)
     val closer = ResourceAdapting.closeAction(closeAction)
-    Resource.fromWriter(nResource).appendCloseAction(closer)
+    if(isManaged) new WriterResource(nResource, closer)
+    else new WriterResource(nResource, closer) with UnmanagedResourceAdapter
   }
   def writableByteChannel = this
 }

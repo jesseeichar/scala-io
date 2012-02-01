@@ -68,7 +68,7 @@ object MoreOutputExamples {
     // underlying resource is a SocketOutputStream then
     // the socket connection will be opened twice and
     // and both lines will be sent to the server
-    output.openOutput {out =>
+    for(out <- output.outputProcessor) {
       out.write("first write\n")
       out.write("second write\n")
     }

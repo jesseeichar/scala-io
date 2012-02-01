@@ -159,7 +159,7 @@ object BasicIO {
     val chars: LongTraversable[Char] = in.chars(Codec("UTF8"))
 
     // create a ReadChars so that Codec only needs to be specified once
-    val readChars: ReaderResource[Reader] = in.reader(Codec.ISO8859)
+    val readChars: ReadCharsResource[Reader] = in.reader(Codec.ISO8859)
     val string2:String = readChars.slurpString
     val chars2: LongTraversable[Char] = readChars.chars
 
@@ -168,7 +168,7 @@ object BasicIO {
 
     val string3:String = in.slurpString
     val chars3: LongTraversable[Char] = in.chars
-    val readChars2: ReaderResource[Reader] = in.reader
+    val readChars2: ReadCharsResource[Reader] = in.reader
 
   }
 
