@@ -44,6 +44,7 @@ object Resources {
    */
   def createResources {
     import scalax.io._
+    import scalax.io.managed._
     import java.io._
     import java.nio.channels._
     import java.net.URL
@@ -99,6 +100,7 @@ object Resources {
    */
   def usingIoResources {
     import scalax.io._
+    import scalax.io.managed._
     import java.io._
     import java.nio.channels._
 
@@ -132,12 +134,12 @@ object Resources {
    * the term Peristent.  For example fromUnmanagedStream</p>
    */
   def createResourcesThatArentClosed {
-    import scalax.io.{Resource, InputStreamResource, OutputStreamResource, WriterResource}
+    import scalax.io.{Resource, InputResource, OutputResource, WriteCharsResource}
     import java.io.{InputStream, OutputStream, OutputStreamWriter, Writer}
     
-    val stdIn:InputStreamResource[InputStream] = Resource.fromInputStream(System.in).unmanaged
-    val stdOut:OutputStreamResource[OutputStream] = Resource.fromOutputStream(System.out).unmanaged
-    val stdErr:WriterResource[Writer] = Resource.fromWriter(new OutputStreamWriter(System.err)).unmanaged
+    val stdIn:InputResource[InputStream] = Resource.fromInputStream(System.in).unmanaged
+    val stdOut:OutputResource[OutputStream] = Resource.fromOutputStream(System.out).unmanaged
+    val stdErr:WriteCharsResource[Writer] = Resource.fromWriter(new OutputStreamWriter(System.err)).unmanaged
 
   }
 
@@ -150,6 +152,7 @@ object Resources {
    */
   def performAdditionalActionOnClose {
     import scalax.io._
+    import scalax.io.managed.InputStreamResource
 
     // a close action can be created by passing a function to execute
     // to the Closer object's apply method
@@ -194,6 +197,7 @@ object Resources {
    */
   def whyAreCloseActionsContravariant {
     import scalax.io._
+    import scalax.io.managed._
     import java.io._
 
     // Since CloseAction is Defined as CloseAction[-A], the following compiles

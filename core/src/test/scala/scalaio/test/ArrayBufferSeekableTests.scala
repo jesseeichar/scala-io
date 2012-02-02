@@ -4,6 +4,7 @@ import collection.mutable.ArrayBuffer
 import scalax.io.{Codec, Resource, ArrayBufferSeekableChannel, Seekable}
 import scalax.io.StandardOpenOption.ReadWrite
 import scalax.io._
+import scalax.io.managed.SeekableByteChannelResource
 
 class OpenableArrayBufferSeekableTest extends AbstractSeekableTests[SeekableByteChannel] {
   def open(data: String, closeAction:CloseAction[SeekableByteChannel] = CloseAction.Noop) = {

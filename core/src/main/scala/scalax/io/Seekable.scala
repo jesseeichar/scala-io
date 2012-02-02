@@ -18,6 +18,7 @@ import StandardOpenOption._
 import java.nio.channels.{FileChannel, ByteChannel, WritableByteChannel}
 import java.io.{OutputStream, RandomAccessFile, File}
 import scalax.io.ResourceAdapting.ChannelOutputStreamAdapter
+import scalax.io.managed.{SeekableByteChannelResource, OutputStreamResource, ByteChannelResource}
 
 /**
  * A strategy trait used with the Seekable.patch to control how data is

@@ -3,6 +3,7 @@
  * is given a Java library that requires a InputStream, Reader, Writer, etc... what are some of
  * the strategies that can be used to obtain the underlying Java resource for the Java library.
  */
+import scalax.io.managed.SeekableByteChannelResource
 object JavaInterop {
 
   /**

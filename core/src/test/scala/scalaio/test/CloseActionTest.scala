@@ -13,6 +13,7 @@ import scalax.test.sugar._
 import org.junit.Assert._
 import org.junit.Test
 import java.io.InputStream
+import scalax.io.managed.InputStreamResource
 
 class CloseActionTest extends AssertionSugar with IOSugar {
   implicit val codec = Codec.UTF8

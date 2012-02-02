@@ -8,6 +8,7 @@
 
 package scalax.io
 import java.io.Reader
+import scalax.io.managed.ReaderResource
 
 
 class ReaderResourceTraversableTest extends ResourceTraversableTest {

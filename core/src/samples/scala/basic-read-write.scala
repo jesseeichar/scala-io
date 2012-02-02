@@ -150,8 +150,9 @@ object BasicIO {
    */
   def usingCodecs {
     import scalax.io._
+    import scalax.io.managed._
     import java.io._
-
+    
     val in: InputStreamResource[FileInputStream] = Resource.fromInputStream(new FileInputStream("file"))
 
     // declare the Codec explicitly
@@ -192,6 +193,7 @@ object BasicIO {
    */
   def addAllBytes{
     import scalax.io._
+    import scalax.io.managed._
     import java.io.InputStream
     import java.net.URL
 
@@ -212,6 +214,7 @@ object BasicIO {
 
     // first load as strings and remove vowels
     import scalax.io._
+    import scalax.io.managed._
     import Resource._
     import java.net.URL
     import java.io.InputStream

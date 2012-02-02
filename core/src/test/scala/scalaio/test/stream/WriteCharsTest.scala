@@ -14,6 +14,7 @@ import org.junit.Test
 import org.junit.Assert._
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, PipedInputStream, PipedOutputStream}
 import java.io.OutputStreamWriter
+import scalax.io.managed.WriterResource
 
 class WriteCharsTest extends AbstractWriteCharsTests {
   def open(ca:CloseAction[java.io.Writer] = CloseAction.Noop) = {

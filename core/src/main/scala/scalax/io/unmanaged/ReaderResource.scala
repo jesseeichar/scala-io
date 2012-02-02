@@ -1,4 +1,5 @@
 package scalax.io
+package unmanaged
 
 import java.io.{Reader, BufferedReader}
 
@@ -6,19 +7,17 @@ import java.io.{Reader, BufferedReader}
  * A ManagedResource for accessing and using Readers.  Class can be created using the [[scalax.io.Resource]] object.
  */
 class ReaderResource[+A <: Reader] (
-    opener: => A,
+    resource: A,
     closeAction:CloseAction[A] = CloseAction.Noop,
     descName:ResourceDescName = UnknownName())
   extends ReadCharsResource[A]
-  with ResourceOps[A, ReaderResource[A]] {
+  with ResourceOps[A, ReaderResource[A]]
+  with UnmanagedResource {
   
   self =>
-  def open():OpenedResource[A] = new CloseableOpenedResource(opener,closeAction)
-  def unmanaged = new ReaderResource[A](opener, CloseAction.Noop, descName) with UnmanagedResource {
-    private[this] val resource = self.open
-    override def open = new UnmanagedOpenedResource(resource.get)
-    def close() = resource.close()
-  }
+  override def open():OpenedResource[A] = new UnmanagedOpenedResource(resource)
+  override def close() = new CloseableOpenedResource(open.get, closeAction).close()
+  override def unmanaged = this
 
   override def chars : LongTraversable[Char]= ResourceTraversable.readerBased(this.open)
 

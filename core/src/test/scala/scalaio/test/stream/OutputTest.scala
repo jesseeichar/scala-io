@@ -16,6 +16,7 @@ import org.junit.Test
 import org.junit.Assert._
 import scalax.io._
 import java.sql.Date
+import scalax.io.managed.OutputStreamResource
 
 class OutputTest extends AbstractOutputTests[ByteArrayInputStream,ByteArrayOutputStream] {
   def open(closeAction:CloseAction[ByteArrayOutputStream] = CloseAction.Noop) = {

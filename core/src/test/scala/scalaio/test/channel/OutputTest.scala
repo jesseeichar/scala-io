@@ -18,6 +18,7 @@ import scalax.io._
 import java.sql.Date
 import java.nio.channels._
 import java.io._
+import scalax.io.managed.WritableByteChannelResource
 
 class OutputTest extends AbstractOutputTests[ReadableByteChannel, WritableByteChannel] {
   def open(closeAction:CloseAction[WritableByteChannel] = CloseAction.Noop) = {

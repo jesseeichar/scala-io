@@ -1,4 +1,5 @@
 package scalax.io
+package unmanaged
 
 import java.io.BufferedInputStream
 import java.nio.channels.{Channels, ReadableByteChannel}
@@ -10,31 +11,27 @@ import java.io.InputStream
  * A ManagedResource for accessing and using ByteChannels.  Class can be created using the [[scalax.io.Resource]] object.
  */
 class ReadableByteChannelResource[+A <: ReadableByteChannel] (
-    opener: => A,
+    resource: A,
     closeAction:CloseAction[A] = CloseAction.Noop,
-    protected val sizeFunc:() => Option[Long] = () => None,
     descName:ResourceDescName = UnknownName())
   extends InputResource[A]
-  with ResourceOps[A, ReadableByteChannelResource[A]] {
+  with ResourceOps[A, ReadableByteChannelResource[A]]
+  with UnmanagedResource {
   self => 
-  def open():OpenedResource[A] = new CloseableOpenedResource(opener,closeAction)
-  def unmanaged = new ReadableByteChannelResource[A](opener, CloseAction.Noop, sizeFunc, descName) with UnmanagedResource {
-    private[this] val resource = self.open
-    override def open = new UnmanagedOpenedResource(resource.get)
-    def close() = resource.close()
-  }
-
+  override def open():OpenedResource[A] = new UnmanagedOpenedResource(resource)
+  override def close() = new CloseableOpenedResource(open.get, closeAction).close()
+  override def unmanaged = this
+  protected def sizeFunc = () => None
+  
   def inputStream:InputResource[InputStream] = {
-    def nResource = new ChannelInputStreamAdapter(opener, isManaged)
+    def nResource = new ChannelInputStreamAdapter(resource, false)
     val closer = ResourceAdapting.closeAction(closeAction)
-    if(isManaged) new InputStreamResource(nResource, closer, sizeFunc,descName)
-    else new InputStreamResource(nResource, closer, sizeFunc,descName) with UnmanagedResourceAdapter
+    new InputStreamResource(nResource, closer, descName)
   }
   def reader(implicit sourceCodec: Codec) = {
-    def nResource = new ChannelReaderAdapter(opener,sourceCodec, isManaged)
+    def nResource = new ChannelReaderAdapter(resource,sourceCodec, false)
     val closer = ResourceAdapting.closeAction(closeAction)
-    if(isManaged) new ReaderResource(nResource, closer)
-    else new ReaderResource(nResource, closer) with UnmanagedResourceAdapter
+    new ReaderResource(nResource, closer)
   }
   def readableByteChannel:InputResource[ReadableByteChannel] = this
   override def bytesAsInts = ResourceTraversable.byteChannelBased[Byte,Int](this.open, sizeFunc, initialConv = ResourceTraversable.toIntConv)

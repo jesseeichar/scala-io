@@ -13,6 +13,7 @@ import scala.collection.Traversable
 import scalax.io.CloseAction.Noop
 import java.io._
 import collection.immutable.StringLike
+import scalax.io.managed.WriterResource
 
 /**
  * A trait for objects that can have expect to have characters written to them. For example a

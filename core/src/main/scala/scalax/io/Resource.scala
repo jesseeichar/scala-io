@@ -14,16 +14,17 @@ import java.nio.channels.{
   Channels
 }
 import java.io._
-import nio.SeekableFileChannel
-import java.net.{URLConnection, URL}
-import scalax.io.CloseAction._
-import StandardOpenOption._
-import collection.immutable.List._
-import util.control.Exception
 import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
-import scalax.io.extractor._
-import scalax.io.support.FileUtils
+import nio.SeekableFileChannel
+import java.net.{URLConnection, URL}
+import CloseAction._
+import StandardOpenOption._
+import managed._
+import collection.immutable.List._
+import util.control.Exception
+import extractor._
+import support.FileUtils
 
 trait OpenedResource[+R] {
   def get:R
@@ -69,8 +70,7 @@ trait UnmanagedResource {
  * @tparam R The type of object that is managed by this resource
  * @tparam Repr The actual type of the concrete subclass
  */
-trait ResourceOps[+R, +Repr <: ResourceOps[R,Repr]] {
-   self:Repr => 
+trait ResourceOps[+R, +UnmanagedType] {
   /**
    * Create a new instance of this resource that will not close the resource after each operation.
    * Create a Resource that will not close the stream.  The same stream will be reused for each request an never closed.  Use with care.
@@ -87,23 +87,8 @@ trait ResourceOps[+R, +Repr <: ResourceOps[R,Repr]] {
    *
    * @return return an instance of the same type that is not managed
    */
-  def unmanaged: Repr with UnmanagedResource
+  def unmanaged: UnmanagedType with UnmanagedResource
   
-  def isManaged = !isInstanceOf[UnmanagedResource]
-  /**
-   * Trait to assist converting Resource objects from one type to another
-   * 
-   * Should be used in a block as follows:
-   * 
-   * {{{
-   * if(isManaged) new OutputStreamResource(nResource,closer)
-   * else new OutputStreamResource(nResource,closer) with UnmanagedResourceAdapter
-   * }}}
-   */
-  protected trait UnmanagedResourceAdapter extends UnmanagedResource {
-      def close() = self.asInstanceOf[UnmanagedResource].close()
-    }
-
 }
 /**
  * A Resource that can be used to do IO.  Primarily it wraps objects from the java io and makes

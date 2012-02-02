@@ -1,5 +1,6 @@
 <ul>
-	<li>New options for creating paths to reduce verbosity.  Now:  Path("a/b/c",'/') will create a path by splitting the string with the separator and using the resulting parts as path segments</li>
+	<li>New options for creating paths to reduce verbosity.  Now:  Path("a/b/c",'/') will create a path by splitting the string with the separator and using the resulting parts as path segments.  I recommend looking at the new documentation of Path and Filesystem.</li>
 	<li>New API for processing Input objects.</li>
 	<li>Options to create Resources that don't close underlying resource.  For example if Standard In is to be processed, the stream should not be closed</li>
+	<li>Replaced openOutput, openSeekable, etc... with processors so read write is uniform</li>
 </ul>

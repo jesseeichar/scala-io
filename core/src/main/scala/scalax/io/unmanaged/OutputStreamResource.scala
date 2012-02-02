@@ -1,4 +1,5 @@
 package scalax.io
+package unmanaged
 
 import java.io.{OutputStream, BufferedOutputStream, Writer, OutputStreamWriter}
 import java.nio.channels.Channels
@@ -8,17 +9,15 @@ import scalax.io.ResourceAdapting.WritableChannelAdapter
  * A ManagedResource for accessing and using OutputStreams.  Class can be created using the [[scalax.io.Resource]] object.
  */
 class OutputStreamResource[+A <: OutputStream] (
-    opener: => A,
+    resource: A,
     closeAction:CloseAction[A]=CloseAction.Noop)
   extends OutputResource[A]
-  with ResourceOps[A, OutputStreamResource[A]] {
+  with ResourceOps[A, OutputStreamResource[A]]
+  with UnmanagedResource {
     self => 
-  def open(): OpenedResource[A] = new CloseableOpenedResource(opener,closeAction)
-  def unmanaged = new OutputStreamResource[A](opener, CloseAction.Noop) with UnmanagedResource {
-    private[this] val resource = self.open
-    override def open = new UnmanagedOpenedResource(resource.get)
-    def close() = resource.close()
-  }
+  override def open():OpenedResource[A] = new UnmanagedOpenedResource(resource)
+  override def close() = new CloseableOpenedResource(open.get, closeAction).close()
+  override def unmanaged = this
 
   def outputStream = this
   def underlyingOutput = this
@@ -30,13 +29,11 @@ class OutputStreamResource[+A <: OutputStream] (
       }
     }
     val closer = ResourceAdapting.closeAction(closeAction)
-    if(isManaged) new WriterResource(nResource, closer)
-    else new WriterResource(nResource, closer) with UnmanagedResourceAdapter
+    new WriterResource(nResource, closer)
   }
   def writableByteChannel = {
-    val nResource = new WritableChannelAdapter(opener)
+    val nResource = new WritableChannelAdapter(resource)
     val closer = ResourceAdapting.closeAction(closeAction)
-    if(isManaged) new WritableByteChannelResource(nResource, closer)
-    else new WritableByteChannelResource(nResource, closer) with UnmanagedResourceAdapter
+    new WritableByteChannelResource(nResource, closer)
   }
 }

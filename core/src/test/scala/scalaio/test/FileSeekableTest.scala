@@ -5,6 +5,7 @@ import org.junit.rules.TemporaryFolder
 import org.junit.{ After, Before }
 import java.io.{ RandomAccessFile, File }
 import scalax.io._
+import scalax.io.managed.SeekableByteChannelResource
 
 abstract class AbstractFileSeekableTest extends AbstractSeekableTests[SeekableByteChannel] {
   var folder: TemporaryFolder = _
