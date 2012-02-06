@@ -50,7 +50,7 @@ trait WriteChars {
    */
   def open[U](f:WriteChars=> U):U = {
     writer.acquireAndGet {out =>
-      val nonClosingOutput:WriteChars = new WriterResource[Writer](null,Noop) {
+      val nonClosingOutput:WriteChars = new WriterResource[Writer](null,writer.context) {
         val instance = new OpenedResource[Writer]{
           def closeAction[U >: Writer] = CloseAction.Noop
           val get = new FilterWriter(out){

@@ -22,9 +22,6 @@ abstract class AbstractFileSeekableTest extends AbstractSeekableTests[SeekableBy
   }
   protected def openResource(closeAction:CloseAction[SeekableByteChannel]): Seekable
   def canAddCloseAction = false
-  override def correctly_closes_resources : Unit = if(canAddCloseAction) super.openSeekableReadAndWrite else ()
-  override def openSeekableReadAndWrite: Unit = if(canAddCloseAction) super.openSeekableReadAndWrite else ()
-  override def openSeekable: Unit = if(canAddCloseAction) super.openSeekable else ()
   def open(data: String, closeAction:CloseAction[SeekableByteChannel] = CloseAction.Noop) = {
     folder.delete()
     folder.create()
@@ -36,20 +33,20 @@ abstract class AbstractFileSeekableTest extends AbstractSeekableTests[SeekableBy
 
 class FileStringSeekableTest extends AbstractFileSeekableTest {
   def openResource(closeAction:CloseAction[SeekableByteChannel]): Seekable = {
-    Resource.fromFile(new File(folder.getRoot, "testfile").getAbsolutePath)
+    Resource.fromFile(new File(folder.getRoot, "testfile").getAbsolutePath).updateContext(_.copy(closeAction=closeAction))
   }
 }
 
 class FileSeekableTest extends AbstractFileSeekableTest {
   def openResource(closeAction:CloseAction[SeekableByteChannel]): Seekable = {
-    Resource.fromFile(new File(folder.getRoot, "testfile"))
+    Resource.fromFile(new File(folder.getRoot, "testfile")).updateContext(_.copy(closeAction=closeAction))
   }
 }
 
 class RandomAccessFileSeekableTest extends AbstractFileSeekableTest {
   def openResource(closeAction:CloseAction[SeekableByteChannel]): Seekable = {
     val file = new File(folder.getRoot, "testfile")
-    Resource.fromRandomAccessFile(new RandomAccessFile(file, "rw"))
+    Resource.fromRandomAccessFile(new RandomAccessFile(file, "rw")).updateContext(_.copy(closeAction=closeAction))
   }
 }
 
@@ -57,6 +54,6 @@ class StraightCreationSeekableTest extends AbstractFileSeekableTest {
   override def canAddCloseAction = true
   def openResource(closeAction:CloseAction[SeekableByteChannel]): Seekable = {
     def channel = SeekableByteChannel.fromFile(new File(folder.getRoot, "testfile").getAbsolutePath)
-    new SeekableByteChannelResource(channel, closeAction, () => Some(channel(List(StandardOpenOption.Read)).size))
+    Resource.fromSeekableByteChannel(channel).updateContext(_.copy(closeAction=closeAction))
   }
 }

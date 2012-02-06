@@ -145,10 +145,9 @@ object Resources {
 
   /**
    * Perform additional actions when a resource is closed. One of the important features of the Scala IO is that resources are cleaned up
-   * automatically.  
-   * 
-   * However occasionally one would like to perform an action on close in addition to
-   * the default closing/flushing of the resource.
+   * automatically.  However occasionally one would like to perform an action on close in addition to
+   * the default closing/flushing of the resource.  This can be done by updating the ResourceContext of
+   * the Resource with a new CloseAction or multiple CloseActions
    */
   def performAdditionalActionOnClose {
     import scalax.io._
@@ -179,12 +178,12 @@ object Resources {
     // we can then create a resource and pass it to the closer parameter
     // now each time resource is used (and closed) the closer will also be executed
     // just before the actual closing.
-    // <p>
-    // The normal resource factory methods do not support the close actions because
-    // closeactions is has not been shown to be a common use-case.  The correct 
-    // resource object needs to be created.
-    // </p>
-    val resource = new InputStreamResource(new FileInputStream("file"), closer)
+    val resource = Resource.fromFile("file").updateContext(_.copy(closeAction = closer))
+    
+    // if the resource was not created in the current code block it is possible that 
+    // there is already a close action.  One can update the close action instead of 
+    // replacing it 
+    //resource.updateContext(_.updateCloseAction(_ :+ closeAction2))
   }
 
   /**
@@ -214,7 +213,7 @@ object Resources {
     val closeAction:CloseAction[InputStream] = CloseAction{in:InputStream => println(in.available)}
 
     //Given the previous declarations it should be obvious that the following works
-    val updatedResource:Resource[InputStream] = new InputStreamResource(new FileInputStream("file"),closeAction)
+    val updatedResource:Resource[InputStream] = Resource.fromInputStream(new FileInputStream("file")).updateContext(_.copy(closeAction = closeAction))
 
     // However since resource2 is a Resource[Closeable] it should be obvious that one cannot
     // add a closeAction that requires an InputStream.  so the following would fail to compile

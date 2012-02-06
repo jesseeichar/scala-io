@@ -28,6 +28,7 @@ import support.FileUtils
 
 trait OpenedResource[+R] {
   def get:R
+  def context:ResourceContext[R]
   def close():List[Throwable] = closeAction(get) 
   def closeAction[U >: R]:CloseAction[U]
   def toSingleUseResource = new ManagedResourceOperations[R] {
@@ -40,10 +41,10 @@ trait OpenedResource[+R] {
     }
   }
 }
-class CloseableOpenedResource[+R <: Closeable](val get:R,mainCloseAction:CloseAction[R]) extends OpenedResource[R]{
-  def closeAction[U >: R] = (mainCloseAction :+ CloseAction ((_:R).close())).asInstanceOf[CloseAction[U]]
+class CloseableOpenedResource[+R <: Closeable](val get:R,resourceContext:ResourceContext[R]) extends OpenedResource[R] {
+  def closeAction[U >: R] = (context.closeAction :+ CloseAction ((_:R).close())).asInstanceOf[CloseAction[U]]
 }
-class UnmanagedOpenedResource[+R](val get:R) extends OpenedResource[R]{
+class UnmanagedOpenedResource[+R](val get:R,val context:ResourceContext[R]) extends OpenedResource[R]{
   def closeAction[U >: R] = CloseAction.Noop
 }
 
@@ -70,7 +71,21 @@ trait UnmanagedResource {
  * @tparam R The type of object that is managed by this resource
  * @tparam Repr The actual type of the concrete subclass
  */
-trait ResourceOps[+R, +UnmanagedType] {
+trait ResourceOps[+R, +UnmanagedType, +Repr] {
+  /**
+   * Get the Resource context associated with this Resource instance.  
+   * 
+   * @note as Resources are immutable objects a given Resource instance will always be associated with
+   * the same ResourceContext
+   * 
+   * @return the associated ResourceContext
+   */
+  def context:ResourceContext[R]
+  /**
+   * Create a Resource instance that is configured with the new ResourceContext 
+   */
+  def newContext[U >: R](newContext:ResourceContext[U]):Repr
+  def updateContext[U >: R](f:ResourceContext[R] => ResourceContext[U]) = newContext(f(context))
   /**
    * Create a new instance of this resource that will not close the resource after each operation.
    * Create a Resource that will not close the stream.  The same stream will be reused for each request an never closed.  Use with care.
@@ -112,7 +127,7 @@ trait ResourceOps[+R, +UnmanagedType] {
  * @author  Jesse Eichar
  * @since   1.0
  */
-trait Resource[+R <: Closeable] extends ManagedResourceOperations[R] with ResourceOps[R, Resource[R]]{
+trait Resource[+R <: Closeable] extends ManagedResourceOperations[R] with ResourceOps[R, Resource[R], Resource[R]] {
   /**
    * Creates a new instance of the underlying resource (or opens it).
    * Sometimes the code block used to create the Resource is non-reusable in
@@ -175,7 +190,7 @@ trait Resource[+R <: Closeable] extends ManagedResourceOperations[R] with Resour
  * @author  Jesse Eichar
  * @since   1.0
  */
-trait InputResource[+R <: Closeable] extends Resource[R] with Input with ResourceOps[R, InputResource[R]] {
+trait InputResource[+R <: Closeable] extends Resource[R] with Input with ResourceOps[R, InputResource[R], InputResource[R]] {
 
     /**
      * Obtain the [[scalax.io.InputStreamResource]](typically) version of this object.
@@ -223,7 +238,7 @@ trait InputResource[+R <: Closeable] extends Resource[R] with Input with Resourc
  * @author  Jesse Eichar
  * @since   1.0
  */
-trait ReadCharsResource[+R <: Closeable] extends Resource[R] with ReadChars with ResourceOps[R, ReadCharsResource[R]]
+trait ReadCharsResource[+R <: Closeable] extends Resource[R] with ReadChars with ResourceOps[R, ReadCharsResource[R], ReadCharsResource[R]]
 
 /**
  * An Resource object that is a also an [[scalax.io.Output]].  This trait adds methods
@@ -236,7 +251,7 @@ trait ReadCharsResource[+R <: Closeable] extends Resource[R] with ReadChars with
  * @author  Jesse Eichar
  * @since   1.0
  */
-trait OutputResource[+R <: Closeable] extends Resource[R] with Output with ResourceOps[R, OutputResource[R]] {
+trait OutputResource[+R <: Closeable] extends Resource[R] with Output with ResourceOps[R, OutputResource[R], OutputResource[R]] {
   /**
    * Obtain the [[scalax.io.OutputStreamResource]](typically) version of this object.
    *
@@ -284,7 +299,7 @@ trait OutputResource[+R <: Closeable] extends Resource[R] with Output with Resou
  * @author  Jesse Eichar
  * @since   1.0
  */
-trait SeekableResource[+R <: Closeable] extends Seekable with InputResource[R] with OutputResource[R] with ResourceOps[R, SeekableResource[R]]
+trait SeekableResource[+R <: Closeable] extends Seekable with InputResource[R] with OutputResource[R] with ResourceOps[R, SeekableResource[R], SeekableResource[R]]
 
 /**
  * An object that in addition to being a resource is also a [[scalax.io.WriteChars]] Resource.
@@ -294,7 +309,7 @@ trait SeekableResource[+R <: Closeable] extends Seekable with InputResource[R] w
  * @author  Jesse Eichar
  * @since   1.0
  */
-trait WriteCharsResource[+R <: Closeable] extends Resource[R] with WriteChars with ResourceOps[R, WriteCharsResource[R]]
+trait WriteCharsResource[+R <: Closeable] extends Resource[R] with WriteChars with ResourceOps[R, WriteCharsResource[R], WriteCharsResource[R]]
 
 /**
  * Defines several factory methods for creating instances of Resource.
@@ -330,7 +345,7 @@ object Resource {
    *
    * @return an InputStreamResource
    */
-  def fromInputStream[A <: InputStream](opener: => A): InputStreamResource[A] = new InputStreamResource[A](opener, Noop, () => None,UnknownName())
+  def fromInputStream[A <: InputStream](opener: => A): InputStreamResource[A] = new InputStreamResource[A](opener, ResourceContext(), () => None)
   /**
    * Create an Output Resource instance from an OutputStream.
    *
@@ -342,7 +357,7 @@ object Resource {
    *
    * @return an OutputStreamResource
    */
-  def fromOutputStream[A <: OutputStream](opener: => A) : OutputStreamResource[A] = new OutputStreamResource[A](opener,Noop)
+  def fromOutputStream[A <: OutputStream](opener: => A) : OutputStreamResource[A] = new OutputStreamResource[A](opener,ResourceContext())
   // Reader factory methods
   /**
    * Create an ReadChars Resource instance from an Reader.
@@ -353,7 +368,7 @@ object Resource {
    *
    * @return an ReaderResource
    */
-  def fromReader[A <: Reader](opener: => A) : ReaderResource[A] = new ReaderResource[A](opener, Noop,UnknownName())
+  def fromReader[A <: Reader](opener: => A) : ReaderResource[A] = new ReaderResource[A](opener, ResourceContext())
   // Writer factory methods
   /**
    * Create an WriteChars Resource instance with conversion traits from an Writer.
@@ -364,7 +379,7 @@ object Resource {
    *
    * @return an WriterResource
    */
-  def fromWriter[A <: Writer](opener: => A) : WriterResource[A] = new WriterResource[A](opener,Noop)
+  def fromWriter[A <: Writer](opener: => A) : WriterResource[A] = new WriterResource[A](opener,ResourceContext())
   // Channel factory methods
   /**
    * Create an Input Resource instance from an ReadableByteChannel.
@@ -375,7 +390,7 @@ object Resource {
    *
    * @return an ReadableByteChannelResource
    */
-  def fromReadableByteChannel[A <: ReadableByteChannel](opener: => A) : ReadableByteChannelResource[A] = new ReadableByteChannelResource[A](opener, Noop, () => None,UnknownName())
+  def fromReadableByteChannel[A <: ReadableByteChannel](opener: => A) : ReadableByteChannelResource[A] = new ReadableByteChannelResource[A](opener, ResourceContext(), () => None)
   /**
    * Create an Output Resource instance from an WritableByteChannel.
    *
@@ -385,7 +400,7 @@ object Resource {
    *
    * @return an WritableByteChannelResource
    */
-  def fromWritableByteChannel[A <: WritableByteChannel](opener: => A) : WritableByteChannelResource[A] = new WritableByteChannelResource[A](opener,Noop)
+  def fromWritableByteChannel[A <: WritableByteChannel](opener: => A) : WritableByteChannelResource[A] = new WritableByteChannelResource[A](opener,ResourceContext())
   /**
    * Create an Input/Output Resource instance from a ByteChannel.
    *
@@ -395,7 +410,7 @@ object Resource {
    *
    * @return a ByteChannelResource
    */
-  def fromByteChannel[A <: ByteChannel](opener: => A) : ByteChannelResource[A] = new ByteChannelResource[A](opener,Noop, () => None)
+  def fromByteChannel[A <: ByteChannel](opener: => A) : ByteChannelResource[A] = new ByteChannelResource[A](opener,ResourceContext(), () => None)
   /**
    * Create an Input/Output/Seekable Resource instance from a SeekableByteChannel.
    *
@@ -406,7 +421,7 @@ object Resource {
    * @return a SeekableByteChannelResource
    */
   def fromSeekableByteChannel[A <: SeekableByteChannel](opener: => A) : SeekableByteChannelResource[A] = {
-    new SeekableByteChannelResource[A](_ => opener,Noop, seekablesizeFunction(opener),UnknownName(), None)
+    new SeekableByteChannelResource[A](_ => opener,ResourceContext(), seekablesizeFunction(opener),None)
   }
 
   /**
@@ -420,7 +435,7 @@ object Resource {
    * @return a SeekableByteChannelResource
    */
   def fromSeekableByteChannel[A <: SeekableByteChannel](opener: Seq[OpenOption] => A) : SeekableByteChannelResource[A] = {
-    new SeekableByteChannelResource[A](opener,Noop, seekablesizeFunction(opener(Read :: Nil)),UnknownName(), Some(ReadWrite))
+    new SeekableByteChannelResource[A](opener,ResourceContext(), seekablesizeFunction(opener(Read :: Nil)),Some(ReadWrite))
   }
 
   private def seekablesizeFunction(resource: => SeekableByteChannel)= () => {
@@ -445,7 +460,7 @@ object Resource {
         case len => Some(len)
       }
     }
-    new SeekableByteChannelResource[SeekableFileChannel](open ,Noop,sizeFunc,PrefixedName("RandomAccessFile"),Some(ReadWrite))
+    new SeekableByteChannelResource[SeekableFileChannel](open ,ResourceContext(descName=PrefixedName("RandomAccessFile")),sizeFunc,Some(ReadWrite))
   }
 
   /**
@@ -468,7 +483,7 @@ object Resource {
         conn.getInputStream.close()
       }
     }
-    new InputStreamResource(url.openStream,Noop,sizeFunc,KnownName(url.toExternalForm))
+    new InputStreamResource(url.openStream,ResourceContext(descName = KnownName(url.toExternalForm)),sizeFunc)
   }
 
   /**
@@ -495,8 +510,7 @@ object Resource {
       if(file.exists) Some(file.length)
       else None
     }
-    new SeekableByteChannelResource[SeekableFileChannel](open,Noop,sizeFunc,KnownName(file.getPath), Some(ReadWrite))
-
+    new SeekableByteChannelResource[SeekableFileChannel](open,ResourceContext(descName = KnownName(file.getPath)),sizeFunc, Some(ReadWrite))
   }
   /**
    * Create a file from string then create a Seekable Resource from a File

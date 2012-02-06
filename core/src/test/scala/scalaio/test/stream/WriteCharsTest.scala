@@ -23,7 +23,7 @@ class WriteCharsTest extends AbstractWriteCharsTests {
     def in = new ByteArrayInputStream(out.toByteArray)
 
     val inResource = Resource.fromInputStream(in).reader(Codec.UTF8)
-    val outResource = new WriterResource(new OutputStreamWriter(out, Codec.UTF8.name), ca)
+    val outResource = Resource.fromWriter(new OutputStreamWriter(out)).updateContext(_.copy(closeAction=ca))
 
     (inResource, outResource)
   }

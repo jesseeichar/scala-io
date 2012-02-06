@@ -8,16 +8,16 @@ import java.io.{Reader, BufferedReader}
  */
 class ReaderResource[+A <: Reader] (
     opener: => A,
-    closeAction:CloseAction[A] = CloseAction.Noop,
-    descName:ResourceDescName = UnknownName())
+    val context:ResourceContext[A])
   extends ReadCharsResource[A]
-  with ResourceOps[A, ReadCharsResource[A]] {
-  
-  self =>
-  def open():OpenedResource[A] = new CloseableOpenedResource(opener,closeAction)
-  def unmanaged = new scalax.io.unmanaged.ReaderResource[A](opener, CloseAction.Noop, descName)
+  with ResourceOps[A, ReadCharsResource[A], ReaderResource[A]] {
+
+  self => 
+
+  def open():OpenedResource[A] = new CloseableOpenedResource(opener,context)
+  def unmanaged = new scalax.io.unmanaged.ReaderResource[A](opener, context)
 
   override def chars : LongTraversable[Char]= ResourceTraversable.readerBased(this.open)
 
-  override def toString: String = "ReaderResource("+descName.name+")"
+  override def toString: String = "ReaderResource("+context.descName.name+")"
 }

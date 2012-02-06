@@ -10,12 +10,14 @@ import scalax.io.ResourceAdapting.WritableChannelAdapter
  */
 class OutputStreamResource[+A <: OutputStream] (
     opener: => A,
-    closeAction:CloseAction[A]=CloseAction.Noop)
+    val context:ResourceContext[A])
   extends OutputResource[A]
-  with ResourceOps[A, OutputResource[A]] {
-    self => 
-  def open():OpenedResource[A] = new CloseableOpenedResource(opener,closeAction)
-  def unmanaged = new scalax.io.unmanaged.OutputStreamResource[A](opener, CloseAction.Noop)
+  with ResourceOps[A, OutputResource[A], OutputStreamResource[A]] {
+
+  self => 
+
+  def open():OpenedResource[A] = new CloseableOpenedResource(opener,context)
+  def unmanaged = new scalax.io.unmanaged.OutputStreamResource[A](opener, context)
 
   def outputStream = this
   def underlyingOutput = this
@@ -26,12 +28,12 @@ class OutputStreamResource[+A <: OutputStream] (
         def src = a.get
       }
     }
-    val closer = ResourceAdapting.closeAction(closeAction)
-    new WriterResource(nResource, closer)
+    val newContext = context.copy(closeAction = ResourceAdapting.closeAction(context.closeAction))
+    new WriterResource(nResource, newContext)
   }
   def writableByteChannel = {
     val nResource = new WritableChannelAdapter(opener)
-    val closer = ResourceAdapting.closeAction(closeAction)
-    new WritableByteChannelResource(nResource, closer)
+    val newContext = context.copy(closeAction = ResourceAdapting.closeAction(context.closeAction))
+    new WritableByteChannelResource(nResource, newContext)
   }
 }

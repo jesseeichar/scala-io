@@ -28,7 +28,7 @@ class OutputTest extends AbstractOutputTests[ReadableByteChannel, WritableByteCh
     def in = Channels.newChannel(new ByteArrayInputStream(oStream.toByteArray))
 
     val inResource = Resource.fromReadableByteChannel(in)
-    val outResource = new WritableByteChannelResource(out, closeAction)
+    val outResource = Resource.fromWritableByteChannel(out).updateContext(_.copy(closeAction=closeAction))
 
     (inResource, outResource)
   }

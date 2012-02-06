@@ -7,13 +7,14 @@ import java.io.{Writer, BufferedWriter}
  */
 class WriterResource[+A <: Writer] (
     opener: => A,
-    closeAction:CloseAction[A] = CloseAction.Noop)
+    val context:ResourceContext[A])
   extends WriteCharsResource[A]
-  with ResourceOps[A, WriteCharsResource[A]]  {
+  with ResourceOps[A, WriteCharsResource[A], WriterResource[A]]  {
 
-  self =>
-  def open():OpenedResource[A] = new CloseableOpenedResource(opener,closeAction)
-  def unmanaged = new scalax.io.unmanaged.WriterResource[A](opener, CloseAction.Noop)
+  self => 
+
+  def open():OpenedResource[A] = new CloseableOpenedResource(opener,context)
+  def unmanaged = new scalax.io.unmanaged.WriterResource[A](opener, context)
 
   protected def writer = this
 }

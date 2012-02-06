@@ -2,5 +2,44 @@
 	<li>New options for creating paths to reduce verbosity.  Now:  Path("a/b/c",'/') will create a path by splitting the string with the separator and using the resulting parts as path segments.  I recommend looking at the new documentation of Path and Filesystem.</li>
 	<li>New API for processing Input objects.</li>
 	<li>Options to create Resources that don't close underlying resource.  For example if Standard In is to be processed, the stream should not be closed</li>
-	<li>Replaced openOutput, openSeekable, etc... with processors so read write is uniform</li>
+	<li>Replaced openOutput, openSeekable, etc... with processors so read write is uniform
+	  <p>The required change is essentially as follows:
+	    <ul>
+	      <li>Before:
+	        <pre><code>
+	          output.openOutput{out =>
+	            out.write(3)
+	            out.write("hi")
+	          }
+          </pre></code>
+        </li>
+        <li>Now:
+          <pre><code>
+            for {
+              out <- output.outputProcessor
+            } {
+              out.write(3)
+              out.write(4)
+            }
+          </code></pre>
+          Note: Since out's write operations return Processors they can be interleaved within the for comprehension if needed like:
+          <pre><code>
+            for {
+              out <- output.outputProcessor
+              _ <- out.write(3)
+              _ <- out.write(4)
+            } ()
+          </code></pre>
+        </li>
+      </ul>
+	</li>
+	<li>Added a context object for each resource which allows configuration of the resource's parameters.  Currently there are only a couple of parameters that are
+	  common to all connections.  
+	  <ul>
+	    <li>An error handler which allows custom handling of exceptions raised while accessing a resource.  Default behaviour is to throw a ScalaIOException which contains the list of exceptions that were raised during the operation and while closing.</li>
+	    <li>CloseActions have been moved to the context object</li>
+	    <li>Methods for controlling the size of the character and byte buffers</li>
+	    <li>An optional descriptive name for each resource for debugging</li>
+    </ul>
+  </li>
 </ul>
