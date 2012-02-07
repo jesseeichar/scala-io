@@ -12,7 +12,8 @@ import java.io.InputStream
  */
 class ReadableByteChannelResource[+A <: ReadableByteChannel] (
     resource: A,
-    val context: ResourceContext[A])
+    val context:ResourceContext = ResourceContext(),
+    closeAction: CloseAction[A] = CloseAction.Noop)
   extends InputResource[A]
   with ResourceOps[A, InputResource[A], ReadableByteChannelResource[A]]
   with UnmanagedResource {
@@ -20,21 +21,25 @@ class ReadableByteChannelResource[+A <: ReadableByteChannel] (
   self => 
 
   override def open():OpenedResource[A] = new UnmanagedOpenedResource(resource, context)
-  override def close() = new CloseableOpenedResource(open.get, context).close()
+  override def close() = new CloseableOpenedResource(open.get, context, closeAction).close()
+  override def newContext(newContext:ResourceContext) = 
+    new ReadableByteChannelResource(resource, newContext, closeAction)
+  override def addCloseAction(newCloseAction: CloseAction[A]) = 
+    new ReadableByteChannelResource(resource, context, newCloseAction :+ closeAction)
   override def unmanaged = this
   protected def sizeFunc = () => None
   
-  def inputStream:InputResource[InputStream] = {
+  override def inputStream:InputResource[InputStream] = {
     def nResource = new ChannelInputStreamAdapter(resource, false)
-    val newContext = context.copy(closeAction = ResourceAdapting.closeAction(context.closeAction))
-    new InputStreamResource(nResource, newContext)
+    val closer = ResourceAdapting.closeAction(closeAction)
+    new InputStreamResource(nResource, context, closer)
   }
-  def reader(implicit sourceCodec: Codec) = {
+  override def reader(implicit sourceCodec: Codec) = {
     def nResource = new ChannelReaderAdapter(resource,sourceCodec, false)
-    val newContext = context.copy(closeAction = ResourceAdapting.closeAction(context.closeAction))
-    new ReaderResource(nResource, newContext)
+    val closer = ResourceAdapting.closeAction(closeAction)
+    new ReaderResource(nResource, context, closer)
   }
-  def readableByteChannel:InputResource[ReadableByteChannel] = this
+  override def readableByteChannel:InputResource[ReadableByteChannel] = this
   override def bytesAsInts = ResourceTraversable.byteChannelBased[Byte,Int](this.open, sizeFunc, initialConv = ResourceTraversable.toIntConv)
   override def bytes = ResourceTraversable.byteChannelBased[Byte,Byte](this.open, sizeFunc)
   override def chars(implicit codec: Codec) = reader(codec).chars  // TODO optimize for byteChannel

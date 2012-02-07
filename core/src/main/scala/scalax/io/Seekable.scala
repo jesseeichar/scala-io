@@ -106,12 +106,12 @@ trait Seekable extends Input with Output {
   protected def underlyingChannel(append:Boolean):OpenedResource[SeekableByteChannel]
 
   // for Java 7 change this to a Seekable Channel
-  protected def readWriteChannel[U](f:(SeekableByteChannel,ResourceContext[SeekableByteChannel]) => U) : U = {
+  protected def readWriteChannel[U](f:(SeekableByteChannel,ResourceContext) => U) : U = {
     val resource = underlyingChannel(false)
     resource.toSingleUseResource.acquireAndGet(r => f(r,resource.context))
   }
 
-  protected def appendChannel[U](f:(SeekableByteChannel,ResourceContext[SeekableByteChannel]) => U) : U = {
+  protected def appendChannel[U](f:(SeekableByteChannel,ResourceContext) => U) : U = {
     val resource = underlyingChannel(true)
     resource.toSingleUseResource.acquireAndGet(r => f(r,resource.context))
   }
@@ -150,7 +150,7 @@ trait Seekable extends Input with Output {
       val nonSeekable: OpenSeekable = {
         val newContext = context.copy(descName = KnownName("Seekable opened resource"))
         val sizeFunc = () => Some(channel.size)
-        new SeekableByteChannelResource[SeekableByteChannel](_ => nonCloseable, newContext, sizeFunc, None) {
+        new SeekableByteChannelResource[SeekableByteChannel](_ => nonCloseable, newContext, CloseAction.Noop, sizeFunc, None) {
           override def toString: String = "Seekable-opened " + self.toString
 
           def position: Long = channel.position
@@ -549,8 +549,8 @@ trait Seekable extends Input with Output {
 
   protected def underlyingOutput: OutputResource[OutputStream] = {
     val resource = underlyingChannel(false)
-    val newContext = resource.context.copy(closeAction = ResourceAdapting.closeAction(resource.context.closeAction))
-    new OutputStreamResource(new ChannelOutputStreamAdapter(resource.get, true), newContext)
+    val closer = ResourceAdapting.closeAction(resource.closeAction)
+    new OutputStreamResource(new ChannelOutputStreamAdapter(resource.get, true), resource.context, closer)
   }
 
   /**
@@ -564,7 +564,7 @@ trait Seekable extends Input with Output {
       r.get.position(0)
       r
     }
-    new ByteChannelResource(opened.get,opened.context,() => Some(opened.get.size))
+    new ByteChannelResource(opened.get,opened.context,opened.closeAction, () => Some(opened.get.size))
   }
   
   override def chars(implicit codec: Codec) = toByteChannelResource(false).chars(codec)
@@ -577,7 +577,7 @@ trait Seekable extends Input with Output {
     
     val resource = underlyingChannel(false)
     try {
-      val chars = new SeekableByteChannelResource((_: Seq[OpenOption]) => resource.get, resource.context, () => Some(resource.get.size), None).chars(codec)
+      val chars = new SeekableByteChannelResource((_: Seq[OpenOption]) => resource.get, resource.context, resource.closeAction, () => Some(resource.get.size), None).chars(codec)
       val segment = chars.lslice(start, end)
 
       (0L /: segment) { (replacedInBytes, nextChar) =>

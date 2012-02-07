@@ -178,12 +178,7 @@ object Resources {
     // we can then create a resource and pass it to the closer parameter
     // now each time resource is used (and closed) the closer will also be executed
     // just before the actual closing.
-    val resource = Resource.fromFile("file").updateContext(_.copy(closeAction = closer))
-    
-    // if the resource was not created in the current code block it is possible that 
-    // there is already a close action.  One can update the close action instead of 
-    // replacing it 
-    //resource.updateContext(_.updateCloseAction(_ :+ closeAction2))
+    val resource = Resource.fromFile("file").addCloseAction(closer)
   }
 
   /**
@@ -213,7 +208,7 @@ object Resources {
     val closeAction:CloseAction[InputStream] = CloseAction{in:InputStream => println(in.available)}
 
     //Given the previous declarations it should be obvious that the following works
-    val updatedResource:Resource[InputStream] = Resource.fromInputStream(new FileInputStream("file")).updateContext(_.copy(closeAction = closeAction))
+    val updatedResource:Resource[InputStream] = Resource.fromInputStream(new FileInputStream("file")).addCloseAction(closeAction)
 
     // However since resource2 is a Resource[Closeable] it should be obvious that one cannot
     // add a closeAction that requires an InputStream.  so the following would fail to compile

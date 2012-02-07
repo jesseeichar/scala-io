@@ -52,6 +52,7 @@ trait WriteChars {
     writer.acquireAndGet {out =>
       val nonClosingOutput:WriteChars = new WriterResource[Writer](null,writer.context) {
         val instance = new OpenedResource[Writer]{
+          def context = writer.context
           def closeAction[U >: Writer] = CloseAction.Noop
           val get = new FilterWriter(out){
             override def close() {}

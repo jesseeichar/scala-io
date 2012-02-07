@@ -33,20 +33,20 @@ abstract class AbstractFileSeekableTest extends AbstractSeekableTests[SeekableBy
 
 class FileStringSeekableTest extends AbstractFileSeekableTest {
   def openResource(closeAction:CloseAction[SeekableByteChannel]): Seekable = {
-    Resource.fromFile(new File(folder.getRoot, "testfile").getAbsolutePath).updateContext(_.copy(closeAction=closeAction))
+    Resource.fromFile(new File(folder.getRoot, "testfile").getAbsolutePath).addCloseAction(closeAction)
   }
 }
 
 class FileSeekableTest extends AbstractFileSeekableTest {
   def openResource(closeAction:CloseAction[SeekableByteChannel]): Seekable = {
-    Resource.fromFile(new File(folder.getRoot, "testfile")).updateContext(_.copy(closeAction=closeAction))
+    Resource.fromFile(new File(folder.getRoot, "testfile")).addCloseAction(closeAction)
   }
 }
 
 class RandomAccessFileSeekableTest extends AbstractFileSeekableTest {
   def openResource(closeAction:CloseAction[SeekableByteChannel]): Seekable = {
     val file = new File(folder.getRoot, "testfile")
-    Resource.fromRandomAccessFile(new RandomAccessFile(file, "rw")).updateContext(_.copy(closeAction=closeAction))
+    Resource.fromRandomAccessFile(new RandomAccessFile(file, "rw")).addCloseAction(closeAction)
   }
 }
 
@@ -54,6 +54,6 @@ class StraightCreationSeekableTest extends AbstractFileSeekableTest {
   override def canAddCloseAction = true
   def openResource(closeAction:CloseAction[SeekableByteChannel]): Seekable = {
     def channel = SeekableByteChannel.fromFile(new File(folder.getRoot, "testfile").getAbsolutePath)
-    Resource.fromSeekableByteChannel(channel).updateContext(_.copy(closeAction=closeAction))
+    Resource.fromSeekableByteChannel(channel).addCloseAction(closeAction)
   }
 }

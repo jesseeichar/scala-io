@@ -4,13 +4,15 @@ package unmanaged
 import java.io.{OutputStream, BufferedOutputStream, Writer, OutputStreamWriter}
 import java.nio.channels.Channels
 import scalax.io.ResourceAdapting.WritableChannelAdapter
+import java.nio.channels.WritableByteChannel
 
 /**
  * A ManagedResource for accessing and using OutputStreams.  Class can be created using the [[scalax.io.Resource]] object.
  */
 class OutputStreamResource[+A <: OutputStream] (
     resource: A,
-    val context: ResourceContext[A])
+    val context:ResourceContext = ResourceContext(),
+    closeAction: CloseAction[A] = CloseAction.Noop)
   extends OutputResource[A]
   with ResourceOps[A, OutputResource[A], OutputStreamResource[A]]
   with UnmanagedResource {
@@ -19,24 +21,28 @@ class OutputStreamResource[+A <: OutputStream] (
   type Repr = OutputStreamResource[A]
 
   override def open():OpenedResource[A] = new UnmanagedOpenedResource(resource, context)
-  override def close() = new CloseableOpenedResource(open.get, context).close()
+  override def close() = new CloseableOpenedResource(open.get, context, closeAction).close()
+  override def newContext(newContext:ResourceContext) = 
+    new OutputStreamResource(resource, newContext, closeAction)
+  override def addCloseAction(newCloseAction: CloseAction[A]) = 
+    new OutputStreamResource(resource, context, newCloseAction :+ closeAction)
   override def unmanaged = this
 
-  def outputStream = this
-  def underlyingOutput = this
-  def writer(implicit sourceCodec: Codec):WriterResource[Writer] = {
+  override def outputStream = this
+  protected override def underlyingOutput = this
+  override def writer(implicit sourceCodec: Codec):WriterResource[Writer] = {
     def nResource = {
       val a = open()
       new OutputStreamWriter(a.get) with Adapter[A] {
-        def src = a.get
+        override def src = a.get
       }
     }
-    val newContext = context.copy(closeAction = ResourceAdapting.closeAction(context.closeAction))
-    new WriterResource(nResource, newContext)
+    val closer = ResourceAdapting.closeAction(closeAction)
+    new WriterResource(nResource, context, closer)
   }
-  def writableByteChannel = {
+  override def writableByteChannel = {
     val nResource = new WritableChannelAdapter(resource)
-    val newContext = context.copy(closeAction = ResourceAdapting.closeAction(context.closeAction))
-    new WritableByteChannelResource(nResource, newContext)
+    val closer = ResourceAdapting.closeAction(closeAction)
+    new WritableByteChannelResource(nResource, context, closer)
   }
 }

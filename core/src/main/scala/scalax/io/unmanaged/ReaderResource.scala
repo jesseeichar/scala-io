@@ -8,7 +8,8 @@ import java.io.{Reader, BufferedReader}
  */
 class ReaderResource[+A <: Reader] (
     resource: A,
-    val context: ResourceContext[A])
+    val context:ResourceContext = ResourceContext(),
+    closeAction: CloseAction[A] = CloseAction.Noop)
   extends ReadCharsResource[A]
   with ResourceOps[A, ReadCharsResource[A], ReaderResource[A]]
   with UnmanagedResource {
@@ -16,7 +17,11 @@ class ReaderResource[+A <: Reader] (
   self => 
 
   override def open():OpenedResource[A] = new UnmanagedOpenedResource(resource,context)
-  override def close() = new CloseableOpenedResource(open.get, context).close()
+  override def close() = new CloseableOpenedResource(open.get, context, closeAction).close()
+  override def newContext(newContext:ResourceContext) = 
+    new ReaderResource(resource, newContext, closeAction)
+  override def addCloseAction(newCloseAction: CloseAction[A]) = 
+    new ReaderResource(resource, context, newCloseAction :+ closeAction)
   override def unmanaged = this
 
   override def chars : LongTraversable[Char]= ResourceTraversable.readerBased(this.open)

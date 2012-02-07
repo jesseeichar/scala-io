@@ -10,8 +10,11 @@ class OpenableArrayBufferSeekableTest extends AbstractSeekableTests[SeekableByte
   def open(data: String, closeAction:CloseAction[SeekableByteChannel] = CloseAction.Noop) = {
     val buffer = ArrayBuffer[Byte]()
     buffer ++= data.getBytes(Codec.UTF8.charSet)
-    val context = ResourceContext(closeAction = closeAction)
-    new SeekableByteChannelResource(options => new ArrayBufferSeekableChannel(buffer,options:_*)(_=>(),_=>()), context, () => Some(buffer.size))
+    new SeekableByteChannelResource(
+        options => new ArrayBufferSeekableChannel(buffer,options:_*)(_=>(),_=>()), 
+        ResourceContext(), 
+        closeAction, 
+        () => Some(buffer.size))
   }
 }
 
@@ -19,7 +22,10 @@ class SeekableArrayBufferSeekableTest extends AbstractSeekableTests[SeekableByte
   def open(data: String, closeAction:CloseAction[SeekableByteChannel] = CloseAction.Noop): Seekable = {
     val buffer = ArrayBuffer[Byte]()
     buffer ++= data.getBytes(Codec.UTF8.charSet)
-    val context = ResourceContext(closeAction = closeAction)
-    new SeekableByteChannelResource(_ => new ArrayBufferSeekableChannel(buffer,ReadWrite:_*)(_=>(),_=>()), context, () => Some(buffer.size))
+    new SeekableByteChannelResource(
+        _ => new ArrayBufferSeekableChannel(buffer,ReadWrite:_*)(_=>(),_=>()), 
+        ResourceContext(), 
+        closeAction,
+        () => Some(buffer.size))
   }
 }

@@ -15,13 +15,12 @@ object ResourceContext {
   }
   val errorHandler: List[Throwable] => Unit = (exceptions: List[Throwable]) => throw new ScalaIOException(exceptions)
 }
-case class ResourceContext[-A] (
+case class ResourceContext (
   recommendedByteBufferSize:Int = ResourceContext.recommendedByteBufferSize,
   recommendedCharBufferSize:Int = ResourceContext.recommendedCharBufferSize,
   byteBufferSize: Option[Long] => Int = ResourceContext.byteBufferSize,
   charBufferSize: Option[Int] => Int = ResourceContext.charBufferSize,
   errorHandler: List[Throwable] => Unit = ResourceContext.errorHandler,
-  closeAction:CloseAction[A] = CloseAction.Noop,
   descName:ResourceDescName = UnknownName()) {
   
   //def updateCloseAction(f:)

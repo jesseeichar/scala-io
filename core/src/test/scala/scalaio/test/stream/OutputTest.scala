@@ -25,7 +25,7 @@ class OutputTest extends AbstractOutputTests[ByteArrayInputStream,ByteArrayOutpu
     def in = new ByteArrayInputStream(out.toByteArray)
 
     val inResource = Resource.fromInputStream(in)
-    val outResource = Resource.fromOutputStream(out).updateContext(_.copy(closeAction=closeAction))
+    val outResource = Resource.fromOutputStream(out).addCloseAction(closeAction)
 
     (inResource, outResource)
   }

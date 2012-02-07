@@ -28,7 +28,7 @@ import support.FileUtils
 
 trait OpenedResource[+R] {
   def get:R
-  def context:ResourceContext[R]
+  def context:ResourceContext
   def close():List[Throwable] = closeAction(get) 
   def closeAction[U >: R]:CloseAction[U]
   def toSingleUseResource = new ManagedResourceOperations[R] {
@@ -41,10 +41,10 @@ trait OpenedResource[+R] {
     }
   }
 }
-class CloseableOpenedResource[+R <: Closeable](val get:R,resourceContext:ResourceContext[R]) extends OpenedResource[R] {
-  def closeAction[U >: R] = (context.closeAction :+ CloseAction ((_:R).close())).asInstanceOf[CloseAction[U]]
+class CloseableOpenedResource[+R <: Closeable](val get:R,val context:ResourceContext, closeResourceAction:CloseAction[R]) extends OpenedResource[R] {
+  def closeAction[U >: R] = (closeResourceAction :+ CloseAction ((_:R).close())).asInstanceOf[CloseAction[U]]
 }
-class UnmanagedOpenedResource[+R](val get:R,val context:ResourceContext[R]) extends OpenedResource[R]{
+class UnmanagedOpenedResource[+R](val get:R,val context:ResourceContext) extends OpenedResource[R]{
   def closeAction[U >: R] = CloseAction.Noop
 }
 
@@ -80,12 +80,13 @@ trait ResourceOps[+R, +UnmanagedType, +Repr] {
    * 
    * @return the associated ResourceContext
    */
-  def context:ResourceContext[R]
+  def context:ResourceContext
   /**
    * Create a Resource instance that is configured with the new ResourceContext 
    */
-  def newContext[U >: R](newContext:ResourceContext[U]):Repr
-  def updateContext[U >: R](f:ResourceContext[R] => ResourceContext[U]) = newContext(f(context))
+  def newContext(newContext:ResourceContext):Repr
+  def updateContext(f:ResourceContext => ResourceContext) = newContext(f(context))
+  def addCloseAction(newCloseAction: CloseAction[R]):Repr
   /**
    * Create a new instance of this resource that will not close the resource after each operation.
    * Create a Resource that will not close the stream.  The same stream will be reused for each request an never closed.  Use with care.
@@ -345,7 +346,7 @@ object Resource {
    *
    * @return an InputStreamResource
    */
-  def fromInputStream[A <: InputStream](opener: => A): InputStreamResource[A] = new InputStreamResource[A](opener, ResourceContext(), () => None)
+  def fromInputStream[A <: InputStream](opener: => A): InputStreamResource[A] = new InputStreamResource[A](opener)
   /**
    * Create an Output Resource instance from an OutputStream.
    *
@@ -357,7 +358,7 @@ object Resource {
    *
    * @return an OutputStreamResource
    */
-  def fromOutputStream[A <: OutputStream](opener: => A) : OutputStreamResource[A] = new OutputStreamResource[A](opener,ResourceContext())
+  def fromOutputStream[A <: OutputStream](opener: => A) : OutputStreamResource[A] = new OutputStreamResource[A](opener)
   // Reader factory methods
   /**
    * Create an ReadChars Resource instance from an Reader.
@@ -368,7 +369,7 @@ object Resource {
    *
    * @return an ReaderResource
    */
-  def fromReader[A <: Reader](opener: => A) : ReaderResource[A] = new ReaderResource[A](opener, ResourceContext())
+  def fromReader[A <: Reader](opener: => A) : ReaderResource[A] = new ReaderResource[A](opener)
   // Writer factory methods
   /**
    * Create an WriteChars Resource instance with conversion traits from an Writer.
@@ -379,7 +380,7 @@ object Resource {
    *
    * @return an WriterResource
    */
-  def fromWriter[A <: Writer](opener: => A) : WriterResource[A] = new WriterResource[A](opener,ResourceContext())
+  def fromWriter[A <: Writer](opener: => A) : WriterResource[A] = new WriterResource[A](opener)
   // Channel factory methods
   /**
    * Create an Input Resource instance from an ReadableByteChannel.
@@ -390,7 +391,7 @@ object Resource {
    *
    * @return an ReadableByteChannelResource
    */
-  def fromReadableByteChannel[A <: ReadableByteChannel](opener: => A) : ReadableByteChannelResource[A] = new ReadableByteChannelResource[A](opener, ResourceContext(), () => None)
+  def fromReadableByteChannel[A <: ReadableByteChannel](opener: => A) : ReadableByteChannelResource[A] = new ReadableByteChannelResource[A](opener)
   /**
    * Create an Output Resource instance from an WritableByteChannel.
    *
@@ -400,7 +401,7 @@ object Resource {
    *
    * @return an WritableByteChannelResource
    */
-  def fromWritableByteChannel[A <: WritableByteChannel](opener: => A) : WritableByteChannelResource[A] = new WritableByteChannelResource[A](opener,ResourceContext())
+  def fromWritableByteChannel[A <: WritableByteChannel](opener: => A) : WritableByteChannelResource[A] = new WritableByteChannelResource[A](opener)
   /**
    * Create an Input/Output Resource instance from a ByteChannel.
    *
@@ -410,7 +411,7 @@ object Resource {
    *
    * @return a ByteChannelResource
    */
-  def fromByteChannel[A <: ByteChannel](opener: => A) : ByteChannelResource[A] = new ByteChannelResource[A](opener,ResourceContext(), () => None)
+  def fromByteChannel[A <: ByteChannel](opener: => A) : ByteChannelResource[A] = new ByteChannelResource[A](opener)
   /**
    * Create an Input/Output/Seekable Resource instance from a SeekableByteChannel.
    *
@@ -421,7 +422,7 @@ object Resource {
    * @return a SeekableByteChannelResource
    */
   def fromSeekableByteChannel[A <: SeekableByteChannel](opener: => A) : SeekableByteChannelResource[A] = {
-    new SeekableByteChannelResource[A](_ => opener,ResourceContext(), seekablesizeFunction(opener),None)
+    new SeekableByteChannelResource[A](_ => opener,ResourceContext(), Noop, seekablesizeFunction(opener),None)
   }
 
   /**
@@ -435,7 +436,7 @@ object Resource {
    * @return a SeekableByteChannelResource
    */
   def fromSeekableByteChannel[A <: SeekableByteChannel](opener: Seq[OpenOption] => A) : SeekableByteChannelResource[A] = {
-    new SeekableByteChannelResource[A](opener,ResourceContext(), seekablesizeFunction(opener(Read :: Nil)),Some(ReadWrite))
+    new SeekableByteChannelResource[A](opener,ResourceContext(), Noop, seekablesizeFunction(opener(Read :: Nil)),Some(ReadWrite))
   }
 
   private def seekablesizeFunction(resource: => SeekableByteChannel)= () => {
@@ -460,7 +461,7 @@ object Resource {
         case len => Some(len)
       }
     }
-    new SeekableByteChannelResource[SeekableFileChannel](open ,ResourceContext(descName=PrefixedName("RandomAccessFile")),sizeFunc,Some(ReadWrite))
+    new SeekableByteChannelResource[SeekableFileChannel](open ,ResourceContext(descName=PrefixedName("RandomAccessFile")),Noop, sizeFunc,Some(ReadWrite))
   }
 
   /**
@@ -483,7 +484,7 @@ object Resource {
         conn.getInputStream.close()
       }
     }
-    new InputStreamResource(url.openStream,ResourceContext(descName = KnownName(url.toExternalForm)),sizeFunc)
+    new InputStreamResource(url.openStream,ResourceContext(descName = KnownName(url.toExternalForm)),Noop,sizeFunc)
   }
 
   /**
@@ -510,7 +511,7 @@ object Resource {
       if(file.exists) Some(file.length)
       else None
     }
-    new SeekableByteChannelResource[SeekableFileChannel](open,ResourceContext(descName = KnownName(file.getPath)),sizeFunc, Some(ReadWrite))
+    new SeekableByteChannelResource[SeekableFileChannel](open,ResourceContext(descName = KnownName(file.getPath)),Noop,sizeFunc, Some(ReadWrite))
   }
   /**
    * Create a file from string then create a Seekable Resource from a File
