@@ -7,20 +7,22 @@ import java.io.{Writer, BufferedWriter}
  */
 class WriterResource[+A <: Writer] (
     resource: A,
-    val context:ResourceContext = ResourceContext(),
+    val context:ResourceContext = DefaultResourceContext,
     closeAction: CloseAction[A] = CloseAction.Noop)
   extends WriteCharsResource[A]
   with ResourceOps[A, WriteCharsResource[A], WriterResource[A]]
   with UnmanagedResource {
 
   self =>
-  override def open():OpenedResource[A] = new UnmanagedOpenedResource(resource, context)
+  override final val open:OpenedResource[A] = new UnmanagedOpenedResource(resource,unmanagedContext(context)){
+    override def closeAction[U >: A] = CloseAction(_ => resource.flush())
+  }
   override def close() = new CloseableOpenedResource(open.get, context, closeAction).close()
   override def newContext(newContext:ResourceContext) = 
     new WriterResource(resource, newContext, closeAction)
   override def addCloseAction(newCloseAction: CloseAction[A]) = 
     new WriterResource(resource, context, newCloseAction :+ closeAction)
-  override def unmanaged = this
+  override final val unmanaged = this
 
   protected def writer = this
 }

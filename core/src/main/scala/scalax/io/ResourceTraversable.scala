@@ -56,11 +56,11 @@ private[io] trait ResourceTraversable[A] extends LongTraversable[A] {
 
   protected def getIterator = new CloseableIterator[A] {
 
-    private val openedSource = source
+    private[this] val openedSource = source
     openedSource.skip(start)
 
-    private var nextEl:Iterator[SourceOut] = null
-    private var c = start
+    private[this] var nextEl:Iterator[SourceOut] = null
+    private[this] var c = start
 
     final def next(): A = {
       val n = nextEl.next()
@@ -101,7 +101,7 @@ private[io] trait ResourceTraversable[A] extends LongTraversable[A] {
   }
   override def slice(_start : Int, _end : Int) = lslice(_start.toLong,_end.toLong)
 
-  private def copy[B](_conv: this.SourceOut => B = conv, _start: Long = start, _end: Long = end): LongTraversable[B] = {
+  private[this] def copy[B](_conv: this.SourceOut => B = conv, _start: Long = start, _end: Long = end): LongTraversable[B] = {
      new ResourceTraversable[B] {
        type In = self.In
        type SourceOut = self.SourceOut
@@ -179,10 +179,10 @@ private[io] object ResourceTraversable {
         type SourceOut = Char
 
         def source = new TraversableSource[Reader, Char] {
-          val buffer = Buffers.readerBuffer
-          val iter = parser.iterator(buffer)
-          val openedResource = opener
-          val stream = openedResource.get
+          private[this] final val openedResource = opener
+          private[this] final val buffer = new Array[Char](openedResource.context.charBufferSize(None))
+          private[this] final val iter = parser.iterator(buffer)
+          private[this] final val stream = openedResource.get
           def read() = {
             val read = stream.read(buffer)
             parser(iter, read)
@@ -215,17 +215,17 @@ private[io] object ResourceTraversable {
                             startIndex : Long = 0,
                             endIndex : Long = Long.MaxValue):LongTraversable[B] = {
     if (parser == DefaultByteBufferParser && initialConv == IdentityByteConversion) {
-      new traversable.ByteResourceTraversable(opener, sizeFunc, startIndex, endIndex).asInstanceOf[LongTraversable[B]]
+      new traversable.ByteResourceTraversable(opener, sizeFunc, startIndex, endIndex, false).asInstanceOf[LongTraversable[B]]
     } else {
       new ResourceTraversable[B] {
         type In = ReadableByteChannel
         type SourceOut = A
 
         def source = new TraversableSource[ReadableByteChannel, A] {
-          private final val openedResource = opener
-          private final val channel = openedResource.get
-          private final val buffer = Buffers.nioDirectBuffer(sizeFunc())
-          private final val iter = parser.iterator(buffer)
+          private[this] final val openedResource = opener
+          private[this] final val channel = openedResource.get
+          private[this] final val buffer = openedResource.context.createNioBuffer(sizeFunc())
+          private[this] final val iter = parser.iterator(buffer)
           
           def read() = {
             buffer.clear
@@ -273,17 +273,17 @@ private[io] object ResourceTraversable {
                           startIndex : Long = 0,
                           endIndex : Long = Long.MaxValue):LongTraversable[B] = {
     if (parser == DefaultByteBufferParser && initialConv == IdentityByteConversion) {
-      new traversable.ByteResourceTraversable(opener, sizeFunc, startIndex, endIndex).asInstanceOf[LongTraversable[B]]
+      new traversable.ByteResourceTraversable(opener, sizeFunc, startIndex, endIndex, true).asInstanceOf[LongTraversable[B]]
     } else {
         new ResourceTraversable[B] {
           type In = SeekableByteChannel
           type SourceOut = A
     
           def source = new TraversableSource[SeekableByteChannel, A] {
-            private final val openedResource = opener
-            private final val channel = openedResource.get
-            private final val buffer = Buffers.nioDirectBuffer(Some(channel.size))
-            private final val iter = parser.iterator(buffer)
+            private[this] final val openedResource = opener
+            private[this] final val channel = openedResource.get
+            private[this] final val buffer = openedResource.context.createNioBuffer(Some(channel.size))
+            private[this] final val iter = parser.iterator(buffer)
     
             var position = 0L
     

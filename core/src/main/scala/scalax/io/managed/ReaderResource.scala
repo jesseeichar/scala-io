@@ -8,7 +8,7 @@ import java.io.{Reader, BufferedReader}
  */
 class ReaderResource[+A <: Reader] (
     opener: => A,
-    val context:ResourceContext = ResourceContext(),
+    val context:ResourceContext = DefaultResourceContext,
     closeAction: CloseAction[A] = CloseAction.Noop)
   extends ReadCharsResource[A]
   with ResourceOps[A, ReadCharsResource[A], ReaderResource[A]] {

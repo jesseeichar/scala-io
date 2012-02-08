@@ -123,8 +123,7 @@ trait LongTraversableLike[@specialized(Byte,Char) +A, +Repr <: LongTraversableLi
 
   override def head = headOption.getOrElse (throw new java.util.NoSuchElementException("head of an empty traversable"))
   override def headOption = withIterator { iterator =>
-    val iter = CloseableIteratorOps(iterator).take(1)
-    if (iter.hasNext) Some(iter.next()) else None
+    if (iterator.hasNext) Some(iterator.next()) else None
   }
 
   def lcount(p: A => Boolean): Long = withIterator { iter =>

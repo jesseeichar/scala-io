@@ -10,7 +10,7 @@ import scalax.io.ResourceAdapting.WritableChannelAdapter
  */
 class OutputStreamResource[+A <: OutputStream] (
     opener: => A,
-    val context:ResourceContext = ResourceContext(),
+    val context:ResourceContext = DefaultResourceContext,
     closeAction: CloseAction[A] = CloseAction.Noop)
   extends OutputResource[A]
   with ResourceOps[A, OutputResource[A], OutputStreamResource[A]] {
@@ -36,7 +36,7 @@ class OutputStreamResource[+A <: OutputStream] (
     new WriterResource(nResource, context, closer)
   }
   override def writableByteChannel = {
-    val nResource = new WritableChannelAdapter(opener)
+    def nResource = new WritableChannelAdapter(opener)
     val closer = ResourceAdapting.closeAction(closeAction)
     new WritableByteChannelResource(nResource, context, closer)
   }

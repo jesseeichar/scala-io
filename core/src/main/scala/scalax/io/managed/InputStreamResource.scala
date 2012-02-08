@@ -13,7 +13,7 @@ import java.nio.channels.ReadableByteChannel
  */
 class InputStreamResource[+A <: InputStream] (
     opener: => A,
-    val context:ResourceContext = ResourceContext(),
+    val context:ResourceContext = DefaultResourceContext,
     closeAction: CloseAction[A] = CloseAction.Noop,
     protected val sizeFunc:() => Option[Long] = () => None)
   extends InputResource[A]
@@ -23,7 +23,8 @@ class InputStreamResource[+A <: InputStream] (
 
   def open():OpenedResource[A] = new CloseableOpenedResource(opener,context, closeAction)
   
-  def unmanaged = new scalax.io.unmanaged.InputStreamResource[A](opener, context,closeAction)
+  def unmanaged = new scalax.io.unmanaged.InputStreamResource[A](opener, context,closeAction, () => None)
+      // sizeFunction must be unknown because we cannot risk opening the resource for reading the size in an unmanaged resource 
   def newContext(newContext:ResourceContext) = new InputStreamResource(opener, newContext, closeAction, sizeFunc)
   override def addCloseAction(newCloseAction: CloseAction[A]) = 
     new InputStreamResource(opener, context, newCloseAction :+ closeAction, sizeFunc)
@@ -44,7 +45,7 @@ class InputStreamResource[+A <: InputStream] (
   }
 
   def readableByteChannel:ReadableByteChannelResource[ReadableByteChannel] = {
-    def nResource = new ReadableChannelAdapter(opener, false)
+    def nResource = new ReadableChannelAdapter(opener)
     val closer = ResourceAdapting.closeAction(closeAction)
     new ReadableByteChannelResource(nResource, context, closer, sizeFunc)
   }
@@ -56,7 +57,7 @@ class InputStreamResource[+A <: InputStream] (
       
       new CloseableOpenedResource (Channels.newChannel(opened.get), context, closer)
     }
-    new traversable.ChannelBlockLongTraversable(blockSize orElse sizeFunc().map{Buffers.bufferSize(_,0)}, toChannelOpen)
+    new traversable.ChannelBlockLongTraversable(blockSize, sizeFunc, toChannelOpen)
   }
 
   override def bytesAsInts : LongTraversable[Int] = readableByteChannel.bytesAsInts

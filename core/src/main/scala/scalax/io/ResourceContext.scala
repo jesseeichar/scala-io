@@ -1,27 +1,38 @@
 package scalax.io
 import java.io.IOException
+import java.nio.ByteBuffer
 
-object ResourceContext {
-  val recommendedByteBufferSize = 4 * 1024
-  val recommendedCharBufferSize = 1024
+trait ResourceContext {
+  self =>
 
-  val byteBufferSize: Option[Long] => Int = (dataSize: Option[Long]) => dataSize match {
+  final val recommendedByteBufferSize = 4 * 1024
+  final val recommendedCharBufferSize = 1024
+
+  def errorHandler(exceptions: List[Throwable]): Unit = throw new ScalaIOException(exceptions)
+  def descName: ResourceDescName = UnknownName()
+  def byteBufferSize(dataSize: Option[Long]): Int = dataSize match {
     case Some(size) => (size min recommendedByteBufferSize).toInt
     case None => recommendedByteBufferSize
   }
-  val charBufferSize: Option[Int] => Int = (dataSize: Option[Int]) => dataSize match {
+  def charBufferSize(dataSize: Option[Int]): Int = dataSize match {
     case Some(size) => size min recommendedCharBufferSize
     case None => recommendedCharBufferSize
   }
-  val errorHandler: List[Throwable] => Unit = (exceptions: List[Throwable]) => throw new ScalaIOException(exceptions)
+  def createNioBuffer(bufferSize: Int): java.nio.ByteBuffer = ByteBuffer.allocateDirect(bufferSize)
+  final def createNioBuffer(dataSize: Option[Long]): java.nio.ByteBuffer = ByteBuffer.allocateDirect(byteBufferSize(dataSize))
+
+  def copy(
+    newByteBufferSize: Option[Option[Long] => Int] = None,
+    newCharBufferSize: Option[Option[Int] => Int] = None,
+    newCreateNioBuffer: Option[Int => ByteBuffer] = None,
+    newErrorHandler: Option[List[Throwable] => Unit] = None,
+    newDescName: Option[ResourceDescName] = None) = new ResourceContext {
+    override def errorHandler(exceptions: List[Throwable]): Unit = (newErrorHandler getOrElse (self.errorHandler _))(exceptions)
+    override def descName: ResourceDescName = newDescName getOrElse self.descName
+    override def byteBufferSize(dataSize: Option[Long]): Int = (newByteBufferSize getOrElse (self.byteBufferSize _))(dataSize)
+    override def charBufferSize(dataSize: Option[Int]): Int = (newCharBufferSize getOrElse (self.charBufferSize _))(dataSize)
+    override def createNioBuffer(bufferSize: Int): java.nio.ByteBuffer = newCreateNioBuffer.map(_(bufferSize)) getOrElse self.createNioBuffer(bufferSize)
+  }
 }
-case class ResourceContext (
-  recommendedByteBufferSize:Int = ResourceContext.recommendedByteBufferSize,
-  recommendedCharBufferSize:Int = ResourceContext.recommendedCharBufferSize,
-  byteBufferSize: Option[Long] => Int = ResourceContext.byteBufferSize,
-  charBufferSize: Option[Int] => Int = ResourceContext.charBufferSize,
-  errorHandler: List[Throwable] => Unit = ResourceContext.errorHandler,
-  descName:ResourceDescName = UnknownName()) {
-  
-  //def updateCloseAction(f:)
-}
+
+object DefaultResourceContext extends ResourceContext

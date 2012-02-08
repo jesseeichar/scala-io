@@ -17,7 +17,8 @@ protected[io] class ByteResourceTraversable(
   resourceOpener: => OpenedResource[Closeable],
   sizeFunc: () => Option[Long],
   start: Long,
-  end: Long)
+  end: Long,
+  allowSeekable: Boolean)
   extends LongTraversable[Byte]
   with LongTraversableLike[Byte, LongTraversable[Byte]] {
   self =>
@@ -25,9 +26,9 @@ protected[io] class ByteResourceTraversable(
   protected[io] def iterator: Sliceable = {
     val resource = resourceOpener
     resource.get match {
-      case FileChannelExtractor(seekable) =>
+      case FileChannelExtractor(seekable) if allowSeekable =>
         new SeekableByteChannelIterator(sizeFunc, new SeekableFileChannel(seekable), resource, start, end)
-      case seekable: SeekableByteChannel =>
+      case seekable: SeekableByteChannel if allowSeekable =>
         new SeekableByteChannelIterator(sizeFunc, seekable, resource, start, end)
       case stream: InputStream =>
         new ReadableByteChannelIterator(sizeFunc, Channels.newChannel(stream), resource, start, end)

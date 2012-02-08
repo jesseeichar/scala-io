@@ -17,7 +17,7 @@ import java.io.Closeable
  * override the default values.
  */
 object Buffers {
-  final val BufferSize = 4 * 1024
+/*  final val BufferSize = 4 * 1024
   final val CharBufferSize = 1024
 
   def arrayBuffer(size: Option[Long]) = {
@@ -51,5 +51,5 @@ object Buffers {
   def bufferSize(size: Long, min: Int) = {
     if (size < BufferSize && size > min) size.toInt
     else BufferSize
-  }
+  }*/
 }

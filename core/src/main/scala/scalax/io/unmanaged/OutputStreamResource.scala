@@ -11,7 +11,7 @@ import java.nio.channels.WritableByteChannel
  */
 class OutputStreamResource[+A <: OutputStream] (
     resource: A,
-    val context:ResourceContext = ResourceContext(),
+    val context:ResourceContext = DefaultResourceContext,
     closeAction: CloseAction[A] = CloseAction.Noop)
   extends OutputResource[A]
   with ResourceOps[A, OutputResource[A], OutputStreamResource[A]]
@@ -20,19 +20,19 @@ class OutputStreamResource[+A <: OutputStream] (
   self => 
   type Repr = OutputStreamResource[A]
 
-  override def open():OpenedResource[A] = new UnmanagedOpenedResource(resource, context)
+  override final val open:OpenedResource[A] = new UnmanagedOpenedResource(resource, unmanagedContext(context))
   override def close() = new CloseableOpenedResource(open.get, context, closeAction).close()
   override def newContext(newContext:ResourceContext) = 
     new OutputStreamResource(resource, newContext, closeAction)
   override def addCloseAction(newCloseAction: CloseAction[A]) = 
     new OutputStreamResource(resource, context, newCloseAction :+ closeAction)
-  override def unmanaged = this
+  override final val unmanaged = this
 
   override def outputStream = this
   protected override def underlyingOutput = this
   override def writer(implicit sourceCodec: Codec):WriterResource[Writer] = {
     def nResource = {
-      val a = open()
+      val a = open
       new OutputStreamWriter(a.get) with Adapter[A] {
         override def src = a.get
       }
@@ -41,7 +41,7 @@ class OutputStreamResource[+A <: OutputStream] (
     new WriterResource(nResource, context, closer)
   }
   override def writableByteChannel = {
-    val nResource = new WritableChannelAdapter(resource)
+    def nResource = new WritableChannelAdapter(resource)
     val closer = ResourceAdapting.closeAction(closeAction)
     new WritableByteChannelResource(nResource, context, closer)
   }

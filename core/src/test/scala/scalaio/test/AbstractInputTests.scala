@@ -257,7 +257,7 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
 
   @Test(timeout = 3000) //@Ignore
   def byteCountForLargeInput(): Unit = {
-    val text = (1 to Buffers.BufferSize flatMap { _ => TEXT_VALUE }).mkString
+    val text = (1 to (8*1024) flatMap { _ => TEXT_VALUE }).mkString
     val in = input(TextCustomData("\n", text))
 
 

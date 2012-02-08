@@ -26,7 +26,7 @@ class ResourceTraversableTest extends LongTraversableTest {
                                  closeFunction: () => Unit = () => ()):LongTraversable[A] = {
     def stream = Channels.newChannel(new ByteArrayInputStream(dataFunc(tsize) map {_.toByte} toArray))
     val ca = CloseAction((_:ReadableByteChannel) => closeFunction())
-    def resource = new CloseableOpenedResource(stream,ResourceContext(), ca)
+    def resource = new CloseableOpenedResource(stream,DefaultResourceContext, ca)
     val callBackAndConv = (i:Byte) => {
       callback(i.toInt)
       conv(i.toInt)

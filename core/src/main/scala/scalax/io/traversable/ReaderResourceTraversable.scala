@@ -15,8 +15,8 @@ private[io] class ReaderResourceTraversable (
   with LongTraversableLike[Char, LongTraversable[Char]] {
 
   protected[io] def iterator: CloseableIterator[Char] = new CloseableIterator[Char] {
-    private[this] val buffer = Buffers.readerBuffer
     private[this] val openResource = resourceOpener
+    private[this] val buffer = new Array[Char](openResource.context.charBufferSize(None))
     private[this] val inConcrete = openResource.get
     inConcrete.skip(start)
     private[this] var read = inConcrete.read(buffer)

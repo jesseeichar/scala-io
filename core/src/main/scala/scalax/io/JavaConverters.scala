@@ -77,7 +77,7 @@ object JavaConverters {
           val concreteBlockSize = blockSize match {
             case Some(size) => size
             case None if t.hasDefiniteSize => t.size
-            case None => Buffers.BufferSize
+            case None => DefaultResourceContext.recommendedByteBufferSize
           }
           def iterator: CloseableIterator[ByteBlock] = {
             val sliding: Iterator[Seq[Int]] = t.toIterator.sliding(concreteBlockSize, concreteBlockSize)
@@ -130,7 +130,7 @@ object JavaConverters {
           val concreteBlockSize = blockSize match {
             case Some(size) => size
             case None if t.hasDefiniteSize => t.size
-            case None => Buffers.BufferSize
+            case None => DefaultResourceContext.recommendedByteBufferSize
           }
           def iterator: CloseableIterator[ByteBlock] = {
             val sliding: Iterator[Seq[Byte]] = t.toIterator.sliding(concreteBlockSize, concreteBlockSize)

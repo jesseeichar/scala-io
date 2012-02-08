@@ -12,30 +12,30 @@ import java.io.InputStream
  */
 class ReadableByteChannelResource[+A <: ReadableByteChannel] (
     resource: A,
-    val context:ResourceContext = ResourceContext(),
-    closeAction: CloseAction[A] = CloseAction.Noop)
+    val context:ResourceContext = DefaultResourceContext,
+    closeAction: CloseAction[A] = CloseAction.Noop,
+    protected val sizeFunc:() => Option[Long] = () => None)
   extends InputResource[A]
   with ResourceOps[A, InputResource[A], ReadableByteChannelResource[A]]
   with UnmanagedResource {
 
   self => 
 
-  override def open():OpenedResource[A] = new UnmanagedOpenedResource(resource, context)
+  override final val open:OpenedResource[A] = new UnmanagedOpenedResource(resource, unmanagedContext(context))
   override def close() = new CloseableOpenedResource(open.get, context, closeAction).close()
   override def newContext(newContext:ResourceContext) = 
-    new ReadableByteChannelResource(resource, newContext, closeAction)
+    new ReadableByteChannelResource(resource, newContext, closeAction, sizeFunc)
   override def addCloseAction(newCloseAction: CloseAction[A]) = 
-    new ReadableByteChannelResource(resource, context, newCloseAction :+ closeAction)
-  override def unmanaged = this
-  protected def sizeFunc = () => None
+    new ReadableByteChannelResource(resource, context, newCloseAction :+ closeAction, sizeFunc)
+  override final val unmanaged = this
   
   override def inputStream:InputResource[InputStream] = {
-    def nResource = new ChannelInputStreamAdapter(resource, false)
+    def nResource = new ChannelInputStreamAdapter(resource)
     val closer = ResourceAdapting.closeAction(closeAction)
-    new InputStreamResource(nResource, context, closer)
+    new InputStreamResource(nResource, context, closer, sizeFunc)
   }
   override def reader(implicit sourceCodec: Codec) = {
-    def nResource = new ChannelReaderAdapter(resource,sourceCodec, false)
+    def nResource = new ChannelReaderAdapter(resource,sourceCodec)
     val closer = ResourceAdapting.closeAction(closeAction)
     new ReaderResource(nResource, context, closer)
   }
@@ -44,7 +44,7 @@ class ReadableByteChannelResource[+A <: ReadableByteChannel] (
   override def bytes = ResourceTraversable.byteChannelBased[Byte,Byte](this.open, sizeFunc)
   override def chars(implicit codec: Codec) = reader(codec).chars  // TODO optimize for byteChannel
   override def blocks(blockSize: Option[Int] = None): LongTraversable[ByteBlock] = 
-    new traversable.ChannelBlockLongTraversable(blockSize orElse sizeFunc().map{Buffers.bufferSize(_,0)}, open)
+    new traversable.ChannelBlockLongTraversable(blockSize, sizeFunc, open)
 
   override def toString: String = "ReadableByteChannelResource ("+context.descName.name+")"
 }

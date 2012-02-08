@@ -7,7 +7,7 @@ import java.io.{Writer, BufferedWriter}
  */
 class WriterResource[+A <: Writer] (
     opener: => A,
-    val context:ResourceContext = ResourceContext(),
+    val context:ResourceContext = DefaultResourceContext,
     closeAction: CloseAction[A] = CloseAction.Noop)
   extends WriteCharsResource[A]
   with ResourceOps[A, WriteCharsResource[A], WriterResource[A]]  {

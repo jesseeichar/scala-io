@@ -11,7 +11,7 @@ import StandardOpenOption._
  */
 class SeekableByteChannelResource[+A <: SeekableByteChannel] (
     opener: (Seq[OpenOption])=> A,
-    val context:ResourceContext = ResourceContext(),
+    val context:ResourceContext = DefaultResourceContext,
     closeAction: CloseAction[A] = CloseAction.Noop,
     protected val sizeFunc:() => Option[Long] = () => None,
     protected val openOptions:Option[Seq[OpenOption]] = None)
@@ -23,29 +23,32 @@ class SeekableByteChannelResource[+A <: SeekableByteChannel] (
 
   private def rawOpen() = opener(openOptions getOrElse ReadWrite)
   override def open():OpenedResource[A] = new CloseableOpenedResource(rawOpen(),context, closeAction)
-  override def unmanaged = new scalax.io.unmanaged.SeekableByteChannelResource[A](rawOpen(), context, closeAction, openOptions)
+  override def unmanaged = {
+    val r = rawOpen
+    new scalax.io.unmanaged.SeekableByteChannelResource[A](r, context, closeAction, () => Some(r.size))
+  }
   override def newContext(newContext:ResourceContext) = 
     new SeekableByteChannelResource(opener, newContext, closeAction, sizeFunc, openOptions)
   override def addCloseAction(newCloseAction: CloseAction[A]) = 
     new SeekableByteChannelResource(opener, context, newCloseAction :+ closeAction, sizeFunc, openOptions)
 
   override def inputStream = {
-    def nResource = new ChannelInputStreamAdapter(rawOpen(), false)
+    def nResource = new ChannelInputStreamAdapter(rawOpen())
     val closer = ResourceAdapting.closeAction(closeAction)
     new InputStreamResource(nResource,context, closer,sizeFunc)
   }
   override def outputStream = {
-    def nResource = new ChannelOutputStreamAdapter(rawOpen(), false)
+    def nResource = new ChannelOutputStreamAdapter(rawOpen())
     val closer = ResourceAdapting.closeAction(closeAction)
     new OutputStreamResource(nResource, context, closer)
   }
   override def reader(implicit sourceCodec: Codec) = {
-    def nResource = new ChannelReaderAdapter(rawOpen(),sourceCodec, false)
+    def nResource = new ChannelReaderAdapter(rawOpen(),sourceCodec)
     val closer = ResourceAdapting.closeAction(closeAction)
     new ReaderResource(nResource, context, closer)
   }
   override def writer(implicit sourceCodec: Codec) = {
-    def nResource = new ChannelWriterAdapter(rawOpen(),sourceCodec, false)
+    def nResource = new ChannelWriterAdapter(rawOpen(),sourceCodec)
     val closer = ResourceAdapting.closeAction(closeAction)
     new WriterResource(nResource, context, closer)
   }
@@ -73,7 +76,7 @@ class SeekableByteChannelResource[+A <: SeekableByteChannel] (
 
   protected override def underlyingOutput: OutputResource[OutputStream] = outputStream
   override def blocks(blockSize: Option[Int] = None):LongTraversable[ByteBlock] = 
-    new traversable.ChannelBlockLongTraversable(blockSize orElse sizeFunc().map{Buffers.bufferSize(_,0)}, open)
+    new traversable.ChannelBlockLongTraversable(blockSize, sizeFunc, open)
 
   override def bytesAsInts:LongTraversable[Int] = ResourceTraversable.seekableByteChannelBased[Byte,Int](this.open, sizeFunc, initialConv = ResourceTraversable.toIntConv)
   override def bytes:LongTraversable[Byte] = ResourceTraversable.seekableByteChannelBased[Byte,Byte](this.open, sizeFunc)

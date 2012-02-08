@@ -39,8 +39,14 @@ private[io] abstract class Sliceable extends CloseableIterator[Byte] {
   override def size = lsize min Integer.MAX_VALUE toInt
   def lsize = {
     def fileSize = sizeFunc() match {
-      case Some(size) => size
-      case None => super.size
+      case Some(size) => size min (end - start)
+      case None => 
+          var result = 0L  
+            while(hasNext){
+              result += 1
+              next
+            }
+            result
     }
 
     init()

@@ -12,7 +12,7 @@ class OpenableArrayBufferSeekableTest extends AbstractSeekableTests[SeekableByte
     buffer ++= data.getBytes(Codec.UTF8.charSet)
     new SeekableByteChannelResource(
         options => new ArrayBufferSeekableChannel(buffer,options:_*)(_=>(),_=>()), 
-        ResourceContext(), 
+        DefaultResourceContext, 
         closeAction, 
         () => Some(buffer.size))
   }
@@ -24,7 +24,7 @@ class SeekableArrayBufferSeekableTest extends AbstractSeekableTests[SeekableByte
     buffer ++= data.getBytes(Codec.UTF8.charSet)
     new SeekableByteChannelResource(
         _ => new ArrayBufferSeekableChannel(buffer,ReadWrite:_*)(_=>(),_=>()), 
-        ResourceContext(), 
+        DefaultResourceContext, 
         closeAction,
         () => Some(buffer.size))
   }

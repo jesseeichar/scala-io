@@ -12,7 +12,7 @@ import java.io.Writer
  */
 class WritableByteChannelResource[+A <: WritableByteChannel] (
     opener: => A,
-    val context:ResourceContext = ResourceContext(),
+    val context:ResourceContext = DefaultResourceContext,
     closeAction: CloseAction[A] = CloseAction.Noop)
   extends OutputResource[A]
   with ResourceOps[A, OutputResource[A], WritableByteChannelResource[A]]  {
@@ -27,13 +27,13 @@ class WritableByteChannelResource[+A <: WritableByteChannel] (
     new WritableByteChannelResource(opener, context, newCloseAction :+ closeAction)
 
   override def outputStream = {
-    def nResource = new ChannelOutputStreamAdapter(opener, false)
+    def nResource = new ChannelOutputStreamAdapter(opener)
     val closer = ResourceAdapting.closeAction(closeAction)
     new OutputStreamResource(nResource, context, closer)
   }
   protected override def underlyingOutput = outputStream
   override def writer(implicit sourceCodec: Codec) = {
-    def nResource = new ChannelWriterAdapter(opener,sourceCodec, false)
+    def nResource = new ChannelWriterAdapter(opener,sourceCodec)
     val closer = ResourceAdapting.closeAction(closeAction)
     new WriterResource(nResource, context, closer)
   }

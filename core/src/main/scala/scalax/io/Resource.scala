@@ -45,7 +45,7 @@ class CloseableOpenedResource[+R <: Closeable](val get:R,val context:ResourceCon
   def closeAction[U >: R] = (closeResourceAction :+ CloseAction ((_:R).close())).asInstanceOf[CloseAction[U]]
 }
 class UnmanagedOpenedResource[+R](val get:R,val context:ResourceContext) extends OpenedResource[R]{
-  def closeAction[U >: R] = CloseAction.Noop
+  def closeAction[U >: R]:CloseAction[U] = CloseAction.Noop
 }
 
 /**
@@ -422,7 +422,7 @@ object Resource {
    * @return a SeekableByteChannelResource
    */
   def fromSeekableByteChannel[A <: SeekableByteChannel](opener: => A) : SeekableByteChannelResource[A] = {
-    new SeekableByteChannelResource[A](_ => opener,ResourceContext(), Noop, seekablesizeFunction(opener),None)
+    new SeekableByteChannelResource[A](_ => opener,DefaultResourceContext, Noop, seekablesizeFunction(opener),None)
   }
 
   /**
@@ -436,7 +436,7 @@ object Resource {
    * @return a SeekableByteChannelResource
    */
   def fromSeekableByteChannel[A <: SeekableByteChannel](opener: Seq[OpenOption] => A) : SeekableByteChannelResource[A] = {
-    new SeekableByteChannelResource[A](opener,ResourceContext(), Noop, seekablesizeFunction(opener(Read :: Nil)),Some(ReadWrite))
+    new SeekableByteChannelResource[A](opener,DefaultResourceContext, Noop, seekablesizeFunction(opener(Read :: Nil)),Some(ReadWrite))
   }
 
   private def seekablesizeFunction(resource: => SeekableByteChannel)= () => {
@@ -461,7 +461,7 @@ object Resource {
         case len => Some(len)
       }
     }
-    new SeekableByteChannelResource[SeekableFileChannel](open ,ResourceContext(descName=PrefixedName("RandomAccessFile")),Noop, sizeFunc,Some(ReadWrite))
+    new SeekableByteChannelResource[SeekableFileChannel](open ,new ResourceContext{override def descName=PrefixedName("RandomAccessFile")},Noop, sizeFunc,Some(ReadWrite))
   }
 
   /**
@@ -484,7 +484,7 @@ object Resource {
         conn.getInputStream.close()
       }
     }
-    new InputStreamResource(url.openStream,ResourceContext(descName = KnownName(url.toExternalForm)),Noop,sizeFunc)
+    new InputStreamResource(url.openStream,new ResourceContext{override def descName=KnownName(url.toExternalForm)},Noop,sizeFunc)
   }
 
   /**
@@ -511,7 +511,7 @@ object Resource {
       if(file.exists) Some(file.length)
       else None
     }
-    new SeekableByteChannelResource[SeekableFileChannel](open,ResourceContext(descName = KnownName(file.getPath)),Noop,sizeFunc, Some(ReadWrite))
+    new SeekableByteChannelResource[SeekableFileChannel](open,new ResourceContext{override def descName=KnownName(file.getPath)},Noop,sizeFunc, Some(ReadWrite))
   }
   /**
    * Create a file from string then create a Seekable Resource from a File
