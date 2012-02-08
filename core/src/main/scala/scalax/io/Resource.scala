@@ -82,10 +82,21 @@ trait ResourceOps[+R, +UnmanagedType, +Repr] {
    */
   def context:ResourceContext
   /**
-   * Create a Resource instance that is configured with the new ResourceContext 
+   * Create a Resource instance that is configured with the new ResourceContext
+   * 
+   * @param newContext A new ResourceContext 
+   *  
+   * @return a new instance configured with the new context
    */
-  def newContext(newContext:ResourceContext):Repr
-  def updateContext(f:ResourceContext => ResourceContext) = newContext(f(context))
+  def updateContext(newContext:ResourceContext):Repr
+  /**
+   * Returns a new Resource instance with the updated context
+   * 
+   * @param f A function for transforming the current context to a new context with new values.
+   * 
+   * @return a new instance configured with the new context
+   */
+  def updateContext(f:ResourceContext => ResourceContext):Repr = updateContext(f(context))
   def addCloseAction(newCloseAction: CloseAction[R]):Repr
   /**
    * Create a new instance of this resource that will not close the resource after each operation.

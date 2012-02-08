@@ -27,7 +27,7 @@ class SeekableByteChannelResource[+A <: SeekableByteChannel] (
     val r = rawOpen
     new scalax.io.unmanaged.SeekableByteChannelResource[A](r, context, closeAction, () => Some(r.size))
   }
-  override def newContext(newContext:ResourceContext) = 
+  override def updateContext(newContext:ResourceContext) = 
     new SeekableByteChannelResource(opener, newContext, closeAction, sizeFunc, openOptions)
   override def addCloseAction(newCloseAction: CloseAction[A]) = 
     new SeekableByteChannelResource(opener, context, newCloseAction :+ closeAction, sizeFunc, openOptions)

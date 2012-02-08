@@ -11,13 +11,8 @@ import java.nio.channels.ReadableByteChannel
 import java.nio.ByteBuffer
 import java.io.Closeable
 
-/**
- * Not public API.  I don't think I like the idea of having constants
- * defined like this.  At the very least there needs to be a way to
- * override the default values.
- */
 object Buffers {
-/*  final val BufferSize = 4 * 1024
+  final val BufferSize = 4 * 1024
   final val CharBufferSize = 1024
 
   def arrayBuffer(size: Option[Long]) = {
@@ -51,5 +46,5 @@ object Buffers {
   def bufferSize(size: Long, min: Int) = {
     if (size < BufferSize && size > min) size.toInt
     else BufferSize
-  }*/
+  }
 }

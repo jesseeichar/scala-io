@@ -25,7 +25,7 @@ class ByteChannelResource[+A <: ByteChannel] (
   override final val open:OpenedResource[A] = new UnmanagedOpenedResource(resource, unmanagedContext(context))
   override def close() = new CloseableOpenedResource(open.get, context, closeAction).close()
   override final val unmanaged = this
-  override def newContext(newContext:ResourceContext) = 
+  override def updateContext(newContext:ResourceContext) = 
     new ByteChannelResource(resource, newContext, closeAction, sizeFunc)
   override def addCloseAction(newCloseAction: CloseAction[A]) = 
     new ByteChannelResource(resource, context, newCloseAction :+ closeAction, sizeFunc)

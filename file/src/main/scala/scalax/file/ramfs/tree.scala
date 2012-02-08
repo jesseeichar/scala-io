@@ -14,6 +14,7 @@ import java.io.{
   OutputStream, InputStream, ByteArrayOutputStream, ByteArrayInputStream, IOException
 }
 import scalax.io._
+import scalax.io.managed._
 import StandardOpenOption._
 
 private[ramfs] trait NodeFac {

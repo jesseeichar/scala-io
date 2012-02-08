@@ -22,7 +22,7 @@ class WritableByteChannelResource[+A <: WritableByteChannel] (
 
   override def open():OpenedResource[A] = new CloseableOpenedResource(opener,context, closeAction)
   override def unmanaged = new scalax.io.unmanaged.WritableByteChannelResource[A](opener, context, closeAction)
-  override def newContext(newContext:ResourceContext) = new WritableByteChannelResource(opener, newContext, closeAction)
+  override def updateContext(newContext:ResourceContext) = new WritableByteChannelResource(opener, newContext, closeAction)
   override def addCloseAction(newCloseAction: CloseAction[A]) = 
     new WritableByteChannelResource(opener, context, newCloseAction :+ closeAction)
 

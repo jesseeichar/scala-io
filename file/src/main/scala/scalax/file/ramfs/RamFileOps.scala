@@ -11,7 +11,7 @@ package ramfs
 
 import scalax.io.OpenSeekable
 import scalax.io.StandardOpenOption.{Create,CreateFull,Read,Write,Truncate,DeleteOnClose,WriteTruncate,Append,CreateNew}
-import scalax.io.ByteChannelResource
+import scalax.io.managed.ByteChannelResource
 import java.nio.channels.FileChannel
 import java.io.{
   FileNotFoundException, IOException

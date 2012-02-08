@@ -22,7 +22,7 @@ class WritableByteChannelResource[+A <: WritableByteChannel] (
 
   override final val open:OpenedResource[A] = new UnmanagedOpenedResource(resource, unmanagedContext(context))
   override def close() = new CloseableOpenedResource(open.get, context, closeAction).close()
-  override def newContext(newContext:ResourceContext) = 
+  override def updateContext(newContext:ResourceContext) = 
     new WritableByteChannelResource(resource, newContext, closeAction)
   override def addCloseAction(newCloseAction: CloseAction[A]) = 
     new WritableByteChannelResource(resource, context, newCloseAction :+ closeAction)

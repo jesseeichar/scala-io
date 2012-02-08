@@ -19,7 +19,7 @@ class OutputStreamResource[+A <: OutputStream] (
 
   override def open():OpenedResource[A] = new CloseableOpenedResource(opener,context, closeAction)
   override def unmanaged = new scalax.io.unmanaged.OutputStreamResource[A](opener, context, closeAction)
-  override def newContext(newContext:ResourceContext) = new OutputStreamResource(opener, newContext, closeAction)
+  override def updateContext(newContext:ResourceContext) = new OutputStreamResource(opener, newContext, closeAction)
   override def addCloseAction(newCloseAction: CloseAction[A]) = 
     new OutputStreamResource(opener, context, newCloseAction :+ closeAction)
 

@@ -17,7 +17,7 @@ class ReaderResource[+A <: Reader] (
 
   override def open():OpenedResource[A] = new CloseableOpenedResource(opener,context, closeAction)
   override def unmanaged = new scalax.io.unmanaged.ReaderResource[A](opener, context, closeAction)
-  override def newContext(newContext:ResourceContext) = 
+  override def updateContext(newContext:ResourceContext) = 
     new ReaderResource(opener, newContext, closeAction)
   override def addCloseAction(newCloseAction: CloseAction[A]) = 
     new ReaderResource(opener, context, newCloseAction :+ closeAction)

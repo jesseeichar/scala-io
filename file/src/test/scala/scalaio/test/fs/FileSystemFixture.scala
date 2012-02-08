@@ -17,6 +17,7 @@ import scalaio.test.{
 import scalax.io._
 import scalax.file._
 import scalax.io._
+import scalax.io.managed._
 
 import java.io.InputStream
 

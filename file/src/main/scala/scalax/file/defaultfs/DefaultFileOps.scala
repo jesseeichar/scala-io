@@ -10,6 +10,7 @@ package scalax.file
 package defaultfs
 
 import scalax.io._
+import scalax.io.managed._
 import StandardOpenOption._
 import scalax.io.nio.SeekableFileChannel
 import scalax.io.support.DeletingFileOutputStream
@@ -53,6 +54,7 @@ private[file] trait DefaultFileOps {
       def size = path.size
       def position:Long = c.position
       def position_=(position:Long):Unit = {c.position(position)}
+      def context = self.context
 
       override def open[U](f: (OpenSeekable) => U): U = f(this)
       protected def underlyingChannel(append: Boolean) = new OpenedResource[SeekableFileChannel] {
@@ -63,7 +65,7 @@ private[file] trait DefaultFileOps {
           def src = c
           override def close = {}
         }
-
+        def context = self.context
         override def closeAction[U >: SeekableFileChannel]:CloseAction[U] = CloseAction.Noop
       }
 

@@ -25,7 +25,7 @@ class InputStreamResource[+A <: InputStream] (
   
   def unmanaged = new scalax.io.unmanaged.InputStreamResource[A](opener, context,closeAction, () => None)
       // sizeFunction must be unknown because we cannot risk opening the resource for reading the size in an unmanaged resource 
-  def newContext(newContext:ResourceContext) = new InputStreamResource(opener, newContext, closeAction, sizeFunc)
+  def updateContext(newContext:ResourceContext) = new InputStreamResource(opener, newContext, closeAction, sizeFunc)
   override def addCloseAction(newCloseAction: CloseAction[A]) = 
     new InputStreamResource(opener, context, newCloseAction :+ closeAction, sizeFunc)
 

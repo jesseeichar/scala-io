@@ -22,7 +22,7 @@ class ByteChannelResource[+A <: ByteChannel] (
   override def open():OpenedResource[A] = new CloseableOpenedResource(opener,context, closeAction)
 
   override def unmanaged = new scalax.io.unmanaged.ByteChannelResource[A](opener, context, closeAction, sizeFunc)
-  override def newContext(newContext:ResourceContext) = new ByteChannelResource(opener, newContext, closeAction, () => None)
+  override def updateContext(newContext:ResourceContext) = new ByteChannelResource(opener, newContext, closeAction, () => None)
       // sizeFunction must be unknown because we cannot risk opening the resource for reading the size in an unmanaged resource
   override def addCloseAction(newCloseAction: CloseAction[A]) = 
     new ByteChannelResource(opener, context, newCloseAction :+ closeAction, sizeFunc)

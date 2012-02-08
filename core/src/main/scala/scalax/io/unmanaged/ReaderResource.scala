@@ -18,7 +18,7 @@ class ReaderResource[+A <: Reader] (
 
   override final val open:OpenedResource[A] = new UnmanagedOpenedResource(resource, unmanagedContext(context))
   override def close() = new CloseableOpenedResource(open.get, context, closeAction).close()
-  override def newContext(newContext:ResourceContext) = 
+  override def updateContext(newContext:ResourceContext) = 
     new ReaderResource(resource, newContext, closeAction)
   override def addCloseAction(newCloseAction: CloseAction[A]) = 
     new ReaderResource(resource, context, newCloseAction :+ closeAction)

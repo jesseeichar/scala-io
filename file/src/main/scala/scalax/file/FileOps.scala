@@ -15,9 +15,10 @@ import java.nio.channels.{
     ByteChannel, FileChannel
 }
 import scalax.io._
+import scalax.io.managed._
 import scala.collection.Traversable
 import scalax.io.StandardOpenOption._
-import Resource._
+import scalax.io.Resource._
 import scalax.io.{Codec, SeekableByteChannel, OpenOption, Seekable, LongTraversable}
 
 /**
@@ -176,9 +177,11 @@ abstract class FileOps extends Seekable {
       r
     }
     def closeAction = CloseAction((r:ByteChannel) => resource.closeAction(r))
-    new ByteChannelResource(resource.get,closeAction,() => Some(resource.get.size))    
+    new ByteChannelResource(resource.get,context, closeAction,() => Some(resource.get.size))    
   }
 
+  def context:ResourceContext = DefaultResourceContext
+  
   // required method for Output trait
   override protected def underlyingOutput = outputStream()
   protected def underlyingChannel(append: Boolean) = {

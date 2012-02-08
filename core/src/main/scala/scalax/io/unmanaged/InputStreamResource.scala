@@ -25,7 +25,7 @@ class InputStreamResource[+A <: InputStream] (
   override final val open:OpenedResource[A] = new UnmanagedOpenedResource(resource, unmanagedContext(context))
   override def close() = new CloseableOpenedResource(open.get, context, closeAction).close()
   override final val unmanaged = this
-  override def newContext(newContext:ResourceContext) = 
+  override def updateContext(newContext:ResourceContext) = 
     new InputStreamResource(resource, newContext, closeAction, sizeFunc)
   override def addCloseAction(newCloseAction: CloseAction[A]) = 
     new InputStreamResource(resource, context, newCloseAction :+ closeAction, sizeFunc)

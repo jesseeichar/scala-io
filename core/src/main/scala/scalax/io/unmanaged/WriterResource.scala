@@ -18,7 +18,7 @@ class WriterResource[+A <: Writer] (
     override def closeAction[U >: A] = CloseAction(_ => resource.flush())
   }
   override def close() = new CloseableOpenedResource(open.get, context, closeAction).close()
-  override def newContext(newContext:ResourceContext) = 
+  override def updateContext(newContext:ResourceContext) = 
     new WriterResource(resource, newContext, closeAction)
   override def addCloseAction(newCloseAction: CloseAction[A]) = 
     new WriterResource(resource, context, newCloseAction :+ closeAction)

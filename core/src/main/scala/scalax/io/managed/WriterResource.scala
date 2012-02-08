@@ -16,7 +16,7 @@ class WriterResource[+A <: Writer] (
 
   override def open():OpenedResource[A] = new CloseableOpenedResource(opener,context, closeAction)
   override def unmanaged = new scalax.io.unmanaged.WriterResource[A](opener, context, closeAction)
-  override def newContext(newContext:ResourceContext) = 
+  override def updateContext(newContext:ResourceContext) = 
     new WriterResource(opener, newContext, closeAction)
   override def addCloseAction(newCloseAction: CloseAction[A]) = 
     new WriterResource(opener, context, newCloseAction :+ closeAction)
