@@ -10,12 +10,14 @@ package scalax.file
 package defaultfs
 
 import java.io.{File=>JFile}
+import scalax.io.ResourceContext
+import scalax.io.DefaultResourceContext
 
 /**
  * @author  Jesse Eichar
  * @since   1.0
  */
-private[file] class DefaultFileSystem extends FileSystem {
+private[file] class DefaultFileSystem(val context:ResourceContext = DefaultResourceContext) extends FileSystem {
   val name = "Default"
   def separator: String = JFile.separator
   def fromString(path: String): DefaultPath = apply (new JFile (path))
@@ -45,6 +47,7 @@ private[file] class DefaultFileSystem extends FileSystem {
     }
     path
   }
-
+  def updateContext(newContext:ResourceContext):DefaultFileSystem = new DefaultFileSystem(newContext)
+  override def updateContext(f:ResourceContext => ResourceContext):DefaultFileSystem = updateContext(f(context))
   override def toString = "Default File System"
 }

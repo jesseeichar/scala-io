@@ -34,7 +34,31 @@ import java.io.{InputStream, File}
  * @see [[scalax.io.WriteChars]]
  */
 trait Input {
-
+  /**
+   * Get the Resource context associated with this Resource instance.  
+   * 
+   * @note as Resources are immutable objects a given Resource instance will always be associated with
+   * the same ResourceContext
+   * 
+   * @return the associated ResourceContext
+   */
+//  def context:ResourceContext
+  /**
+   * Create a Resource instance that is configured with the new ResourceContext
+   * 
+   * @param newContext A new ResourceContext 
+   *  
+   * @return a new instance configured with the new context
+   */
+//  def updateContext(newContext:ResourceContext):Input
+  /**
+   * Update the current ResourceContext and return a new Resource instance with the updated context
+   * 
+   * @param f A function for transforming the current context to a new context with new values.
+   * 
+   * @return a new instance configured with the new context
+   */
+//  def updateContext(f:ResourceContext => ResourceContext):Input = updateContext(f(context))
   /**
   * The number of bytes that can be read from the underlying resource.
   *

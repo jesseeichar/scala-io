@@ -37,7 +37,8 @@ private[traversable] class ReadableByteChannelIterator(
   @inline
   final def init() = if (inConcrete == null) {
     val sliceLength: Long = (end - start) min Int.MaxValue
-    buffer = openResource.context.createNioBuffer(sizeFunc().map(_ min (sliceLength)).orElse(Some(sliceLength)))
+    val bufferSize = sizeFunc().map(_ min (sliceLength)).orElse(Some(sliceLength))
+    buffer = openResource.context.createNioBuffer(bufferSize, Some(getIn), true)
     inConcrete = getIn
     skip(startIndex)
   }
@@ -95,7 +96,8 @@ private[traversable] class SeekableByteChannelIterator(
   @inline
   final def init() = if (!isInitialized) {
     val sliceLength: Long = (end - start) min Int.MaxValue
-    buffer = openResource.context.createNioBuffer(sizeFunc().map(_ min (sliceLength)).orElse(Some(sliceLength)))
+    val bufferSize = sizeFunc().map(_ min (sliceLength)).orElse(Some(sliceLength))
+    buffer = openResource.context.createNioBuffer(bufferSize, Some(getIn), true)
     isInitialized = true
     channel.position(position)
   }

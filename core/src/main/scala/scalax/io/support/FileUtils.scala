@@ -113,7 +113,7 @@ object FileUtils {
   }
   
   def copy(in:ReadableByteChannel, out:WritableByteChannel) = {
-    val buf = DefaultResourceContext.createNioBuffer(None)
+    val buf = DefaultResourceContext.createNioBuffer(None, Some(in), true)
     var read = in.read(buf)
     while(read > -1) {
       if(read == 0) Thread.sleep(100)

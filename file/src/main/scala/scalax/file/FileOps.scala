@@ -74,14 +74,19 @@ import scalax.io.{Codec, SeekableByteChannel, OpenOption, Seekable, LongTraversa
  * @since 1.0
  */
 abstract class FileOps extends Seekable {
-
+  self : Path =>
+      
   /**
    * Obtains an input stream resource for reading from the file
+   * 
+   * The Resource will be configured with the associated fileSystem's ResourceContext
    */
   def inputStream(): InputStreamResource[InputStream]
   /**
   * Obtains an OutputStreamResource for writing to the file
   *
+  * The Resource will be configured with the associated fileSystem's ResourceContext
+  * 
   * All {@link OpenOption} can be used except Read which will be ignored if present
   *
   *  @param openOptions
@@ -92,7 +97,9 @@ abstract class FileOps extends Seekable {
   def outputStream(openOptions:OpenOption*) : OutputStreamResource[OutputStream]
   /**
    * Obtains a ByteChannel for read/write access to the file.  If no OpenOptions are
-   * specified the underlying file will be opened with read/write/create/truncate options
+   * specified the underlying file will be opened with read/write/create/truncate options.
+   * 
+   * The Resource will be configured with the associated fileSystem's ResourceContext
    *
    * All {@link OpenOption} can be used
    *
@@ -108,12 +115,14 @@ abstract class FileOps extends Seekable {
    * If no OpenOptions are specified the underlying file will be
    * opened with read/write/create/truncate options
    *
-  * All {@link OpenOption} can be used
-  *
-  * @param openOptions
-  *          the options that define how the file is opened when using the stream
-  *          Default is read/write/create/truncate
-  */
+   * All {@link OpenOption} can be used
+   *
+   * The Resource will be configured with the associated fileSystem's ResourceContext
+   * 
+   * @param openOptions
+   *          the options that define how the file is opened when using the stream
+   *          Default is read/write/create/truncate
+   */
   def fileChannel(openOptions:OpenOption*): Option[SeekableByteChannelResource[SeekableByteChannel]]
 
   /**
@@ -134,8 +143,10 @@ abstract class FileOps extends Seekable {
    *          Default is Write/Create/Truncate
    * @param action
    *          The function that will be executed within the block
+   * @param context
+   *          The context for controlling buffer sizes error handling and other low level configuration
    */
-  def open[R](openOptions: Seq[OpenOption] = WriteTruncate)(action: OpenSeekable => R): R
+  def open[R](openOptions: Seq[OpenOption] = WriteTruncate, context:ResourceContext = fileSystem.context)(action: OpenSeekable => R): R
 
   /**
    * Performs an operation on the file with a FileLock
@@ -158,11 +169,13 @@ abstract class FileOps extends Seekable {
    * @param shared
    *          If true then a shared lock will be obtained if possible.  If shared locks are not supported
    *          then an exclusive lock will be obtained
+   * @param context
+   *          The context for controlling buffer sizes error handling and other low level configuration
    *
    * @return the result
    *          the result from the block or None if the filesystem does not support locking
    */
-  def withLock[R](start: Long = 0, size: Long = -1, shared: Boolean = false)(block: Seekable => R): Option[R]
+  def withLock[R](start: Long = 0, size: Long = -1, shared: Boolean = false, context:ResourceContext = fileSystem.context)(block: Seekable => R): Option[R]
 
   // API ends here.
   // required for path
@@ -180,8 +193,6 @@ abstract class FileOps extends Seekable {
     new ByteChannelResource(resource.get,context, closeAction,() => Some(resource.get.size))    
   }
 
-  def context:ResourceContext = DefaultResourceContext
-  
   // required method for Output trait
   override protected def underlyingOutput = outputStream()
   protected def underlyingChannel(append: Boolean) = {

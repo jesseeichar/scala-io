@@ -12,6 +12,7 @@ import java.net.URLStreamHandler
 import PathMatcher.{ GlobPathMatcher, RegexPathMatcher }
 import util.Random.nextInt
 import java.io.{ IOException, File => JFile }
+import scalax.io.ResourceContext
 
 /**
  * Factory object for obtaining filesystem objects
@@ -48,6 +49,31 @@ abstract class FileSystem {
     val lastChar = legalChars(nextInt(legalChars.size - 1))
     seg :+ lastChar mkString ""
   }
+  /**
+   * Get the Resource context associated with this FileSystem instance.  
+   * 
+   * @note as FileSystems are immutable objects a given Resource instance will always be associated with
+   * the same ResourceContext
+   * 
+   * @return the associated ResourceContext
+   */
+  def context:ResourceContext
+  /**
+   * Create a new FileSystem instance that is configured with the new ResourceContext
+   * 
+   * @param newContext a new ResourceContext 
+   *  
+   * @return a new instance configured with the new context
+   */
+  def updateContext(newContext:ResourceContext):FileSystem
+  /**
+   * Update the current ResourceContext and return a new FileSystem instance with the updated context
+   * 
+   * @param f A function for transforming the current context to a new context with new values.
+   * 
+   * @return a new instance configured with the new context
+   */
+  def updateContext(f:ResourceContext => ResourceContext):FileSystem = updateContext(f(context))
 
   /** A name identifying the filesystem */
   def name: String

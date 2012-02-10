@@ -14,6 +14,7 @@ import java.net.{
 }
 import java.util.UUID
 import java.io.{IOException, FileNotFoundException}
+import scalax.io.{ResourceContext, DefaultResourceContext}
 
 object RamFileSystem {
   case class RamFsId(id:String = UUID.randomUUID.toString)
@@ -37,7 +38,7 @@ object RamFileSystem {
   }
 }
 
-class RamFileSystem(val id : RamFileSystem.RamFsId = RamFileSystem.RamFsId(), val separator:String = "/") extends FileSystem {
+class RamFileSystem(val id : RamFileSystem.RamFsId = RamFileSystem.RamFsId(), val separator:String = "/", val context:ResourceContext = DefaultResourceContext) extends FileSystem {
   private var fsTree = new DirNode(separator)
 
   RamFileSystem.register(id,this)
@@ -67,7 +68,9 @@ class RamFileSystem(val id : RamFileSystem.RamFsId = RamFileSystem.RamFsId(), va
     else newpath
   }
   override def roots:Set[Path] = Set (root)
-  
+  def updateContext(newContext:ResourceContext):RamFileSystem = new RamFileSystem(id,separator,newContext)
+  override def updateContext(f:ResourceContext => ResourceContext):RamFileSystem = updateContext(f(context))
+
   def createTempFile(prefix: String = randomPrefix,
                    suffix: String = null,
                    dir: String = null,

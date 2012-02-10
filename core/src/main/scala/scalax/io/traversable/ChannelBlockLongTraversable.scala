@@ -17,8 +17,8 @@ class ChannelBlockLongTraversable(blockSize: Option[Int], sizeFunc:()  => Option
     private[this] val channel = opened.get
     private[this] val context = opened.context
     private[this] var buffer = blockSize match {
-      case Some(size) => context.createNioBuffer(size)
-      case None => context.createNioBuffer(sizeFunc())
+      case Some(size) => context.createNioBuffer(size, Some(channel), true)
+      case None => context.createNioBuffer(sizeFunc(), Some(channel), true)
     }
     // bytes read the last read.  -1 
     private[this] var state: State = ContinueState

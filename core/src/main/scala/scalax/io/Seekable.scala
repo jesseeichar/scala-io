@@ -104,7 +104,6 @@ trait Seekable extends Input with Output {
 
 
   protected def underlyingChannel(append:Boolean):OpenedResource[SeekableByteChannel]
-  protected def context:ResourceContext
 
   // for Java 7 change this to a Seekable Channel
   protected def readWriteChannel[U](f:SeekableByteChannel => U) : U = {
@@ -405,7 +404,7 @@ trait Seekable extends Input with Output {
 
 //      println("copySlice(srcIndex, destIndex, length)", srcIndex, destIndex, length)
 
-      val buf = context.createNioBuffer(None)
+      val buf = context.createNioBuffer(None, Some(channel), false)
       def write(done : Int) = {
 //        println("copySlice:write(done)", done)
         if(length < done + buf.capacity()) buf.limit((length - done).toInt)
@@ -461,7 +460,7 @@ trait Seekable extends Input with Output {
           // TODO user hasDefinitateSize to improve performance
           // if the size is small enough we can probably open a memory mapped buffer
           // or at least copy to a buffer in one go.
-            val buf = context.createNioBuffer(if(length < 0) None else Some(length))
+            val buf = context.createNioBuffer(if(length < 0) None else Some(length), Some(c), false)
             var earlyTermination = false
 
             @tailrec

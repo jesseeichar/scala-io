@@ -29,10 +29,11 @@ import scalax.io.Adapter
 private[file] trait DefaultFileOps {
   self : DefaultPath =>
 
-  def inputStream = Resource.fromInputStream(new FileInputStream(jfile))
+  override def inputStream = 
+    Resource.fromInputStream(new FileInputStream(jfile)).updateContext(fileSystem.context)
 
-  def outputStream(openOptions: OpenOption*) = {
-      openOptions match {
+  override def outputStream(openOptions: OpenOption*) = {
+      val r = openOptions match {
           case Seq() =>
               openOutputStream(jfile,openOptions)
           case opts if opts forall {opt => opt != Write && opt != Append} =>
@@ -40,21 +41,24 @@ private[file] trait DefaultFileOps {
           case _ =>
             openOutputStream(jfile,openOptions)
       }
+      r.updateContext(fileSystem.context)
   }
 
-  def channel(openOptions: OpenOption*) = {
-    Resource.fromSeekableByteChannel(openChannel(jfile,openOptions))
-  }
-  override def fileChannel(openOptions: OpenOption*):Some[SeekableByteChannelResource[SeekableFileChannel]] = Some(Resource fromSeekableByteChannel openChannel(jfile,openOptions))
+  override def channel(openOptions: OpenOption*) = 
+    Resource.fromSeekableByteChannel(openChannel(jfile,openOptions)).updateContext(fileSystem.context)
 
-  def open[R](openOptions: Seq[OpenOption] = List(Read,Write))(action: OpenSeekable => R): R = {
+  override def fileChannel(openOptions: OpenOption*):Some[SeekableByteChannelResource[SeekableFileChannel]] = 
+    Some(Resource.fromSeekableByteChannel(openChannel(jfile,openOptions)).updateContext(fileSystem.context))
+
+  def open[R](openOptions: Seq[OpenOption] = List(Read,Write), context:ResourceContext)(action: OpenSeekable => R): R = {
+    val contextToUse = context
     val c = openChannel(jfile,openOptions)
     val path = this
     val seekable = new Seekable {
       def size = path.size
       def position:Long = c.position
       def position_=(position:Long):Unit = {c.position(position)}
-      def context = self.context
+      def context = contextToUse
 
       override def open[U](f: (OpenSeekable) => U): U = f(this)
       protected def underlyingChannel(append: Boolean) = new OpenedResource[SeekableFileChannel] {
@@ -65,7 +69,7 @@ private[file] trait DefaultFileOps {
           def src = c
           override def close = {}
         }
-        def context = self.context
+        def context = contextToUse
         override def closeAction[U >: SeekableFileChannel]:CloseAction[U] = CloseAction.Noop
       }
 
@@ -77,9 +81,9 @@ private[file] trait DefaultFileOps {
     }
   }
 
-  def withLock[R](start: Long = 0, size: Long = -1, shared: Boolean = false)(block: Seekable => R): Option[R] = {
+  def withLock[R](start: Long = 0, size: Long = -1, shared: Boolean = false, context:ResourceContext)(block: Seekable => R): Option[R] = {
     val self = this
-    fileChannel().get.acquireAndGet{ fc =>
+    fileChannel().get.updateContext(fileSystem.context).acquireAndGet{ fc =>
       Option(fc.self.tryLock(start,size,shared)).map{_ => block(self)}
     }
   }

@@ -1261,4 +1261,6 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
   override protected def tempFile() : Path = fileSystem.createTempFile()
   override def copyDataTo(output: Output): Unit = channel(StandardOpenOption.Read).copyDataTo(output)
   override def doCopyFrom(input:Input): Unit = channel(StandardOpenOption.WriteTruncate:_*).doCopyFrom(input)
+  def context = fileSystem.context
+
 }

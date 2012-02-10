@@ -90,13 +90,20 @@ trait ResourceOps[+R, +UnmanagedType, +Repr] {
    */
   def updateContext(newContext:ResourceContext):Repr
   /**
-   * Returns a new Resource instance with the updated context
+   * Update the current ResourceContext and return a new Resource instance with the updated context
    * 
    * @param f A function for transforming the current context to a new context with new values.
    * 
    * @return a new instance configured with the new context
    */
-  def updateContext(f:ResourceContext => ResourceContext):Repr = updateContext(f(context))
+  def updateContext(f:ResourceContext => ResourceContext):Repr
+  /**
+   * Add a CloseAction that will be executed each time the resource is closed.
+   * 
+   * @param newCloseAction the action to add
+   * 
+   * @return a new resource instance with the close action added 
+   */
   def addCloseAction(newCloseAction: CloseAction[R]):Repr
   /**
    * Create a new instance of this resource that will not close the resource after each operation.
@@ -209,7 +216,8 @@ trait InputResource[+R <: Closeable] extends Resource[R] with Input with Resourc
      *
      * @return the [[scalax.io.InputStreamResource]](typically) version of this object.
      */
-    def inputStream: InputResource[InputStream]
+  def inputStream: InputResource[InputStream]
+    
   override def copyDataTo(output: Output): Unit =
     output  match {
       case outR: OutputResource[_] =>

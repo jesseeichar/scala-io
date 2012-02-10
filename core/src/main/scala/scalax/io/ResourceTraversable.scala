@@ -180,7 +180,7 @@ private[io] object ResourceTraversable {
 
         def source = new TraversableSource[Reader, Char] {
           private[this] final val openedResource = opener
-          private[this] final val buffer = new Array[Char](openedResource.context.charBufferSize(None))
+          private[this] final val buffer = new Array[Char](openedResource.context.charBufferSize(None, true))
           private[this] final val iter = parser.iterator(buffer)
           private[this] final val stream = openedResource.get
           def read() = {
@@ -224,7 +224,7 @@ private[io] object ResourceTraversable {
         def source = new TraversableSource[ReadableByteChannel, A] {
           private[this] final val openedResource = opener
           private[this] final val channel = openedResource.get
-          private[this] final val buffer = openedResource.context.createNioBuffer(sizeFunc())
+          private[this] final val buffer = openedResource.context.createNioBuffer(sizeFunc(), Some(channel), true)
           private[this] final val iter = parser.iterator(buffer)
           
           def read() = {
@@ -282,7 +282,7 @@ private[io] object ResourceTraversable {
           def source = new TraversableSource[SeekableByteChannel, A] {
             private[this] final val openedResource = opener
             private[this] final val channel = openedResource.get
-            private[this] final val buffer = openedResource.context.createNioBuffer(Some(channel.size))
+            private[this] final val buffer = openedResource.context.createNioBuffer(Some(channel.size), Some(channel), true)
             private[this] final val iter = parser.iterator(buffer)
     
             var position = 0L

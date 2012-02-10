@@ -17,6 +17,7 @@ import java.io.{
   FileNotFoundException, IOException
 }
 import scalax.io.{Seekable, OpenOption}
+import scalax.io.ResourceContext
 
 private[file] trait RamFileOps {
   self : RamPath =>
@@ -59,18 +60,18 @@ private[file] trait RamFileOps {
     }
 
   }
-  def inputStream = fileResource(_.inputResource,Read)
+  def inputStream = fileResource(_.inputResource.updateContext(fileSystem.context),Read)
   def outputStream(openOptions: OpenOption*) = {
     val updatedOpts = openOptions match {
           case Seq() => WriteTruncate
           case opts if opts forall {opt => opt != Write && opt != Append} => openOptions :+ Write
           case _ => openOptions
       }
-    fileResource( _.outputResource(this, updatedOpts:_*), updatedOpts:_*)
+    fileResource( _.outputResource(this, updatedOpts:_*).updateContext(fileSystem.context), updatedOpts:_*)
   }
-  def channel(openOptions: OpenOption*) = fileResource(_.channel(this, openOptions:_*), openOptions:_*)
+  def channel(openOptions: OpenOption*) = fileResource(_.channel(this, openOptions:_*).updateContext(fileSystem.context), openOptions:_*)
   def fileChannel(openOptions: OpenOption*) = None // not supported
 
-  def withLock[R](start: Long,size: Long,shared: Boolean)(block: (Seekable) => R):Option[R] = None // TODO
-  def open[R](openOptions: Seq[OpenOption])(action: (OpenSeekable) => R):R = null.asInstanceOf[R] // TODO
+  def withLock[R](start: Long,size: Long,shared: Boolean, context:ResourceContext)(block: (Seekable) => R):Option[R] = None // TODO
+  def open[R](openOptions: Seq[OpenOption], context:ResourceContext)(action: (OpenSeekable) => R):R = null.asInstanceOf[R] // TODO
 }
