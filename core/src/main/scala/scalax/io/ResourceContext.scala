@@ -23,16 +23,24 @@ trait ResourceContext {
   final val recommendedCharBufferSize = 1024
 
   /**
-   * Called when an exception is raised during a IO operation.  The resource will be closed and all exceptions (including the closing exceptions)
+   * Called when an exception is raised during an IO operation.  The resource will be closed and all exceptions (including the closing exceptions)
    * will be passed to this errorHandler.
    *
-   * If the exception occurred during the closing of the resource the mainException will be None
+   * If no exception occurred during the access of the resource the mainException will be a Right(...) containing the result and the closingExceptions
+   * will contain the list of exceptions raised while closing the resource (and the CloseActions)
+   * 
+   * The default behaviour is to throw a ScalaIOException irregardless of whether the exception occurred during the operation or during closing the
+   * resource.
    *
-   * @param mainException the main exception or None if no exception was raised during the normal access of the resource
+   * @param accessResult the exception that occurred during the resource access or the result.  
    *
    * @param closingExceptions the exceptions raised while closing the resource.
+   * 
+   * @return if the method does not throw an exception the result is to be returned by the errorHandler.
    */
-  def errorHandler(mainException: Option[Throwable], closingExceptions: List[Throwable]): Unit = throw new ScalaIOException(mainException.toList ++ closingExceptions)
+  def errorHandler[U](accessResult: Either[Throwable, U], closingExceptions: List[Throwable]): U = {
+    throw new ScalaIOException(accessResult.left.toOption,closingExceptions)
+  }
 
   /**
    * A name that describes the resource.  This has no real functional value, it is intended to assist in debugging (for example loggin)
@@ -124,13 +132,14 @@ trait ResourceContext {
    * @param newDescName A new descriptive name for the associated resources
    *        The default value is None which will keep the behaviour of the current context 
    */
-  def copy(
+  def copy[U](
     newByteBufferSize: Option[(Option[Long], Boolean) => Int] = None,
     newCharBufferSize: Option[(Option[Int], Boolean) => Int] = None,
     newCreateNioBuffer: Option[(Int, Option[Channel], Boolean) => ByteBuffer] = None,
-    newErrorHandler: Option[(Option[Throwable], List[Throwable]) => Unit] = None,
+    newErrorHandler: Option[(Either[Throwable,U], List[Throwable]) => U] = None,
     newDescName: Option[ResourceDescName] = None) = new ResourceContext {
-    override def errorHandler(mainException: Option[Throwable], closingExceptions: List[Throwable]): Unit = (newErrorHandler getOrElse (self.errorHandler _))(mainException, closingExceptions)
+    override def errorHandler[U](accessResult: Either[Throwable, U], closingExceptions: List[Throwable]): U = 
+      (newErrorHandler getOrElse (self.errorHandler _))(accessResult.asInstanceOf[Either[Throwable,Nothing]], closingExceptions).asInstanceOf[U]
     override def descName: ResourceDescName = newDescName getOrElse self.descName
     override def byteBufferSize(dataSize: Option[Long], readOnly: Boolean): Int = (newByteBufferSize getOrElse (self.byteBufferSize _))(dataSize, readOnly)
     override def charBufferSize(dataSize: Option[Int], readOnly: Boolean): Int = (newCharBufferSize getOrElse (self.charBufferSize _))(dataSize, readOnly)

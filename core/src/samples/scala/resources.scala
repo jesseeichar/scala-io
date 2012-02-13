@@ -167,8 +167,10 @@ object Resources {
     // another option is the extend/implement the CloseAction trait
     val closer2 = new CloseAction[Any]{
 
-      protected def closeImpl(a: Any):Unit =
+      protected def closeImpl(a: Any):List[Throwable] = {
         println("Message from second closer")
+        Nil
+      }
     }
 
     // closers can naturally be combined

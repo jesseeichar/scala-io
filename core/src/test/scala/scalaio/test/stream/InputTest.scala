@@ -44,6 +44,9 @@ class InputTest extends AbstractInputTests with DataIndependentLongTraversableTe
       new ByteArrayInputStream(data.getBytes(Codec.UTF8.charSet))
     )
     case Image => fromInputStream(Constants.IMAGE.openStream())
+    case ErrorOnRead => fromInputStream(ErrorOnRead.errorInputStream)
+    case ErrorOnClose => fromInputStream(ErrorOnClose.errorInputStream)
+
   }
 
   override protected def sizeIsDefined = false

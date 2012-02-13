@@ -56,6 +56,8 @@ class InputTest extends AbstractInputTests with DataIndependentLongTraversableTe
     case TextCustom(sep) => textResource(sep)
     case TextCustomData(sep, data) => customDataResource(data)
     case Image => imageResource
+    case ErrorOnRead => fromReadableByteChannel(Channels.newChannel(ErrorOnRead.errorInputStream))
+    case ErrorOnClose => fromReadableByteChannel(Channels.newChannel(ErrorOnClose.errorInputStream))
   }
 
   override protected def sizeIsDefined = false

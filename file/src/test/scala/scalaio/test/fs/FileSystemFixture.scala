@@ -9,17 +9,15 @@
 package scalaio.test.fs
 
 import util.Random
-
 import scalaio.test.{
   Constants, Node
 }
-
 import scalax.io._
 import scalax.file._
 import scalax.io._
 import scalax.io.managed._
-
 import java.io.InputStream
+import java.io.IOException
 
 object TestDataType extends Enumeration {
   type Type = Value
@@ -56,7 +54,19 @@ abstract class FileSystemFixture(val fs : FileSystem, rnd : Random) {
     val seg = rndInt(10)
     file(seg)
   }
-
+  def errorOnCloseResource = {
+    val p = path
+    p.createFile()
+    p.channel().addCloseAction(CloseAction(_ => throw new IOException("closeError")))
+  }
+  def errorOnAccessResource = {
+    val p = {
+      var tmp = path
+      while (tmp.exists) tmp = path
+      tmp
+    }
+    p.channel().addCloseAction(CloseAction(_ => throw new IOException("closeError")))
+  }
   def path(segments : Int, root : Path = root) : Path = root \ fs.fromString(file(segments))
   def path : Path = root \ fs.fromString(file)
 

@@ -96,7 +96,7 @@ trait ResourceOps[+R, +UnmanagedType, +Repr] {
    * 
    * @return a new instance configured with the new context
    */
-  def updateContext(f:ResourceContext => ResourceContext):Repr
+  def updateContext(f:ResourceContext => ResourceContext):Repr = updateContext(f(context))
   /**
    * Add a CloseAction that will be executed each time the resource is closed.
    * 
@@ -146,7 +146,7 @@ trait ResourceOps[+R, +UnmanagedType, +Repr] {
  * @author  Jesse Eichar
  * @since   1.0
  */
-trait Resource[+R <: Closeable] extends ManagedResourceOperations[R] with ResourceOps[R, Resource[R], Resource[R]] {
+trait Resource[+R] extends ManagedResourceOperations[R] with ResourceOps[R, Resource[R], Resource[R]] {
   /**
    * Creates a new instance of the underlying resource (or opens it).
    * Sometimes the code block used to create the Resource is non-reusable in
@@ -177,25 +177,21 @@ trait Resource[+R <: Closeable] extends ManagedResourceOperations[R] with Resour
    */
     def open(): OpenedResource[R]
         
-    def acquireFor[B](f : R => B) : Either[List[Throwable], B] ={
-      val resource = open()
+    final def acquireFor[B](f : R => B) : Either[List[Throwable], B] ={
+    val resource = open()
 
-      var exceptions = List[Throwable]()
-      val result = try {
-          Some(f(resource.get))
-      } catch {
-          case e =>
-              exceptions ::= e
-              None
-      } finally {
-          exceptions ++= resource.close()
-      }
+    var closeExceptions: List[Throwable] = Nil
+    val catcher = util.control.Exception.allCatch.andFinally(closeExceptions = resource.close())
+    val result = catcher.either {f(resource.get)}
 
-      result match {
-          case Some(r) => Right(r)
-          case None => Left(exceptions)
+    Right {
+      if (result.left.toOption ++ closeExceptions nonEmpty) {
+        context.errorHandler(result, closeExceptions)
+      } else {
+        result.right.get
       }
     }
+  }
 }
 
 /**

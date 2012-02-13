@@ -16,23 +16,26 @@ object CloseAction {
    * on close.
    */
   def apply[A](f : A => Unit ) = new CloseAction[A]{
-    protected def closeImpl(a:A) = f(a)
+    protected def closeImpl(a:A) = {
+      f(a)
+      Nil
+    }
   }
 
   /**
    * The unit/nothing [[scalax.io.CloseAction]]
    */
   object Noop extends CloseAction[Any] {
-    protected def closeImpl(a:Any) = ()
+    protected def closeImpl(a:Any) = Nil
     override def +:[B <: Any](o:CloseAction[B]):CloseAction[B] = o
     override def :+[B <: Any](o:CloseAction[B]):CloseAction[B] = o
   }
   protected[CloseAction] class Prepend[A,B >: A](a:CloseAction[A],b:CloseAction[B]) extends CloseAction[A] {
-    protected def closeImpl(p:A):Unit = ()
+    protected def closeImpl(p:A) = Nil
     override def apply(u:A):List[Throwable] = a(u) ++ b(u)
   }
   protected[CloseAction] class Append[A,B >: A](a:CloseAction[A],b:CloseAction[B]) extends CloseAction[A] {
-    protected def closeImpl(p:A):Unit = ()
+    protected def closeImpl(p:A)= Nil
     override def apply(u:A):List[Throwable] = b(u) ++ a(u)
   }
 }
@@ -91,7 +94,7 @@ trait CloseAction[-A] {
    *
    * @param resource the resource that will be closed.
    */
-  protected def closeImpl(resource:A):Unit
+  protected def closeImpl(resource:A):List[Throwable]
 
   /**
    * Execute the action and return any Exceptions that may have
@@ -103,7 +106,6 @@ trait CloseAction[-A] {
   def apply(resource:A):List[Throwable] = {
     try {
       closeImpl(resource)
-      Nil
     } catch {
       case e => List(e)
     }

@@ -11,7 +11,6 @@ package scalax.io
 import java.io.ByteArrayInputStream
 import java.nio.channels.Channels
 import java.nio.ByteBuffer
-import scalaio.test.AbstractInputTests
 import scalaio.test.stream.InputTest
 import collection.mutable.ArrayBuffer
 

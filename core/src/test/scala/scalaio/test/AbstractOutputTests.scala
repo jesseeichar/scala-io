@@ -13,15 +13,20 @@ import org.junit.Assert._
 import org.junit.{
 Test, Ignore
 }
-
 import Constants.TEXT_VALUE
+import java.io.IOException
+import java.io.OutputStream
 
 abstract class AbstractOutputTests[InResource, OutResource] extends scalax.test.sugar.AssertionSugar {
   private final val DEFAULT_DATA = "default data"
   implicit val codec = Codec.UTF8
 
   def open(closeAction:CloseAction[OutResource] = CloseAction.Noop): (Input, Output)
-
+  def errorOnWriteOut:Output
+  final def errorStream = new OutputStream(){
+    override def write(b:Array[Byte], off:Int, len:Int) = throw new IOException("error") 
+    override def write(b:Int) = throw new IOException("error") 
+  }
   @Test //@Ignore
   def write_bytes(): Unit = {
     val (input, output) = open()
@@ -94,7 +99,7 @@ abstract class AbstractOutputTests[InResource, OutResource] extends scalax.test.
 
   @Test //@Ignore
   def openOutput: Unit = {
-          var closes = 0;
+    var closes = 0;
     val (in,out) = open(CloseAction((c:Any) => closes += 1))
     out match {
       case out:OutputResource[_] =>
@@ -113,4 +118,64 @@ abstract class AbstractOutputTests[InResource, OutResource] extends scalax.test.
       case _ => ()
     }
   }
+  
+  
+  @Test
+  def scalaIoException_On_Write_Error_by_default{
+    intercept[ScalaIOException] {
+        errorOnWriteOut.write("hi")
+    }
+  }
+    
+  @Test
+  def scalaIoException_On_Close_Error_by_default{
+    intercept[ScalaIOException] {
+       open(CloseAction(_ => 
+         throw new IOException("CloseError")
+         ))._2.write("hi")
+    }
+  }
+  @Test
+  def customErrorHandler_On_Write_Error{
+    val testContext = new ErrorHandlingTestContext() 
+
+    val errorOnReadOutput = errorOnWriteOut
+
+    if(errorOnReadOutput.isInstanceOf[Resource[_]]) {
+      val customHandlerOutput = errorOnReadOutput.asInstanceOf[Resource[_]].
+                                  updateContext(testContext.customContext).
+                                  asInstanceOf[Output]
+      customHandlerOutput.write("hi")
+      assertEquals(1, testContext.accessExceptions)
+      assertEquals(0, testContext.closeExceptions)
+    }
+  }
+  @Test
+  def customErrorHandler_On_Close_Error{
+    val testContext = new ErrorHandlingTestContext() 
+
+    val errorOnCloseOutput = open(CloseAction(_ => throw new IOException("CloseError")))._2
+    if (errorOnCloseOutput.isInstanceOf[Resource[_]]) {
+      val customHandlerOutput = errorOnCloseOutput.asInstanceOf[Resource[_]].
+                                  updateContext(testContext.customContext).
+                                  asInstanceOf[Output]
+      customHandlerOutput.write("hi")
+      assertEquals(0, testContext.accessExceptions)
+      assertEquals(1, testContext.closeExceptions)
+    }
+  }
+  @Test
+  def customErrorHandler_On_AcquireAndGet {
+    val testContext = new ErrorHandlingTestContext() 
+    val (_,goodOutput) = open()
+    
+    if (goodOutput.isInstanceOf[Resource[_]]) {
+      val customHandlerInput = goodOutput.asInstanceOf[Resource[_]].
+        updateContext(testContext.customContext)
+      customHandlerInput.acquireAndGet(_ => assert(false))
+      assertEquals(1, testContext.accessExceptions)
+      assertEquals(0, testContext.closeExceptions)
+    }
+  }
+
 }

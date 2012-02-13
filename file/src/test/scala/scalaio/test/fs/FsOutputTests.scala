@@ -25,6 +25,7 @@ abstract class FsOutputTests extends AbstractOutputTests[Path,Path] with Fixture
         val path = fixture.path
         (path, path)
     }
+  def errorOnWriteOut = fixture.errorOnAccessResource
 
     @Test //@Ignore
     def create_file_with_write() : Unit = {

@@ -21,6 +21,9 @@ import java.io.{ByteArrayOutputStream, ByteArrayInputStream}
 import java.nio.channels.Channels
 import java.io.File
 import java.io.FileOutputStream
+import java.io.InputStream
+import java.io.IOException
+import java.io.Closeable
 
 abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
 
@@ -39,6 +42,19 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
   case class TextCustom(s: String) extends Text(s)
 
   case class TextCustomData(s: String, data: String) extends Text(s)
+
+  case object ErrorOnRead extends Type {
+    def errorInputStream = new InputStream {
+      override def read = throw new IOException("error")
+      override def read(buf:Array[Byte], off:Int, len:Int) = throw new IOException("error") 
+    }
+  }
+  
+  case object ErrorOnClose extends Type {
+    def errorInputStream = new ByteArrayInputStream("hello".getBytes("UTF-8")) {
+      override def close = throw new IOException("error")
+    }
+  } 
 
   protected def input(t: Type): Input
 
@@ -264,5 +280,68 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
     assertEquals(text.getBytes("UTF-8").length, in.bytes.size)
   }
 
+  @Test
+  def scalaIoException_On_Read_Error_by_default{
+    intercept[ScalaIOException] {
+        input(ErrorOnRead).bytes.head
+    }
+  }
+    
+  @Test
+  def scalaIoException_On_Close_Error_by_default{
+    intercept[ScalaIOException] {
+        input(ErrorOnClose).bytes.head
+    }
+  }
+  @Test
+  def customErrorHandler_On_Read_Error{
+    val testContext = new ErrorHandlingTestContext() 
+
+    val errorOnReadInput = input(ErrorOnRead)
+    if(errorOnReadInput.isInstanceOf[Resource[_]]) {
+      val customHandlerInput = errorOnReadInput.asInstanceOf[Resource[_]].
+                                  updateContext(testContext.customContext).
+                                  asInstanceOf[Input]
+      customHandlerInput.bytes.head
+      assertEquals(1, testContext.accessExceptions)
+      assertEquals(0, testContext.closeExceptions)
+    }
+  }
+  @Test
+  def customErrorHandler_On_Close_Error{
+    val testContext = new ErrorHandlingTestContext() 
+
+    val errorOnCloseInput = input(ErrorOnClose)
+    if (errorOnCloseInput.isInstanceOf[Resource[_]]) {
+      val customHandlerInput = errorOnCloseInput.asInstanceOf[Resource[_]].
+                                  updateContext(testContext.customContext).
+                                  asInstanceOf[Input]
+      customHandlerInput.bytes.head
+      assertEquals(0, testContext.accessExceptions)
+      assertEquals(1, testContext.closeExceptions)
+    }
+  }
+  @Test
+  def customErrorHandler_On_AcquireAndGet {
+    var readExceptions = 0
+    var closeExceptions = 0
+    val customContext = new ResourceContext{
+      override def errorHandler[U](accessResult: Either[Throwable, U], closingExceptions: List[Throwable]): U = {
+        accessResult.left.toOption foreach {_ => readExceptions += 1}
+        closingExceptions foreach {_ => closeExceptions += 1}
+        null.asInstanceOf[U]
+      }
+    }
+
+    val goodInput = input(Image)
+    
+    if (goodInput.isInstanceOf[Resource[_]]) {
+      val customHandlerInput = goodInput.asInstanceOf[Resource[_]].
+        updateContext(customContext)
+      customHandlerInput.acquireAndGet(_ => assert(false))
+      assertEquals(1, readExceptions)
+      assertEquals(0, closeExceptions)
+    }
+  }
 
 }

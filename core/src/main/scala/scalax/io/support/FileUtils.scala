@@ -113,16 +113,22 @@ object FileUtils {
   }
   
   def copy(in:ReadableByteChannel, out:WritableByteChannel) = {
-    val buf = DefaultResourceContext.createNioBuffer(None, Some(in), true)
-    var read = in.read(buf)
-    while(read > -1) {
-      if(read == 0) Thread.sleep(100)
-      else {
-    	buf.flip()
-        out.write(buf)
-      }
-      buf.clear()
-      read = in.read(buf)
+    (in,out) match {
+      case (fc: FileChannel, oc) => fc.transferTo(0, Long.MaxValue, oc)
+      case (ic, fc: FileChannel) => fc.transferFrom(ic, 0, Long.MaxValue)
+      case _ =>
+        val buf = DefaultResourceContext.createNioBuffer(None, Some(in), true)
+
+        var read = in.read(buf)
+        while (read > -1) {
+          if (read == 0) Thread.sleep(100)
+          else {
+            buf.flip()
+            out.write(buf)
+          }
+          buf.clear()
+          read = in.read(buf)
+        }
     }
   }
 

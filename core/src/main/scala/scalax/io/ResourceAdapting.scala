@@ -41,7 +41,9 @@ protected[io] object ResourceAdapting {
       case CloseAction.Noop =>
         CloseAction.Noop
       case _ =>
-        CloseAction((in:Adapter[A]) => src(in.src))
+        new CloseAction[Adapter[A]] {
+          def closeImpl(in:Adapter[A]):List[Throwable] = src(in.src)
+        }
     }
   }
 

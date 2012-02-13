@@ -22,5 +22,8 @@ abstract class FsInputTests extends AbstractInputTests with Fixture {
           p.outputStream().writer(Codec.UTF8).write(data)
           p
         case Image => fixture.image
+       case ErrorOnRead => fixture.errorOnAccessResource
+       case ErrorOnClose => fixture.errorOnCloseResource
+
     }
 }

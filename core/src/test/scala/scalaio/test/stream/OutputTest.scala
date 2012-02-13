@@ -29,6 +29,7 @@ class OutputTest extends AbstractOutputTests[ByteArrayInputStream,ByteArrayOutpu
 
     (inResource, outResource)
   }
+  def errorOnWriteOut = Resource.fromOutputStream(errorStream)
 
 
 }

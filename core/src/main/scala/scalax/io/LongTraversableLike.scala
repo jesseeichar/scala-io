@@ -108,6 +108,23 @@ trait LongTraversableLike[@specialized(Byte,Char) +A, +Repr <: LongTraversableLi
    */
   def withIterator[U](f: CloseableIterator[A] => U) = {
     val iter = iterator
+    /*var closeExceptions: List[Throwable] = Nil
+    val catcher = util.control.Exception.allCatch.andFinally(closeExceptions = iter.close())
+    
+    val result = catcher.either {
+      val result = f(iter)
+      assert(System.identityHashCode(result) != System.identityHashCode(iter), 
+          "the iterator may not escape the bounds of this block")
+      result
+    }
+
+    Right {
+      if (result.left.toOption ++ closeExceptions nonEmpty) {
+        context.errorHandler(result, closeExceptions)
+      } else {
+        result.right.get
+      }
+    }*/
     try {
       val result = f(iter)
       assert(System.identityHashCode(result) != System.identityHashCode(iter), 

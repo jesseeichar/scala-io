@@ -32,6 +32,7 @@ class OutputTest extends AbstractOutputTests[ReadableByteChannel, WritableByteCh
 
     (inResource, outResource)
   }
-
-
+  def errorOnWriteOut = Resource.fromWritableByteChannel(Channels.newChannel(errorStream))
+  
+  override def customErrorHandler_On_Write_Error = ()
 }

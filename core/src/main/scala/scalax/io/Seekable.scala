@@ -104,6 +104,7 @@ trait Seekable extends Input with Output {
 
 
   protected def underlyingChannel(append:Boolean):OpenedResource[SeekableByteChannel]
+  protected def context: ResourceContext
 
   // for Java 7 change this to a Seekable Channel
   protected def readWriteChannel[U](f:SeekableByteChannel => U) : U = {
