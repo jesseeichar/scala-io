@@ -9,8 +9,8 @@ private object ReadyState extends State { final val id = 0 }
 private object ContinueState extends State { final val id = 1 }
 private object EmptyState extends State { final val id = 2 }
 
-class ChannelBlockLongTraversable(blockSize: Option[Int], sizeFunc:()  => Option[Long], opener: => OpenedResource[ReadableByteChannel]) extends LongTraversable[ByteBlock] {
-  def self = this
+class ChannelBlockLongTraversable(blockSize: Option[Int], val context: ResourceContext, sizeFunc:()  => Option[Long], opener: => OpenedResource[ReadableByteChannel]) extends LongTraversable[ByteBlock] {
+  self =>
 
   protected[io] def iterator: CloseableIterator[ByteBlock] = new CloseableIterator[ByteBlock] {
     private[this] val opened = opener
@@ -44,7 +44,7 @@ class ChannelBlockLongTraversable(blockSize: Option[Int], sizeFunc:()  => Option
   }
 
   override def force = new LongTraversable[ByteBlock] {
-    
+    def context = self.context
     private[this] val data = self.withIterator {
        _.foldLeft(Vector[ByteBlock]()) { (acc, next) =>
           acc :+ next.force

@@ -23,10 +23,9 @@ trait LongTraversable[@specialized(Byte,Char) +A] extends Traversable[A]
   with LongTraversableLike[A, LongTraversable[A]] {
   self =>
   override def companion: GenericCompanion[LongTraversable] = LongTraversable
-
   protected[this] override def newBuilder = LongTraversable.newBuilder
   def force: LongTraversable[A] = {
-    val b = new ListBuffer[A] mapResult (x => new LongTraversableImpl[A](x))
+    val b = new ListBuffer[A] mapResult (x => new LongTraversableImpl[A](x, context))
     withIterator{b ++= _} 
     b.result()
   }
@@ -44,20 +43,28 @@ object LongTraversable extends TraversableFactory[LongTraversable] {
   // TODO consider a correct implementation
   def newBuilder[A]: LongTraversableBuilder[A, LongTraversable[A]] =
     new AbstractLazyIteratorBasedBuilder[A, LongTraversable[A]] with LongTraversableBuilder[A, LongTraversable[A]] {
-      override def result() = new CompositeIterable[A](builderIterators) with LongTraversable[A]
-      def fromIterator(iter: => CloseableIterator[A]): LongTraversable[A] = new LongTraversable[A] {
+      override def result() = new CompositeIterable[A](builderIterators) with LongTraversable[A] {
+        def context = DefaultResourceContext
+      }
+      override def result(resourceContext: ResourceContext) = new CompositeIterable[A](builderIterators) with LongTraversable[A] {
+          def context = resourceContext
+      }
+      
+      def fromIterator(iter: => CloseableIterator[A], resourceContext: ResourceContext): LongTraversable[A] = new LongTraversable[A] {
+        def context = resourceContext
         def iterator = iter
       }
 
     }
 
-  def apply[A](iteratorImpl: => CloseableIterator[A], toStringImpl: String = "LongTraversable(...)") = new LongTraversable[A] {
+  def apply[A](iteratorImpl: => CloseableIterator[A], toStringImpl: String = "LongTraversable(...)", resourceContext: ResourceContext) = new LongTraversable[A] {
+    def context = resourceContext
     protected[io] def iterator: CloseableIterator[A] = iteratorImpl
     override def toString() = toStringImpl
   }
 }
 
-private class LongTraversableImpl[A](contained: Traversable[A]) extends LongTraversable[A] {
+private class LongTraversableImpl[A](contained: Traversable[A], val context:ResourceContext) extends LongTraversable[A] {
   protected[io] def iterator: CloseableIterator[A] = contained match {
     case c: LongTraversable[A] => c.iterator
     case _ => CloseableIterator(contained.toIterator)

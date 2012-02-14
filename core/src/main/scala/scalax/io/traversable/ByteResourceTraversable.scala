@@ -1,20 +1,22 @@
-package scalax.io.traversable
-import scalax.io.LongTraversableLike
-import scalax.io.LongTraversable
-import scalax.io.OpenedResource
-import java.nio.channels.ReadableByteChannel
-import scalax.io.extractor.FileChannelExtractor
+package scalax.io
+package traversable
+
 import java.io.Closeable
-import scalax.io.nio.SeekableFileChannel
-import scalax.io.SeekableByteChannel
 import java.io.InputStream
 import java.nio.channels.Channels
+import java.nio.channels.ReadableByteChannel
+
+import scala.Option.option2Iterable
+
+import scalax.io.extractor.FileChannelExtractor
+import scalax.io.nio.SeekableFileChannel
 
 /**
  * resourceOpener must either be a InputStream or a ReadableByteChannel (or subclass).  Anything else will throw an exception
  */
 protected[io] class ByteResourceTraversable(
   resourceOpener: => OpenedResource[Closeable],
+  resourceContext: ResourceContext,
   sizeFunc: () => Option[Long],
   start: Long,
   end: Long,
@@ -22,7 +24,7 @@ protected[io] class ByteResourceTraversable(
   extends LongTraversable[Byte]
   with LongTraversableLike[Byte, LongTraversable[Byte]] {
   self =>
-
+  def context = resourceContext
   protected[io] def iterator: Sliceable = {
     val resource = resourceOpener
     resource.get match {

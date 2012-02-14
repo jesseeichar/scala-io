@@ -2,10 +2,10 @@ package scalaio.test
 
 import org.junit.Assert._
 import org.junit.Test
-
 import scalax.io.JavaConverters._
 import scalax.io._
 import scalax.test.sugar._
+import java.io.IOException
 
 class LongTraversableTest extends DataIndependentLongTraversableTest[Int] with ProcessorTest with AssertionSugar {
   implicit val codec = Codec.UTF8
@@ -16,9 +16,10 @@ class LongTraversableTest extends DataIndependentLongTraversableTest[Int] with P
     callback: (Int) => U = (_: Int) => (),
     dataFunc: (Int) => Traversable[Int] = (i: Int) => 1 to i,
     conv: Int => A = identity,
-    closeFunction: () => Unit = () => ()): LongTraversable[A] = {
+    closeFunction: () => Unit = () => (),
+    resourceContext:ResourceContext = DefaultResourceContext): LongTraversable[A] = {
     val lt = new LongTraversable[Int] {
-
+      def context = resourceContext
       def iterator: CloseableIterator[Int] = new CloseableIterator[Int] {
         val data = dataFunc(tsize)
         val iter = data.toIterator
@@ -273,6 +274,7 @@ class LongTraversableTest extends DataIndependentLongTraversableTest[Int] with P
     assertEquals(0, count)
   }
   def toLongResource[A](wrappedSeq: Seq[A]): LongTraversable[A] = new LongTraversable[A] {
+    def context = DefaultResourceContext
     def iterator: CloseableIterator[A] = CloseableIterator(wrappedSeq.iterator)
   }
 
@@ -358,4 +360,37 @@ class LongTraversableTest extends DataIndependentLongTraversableTest[Int] with P
     }
   }
  
+   
+  @Test
+  def scalaIoException_On_Read_Error_by_default{
+    intercept[ScalaIOException] {
+        traversable(callback = _ => throw new IOException("Bang")).head
+    }
+  }
+    
+  @Test
+  def scalaIoException_On_Close_Error_by_default{
+    intercept[ScalaIOException] {
+        traversable(closeFunction = () => throw new IOException("Bang")).head
+    }
+  }
+  @Test
+  def customErrorHandler_On_Read_Error{
+    val testContext = new ErrorHandlingTestContext() 
+
+    val errorOnReadInput = traversable(callback = _ => throw new IOException("Bang"), resourceContext = testContext.customContext)
+      errorOnReadInput.head
+      assertEquals(1, testContext.accessExceptions)
+      assertEquals(0, testContext.closeExceptions)
+  }
+  @Test
+  def customErrorHandler_On_Close_Error{
+    val testContext = new ErrorHandlingTestContext() 
+
+    val errorOnCloseInput = traversable(closeFunction = () => throw new IOException("Bang"), resourceContext = testContext.customContext)
+      errorOnCloseInput.head
+      assertEquals(0, testContext.accessExceptions)
+      assertEquals(1, testContext.closeExceptions)
+  }
+
 }

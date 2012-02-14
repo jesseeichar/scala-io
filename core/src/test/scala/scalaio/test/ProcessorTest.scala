@@ -8,11 +8,13 @@ import scalax.io.processing.CharProcessor
 import scalax.io.processing.ByteProcessor
 import java.io.DataInputStream
 import java.io.ByteArrayInputStream
+import scalax.io.ResourceContext
+import scalax.io.DefaultResourceContext
 
 trait ProcessorTest extends AssertionSugar {
   self: LongTraversableTest =>
 
-  private def processorTraversable(elems: Int, callback: => Unit) = {
+  private def processorTraversable(elems: Int, callback: => Unit, context:ResourceContext = DefaultResourceContext) = {
     var closed: Int = 0
     var opened: Int = 0
     new {
@@ -23,7 +25,8 @@ trait ProcessorTest extends AssertionSugar {
           opened += 1;
           1 to i
         },
-        closeFunction = () => closed += 1)
+        closeFunction = () => closed += 1,
+        resourceContext = context)
       def assertOpenedClosed(times: Int) = {
         assertEquals(times, opened)
         assertEquals(times, closed)
@@ -676,5 +679,17 @@ trait ProcessorTest extends AssertionSugar {
     }
   }
   
+  @Test
+  def transfersContext = {
+    val customContext = new ResourceContext{}
+    val prepared = processorTraversable(100, () => (), context = customContext)
+
+    val p = for {
+      iter <- prepared.traversable.processor
+      _ <- iter.repeatUntilEmpty()
+      n <- iter.next
+    } yield n
+    assertSame(customContext, p.traversable.context)
+  }
   
 }

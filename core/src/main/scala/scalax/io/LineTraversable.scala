@@ -20,8 +20,8 @@ import annotation.tailrec
  * @see [[scalax.io.Input]]
  * @see [[scalax.io.ReadChars]]
  */
-class LineTraversable(source: => CloseableIterator[Char], terminator: Terminator, includeTerminator: Boolean) extends LongTraversable[String] {
-
+class LineTraversable(source: => CloseableIterator[Char], terminator: Terminator, includeTerminator: Boolean, resourceContext: ResourceContext) extends LongTraversable[String] {
+  def context = resourceContext
   protected[io] def iterator = terminator match {
     case Auto => new AutoCharIter(source,includeTerminator)
     case t:SimpleTerminator if t.sep.size == 1 => new SingleCharIter(source, t.sep.head, includeTerminator) 

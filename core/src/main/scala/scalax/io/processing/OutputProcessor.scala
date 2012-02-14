@@ -5,6 +5,7 @@ import java.io.OutputStream
 import java.io.FilterOutputStream
 
 class OutputProcessor(resource:OutputResource[OutputStream]) extends Processor[OpenOutput] {
+  def context = resource.context
     def init = new Opened[OpenOutput]{
       val openedResource = resource.unmanaged
       def execute() = Some(new OpenOutput(openedResource))

@@ -24,7 +24,7 @@ class ReaderResource[+A <: Reader] (
     new ReaderResource(resource, context, newCloseAction :+ closeAction)
   override final val unmanaged = this
 
-  override def chars : LongTraversable[Char]= ResourceTraversable.readerBased(this.open)
+  override def chars : LongTraversable[Char]= ResourceTraversable.readerBased(this.open, context)
 
   override def toString: String = "ReaderResource("+context.descName.name+")"
 }

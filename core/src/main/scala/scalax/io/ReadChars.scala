@@ -35,6 +35,12 @@ import java.io.{Reader, File}
  */
 trait ReadChars {
   /**
+   * Get the Resource context that configures how the underlying resource is accessed
+   * 
+   * @return the associated ResourceContext
+   */
+  def context:ResourceContext
+  /**
    * The characters in the object.
    *
    * @return
@@ -56,7 +62,7 @@ trait ReadChars {
    */
   def lines(terminator: Terminators.Terminator = Terminators.Auto,
             includeTerminator: Boolean = false): LongTraversable[String] = {
-             new LineTraversable(chars.iterator, terminator, includeTerminator)
+             new LineTraversable(chars.iterator, terminator, includeTerminator, context)
         }
   /**
    * Loads all the characters into memory. There is no protection against

@@ -8,7 +8,7 @@ package processing
  */
 case class ByteProcessor(base:CloseableIteratorProcessor[Byte]) 
     extends SpecificApiFactory[Byte, ByteProcessorAPI](base) {
-    protected def create(iter: CloseableIterator[Byte]) = new ByteProcessorAPI(iter)
+    protected def create(iter: CloseableIterator[Byte]) = new ByteProcessorAPI(iter, base.context)
 }
 /**
  * An api for reading data from the a Byte input source.  Contains methods for reading shorts, longs, etc... All datatypes (like long) read from
@@ -18,16 +18,17 @@ case class ByteProcessor(base:CloseableIteratorProcessor[Byte])
  *  @see scalax.io.processing.ProcessorAPI
  *  @see scalax.io.processing.CharProcessorAPI
  */
-class ByteProcessorAPI private[processing](private[this] val iter: CloseableIterator[Byte]) extends ProcessorAPI[Byte](iter) {
+class ByteProcessorAPI private[processing](private[this] val iter: CloseableIterator[Byte], context: ResourceContext) extends ProcessorAPI[Byte](iter, context) {
+  
   /**
    * Create an API object for reading numeric values interpretted with little-endianness. 
    */
-  def littleEndianAPI = new LittleEndianAPI(this)
+  def littleEndianAPI = new LittleEndianAPI(this, processFactory)
 
   /**
    * Read a big-endian short
    */
-  def nextShort = Processor {
+  def nextShort = processFactory {
     iterator.takeIfPossible(2) match {
       case bytes if bytes.nonEmpty =>
         Some(((bytes(0) & 0xff) << 8) | (bytes(1) & 0xff))
@@ -38,7 +39,7 @@ class ByteProcessorAPI private[processing](private[this] val iter: CloseableIter
   /**
    * Read a big-endian int
    */
-  def nextInt = Processor {
+  def nextInt = processFactory {
     iterator.takeIfPossible(4) match {
       case bytes if bytes.nonEmpty =>
         Some(
@@ -53,7 +54,7 @@ class ByteProcessorAPI private[processing](private[this] val iter: CloseableIter
   /**
    * Read a big endian long
    */
-  def nextLong = Processor {
+  def nextLong = processFactory {
     iterator.takeIfPossible(8) match {
       case bytes if bytes.nonEmpty =>
         def long(i: Int) = (bytes(i) & 0xff).asInstanceOf[Long]
@@ -83,12 +84,12 @@ class ByteProcessorAPI private[processing](private[this] val iter: CloseableIter
  * The same API as ByteProcessor except that the methods returning bytes return bytes interpreted
  * little-endian
  */
-class LittleEndianAPI private[processing](@inline private[this] val wrapped: ByteProcessorAPI) {
+class LittleEndianAPI private[processing](@inline private[this] val wrapped: ByteProcessorAPI, processorFactory: ProcessorFactory) {
 
   /**
    * Read a little-endian short
    */
-  def nextShort = Processor {
+  def nextShort = processorFactory {
     wrapped.iterator.takeIfPossible(2) match {
       case bytes if bytes.nonEmpty =>
         Some(((bytes(1) & 0xff) << 8) | (bytes(0) & 0xff))
@@ -99,7 +100,7 @@ class LittleEndianAPI private[processing](@inline private[this] val wrapped: Byt
   /**
    * Read a little-endian int
    */
-  def nextInt = Processor {
+  def nextInt = processorFactory {
       wrapped.iterator.takeIfPossible(4) match {
         case bytes if bytes.nonEmpty => 
           Some(
@@ -114,7 +115,7 @@ class LittleEndianAPI private[processing](@inline private[this] val wrapped: Byt
   /**
    * Read a little-endian long
    */
-    def nextLong = Processor {
+    def nextLong = processorFactory {
         wrapped.iterator.takeIfPossible(8) match {
         case bytes if bytes.nonEmpty =>
           def long(i:Int) = (bytes(i) & 0xff).asInstanceOf[Long]

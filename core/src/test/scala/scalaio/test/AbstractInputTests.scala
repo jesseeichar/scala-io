@@ -323,24 +323,16 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
   }
   @Test
   def customErrorHandler_On_AcquireAndGet {
-    var readExceptions = 0
-    var closeExceptions = 0
-    val customContext = new ResourceContext{
-      override def errorHandler[U](accessResult: Either[Throwable, U], closingExceptions: List[Throwable]): U = {
-        accessResult.left.toOption foreach {_ => readExceptions += 1}
-        closingExceptions foreach {_ => closeExceptions += 1}
-        null.asInstanceOf[U]
-      }
-    }
+    val testContext = new ErrorHandlingTestContext() 
 
     val goodInput = input(Image)
     
     if (goodInput.isInstanceOf[Resource[_]]) {
       val customHandlerInput = goodInput.asInstanceOf[Resource[_]].
-        updateContext(customContext)
+        updateContext(testContext.customContext)
       customHandlerInput.acquireAndGet(_ => assert(false))
-      assertEquals(1, readExceptions)
-      assertEquals(0, closeExceptions)
+      assertEquals(1, testContext.accessExceptions)
+      assertEquals(0, testContext.closeExceptions)
     }
   }
 

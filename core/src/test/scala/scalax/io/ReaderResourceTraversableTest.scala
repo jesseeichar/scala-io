@@ -21,15 +21,16 @@ class ReaderResourceTraversableTest extends ResourceTraversableTest {
                                  callback: (Int) => U,
                                  dataFunc: (Int) => Traversable[Int],
                                  conv: (Int) => A,
-                                 closeFunction: () => Unit = () => ()) = {
+                                 closeFunction: () => Unit = () => (),
+                                 resourceContext:ResourceContext) = {
     val callBackAndConv = (c:Char) => {
       val i = c.toInt
       callback(i)
       conv(i)
     }
     val closeAction = CloseAction((_:Reader) => closeFunction())
-    def resource = Resource.fromReader(new java.io.StringReader(dataFunc(tsize) mkString "")).addCloseAction(closeAction)
-    ResourceTraversable.readerBased(resource.open,initialConv = callBackAndConv)
+    def resource = Resource.fromReader(new java.io.StringReader(dataFunc(tsize) mkString "")).addCloseAction(closeAction).updateContext(resourceContext)
+    ResourceTraversable.readerBased(resource.open, resource.context,initialConv = callBackAndConv)
   }
 
 }

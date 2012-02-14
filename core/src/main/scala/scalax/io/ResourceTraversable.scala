@@ -103,6 +103,7 @@ private[io] trait ResourceTraversable[A] extends LongTraversable[A] {
 
   private[this] def copy[B](_conv: this.SourceOut => B = conv, _start: Long = start, _end: Long = end): LongTraversable[B] = {
      new ResourceTraversable[B] {
+       def context = self.context
        type In = self.In
        type SourceOut = self.SourceOut
        def source = self.source
@@ -165,19 +166,20 @@ private[io] object ResourceTraversable {
     }
   }
   val IdentityCharConversion = identity[Char]_
-  def readerBased[A](opener : => OpenedResource[Reader],
-				    parser : InputParser[Char,Array[Char]] = DefaultCharParser,
+  def readerBased[A](opener: => OpenedResource[Reader],
+                    resourceContext: ResourceContext,
+				    parser: InputParser[Char,Array[Char]] = DefaultCharParser,
                     initialConv: Char => A = IdentityCharConversion,
-                    startIndex : Long = 0,
+                    startIndex: Long = 0,
                     endIndex: Long = Long.MaxValue) = {
 
     if (parser == DefaultCharParser && initialConv == IdentityCharConversion) {
-    	new traversable.ReaderResourceTraversable(opener, startIndex, endIndex).asInstanceOf[LongTraversable[A]]
+    	new traversable.ReaderResourceTraversable(opener, resourceContext, startIndex, endIndex).asInstanceOf[LongTraversable[A]]
     } else {
       new ResourceTraversable[A] {
         type In = Reader
         type SourceOut = Char
-
+        def context = resourceContext
         def source = new TraversableSource[Reader, Char] {
           private[this] final val openedResource = opener
           private[this] final val buffer = new Array[Char](openedResource.context.charBufferSize(None, true))
@@ -209,18 +211,19 @@ private[io] object ResourceTraversable {
   }
     
   def byteChannelBased[A,B](opener : => OpenedResource[ReadableByteChannel],
+                            resourceContext: ResourceContext,
 		  					sizeFunc:() => Option[Long],
                             parser : InputParser[A,NioByteBuffer] = DefaultByteBufferParser,
                             initialConv: A => B = IdentityByteConversion,
                             startIndex : Long = 0,
                             endIndex : Long = Long.MaxValue):LongTraversable[B] = {
     if (parser == DefaultByteBufferParser && initialConv == IdentityByteConversion) {
-      new traversable.ByteResourceTraversable(opener, sizeFunc, startIndex, endIndex, false).asInstanceOf[LongTraversable[B]]
+      new traversable.ByteResourceTraversable(opener, resourceContext, sizeFunc, startIndex, endIndex, false).asInstanceOf[LongTraversable[B]]
     } else {
       new ResourceTraversable[B] {
         type In = ReadableByteChannel
         type SourceOut = A
-
+        def context = resourceContext
         def source = new TraversableSource[ReadableByteChannel, A] {
           private[this] final val openedResource = opener
           private[this] final val channel = openedResource.get
@@ -267,18 +270,19 @@ private[io] object ResourceTraversable {
   }
   
   def seekableByteChannelBased[A,B](opener : => OpenedResource[SeekableByteChannel],
+                          resourceContext: ResourceContext,
                           sizeFunc:() => Option[Long],
                           parser : InputParser[A,NioByteBuffer] = DefaultByteBufferParser,
                           initialConv: A => B = IdentityByteConversion,
                           startIndex : Long = 0,
                           endIndex : Long = Long.MaxValue):LongTraversable[B] = {
     if (parser == DefaultByteBufferParser && initialConv == IdentityByteConversion) {
-      new traversable.ByteResourceTraversable(opener, sizeFunc, startIndex, endIndex, true).asInstanceOf[LongTraversable[B]]
+      new traversable.ByteResourceTraversable(opener, resourceContext, sizeFunc, startIndex, endIndex, true).asInstanceOf[LongTraversable[B]]
     } else {
         new ResourceTraversable[B] {
           type In = SeekableByteChannel
           type SourceOut = A
-    
+    def context = resourceContext
           def source = new TraversableSource[SeekableByteChannel, A] {
             private[this] final val openedResource = opener
             private[this] final val channel = openedResource.get

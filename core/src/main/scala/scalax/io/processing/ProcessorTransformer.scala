@@ -14,6 +14,7 @@ private[this] object ProcessorTransformer {
   }
   implicit def iteratorToLongTraverableTransformer[A] = new ProcessorTransformer[A, Iterator[A], LongTraversable[A]] {
     def transform(from: Processor[Iterator[A]]) = new LongTraversable[A] {
+      def context = from.context
       def iterator = {
         val opened = from.init
         new CloseableIterator[A] {

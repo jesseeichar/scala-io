@@ -35,30 +35,11 @@ import java.io.{InputStream, File}
  */
 trait Input {
   /**
-   * Get the Resource context associated with this Resource instance.  
-   * 
-   * @note as Resources are immutable objects a given Resource instance will always be associated with
-   * the same ResourceContext
+   * Get the Resource context that configures how the underlying resource is accessed
    * 
    * @return the associated ResourceContext
    */
-//  def context:ResourceContext
-  /**
-   * Create a Resource instance that is configured with the new ResourceContext
-   * 
-   * @param newContext A new ResourceContext 
-   *  
-   * @return a new instance configured with the new context
-   */
-//  def updateContext(newContext:ResourceContext):Input
-  /**
-   * Update the current ResourceContext and return a new Resource instance with the updated context
-   * 
-   * @param f A function for transforming the current context to a new context with new values.
-   * 
-   * @return a new instance configured with the new context
-   */
-//  def updateContext(f:ResourceContext => ResourceContext):Input = updateContext(f(context))
+  def context:ResourceContext
   /**
   * The number of bytes that can be read from the underlying resource.
   *
@@ -150,7 +131,7 @@ trait Input {
    */
   def lines(terminator: Terminators.Terminator = Terminators.Auto,
             includeTerminator: Boolean = false)(implicit codec: Codec = Codec.default): LongTraversable[String] = {
-    new LineTraversable(chars(codec).iterator, terminator, includeTerminator)
+    new LineTraversable(chars(codec).iterator, terminator, includeTerminator, context)
   }
   /**
    * Loads all the characters into memory. There is no protection against

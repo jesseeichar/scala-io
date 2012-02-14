@@ -68,12 +68,15 @@ object JavaConverters {
      */
     implicit object TraversableIntsAsBytesConverter extends AsInputConverter[Traversable[Int]]{
       def toInput(t: Traversable[Int]) = new Input {
+        def context = DefaultResourceContext
         def chars(implicit codec: Codec = Codec.default) = new LongTraversable[Char] {
+          def context = DefaultResourceContext
           val maxChars = codec.encoder.maxBytesPerChar
           lazy val chars = codec.decode(t.view.map{_.toByte}.toArray)
           def iterator: CloseableIterator[Char] = CloseableIterator(chars.iterator)
         }
         def blocks(blockSize: Option[Int] = None) = new LongTraversable[ByteBlock] {
+          def context = DefaultResourceContext
           val concreteBlockSize = blockSize match {
             case Some(size) => size
             case None if t.hasDefiniteSize => t.size
@@ -93,6 +96,7 @@ object JavaConverters {
         }
 
         override def bytesAsInts = new LongTraversable[Int]{
+          def context = DefaultResourceContext
           def iterator = new CloseableIterator[Int] {
             var iter = OutputConverter.TraversableIntConverter.toBytes(t)
 
@@ -102,6 +106,7 @@ object JavaConverters {
           }
         }
         def bytes = new LongTraversable[Byte]{
+          def context = DefaultResourceContext
           def iterator = new CloseableIterator[Byte] {
             var iter = OutputConverter.TraversableIntConverter.toBytes(t)
 
@@ -119,7 +124,9 @@ object JavaConverters {
      */
     implicit object TraversableByteConverter extends AsInputConverter[Traversable[Byte]]{
       def toInput(t: Traversable[Byte]) = new Input {
+        def context = DefaultResourceContext
         def chars(implicit codec: Codec = Codec.default) = new LongTraversable[Char] {
+          def context = DefaultResourceContext
           val maxChars = codec.encoder.maxBytesPerChar
 
           lazy val chars = codec.decode(t.toArray)
@@ -127,6 +134,7 @@ object JavaConverters {
           def iterator: CloseableIterator[Char] = CloseableIterator(chars.iterator)
         }
         def blocks(blockSize: Option[Int] = None) = new LongTraversable[ByteBlock] {
+          def context = DefaultResourceContext
           val concreteBlockSize = blockSize match {
             case Some(size) => size
             case None if t.hasDefiniteSize => t.size
@@ -146,11 +154,13 @@ object JavaConverters {
         }
 
         override def bytesAsInts = new LongTraversable[Int]{
+          def context = DefaultResourceContext
           def iterator: CloseableIterator[Int] = CloseableIterator(t.toIterator.map(_.toInt))
         }
 
 
         override def bytes = new LongTraversable[Byte]{
+          def context = DefaultResourceContext
           def iterator: CloseableIterator[Byte] = CloseableIterator(t.toIterator)
         }
 
@@ -303,8 +313,9 @@ object JavaConverters {
      */
     implicit object TraversableCharConverter extends AsReadCharsConverter[Traversable[Char]]{
       def toReadChars(t: Traversable[Char]): ReadChars = new ReadChars {
+        def context = DefaultResourceContext
         def chars: LongTraversable[Char] = new LongTraversable[Char] {
-
+          def context = DefaultResourceContext
           protected[io] def iterator: CloseableIterator[Char] = CloseableIterator(t.toIterator)
         }
       }

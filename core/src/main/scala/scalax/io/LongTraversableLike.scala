@@ -48,7 +48,7 @@ case class End[@specialized(Byte,Char) +A](result: A) extends FoldResult[A]
  */
 trait LongTraversableLike[@specialized(Byte,Char) +A, +Repr <: LongTraversableLike[A, Repr]] extends TraversableLike[A, Repr] {
   self =>
-
+  def context:ResourceContext
   override protected[this] def thisCollection: LongTraversable[A] = this.asInstanceOf[LongTraversable[A]]
   override protected[this] def toCollection(repr: Repr): LongTraversable[A] = repr.asInstanceOf[LongTraversable[A]]
   override def toArray[B >: A: ClassManifest] = 
@@ -63,7 +63,7 @@ trait LongTraversableLike[@specialized(Byte,Char) +A, +Repr <: LongTraversableLi
     } else {
       toBuffer.toArray
   }
-  def processor = new processing.CloseableIteratorProcessor(() => iterator)
+  def processor = new processing.CloseableIteratorProcessor(() => iterator, context)
 
   /**
    * A foldLeft operation that can be terminated without processing the entire collection.
@@ -150,7 +150,7 @@ trait LongTraversableLike[@specialized(Byte,Char) +A, +Repr <: LongTraversableLi
   }
 
   private def build[B >: A](f: CloseableIteratorOps[A] => CloseableIterator[B]) : Repr = newBuilder match {
-    case ltf:LongTraversableBuilder[A,Repr] => ltf.fromIterator(f(CloseableIteratorOps(iterator)).asInstanceOf[CloseableIterator[A]])
+    case ltf:LongTraversableBuilder[A,Repr] => ltf.fromIterator(f(CloseableIteratorOps(iterator)).asInstanceOf[CloseableIterator[A]], context)
     case b => 
       withIterator(iter => b ++= f(CloseableIteratorOps(iter)).asInstanceOf[CloseableIterator[A]])
       b.result()
@@ -190,14 +190,14 @@ trait LongTraversableLike[@specialized(Byte,Char) +A, +Repr <: LongTraversableLi
     
   override /*TraversableLike*/ def filter(p: A => Boolean): Repr = build(_ filter p)
   override /*TraversableLike*/ def map[B, That](f: A => B)(implicit bf: CanBuildFrom[Repr, B, That]): That = bf(repr) match {
-    case ltf:LongTraversableBuilder[B,That] => ltf.fromIterator(CloseableIteratorOps(iterator).map(f))
+    case ltf:LongTraversableBuilder[B,That] => ltf.fromIterator(CloseableIteratorOps(iterator).map(f), context)
     case b => 
       withIterator(i => b++= i.map(f))
       b.result()
   }
     override /*TraversableLike*/ def ++:[B >: A, That](that: Traversable[B])(implicit bf: CanBuildFrom[Repr, B, That]): That = 
     bf(repr) match {
-	    case ltf:LongTraversableBuilder[B,That] => ltf.fromIterator(CloseableIteratorOps(iterator) ++ that)
+	    case ltf:LongTraversableBuilder[B,That] => ltf.fromIterator(CloseableIteratorOps(iterator) ++ that, context)
 	    case b => 
 	      withIterator(it => b ++= it)
 	      b ++= that
@@ -205,14 +205,14 @@ trait LongTraversableLike[@specialized(Byte,Char) +A, +Repr <: LongTraversableLi
 	    }
 override /*TraversableLike*/ def flatMap[B, That](f: A => GenTraversableOnce[B])(implicit bf: CanBuildFrom[Repr, B, That]): That = 
   bf(repr) match {
-    case ltf:LongTraversableBuilder[B,That] => ltf.fromIterator(CloseableIteratorOps(iterator).flatMap(f))
+    case ltf:LongTraversableBuilder[B,That] => ltf.fromIterator(CloseableIteratorOps(iterator).flatMap(f), context)
     case b => 
       withIterator(i => b ++= i.flatMap(f))
       b.result()
   }
   override /*TraversableLike*/ def collect[B, That](pf: PartialFunction[A, B])(implicit bf: CanBuildFrom[Repr, B, That]): That =  
   bf(repr) match {
-    case ltf:LongTraversableBuilder[B,That] => ltf.fromIterator(CloseableIteratorOps(iterator).collect(pf))
+    case ltf:LongTraversableBuilder[B,That] => ltf.fromIterator(CloseableIteratorOps(iterator).collect(pf),context)
     case b => 
       
 withIterator(i => b ++= i.collect(pf))
@@ -249,7 +249,7 @@ withIterator(i => b ++= i.collect(pf))
     doZip(that.iterator)(bf)
 
   private def doZip[B,A1 >: A, That](those: => Iterator[B])(bf:LongTraversableBuilder[(A1,B),That]): That = 
-    bf.fromIterator(CloseableIteratorOps(self.iterator).zip(those))
+    bf.fromIterator(CloseableIteratorOps(self.iterator).zip(those), context)
 
   /**
    * Returns a $coll formed from this $coll and another iterable collection
@@ -296,7 +296,7 @@ withIterator(i => b ++= i.collect(pf))
     doZipAll(that.iterator, thisElem, thatElem)(bf)
 
   private def doZipAll[B, A1 >: A, That](those: => Iterator[B], thisElem: A1, thatElem: B)(bf:LongTraversableBuilder[(A1,B),That]): That = 
-  	bf.fromIterator(CloseableIteratorOps(self.iterator).zipAll(those, thisElem, thatElem))
+  	bf.fromIterator(CloseableIteratorOps(self.iterator).zipAll(those, thisElem, thatElem), context)
 
   /**
    * Zips this $coll with its indices.
@@ -325,7 +325,7 @@ withIterator(i => b ++= i.collect(pf))
    *
    */
   def zipWithIndex[A1 >: A, That](implicit bf: LongTraversableBuilder[(A1, Int), That]): That =
-    bf.fromIterator(CloseableIteratorOps(iterator).zipWithIndex)
+    bf.fromIterator(CloseableIteratorOps(iterator).zipWithIndex, context)
 
   override def hasDefiniteSize = false
   /**
@@ -662,7 +662,7 @@ withIterator(i => b ++= i.collect(pf))
    *          fewer elements than size.
    */
   def sliding[That](size: Int, step: Int = 1)(implicit bf: CanBuildFrom[Repr, Seq[A], That]): That = bf(repr) match {
-    case ltf:LongTraversableBuilder[Seq[A],That] => ltf.fromIterator(CloseableIteratorOps(iterator).modifiedSliding(size,step))
+    case ltf:LongTraversableBuilder[Seq[A],That] => ltf.fromIterator(CloseableIteratorOps(iterator).modifiedSliding(size,step), context)
     case b => 
       b ++= withIterator(iter => CloseableIteratorOps(iter).modifiedSliding(size,step))
       b.result()
@@ -715,7 +715,8 @@ object LongTraversableBuilder {
 
 }
 trait LongTraversableBuilder[-A,+Repr] extends Builder[A, Repr] {
-  def fromIterator(iterator: =>CloseableIterator[A]):Repr
+  def fromIterator(iterator: =>CloseableIterator[A], resourceContext: ResourceContext):Repr
+  def result(resourceContext: ResourceContext):Repr
 }
 
 object LongTraversableLike {

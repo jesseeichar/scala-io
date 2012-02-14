@@ -16,6 +16,7 @@ package processing
  *  @see scalax.io.processing.CharProcessorAPI
  */
 abstract class SpecificApiFactory[A,API <: ProcessorAPI[A]](base:CloseableIteratorProcessor[A]) extends Processor[API] {
+  def context = base.context
   /**
    * Factory method to create the actual API object
    */

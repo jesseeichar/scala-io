@@ -122,8 +122,8 @@ package processing
  * @see scalax.io.processing.ProcessorAPI
  * @see scalax.io.processing.CharProcessorAPI
  */
-class ProcessorAPI[+A](private[this] val iter: CloseableIterator[A]) {
-  
+class ProcessorAPI[+A](private[this] val iter: CloseableIterator[A], val resourceContext: ResourceContext) {
+  protected def processFactory = new ProcessorFactory(resourceContext)
   /**
    * Construct a sequence by taking elements from the input source until the function returns false or
    * there are no more elements in the input source.
@@ -132,7 +132,7 @@ class ProcessorAPI[+A](private[this] val iter: CloseableIterator[A]) {
    *
    * @return a Seq[A] consisting of the elements taken from the input source
    */
-  def takeWhile(f: A => Boolean) = Processor(Some(bufferedIter takeWhile f))
+  def takeWhile(f: A => Boolean) = processFactory(Some(bufferedIter takeWhile f))
 
   /**
    * Construct a sequence by taking up to i elements from the input source
@@ -141,7 +141,7 @@ class ProcessorAPI[+A](private[this] val iter: CloseableIterator[A]) {
    *
    * @return a Seq[A] consisting of the elements taken from the input source
    */
-  def take(i: Int) = Processor(Some(bufferedIter take i))
+  def take(i: Int) = processFactory(Some(bufferedIter take i))
 
   /**
    * Drop/skip the next i elements in the input source if possible.
@@ -160,7 +160,7 @@ class ProcessorAPI[+A](private[this] val iter: CloseableIterator[A]) {
    * @param i the number of elements to skip
    * @return the returned Processor can typically be ignored since it is a unit processor.
    */
-  def drop(i: Int) = Processor(Some(bufferedIter drop i))
+  def drop(i: Int) = processFactory(Some(bufferedIter drop i))
 
   /**
    * Ends the ProcessAPI.  Any attempts to take or drop will have no effect after the process is ended.
@@ -255,7 +255,7 @@ class ProcessorAPI[+A](private[this] val iter: CloseableIterator[A]) {
    * @return An empty processor if there are no more elements in the input source or a processor containing the next element
    *        in the input source.
    */
-  def next:Processor[A] = Processor(if(bufferedIter.hasNext) Some(bufferedIter.next) else None)
+  def next:Processor[A] = processFactory(if(bufferedIter.hasNext) Some(bufferedIter.next) else None)
 
   /**
    * Create a Processor that simply repeats until this processor and all of the other input sources that are passed
@@ -325,7 +325,7 @@ class ProcessorAPI[+A](private[this] val iter: CloseableIterator[A]) {
    * 
    * @return A Processor containing a sequence of whatever elements are returned by the for-comprehension
    */
-  def repeatUntilEmpty(otherProcessorAPIs: ProcessorAPI[_]*) = new RepeatUntilEmpty(Long.MaxValue, (this +: otherProcessorAPIs): _*)
+  def repeatUntilEmpty(otherProcessorAPIs: ProcessorAPI[_]*) = new RepeatUntilEmpty(Long.MaxValue, processFactory, (this +: otherProcessorAPIs): _*)
   
   /**
    * Loops n times or until the provided input sources are all empty.
@@ -336,21 +336,22 @@ class ProcessorAPI[+A](private[this] val iter: CloseableIterator[A]) {
    * @param otherProcessorAPIs other input sources to monitor for empty before prematurely ending the loop.  
    *                           If this and otherProcessorAPIs are all empty then the looping will be ended
    */
-  def repeat(times: Int, otherProcessorAPIs: ProcessorAPI[_]*) = new RepeatUntilEmpty(times, (this +: otherProcessorAPIs): _*)
+  def repeat(times: Int, otherProcessorAPIs: ProcessorAPI[_]*) = new RepeatUntilEmpty(times, processFactory, (this +: otherProcessorAPIs): _*)
 
   // private methods follow
   private[this] def createSideEffect(f: => Unit) = new Processor[Unit] {
+    def context = resourceContext
     private[processing] def init = new Opened[Unit] {
       def cleanUp() = ()
       def execute() = Some(f)
     }
   }
 
-  private[this] def createSeq[U](f: => Iterator[U]) = Processor({
+  private[this] def createSeq[U](f: => Iterator[U]) = processFactory {
     val builder = new collection.immutable.VectorBuilder[U]()
     builder ++= f
     Some(builder.result())
-  })
+  }
   private[this] def doEnd() = bufferedIter.end()
   private[this] val bufferedIter = new SpecializedBufferedIterator(iter)
   private[processing] val iterator = bufferedIter

@@ -39,11 +39,11 @@ class ReadableByteChannelResource[+A <: ReadableByteChannel] (
     new ReaderResource(nResource, context, closer)
   }
   override def readableByteChannel:InputResource[ReadableByteChannel] = this
-  override def bytesAsInts = ResourceTraversable.byteChannelBased[Byte,Int](this.open, sizeFunc, initialConv = ResourceTraversable.toIntConv)
-  override def bytes = ResourceTraversable.byteChannelBased[Byte,Byte](this.open, sizeFunc)
+  override def bytesAsInts = ResourceTraversable.byteChannelBased[Byte,Int](this.open, context, sizeFunc, initialConv = ResourceTraversable.toIntConv)
+  override def bytes = ResourceTraversable.byteChannelBased[Byte,Byte](this.open, context, sizeFunc)
   override def chars(implicit codec: Codec) = reader(codec).chars  // TODO optimize for byteChannel
   override def blocks(blockSize: Option[Int] = None): LongTraversable[ByteBlock] = 
-    new traversable.ChannelBlockLongTraversable(blockSize, sizeFunc, open)
+    new traversable.ChannelBlockLongTraversable(blockSize, context, sizeFunc, open)
 
   override def toString: String = "ReadableByteChannelResource ("+context.descName.name+")"
 }

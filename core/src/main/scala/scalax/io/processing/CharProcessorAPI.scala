@@ -6,10 +6,11 @@ package processing
  */
 case class CharProcessor(base:CloseableIteratorProcessor[Char]) 
     extends SpecificApiFactory[Char, CharProcessorAPI](base) {
-    protected def create(iter: CloseableIterator[Char]) = new CharProcessorAPI(iter)
+    protected def create(iter: CloseableIterator[Char]) = new CharProcessorAPI(iter, base.context)
 }
 
-class CharProcessorAPI private[processing](iter: CloseableIterator[Char]) extends ProcessorAPI[Char](iter) {
+class CharProcessorAPI private[processing](iter: CloseableIterator[Char],
+                    resourceContext: ResourceContext) extends ProcessorAPI[Char](iter, resourceContext) {
   /**
    * Read the sequence of characters from the current element in the input source if A are Char.
    *
@@ -29,7 +30,7 @@ class CharProcessorAPI private[processing](iter: CloseableIterator[Char]) extend
         @inline final def hasNext = proxy.hasNext
         final def doClose = ()
       }
-      Processor(Some(new LineTraversable(wrapped, lineTerminator, includeTerminator).headOption.getOrElse("").toSeq))
+      processFactory(Some(new LineTraversable(wrapped, lineTerminator, includeTerminator, resourceContext).headOption.getOrElse("").toSeq))
   }
   
 }

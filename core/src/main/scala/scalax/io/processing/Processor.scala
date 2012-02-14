@@ -50,6 +50,9 @@ package processing;
 trait Processor[+A] {
   self =>
 
+  protected[processing] def context: ResourceContext
+  
+  protected def processFactory = new ProcessorFactory(context)
   /**
    * Convert the Processor into a LongTraversable if A is a subclass of Iterator.
    */
@@ -90,6 +93,8 @@ trait Processor[+A] {
    * The above example processes the streams completely even if one ends prematurely.
    */
   def opt = new Processor[Option[A]] {
+    def context = self.context
+
     private[processing] def init = new Opened[Option[A]] {
       private[this] val outer = self.init
       def execute = Some(outer.execute)
@@ -126,9 +131,9 @@ trait Processor[+A] {
    * to convert the value read from a ProcessorAPI to a new value.  Suppose the value read was an integer you might
    * use map to convert the contained value to a float.
    */
-  def map[U](f: A => U) = Processor[Opened[A], U](init, in => in.execute.map(f), _.cleanUp)
+  def map[U](f: A => U) = processFactory[Opened[A], U](init, in => in.execute.map(f), _.cleanUp)
   def flatMap[U](f: A => Processor[U]) = {
-    Processor[(Opened[A], Option[Opened[U]]), U]({
+    processFactory[(Opened[A], Option[Opened[U]]), U]({
       val currentOpenProcessor = self.init
       (currentOpenProcessor, currentOpenProcessor.execute.map(f(_).init))
     },
@@ -151,7 +156,7 @@ private[processing] trait Opened[+A] {
 /**
  * Factory methods for creating Processor objects
  */
-object Processor {
+class ProcessorFactory(resourceContext: ResourceContext) {
   /**
    * Create a new Processor
    * 
@@ -160,6 +165,7 @@ object Processor {
    * @param after method that cleans up the resource
    */
   def apply[B, A](opener: => B, valueFactory: B => Option[A], after: B => Unit) = new Processor[A] {
+    def context = resourceContext
     private[processing] def init = {
       val resource = opener
       new Opened[A] {
@@ -175,6 +181,7 @@ object Processor {
    * @param valueFactory a function that creates the value
    */
   def apply[A](valueFactory: => Option[A]) = new Processor[A] {
+    def context = resourceContext
     private[processing] def init = {
       new Opened[A] {
         def execute() = valueFactory
@@ -187,6 +194,7 @@ object Processor {
    * the empty processor
    */
   def empty[A] = new Processor[Nothing] {
+    def context = resourceContext
     private[processing] def init = null.asInstanceOf[Opened[Nothing]]
     override def foreach[U](f: Nothing => U): Unit = ()
     override def map[U](f: Nothing => U) = this
@@ -197,10 +205,11 @@ object Processor {
 /**
  * An internal implementation Processor containing a ProcessorAPI.
  */
-private[io] class CloseableIteratorProcessor[+A](private[processing] val iter: () => CloseableIterator[A]) extends Processor[ProcessorAPI[A]] {
+private[io] class CloseableIteratorProcessor[+A](private[processing] val iter: () => CloseableIterator[A], resourceContext: ResourceContext) extends Processor[ProcessorAPI[A]] {
+  def context = resourceContext
   private[processing] def init = {
     val iterInstance = iter()
-    val processorAPI = new ProcessorAPI[A](iterInstance)
+    val processorAPI = new ProcessorAPI[A](iterInstance, resourceContext)
     new Opened[ProcessorAPI[A]] {
       def execute() = Some(processorAPI)
       def cleanUp() = iterInstance.close()
@@ -215,11 +224,12 @@ private[io] class CloseableIteratorProcessor[+A](private[processing] val iter: (
  */
 private[processing] class WithFilter[+A](base:Processor[A], filter: A=>Boolean) extends Processor[A] {
     private[processing] def init = base.init
+    def context = base.context
 
     override def foreach[U](f: A => U): Unit = 
       base.init.execute.filter(filter).foreach(f)
     override def map[U](f: A => U) = 
-      Processor(base.init.execute.filter(filter).map(f))
+      processFactory(base.init.execute.filter(filter).map(f))
     override def flatMap[U](f: A => Processor[U]) = 
-      Processor(base.init.execute.filter(filter).flatMap(f(_).init.execute))
+      processFactory(base.init.execute.filter(filter).flatMap(f(_).init.execute))
 }
