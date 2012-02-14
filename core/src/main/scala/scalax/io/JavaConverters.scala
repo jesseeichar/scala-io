@@ -102,7 +102,7 @@ object JavaConverters {
 
             final def next() = iter.next.toInt
             final def hasNext: Boolean = iter.hasNext
-            def doClose() {}
+            def doClose() = Nil
           }
         }
         def bytes = new LongTraversable[Byte]{
@@ -112,7 +112,7 @@ object JavaConverters {
 
             final def next() = iter.next
             final def hasNext: Boolean = iter.hasNext
-            def doClose() {}
+            def doClose() = Nil
           }
         }
 

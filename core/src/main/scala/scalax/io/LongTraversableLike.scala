@@ -17,6 +17,8 @@ import scala.util.control.Breaks.break
 import scala.util.control.Breaks.breakable
 import scala.collection.mutable.Builder
 import scala.collection.GenTraversableOnce
+import scala.util.control.ControlThrowable
+
 /**
  * The control signals for the limitFold method in [[scalax.io.LongTraversable]].
  *
@@ -81,57 +83,66 @@ trait LongTraversableLike[@specialized(Byte,Char) +A, +Repr <: LongTraversableLi
    * @return the last value contained in the [[scalax.io.FoldResult]] which was returned by op
    */
   def limitFold[U](init: U)(op: (U, A) => FoldResult[U]): U = {
-    class FoldTerminator(val value: U) extends RuntimeException
-    try {
-      val result = foldLeft((init,0L)) { (acc, next) =>
-        if(acc._2 > 0 ) (acc._1, acc._2 - 1)
-        else {
-	        op(acc._1, next) match {
-	          case Continue(result,skip) => (result,skip)
-	          case End(result) => throw new FoldTerminator(result)
-	        }
+    withIterator {
+      iter =>
+        var remaining = iter
+        var continue = true
+        var skip = 0L
+        var result = init
+        while(remaining.hasNext && continue) {
+          if(skip > 0) remaining = remaining.ldrop(skip)
+          else {
+            result = op(result, remaining.next) match {
+              case Continue(result,newSkip) =>
+                skip = newSkip
+                result
+              case End(result) => 
+                continue = false
+                result
+            }
+          }
         }
-      }
-      result._1
-    } catch {
-      case ft:FoldTerminator => ft.value
+        result
     }
   }
   
   /**
    * Use the underlying iterator for this traversable.  
    * 
-   * Note:  If the iterator is returned from this block an exception will be thrown 
+   * @note  If the iterator is returned from this block an exception will be thrown 
    * because the iterator is invalid outside of this block and the behaviour is undefined
    * 
+   * @note withIterator catches all exceptions and calls the error handler to handle the exceptions
+   *     So exceptions must not be thrown in f as control flow exceptions.
+   *  
    * @throws AssertionError if the iterator is returned
    */
-  def withIterator[U](f: CloseableIterator[A] => U) = {
+  def withIterator[U](f: CloseableIterator[A] => U):U = {
+    try {
     val iter = iterator
-    /*var closeExceptions: List[Throwable] = Nil
-    val catcher = util.control.Exception.allCatch.andFinally(closeExceptions = iter.close())
-    
+    var closeExceptions: List[Throwable] = Nil
+    val catcher = util.control.Exception.allCatch.andFinally{
+        closeExceptions = try iter.close() catch {case e => List(e)}
+    }
+
     val result = catcher.either {
       val result = f(iter)
-      assert(System.identityHashCode(result) != System.identityHashCode(iter), 
-          "the iterator may not escape the bounds of this block")
+      if (System.identityHashCode(result) == System.identityHashCode(iter)) {
+        throw new AssertionError("the iterator may not escape the bounds of this block") with ControlThrowable
+      }
       result
     }
 
-    Right {
-      if (result.left.toOption ++ closeExceptions nonEmpty) {
-        context.errorHandler(result, closeExceptions)
-      } else {
-        result.right.get
-      }
-    }*/
-    try {
-      val result = f(iter)
-      assert(System.identityHashCode(result) != System.identityHashCode(iter), 
-          "the iterator may not escape the bounds of this block")
-      result
+    result.left.toOption.filter{_.isInstanceOf[ControlThrowable]}.foreach(throw _)
+
+    if (result.left.toOption ++ closeExceptions nonEmpty) {
+      context.errorHandler(result, closeExceptions)
+    } else {
+      result.right.get
     }
-    finally iter.close()
+    } catch {
+      case t => context.errorHandler(Left(t), Nil)
+    }
   }
   
   protected[io] def iterator: CloseableIterator[A]

@@ -21,9 +21,9 @@ class ByteChannelResource[+A <: ByteChannel] (
   
   override def open():OpenedResource[A] = new CloseableOpenedResource(opener,context, closeAction)
 
-  override def unmanaged = new scalax.io.unmanaged.ByteChannelResource[A](opener, context, closeAction, sizeFunc)
-  override def updateContext(newContext:ResourceContext) = new ByteChannelResource(opener, newContext, closeAction, () => None)
-      // sizeFunction must be unknown because we cannot risk opening the resource for reading the size in an unmanaged resource
+  // safeSizeFunction must be unknown because we cannot risk opening the resource for reading the size in an unmanaged resource
+  override def unmanaged = new scalax.io.unmanaged.ByteChannelResource[A](opener, context, closeAction, () => None)
+  override def updateContext(newContext:ResourceContext) = new ByteChannelResource(opener, newContext, closeAction, sizeFunc)
   override def addCloseAction(newCloseAction: CloseAction[A]) = 
     new ByteChannelResource(opener, context, newCloseAction :+ closeAction, sizeFunc)
   
@@ -53,9 +53,9 @@ class ByteChannelResource[+A <: ByteChannel] (
   override def readableByteChannel = new ReadableByteChannelResource(opener, context, closeAction, sizeFunc)
   
   override def blocks(blockSize: Option[Int] = None): LongTraversable[ByteBlock] = 
-    new traversable.ChannelBlockLongTraversable(blockSize, context, sizeFunc, open)
+    new traversable.ChannelBlockLongTraversable(blockSize, context, safeSizeFunc, open)
   
-  override def bytesAsInts = ResourceTraversable.byteChannelBased[Byte,Int](this.open, context, sizeFunc, initialConv = ResourceTraversable.toIntConv)
-  override def bytes = ResourceTraversable.byteChannelBased[Byte,Byte](this.open, context, sizeFunc)
+  override def bytesAsInts = ResourceTraversable.byteChannelBased[Byte,Int](this.open, context, safeSizeFunc, initialConv = ResourceTraversable.toIntConv)
+  override def bytes = ResourceTraversable.byteChannelBased[Byte,Byte](this.open, context, safeSizeFunc)
   override def chars(implicit codec: Codec) = reader(codec).chars  // TODO optimize for byteChannel
   }

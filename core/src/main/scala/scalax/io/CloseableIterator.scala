@@ -4,18 +4,18 @@ import java.io.Closeable
 import resource.{AbstractManagedResource, ManagedResourceOperations}
 import collection.{GenTraversableOnce, Iterator, TraversableOnce}
 import java.util.concurrent.locks.ReentrantLock
-trait CloseableIterator[@specialized(Byte,Char) +A] extends Iterator[A] with Closeable {
+import scala.util.control.Exception
+
+trait CloseableIterator[@specialized(Byte,Char) +A] extends Iterator[A] {
   self =>
   def next(): A
   def hasNext: Boolean
-  protected def doClose(): Unit
+  protected def doClose():List[Throwable]
 
   override def foreach[@specialized(Unit) U](f: A => U) =
     while (hasNext) f(next)
 
-  final def close() {
-    doClose()
-  }
+  final def close():List[Throwable] = doClose()
   
   override def take(i: Int) = lslice(0, i)
   def ltake(i: Long) = lslice(0, i)
@@ -63,11 +63,7 @@ private[io] class CloseableIteratorOps[+A](val iter: CloseableIterator[A]) {
     val concThat = that
     new Proxy[B,Iterator[B]](iter.++(concThat)) {
       override def doClose() = {
-        iter.close()
-        that match {
-          case concThat:Closeable => concThat.close
-          case _ => ()
-        }
+        iter.close() ++ CloseableIterator.safeClose(concThat)
       }
     }
   }
@@ -91,9 +87,8 @@ private[io] class CloseableIteratorOps[+A](val iter: CloseableIterator[A]) {
   class Proxy[+B, C <: Iterator[B]](private[this] val wrapped: C, otherComposingIterators: Iterator[_]*) extends CloseableIterator[B] {
     final def next() = wrapped.next
     final def hasNext: Boolean = wrapped.hasNext
-    def doClose() = {
-      safeClose(iter)
-      otherComposingIterators.foreach(safeClose)
+    def doClose():List[Throwable] = {
+      safeClose(iter) ++ otherComposingIterators.flatMap(safeClose)
     }
   }
   object Proxy {
@@ -102,14 +97,19 @@ private[io] class CloseableIteratorOps[+A](val iter: CloseableIterator[A]) {
 }
 
 object CloseableIterator {
-  def safeClose(iter: Iterator[_]) = iter match {
-    case ci: CloseableIterator[_] => ci.close()
-    case _ => ()
-  }
+  def safeClose(iter: Any):List[Throwable] = 
+    iter match {
+        case ci: CloseableIterator[_] => 
+          ci.close()
+        case c: Closeable => 
+          Exception.allCatch.either{c.close()}.left.toOption.toList
+        case _ => Nil
+    }
+  
   def apply[A](iter: Iterator[A]) = new CloseableIterator[A] {
     final def next(): A = iter.next
     final def hasNext: Boolean = iter.hasNext
-    def doClose() {}
+    def doClose() = Nil
   }
   def empty[A] = apply(Iterator.empty)
   def selfClosing[A](wrapped: CloseableIterator[A]) = new CloseableIterator[A] {

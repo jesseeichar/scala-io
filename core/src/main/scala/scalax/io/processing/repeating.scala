@@ -14,7 +14,7 @@ private[processing] class RepeatUntilEmpty(private[this] val maxRepetitions:Long
       index += 1
       index - 1
     }
-    def doClose = ()
+    def doClose = Nil
   })
 
   def foreach[U](f: Long => U) = iter.iter foreach f

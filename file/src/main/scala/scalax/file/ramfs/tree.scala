@@ -44,8 +44,7 @@ private[ramfs] trait Node {
 private[ramfs] class FileNode(var name:String) extends Node {
     var data = ArrayBuffer[Byte]()
     var lastModified = System.currentTimeMillis
-    def inputResource : InputStreamResource[InputStream] =
-      Resource.fromInputStream(new ByteArrayInputStream(data.toArray))
+    def inputStream : InputStream = new ByteArrayInputStream(data.toArray)
 
     def outputResource(owner:RamPath, openOptions: OpenOption*) : OutputStreamResource[OutputStream] = {
       require (owner.node exists {_ == this})

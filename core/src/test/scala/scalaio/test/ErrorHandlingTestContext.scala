@@ -8,7 +8,7 @@ class ErrorHandlingTestContext {
       override def errorHandler[U](accessResult: Either[Throwable, U], closingExceptions: List[Throwable]): U = {
         accessResult.left.toOption foreach {_ => accessExceptions += 1}
         closingExceptions foreach {_ => closeExceptions += 1}
-        null.asInstanceOf[U]
+        accessResult.right.toOption getOrElse null.asInstanceOf[U]
       }
     }
 

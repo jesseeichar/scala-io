@@ -302,7 +302,7 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
       val customHandlerInput = errorOnReadInput.asInstanceOf[Resource[_]].
                                   updateContext(testContext.customContext).
                                   asInstanceOf[Input]
-      customHandlerInput.bytes.head
+      customHandlerInput.bytes.headOption
       assertEquals(1, testContext.accessExceptions)
       assertEquals(0, testContext.closeExceptions)
     }
@@ -316,9 +316,9 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
       val customHandlerInput = errorOnCloseInput.asInstanceOf[Resource[_]].
                                   updateContext(testContext.customContext).
                                   asInstanceOf[Input]
-      customHandlerInput.bytes.head
+      customHandlerInput.bytes.headOption
       assertEquals(0, testContext.accessExceptions)
-      assertEquals(1, testContext.closeExceptions)
+      assertTrue(testContext.closeExceptions >= 1)
     }
   }
   @Test

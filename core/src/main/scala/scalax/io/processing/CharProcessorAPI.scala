@@ -28,7 +28,7 @@ class CharProcessorAPI private[processing](iter: CloseableIterator[Char],
         private[this] val proxy = iterator
         @inline final def next = proxy.next
         @inline final def hasNext = proxy.hasNext
-        final def doClose = ()
+        final def doClose = Nil
       }
       processFactory(Some(new LineTraversable(wrapped, lineTerminator, includeTerminator, resourceContext).headOption.getOrElse("").toSeq))
   }

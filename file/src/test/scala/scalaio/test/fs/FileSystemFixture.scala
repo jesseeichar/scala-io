@@ -60,12 +60,10 @@ abstract class FileSystemFixture(val fs : FileSystem, rnd : Random) {
     p.channel().addCloseAction(CloseAction(_ => throw new IOException("closeError")))
   }
   def errorOnAccessResource = {
-    val p = {
-      var tmp = path
-      while (tmp.exists) tmp = path
-      tmp
-    }
-    p.channel().addCloseAction(CloseAction(_ => throw new IOException("closeError")))
+    val p = path
+    p.createFile()
+    p.access = ""
+    p.channel()
   }
   def path(segments : Int, root : Path = root) : Path = root \ fs.fromString(file(segments))
   def path : Path = root \ fs.fromString(file)

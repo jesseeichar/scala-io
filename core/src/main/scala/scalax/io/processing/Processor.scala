@@ -150,7 +150,7 @@ trait Processor[+A] {
  */
 private[processing] trait Opened[+A] {
   def execute: Option[A]
-  def cleanUp(): Unit
+  def cleanUp(): List[Throwable]
 }
 
 /**
@@ -164,7 +164,7 @@ class ProcessorFactory(resourceContext: ResourceContext) {
    * @param valueFactory a function that creates the value from the opened resource
    * @param after method that cleans up the resource
    */
-  def apply[B, A](opener: => B, valueFactory: B => Option[A], after: B => Unit) = new Processor[A] {
+  def apply[B, A](opener: => B, valueFactory: B => Option[A], after: B => List[Throwable]) = new Processor[A] {
     def context = resourceContext
     private[processing] def init = {
       val resource = opener
@@ -185,7 +185,7 @@ class ProcessorFactory(resourceContext: ResourceContext) {
     private[processing] def init = {
       new Opened[A] {
         def execute() = valueFactory
-        def cleanUp() = ()
+        def cleanUp() = Nil
       }
     }
   }

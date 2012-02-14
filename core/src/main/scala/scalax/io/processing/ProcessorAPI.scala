@@ -342,7 +342,7 @@ class ProcessorAPI[+A](private[this] val iter: CloseableIterator[A], val resourc
   private[this] def createSideEffect(f: => Unit) = new Processor[Unit] {
     def context = resourceContext
     private[processing] def init = new Opened[Unit] {
-      def cleanUp() = ()
+      def cleanUp() = Nil
       def execute() = Some(f)
     }
   }

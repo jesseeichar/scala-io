@@ -23,8 +23,8 @@ class InputStreamResource[+A <: InputStream] (
 
   def open():OpenedResource[A] = new CloseableOpenedResource(opener,context, closeAction)
   
+  // safeSizeFunction must be unknown because we cannot risk opening the resource for reading the size in an unmanaged resource 
   def unmanaged = new scalax.io.unmanaged.InputStreamResource[A](opener, context,closeAction, () => None)
-      // sizeFunction must be unknown because we cannot risk opening the resource for reading the size in an unmanaged resource 
   def updateContext(newContext:ResourceContext) = new InputStreamResource(opener, newContext, closeAction, sizeFunc)
   override def addCloseAction(newCloseAction: CloseAction[A]) = 
     new InputStreamResource(opener, context, newCloseAction :+ closeAction, sizeFunc)
@@ -57,7 +57,7 @@ class InputStreamResource[+A <: InputStream] (
       
       new CloseableOpenedResource (Channels.newChannel(opened.get), context, closer)
     }
-    new traversable.ChannelBlockLongTraversable(blockSize, context, sizeFunc, toChannelOpen)
+    new traversable.ChannelBlockLongTraversable(blockSize, context, safeSizeFunc, toChannelOpen)
   }
 
   override def bytesAsInts : LongTraversable[Int] = readableByteChannel.bytesAsInts

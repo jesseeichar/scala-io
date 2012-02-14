@@ -176,20 +176,24 @@ trait Resource[+R] extends ManagedResourceOperations[R] with ResourceOps[R, Reso
    * @return the actual resource that has been opened
    */
     def open(): OpenedResource[R]
-        
-    final def acquireFor[B](f : R => B) : Either[List[Throwable], B] ={
-    val resource = open()
 
-    var closeExceptions: List[Throwable] = Nil
-    val catcher = util.control.Exception.allCatch.andFinally(closeExceptions = resource.close())
-    val result = catcher.either {f(resource.get)}
+  final def acquireFor[B](f: R => B): Either[List[Throwable], B] = {
+    try {
+      val resource = open()
 
-    Right {
-      if (result.left.toOption ++ closeExceptions nonEmpty) {
-        context.errorHandler(result, closeExceptions)
-      } else {
-        result.right.get
+      var closeExceptions: List[Throwable] = Nil
+      val catcher = util.control.Exception.allCatch.andFinally(closeExceptions = resource.close())
+      val result = catcher.either { f(resource.get) }
+
+      Right {
+        if (result.left.toOption ++ closeExceptions nonEmpty) {
+          context.errorHandler(result, closeExceptions)
+        } else {
+          result.right.get
+        }
       }
+    } catch {
+      case t => Right(context.errorHandler(Left(t), Nil))
     }
   }
 }
@@ -243,7 +247,8 @@ trait InputResource[+R <: Closeable] extends Resource[R] with Input with Resourc
      * @return the [[scalax.io.ReadableByteChannelResource]](typically) version of this object.
      */
     def readableByteChannel: InputResource[ReadableByteChannel]
-    final def size : Option[Long] = sizeFunc()
+    final def size : Option[Long] = safeSizeFunc()
+    final def safeSizeFunc = () => try{sizeFunc()} catch {case e => context.errorHandler(Right(None), List(e))}
     protected def sizeFunc: () => Option[Long]
 }
 /**
@@ -437,7 +442,7 @@ object Resource {
    * @return a SeekableByteChannelResource
    */
   def fromSeekableByteChannel[A <: SeekableByteChannel](opener: => A) : SeekableByteChannelResource[A] = {
-    new SeekableByteChannelResource[A](_ => opener,DefaultResourceContext, Noop, seekablesizeFunction(opener),None)
+    new SeekableByteChannelResource[A](_ => opener,DefaultResourceContext, Noop, seekablesafeSizeFunction(opener),None)
   }
 
   /**
@@ -451,10 +456,10 @@ object Resource {
    * @return a SeekableByteChannelResource
    */
   def fromSeekableByteChannel[A <: SeekableByteChannel](opener: Seq[OpenOption] => A) : SeekableByteChannelResource[A] = {
-    new SeekableByteChannelResource[A](opener,DefaultResourceContext, Noop, seekablesizeFunction(opener(Read :: Nil)),Some(ReadWrite))
+    new SeekableByteChannelResource[A](opener,DefaultResourceContext, Noop, seekablesafeSizeFunction(opener(Read :: Nil)),Some(ReadWrite))
   }
 
-  private def seekablesizeFunction(resource: => SeekableByteChannel)= () => {
+  private def seekablesafeSizeFunction(resource: => SeekableByteChannel)= () => {
     val r = resource
     try{Some(r.size)}finally{r.close()}
   }
@@ -487,7 +492,7 @@ object Resource {
    * @return an InputStreamResource
    */
   def fromURL(url:URL): InputStreamResource[InputStream] = {
-    val sizeFunc = () => {
+    val safeSizeFunc = () => {
       val conn: URLConnection = url.openConnection
       try {
         conn.connect()
@@ -499,7 +504,7 @@ object Resource {
         conn.getInputStream.close()
       }
     }
-    new InputStreamResource(url.openStream,new ResourceContext{override def descName=KnownName(url.toExternalForm)},Noop,sizeFunc)
+    new InputStreamResource(url.openStream,new ResourceContext{override def descName=KnownName(url.toExternalForm)},Noop,safeSizeFunc)
   }
 
   /**
@@ -522,11 +527,11 @@ object Resource {
    */
   def fromFile(file:File): SeekableByteChannelResource[SeekableByteChannel] = {
     def open = (opts:Seq[OpenOption]) => support.FileUtils.openChannel(file,opts)
-    def sizeFunc = () => {
+    def safeSizeFunc = () => {
       if(file.exists) Some(file.length)
       else None
     }
-    new SeekableByteChannelResource[SeekableFileChannel](open,new ResourceContext{override def descName=KnownName(file.getPath)},Noop,sizeFunc, Some(ReadWrite))
+    new SeekableByteChannelResource[SeekableFileChannel](open,new ResourceContext{override def descName=KnownName(file.getPath)},Noop,safeSizeFunc, Some(ReadWrite))
   }
   /**
    * Create a file from string then create a Seekable Resource from a File

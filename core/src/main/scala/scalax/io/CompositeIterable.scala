@@ -20,9 +20,8 @@ class CompositeIterable[A](builderIterators: Seq[() => Iterator[A]]) {
       }
       def doClose = {
         import CloseableIterator.safeClose
-        safeClose(now)
-        toClose.foreach(safeClose)
-        iterators.map(_.apply()).foreach(safeClose)
+        safeClose(now) ++ toClose.flatMap(safeClose) ++
+            iterators.map(_.apply()).flatMap(safeClose)
       }
     }
   }

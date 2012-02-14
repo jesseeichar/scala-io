@@ -130,11 +130,13 @@ abstract class AbstractOutputTests[InResource, OutResource] extends scalax.test.
   @Test
   def scalaIoException_On_Close_Error_by_default{
     intercept[ScalaIOException] {
-       open(CloseAction(_ => 
+       val output = open(CloseAction(_ => 
          throw new IOException("CloseError")
-         ))._2.write("hi")
+         ))._2
+     output.write("hi")
     }
   }
+  def writeErrorRaisedOnClose = false
   @Test
   def customErrorHandler_On_Write_Error{
     val testContext = new ErrorHandlingTestContext() 
@@ -146,8 +148,8 @@ abstract class AbstractOutputTests[InResource, OutResource] extends scalax.test.
                                   updateContext(testContext.customContext).
                                   asInstanceOf[Output]
       customHandlerOutput.write("hi")
-      assertEquals(1, testContext.accessExceptions)
-      assertEquals(0, testContext.closeExceptions)
+      assertEquals(if(writeErrorRaisedOnClose) 0 else 1, testContext.accessExceptions)
+      assertEquals(if(writeErrorRaisedOnClose) 1 else 0, testContext.closeExceptions)
     }
   }
   @Test

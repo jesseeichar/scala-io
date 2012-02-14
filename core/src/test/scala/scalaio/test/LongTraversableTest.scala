@@ -29,7 +29,7 @@ class LongTraversableTest extends DataIndependentLongTraversableTest[Int] with P
           i
         }
         def hasNext: Boolean = iter.hasNext
-        def doClose() = closeFunction()
+        def doClose() = try{closeFunction(); Nil}catch {case e => List(e)}
       }
     }
     if (conv != identity) lt.map(conv)
@@ -371,7 +371,9 @@ class LongTraversableTest extends DataIndependentLongTraversableTest[Int] with P
   @Test
   def scalaIoException_On_Close_Error_by_default{
     intercept[ScalaIOException] {
-        traversable(closeFunction = () => throw new IOException("Bang")).head
+        traversable(closeFunction = () => 
+          throw new IOException("Bang")
+          ).head
     }
   }
   @Test
@@ -379,7 +381,7 @@ class LongTraversableTest extends DataIndependentLongTraversableTest[Int] with P
     val testContext = new ErrorHandlingTestContext() 
 
     val errorOnReadInput = traversable(callback = _ => throw new IOException("Bang"), resourceContext = testContext.customContext)
-      errorOnReadInput.head
+      errorOnReadInput.headOption
       assertEquals(1, testContext.accessExceptions)
       assertEquals(0, testContext.closeExceptions)
   }
@@ -388,7 +390,7 @@ class LongTraversableTest extends DataIndependentLongTraversableTest[Int] with P
     val testContext = new ErrorHandlingTestContext() 
 
     val errorOnCloseInput = traversable(closeFunction = () => throw new IOException("Bang"), resourceContext = testContext.customContext)
-      errorOnCloseInput.head
+      errorOnCloseInput.headOption
       assertEquals(0, testContext.accessExceptions)
       assertEquals(1, testContext.closeExceptions)
   }

@@ -17,7 +17,7 @@ import scalax.io.nio.SeekableFileChannel
 protected[io] class ByteResourceTraversable(
   resourceOpener: => OpenedResource[Closeable],
   resourceContext: ResourceContext,
-  sizeFunc: () => Option[Long],
+  safeSizeFunc: () => Option[Long],
   start: Long,
   end: Long,
   allowSeekable: Boolean)
@@ -29,19 +29,19 @@ protected[io] class ByteResourceTraversable(
     val resource = resourceOpener
     resource.get match {
       case FileChannelExtractor(seekable) if allowSeekable =>
-        new SeekableByteChannelIterator(sizeFunc, new SeekableFileChannel(seekable), resource, start, end)
+        new SeekableByteChannelIterator(safeSizeFunc, new SeekableFileChannel(seekable), resource, start, end)
       case seekable: SeekableByteChannel if allowSeekable =>
-        new SeekableByteChannelIterator(sizeFunc, seekable, resource, start, end)
+        new SeekableByteChannelIterator(safeSizeFunc, seekable, resource, start, end)
       case stream: InputStream =>
-        new ReadableByteChannelIterator(sizeFunc, Channels.newChannel(stream), resource, start, end)
+        new ReadableByteChannelIterator(safeSizeFunc, Channels.newChannel(stream), resource, start, end)
       case rbc: ReadableByteChannel =>
-        new ReadableByteChannelIterator(sizeFunc, rbc, resource, start, end)
+        new ReadableByteChannelIterator(safeSizeFunc, rbc, resource, start, end)
       case _ =>
         throw new AssertionError(getClass.getSimpleName + " only accepts inputStreams and readableByteChannels as input")
     }
   }
 
-  override lazy val hasDefiniteSize = sizeFunc().nonEmpty
+  override lazy val hasDefiniteSize = safeSizeFunc().nonEmpty
   override def lsize = {
     val iter = iterator
     try iter.size

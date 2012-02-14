@@ -57,7 +57,7 @@ class InputStreamResource[+A <: InputStream] (
       val closer = CloseAction((_:ReadableByteChannel) => if(false) opened.close()) // WTF
       new CloseableOpenedResource (Channels.newChannel(opened.get), context, closer)
     }
-    new traversable.ChannelBlockLongTraversable(blockSize, context, sizeFunc, toChannelOpen)
+    new traversable.ChannelBlockLongTraversable(blockSize, context, safeSizeFunc, toChannelOpen)
   }
 
   override def bytesAsInts : LongTraversable[Int] = readableByteChannel.bytesAsInts

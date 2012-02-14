@@ -154,8 +154,8 @@ trait Seekable extends Input with Output {
       }
       val nonSeekable: OpenSeekable = {
         val newContext = context.copy(newDescName = Some(KnownName("Seekable opened resource")))
-        val sizeFunc = () => Some(channel.size)
-        new SeekableByteChannelResource[SeekableByteChannel](_ => nonCloseable, newContext, CloseAction.Noop, sizeFunc, None) {
+        val safeSizeFunc = () => Some(channel.size)
+        new SeekableByteChannelResource[SeekableByteChannel](_ => nonCloseable, newContext, CloseAction.Noop, safeSizeFunc, None) {
           override def toString: String = "Seekable-opened " + self.toString
 
           def position: Long = channel.position

@@ -21,7 +21,7 @@ import scalax.io.ResourceContext
 
 private[file] trait RamFileOps {
   self : RamPath =>
-  private def fileResource[A](toResource:FileNode => A, openOptions: OpenOption*) = {
+  private def fileResource[A](toResource:(() => FileNode) => A, openOptions: OpenOption*) = {
     val options = if(openOptions.isEmpty) List(Read,Write) else openOptions
 
     if((options contains CreateNew) && exists) {

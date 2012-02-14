@@ -9,7 +9,7 @@ private object ReadyState extends State { final val id = 0 }
 private object ContinueState extends State { final val id = 1 }
 private object EmptyState extends State { final val id = 2 }
 
-class ChannelBlockLongTraversable(blockSize: Option[Int], val context: ResourceContext, sizeFunc:()  => Option[Long], opener: => OpenedResource[ReadableByteChannel]) extends LongTraversable[ByteBlock] {
+class ChannelBlockLongTraversable(blockSize: Option[Int], val context: ResourceContext, safeSizeFunc:()  => Option[Long], opener: => OpenedResource[ReadableByteChannel]) extends LongTraversable[ByteBlock] {
   self =>
 
   protected[io] def iterator: CloseableIterator[ByteBlock] = new CloseableIterator[ByteBlock] {
@@ -18,7 +18,7 @@ class ChannelBlockLongTraversable(blockSize: Option[Int], val context: ResourceC
     private[this] val context = opened.context
     private[this] var buffer = blockSize match {
       case Some(size) => context.createNioBuffer(size, Some(channel), true)
-      case None => context.createNioBuffer(sizeFunc(), Some(channel), true)
+      case None => context.createNioBuffer(safeSizeFunc(), Some(channel), true)
     }
     // bytes read the last read.  -1 
     private[this] var state: State = ContinueState
@@ -40,7 +40,7 @@ class ChannelBlockLongTraversable(blockSize: Option[Int], val context: ResourceC
           state == ReadyState
       }
     }
-    protected def doClose(): Unit = opened.close()
+    protected def doClose() = opened.close()
   }
 
   override def force = new LongTraversable[ByteBlock] {

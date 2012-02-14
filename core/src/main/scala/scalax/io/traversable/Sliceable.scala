@@ -32,13 +32,13 @@ private[io] abstract class Sliceable extends CloseableIterator[Byte] {
     create(newStart, newEnd)
   }
 
-  protected def sizeFunc: () => Option[Long]
+  protected def safeSizeFunc: () => Option[Long]
   /** Return the underlying ReadableByteChannel or InputStream.  any other object is an error*/
   protected def getIn: Any
 
   override def size = lsize min Integer.MAX_VALUE toInt
   def lsize = {
-    def fileSize = sizeFunc() match {
+    def fileSize = safeSizeFunc() match {
       case Some(size) => size min (end - start)
       case None => 
           var result = 0L  
