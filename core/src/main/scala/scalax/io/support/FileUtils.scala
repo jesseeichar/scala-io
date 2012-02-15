@@ -14,23 +14,30 @@ import scalax.io.extractor.WritableByteChannelExtractor
 import scalax.io.extractor.FileChannelExtractor
 
 object FileUtils {
-  def openOutputStream(jfile:File, openOptions: Seq[OpenOption]) = {
-    val (append, options) = preOpen(jfile,openOptions,true)
-    if (options contains DeleteOnClose) {
-        Resource fromOutputStream new DeletingFileOutputStream(jfile, append)
-    } else {
-        Resource fromOutputStream new FileOutputStream(jfile,append)
-    }
+  def openOutputStream(jfile: File, openOptions: Seq[OpenOption]) = {
+    Resource.fromOutputStream({
+      val (append, options) = preOpen(jfile, openOptions, true)
+      if (options contains DeleteOnClose) {
+        new DeletingFileOutputStream(jfile, append)
+      } else {
+        new FileOutputStream(jfile, append)
+      }
+    })
   }
-  def openChannel(raf:RandomAccessFile, openOptions: Seq[OpenOption]):SeekableFileChannel = {
-    if (openOptions contains DeleteOnClose)
-      throw new UnsupportedOperationException("DeleteOnClose is not supported on FileChannels pre Java 7 implementations.")
-    if((openOptions contains Truncate) && (openOptions exists {opt => opt == Write || opt == Append}))
-      raf.setLength(0)
-    if(openOptions contains Append)
-      raf.seek(raf.length)
 
-    new SeekableFileChannel(raf.getChannel)
+  def openChannel(raf: RandomAccessFile, openOptions: Seq[OpenOption]): SeekableFileChannel = {
+    new SeekableFileChannel({
+      if (openOptions contains DeleteOnClose)
+        throw new UnsupportedOperationException("DeleteOnClose is not supported on FileChannels pre Java 7 implementations.")
+      if ((openOptions contains Truncate) && (openOptions exists {
+        opt => opt == Write || opt == Append
+      }))
+        raf.setLength(0)
+      if (openOptions contains Append)
+        raf.seek(raf.length)
+
+      raf.getChannel
+    })
 
   }
 
@@ -58,7 +65,8 @@ object FileUtils {
           parent.getOrElse(throw new IOException("unable to get parent file of"+jfile)).mkdirs()
           jfile.createNewFile()
         case CreateNew =>
-          if (jfile.exists) throw new IOException(jfile+" already exists, openOption "+CreateNew+" cannot be used with an existing file")
+          if (jfile.exists)
+            throw new IOException(jfile+" already exists, openOption '"+CreateNew+"' cannot be used with an existing file")
         case Truncate if processTruncate && (options.exists {opt => opt == Write || opt == Append} && (jfile.length > 0))=>
           new FileOutputStream(jfile).close()  // truncate file
 

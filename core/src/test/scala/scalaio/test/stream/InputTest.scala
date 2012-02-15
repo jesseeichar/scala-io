@@ -52,18 +52,18 @@ class InputTest extends AbstractInputTests with DataIndependentLongTraversableTe
   override protected def sizeIsDefined = false
 
   @Test
-  def issue_8_lines_in_Input_not_lazy {
+  def issue_8_lines_in_Input_should_be_lazy {
     import scalax.io.Line.Terminators._
 
     val file = largeResource(Key.TEXT)
     
     val start = System.currentTimeMillis
-    val fromFile = Resource.fromFile(file).lines(NewLine)(codec=Codec.UTF8)
-    val fromString = Resource.fromFile(file.getAbsolutePath).lines(NewLine)(codec=Codec.UTF8)
+    val fromFile = Resource.fromFile(file).lines(Auto, false)(Codec.UTF8)
+    val fromString = Resource.fromFile(file.getAbsolutePath).lines(Auto, false)(Codec.UTF8)
     fromString.toString
     fromFile.toString
     val end = System.currentTimeMillis
-    assertTrue(end-start < 500)
+    assertTrue("took "+(end-start), end-start < 500)
   }
   
   @Test

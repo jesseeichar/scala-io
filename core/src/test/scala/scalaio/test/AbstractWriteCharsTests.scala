@@ -34,7 +34,7 @@ abstract class AbstractWriteCharsTests extends scalax.test.sugar.AssertionSugar 
   def write_many_strings(): Unit = {
     val (input, output) = open()
 
-    output writeStrings (DEFAULT_DATA :: DEFAULT_DATA :: DEFAULT_DATA :: Nil)
+    output.writeStrings (DEFAULT_DATA :: DEFAULT_DATA :: DEFAULT_DATA :: Nil, "")
     assertEquals(DEFAULT_DATA + DEFAULT_DATA + DEFAULT_DATA, input.slurpString)
 
     val (input2, output2) = open()

@@ -35,7 +35,7 @@ private[file] trait DefaultFileOps {
   override def outputStream(openOptions: OpenOption*) = {
       val r = openOptions match {
           case Seq() =>
-              openOutputStream(jfile,openOptions)
+              openOutputStream(jfile,ReadWrite)
           case opts if opts forall {opt => opt != Write && opt != Append} =>
               openOutputStream(jfile,openOptions :+ Write)
           case _ =>

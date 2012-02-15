@@ -83,7 +83,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
   def truncate_deletes_previous_file {
     repeat {
       val p = path
-      p.outputStream(Truncate,Write)
+      p.outputStream(Truncate,Write).open().close()
       assertEquals("", p.slurpString)
     }
   }
@@ -92,20 +92,31 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
   def truncate_takes_precedence_over_Append {
     repeat {
       val p = path
-      p.outputStream(Truncate,Write,Append)
+      p.outputStream(Truncate,Write,Append).open().close()
       assertEquals("", p.slurpString)
     }
   }
 
   @Test //@Ignore
-  def create_new_fails_when_file_exists {
-    repeat {
+  def obtaining_resource_does_not_fail_when_not_opened {
       val p = path
-      intercept[IOException] {
-        p.outputStream(CreateNew)
+      p.outputStream(CreateNew)
+      // no error, that is a pass
+      p.channel(CreateNew)
+      // no error, that is a pass
+      p.delete(true)
+      p.inputStream()
+      // no error, that is a pass
+
+  }
+
+  @Test //@Ignore
+  def create_new_fails_when_file_exists {
+      val p = path
+      intercept[Exception] {
+        p.outputStream(CreateNew).open().close()
       }
       assertEquals(demoData, p.slurpString)
-    }
   }
 
   @Test //@Ignore

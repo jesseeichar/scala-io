@@ -301,9 +301,9 @@ trait DataIndependentLongTraversableTest[T] {
     val input = independentTraversable()
     val expected = independentTraversable
 
-    val basicsliding = input.sliding(10)
-    assertEquals(expected.sliding(10).size, basicsliding.size)
-    basicsliding.zip(expected.sliding(10).toSeq).forall {
+    val basicsliding = input.sliding(10,1)
+    assertEquals(expected.sliding(10,1).size, basicsliding.size)
+    basicsliding.zip(expected.sliding(10,1).toSeq).forall {
       case (actual, expected) =>
         actual.toList == expected.toList
     }

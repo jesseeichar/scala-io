@@ -117,34 +117,41 @@ trait LongTraversableLike[@specialized(Byte,Char) +A, +Repr <: LongTraversableLi
    *  
    * @throws AssertionError if the iterator is returned
    */
-  def withIterator[U](f: CloseableIterator[A] => U):U = {
-    try {
-    val iter = iterator
+  def withIterator[U](f: CloseableIterator[A] => U): U = {
     var closeExceptions: List[Throwable] = Nil
-    val catcher = util.control.Exception.allCatch.andFinally{
-        closeExceptions = try iter.close() catch {case e => List(e)}
-    }
-
-    val result = catcher.either {
-      val result = f(iter)
-      if (System.identityHashCode(result) == System.identityHashCode(iter)) {
-        throw new AssertionError("the iterator may not escape the bounds of this block") with ControlThrowable
+    val result = try {
+      val iter = iterator
+      val catcher = util.control.Exception.allCatch.andFinally {
+        closeExceptions = try iter.close() catch {
+          case e => List(e)
+        }
       }
-      result
-    }
 
-    result.left.toOption.filter{_.isInstanceOf[ControlThrowable]}.foreach(throw _)
+      val result = catcher.either {
+        val result = f(iter)
+        if (System.identityHashCode(result) == System.identityHashCode(iter)) {
+          throw new AssertionError("the iterator may not escape the bounds of this block") with ControlThrowable
+        }
+        result
+      }
+
+      result.left.toOption.filter {
+        _.isInstanceOf[ControlThrowable]
+      }.foreach(throw _)
+
+      result
+    } catch {
+      case t:ControlThrowable => throw t
+      case t => Left(t)
+    }
 
     if (result.left.toOption ++ closeExceptions nonEmpty) {
       context.errorHandler(result, closeExceptions)
     } else {
       result.right.get
     }
-    } catch {
-      case t => context.errorHandler(Left(t), Nil)
-    }
   }
-  
+
   protected[io] def iterator: CloseableIterator[A]
 
   def foreach[@specialized(Unit) U](f: (A) => U) = withIterator { _.foreach(f) }

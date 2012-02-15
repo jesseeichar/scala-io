@@ -46,7 +46,7 @@ private[ramfs] class FileNode(var name:String) extends Node {
     var lastModified = System.currentTimeMillis
     def inputStream : InputStream = new ByteArrayInputStream(data.toArray)
 
-    def outputResource(owner:RamPath, openOptions: OpenOption*) : OutputStreamResource[OutputStream] = {
+    def outputResource(owner:RamPath, openOptions: OpenOption*) : OutputStream = {
       require (owner.node exists {_ == this})
 
       def newResource = {
@@ -68,12 +68,12 @@ private[ramfs] class FileNode(var name:String) extends Node {
 
       if(openOptions contains Truncate) data.clear()
 
-      Resource.fromOutputStream(newResource)
+      newResource
     }
 
     def channel(owner:RamPath, openOptions: OpenOption*) = {
       def newchannel = new ArrayBufferSeekableChannel(this.data,openOptions:_*)(_ => owner.delete(force=true), _ => ())
-      Resource.fromSeekableByteChannel(newchannel)
+      newchannel
     }
   }
 

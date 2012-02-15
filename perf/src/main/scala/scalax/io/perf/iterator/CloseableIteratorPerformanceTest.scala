@@ -133,7 +133,7 @@ class ByteIter(max: Int) extends CloseableIterator[Byte] {
     byte
   }
   def hasNext = c < max
-  protected def doClose(): Unit = ()
+  protected def doClose(): List[Throwable] = Nil
 
 }
 class Closeable1(max: Int) extends Iterator[Byte] {

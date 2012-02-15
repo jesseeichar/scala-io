@@ -18,10 +18,11 @@ import java.io.{
 }
 import scalax.io.{Seekable, OpenOption}
 import scalax.io.ResourceContext
+import scalax.io.Resource
 
 private[file] trait RamFileOps {
   self : RamPath =>
-  private def fileResource[A](toResource:(() => FileNode) => A, openOptions: OpenOption*) = {
+  private def fileResource[A](toResource:FileNode => A, openOptions: OpenOption*) = {
     val options = if(openOptions.isEmpty) List(Read,Write) else openOptions
 
     if((options contains CreateNew) && exists) {
@@ -60,16 +61,16 @@ private[file] trait RamFileOps {
     }
 
   }
-  def inputStream = fileResource(_.inputResource.updateContext(fileSystem.context),Read)
-  def outputStream(openOptions: OpenOption*) = {
+  def inputStream = Resource.fromInputStream(fileResource(_.inputStream,Read)).updateContext(fileSystem.context)
+  def outputStream(openOptions: OpenOption*) = Resource.fromOutputStream {
     val updatedOpts = openOptions match {
           case Seq() => WriteTruncate
           case opts if opts forall {opt => opt != Write && opt != Append} => openOptions :+ Write
           case _ => openOptions
       }
-    fileResource( _.outputResource(this, updatedOpts:_*).updateContext(fileSystem.context), updatedOpts:_*)
-  }
-  def channel(openOptions: OpenOption*) = fileResource(_.channel(this, openOptions:_*).updateContext(fileSystem.context), openOptions:_*)
+    fileResource( _.outputResource(this, updatedOpts:_*), updatedOpts:_*)
+  }.updateContext(fileSystem.context)
+  def channel(openOptions: OpenOption*) = Resource.fromSeekableByteChannel(fileResource(_.channel(this, openOptions:_*), openOptions:_*)).updateContext(fileSystem.context)
   def fileChannel(openOptions: OpenOption*) = None // not supported
 
   def withLock[R](start: Long,size: Long,shared: Boolean, context:ResourceContext)(block: (Seekable) => R):Option[R] = None // TODO
