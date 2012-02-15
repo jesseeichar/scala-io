@@ -153,13 +153,13 @@ class UnmanagedResourceTests extends scalax.test.sugar.AssertionSugar {
     val context = new InputContext()
 
     val resource = Resource.fromSeekableByteChannel(ops => context.seekable(ops: _*))
-    /*    context.assertRead(resource.unmanaged.inputStream)(_.toByte, _.bytes.take(1).head)
+    context.assertRead(resource.unmanaged.inputStream)(_.toByte, _.bytes.take(1).head)
     context.assertRead(resource.unmanaged.inputStream.inputStream)(_.toByte, _.bytes.take(1).head)
     context.assertRead(resource.unmanaged.inputStream.readableByteChannel)(_.toByte, _.bytes.take(1).head)
     context.assertRead(resource.unmanaged.readableByteChannel)( _.toByte, _.bytes.take(1).head)
     context.assertRead(resource.unmanaged.readableByteChannel.inputStream)( _.toByte, _.bytes.take(1).head)
     context.assertRead(resource.unmanaged.readableByteChannel.readableByteChannel)( _.toByte, _.bytes.take(1).head)
-    context.assertRead(resource.unmanaged.reader())( _.toChar, _.chars.take(1).head)    */
+    context.assertRead(resource.unmanaged.reader())( _.toChar, _.chars.take(1).head)
     context.assertSeekable(resource.unmanaged)
   }
 

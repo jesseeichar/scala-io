@@ -132,14 +132,16 @@ trait ResourceContext {
    * @param newDescName A new descriptive name for the associated resources
    *        The default value is None which will keep the behaviour of the current context 
    */
-  def copy[U](
+  def copy[A](
     newByteBufferSize: Option[(Option[Long], Boolean) => Int] = None,
     newCharBufferSize: Option[(Option[Int], Boolean) => Int] = None,
     newCreateNioBuffer: Option[(Int, Option[Channel], Boolean) => ByteBuffer] = None,
-    newErrorHandler: Option[(Either[Throwable,U], List[Throwable]) => U] = None,
+    newErrorHandler: Option[(Either[Throwable,A], List[Throwable]) => A] = None,
     newDescName: Option[ResourceDescName] = None) = new ResourceContext {
-    override def errorHandler[U](accessResult: Either[Throwable, U], closingExceptions: List[Throwable]): U = 
-      (newErrorHandler getOrElse (self.errorHandler _))(accessResult.asInstanceOf[Either[Throwable,Nothing]], closingExceptions).asInstanceOf[U]
+    override def errorHandler[U](accessResult: Either[Throwable, U], closingExceptions: List[Throwable]): U = {
+      (newErrorHandler.map(_.apply(accessResult.asInstanceOf[Either[Throwable,A]], closingExceptions)).getOrElse 
+          (self.errorHandler(accessResult.asInstanceOf[Either[Throwable,U]], closingExceptions))).asInstanceOf[U]
+    }
     override def descName: ResourceDescName = newDescName getOrElse self.descName
     override def byteBufferSize(dataSize: Option[Long], readOnly: Boolean): Int = (newByteBufferSize getOrElse (self.byteBufferSize _))(dataSize, readOnly)
     override def charBufferSize(dataSize: Option[Int], readOnly: Boolean): Int = (newCharBufferSize getOrElse (self.charBufferSize _))(dataSize, readOnly)

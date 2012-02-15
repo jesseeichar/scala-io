@@ -151,6 +151,7 @@ trait Resource[+R] extends ManagedResourceOperations[R] with ResourceOps[R, Reso
    * Creates a new instance of the underlying resource (or opens it).
    * Sometimes the code block used to create the Resource is non-reusable in
    * which case this Resource can only be used once.  This is not recommended.
+   * 
    * When creating a resource it is recommended to pass the code block for creating
    * the resource to the resource so that the resource can be reused.  Of course this
    * is not always possible
@@ -173,28 +174,33 @@ trait Resource[+R] extends ManagedResourceOperations[R] with ResourceOps[R, Reso
    * }
    * }}}
    *
+   * @note normally the error handler regiested with the associated ResourceContext 
+   *        will handle any errors opening the resource, but when calling this method
+   *        the caller must handle any possible errors that are raised.  
    * @return the actual resource that has been opened
    */
     def open(): OpenedResource[R]
 
   final def acquireFor[B](f: R => B): Either[List[Throwable], B] = {
-    try {
+    var closeExceptions: List[Throwable] = Nil
+    val result = try {
       val resource = open()
 
-      var closeExceptions: List[Throwable] = Nil
       val catcher = util.control.Exception.allCatch.andFinally(closeExceptions = resource.close())
-      val result = catcher.either { f(resource.get) }
+      catcher.either { f(resource.get) }
 
-      Right {
-        if (result.left.toOption ++ closeExceptions nonEmpty) {
-          context.errorHandler(result, closeExceptions)
-        } else {
-          result.right.get
-        }
-      }
     } catch {
-      case t => Right(context.errorHandler(Left(t), Nil))
+      case t => Left(t)
     }
+
+    Right {
+      if (result.left.toOption ++ closeExceptions nonEmpty) {
+        context.errorHandler(result, closeExceptions)
+      } else {
+        result.right.get
+      }
+    }
+
   }
 }
 
