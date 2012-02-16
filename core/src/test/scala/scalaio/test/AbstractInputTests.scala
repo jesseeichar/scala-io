@@ -14,10 +14,11 @@ import Codec.UTF8
 import Line.Terminators._
 import org.junit.Assert._
 import org.junit.{
-Test, Ignore
+  Test,
+  Ignore
 }
 import Constants.TEXT_VALUE
-import java.io.{ByteArrayOutputStream, ByteArrayInputStream}
+import java.io.{ ByteArrayOutputStream, ByteArrayInputStream }
 import java.nio.channels.Channels
 import java.io.File
 import java.io.FileOutputStream
@@ -30,7 +31,7 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
   sealed trait Type
 
   case object Image extends Type
-  
+
   abstract class Text(val sep: String) extends Type
 
   case object TextNewLine extends Text(NewLine.sep)
@@ -46,15 +47,16 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
   case object ErrorOnRead extends Type {
     def errorInputStream = new InputStream {
       override def read = throw new IOException("error")
-      override def read(buf:Array[Byte], off:Int, len:Int) = throw new IOException("error") 
+      override def read(buf: Array[Byte], off: Int, len: Int) = 
+        throw new IOException("error")
     }
   }
-  
+
   case object ErrorOnClose extends Type {
     def errorInputStream = new ByteArrayInputStream("hello".getBytes("UTF-8")) {
       override def close = throw new IOException("error")
     }
-  } 
+  }
 
   protected def input(t: Type): Input
 
@@ -95,8 +97,7 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
       expected, bytes)
   }
 
-
-  @Test//(timeout = 3000) //@Ignore
+  @Test //(timeout = 3000) //@Ignore
   def read_all_bytes_as_Ints(): Unit = {
     val ints = input(TextNewLine).bytesAsInts.toArray
     val expected = {
@@ -118,7 +119,6 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
     assertEquals(expected.size, ints.size)
     assertArrayEquals(expected, ints)
   }
-
 
   @Test(timeout = 3000) //@Ignore
   def read_all_bytes_into_array(): Unit = {
@@ -163,16 +163,15 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
     assertEquals(expected, read)
   }
 
-  
   @Test(timeout = 3000) //@Ignore
   def read_lines_Auto_stackoverflow_bug: Unit = {
     import JavaConverters._
-    
+
     val data = "l1\nl2\nlastline not terminator"
     val lines = data.asReadChars.lines()
     assertEquals(data.split("\\n").toList, lines.toList)
   }
-  
+
   @Test(timeout = 3000) //@Ignore
   def read_all_lines_Auto: Unit = {
     testLines("NewLine", TextCustomData("\n", "\n"), Auto, false)
@@ -194,7 +193,6 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
     testLines("CarriageReturn", TextCarriageReturn, CarriageReturn, false)
     testLines("Custom", TextCustom("x"), Custom("x"), false)
   }
-
 
   @Test(timeout = 3000) //@Ignore
   def read_all_lines_includeTerminator(): Unit = {
@@ -223,8 +221,8 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
       }
       else withLastEl
     }
-    def display(c:List[String]) = c.map(_.replace("\n","\\n").replace("\r","\\r")) 
-    assert(expected == read, "expected: "+display(expected)+" but was "+display(read));
+    def display(c: List[String]) = c.map(_.replace("\n", "\\n").replace("\r", "\\r"))
+    assert(expected == read, "expected: " + display(expected) + " but was " + display(read));
   }
 
   @Test(timeout = 3000) //@Ignore
@@ -241,17 +239,17 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
     assertFalse(read contains textExpected)
   }
 
-  @Test//(timeout = 3000) //@Ignore
+  @Test //(timeout = 3000) //@Ignore
   def copyDataTo(): Unit = {
     val outStream = new ByteArrayOutputStream()
     input(TextNewLine).copyDataTo(outStream.asOutput)
 
     val expected = TEXT_VALUE
 
-    assertEquals(expected, new String(outStream.toByteArray,"UTF-8"))
+    assertEquals(expected, new String(outStream.toByteArray, "UTF-8"))
   }
 
-  @Test//(timeout = 3000) //@Ignore
+  @Test //(timeout = 3000) //@Ignore
   def copyDataToWithChannel(): Unit = {
     val outStream = new ByteArrayOutputStream()
     val outChan = Channels.newChannel(outStream)
@@ -259,96 +257,107 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
 
     val expected = TEXT_VALUE
 
-    assertEquals(expected, new String(outStream.toByteArray,"UTF-8"))
+    assertEquals(expected, new String(outStream.toByteArray, "UTF-8"))
   }
   def copyDataToFile(): Unit = {
-    val file = File.createTempFile(getClass.getSimpleName(),"tmp")
+    val file = File.createTempFile(getClass.getSimpleName(), "tmp")
     val outChan = Channels.newChannel(new FileOutputStream(file))
     input(TextNewLine).copyDataTo(outChan.asOutput)
 
     val expected = TEXT_VALUE
-    
-    assertEquals(expected, new String(Resource.fromFile(file).byteArray,"UTF-8"))
+
+    assertEquals(expected, new String(Resource.fromFile(file).byteArray, "UTF-8"))
   }
 
   @Test(timeout = 3000) //@Ignore
   def byteCountForLargeInput(): Unit = {
-    val text = (1 to (8*1024) flatMap { _ => TEXT_VALUE }).mkString
+    val text = (1 to (8 * 1024) flatMap { _ => TEXT_VALUE }).mkString
     val in = input(TextCustomData("\n", text))
-
 
     assertEquals(text.getBytes("UTF-8").length, in.bytes.size)
   }
 
   @Test
-  def scalaIoException_On_Read_Error_by_default{
+  def scalaIoException_On_Read_Error_by_default {
     intercept[ScalaIOException] {
-        input(ErrorOnRead).bytes.head
+      input(ErrorOnRead).bytes.head
     }
   }
-    
+
   @Test
-  def scalaIoException_On_Close_Error_by_default{
+  def scalaIoException_On_Close_Error_by_default {
     intercept[ScalaIOException] {
-        input(ErrorOnClose).bytes.head
+      input(ErrorOnClose).bytes.head
     }
   }
-  def assertNoExceptionsRaisedOnInputMethodCalls(input:Input) {
-    input.blocks(Some(2)).foreach(_ => ())
-    input.blocks().foreach(_ => ())
-    input.blocks(Some(1000000)).foreach(_ => ())
-    input.blocks(Some(2)).force
-    input.byteArray
-    input.slurpString()
-    input.slurpString(Codec.ISO8859)
-    input.bytes.foreach(_ => ())
-    input.bytes.force
-    input.bytesAsInts.force
-    input.bytesAsInts.foreach(_ => ())
-    input.chars().foreach(_ => ())
-    input.chars().force
-    input.chars(Codec.ISO8859).foreach(_ => ())
-    input.chars(Codec.ISO8859).force
-    input.lines().force
-    input.lines().foreach(_ => ())
-    input.size
+  @Test
+  def assertNoExceptionsRaisedOnInputMethodCalls() {
+    val errorOnReadInput = input(ErrorOnRead)
+    if (errorOnReadInput.isInstanceOf[Resource[_]]) {
+      class MyException extends Exception
+      val context = new ResourceContext {
+          override def openErrorHandler[A,U](f: A => U , openException:Throwable):U = 
+            throw new MyException
+          override def errorHandler[A,U](f:A => U, accessResult: Either[Throwable, U], closingExceptions: List[Throwable]): U = 
+            throw new MyException
+      }
+      val input = errorOnReadInput.asInstanceOf[Resource[_]].
+        updateContext(context).
+        asInstanceOf[Input]
+
+      intercept[MyException](input.blocks(Some(2)).foreach(_ => ()))
+      intercept[MyException](input.blocks().foreach(_ => ()))
+      intercept[MyException](input.blocks(Some(1000000)).foreach(_ => ()))
+      intercept[MyException](input.blocks(Some(2)).force)
+      intercept[MyException](input.byteArray)
+      intercept[MyException](input.slurpString())
+      intercept[MyException](input.slurpString(Codec.ISO8859))
+      intercept[MyException](input.bytes.foreach(_ => ()))
+      intercept[MyException](input.bytes.force)
+      intercept[MyException](input.bytesAsInts.force)
+      intercept[MyException](input.bytesAsInts.foreach(_ => ()))
+      intercept[MyException](input.chars().foreach(_ => ()))
+      intercept[MyException](input.chars().force)
+      intercept[MyException](input.chars(Codec.ISO8859).foreach(_ => ()))
+      intercept[MyException](input.chars(Codec.ISO8859).force)
+      intercept[MyException](input.lines().force)
+      intercept[MyException](input.lines().foreach(_ => ()))
+    }
   }
   @Test
-  def customErrorHandler_On_Read_Error{
-    val testContext = new ErrorHandlingTestContext() 
+  def customErrorHandler_On_Read_Error {
+    val testContext = new ErrorHandlingTestContext()
 
     val errorOnReadInput = input(ErrorOnRead)
-    if(errorOnReadInput.isInstanceOf[Resource[_]]) {
+    if (errorOnReadInput.isInstanceOf[Resource[_]]) {
       val customHandlerInput = errorOnReadInput.asInstanceOf[Resource[_]].
-                                  updateContext(testContext.customContext).
-                                  asInstanceOf[Input]
+        updateContext(testContext.customContext).
+        asInstanceOf[Input]
       customHandlerInput.bytes.headOption
       assertEquals(1, testContext.accessExceptions)
       assertEquals(0, testContext.closeExceptions)
-      assertNoExceptionsRaisedOnInputMethodCalls(customHandlerInput)
     }
   }
   @Test
-  def customErrorHandler_On_Close_Error{
-    val testContext = new ErrorHandlingTestContext() 
+  def customErrorHandler_On_Close_Error {
+    val testContext = new ErrorHandlingTestContext()
 
     val errorOnCloseInput = input(ErrorOnClose)
     if (errorOnCloseInput.isInstanceOf[Resource[_]]) {
       val customHandlerInput = errorOnCloseInput.asInstanceOf[Resource[_]].
-                                  updateContext(testContext.customContext).
-                                  asInstanceOf[Input]
+        updateContext(testContext.customContext).
+        asInstanceOf[Input]
       customHandlerInput.bytes.headOption
       assertEquals(0, testContext.accessExceptions)
       assertTrue(testContext.closeExceptions >= 1)
-      assertNoExceptionsRaisedOnInputMethodCalls(customHandlerInput)
     }
   }
   @Test
   def customErrorHandler_On_AcquireAndGet {
-    val testContext = new ErrorHandlingTestContext() 
+    val testContext = new ErrorHandlingTestContext()
 
     val goodInput = input(Image)
-    
+
     if (goodInput.isInstanceOf[Resource[_]]) {
       val customHandlerInput = goodInput.asInstanceOf[Resource[_]].
         updateContext(testContext.customContext)
@@ -360,8 +369,8 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
 
   @Test
   def custom_ErrorHandler_can_return_default_string {
-    
-    val default = "Default"
+
+    val default = "Default".getBytes("UTF-8")
     val context = new ResourceContext {
       override def openErrorHandler[A, U](f: A => U, openException: Throwable): U = {
         default.asInstanceOf[U]
@@ -371,7 +380,7 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
       }
     }
     val resource = input(ErrorOnRead)
-        if (resource.isInstanceOf[Resource[_]]) {
+    if (resource.isInstanceOf[Resource[_]]) {
       val customHandlerInput = resource.asInstanceOf[Resource[_]].
         updateContext(context).
         asInstanceOf[Input]

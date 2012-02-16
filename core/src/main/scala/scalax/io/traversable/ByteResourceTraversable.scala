@@ -43,15 +43,11 @@ protected[io] class ByteResourceTraversable(
 
   override lazy val hasDefiniteSize = safeSizeFunc().nonEmpty
   override def lsize = {
-    val iter = iterator
-    try iter.size
-    finally iter.close
+    CloseableIterator.withIterator(iterator,context) {_.size}
   }
 
   override def toArray[B >: Byte: ClassManifest]: Array[B] = {
-    val iter = iterator
-    try iter.toArray
-    finally iter.close
+    CloseableIterator.withIterator(iterator,context) {_.toArray}
   }
 
 }

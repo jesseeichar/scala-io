@@ -43,14 +43,25 @@ object ExceptionHandling {
 
   /**
    * Illustrate how a default value can be returned if an error occurs.
-   *
+   * <p>
    * In the example below it is known that only a single request will be made, and the type of result
-   * is also known so a default value can be provided
+   * is also known so a default value can be provided.
+   * </p><p>
+   * This pattern can be quite tricky because the internals of how Scala-IO works needs to be known.
+   * For example if providing a default for slurpString then one must know that bytes must be 
+   * returned as the default rather than a string.  
+   * </p>
+   * <p>
+   * Also if the scala-io implementation changes the code could break.  Defaults work better when
+   * working with acquireAndGet or acquireFor  
+   * </p>
    */
   def returnDefaultValueOnFailure {
     import scalax.io._
 
-    val default = "Default"
+    // slurpString reads bytes and converts them to a string. so the default value has
+    // to be a byte array.
+    val default = "Default".getBytes("UTF-8")
     // In this context the default will be returned if there the access fails
     // and errors are logged (stupidly in this example)
     val context = new ResourceContext {

@@ -5,6 +5,8 @@ import resource.{AbstractManagedResource, ManagedResourceOperations}
 import collection.{GenTraversableOnce, Iterator, TraversableOnce}
 import java.util.concurrent.locks.ReentrantLock
 import scala.util.control.Exception
+import Exception.allCatch
+
 
 trait CloseableIterator[@specialized(Byte,Char) +A] extends Iterator[A] {
   self =>
@@ -97,7 +99,44 @@ private[io] class CloseableIteratorOps[+A](val iter: CloseableIterator[A]) {
 }
 
 object CloseableIterator {
-  def safeClose(iter: Any):List[Throwable] = 
+  def withIterator[A,U](iterator: => CloseableIterator[A], context:ResourceContext)(f:CloseableIterator[A] => U): U = {
+    val resourceEither = allCatch.either { iterator }
+    var closeExceptions: List[Throwable] = Nil
+
+    /** Close resource and assign any exceptions to closeException */ 
+    def close(resource:CloseableIterator[A]) = try {
+      closeExceptions = resource.close()
+    } catch {
+      case t => closeExceptions = List(t)
+    }
+
+    /** Handle error that occurs during resource access */
+    def handleAccessError: PartialFunction[Throwable, Either[Throwable, U]] = {
+      case c: scala.util.control.ControlThrowable => throw c
+      case t => Left(t)
+    }
+
+    resourceEither match {
+      case left @ Left(t) =>
+        context.openErrorHandler(f, t)
+      case Right(resource) =>
+        val result =
+          try Right(f(resource))
+          catch handleAccessError
+          finally close(resource)
+    
+        val handleError = result.left.toOption ++ closeExceptions nonEmpty
+        
+        if (handleError) {
+            context.errorHandler(f, result, closeExceptions)
+        } else {
+          result.right.get
+        }
+        
+    }
+
+  }
+  private[io] def safeClose(iter: Any):List[Throwable] = 
     iter match {
         case ci: CloseableIterator[_] => 
           ci.close()

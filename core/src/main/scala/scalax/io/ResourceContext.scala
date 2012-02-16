@@ -33,7 +33,7 @@ trait ResourceContext {
    * 
    * @return if a default value can be determined by inspecting f or openException then this
    *         method can return that value.  The value will be returned in lieu of the 
-   *         result calling f.  
+   *         result calling f.   If a value cannot be returned an exception should be thrown.  DO NOT RETURN null!
    */
   def openErrorHandler[A,U](f: A => U , openException:Throwable):U = throw openException
   /**
@@ -51,7 +51,7 @@ trait ResourceContext {
    * @param closingExceptions the exceptions raised while closing the resource.
    * 
    * @return the value of accessResult if it has a result or optionally a default value if a default value can be determined from problemFunction or
-   * the accessResult (possibly the resulting error).  
+   * the accessResult (possibly the resulting error).  If a value cannot be returned an exception should be thrown.  DO NOT RETURN null!  
    */
   def errorHandler[A,U](problemFunction:A => U, accessResult: Either[Throwable,U], closingExceptions: List[Throwable]):U =
     throw new ScalaIOException(accessResult.left.toOption, closingExceptions)
