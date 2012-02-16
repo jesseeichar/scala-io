@@ -23,6 +23,20 @@ trait ResourceContext {
   final val recommendedCharBufferSize = 1024
 
   /**
+   * Called when opening the resource and an exception occurs. 
+   * 
+   * The default behaviour is to throw the openException
+   * 
+   * @param f the function that would have been executed if the resource opened correctly.  
+   *   Can be used as context to decide how to handle the error
+   * @param openException the exception that was raised while opening the resource.
+   * 
+   * @return if a default value can be determined by inspecting f or openException then this
+   *         method can return that value.  The value will be returned in lieu of the 
+   *         result calling f.  
+   */
+  def openErrorHandler[A,U](f: A => U , openException:Throwable):U = throw openException
+  /**
    * Called when an exception is raised during an IO operation.  The resource will be closed and all exceptions (including the closing exceptions)
    * will be passed to this errorHandler.
    *
@@ -36,11 +50,11 @@ trait ResourceContext {
    *
    * @param closingExceptions the exceptions raised while closing the resource.
    * 
-   * @return if the method does not throw an exception the result is to be returned by the errorHandler.
+   * @return the value of accessResult if it has a result or optionally a default value if a default value can be determined from problemFunction or
+   * the accessResult (possibly the resulting error).  
    */
-  def errorHandler[U](accessResult: Either[Throwable, U], closingExceptions: List[Throwable]): U = {
-    throw new ScalaIOException(accessResult.left.toOption,closingExceptions)
-  }
+  def errorHandler[A,U](problemFunction:A => U, accessResult: Either[Throwable,U], closingExceptions: List[Throwable]):U =
+    throw new ScalaIOException(accessResult.left.toOption, closingExceptions)
 
   /**
    * A name that describes the resource.  This has no real functional value, it is intended to assist in debugging (for example loggin)
@@ -132,15 +146,32 @@ trait ResourceContext {
    * @param newDescName A new descriptive name for the associated resources
    *        The default value is None which will keep the behaviour of the current context 
    */
-  def copy[A](
+  def copy[A,U](
     newByteBufferSize: Option[(Option[Long], Boolean) => Int] = None,
     newCharBufferSize: Option[(Option[Int], Boolean) => Int] = None,
     newCreateNioBuffer: Option[(Int, Option[Channel], Boolean) => ByteBuffer] = None,
-    newErrorHandler: Option[(Either[Throwable,A], List[Throwable]) => A] = None,
+    newOpenErrorHandler: Option[(A => U, Throwable) => U] = None,
+    newErrorHandler: Option[(A => U, Either[Throwable,U], List[Throwable]) => U] = None,
     newDescName: Option[ResourceDescName] = None) = new ResourceContext {
-    override def errorHandler[U](accessResult: Either[Throwable, U], closingExceptions: List[Throwable]): U = {
-      (newErrorHandler.map(_.apply(accessResult.asInstanceOf[Either[Throwable,A]], closingExceptions)).getOrElse 
-          (self.errorHandler(accessResult.asInstanceOf[Either[Throwable,U]], closingExceptions))).asInstanceOf[U]
+    override def errorHandler[A2,U2](problemFunction:A2 => U2, accessResult: Either[Throwable,U2], closingExceptions: List[Throwable]): U2 = {
+       newErrorHandler match {
+         case Some(handler) =>
+           val castFunction = problemFunction.asInstanceOf[A => U]
+           val castResult = accessResult.asInstanceOf[Either[Throwable,U]]
+           handler(castFunction,castResult, closingExceptions).asInstanceOf[U2]
+         case None =>
+           self.errorHandler(problemFunction, accessResult, closingExceptions)
+       }
+    }
+    override def openErrorHandler[A2,U2](f: A2 => U2 , openException:Throwable): U2 = {
+      newOpenErrorHandler match {
+        case Some(handler) =>
+            val castFunction = f.asInstanceOf[A => U]
+            handler(castFunction, openException).asInstanceOf[U2]
+        case None =>
+          self.openErrorHandler(f,openException)
+
+      }
     }
     override def descName: ResourceDescName = newDescName getOrElse self.descName
     override def byteBufferSize(dataSize: Option[Long], readOnly: Boolean): Int = (newByteBufferSize getOrElse (self.byteBufferSize _))(dataSize, readOnly)

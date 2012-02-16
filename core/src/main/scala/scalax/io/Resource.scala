@@ -9,6 +9,7 @@
 package scalax.io
 
 import _root_.resource.{ManagedResourceOperations}
+import scala.util.control.Exception.allCatch
 import java.nio.channels.{
   ByteChannel, ReadableByteChannel, WritableByteChannel,
   Channels
@@ -147,6 +148,7 @@ trait ResourceOps[+R, +UnmanagedType, +Repr] {
  * @since   1.0
  */
 trait Resource[+R] extends ManagedResourceOperations[R] with ResourceOps[R, Resource[R], Resource[R]] {
+  self =>
   /**
    * Creates a new instance of the underlying resource (or opens it).
    * Sometimes the code block used to create the Resource is non-reusable in
@@ -174,33 +176,66 @@ trait Resource[+R] extends ManagedResourceOperations[R] with ResourceOps[R, Reso
    * }
    * }}}
    *
-   * @note normally the error handler regiested with the associated ResourceContext 
+   * @note normally the error handler registered with the associated ResourceContext 
    *        will handle any errors opening the resource, but when calling this method
    *        the caller must handle any possible errors that are raised.  
    * @return the actual resource that has been opened
    */
     def open(): OpenedResource[R]
 
+    /**
+     * Open the resource execute the function and either return all errors as a list or the result of the 
+     * function execution.
+     * 
+     * On open and close error handlers in ResourceContext are called.  If they then raise errors
+     * the errors are captured and returned as a Right[List[Throwable]]
+     * 
+     * Perhaps the worst method I have ever written :-(
+     */
   final def acquireFor[B](f: R => B): Either[List[Throwable], B] = {
+
+      // perhaps the worst written method I have ever done :-(
+    val resourceEither = allCatch.either {
+      open()
+    }
     var closeExceptions: List[Throwable] = Nil
-    val result = try {
-      val resource = open()
 
-      val catcher = util.control.Exception.allCatch.andFinally(closeExceptions = resource.close())
-      catcher.either { f(resource.get) }
-
+    /** Close resource and assign any exceptions to closeException */ 
+    def close(resource:OpenedResource[R]) = try {
+      closeExceptions = resource.close()
     } catch {
+      case t => closeExceptions = List(t)
+    }
+
+    /** Handle error that occurs during resource access */
+    def handleAccessError: PartialFunction[Throwable, Either[Throwable, B]] = {
+      case c: scala.util.control.ControlThrowable => throw c
       case t => Left(t)
     }
 
-    Right {
-      if (result.left.toOption ++ closeExceptions nonEmpty) {
-        context.errorHandler(result, closeExceptions)
-      } else {
-        result.right.get
-      }
+    resourceEither match {
+      case left @ Left(t) =>
+        context.openErrorHandler(f, t)
+        Left(List(t))
+      case Right(resource) =>
+        val result =
+          try Right(f(resource.get))
+          catch handleAccessError
+          finally close(resource)
+    
+        val handleError = result.left.toOption ++ closeExceptions nonEmpty
+        
+        if (handleError) {
+          try {
+            Right(context.errorHandler(f, result, closeExceptions))
+          } catch {
+            case t => Left(List(t))
+          }
+        } else {
+          Right(result.right.get)
+        }
+        
     }
-
   }
 }
 
@@ -254,7 +289,7 @@ trait InputResource[+R <: Closeable] extends Resource[R] with Input with Resourc
      */
     def readableByteChannel: InputResource[ReadableByteChannel]
     final def size : Option[Long] = safeSizeFunc()
-    final def safeSizeFunc = () => try{sizeFunc()} catch {case e => context.errorHandler(Right(None), List(e))}
+    final def safeSizeFunc = () => try{sizeFunc()} catch {case e => context.errorHandler((_:R) => sizeFunc(), Left(e), Nil)}
     protected def sizeFunc: () => Option[Long]
 }
 /**

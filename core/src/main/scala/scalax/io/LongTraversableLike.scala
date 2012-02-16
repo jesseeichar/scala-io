@@ -18,7 +18,7 @@ import scala.util.control.Breaks.breakable
 import scala.collection.mutable.Builder
 import scala.collection.GenTraversableOnce
 import scala.util.control.ControlThrowable
-
+import scala.util.control.Exception.allCatch
 /**
  * The control signals for the limitFold method in [[scalax.io.LongTraversable]].
  *
@@ -118,6 +118,46 @@ trait LongTraversableLike[@specialized(Byte,Char) +A, +Repr <: LongTraversableLi
    * @throws AssertionError if the iterator is returned
    */
   def withIterator[U](f: CloseableIterator[A] => U): U = {
+    {
+
+    val resourceEither = allCatch.either { iterator }
+    var closeExceptions: List[Throwable] = Nil
+
+    /** Close resource and assign any exceptions to closeException */ 
+    def close(resource:CloseableIterator[A]) = try {
+      closeExceptions = resource.close()
+    } catch {
+      case t => closeExceptions = List(t)
+    }
+
+    /** Handle error that occurs during resource access */
+    def handleAccessError: PartialFunction[Throwable, Either[Throwable, U]] = {
+      case c: scala.util.control.ControlThrowable => throw c
+      case t => Left(t)
+    }
+
+    resourceEither match {
+      case left @ Left(t) =>
+        context.openErrorHandler(f, t)
+      case Right(resource) =>
+        val result =
+          try Right(f(resource))
+          catch handleAccessError
+          finally close(resource)
+    
+        val handleError = result.left.toOption ++ closeExceptions nonEmpty
+        
+        if (handleError) {
+            context.errorHandler(f, result, closeExceptions)
+        } else {
+          result.right.get
+        }
+        
+    }
+  }
+
+    
+    /*
     var closeExceptions: List[Throwable] = Nil
     val result = try {
       val iter = iterator
@@ -149,7 +189,7 @@ trait LongTraversableLike[@specialized(Byte,Char) +A, +Repr <: LongTraversableLi
       context.errorHandler(result, closeExceptions)
     } else {
       result.right.get
-    }
+    }*/
   }
 
   protected[io] def iterator: CloseableIterator[A]

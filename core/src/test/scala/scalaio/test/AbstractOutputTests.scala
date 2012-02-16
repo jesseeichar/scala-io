@@ -137,6 +137,18 @@ abstract class AbstractOutputTests[InResource, OutResource] extends scalax.test.
     }
   }
   def writeErrorRaisedOnClose = false
+  def assertNoExceptionsRaisedOnOutputMethodCalls(out:Output) {
+    import scalax.io.JavaConverters._
+    List(1,2,3).asInput.copyDataTo(out)
+    out.write("hi")
+    out.write(List(1,2,3))
+    out.write(List(1.toByte))
+    out.write(3)
+    out.writeChars("hi")
+    out.writeIntsAsBytes(1,2,3,4)
+    out.writeStrings(List("1","2"))
+  }
+
   @Test
   def customErrorHandler_On_Write_Error{
     val testContext = new ErrorHandlingTestContext() 
@@ -150,6 +162,7 @@ abstract class AbstractOutputTests[InResource, OutResource] extends scalax.test.
       customHandlerOutput.write("hi")
       assertEquals(if(writeErrorRaisedOnClose) 0 else 1, testContext.accessExceptions)
       assertEquals(if(writeErrorRaisedOnClose) 1 else 0, testContext.closeExceptions)
+      assertNoExceptionsRaisedOnOutputMethodCalls(customHandlerOutput)
     }
   }
   @Test
@@ -164,6 +177,7 @@ abstract class AbstractOutputTests[InResource, OutResource] extends scalax.test.
       customHandlerOutput.write("hi")
       assertEquals(0, testContext.accessExceptions)
       assertEquals(1, testContext.closeExceptions)
+      assertNoExceptionsRaisedOnOutputMethodCalls(customHandlerOutput)
     }
   }
   @Test

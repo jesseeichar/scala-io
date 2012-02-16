@@ -9,13 +9,17 @@ import java.io.File
  */
 object ExceptionHandling {
   /**
-   * Add a custom error handler that logs an error and returns a default value.
+   * Add a custom error handler that in the case of an error during closing simply logs the error and returns the result that
+   * was calculated before closing.
    */
   def logClosingError {
     import scalax.io._
 
-    new ResourceContext {
-      override def errorHandler[U](accessResult: Either[Throwable, U], closingExceptions: List[Throwable]): U = {
+    // Create a new ResourceContext instance that provides a custom errorHandler method
+    // Note: the openErrorHandler is not overridden so failure to open resource will use
+    // default behaviour
+    val context = new ResourceContext {
+      override def errorHandler[A, U](f: A => U, accessResult: Either[Throwable, U], closingExceptions: List[Throwable]): U = {
         def throwError(t: Throwable) = throw t
         def logClosingErrorAndReturn(result: U) = {
           closingExceptions.foreach(_.printStackTrace())
@@ -24,19 +28,108 @@ object ExceptionHandling {
         accessResult.fold(throwError, logClosingErrorAndReturn)
       }
     }
+
+    // after creating a resource assign context object to the Resource
+    Resource.fromFile("someFile").updateContext(context).slurpString
+
+    // Remember Resources are immutable, so a new instance is created by updateContext
+    // the following will not work:
+
+    val resourceWithDefaultErrorHandler = Resource.fromFile("someFile")
+    val resourceWithCustomErrorHandler = resourceWithDefaultErrorHandler.updateContext(context)
+    // resourceWithDefaultErrorHandler != resourceWithDefaultErrorHandler
+    // they are 2 different object and have 2 different ResourceContext objects
   }
-  /*
-  def returnDefaultValue {
+
+  /**
+   * Illustrate how a default value can be returned if an error occurs.
+   *
+   * In the example below it is known that only a single request will be made, and the type of result
+   * is also known so a default value can be provided
+   */
+  def returnDefaultValueOnFailure {
     import scalax.io._
 
-    new ResourceContext {
-      override def errorHandler[U](accessResult: Either[Throwable, U], closingExceptions: List[Throwable]): U = {
-        val u = implicitly[Manifest[U]].erasure match {
-          case str if classOf[String].isInstanceOf[String] => ""
+    val default = "Default"
+    // In this context the default will be returned if there the access fails
+    // and errors are logged (stupidly in this example)
+    val context = new ResourceContext {
+      override def openErrorHandler[A, U](f: A => U, openException: Throwable): U = {
+        // log exception
+        openException.printStackTrace()
+        // need cast because U can be anything
+        // but we know our use so we can do this hack
+        default.asInstanceOf[U]
+      }
+      override def errorHandler[A, U](f: A => U, accessResult: Either[Throwable, U], closingExceptions: List[Throwable]): U = {
+        closingExceptions.foreach(_.printStackTrace())
+        def logAndReturnDefault(t: Throwable) = {
+          t.printStackTrace()
+          // need cast because U can be anything
+          // but we know our use so we can do this hack
+          default.asInstanceOf[U]
         }
-        
-        u.asInstanceOf[U]
+        accessResult.fold(logAndReturnDefault, result => result)
       }
     }
-  }*/
+
+    // Now the default value should be returned if the resource access throws an exception.
+    val string = Resource.fromFile("file").updateContext(context).slurpString
+  }
+
+  /**
+   * Illustrate an alternate (and advanced) pattern where in the case of an exception a default value is returned by the error handler.
+   * <p>
+   * This is not a particularly common pattern of usage, but illustrates one of the more advanced possibilities
+   * </p>
+   */
+  def returnDefaultValueWithFunctionMatching {
+    import scalax.io._
+
+    /*
+     * In the example we are providing a custom type of function that provides a
+     * default value, which can be returned in the case of a resource exception
+     */
+    trait FunctionWithDefault[A, U] extends Function[A, U] {
+      def defaultValue: U
+    }
+
+    /*
+     * Create a custom context that checks if the function is a FunctionWithDefault
+     * In this example both openErrorHandler and errorHandler perform the check.
+     */
+    val context = new ResourceContext {
+      override def openErrorHandler[A, U](f: A => U, openException: Throwable): U = {
+        f match {
+          case f: FunctionWithDefault[_, U] =>
+            // perform logging 
+            f.defaultValue
+          case _ => super.openErrorHandler(f, openException)
+        }
+      }
+      override def errorHandler[A, U](f: A => U, accessResult: Either[Throwable, U], closingExceptions: List[Throwable]): U = {
+        f match {
+          case f: FunctionWithDefault[_, U] =>
+            // perform logging 
+            f.defaultValue
+          case _ => super.errorHandler(f, accessResult, closingExceptions)
+        }
+      }
+    }
+
+    // the normal Input/Output etc... functions are not FunctionWithDefault objects so
+    // we need to call acquireAndGet and pass in out own function for reading the data
+    val resource = Resource.fromFile("someFile").reader().updateContext(context)
+
+    // now we can perform the read operation with an instance of our
+    // FunctionWithDefault
+    resource.acquireAndGet(new FunctionWithDefault[java.io.Reader, String] {
+      def defaultValue = "Default"
+      def apply(reader: java.io.Reader) = {
+        val buffer = new Array[Char](10)
+        val read = reader.read(buffer)
+        buffer.take(read).mkString
+      }
+    })
+  }
 }

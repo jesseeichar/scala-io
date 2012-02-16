@@ -293,6 +293,26 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
         input(ErrorOnClose).bytes.head
     }
   }
+  def assertNoExceptionsRaisedOnInputMethodCalls(input:Input) {
+    input.blocks(Some(2)).foreach(_ => ())
+    input.blocks().foreach(_ => ())
+    input.blocks(Some(1000000)).foreach(_ => ())
+    input.blocks(Some(2)).force
+    input.byteArray
+    input.slurpString()
+    input.slurpString(Codec.ISO8859)
+    input.bytes.foreach(_ => ())
+    input.bytes.force
+    input.bytesAsInts.force
+    input.bytesAsInts.foreach(_ => ())
+    input.chars().foreach(_ => ())
+    input.chars().force
+    input.chars(Codec.ISO8859).foreach(_ => ())
+    input.chars(Codec.ISO8859).force
+    input.lines().force
+    input.lines().foreach(_ => ())
+    input.size
+  }
   @Test
   def customErrorHandler_On_Read_Error{
     val testContext = new ErrorHandlingTestContext() 
@@ -305,6 +325,7 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
       customHandlerInput.bytes.headOption
       assertEquals(1, testContext.accessExceptions)
       assertEquals(0, testContext.closeExceptions)
+      assertNoExceptionsRaisedOnInputMethodCalls(customHandlerInput)
     }
   }
   @Test
@@ -319,6 +340,7 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
       customHandlerInput.bytes.headOption
       assertEquals(0, testContext.accessExceptions)
       assertTrue(testContext.closeExceptions >= 1)
+      assertNoExceptionsRaisedOnInputMethodCalls(customHandlerInput)
     }
   }
   @Test
@@ -336,4 +358,26 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
     }
   }
 
+  @Test
+  def custom_ErrorHandler_can_return_default_string {
+    
+    val default = "Default"
+    val context = new ResourceContext {
+      override def openErrorHandler[A, U](f: A => U, openException: Throwable): U = {
+        default.asInstanceOf[U]
+      }
+      override def errorHandler[A, U](f: A => U, accessResult: Either[Throwable, U], closingExceptions: List[Throwable]): U = {
+        default.asInstanceOf[U]
+      }
+    }
+    val resource = input(ErrorOnRead)
+        if (resource.isInstanceOf[Resource[_]]) {
+      val customHandlerInput = resource.asInstanceOf[Resource[_]].
+        updateContext(context).
+        asInstanceOf[Input]
+
+      assertEquals("Default", customHandlerInput.slurpString())
+    }
+
+  }
 }
