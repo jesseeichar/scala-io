@@ -28,7 +28,7 @@ class OutputStreamResource[+A <: OutputStream] (
   override def writer(implicit sourceCodec: Codec):WriterResource[Writer] = {
     def nResource = {
       val a = open()
-      new OutputStreamWriter(a.get) with Adapter[A] {
+      new OutputStreamWriter(a.get, sourceCodec.name) with Adapter[A] {
         override def src = a.get
       }
     }
