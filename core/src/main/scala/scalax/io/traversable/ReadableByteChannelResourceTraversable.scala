@@ -18,7 +18,7 @@ import java.io.ByteArrayOutputStream
 import scalax.io.extractor.FileChannelExtractor
 
 private[traversable] class ReadableByteChannelIterator(
-  protected val safeSizeFunc: () => Option[Long],
+  protected val sizeFunc: () => Option[Long],
   protected val getIn: ReadableByteChannel,
   protected val openResource: OpenedResource[Closeable],
   protected val start: Long,
@@ -37,7 +37,7 @@ private[traversable] class ReadableByteChannelIterator(
   @inline
   final def init() = if (inConcrete == null) {
     val sliceLength: Long = (end - start) min Int.MaxValue
-    val bufferSize = safeSizeFunc().map(_ min (sliceLength)).orElse(Some(sliceLength))
+    val bufferSize = sizeFunc().map(_ min (sliceLength)).orElse(Some(sliceLength))
     buffer = openResource.context.createNioBuffer(bufferSize, Some(getIn), true)
     inConcrete = getIn
     skip(startIndex)
@@ -78,11 +78,11 @@ private[traversable] class ReadableByteChannelIterator(
   }
 
   def create(start: Long, end: Long) =
-    new ReadableByteChannelIterator(safeSizeFunc, getIn, openResource, start, end)
+    new ReadableByteChannelIterator(sizeFunc, getIn, openResource, start, end)
 }
 
 private[traversable] class SeekableByteChannelIterator(
-  val safeSizeFunc: () => Option[Long],
+  val sizeFunc: () => Option[Long],
   val getIn: SeekableByteChannel,
   val openResource: OpenedResource[Closeable],
   val start: Long,
@@ -96,7 +96,7 @@ private[traversable] class SeekableByteChannelIterator(
   @inline
   final def init() = if (!isInitialized) {
     val sliceLength: Long = (end - start) min Int.MaxValue
-    val bufferSize = safeSizeFunc().map(_ min (sliceLength)).orElse(Some(sliceLength))
+    val bufferSize = sizeFunc().map(_ min (sliceLength)).orElse(Some(sliceLength))
     buffer = openResource.context.createNioBuffer(bufferSize, Some(getIn), true)
     isInitialized = true
     channel.position(position)
@@ -127,6 +127,6 @@ private[traversable] class SeekableByteChannelIterator(
   }
 
   def create(start: Long, end: Long) =
-    new SeekableByteChannelIterator(safeSizeFunc, getIn, openResource, start, end)
+    new SeekableByteChannelIterator(sizeFunc, getIn, openResource, start, end)
 
 }

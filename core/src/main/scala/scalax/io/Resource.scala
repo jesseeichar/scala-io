@@ -214,9 +214,9 @@ trait Resource[+R] extends ManagedResourceOperations[R] with ResourceOps[R, Reso
     }
 
     resourceEither match {
-      case left @ Left(t) =>
-        context.openErrorHandler(f, t)
-        Left(List(t))
+      case Left(t) =>
+        val handlerValue = context.openErrorHandler(f, t).map(Right(_))
+        handlerValue getOrElse Left(List(t))
       case Right(resource) =>
         val result =
           try Right(f(resource.get))
@@ -288,8 +288,12 @@ trait InputResource[+R <: Closeable] extends Resource[R] with Input with Resourc
      * @return the [[scalax.io.ReadableByteChannelResource]](typically) version of this object.
      */
     def readableByteChannel: InputResource[ReadableByteChannel]
-    final def size : Option[Long] = safeSizeFunc()
-    final def safeSizeFunc = () => try{sizeFunc()} catch {case e => context.errorHandler((_:R) => sizeFunc(), Left(e), Nil)}
+    final def size : Option[Long] = sizeFunc()
+    /**
+     * Safely calculation the size of the resource or return None in case of failure or if
+     * it is not possible to determin size of resource before accessing the resource.
+     * 
+     */
     protected def sizeFunc: () => Option[Long]
 }
 /**
@@ -483,7 +487,7 @@ object Resource {
    * @return a SeekableByteChannelResource
    */
   def fromSeekableByteChannel[A <: SeekableByteChannel](opener: => A) : SeekableByteChannelResource[A] = {
-    new SeekableByteChannelResource[A](_ => opener,DefaultResourceContext, Noop, seekablesafeSizeFunction(opener),None)
+    new SeekableByteChannelResource[A](_ => opener,DefaultResourceContext, Noop, seekablesizeFunction(opener),None)
   }
 
   /**
@@ -497,12 +501,12 @@ object Resource {
    * @return a SeekableByteChannelResource
    */
   def fromSeekableByteChannel[A <: SeekableByteChannel](opener: Seq[OpenOption] => A) : SeekableByteChannelResource[A] = {
-    new SeekableByteChannelResource[A](opener,DefaultResourceContext, Noop, seekablesafeSizeFunction(opener(Read :: Nil)),Some(ReadWrite))
+    new SeekableByteChannelResource[A](opener,DefaultResourceContext, Noop, seekablesizeFunction(opener(Read :: Nil)),Some(ReadWrite))
   }
 
-  private def seekablesafeSizeFunction(resource: => SeekableByteChannel)= () => {
+  private def seekablesizeFunction(resource: => SeekableByteChannel)= () => {
     val r = resource
-    try{Some(r.size)}finally{r.close()}
+    allCatch.opt(try{r.size}finally{r.close()})
   }
 
   /**
@@ -516,10 +520,9 @@ object Resource {
    */
   def fromRandomAccessFile(opener: => RandomAccessFile) : SeekableByteChannelResource[SeekableFileChannel] = {
     def open = (opts:Seq[OpenOption]) => support.FileUtils.openChannel(opener,opts)
-    def sizeFunc = () => resource.managed(opener).acquireAndGet {
-      _.length match {
-        case len if len < 0 => None
-        case len => Some(len)
+    def sizeFunc = () => allCatch.opt{
+      resource.managed(opener).acquireAndGet {
+          _.length match {case len if len > -1 => len}
       }
     }
     new SeekableByteChannelResource[SeekableFileChannel](open ,new ResourceContext{override def descName=PrefixedName("RandomAccessFile")},Noop, sizeFunc,Some(ReadWrite))
@@ -533,19 +536,18 @@ object Resource {
    * @return an InputStreamResource
    */
   def fromURL(url:URL): InputStreamResource[InputStream] = {
-    val safeSizeFunc = () => {
+    val sizeFunc = () => allCatch.opt {
       val conn: URLConnection = url.openConnection
       try {
         conn.connect()
         conn.getContentLength match {
-          case len if len < 0 => None
-          case len => Some(len.toLong)
+          case len if len > -1 => len:Long
         }
       } finally {
         conn.getInputStream.close()
       }
     }
-    new InputStreamResource(url.openStream,new ResourceContext{override def descName=KnownName(url.toExternalForm)},Noop,safeSizeFunc)
+    new InputStreamResource(url.openStream,new ResourceContext{override def descName=KnownName(url.toExternalForm)},Noop,sizeFunc)
   }
 
   /**
@@ -568,11 +570,8 @@ object Resource {
    */
   def fromFile(file:File): SeekableByteChannelResource[SeekableByteChannel] = {
     def open = (opts:Seq[OpenOption]) => support.FileUtils.openChannel(file,opts)
-    def safeSizeFunc = () => {
-      if(file.exists) Some(file.length)
-      else None
-    }
-    new SeekableByteChannelResource[SeekableFileChannel](open,new ResourceContext{override def descName=KnownName(file.getPath)},Noop,safeSizeFunc, Some(ReadWrite))
+    def sizeFunc = () => allCatch.opt{file.length}
+    new SeekableByteChannelResource[SeekableFileChannel](open,new ResourceContext{override def descName=KnownName(file.getPath)},Noop,sizeFunc, Some(ReadWrite))
   }
   /**
    * Create a file from string then create a Seekable Resource from a File

@@ -22,7 +22,8 @@ class ReaderResource[+A <: Reader] (
   override def addCloseAction(newCloseAction: CloseAction[A]) = 
     new ReaderResource(opener, context, newCloseAction :+ closeAction)
 
-  override def chars : LongTraversable[Char]= ResourceTraversable.readerBased(this.open, context)
+  override def chars : LongTraversable[Char]= 
+    ResourceTraversable.readerBased(this.open, context)
 
   override def toString: String = "ReaderResource("+context.descName.name+")"
 }

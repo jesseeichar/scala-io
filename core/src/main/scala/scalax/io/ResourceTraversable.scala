@@ -212,13 +212,13 @@ private[io] object ResourceTraversable {
     
   def byteChannelBased[A,B](opener : => OpenedResource[ReadableByteChannel],
                             resourceContext: ResourceContext,
-		  					safeSizeFunc:() => Option[Long],
+		  					sizeFunc:() => Option[Long],
                             parser : InputParser[A,NioByteBuffer] = DefaultByteBufferParser,
                             initialConv: A => B = IdentityByteConversion,
                             startIndex : Long = 0,
                             endIndex : Long = Long.MaxValue):LongTraversable[B] = {
     if (parser == DefaultByteBufferParser && initialConv == IdentityByteConversion) {
-      new traversable.ByteResourceTraversable(opener, resourceContext, safeSizeFunc, startIndex, endIndex, false).asInstanceOf[LongTraversable[B]]
+      new traversable.ByteResourceTraversable(opener, resourceContext, sizeFunc, startIndex, endIndex, false).asInstanceOf[LongTraversable[B]]
     } else {
       new ResourceTraversable[B] {
         type In = ReadableByteChannel
@@ -227,7 +227,7 @@ private[io] object ResourceTraversable {
         def source = new TraversableSource[ReadableByteChannel, A] {
           private[this] final val openedResource = opener
           private[this] final val channel = openedResource.get
-          private[this] final val buffer = openedResource.context.createNioBuffer(safeSizeFunc(), Some(channel), true)
+          private[this] final val buffer = openedResource.context.createNioBuffer(sizeFunc(), Some(channel), true)
           private[this] final val iter = parser.iterator(buffer)
           
           def read() = {
@@ -258,8 +258,8 @@ private[io] object ResourceTraversable {
         protected val start = startIndex
         protected val end = endIndex
         
-        override lazy val hasDefiniteSize= safeSizeFunc().nonEmpty
-        override def lsize = safeSizeFunc() match {
+        override lazy val hasDefiniteSize= sizeFunc().nonEmpty
+        override def lsize = sizeFunc() match {
           case Some(size) => size
           case None => super.lsize
         }
@@ -271,13 +271,13 @@ private[io] object ResourceTraversable {
   
   def seekableByteChannelBased[A,B](opener : => OpenedResource[SeekableByteChannel],
                           resourceContext: ResourceContext,
-                          safeSizeFunc:() => Option[Long],
+                          sizeFunc:() => Option[Long],
                           parser : InputParser[A,NioByteBuffer] = DefaultByteBufferParser,
                           initialConv: A => B = IdentityByteConversion,
                           startIndex : Long = 0,
                           endIndex : Long = Long.MaxValue):LongTraversable[B] = {
     if (parser == DefaultByteBufferParser && initialConv == IdentityByteConversion) {
-      new traversable.ByteResourceTraversable(opener, resourceContext, safeSizeFunc, startIndex, endIndex, true).asInstanceOf[LongTraversable[B]]
+      new traversable.ByteResourceTraversable(opener, resourceContext, sizeFunc, startIndex, endIndex, true).asInstanceOf[LongTraversable[B]]
     } else {
         new ResourceTraversable[B] {
           type In = SeekableByteChannel
@@ -319,8 +319,8 @@ private[io] object ResourceTraversable {
           protected val start = startIndex
           protected val end = endIndex
           
-          override lazy val hasDefiniteSize= safeSizeFunc().nonEmpty
-          override def lsize = safeSizeFunc() match {
+          override lazy val hasDefiniteSize= sizeFunc().nonEmpty
+          override def lsize = sizeFunc() match {
             case Some(size) => size
             case None => super.size
           }

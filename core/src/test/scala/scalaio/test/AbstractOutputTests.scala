@@ -160,7 +160,7 @@ abstract class AbstractOutputTests[InResource, OutResource] extends scalax.test.
                                   updateContext(testContext.customContext).
                                   asInstanceOf[Output]
       customHandlerOutput.write("hi")
-      assertEquals(if(writeErrorRaisedOnClose) 0 else 1, testContext.accessExceptions)
+      assertEquals(if(writeErrorRaisedOnClose) 0 else 1, testContext.accessExceptions + testContext.openExceptions)
       assertEquals(if(writeErrorRaisedOnClose) 1 else 0, testContext.closeExceptions)
       assertNoExceptionsRaisedOnOutputMethodCalls(customHandlerOutput)
     }

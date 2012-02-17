@@ -65,12 +65,12 @@ object ExceptionHandling {
     // In this context the default will be returned if there the access fails
     // and errors are logged (stupidly in this example)
     val context = new ResourceContext {
-      override def openErrorHandler[A, U](f: A => U, openException: Throwable): U = {
+      override def openErrorHandler[A, U](f: A => U, openException: Throwable): Option[U] = {
         // log exception
         openException.printStackTrace()
         // need cast because U can be anything
         // but we know our use so we can do this hack
-        default.asInstanceOf[U]
+        Some(default.asInstanceOf[U])
       }
       override def errorHandler[A, U](f: A => U, accessResult: Either[Throwable, U], closingExceptions: List[Throwable]): U = {
         closingExceptions.foreach(_.printStackTrace())
@@ -110,11 +110,11 @@ object ExceptionHandling {
      * In this example both openErrorHandler and errorHandler perform the check.
      */
     val context = new ResourceContext {
-      override def openErrorHandler[A, U](f: A => U, openException: Throwable): U = {
+      override def openErrorHandler[A, U](f: A => U, openException: Throwable): Option[U] = {
         f match {
           case f: FunctionWithDefault[_, U] =>
             // perform logging 
-            f.defaultValue
+            Some(f.defaultValue)
           case _ => super.openErrorHandler(f, openException)
         }
       }

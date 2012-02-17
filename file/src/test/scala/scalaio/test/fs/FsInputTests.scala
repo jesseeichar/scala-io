@@ -10,6 +10,8 @@ package scalaio.test.fs
 
 import scalax.io._
 import scalaio.test._
+import org.junit.Test
+import java.io.IOException
 
 abstract class FsInputTests extends AbstractInputTests with Fixture {
     protected def input(t:Type) = t match {
@@ -26,4 +28,12 @@ abstract class FsInputTests extends AbstractInputTests with Fixture {
        case ErrorOnClose => fixture.errorOnCloseResource
 
     }
+    
+  @Test
+  override def scalaIoException_On_Read_Error_by_default {
+    intercept[IOException] {
+      input(ErrorOnRead).bytes.head
+    }
+  }
+
 }

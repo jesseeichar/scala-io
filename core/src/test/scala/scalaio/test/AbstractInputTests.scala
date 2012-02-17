@@ -296,7 +296,7 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
     if (errorOnReadInput.isInstanceOf[Resource[_]]) {
       class MyException extends Exception
       val context = new ResourceContext {
-          override def openErrorHandler[A,U](f: A => U , openException:Throwable):U = 
+          override def openErrorHandler[A,U](f: A => U , openException:Throwable):Option[U] =
             throw new MyException
           override def errorHandler[A,U](f:A => U, accessResult: Either[Throwable, U], closingExceptions: List[Throwable]): U = 
             throw new MyException
@@ -320,8 +320,8 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
       intercept[MyException](input.chars().force)
       intercept[MyException](input.chars(Codec.ISO8859).foreach(_ => ()))
       intercept[MyException](input.chars(Codec.ISO8859).force)
-      intercept[MyException](input.lines().force)
-      intercept[MyException](input.lines().foreach(_ => ()))
+      intercept[MyException](input.lines(Line.Terminators.Auto, false)(Codec.UTF8).force)
+      intercept[MyException](input.lines(Line.Terminators.Auto, false)(Codec.UTF8).foreach(_ => ()))
     }
   }
   @Test
@@ -334,7 +334,7 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
         updateContext(testContext.customContext).
         asInstanceOf[Input]
       customHandlerInput.bytes.headOption
-      assertEquals(1, testContext.accessExceptions)
+      assertEquals(1, testContext.accessExceptions + testContext.openExceptions) // Sometimes access error occurs during opening resource like with files
       assertEquals(0, testContext.closeExceptions)
     }
   }
@@ -372,8 +372,8 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
 
     val default = "Default".getBytes("UTF-8")
     val context = new ResourceContext {
-      override def openErrorHandler[A, U](f: A => U, openException: Throwable): U = {
-        default.asInstanceOf[U]
+      override def openErrorHandler[A, U](f: A => U, openException: Throwable): Option[U] = {
+        Some(default.asInstanceOf[U])
       }
       override def errorHandler[A, U](f: A => U, accessResult: Either[Throwable, U], closingExceptions: List[Throwable]): U = {
         default.asInstanceOf[U]

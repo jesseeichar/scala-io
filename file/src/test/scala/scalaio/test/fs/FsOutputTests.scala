@@ -12,12 +12,9 @@ import scalax.io._
 import org.junit.Assert._
 import org.junit.Test
 import scalaio.test._
-import java.io.{
-  DataInputStream,
-  DataOutputStream
-}
 import scalax.file.Path
 import StandardOpenOption._
+import java.io.{IOException, DataInputStream, DataOutputStream}
 
 abstract class FsOutputTests extends AbstractOutputTests[Path, Any] with Fixture {
 
@@ -33,6 +30,13 @@ abstract class FsOutputTests extends AbstractOutputTests[Path, Any] with Fixture
   }
 
   def errorOnWriteOut = fixture.errorOnAccessResource
+
+  @Test
+  override def scalaIoException_On_Write_Error_by_default{
+    intercept[IOException] {
+      errorOnWriteOut.write("hi")
+    }
+  }
 
   @Test //@Ignore
   def write_deletes_file_each_write_by_default(): Unit = {

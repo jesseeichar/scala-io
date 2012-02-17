@@ -61,10 +61,9 @@ class SeekableByteChannelResource[+A <: SeekableByteChannel] (
         val c = opener(ReadWrite :+ Append)
         val pos = c.position
         val size = c.size
-        if(pos < c.size) {
-          c.position(c.size)
+        if(pos < size) {
+          c.position(size)
         }
-        val newPos = c.position
         c
       case false =>
         opener(ReadWrite)
@@ -75,10 +74,10 @@ class SeekableByteChannelResource[+A <: SeekableByteChannel] (
 
   protected override def underlyingOutput: OutputResource[OutputStream] = outputStream
   override def blocks(blockSize: Option[Int] = None):LongTraversable[ByteBlock] = 
-    new traversable.ChannelBlockLongTraversable(blockSize, context, safeSizeFunc, open)
+    new traversable.ChannelBlockLongTraversable(blockSize, context, sizeFunc, open)
 
-  override def bytesAsInts:LongTraversable[Int] = ResourceTraversable.seekableByteChannelBased[Byte,Int](this.open, context, safeSizeFunc, initialConv = ResourceTraversable.toIntConv)
-  override def bytes:LongTraversable[Byte] = ResourceTraversable.seekableByteChannelBased[Byte,Byte](this.open, context, safeSizeFunc)
+  override def bytesAsInts:LongTraversable[Int] = ResourceTraversable.seekableByteChannelBased[Byte,Int](this.open, context, sizeFunc, initialConv = ResourceTraversable.toIntConv)
+  override def bytes:LongTraversable[Byte] = ResourceTraversable.seekableByteChannelBased[Byte,Byte](this.open, context, sizeFunc)
 
   override def toString: String = "SeekableByteChannelResource("+context.descName.name+")"
 }

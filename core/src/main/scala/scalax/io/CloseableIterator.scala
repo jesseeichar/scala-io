@@ -117,8 +117,8 @@ object CloseableIterator {
     }
 
     resourceEither match {
-      case left @ Left(t) =>
-        context.openErrorHandler(f, t)
+      case Left(t) =>
+        context.openErrorHandler(f, t) getOrElse (throw t)
       case Right(resource) =>
         val result =
           try Right(f(resource))
@@ -127,14 +127,17 @@ object CloseableIterator {
     
         val handleError = result.left.toOption ++ closeExceptions nonEmpty
         
-        if (handleError) {
+        val finalResult = if (handleError) {
             context.errorHandler(f, result, closeExceptions)
         } else {
           result.right.get
         }
         
+        if (System.identityHashCode(finalResult) == System.identityHashCode(resource)) {
+            throw new AssertionError("the iterator may not escape the bounds of this block")
+        }
+        finalResult
     }
-
   }
   private[io] def safeClose(iter: Any):List[Throwable] = 
     iter match {

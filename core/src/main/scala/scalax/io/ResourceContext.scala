@@ -35,7 +35,7 @@ trait ResourceContext {
    *         method can return that value.  The value will be returned in lieu of the 
    *         result calling f.   If a value cannot be returned an exception should be thrown.  DO NOT RETURN null!
    */
-  def openErrorHandler[A,U](f: A => U , openException:Throwable):U = throw openException
+  def openErrorHandler[A,U](f: A => U , openException:Throwable):Option[U] = throw openException
   /**
    * Called when an exception is raised during an IO operation.  The resource will be closed and all exceptions (including the closing exceptions)
    * will be passed to this errorHandler.
@@ -150,7 +150,7 @@ trait ResourceContext {
     newByteBufferSize: Option[(Option[Long], Boolean) => Int] = None,
     newCharBufferSize: Option[(Option[Int], Boolean) => Int] = None,
     newCreateNioBuffer: Option[(Int, Option[Channel], Boolean) => ByteBuffer] = None,
-    newOpenErrorHandler: Option[(A => U, Throwable) => U] = None,
+    newOpenErrorHandler: Option[(A => U, Throwable) => Option[U]] = None,
     newErrorHandler: Option[(A => U, Either[Throwable,U], List[Throwable]) => U] = None,
     newDescName: Option[ResourceDescName] = None) = new ResourceContext {
     override def errorHandler[A2,U2](problemFunction:A2 => U2, accessResult: Either[Throwable,U2], closingExceptions: List[Throwable]): U2 = {
@@ -163,11 +163,11 @@ trait ResourceContext {
            self.errorHandler(problemFunction, accessResult, closingExceptions)
        }
     }
-    override def openErrorHandler[A2,U2](f: A2 => U2 , openException:Throwable): U2 = {
+    override def openErrorHandler[A2,U2](f: A2 => U2 , openException:Throwable): Option[U2] = {
       newOpenErrorHandler match {
         case Some(handler) =>
             val castFunction = f.asInstanceOf[A => U]
-            handler(castFunction, openException).asInstanceOf[U2]
+            handler(castFunction, openException).asInstanceOf[Option[U2]]
         case None =>
           self.openErrorHandler(f,openException)
 
