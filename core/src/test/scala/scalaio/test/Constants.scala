@@ -4,6 +4,7 @@ import java.io.{
 InputStreamReader, BufferedReader
 }
 import scalax.io.Resource
+import java.io.FilterInputStream
 
 object Constants {
   final lazy val IMAGE = resource("resources/image.png", getClass())
@@ -12,5 +13,13 @@ object Constants {
 
   final lazy val TEXT_VALUE = "1\na\nA\n\u00E0\n\u00E4\n\u00A3\n\u2248\n\u331B\n\u0060\n"
 
-  def resource(resourceName: String, base: Class[_]) = base.getClassLoader.getResource(resourceName)
+  def resource(resourceName: String, base: Class[_]) = new {
+    private val r = base.getClassLoader.getResource(resourceName)
+    def openStream(closeFunction: () => Unit = () => ()) = new FilterInputStream(r.openStream()){
+      override def close() = {
+        closeFunction()
+        super.close()
+      }
+    }
+  }
 }

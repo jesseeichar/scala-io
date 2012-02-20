@@ -17,13 +17,12 @@ Test, Ignore
 import Constants.TEXT_VALUE
 import org.junit.Assert._
 
-abstract class AbstractSeekableTests[Resource] extends scalax.test.sugar.AssertionSugar {
-  implicit val codec = Codec.UTF8
+abstract class AbstractSeekableTests[Resource] extends AbstractInputTests with AbstractOutputTests[Resource, Resource] with scalax.test.sugar.AssertionSugar {
 
   /**
    * Seekable containing TEXT_VALUE, otherwise
    */
-  def open(data: String = TEXT_VALUE, closeAction:CloseAction[Resource] = CloseAction.Noop): Seekable
+  def openSeekable(data: String = TEXT_VALUE, closeFunction: () => Unit = () => ()): Seekable
 
 
   val patchParams =
@@ -46,14 +45,14 @@ abstract class AbstractSeekableTests[Resource] extends scalax.test.sugar.Asserti
     patchParams foreach testFunction
 
     intercept[IllegalArgumentException] {
-      open().patch(-1, "@", OverwriteSome(3))
+      openSeekable().patch(-1, "@", OverwriteSome(3))
     }
     // test UTF16?
   }
 
   @Test //@Ignore
   def patchStringASCII(): Unit = {
-    val seekable = open("abc")
+    val seekable = openSeekable("abc")
 
     seekable.patch(1, "x", OverwriteSome(1))(Codec.ISO8859)
 
@@ -61,7 +60,7 @@ abstract class AbstractSeekableTests[Resource] extends scalax.test.sugar.Asserti
   }
 
   private def testPatchString(msg: String, from: Int, data: String, length: Option[Int]) = {
-    val seekable = open()
+    val seekable = openSeekable()
 
     val p = (TEXT_VALUE.replaceAll("\n", "\\n"), from.min(Int.MaxValue).toInt, data, data.size)
     val expected = length match {
@@ -78,7 +77,7 @@ abstract class AbstractSeekableTests[Resource] extends scalax.test.sugar.Asserti
 
   @Test //@Ignore
   def patchWithIterator(): Unit = {
-    val seekable = open("abc")
+    val seekable = openSeekable("abc")
 
     seekable.patch(1, "x".getBytes(UTF8.name).toIterator, OverwriteAll)
 
@@ -96,7 +95,7 @@ abstract class AbstractSeekableTests[Resource] extends scalax.test.sugar.Asserti
 
 
     def test[T](msg: String, f: Seekable => T, pos: Int, bytes: Array[Byte]) = {
-      val seekable = open("abc")
+      val seekable = openSeekable("abc")
       try {
         f(seekable)
       } catch {
@@ -128,7 +127,7 @@ abstract class AbstractSeekableTests[Resource] extends scalax.test.sugar.Asserti
     patchParams foreach testFunction
 
     intercept[IllegalArgumentException] {
-      open().patch(-1, "@".getBytes(UTF8.name), OverwriteSome(3))
+      openSeekable().patch(-1, "@".getBytes(UTF8.name), OverwriteSome(3))
     }
   }
 
@@ -148,7 +147,7 @@ abstract class AbstractSeekableTests[Resource] extends scalax.test.sugar.Asserti
     val data = dataString.getBytes(UTF8.name)
 
     def test[T](datatype: String, f: (Seekable, Long, Array[Byte], Overwrite) => T) = {
-      val seekable = open()
+      val seekable = openSeekable()
       assertEquals(TEXT_VALUE, seekable.slurpString)
 
       val expected = lengthInChars match {
@@ -176,7 +175,7 @@ abstract class AbstractSeekableTests[Resource] extends scalax.test.sugar.Asserti
   @Test //@Ignore
   def appendString: Unit = {
     val data = "�?�"
-    val seekable = open()
+    val seekable = openSeekable()
     val expected = TEXT_VALUE + data
     seekable.append(data)
     assertEquals(expected, seekable.slurpString)
@@ -187,13 +186,13 @@ abstract class AbstractSeekableTests[Resource] extends scalax.test.sugar.Asserti
     val data = "�?�" :: "%" :: "~µ" :: Nil
 
     def test(sep: String) = {
-      val seekable = open()
+      val seekable = openSeekable()
       val expected = TEXT_VALUE + (data mkString sep)
       seekable.appendStrings(data, sep)
       assertEquals(expected, seekable.slurpString)
     }
 
-    val seekable = open()
+    val seekable = openSeekable()
     val expected = TEXT_VALUE + (data mkString "")
     seekable.appendStrings(data)
     assertEquals(expected, seekable.slurpString)
@@ -204,7 +203,7 @@ abstract class AbstractSeekableTests[Resource] extends scalax.test.sugar.Asserti
 
   @Test //@Ignore
   def chopString: Unit = {
-    val seekable = open()
+    val seekable = openSeekable()
     val expected = TEXT_VALUE take 2
     seekable.truncateString(2)
     assertEquals(expected, seekable.slurpString)
@@ -212,7 +211,7 @@ abstract class AbstractSeekableTests[Resource] extends scalax.test.sugar.Asserti
 
   @Test //@Ignore
   def truncate: Unit = {
-    val seekable = open()
+    val seekable = openSeekable()
     val expected = TEXT_VALUE take 2
     seekable.truncate((UTF8 encode expected)size)
     assertEquals(expected, seekable.slurpString)
@@ -228,7 +227,7 @@ abstract class AbstractSeekableTests[Resource] extends scalax.test.sugar.Asserti
   def append: Unit = {
     def test(_type: Int) = {
       val data: String = "�?�"
-      val seekable = open()
+      val seekable = openSeekable()
       val expected = TEXT_VALUE + data
       val bytes = data.getBytes(UTF8.name)
       _type match {
@@ -244,7 +243,7 @@ abstract class AbstractSeekableTests[Resource] extends scalax.test.sugar.Asserti
   @Test //@Ignore
   def openSeekable: Unit = {
     var closes = 0
-    val seekable = open(closeAction = CloseAction((_:Any) => closes += 1)) match {
+    val seekable = openSeekable(closeFunction = () => closes += 1) match {
       case raw:SeekableResource[_] =>
         closes = 0 // set to 0 because open could call closes if it seeds the resource with data using output API
         val seekable = raw
@@ -268,10 +267,7 @@ abstract class AbstractSeekableTests[Resource] extends scalax.test.sugar.Asserti
   @Test //@Ignore
   def openSeekableReadAndWrite: Unit = {
     var closes = 0;
-    val ca = CloseAction{(_:Any) => 
-      closes += 1
-    }
-    val seekable = open(closeAction = ca) match {
+    val seekable = openSeekable(closeFunction = () => ()) match {
       case seekable:SeekableResource[_] =>
         closes = 0 // reset here because open could increment closes 
         val data = "it is a wonderful world"
@@ -325,7 +321,7 @@ abstract class AbstractSeekableTests[Resource] extends scalax.test.sugar.Asserti
       assertEquals(msg+": does not correctly handle the same data zipped together in same openned resource", expectedZip.mkString, zipped.mkString)
     }
 
-    val seekable = open()
+    val seekable = openSeekable()
     seekable.truncate(0)
     seekable.write(testData)
     perform(seekable, "basic seekable")
@@ -340,7 +336,7 @@ abstract class AbstractSeekableTests[Resource] extends scalax.test.sugar.Asserti
   @Test
   def correctly_closes_resources {
     var closes = 0
-    val seekable = open(closeAction = CloseAction((_:Any) => closes += 1))
+    val seekable = openSeekable(closeFunction = () => closes += 1)
     closes = 0 // open can require a write there for seekable will be closed so reset
 
     val taken = seekable.bytes.take(1)

@@ -8,6 +8,7 @@
 
 package scalax.io
 
+import scalaio.test.AbstractInputTests._
 import java.io.ByteArrayInputStream
 import java.nio.channels.Channels
 import java.nio.ByteBuffer
@@ -31,23 +32,26 @@ class ByteChannelResourceTraversableTest extends ResourceTraversableTest {
 }
 
 class ByteChannelResourceInputTest extends InputTest {
-  def resource(sep:String) =
-    Resource.fromReadableByteChannel(Channels.newChannel(stringBasedStream(sep)))
-  protected override def input(t: Type):Input = t match {
-    case t@TextNewLine => resource(t.sep)
-    case t@TextPair => resource(t.sep)
-    case t@TextCarriageReturn => resource(t.sep)
-    case TextCustom(sep) => resource(sep)
-    case TextCustomData(sep, data) => Resource.fromReadableByteChannel(
-      Channels.newChannel(new ByteArrayInputStream(data.getBytes(Codec.UTF8.charSet)))
-    )
+  def resource(sep:String, closeFunction: () => Unit) =
+    Resource.fromReadableByteChannel(Channels.newChannel(stringBasedStream(sep, closeFunction)))
+  protected override def input(t: Type, closeFunction: () => Unit):Input = t match {
+    case t@TextNewLine => resource(t.sep, closeFunction)
+    case t@TextPair => resource(t.sep, closeFunction)
+    case t@TextCarriageReturn => resource(t.sep, closeFunction)
+    case TextCustom(sep) => resource(sep, closeFunction)
+    case TextCustomData(sep, data) => Resource.fromReadableByteChannel{
+      val stream = new ByteArrayInputStream(data.getBytes(Codec.UTF8.charSet)){
+        override def close() = closeFunction()
+      }
+      Channels.newChannel(stream)}
+    
     case ErrorOnRead => 
       Resource.fromReadableByteChannel(Channels.newChannel(ErrorOnRead.errorInputStream))
     case ErrorOnClose => 
       Resource.fromReadableByteChannel(Channels.newChannel(ErrorOnClose.errorInputStream))
     case Image =>
       Resource.fromReadableByteChannel(
-        Channels.newChannel(scalaio.test.Constants.IMAGE.openStream())
+        Channels.newChannel(scalaio.test.Constants.IMAGE.openStream(closeFunction))
       )
   }
 
@@ -55,15 +59,15 @@ class ByteChannelResourceInputTest extends InputTest {
 
 class SeekableByteChannelResourceInputTest extends InputTest {
   
-  def wrap(data:Array[Byte]) = Resource.fromSeekableByteChannel(
-    new ArrayBufferSeekableChannel(ArrayBuffer.apply(data:_*),StandardOpenOption.ReadWrite:_*)(_=>(),_=>())
+  def wrap(data:Array[Byte], closeFunction: () => Unit) = Resource.fromSeekableByteChannel(
+    new ArrayBufferSeekableChannel(ArrayBuffer.apply(data:_*),StandardOpenOption.ReadWrite:_*)(closeAction = _ => closeFunction())
   )
-  protected override def input(t: Type):Input = t match {
-    case t@TextNewLine => wrap(text(t.sep))
-    case t@TextPair => wrap(text(t.sep))
-    case t@TextCarriageReturn => wrap(text(t.sep))
-    case TextCustom(sep) => wrap(text(sep))
-    case TextCustomData(sep, data) => wrap(data.getBytes(Codec.UTF8.charSet))
+  protected override def input(t: Type, closeFunction: () => Unit):Input = t match {
+    case t@TextNewLine => wrap(text(t.sep), closeFunction)
+    case t@TextPair => wrap(text(t.sep), closeFunction)
+    case t@TextCarriageReturn => wrap(text(t.sep), closeFunction)
+    case TextCustom(sep) => wrap(text(sep), closeFunction)
+    case TextCustomData(sep, data) => wrap(data.getBytes(Codec.UTF8.charSet), closeFunction)
     case ErrorOnRead => 
       Resource.fromSeekableByteChannel(
         new ArrayBufferSeekableChannel(ArrayBuffer[Byte](),StandardOpenOption.ReadWrite:_*)() {
@@ -78,7 +82,7 @@ class SeekableByteChannelResourceInputTest extends InputTest {
       })
     case Image =>
       val bytes = Resource.fromInputStream(scalaio.test.Constants.IMAGE.openStream()).byteArray
-      wrap(bytes)
+      wrap(bytes, closeFunction)
   }
   override def sizeIsDefined = true
 }

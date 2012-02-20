@@ -15,6 +15,7 @@ import Resource._
 import org.junit.Test
 import org.junit.Assert._
 import java.lang.String
+import scalaio.test.AbstractInputTests._
 
 class InputTest extends AbstractInputTests with DataIndependentLongTraversableTest[Byte]  {
     def independentTraversable = {
@@ -28,22 +29,25 @@ class InputTest extends AbstractInputTests with DataIndependentLongTraversableTe
   def times(t1:Byte, t2:Byte):Byte = (t1 * t2).toByte
   def lessThan(t:Byte,i:Int):Boolean = t < i
   def scanSeed = 2.toByte
-  protected def stringBasedStream(sep: String) =
-    new java.io.ByteArrayInputStream(text(sep))
+  protected def stringBasedStream(sep: String, closeFunction: () => Unit) =
+    new java.io.ByteArrayInputStream(text(sep)) {
+      override def close() = closeFunction()
+    }
   protected def text(sep: String) = {
     val finalText: String = Constants.TEXT_VALUE.replaceAll("""\n""", sep)
     finalText.getBytes(Codec.UTF8.charSet)
   }
 
-  protected def input(t: Type) = t match {
-    case t@TextNewLine => fromInputStream(stringBasedStream(t.sep))
-    case t@TextPair => fromInputStream(stringBasedStream(t.sep))
-    case t@TextCarriageReturn => fromInputStream(stringBasedStream(t.sep))
-    case TextCustom(sep) => fromInputStream(stringBasedStream(sep))
+  protected def input(t: Type, closeFunction: () => Unit) = t match {
+    case t@TextNewLine => fromInputStream(stringBasedStream(t.sep, closeFunction))
+    case t@TextPair => fromInputStream(stringBasedStream(t.sep, closeFunction))
+    case t@TextCarriageReturn => fromInputStream(stringBasedStream(t.sep, closeFunction))
+    case TextCustom(sep) => fromInputStream(stringBasedStream(sep, closeFunction))
     case TextCustomData(sep, data) => fromInputStream(
-      new ByteArrayInputStream(data.getBytes(Codec.UTF8.charSet))
-    )
-    case Image => fromInputStream(Constants.IMAGE.openStream())
+      new ByteArrayInputStream(data.getBytes(Codec.UTF8.charSet)){
+        override def close() = closeFunction()
+      })
+    case Image => fromInputStream(Constants.IMAGE.openStream(closeFunction))
     case ErrorOnRead => fromInputStream(ErrorOnRead.errorInputStream)
     case ErrorOnClose => fromInputStream(ErrorOnClose.errorInputStream)
 

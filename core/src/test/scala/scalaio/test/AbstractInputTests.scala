@@ -26,7 +26,7 @@ import java.io.InputStream
 import java.io.IOException
 import java.io.Closeable
 
-abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
+object AbstractInputTests {
 
   sealed trait Type
 
@@ -47,7 +47,7 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
   case object ErrorOnRead extends Type {
     def errorInputStream = new InputStream {
       override def read = throw new IOException("error")
-      override def read(buf: Array[Byte], off: Int, len: Int) = 
+      override def read(buf: Array[Byte], off: Int, len: Int) =
         throw new IOException("error")
     }
   }
@@ -58,9 +58,16 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
     }
   }
 
-  protected def input(t: Type): Input
+}
+
+import AbstractInputTests._
+
+abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
+
+  protected def input(t: Type, closeFunction: () => Unit = () => ()): Input
 
   protected def sizeIsDefined = true
+
 
   @Test(timeout = 3000) //@Ignore
   def provide_length_for_files(): Unit = {
@@ -296,10 +303,10 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
     if (errorOnReadInput.isInstanceOf[Resource[_]]) {
       class MyException extends Exception
       val context = new ResourceContext {
-          override def openErrorHandler[A,U](f: A => U , openException:Throwable):Option[U] =
-            throw new MyException
-          override def errorHandler[A,U](f:A => U, accessResult: Either[Throwable, U], closingExceptions: List[Throwable]): U = 
-            throw new MyException
+        override def openErrorHandler[A, U](f: A => U, openException: Throwable): Option[U] =
+          throw new MyException
+        override def errorHandler[A, U](f: A => U, accessResult: Either[Throwable, U], closingExceptions: List[Throwable]): U =
+          throw new MyException
       }
       val input = errorOnReadInput.asInstanceOf[Resource[_]].
         updateContext(context).
@@ -387,6 +394,50 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
 
       assertEquals("Default", customHandlerInput.slurpString())
     }
+  }
 
+  @Test
+  def input_closed_after_each_action {
+    import JavaConverters._
+    var closes = 0
+    val in = input(TextNewLine, () => closes += 1)
+    in.blocks(None).force
+    assertEquals(1, closes)
+    closes = 0
+    in.blocks(None).headOption
+    assertEquals(1, closes)
+    closes = 0
+    in.byteArray
+    assertEquals(1, closes)
+    closes = 0
+    in.bytes.headOption
+    assertEquals(1, closes)
+    closes = 0
+    in.bytes.force
+    assertEquals(1, closes)
+    closes = 0
+    in.bytesAsInts.headOption
+    assertEquals(1, closes)
+    closes = 0
+    in.bytesAsInts.force
+    assertEquals(1, closes)
+    closes = 0
+    in.chars().force
+    assertEquals(1, closes)
+    closes = 0
+    in.chars().headOption
+    assertEquals(1, closes)
+    closes = 0
+    in.copyDataTo(Resource.fromOutputStream(new ByteArrayOutputStream()))
+    assertEquals(1, closes)
+    closes = 0
+    in.lines().force
+    assertEquals(1, closes)
+    closes = 0
+    in.lines().headOption
+    assertEquals(1, closes)
+    closes = 0
+    in.slurpString()
+    assertEquals(1, closes)
   }
 }

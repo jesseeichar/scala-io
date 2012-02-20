@@ -37,7 +37,7 @@ class InputStreamResource[+A <: InputStream] (
   override def reader(implicit sourceCodec: Codec) = {
     def nResource = {
       val a = open
-      new InputStreamReader(a.get) with Adapter[A] {
+      new InputStreamReader(a.get, sourceCodec.charSet) with Adapter[A] {
         override def src = a.get
       }
     }

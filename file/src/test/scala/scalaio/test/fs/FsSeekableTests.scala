@@ -12,14 +12,18 @@ import scalax.io._
 import scalaio.test.AbstractSeekableTests
 import org.junit.Test
 import scalax.file.Path
+import scalaio.test.SeekableTestUtils
 
-abstract class FsSeekableTests extends AbstractSeekableTests[Path] with Fixture {
-  def open(data : String, closeAction:CloseAction[Path]) : Seekable = {
+abstract class FsSeekableTests extends AbstractSeekableTests[Path] with Fixture with SeekableTestUtils[Path] {
+  def deleteResource() = fixture.root.*("*").foreach(_.deleteRecursively(true,true))
+  def openResource(closeAction: CloseAction[Path]): Seekable = {
+    deleteResource()
     val path = fixture.path
-    path write data
     path
   }
-  // can't do the close action for paths so... 
+
+  def canAddCloseAction = false
+  // can't do the close action for paths so...
   override def correctly_closes_resources = ()
-  
+
 }

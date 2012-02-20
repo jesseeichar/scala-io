@@ -12,9 +12,10 @@ import scalax.io._
 import scalaio.test._
 import org.junit.Test
 import java.io.IOException
+import scalaio.test.AbstractInputTests._
 
 abstract class FsInputTests extends AbstractInputTests with Fixture {
-    protected def input(t:Type) = t match {
+    protected def input(t:Type, closeFunction: () => Unit) = t match {
         case t @ TextNewLine => fixture.text(t.sep)
         case t @ TextPair => fixture.text(t.sep)
         case t @ TextCarriageReturn => fixture.text(t.sep)
@@ -26,7 +27,6 @@ abstract class FsInputTests extends AbstractInputTests with Fixture {
         case Image => fixture.image
        case ErrorOnRead => fixture.errorOnAccessResource
        case ErrorOnClose => fixture.errorOnCloseResource
-
     }
     
   @Test
@@ -35,5 +35,7 @@ abstract class FsInputTests extends AbstractInputTests with Fixture {
       input(ErrorOnRead).bytes.head
     }
   }
-
+  
+  // can't do the close action for paths so...
+  override def input_closed_after_each_action {}
 }

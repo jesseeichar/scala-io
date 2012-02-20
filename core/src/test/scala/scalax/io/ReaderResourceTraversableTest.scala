@@ -28,8 +28,10 @@ class ReaderResourceTraversableTest extends ResourceTraversableTest {
       callback(i)
       conv(i)
     }
-    val closeAction = CloseAction((_:Reader) => closeFunction())
-    def resource = Resource.fromReader(new java.io.StringReader(dataFunc(tsize) mkString "")).addCloseAction(closeAction).updateContext(resourceContext)
+    val reader = new java.io.StringReader(dataFunc(tsize) mkString "") {
+      override def close() = closeFunction
+    }
+    def resource = Resource.fromReader(reader).updateContext(resourceContext)
     ResourceTraversable.readerBased(resource.open, resource.context,initialConv = callBackAndConv)
   }
 

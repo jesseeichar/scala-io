@@ -10,12 +10,12 @@ package scalaio.test
 
 import scalax.io._
 import scalax.test.sugar._
-
 import org.junit.Assert._
 import org.junit.{
 Test, Before, After, Rule, Ignore
 }
 import java.io.InputStream
+import java.nio.channels.Channels
 
 class InputStreamResourceTest extends AssertionSugar with IOSugar {
   implicit val codec = Codec.UTF8
@@ -32,14 +32,32 @@ class InputStreamResourceTest extends AssertionSugar with IOSugar {
     assertEquals(source, new String(byteArray,codec.charSet))
   }
 
-  
+  @Test
+  def convert_to_reader_should_respect_codec {
+    val data = "\u00E0"
+    def test(inResource:InputResource[_]) {
+      assertEquals(data, inResource.reader(codec).slurpString)
+      assertEquals(2, inResource.reader(Codec.ISO8859).slurpString.size)
+      assertEquals(data, inResource.readableByteChannel.reader(codec).slurpString)
+      assertEquals(2, inResource.readableByteChannel.reader(Codec.ISO8859).slurpString.size)
+
+      assertEquals(data, inResource.chars(codec).mkString)
+      assertEquals(2, inResource.chars(Codec.ISO8859).mkString.size)
+      assertEquals(data, inResource.readableByteChannel.chars(codec).mkString)
+      assertEquals(2, inResource.readableByteChannel.chars(Codec.ISO8859).mkString.size)
+    }
+
+    test(Resource.fromInputStream(data.inputStream))
+    test(Resource.fromReadableByteChannel(Channels.newChannel(data.inputStream(codec))))
+    test(Resource.fromReadableByteChannel(Channels.newChannel(data.inputStream(codec))).inputStream)
+  }
+
   @Test
   def bytesAsInts_and_bytes_should_have_same_elements_after_simple_map = {
-    
     assertEquals(resource.bytes.map(_.toInt).toList, resource.bytesAsInts.toList)
   }
 
-  
+
   @Test
   def size_should_return_None = assertEquals(None, resource.size)
 

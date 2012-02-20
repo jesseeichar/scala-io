@@ -19,6 +19,7 @@ import java.nio.channels.Channels
 import scalaio.test.LongTraversableTest
 import scalax.io.LongTraversable
 import scalax.io.Input
+import scalaio.test.AbstractInputTests._
 
 class InputTest extends AbstractInputTests with DataIndependentLongTraversableTest[Byte] {
   implicit val codec = Codec.UTF8
@@ -35,27 +36,34 @@ class InputTest extends AbstractInputTests with DataIndependentLongTraversableTe
   def lessThan(t:Byte,i:Int):Boolean = t < i
   def scanSeed = 2.toByte
   
-  protected def textResource(sep: String):Input =
-    fromReadableByteChannel(Channels.newChannel(new java.io.ByteArrayInputStream(text(sep))))
+  protected def textResource(sep: String, closeFunction: () => Unit):Input = {
+    val stream = new java.io.ByteArrayInputStream(text(sep)) {
+      override def close() = closeFunction()
+    }
+    fromReadableByteChannel(Channels.newChannel(stream))
+  }
   protected def text(sep: String) = {
     val finalText: String = Constants.TEXT_VALUE.replaceAll("""\n""", sep)
     finalText.getBytes(Codec.UTF8.charSet)
   }
-  protected def customDataResource(data:String):Input = {
+  protected def customDataResource(data:String, closeFunction: () => Unit):Input = {
+    val stream = new ByteArrayInputStream(data.getBytes(Codec.UTF8.charSet)) {
+      override def close() = closeFunction()
+    }
     fromReadableByteChannel(
-      Channels.newChannel(new ByteArrayInputStream(data.getBytes(Codec.UTF8.charSet)))
+      Channels.newChannel(stream)
     )
   }
-  protected def imageResource:Input= {
-    fromReadableByteChannel(Channels.newChannel(Constants.IMAGE.openStream()))
+  protected def imageResource(closeFunction: () => Unit):Input= {
+    fromReadableByteChannel(Channels.newChannel(Constants.IMAGE.openStream(closeFunction)))
   }
-  protected def input(t: Type) = t match {
-    case t@TextNewLine => textResource(t.sep)
-    case t@TextPair => textResource(t.sep)
-    case t@TextCarriageReturn => textResource(t.sep)
-    case TextCustom(sep) => textResource(sep)
-    case TextCustomData(sep, data) => customDataResource(data)
-    case Image => imageResource
+  protected def input(t: Type, closeFunction: () => Unit) = t match {
+    case t@TextNewLine => textResource(t.sep, closeFunction)
+    case t@TextPair => textResource(t.sep, closeFunction)
+    case t@TextCarriageReturn => textResource(t.sep, closeFunction)
+    case TextCustom(sep) => textResource(sep, closeFunction)
+    case TextCustomData(sep, data) => customDataResource(data, closeFunction)
+    case Image => imageResource(closeFunction)
     case ErrorOnRead => fromReadableByteChannel(Channels.newChannel(ErrorOnRead.errorInputStream))
     case ErrorOnClose => fromReadableByteChannel(Channels.newChannel(ErrorOnClose.errorInputStream))
   }

@@ -17,7 +17,7 @@ import Constants.TEXT_VALUE
 import java.io.IOException
 import java.io.OutputStream
 
-abstract class AbstractOutputTests[InResource, OutResource] extends scalax.test.sugar.AssertionSugar {
+trait AbstractOutputTests[InResource, OutResource] extends scalax.test.sugar.AssertionSugar {
   private final val DEFAULT_DATA = "default data"
   implicit val codec = Codec.UTF8
 
@@ -128,7 +128,7 @@ abstract class AbstractOutputTests[InResource, OutResource] extends scalax.test.
   }
     
   @Test
-  def scalaIoException_On_Close_Error_by_default{
+  def scalaIoException_On_Write_Close_Error_by_default{
     intercept[ScalaIOException] {
        val output = open(CloseAction(_ => 
          throw new IOException("CloseError")
@@ -166,7 +166,7 @@ abstract class AbstractOutputTests[InResource, OutResource] extends scalax.test.
     }
   }
   @Test
-  def customErrorHandler_On_Close_Error{
+  def customErrorHandler_On_Write_Close_Error{
     val testContext = new ErrorHandlingTestContext() 
 
     val errorOnCloseOutput = open(CloseAction(_ => throw new IOException("CloseError")))._2
@@ -181,7 +181,7 @@ abstract class AbstractOutputTests[InResource, OutResource] extends scalax.test.
     }
   }
   @Test
-  def customErrorHandler_On_AcquireAndGet {
+  def customErrorHandler_On_Write_AcquireAndGet {
     val testContext = new ErrorHandlingTestContext() 
     val (_,goodOutput) = open()
     

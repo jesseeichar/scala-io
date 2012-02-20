@@ -250,7 +250,7 @@ trait Resource[+R] extends ManagedResourceOperations[R] with ResourceOps[R, Reso
  * @author  Jesse Eichar
  * @since   1.0
  */
-trait InputResource[+R <: Closeable] extends Resource[R] with Input with ResourceOps[R, InputResource[R], InputResource[R]] {
+trait InputResource[+R] extends Resource[R] with Input with ResourceOps[R, InputResource[R], InputResource[R]] {
 
     /**
      * Obtain the [[scalax.io.InputStreamResource]](typically) version of this object.
@@ -304,7 +304,7 @@ trait InputResource[+R <: Closeable] extends Resource[R] with Input with Resourc
  * @author  Jesse Eichar
  * @since   1.0
  */
-trait ReadCharsResource[+R <: Closeable] extends Resource[R] with ReadChars with ResourceOps[R, ReadCharsResource[R], ReadCharsResource[R]]
+trait ReadCharsResource[+R] extends Resource[R] with ReadChars with ResourceOps[R, ReadCharsResource[R], ReadCharsResource[R]]
 
 /**
  * An Resource object that is a also an [[scalax.io.Output]].  This trait adds methods
@@ -317,7 +317,7 @@ trait ReadCharsResource[+R <: Closeable] extends Resource[R] with ReadChars with
  * @author  Jesse Eichar
  * @since   1.0
  */
-trait OutputResource[+R <: Closeable] extends Resource[R] with Output with ResourceOps[R, OutputResource[R], OutputResource[R]] {
+trait OutputResource[+R] extends Resource[R] with Output with ResourceOps[R, OutputResource[R], OutputResource[R]] {
   /**
    * Obtain the [[scalax.io.OutputStreamResource]](typically) version of this object.
    *
@@ -365,7 +365,7 @@ trait OutputResource[+R <: Closeable] extends Resource[R] with Output with Resou
  * @author  Jesse Eichar
  * @since   1.0
  */
-trait SeekableResource[+R <: Closeable] extends Seekable with InputResource[R] with OutputResource[R] with ResourceOps[R, SeekableResource[R], SeekableResource[R]]
+trait SeekableResource[+R] extends Seekable with InputResource[R] with OutputResource[R] with ResourceOps[R, SeekableResource[R], SeekableResource[R]]
 
 /**
  * An object that in addition to being a resource is also a [[scalax.io.WriteChars]] Resource.
@@ -375,7 +375,7 @@ trait SeekableResource[+R <: Closeable] extends Seekable with InputResource[R] w
  * @author  Jesse Eichar
  * @since   1.0
  */
-trait WriteCharsResource[+R <: Closeable] extends Resource[R] with WriteChars with ResourceOps[R, WriteCharsResource[R], WriteCharsResource[R]]
+trait WriteCharsResource[+R] extends Resource[R] with WriteChars with ResourceOps[R, WriteCharsResource[R], WriteCharsResource[R]]
 
 /**
  * Defines several factory methods for creating instances of Resource.

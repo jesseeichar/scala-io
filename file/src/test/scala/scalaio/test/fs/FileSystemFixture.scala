@@ -46,6 +46,7 @@ abstract class FileSystemFixture(val fs : FileSystem, rnd : Random) {
   import rnd.nextInt
   protected def rndInt(i:Int) = nextInt(i-1)+1
   val root = fs.createTempDirectory()
+  assert(!(java.io.File.listRoots().exists(_.getCanonicalPath() == root.toRealPath().path)), "Root cannot be the true file system root because some tests delete root which could be a major issues as it could delete entire filesystem")
 
   def segment = fs.randomPrefix
 
@@ -124,7 +125,7 @@ abstract class FileSystemFixture(val fs : FileSystem, rnd : Random) {
   }
 
   def copyResource(resource:String, base:Class[_]) : Path =
-    copyResource(Resource.fromInputStream(Constants.resource(resource,base).openStream))
+    copyResource(Resource.fromInputStream(Constants.resource(resource,base).openStream()))
 
   /**
    * returns a path to a text file.  It is a copy of the file
@@ -142,7 +143,7 @@ abstract class FileSystemFixture(val fs : FileSystem, rnd : Random) {
    * returns a path to a binary image file of size 6315.  It is a copy of the file
    * in the test resources directory 'image.png'
    */
-  def image = copyResource(Resource.fromInputStream(Constants.IMAGE.openStream))
+  def image = copyResource(Resource.fromInputStream(Constants.IMAGE.openStream()))
 
   def after() : Unit = root.deleteRecursively(force=true)
 }
