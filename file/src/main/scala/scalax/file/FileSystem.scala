@@ -50,27 +50,27 @@ abstract class FileSystem {
     seg :+ lastChar mkString ""
   }
   /**
-   * Get the Resource context associated with this FileSystem instance.  
-   * 
+   * Get the Resource context associated with this FileSystem instance.
+   *
    * @note as FileSystems are immutable objects a given Resource instance will always be associated with
    * the same ResourceContext
-   * 
+   *
    * @return the associated ResourceContext
    */
   def context:ResourceContext
   /**
    * Create a new FileSystem instance that is configured with the new ResourceContext
-   * 
-   * @param newContext a new ResourceContext 
-   *  
+   *
+   * @param newContext a new ResourceContext
+   *
    * @return a new instance configured with the new context
    */
   def updateContext(newContext:ResourceContext):FileSystem
   /**
    * Update the current ResourceContext and return a new FileSystem instance with the updated context
-   * 
+   *
    * @param f A function for transforming the current context to a new context with new values.
-   * 
+   *
    * @return a new instance configured with the new context
    */
   def updateContext(f:ResourceContext => ResourceContext):FileSystem = updateContext(f(context))
@@ -228,11 +228,11 @@ abstract class FileSystem {
 
   /**
    * Checks if the separator or a "Common" separator is in the segment.
-   *   
-   * If the separator is found the an IllegalArgumentException is thrown.  
-   * If a common separator is found (/ or \) then a warning is logged and the stack trace is logged if fine 
-   * is enabled for the filesystem's logger. 
-   * 
+   *
+   * If the separator is found the an IllegalArgumentException is thrown.
+   * If a common separator is found (/ or \) then a warning is logged and the stack trace is logged if fine
+   * is enabled for the filesystem's logger.
+   *
    * @throws IllegalArgumentException If the separator is found the an IllegalArgumentException is thrown
    */
   def checkSegmentForSeparators(segment: String): Unit = {
@@ -256,8 +256,13 @@ abstract class FileSystem {
     }
 
     result match {
-      case Separator(sep) => 
-        throw new IllegalArgumentException(sep + " is not permitted as a path segment for this filesystem.  Segment in question: "+segment)
+      case Separator(sep) =>
+        val msg = "%s is not permitted as a path 'segment' for this filesystem.  Segment in question: %s.  " +
+        		"\nIf you want to create a Path from a system dependent string then use for string.  " +
+        		"If you want to create a child path use resolve instead of / to create the child path.  " +
+        		"It should be noted that the string after '/' must be a single segment but resolve accepts " +
+        		"""full strings. Examples:\n\tPath.fromString("c:\a\b")\n\tpath / ("a/b/c",'/')\n\tpath resolve "a\b\c" """
+        throw new IllegalArgumentException(msg.format(sep , segment))
       case CommonSeparator(sep) => {
          logger.warning(sep + " should not be used as a character in a path segment because it is a commonly used path separator on many filesystems.  Segment in question: "+segment)
          if(logger.isLoggable(java.util.logging.Level.FINE)) {
