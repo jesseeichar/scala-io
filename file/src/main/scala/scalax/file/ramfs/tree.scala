@@ -48,6 +48,9 @@ private[ramfs] class FileNode(var name:String) extends Node {
 
     def outputResource(owner:RamPath, openOptions: OpenOption*) : OutputStream = {
       require (owner.node exists {_ == this})
+      if (!canWrite) {
+        throw new IOException("Not permitted to write to this file")
+      }
 
       def newResource = {
         val out = new ByteArrayOutputStream(){
@@ -114,6 +117,8 @@ private[ramfs] class DirNode(var name:String) extends Node {
         case Some(x) =>
           // TODO specific exception type ??
           throw new IOException(x+" is not a "+fac)
+        case None if !canWrite =>
+          throw new IOException("Permission denied to create file in "+name)
         case None =>
           val newNode = fac create s
           children += newNode
@@ -123,8 +128,12 @@ private[ramfs] class DirNode(var name:String) extends Node {
       children.find {_.name == path.head} match {
         case Some(f:FileNode) =>
            throw new NotDirectoryException(f.name)
+        case Some(d) if !d.canWrite =>
+          throw new IOException("Permission denied to create file in "+name)
         case Some (d:DirNode) =>
           d.create(rest, fac)
+        case None if !canWrite =>
+          throw new IOException("Permission denied to create file in "+name)
         case None =>
           val newNode = new DirNode(s)
           children += newNode

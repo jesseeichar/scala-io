@@ -22,7 +22,7 @@ abstract class AbstractSeekableTests[Resource] extends AbstractInputTests with A
   /**
    * Seekable containing TEXT_VALUE, otherwise
    */
-  def openSeekable(data: String = TEXT_VALUE, closeFunction: () => Unit = () => ()): Seekable
+  def openSeekable(data: String = TEXT_VALUE, openFunction: () => Unit = () => (), closeFunction: () => Unit = () => ()): Seekable
 
 
   val patchParams =
@@ -267,9 +267,9 @@ abstract class AbstractSeekableTests[Resource] extends AbstractInputTests with A
   @Test //@Ignore
   def openSeekableReadAndWrite: Unit = {
     var closes = 0;
-    val seekable = openSeekable(closeFunction = () => ()) match {
+    openSeekable(closeFunction = () => closes += 1) match {
       case seekable:SeekableResource[_] =>
-        closes = 0 // reset here because open could increment closes 
+        closes = 0 // reset here because open could increment closes
         val data = "it is a wonderful world"
         val expectedEnd = "it is a fantastic place to be"
 
@@ -336,48 +336,49 @@ abstract class AbstractSeekableTests[Resource] extends AbstractInputTests with A
   @Test
   def correctly_closes_resources {
     var closes = 0
-    val seekable = openSeekable(closeFunction = () => closes += 1)
+    var opens = 0
+    def assertCorrectOpens[U](function: => U) = {
+      canExecuteOpenFunction match {
+        case true => assertEquals(opens, closes)
+        case false => assertTrue(closes > 1)
+      }
+      opens = 0
+      closes = 0
+    }
+
+    val seekable = openSeekable(openFunction = () => opens += 1, closeFunction = () => closes += 1)
     closes = 0 // open can require a write there for seekable will be closed so reset
+    opens = 0
 
     val taken = seekable.bytes.take(1)
     assertEquals(0, closes)
-    taken.force
-    
-    closes = 0
+    assertCorrectOpens(taken.force)
     val chars = seekable.chars()
     assertEquals(0, closes)
-    chars.force
-    chars.force
-    assertEquals(2, closes)
-    
-    closes = 0
+    assertCorrectOpens(chars.force)
+    assertCorrectOpens(chars.force)
+
     val ints = seekable.bytesAsInts
     assertEquals(0, closes)
-    ints.force
-    assertEquals(1, closes)
-    
-    closes = 0
-    seekable.byteArray
-    assertEquals(1, closes)
-    
-    closes = 0
+    assertCorrectOpens(ints.force)
+
+    assertCorrectOpens(seekable.byteArray)
     val lines = seekable.lines()
     assertEquals(0, closes)
-    lines.force
-    assertEquals(1, closes)
-    
-    closes = 0
-    val string = seekable.slurpString()
-    assertEquals(1, closes)
+    assertCorrectOpens(lines.force)
 
-    closes = 0
-    seekable.write("hi")
-    assertEquals(1, closes)
-    
-    closes = 0
+    assertCorrectOpens(seekable.slurpString())
+    assertCorrectOpens(seekable.write("hi"))
+
+
     val blocks = seekable.blocks()
     assertEquals(0, closes)
-    blocks.force
-    assertEquals(1, closes)
+    assertCorrectOpens(blocks.force)
+
+    assertCorrectOpens(seekable.append("hi"))
+    assertCorrectOpens(seekable.insert(0,"hi"))
+    assertCorrectOpens(seekable.insert(0,List(1,2,3)))
+    assertCorrectOpens(seekable.insertIntsAsBytes(0,1,2,3))
+    assertCorrectOpens(seekable.patch(0,List(1,2,3), OverwriteSome(2)))
   }
 }

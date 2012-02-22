@@ -22,6 +22,8 @@ class SeekableByteChannelResource[+A <: SeekableByteChannel] (
   self => 
 
   private def rawOpen() = opener(openOptions getOrElse ReadWrite)
+  def writeAppendOpen = opener(openOptions getOrElse WriteAppend)
+
   override def open():OpenedResource[A] = new CloseableOpenedResource(rawOpen(),context, closeAction)
   override def unmanaged = {
     val r = rawOpen
@@ -38,7 +40,7 @@ class SeekableByteChannelResource[+A <: SeekableByteChannel] (
     new InputStreamResource(nResource,context, closer,sizeFunc)
   }
   override def outputStream = {
-    def nResource = new ChannelOutputStreamAdapter(rawOpen())
+    def nResource = new ChannelOutputStreamAdapter(writeAppendOpen)
     val closer = ResourceAdapting.closeAction(closeAction)
     new OutputStreamResource(nResource, context, closer)
   }
@@ -48,11 +50,12 @@ class SeekableByteChannelResource[+A <: SeekableByteChannel] (
     new ReaderResource(nResource, context, closer)
   }
   override def writer(implicit sourceCodec: Codec) = {
-    def nResource = new ChannelWriterAdapter(rawOpen(),sourceCodec)
+    def nResource = new ChannelWriterAdapter(writeAppendOpen,sourceCodec)
     val closer = ResourceAdapting.closeAction(closeAction)
     new WriterResource(nResource, context, closer)
   }
-  def writableByteChannel = new WritableByteChannelResource(rawOpen(), context, closeAction)
+
+  def writableByteChannel = new WritableByteChannelResource(writeAppendOpen, context, closeAction)
   def readableByteChannel = new ReadableByteChannelResource(rawOpen(),context, closeAction,sizeFunc)
   
   protected override def underlyingChannel(append:Boolean) = {

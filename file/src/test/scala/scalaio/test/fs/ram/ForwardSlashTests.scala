@@ -11,8 +11,6 @@ package scalaio.test.fs.ram
 
 class ForwardSlashFsMatchingTest extends scalaio.test.fs.FsMatchingTests with ForwardSlashRamFixture
 class ForwardSlashFsDirectoryStreamTest extends scalaio.test.fs.FsPathSetTests with ForwardSlashRamFixture
-class ForwardSlashFsInputTest extends scalaio.test.fs.FsInputTests with ForwardSlashRamFixture
-class ForwardSlashFsOutputTest extends scalaio.test.fs.FsOutputTests with ForwardSlashRamFixture
 class ForwardSlashFsFileOpsTest extends scalaio.test.fs.FsFileOpsTests with ForwardSlashRamFixture
 class ForwardSlashFileSystemTest extends scalaio.test.fs.FsFileSystemTests with ForwardSlashRamFixture
 class ForwardSlashSeekableTest extends scalaio.test.fs.FsSeekableTests with ForwardSlashRamFixture

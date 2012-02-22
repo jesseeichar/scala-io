@@ -9,54 +9,56 @@ import scalax.io.Resource
 import scalaio.test.AbstractInputTests._
 import java.io.InputStream
 import scalax.io.Codec
-import scalax.io.SeekableByteChannel
-
 trait SeekableTestUtils[ResourceType] {
-  protected def deleteResource():Unit
-  protected def openResource(closeAction: CloseAction[ResourceType]): Seekable
-  def openSeekable(data: String, closeFunction: () => Unit) = {
-    val r = openResource(CloseAction[ResourceType](_ => closeFunction()))
+  protected def forceErrorOnAccess():Unit
+  protected def openResource(openFunction: () => Unit, closeAction: CloseAction[ResourceType]): Seekable
+  def openSeekable(data: String, openFunction: () => Unit, closeFunction: () => Unit) = {
+    val r = openResource(openFunction, CloseAction[ResourceType](_ => closeFunction()))
+    r truncate 0
     r write data
     r
   }
   def open(closeAction: CloseAction[ResourceType] = CloseAction.Noop): (Input, Output) = {
-    val r = openResource(closeAction)
+    val r = openResource(() => (), closeAction)
     (r, r)
   }
   def errorOnWriteOut: Seekable = {
-    val r = openResource(CloseAction.Noop)
-    deleteResource()
-    r
+    val resource = openResource(() => (), CloseAction.Noop)
+    forceErrorOnAccess()
+    resource
   }
 
-  def input(t: Type, closeFunction: () => Unit) = t match {
-    case t @ TextNewLine => text(t.sep,closeFunction)
-    case t @ TextPair => text(t.sep,closeFunction)
-    case t @ TextCarriageReturn => text(t.sep,closeFunction)
-    case TextCustom(sep) => text(sep,closeFunction)
+  def input(t: Type, openFunction: () => Unit, closeFunction: () => Unit) = t match {
+    case t @ TextNewLine => text(t.sep,openFunction,closeFunction)
+    case t @ TextPair => text(t.sep,openFunction,closeFunction)
+    case t @ TextCarriageReturn => text(t.sep,openFunction,closeFunction)
+    case TextCustom(sep) => text(sep,openFunction,closeFunction)
     case TextCustomData(sep, data) =>
-      val s = openResource(CloseAction.Noop)
+      val s = openResource(openFunction,CloseAction.Noop)
+      s truncate 0
       s.write(data)(Codec.UTF8)
       if(s.isInstanceOf[Resource[_]]) {
           s.asInstanceOf[Resource[_]].addCloseAction(CloseAction(_ => closeFunction()))
       }
       s
-    case Image => image(closeFunction)
+    case Image => image(openFunction,closeFunction)
     case ErrorOnRead => errorOnWriteOut
-    case ErrorOnClose => openResource(CloseAction(_ => throw new AssertionError("boom")))
+    case ErrorOnClose => openResource(() => (), CloseAction(_ => throw new AssertionError("boom")))
 
   }
-  def image(closeFunction:() => Unit) = copyResource(Resource.fromInputStream(Constants.IMAGE.openStream()), closeFunction)
+  def image(openFunction: () => Unit, closeFunction:() => Unit) =
+    copyResource(Resource.fromInputStream(Constants.IMAGE.openStream()), openFunction, closeFunction)
 
-  def text(sep: String, closeFunction:() => Unit) = {
+  def text(sep: String, openFunction: () => Unit, closeFunction:() => Unit) = {
     val resource = Resource.fromInputStream {
       val bytes = Constants.TEXT_VALUE.replaceAll("""\n""", sep).getBytes(Codec.UTF8.name)
       new java.io.ByteArrayInputStream(bytes)
     }
-    copyResource(resource, closeFunction)
+    copyResource(resource, openFunction, closeFunction)
   }
-  def copyResource(source : InputStreamResource[InputStream],closeFunction:() => Unit) : Seekable = {
-      val dest = openResource(CloseAction.Noop)
+  def copyResource(source : InputStreamResource[InputStream],openFunction: () => Unit,closeFunction:() => Unit) : Seekable = {
+      val dest = openResource(openFunction, CloseAction(_ => closeFunction))
+      dest truncate 0
       dest write (source.bytes)
       dest
   }

@@ -25,7 +25,8 @@ trait ProcessorTest extends AssertionSugar {
           opened += 1;
           1 to i
         },
-        closeFunction = () => closed += 1,
+        closeFunction = () =>
+          closed += 1,
         resourceContext = context)
       def assertOpenedClosed(times: Int) = {
         assertEquals(times, opened)

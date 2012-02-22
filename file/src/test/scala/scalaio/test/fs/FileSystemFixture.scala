@@ -45,8 +45,7 @@ case class TestData(fs : FileSystem, numSegments : Int, pathName : String) {
 abstract class FileSystemFixture(val fs : FileSystem, rnd : Random) {
   import rnd.nextInt
   protected def rndInt(i:Int) = nextInt(i-1)+1
-  val root = fs.createTempDirectory()
-  assert(!(java.io.File.listRoots().exists(_.getCanonicalPath() == root.toRealPath().path)), "Root cannot be the true file system root because some tests delete root which could be a major issues as it could delete entire filesystem")
+  def root = fs.createTempDirectory()
 
   def segment = fs.randomPrefix
 

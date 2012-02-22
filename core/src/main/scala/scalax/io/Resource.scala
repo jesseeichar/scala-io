@@ -30,7 +30,7 @@ import support.FileUtils
 trait OpenedResource[+R] {
   def get:R
   def context:ResourceContext
-  def close():List[Throwable] = closeAction(get) 
+  def close():List[Throwable] = closeAction(get)
   def closeAction[U >: R]:CloseAction[U]
   def toSingleUseResource = new ManagedResourceOperations[R] {
     def acquireFor[B](f: (R) => B): Either[List[Throwable], B] = {
@@ -50,7 +50,7 @@ class UnmanagedOpenedResource[+R](val get:R,val context:ResourceContext) extends
 }
 
 /**
- * A flag trait that all UnmanagedResources will be tagged with to differentiate from '''normal''' 
+ * A flag trait that all UnmanagedResources will be tagged with to differentiate from '''normal'''
  * Resources
  */
 trait UnmanagedResource {
@@ -74,36 +74,36 @@ trait UnmanagedResource {
  */
 trait ResourceOps[+R, +UnmanagedType, +Repr] {
   /**
-   * Get the Resource context associated with this Resource instance.  
-   * 
+   * Get the Resource context associated with this Resource instance.
+   *
    * @note as Resources are immutable objects a given Resource instance will always be associated with
    * the same ResourceContext
-   * 
+   *
    * @return the associated ResourceContext
    */
   def context:ResourceContext
   /**
    * Create a Resource instance that is configured with the new ResourceContext
-   * 
-   * @param newContext A new ResourceContext 
-   *  
+   *
+   * @param newContext A new ResourceContext
+   *
    * @return a new instance configured with the new context
    */
   def updateContext(newContext:ResourceContext):Repr
   /**
    * Update the current ResourceContext and return a new Resource instance with the updated context
-   * 
+   *
    * @param f A function for transforming the current context to a new context with new values.
-   * 
+   *
    * @return a new instance configured with the new context
    */
   def updateContext(f:ResourceContext => ResourceContext):Repr = updateContext(f(context))
   /**
    * Add a CloseAction that will be executed each time the resource is closed.
-   * 
+   *
    * @param newCloseAction the action to add
-   * 
-   * @return a new resource instance with the close action added 
+   *
+   * @return a new resource instance with the close action added
    */
   def addCloseAction(newCloseAction: CloseAction[R]):Repr
   /**
@@ -123,7 +123,7 @@ trait ResourceOps[+R, +UnmanagedType, +Repr] {
    * @return return an instance of the same type that is not managed
    */
   def unmanaged: UnmanagedType with UnmanagedResource
-  
+
 }
 /**
  * A Resource that can be used to do IO.  Primarily it wraps objects from the java io and makes
@@ -153,7 +153,7 @@ trait Resource[+R] extends ManagedResourceOperations[R] with ResourceOps[R, Reso
    * Creates a new instance of the underlying resource (or opens it).
    * Sometimes the code block used to create the Resource is non-reusable in
    * which case this Resource can only be used once.  This is not recommended.
-   * 
+   *
    * When creating a resource it is recommended to pass the code block for creating
    * the resource to the resource so that the resource can be reused.  Of course this
    * is not always possible
@@ -176,20 +176,20 @@ trait Resource[+R] extends ManagedResourceOperations[R] with ResourceOps[R, Reso
    * }
    * }}}
    *
-   * @note normally the error handler registered with the associated ResourceContext 
+   * @note normally the error handler registered with the associated ResourceContext
    *        will handle any errors opening the resource, but when calling this method
-   *        the caller must handle any possible errors that are raised.  
+   *        the caller must handle any possible errors that are raised.
    * @return the actual resource that has been opened
    */
     def open(): OpenedResource[R]
 
     /**
-     * Open the resource execute the function and either return all errors as a list or the result of the 
+     * Open the resource execute the function and either return all errors as a list or the result of the
      * function execution.
-     * 
+     *
      * On open and close error handlers in ResourceContext are called.  If they then raise errors
      * the errors are captured and returned as a Right[List[Throwable]]
-     * 
+     *
      * Perhaps the worst method I have ever written :-(
      */
   final def acquireFor[B](f: R => B): Either[List[Throwable], B] = {
@@ -200,7 +200,7 @@ trait Resource[+R] extends ManagedResourceOperations[R] with ResourceOps[R, Reso
     }
     var closeExceptions: List[Throwable] = Nil
 
-    /** Close resource and assign any exceptions to closeException */ 
+    /** Close resource and assign any exceptions to closeException */
     def close(resource:OpenedResource[R]) = try {
       closeExceptions = resource.close()
     } catch {
@@ -222,9 +222,9 @@ trait Resource[+R] extends ManagedResourceOperations[R] with ResourceOps[R, Reso
           try Right(f(resource.get))
           catch handleAccessError
           finally close(resource)
-    
+
         val handleError = result.left.toOption ++ closeExceptions nonEmpty
-        
+
         if (handleError) {
           try {
             Right(context.errorHandler(f, result, closeExceptions))
@@ -234,7 +234,7 @@ trait Resource[+R] extends ManagedResourceOperations[R] with ResourceOps[R, Reso
         } else {
           Right(result.right.get)
         }
-        
+
     }
   }
 }
@@ -258,7 +258,7 @@ trait InputResource[+R] extends Resource[R] with Input with ResourceOps[R, Input
      * @return the [[scalax.io.InputStreamResource]](typically) version of this object.
      */
   def inputStream: InputResource[InputStream]
-    
+
   override def copyDataTo(output: Output): Unit =
     output  match {
       case outR: OutputResource[_] =>
@@ -269,7 +269,7 @@ trait InputResource[+R] extends Resource[R] with Input with ResourceOps[R, Input
         } {
           FileUtils.tryCopy(failedToCopy=true)(inChan, outChan)
         }
-        if(failedToCopy) 
+        if(failedToCopy)
           super.copyDataTo(output)
       case _ => super.copyDataTo(output)
     }
@@ -292,7 +292,7 @@ trait InputResource[+R] extends Resource[R] with Input with ResourceOps[R, Input
     /**
      * Safely calculation the size of the resource or return None in case of failure or if
      * it is not possible to determin size of resource before accessing the resource.
-     * 
+     *
      */
     protected def sizeFunc: () => Option[Long]
 }
@@ -339,7 +339,7 @@ trait OutputResource[+R] extends Resource[R] with Output with ResourceOps[R, Out
    */
   def writableByteChannel: OutputResource[WritableByteChannel]
     override def doCopyFrom(input: Input): Unit =
-      
+
     input match {
       case inR: InputResource[_] =>
         var failedToCopy = false
@@ -349,7 +349,7 @@ trait OutputResource[+R] extends Resource[R] with Output with ResourceOps[R, Out
         } {
           FileUtils.tryCopy(failedToCopy=true)(inChan, outChan)
         }
-        if(failedToCopy) 
+        if(failedToCopy)
           super.doCopyFrom(input)
       case _ => super.doCopyFrom(input)
     }
@@ -501,7 +501,7 @@ object Resource {
    * @return a SeekableByteChannelResource
    */
   def fromSeekableByteChannel[A <: SeekableByteChannel](opener: Seq[OpenOption] => A) : SeekableByteChannelResource[A] = {
-    new SeekableByteChannelResource[A](opener,DefaultResourceContext, Noop, seekablesizeFunction(opener(Read :: Nil)),Some(ReadWrite))
+    new SeekableByteChannelResource[A](opener,DefaultResourceContext, Noop, seekablesizeFunction(opener(Read :: Nil)), None)
   }
 
   private def seekablesizeFunction(resource: => SeekableByteChannel)= () => {
@@ -525,7 +525,7 @@ object Resource {
           _.length match {case len if len > -1 => len}
       }
     }
-    new SeekableByteChannelResource[SeekableFileChannel](open ,new ResourceContext{override def descName=PrefixedName("RandomAccessFile")},Noop, sizeFunc,Some(ReadWrite))
+    new SeekableByteChannelResource[SeekableFileChannel](open, new ResourceContext{override def descName=PrefixedName("RandomAccessFile")},Noop, sizeFunc,Some(ReadWrite))
   }
 
   /**
@@ -571,7 +571,7 @@ object Resource {
   def fromFile(file:File): SeekableByteChannelResource[SeekableByteChannel] = {
     def open = (opts:Seq[OpenOption]) => support.FileUtils.openChannel(file,opts)
     def sizeFunc = () => allCatch.opt{file.length}
-    new SeekableByteChannelResource[SeekableFileChannel](open,new ResourceContext{override def descName=KnownName(file.getPath)},Noop,sizeFunc, Some(ReadWrite))
+    new SeekableByteChannelResource[SeekableFileChannel](open,new ResourceContext{override def descName=KnownName(file.getPath)},Noop,sizeFunc, None)
   }
   /**
    * Create a file from string then create a Seekable Resource from a File

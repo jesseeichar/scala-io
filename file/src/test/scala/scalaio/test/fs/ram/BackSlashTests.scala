@@ -10,8 +10,6 @@ package scalaio.test.fs.ram
 
 class BackSlashFsMatchingTest extends scalaio.test.fs.FsMatchingTests with BackSlashRamFixture
 class BackSlashFsDirectoryStreamTest extends scalaio.test.fs.FsPathSetTests with BackSlashRamFixture
-class BackSlashFsInputTest extends scalaio.test.fs.FsInputTests with BackSlashRamFixture
-class BackSlashFsOutputTest extends scalaio.test.fs.FsOutputTests with BackSlashRamFixture
 class BackSlashFsFileOpsTest extends scalaio.test.fs.FsFileOpsTests with BackSlashRamFixture
 class BackSlashFileSystemTest extends scalaio.test.fs.FsFileSystemTests with BackSlashRamFixture
 class BackSlashSeekableTest extends scalaio.test.fs.FsSeekableTests with BackSlashRamFixture

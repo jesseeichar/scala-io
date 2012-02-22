@@ -88,15 +88,15 @@ object StandardOpenOption extends Enumeration {
   val Write = OpenOption
 
   /**
-   * Collection of options: {@link #Create}, {@link #Truncate}, {@link #Write}
+   * Collection of options: {@link #CreateFull}, {@link #Truncate}, {@link #Write}
    */
   final val WriteTruncate = List(CreateFull, Truncate, Write)
   /**
-   * Collection of options: {@link #Create}, {@link #Truncate}, {@link #Write}
+   * Collection of options: {@link #CreateFull}, {@link #Truncate}, {@link #Write}
    */
   final val ReadWrite = List(Read, CreateFull, Write)
   /**
-   * Collection of options: {@link #Create}, {@link #Append}, {@link #Write}
+   * Collection of options: {@link #CreateFull}, {@link #Append}, {@link #Write}
    */
   final val WriteAppend = List(CreateFull, Append, Write)
 }

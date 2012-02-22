@@ -23,9 +23,9 @@ class ResourceTraversableTest extends LongTraversableTest {
                                  callback: (Int) => U,
                                  dataFunc: (Int) => Traversable[Int],
                                  conv: (Int) => A,
-                                 closeFunction: () => Unit = () => (),
+                                 closeFunction: () => Unit,
                                  resourceContext:ResourceContext):LongTraversable[A] = {
-    val in = new ByteArrayInputStream(dataFunc(tsize) map {_.toByte} toArray) {
+    def in = new ByteArrayInputStream(dataFunc(tsize) map {_.toByte} toArray) {
       override def close() = {
        closeFunction()
        super.close 

@@ -38,13 +38,11 @@ class FsDirectoryStreamTest extends scalaio.test.fs.FsPathSetTests with DefaultF
   }
 
 }
-class FsInputTest extends scalaio.test.fs.FsInputTests with DefaultFixture
-class FsOutputTest extends scalaio.test.fs.FsOutputTests with DefaultFixture
 class FsFileOpsTest extends scalaio.test.fs.FsFileOpsTests with DefaultFixture
 class FileSystemTest extends scalaio.test.fs.FsFileSystemTests with DefaultFixture
 class SeekableTest extends scalaio.test.fs.FsSeekableTests with DefaultFixture
 class BasicPathTest extends scalaio.test.fs.FsBasicPathTests with DefaultFixture
 class AccessSetTest extends scalaio.test.fs.FsAccessSetTests with DefaultFixture
 class PathObjectTest extends scalaio.test.fs.FsPathObjectTests with DefaultFixture
-class PathSetTest extends scalaio.test.fs.FsPathSetTests with DefaultFixture 
+class PathSetTest extends scalaio.test.fs.FsPathSetTests with DefaultFixture
 

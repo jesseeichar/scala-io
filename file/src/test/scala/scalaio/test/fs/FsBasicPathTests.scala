@@ -83,7 +83,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
     assertEquals(path, path2)
     assertEquals(path, path3)
 
-    val fs = new RamFileSystem()
+    val fs = new RamFileSystem(separator = fixture.fs.separator)
     val rampath = fs.fromSeq(path.segments)
     val equals = rampath == path
     assertFalse(equals)
@@ -97,7 +97,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
   @Test //@Ignore
   def adding_similar_path_from_two_fs_should_have_different_hashcodes {
     val path = List("a","b","c","d","e")
-    val fs = new RamFileSystem()
+    val fs = new RamFileSystem(separator = fixture.fs.separator)
 
     val set = Set(fs.fromSeq(path),fixture.fs.fromSeq(path))
 

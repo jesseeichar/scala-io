@@ -12,19 +12,21 @@ import scalax.io.support.FileUtils
 class SeekableBackedInputTest extends InputTest {
 
   override def sizeIsDefined = true
-  override protected def textResource(sep: String, closeFunction: () => Unit): Input =
-    		  construct(text(sep), closeFunction)
+  override protected def textResource(sep: String, openFunction: () => Unit, closeFunction: () => Unit): Input =
+    		  construct(text(sep), openFunction, closeFunction)
 
-  override protected def customDataResource(data: String, closeFunction: () => Unit): Input = 
-		  construct(data.getBytes(Codec.UTF8.charSet), closeFunction)
+  override protected def customDataResource(data: String, openFunction: () => Unit, closeFunction: () => Unit): Input =
+		  construct(data.getBytes(Codec.UTF8.charSet), openFunction, closeFunction)
 
-  override protected def imageResource(closeFunction: () => Unit): Input = {
-    construct(Resource.fromInputStream(Constants.IMAGE.openStream()).bytes, closeFunction)
+  override protected def imageResource(openFunction: () => Unit, closeFunction: () => Unit): Input = {
+    construct(Resource.fromInputStream(Constants.IMAGE.openStream()).bytes, openFunction, closeFunction)
   }
-  
-  def construct(bytes:Traversable[Byte], closeFunction: () => Unit) = {
+
+  def construct(bytes:Traversable[Byte], openFunction: () => Unit, closeFunction: () => Unit) = {
     val buffer = new ArrayBuffer[Byte]() ++ bytes
-    val channel = new ArrayBufferSeekableChannel(buffer)(closeAction = _ => closeFunction())
+    def channel = new ArrayBufferSeekableChannel(buffer)(closeAction = _ => closeFunction()) {
+      openFunction()
+    }
     Resource.fromSeekableByteChannel(channel)
   }
 

@@ -16,73 +16,61 @@ import scalaio.test.stream.InputTest
 import collection.mutable.ArrayBuffer
 import java.io.IOException
 
-class ByteChannelResourceTraversableTest extends ResourceTraversableTest {
-    /*        
-  override def traversable[U, A](tsize: Int,
-                                 callback: (Int) => U,
-                                 dataFunc: (Int) => Traversable[Int],
-                                 conv: (Int) => A,
-                                 closeFunction: () => Unit = () => (),
-                                 resourceContext:ResourceContext):LongTraversable[A] = {
-    def channel = Channels.newChannel(new ByteArrayInputStream(dataFunc(tsize) map {_.toByte} toArray))
-    val toInt = (bb:ByteBuffer) => new scalax.io.nio.ByteBuffer(bb).map(byte => conv(byte.toInt)) : Traversable[A]
-    val resource = new CloseableOpenedResource(channel, resourceContext, CloseAction[Any](_ => closeFunction()))
-    ResourceTraversable.byteChannelBased(resource, resourceContext, () => None, initialConv=toInt).map{i => callback(i); i}
-  } */
-}
-
 class ByteChannelResourceInputTest extends InputTest {
-  def resource(sep:String, closeFunction: () => Unit) =
-    Resource.fromReadableByteChannel(Channels.newChannel(stringBasedStream(sep, closeFunction)))
-  protected override def input(t: Type, closeFunction: () => Unit):Input = t match {
-    case t@TextNewLine => resource(t.sep, closeFunction)
-    case t@TextPair => resource(t.sep, closeFunction)
-    case t@TextCarriageReturn => resource(t.sep, closeFunction)
-    case TextCustom(sep) => resource(sep, closeFunction)
+  def resource(sep:String, openFunction: () => Unit, closeFunction: () => Unit) =
+    Resource.fromReadableByteChannel(Channels.newChannel(stringBasedStream(sep, openFunction, closeFunction)))
+  protected override def input(t: Type, openFunction: () => Unit, closeFunction: () => Unit):Input = t match {
+    case t@TextNewLine => resource(t.sep, openFunction, closeFunction)
+    case t@TextPair => resource(t.sep, openFunction, closeFunction)
+    case t@TextCarriageReturn => resource(t.sep, openFunction, closeFunction)
+    case TextCustom(sep) => resource(sep, openFunction, closeFunction)
     case TextCustomData(sep, data) => Resource.fromReadableByteChannel{
       val stream = new ByteArrayInputStream(data.getBytes(Codec.UTF8.charSet)){
+        openFunction()
         override def close() = closeFunction()
       }
       Channels.newChannel(stream)}
-    
-    case ErrorOnRead => 
+
+    case ErrorOnRead =>
       Resource.fromReadableByteChannel(Channels.newChannel(ErrorOnRead.errorInputStream))
-    case ErrorOnClose => 
+    case ErrorOnClose =>
       Resource.fromReadableByteChannel(Channels.newChannel(ErrorOnClose.errorInputStream))
     case Image =>
-      Resource.fromReadableByteChannel(
+      Resource.fromReadableByteChannel({
+        openFunction()
         Channels.newChannel(scalaio.test.Constants.IMAGE.openStream(closeFunction))
-      )
+      })
   }
 
 }
 
 class SeekableByteChannelResourceInputTest extends InputTest {
-  
-  def wrap(data:Array[Byte], closeFunction: () => Unit) = Resource.fromSeekableByteChannel(
+
+  def wrap(data:Array[Byte], openFunction: () => Unit, closeFunction: () => Unit) = Resource.fromSeekableByteChannel({
+    openFunction()
     new ArrayBufferSeekableChannel(ArrayBuffer.apply(data:_*),StandardOpenOption.ReadWrite:_*)(closeAction = _ => closeFunction())
-  )
-  protected override def input(t: Type, closeFunction: () => Unit):Input = t match {
-    case t@TextNewLine => wrap(text(t.sep), closeFunction)
-    case t@TextPair => wrap(text(t.sep), closeFunction)
-    case t@TextCarriageReturn => wrap(text(t.sep), closeFunction)
-    case TextCustom(sep) => wrap(text(sep), closeFunction)
-    case TextCustomData(sep, data) => wrap(data.getBytes(Codec.UTF8.charSet), closeFunction)
-    case ErrorOnRead => 
+  })
+  protected override def input(t: Type, openFunction: () => Unit, closeFunction: () => Unit):Input = t match {
+    case t@TextNewLine => wrap(text(t.sep), openFunction, closeFunction)
+    case t@TextPair => wrap(text(t.sep), openFunction, closeFunction)
+    case t@TextCarriageReturn => wrap(text(t.sep), openFunction, closeFunction)
+    case TextCustom(sep) => wrap(text(sep), openFunction, closeFunction)
+    case TextCustomData(sep, data) => wrap(data.getBytes(Codec.UTF8.charSet), openFunction, closeFunction)
+    case ErrorOnRead =>
       Resource.fromSeekableByteChannel(
         new ArrayBufferSeekableChannel(ArrayBuffer[Byte](),StandardOpenOption.ReadWrite:_*)() {
            override def read(dst : ByteBuffer) = throw new IOException("boom")
       })
-    case ErrorOnClose => 
+    case ErrorOnClose =>
       val bytes = Resource.fromInputStream(scalaio.test.Constants.IMAGE.openStream()).byteArray
       Resource.fromSeekableByteChannel(
         new ArrayBufferSeekableChannel(ArrayBuffer[Byte](bytes:_*),StandardOpenOption.ReadWrite:_*)() {
-           override def close() = 
+           override def close() =
              throw new IOException("boom")
       })
     case Image =>
       val bytes = Resource.fromInputStream(scalaio.test.Constants.IMAGE.openStream()).byteArray
-      wrap(bytes, closeFunction)
+      wrap(bytes, openFunction, closeFunction)
   }
   override def sizeIsDefined = true
 }

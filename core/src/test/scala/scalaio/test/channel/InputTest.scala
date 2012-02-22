@@ -35,9 +35,13 @@ class InputTest extends AbstractInputTests with DataIndependentLongTraversableTe
   def times(t1:Byte, t2:Byte):Byte = (t1 * t2).toByte
   def lessThan(t:Byte,i:Int):Boolean = t < i
   def scanSeed = 2.toByte
-  
-  protected def textResource(sep: String, closeFunction: () => Unit):Input = {
+
+  protected def textResource(
+      sep: String,
+      openFunction: () => Unit,
+      closeFunction: () => Unit):Input = {
     val stream = new java.io.ByteArrayInputStream(text(sep)) {
+      openFunction()
       override def close() = closeFunction()
     }
     fromReadableByteChannel(Channels.newChannel(stream))
@@ -46,24 +50,31 @@ class InputTest extends AbstractInputTests with DataIndependentLongTraversableTe
     val finalText: String = Constants.TEXT_VALUE.replaceAll("""\n""", sep)
     finalText.getBytes(Codec.UTF8.charSet)
   }
-  protected def customDataResource(data:String, closeFunction: () => Unit):Input = {
-    val stream = new ByteArrayInputStream(data.getBytes(Codec.UTF8.charSet)) {
+  protected def customDataResource(
+      data:String,
+      openFunction: () => Unit,
+      closeFunction: () => Unit):Input = {
+    def stream = new ByteArrayInputStream(data.getBytes(Codec.UTF8.charSet)) {
+      openFunction()
       override def close() = closeFunction()
     }
     fromReadableByteChannel(
       Channels.newChannel(stream)
     )
   }
-  protected def imageResource(closeFunction: () => Unit):Input= {
-    fromReadableByteChannel(Channels.newChannel(Constants.IMAGE.openStream(closeFunction)))
+  protected def imageResource(openFunction: () => Unit, closeFunction: () => Unit):Input= {
+    fromReadableByteChannel({
+      openFunction()
+      Channels.newChannel(Constants.IMAGE.openStream(closeFunction))
+    })
   }
-  protected def input(t: Type, closeFunction: () => Unit) = t match {
-    case t@TextNewLine => textResource(t.sep, closeFunction)
-    case t@TextPair => textResource(t.sep, closeFunction)
-    case t@TextCarriageReturn => textResource(t.sep, closeFunction)
-    case TextCustom(sep) => textResource(sep, closeFunction)
-    case TextCustomData(sep, data) => customDataResource(data, closeFunction)
-    case Image => imageResource(closeFunction)
+  protected def input(t: Type, openFunction: () => Unit, closeFunction: () => Unit) = t match {
+    case t@TextNewLine => textResource(t.sep, openFunction, closeFunction)
+    case t@TextPair => textResource(t.sep, openFunction, closeFunction)
+    case t@TextCarriageReturn => textResource(t.sep, openFunction, closeFunction)
+    case TextCustom(sep) => textResource(sep, openFunction, closeFunction)
+    case TextCustomData(sep, data) => customDataResource(data, openFunction, closeFunction)
+    case Image => imageResource(openFunction, closeFunction)
     case ErrorOnRead => fromReadableByteChannel(Channels.newChannel(ErrorOnRead.errorInputStream))
     case ErrorOnClose => fromReadableByteChannel(Channels.newChannel(ErrorOnClose.errorInputStream))
   }
@@ -75,7 +86,7 @@ class InputTest extends AbstractInputTests with DataIndependentLongTraversableTe
     import scalax.io.Line.Terminators._
 
     val file = largeResource(Key.TEXT)
-    
+
     val start = System.currentTimeMillis
     val fromFile = Resource.fromFile(file).lines(NewLine)
     val fromString = Resource.fromFile(file.getAbsolutePath).lines(NewLine)

@@ -258,7 +258,7 @@ abstract class FileSystem {
     result match {
       case Separator(sep) =>
         val msg = "%s is not permitted as a path 'segment' for this filesystem.  Segment in question: %s.  " +
-        		"\nIf you want to create a Path from a system dependent string then use for string.  " +
+        		"\nIf you want to create a Path from a system dependent string then use fromString.  " +
         		"If you want to create a child path use resolve instead of / to create the child path.  " +
         		"It should be noted that the string after '/' must be a single segment but resolve accepts " +
         		"""full strings. Examples:\n\tPath.fromString("c:\a\b")\n\tpath / ("a/b/c",'/')\n\tpath resolve "a\b\c" """
