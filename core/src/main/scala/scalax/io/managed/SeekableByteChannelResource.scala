@@ -16,7 +16,7 @@ class SeekableByteChannelResource[+A <: SeekableByteChannel] (
     protected val sizeFunc:() => Option[Long] = () => None,
     protected val openOptions:Option[Seq[OpenOption]] = None)
   extends SeekableResource[A]
-  with ResourceOps[A, SeekableResource[A], SeekableByteChannelResource[A]]  {
+  with ResourceOps[A, SeekableByteChannelResource[A]]  {
   
 
   self => 
@@ -25,10 +25,6 @@ class SeekableByteChannelResource[+A <: SeekableByteChannel] (
   def writeAppendOpen = opener(openOptions getOrElse WriteAppend)
 
   override def open():OpenedResource[A] = new CloseableOpenedResource(rawOpen(),context, closeAction)
-  override def unmanaged = {
-    val r = rawOpen
-    new scalax.io.unmanaged.SeekableByteChannelResource[A](r, context, closeAction, () => Some(r.size))
-  }
   override def updateContext(newContext:ResourceContext) = 
     new SeekableByteChannelResource(opener, newContext, closeAction, sizeFunc, openOptions)
   override def addCloseAction(newCloseAction: CloseAction[A]) = 

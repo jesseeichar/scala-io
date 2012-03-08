@@ -250,16 +250,32 @@ abstract class AbstractSeekableTests[Resource] extends AbstractInputTests with A
         assertEquals(0,closes)
         seekable.write("whoop!")
         assertEquals(1, closes)
-        seekable.open(opened => {
+        for{
+          processor <- seekable.seekableProcessor
+          opened = processor.asSeekable
+        } {
           opened.truncate(0)
           opened.write("hello-")
           opened.write("world")
 
           opened.position = 5
-          opened.write(' ')
-        })
+          opened.write('_')
+        }
         assertEquals(2, closes)
-        assertEquals("hello world", seekable.slurpString)
+        assertEquals("hello_world", seekable.slurpString)
+
+        closes = 0
+        for{
+          processor <- seekable.seekableProcessor
+          _ <- processor.truncate(0)
+          _ <- processor.write("world-")
+          _ <- processor.write("hello")
+          _ <- processor.position = 5
+          _ <- processor.write('_')
+        } ()
+        assertEquals(1, closes)
+        assertEquals("world_hello", seekable.slurpString)
+
       case _ => ()
     }
   }
@@ -273,7 +289,10 @@ abstract class AbstractSeekableTests[Resource] extends AbstractInputTests with A
         val data = "it is a wonderful world"
         val expectedEnd = "it is a fantastic place to be"
 
-        seekable.open(opened => {
+        for{
+          processor <- seekable.seekableProcessor
+          opened = processor.asSeekable
+        } {
           opened.truncate(0)
           opened.write(data)
 
@@ -285,10 +304,11 @@ abstract class AbstractSeekableTests[Resource] extends AbstractInputTests with A
           assertEquals("it is a fantastic world", opened.slurpString)
 
           val worldPos = opened.bytes.indexOfSlice("world".getBytes(Codec.UTF8.charSet))
+          assertEquals("it is a fantastic world".getBytes(Codec.UTF8.charSet).indexOfSlice("world".getBytes(Codec.UTF8.charSet)), worldPos)
           opened.position = worldPos
           opened.write("place to be")
           assertEquals(expectedEnd, opened.slurpString)
-        })
+        }
         assertEquals(1, closes)
         assertEquals(expectedEnd, seekable.slurpString)
       case _ => ()
@@ -330,7 +350,7 @@ abstract class AbstractSeekableTests[Resource] extends AbstractInputTests with A
 
     seekable.write(testData)
 
-    seekable.open(perform(_, "opened seekable"))
+    for{ processor <- seekable.seekableProcessor } perform(processor.asSeekable, "opened seekable")
   }
 
   @Test

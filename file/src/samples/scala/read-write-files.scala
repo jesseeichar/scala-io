@@ -53,11 +53,17 @@ object ReadWriteFiles {
     import scalax.io.StandardOpenOption._
     // open the file for appending,  it will fail if file does not exist and 
     // it will delete the file after editing the file
-    Path("someFile").open(Seq(DeleteOnClose)) { out =>
+    
+    val processor = for{
+      processor <- Path("someFile").seekableProcessor(Seq(DeleteOnClose))
       // any number of Seekable actions can be performed 
-      out.append(" an ending")
-      out.chars.takeWhile(_ != '.')
-    }
+      _ <- processor.append(" an ending")
+      chars <- processor.chars
+      subSection <- chars.takeWhile(_ != '.') 
+    } yield subSection
+    
+   val firstSentence:Option[Seq[Char]] = processor.acquireAndGet(a => a)
+    
     
     Path("someFile").outputStream(WriteAppend:_*).write("appending")
     Path("someFile").outputStream(WriteTruncate:_*).write("replace all data with this")

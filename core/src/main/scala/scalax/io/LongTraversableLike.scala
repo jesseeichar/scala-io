@@ -523,12 +523,10 @@ withIterator(i => b ++= i.collect(pf))
   def prefixLength(p: A => Boolean) = segmentLength(p, 0)
 
   private def doStartsWith[B](those: Iterator[B], offset: Long) = {
-    breakable {
-      ldrop(offset) foreach { next =>
-        if (!those.hasNext || those.next != next) break
-      }
+    ldrop(offset).withIterator{ iter=>
+      while(those.hasNext && iter.hasNext && those.next == iter.next) {}
+      !those.hasNext
     }
-    !those.hasNext
   }
 
   /**
@@ -599,18 +597,20 @@ withIterator(i => b ++= i.collect(pf))
       if (this.hasDefiniteSize && that.hasDefiniteSize)
         LongTraversableLike.indexOf(thisCollection, 0L, lsize, that, 0, that.length, from)
       else {
-        var i = from
-
-        var s: LongTraversable[A] = thisCollection ldrop i
-        while (s.nonEmpty) {
-          if (s startsWith that)
-            return i
-
-          i += 1
-          s = s.tail
-        }
-        -1
-      }
+        withIterator{ iterBeforeDrop =>
+          val iter = iterBeforeDrop.ldrop(from)
+          var i = from
+          var buffer = Vector(iter.take(that.size).toSeq:_*)
+          var found = buffer.startsWith(that)
+          
+          while (!found && iter.hasNext) {
+	          i += 1
+	          buffer = buffer.tail :+ iter.next()
+	          found = buffer.startsWith(that)
+	        }
+	        if(found) i else -1
+	      }
+	    }
     }
 
   /**

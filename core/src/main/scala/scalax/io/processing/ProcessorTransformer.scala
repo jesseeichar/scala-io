@@ -11,18 +11,18 @@ private[processing] sealed trait ProcessorTransformer[+A, -From, +To] {
 
 private[this] object ProcessorTransformer {
   implicit def iterableToLongTraversableTransformer[A] = new ProcessorTransformer[A, Iterable[A], LongTraversable[A]] {
-    def transform(from: Processor[Iterable[A]]) = iteratorToLongTraverableTransformer[A].transform(from.map(_.iterator))
+    def transform(from: Processor[Iterable[A]]) = iteratorToLongTraverableTransformer[A].transform(from.map(t => LongTraversable(from.context, t.iterator)))
   }
 
-  implicit def iteratorToLongTraverableTransformer[A]: ProcessorTransformer[A, Iterator[A], LongTraversable[A]] =
-    new ProcessorTransformer[A, Iterator[A], LongTraversable[A]] {
-      def transform(from: Processor[Iterator[A]]) = new LongTraversable[A] {
+  implicit def iteratorToLongTraverableTransformer[A]: ProcessorTransformer[A, LongTraversable[A], LongTraversable[A]] =
+    new ProcessorTransformer[A, LongTraversable[A], LongTraversable[A]] {
+      def transform(from: Processor[LongTraversable[A]]) = new LongTraversable[A] {
         def context = from.context
 
         def iterator = {
           val opened = from.init
           new CloseableIterator[A] {
-            private[this] val wrapped = opened.execute.orNull
+            private[this] val wrapped = opened.execute.map(_.iterator).orNull
             /* A currently stupid implementation of WithFilter returns null if the element is filtered
  out so nextElem finds the next non-null element or is null */
             private[this] var nextElem: A = null.asInstanceOf[A]

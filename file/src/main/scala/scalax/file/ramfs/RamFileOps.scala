@@ -9,10 +9,7 @@
 package scalax.file
 package ramfs
 
-import scalax.io.OpenSeekable
 import scalax.io.StandardOpenOption.{Create,CreateFull,Read,Write,Truncate,DeleteOnClose,WriteTruncate,Append,CreateNew}
-import scalax.io.managed.ByteChannelResource
-import java.nio.channels.FileChannel
 import java.io.{
   FileNotFoundException, IOException
 }
@@ -70,9 +67,15 @@ private[file] trait RamFileOps {
       }
     fileResource( _.outputResource(this, updatedOpts:_*), updatedOpts:_*)
   }.updateContext(fileSystem.context)
-  def channel(openOptions: OpenOption*) = Resource.fromSeekableByteChannel(fileResource(_.channel(this, openOptions:_*), openOptions:_*)).updateContext(fileSystem.context)
+  def channel(openOptions: OpenOption*) = Resource.fromSeekableByteChannel{
+    val updatedOpts = openOptions match {
+      case Seq() => WriteTruncate
+      case opts if opts forall {opt => opt != Write && opt != Append} => openOptions :+ Write
+      case _ => openOptions
+    }
+    fileResource(_.channel(this, updatedOpts:_*), updatedOpts:_*)
+  }.updateContext(fileSystem.context)
   def fileChannel(openOptions: OpenOption*) = None // not supported
 
   def withLock[R](start: Long,size: Long,shared: Boolean, context:ResourceContext)(block: (Seekable) => R):Option[R] = None // TODO
-  def open[R](openOptions: Seq[OpenOption], context:ResourceContext)(action: (OpenSeekable) => R):R = null.asInstanceOf[R] // TODO
 }

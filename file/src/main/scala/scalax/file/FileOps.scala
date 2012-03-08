@@ -15,11 +15,13 @@ import java.nio.channels.{
     ByteChannel, FileChannel
 }
 import scalax.io._
+import processing.SeekableProcessor
 import scalax.io.managed._
 import scala.collection.Traversable
 import scalax.io.StandardOpenOption._
 import scalax.io.Resource._
 import scalax.io.{Codec, SeekableByteChannel, OpenOption, Seekable, LongTraversable}
+import java.nio.ByteBuffer
 
 /**
  * An object for reading and writing files.  FileOps provides
@@ -141,12 +143,13 @@ abstract class FileOps extends Seekable {
    *          The options that define how the file is opened for the duration of the
    *          operation
    *          Default is Write/Create/Truncate
-   * @param action
-   *          The function that will be executed within the block
    * @param context
    *          The context for controlling buffer sizes error handling and other low level configuration
+   *          defaults to filesystem Resource context
    */
-  def open[R](openOptions: Seq[OpenOption] = WriteTruncate, context:ResourceContext = fileSystem.context)(action: OpenSeekable => R): R
+  def seekableProcessor(openOptions:Seq[OpenOption] = List(Read,Write), context:ResourceContext = fileSystem.context):SeekableProcessor = {
+    new SeekableProcessor(channel(openOptions:_*).open, context)
+  }
 
   /**
    * Performs an operation on the file with a FileLock
@@ -159,7 +162,7 @@ abstract class FileOps extends Seekable {
    * the case the lock will automatically be upgraded to a exclusiveLock
    * </p>
    * <p>
-   * The sematics of this locking behavious are very similar to those in the {@link java.nio.channels.FileLock}
+   * The semantics of this locking behavious are very similar to those in the {@link java.nio.channels.FileLock}
    * It is recommended that those javadocs are read and the warnings present in those docs are followed.
    * </p>
    * @param start
@@ -183,14 +186,21 @@ abstract class FileOps extends Seekable {
   // required methods for Input trait
   override def chars(implicit codec: Codec): LongTraversable[Char] = inputStream().chars(codec)
 
-  override protected def toByteChannelResource(append:Boolean) = {
+  protected override def toByteChannelResource():InputResource[ByteChannel] = {
     def resource = {
       val r = channel(Read).open
       r.get.position(0)
-      r
+      new ByteChannel {
+        private[this] val wrapped = r.get
+        def resetPosition() = wrapped.position(0)
+        def isOpen = wrapped.isOpen
+        def close() {r.close()}
+        def write(src: ByteBuffer) = wrapped.write(src)
+        def read(dst: ByteBuffer) = wrapped.read(dst)
+        def size = wrapped.size
+      }
     }
-    def closeAction = CloseAction((r:ByteChannel) => resource.closeAction(r))
-    new ByteChannelResource(resource.get,context, closeAction,() => Some(resource.get.size))    
+    new ByteChannelResource(resource,context, CloseAction.Noop,() => Some(resource.size))
   }
 
   // required method for Output trait

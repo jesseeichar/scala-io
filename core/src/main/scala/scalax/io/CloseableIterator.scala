@@ -18,7 +18,7 @@ trait CloseableIterator[@specialized(Byte,Char) +A] extends Iterator[A] {
     while (hasNext) f(next)
 
   final def close():List[Throwable] = doClose()
-  
+
   override def take(i: Int) = lslice(0, i)
   def ltake(i: Long) = lslice(0, i)
   def ldrop(i: Long) = lslice(i,Long.MaxValue)
@@ -33,7 +33,7 @@ trait CloseableIterator[@specialized(Byte,Char) +A] extends Iterator[A] {
         toDrop = 0
       }
     }
-    
+
     if (until == Long.MaxValue) this
     else new CloseableIterator[A] {
       private var count = from max 0
@@ -51,9 +51,9 @@ trait CloseableIterator[@specialized(Byte,Char) +A] extends Iterator[A] {
   }
 }
 
-private[io] object CloseableIteratorOps { def apply[A](iter: CloseableIterator[A]) = new CloseableIteratorOps(iter) } 
+private[io] object CloseableIteratorOps { def apply[A](iter: CloseableIterator[A]) = new CloseableIteratorOps(iter) }
 private[io] class CloseableIteratorOps[+A](val iter: CloseableIterator[A]) {
-  def collect[B, That](pf: PartialFunction[A, B]) = Proxy(iter.collect(pf)) 
+  def collect[B, That](pf: PartialFunction[A, B]) = Proxy(iter.collect(pf))
   def map[B](f: A => B) = Proxy(iter.map(f))
   def flatMap[B](f: (A) => GenTraversableOnce[B]) = Proxy(iter.flatMap(f))
   def dropWhile(p: (A) => Boolean) = Proxy(iter.dropWhile(p))
@@ -103,7 +103,7 @@ object CloseableIterator {
     val resourceEither = allCatch.either { iterator }
     var closeExceptions: List[Throwable] = Nil
 
-    /** Close resource and assign any exceptions to closeException */ 
+    /** Close resource and assign any exceptions to closeException */
     def close(resource:CloseableIterator[A]) = try {
       closeExceptions = resource.close()
     } catch {
@@ -124,34 +124,37 @@ object CloseableIterator {
           try Right(f(resource))
           catch handleAccessError
           finally close(resource)
-    
+
         val handleError = result.left.toOption ++ closeExceptions nonEmpty
-        
+
         val finalResult = if (handleError) {
             context.errorHandler(f, result, closeExceptions)
         } else {
           result.right.get
         }
-        
+
         if (System.identityHashCode(finalResult) == System.identityHashCode(resource)) {
             throw new AssertionError("the iterator may not escape the bounds of this block")
         }
         finalResult
     }
   }
-  private[io] def safeClose(iter: Any):List[Throwable] = 
+  private[io] def safeClose(iter: Any):List[Throwable] =
     iter match {
-        case ci: CloseableIterator[_] => 
+        case ci: CloseableIterator[_] =>
           ci.close()
-        case c: Closeable => 
+        case c: Closeable =>
           Exception.allCatch.either{c.close()}.left.toOption.toList
         case _ => Nil
     }
-  
-  def apply[A](iter: Iterator[A]) = new CloseableIterator[A] {
-    final def next(): A = iter.next
-    final def hasNext: Boolean = iter.hasNext
-    def doClose() = Nil
+
+  def apply[A](iter: Iterator[A]) = iter match {
+    case closeable:CloseableIterator[A] => closeable
+    case _ => new CloseableIterator[A] {
+        final def next(): A = iter.next
+        final def hasNext: Boolean = iter.hasNext
+        def doClose() = Nil
+      }
   }
   def empty[A] = apply(Iterator.empty)
   def selfClosing[A](wrapped: CloseableIterator[A]) = new CloseableIterator[A] {
@@ -184,6 +187,6 @@ private[io] class InitIterator[@specialized(Byte) +A](iter:CloseableIterator[A])
       nextEl = iter.next()
       tmp
     }
-    
+
     def doClose = iter.close()
 }

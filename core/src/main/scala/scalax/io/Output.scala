@@ -49,20 +49,6 @@ trait Output {
    * @return the result of the function
    */
   def outputProcessor = new processing.OutputProcessor(underlyingOutput)
-  /*def openOutput[U](f:Output=> U):U = {
-    underlyingOutput.acquireAndGet {out =>
-      val nonClosingOutput:Output = new OutputStreamResource[OutputStream](null,Noop) {
-        val instance = new OpenedResource[OutputStream]{
-          def close(): List[Throwable] = Nil
-          val get = new FilterOutputStream(out){
-            override def close() {}
-          }
-        }
-        override def open():OpenedResource[OutputStream] = instance
-      }
-      f(nonClosingOutput)
-    }
-  }*/
 
   /**
    * Write data to the underlying object.  Each time write is called the resource is reopened, in the case of a

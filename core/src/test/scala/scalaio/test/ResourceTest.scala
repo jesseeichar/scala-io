@@ -135,8 +135,8 @@ class ResourceTest {
   def issue_15_list_size_of_ints_wrong(): Unit = {
     import JavaConverters._
 
-    assertEquals(Some(5*4),(1 to 5).asInput.size)
-    assertEquals(5*4,(1 to 5).asInput.byteArray.size)
+    assertEquals(Some((1 to 5).size),(1 to 5).asInput.size)
+    assertEquals(5,(1 to 5).asInput.byteArray.size)
 
     assertEquals(Some(5),(1 to 5 map {_.toByte}).asInput.size)
     assertEquals(5,(1 to 5 map {_.toByte}).asInput.byteArray.size)

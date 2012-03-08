@@ -33,7 +33,10 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
 
   @Test //@Ignore
   def open_can_perform_several_ops {
-    path.open(StandardOpenOption.ReadWrite) {stream =>
+    for{
+      processor <- path.seekableProcessor(StandardOpenOption.ReadWrite)
+      stream = processor.asSeekable
+    } {
       assertEquals("initial read works", demoData take 2, stream.chars take 2 mkString)
       stream.truncate(2)
       assertEquals("chop works", demoData take 2, stream.slurpString)
@@ -44,7 +47,10 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
 
   @Test //@Ignore
   def lock_provides_normal_functionality {
-    path.open() {stream =>
+    for{
+      processor <- path.seekableProcessor(StandardOpenOption.ReadWrite)
+      stream = processor.asSeekable
+    } {
       assertEquals("initial read works", demoData take 2, stream.chars take 2 mkString)
       stream.truncate(2)
       assertEquals("chop works", demoData take 2, stream.slurpString)

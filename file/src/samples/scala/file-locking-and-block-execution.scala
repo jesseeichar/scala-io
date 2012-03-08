@@ -59,10 +59,20 @@ object FileLockingAndBlockExecution {
 
     val file: FileOps =  Path ("file")
 
-    file.open()( f => {
-      val s = f.slurpString
-      file.write(s.replaceAll("l", "L"))
-    })
+    // There are several patterns of usage for processors
+    // this demonstrates one.
+    for {
+      // create a processor
+      processor <- file.seekableProcessor()
+      // read in the full text of the file
+      string <- processor.slurpString()
+      // capitize all letter L
+      _ <- processor.write(string.replaceAll("l", "L"))
+    } ()  
+    // the body of for is empty in this example but does not have to be.
+    // if the for comprehension contains a yield the processor will not execute
+    // until the processor that results from the for-comprehension is executed
+    
   }
 
 }

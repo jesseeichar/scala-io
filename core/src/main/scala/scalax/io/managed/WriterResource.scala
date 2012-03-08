@@ -10,12 +10,11 @@ class WriterResource[+A <: Writer] (
     val context:ResourceContext = DefaultResourceContext,
     closeAction: CloseAction[A] = CloseAction.Noop)
   extends WriteCharsResource[A]
-  with ResourceOps[A, WriteCharsResource[A], WriterResource[A]]  {
+  with ResourceOps[A, WriterResource[A]]  {
 
   self => 
 
   override def open():OpenedResource[A] = new CloseableOpenedResource(opener,context, closeAction)
-  override def unmanaged = new scalax.io.unmanaged.WriterResource[A](opener, context, closeAction)
   override def updateContext(newContext:ResourceContext) = 
     new WriterResource(opener, newContext, closeAction)
   override def addCloseAction(newCloseAction: CloseAction[A]) = 

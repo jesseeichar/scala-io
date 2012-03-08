@@ -17,14 +17,12 @@ class InputStreamResource[+A <: InputStream] (
     closeAction: CloseAction[A] = CloseAction.Noop,
     protected val sizeFunc:() => Option[Long] = () => None)
   extends InputResource[A]
-  with ResourceOps[A, InputResource[A], InputStreamResource[A]] {
+  with ResourceOps[A, InputStreamResource[A]] {
 
   self => 
 
   def open():OpenedResource[A] = new CloseableOpenedResource(opener,context, closeAction)
   
-  // sizeFunction must be unknown because we cannot risk opening the resource for reading the size in an unmanaged resource 
-  def unmanaged = new scalax.io.unmanaged.InputStreamResource[A](opener, context,closeAction, () => None)
   def updateContext(newContext:ResourceContext) = new InputStreamResource(opener, newContext, closeAction, sizeFunc)
   override def addCloseAction(newCloseAction: CloseAction[A]) = 
     new InputStreamResource(opener, context, newCloseAction :+ closeAction, sizeFunc)

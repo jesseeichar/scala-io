@@ -15,14 +15,12 @@ class ByteChannelResource[+A <: ByteChannel] (
     protected val sizeFunc:() => Option[Long] = () => None)
   extends InputResource[A]
   with OutputResource[A]
-  with ResourceOps[A, InputResource[A] with OutputResource[A], ByteChannelResource[A]] {
+  with ResourceOps[A, ByteChannelResource[A]] {
 
   self => 
   
   override def open():OpenedResource[A] = new CloseableOpenedResource(opener,context, closeAction)
 
-  // sizeFunction must be unknown because we cannot risk opening the resource for reading the size in an unmanaged resource
-  override def unmanaged = new scalax.io.unmanaged.ByteChannelResource[A](opener, context, closeAction, () => None)
   override def updateContext(newContext:ResourceContext) = new ByteChannelResource(opener, newContext, closeAction, sizeFunc)
   override def addCloseAction(newCloseAction: CloseAction[A]) = 
     new ByteChannelResource(opener, context, newCloseAction :+ closeAction, sizeFunc)

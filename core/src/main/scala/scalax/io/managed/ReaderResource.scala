@@ -11,12 +11,11 @@ class ReaderResource[+A <: Reader] (
     val context:ResourceContext = DefaultResourceContext,
     closeAction: CloseAction[A] = CloseAction.Noop)
   extends ReadCharsResource[A]
-  with ResourceOps[A, ReadCharsResource[A], ReaderResource[A]] {
+  with ResourceOps[A, ReaderResource[A]] {
 
   self => 
 
   override def open():OpenedResource[A] = new CloseableOpenedResource(opener,context, closeAction)
-  override def unmanaged = new scalax.io.unmanaged.ReaderResource[A](opener, context, closeAction)
   override def updateContext(newContext:ResourceContext) = 
     new ReaderResource(opener, newContext, closeAction)
   override def addCloseAction(newCloseAction: CloseAction[A]) = 

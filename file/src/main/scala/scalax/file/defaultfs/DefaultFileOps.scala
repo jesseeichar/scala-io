@@ -13,12 +13,8 @@ import scalax.io._
 import scalax.io.managed._
 import StandardOpenOption._
 import scalax.io.nio.SeekableFileChannel
-import scalax.io.support.DeletingFileOutputStream
 import scalax.io.support.FileUtils._
-import java.io.{OutputStream, FileInputStream, FileOutputStream, File => JFile, RandomAccessFile}
-import java.nio.channels.Channels
-import scalax.io.CloseAction.Noop
-import scalax.io.Adapter
+import java.io.{FileInputStream, File => JFile}
 
 /**
  * <b>Not part of API.</b>
@@ -50,40 +46,10 @@ private[file] trait DefaultFileOps {
   override def fileChannel(openOptions: OpenOption*):Some[SeekableByteChannelResource[SeekableFileChannel]] = 
     Some(Resource.fromSeekableByteChannel(openChannel(jfile,openOptions)).updateContext(fileSystem.context))
 
-  def open[R](openOptions: Seq[OpenOption] = List(Read,Write), context:ResourceContext)(action: OpenSeekable => R): R = {
-    val contextToUse = context
-    val c = openChannel(jfile,openOptions)
-    val path = this
-    val seekable = new Seekable {
-      def size = path.size
-      def position:Long = c.position
-      def position_=(position:Long):Unit = {c.position(position)}
-      def context = contextToUse
-
-      override def open[U](f: (OpenSeekable) => U): U = f(this)
-      protected def underlyingChannel(append: Boolean) = new OpenedResource[SeekableFileChannel] {
-        if(append) {
-          c.self.position(c.self.size())
-        }
-        val get = new SeekableFileChannel(c.self) with Adapter[SeekableFileChannel]{
-          def src = c
-          override def close = {}
-        }
-        def context = contextToUse
-        override def closeAction[U >: SeekableFileChannel]:CloseAction[U] = CloseAction.Noop
-      }
-
-    }
-    try {
-      seekable.open(action)
-    } finally {
-      c.close()
-    }
-  }
 
   def withLock[R](start: Long = 0, size: Long = -1, shared: Boolean = false, context:ResourceContext)(block: Seekable => R): Option[R] = {
     val self = this
-    fileChannel().get.updateContext(fileSystem.context).acquireAndGet{ fc =>
+    fileChannel().get.acquireAndGet{ fc =>
       Option(fc.self.tryLock(start,size,shared)).map{_ => block(self)}
     }
   }

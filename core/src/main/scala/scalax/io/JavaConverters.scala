@@ -8,7 +8,7 @@ import java.io.Writer
 import java.net.URL
 
 import scalax.io.nio.SeekableFileChannel
-import java.nio.channels.{ReadableByteChannel, FileChannel, WritableByteChannel}
+import java.nio.channels.{ReadableByteChannel, FileChannel, WritableByteChannel, Channels}
 
 object JavaConverters {
   class AsInput(op: => Input) {
@@ -67,57 +67,19 @@ object JavaConverters {
      * Converts a Traversable of Ints to an Input object.  Each Int is treated as a byte
      */
     implicit object TraversableIntsAsBytesConverter extends AsInputConverter[Traversable[Int]]{
-      def toInput(t: Traversable[Int]) = new Input {
-        def context = DefaultResourceContext
-        def chars(implicit codec: Codec = Codec.default) = new LongTraversable[Char] {
-          def context = DefaultResourceContext
-          val maxChars = codec.encoder.maxBytesPerChar
-          lazy val chars = codec.decode(t.view.map{_.toByte}.toArray)
-          def iterator: CloseableIterator[Char] = CloseableIterator(chars.iterator)
-        }
-        def blocks(blockSize: Option[Int] = None) = new LongTraversable[ByteBlock] {
-          def context = DefaultResourceContext
-          val concreteBlockSize = blockSize match {
-            case Some(size) => size
-            case None if t.hasDefiniteSize => t.size
-            case None => DefaultResourceContext.recommendedByteBufferSize
-          }
-          def iterator: CloseableIterator[ByteBlock] = {
-            val sliding: Iterator[Seq[Int]] = t.toIterator.sliding(concreteBlockSize, concreteBlockSize)
-            val blockIter = sliding.map { block =>
-              new ByteBlock {
-                private[this] val data = block
-                def apply(i: Int) = data(i).toByte
-                def size = data.size
-              }
-            }
-            CloseableIterator(blockIter)
-          }
-        }
-
-        override def bytesAsInts = new LongTraversable[Int]{
-          def context = DefaultResourceContext
-          def iterator = new CloseableIterator[Int] {
-            var iter = OutputConverter.TraversableIntConverter.toBytes(t)
-
-            final def next() = iter.next.toInt
-            final def hasNext: Boolean = iter.hasNext
-            def doClose() = Nil
-          }
-        }
-        def bytes = new LongTraversable[Byte]{
-          def context = DefaultResourceContext
-          def iterator = new CloseableIterator[Byte] {
-            var iter = OutputConverter.TraversableIntConverter.toBytes(t)
-
-            final def next() = iter.next
-            final def hasNext: Boolean = iter.hasNext
-            def doClose() = Nil
-          }
-        }
-
-        def size = Some(t.size * 4)
-      }
+      def toInput(t: Traversable[Int]) = TraversableByteConverter.toInput(t.view.map(_.toByte))
+    }
+    /**
+     * Converts a Array[Int] to an Input object.  Each Int is treated as a byte
+     */
+    implicit object ArrayIntAsBytesConverter extends AsInputConverter[Array[Int]]{
+      def toInput(t: Array[Int]) = TraversableByteConverter.toInput(t.toTraversable.view.map(_.toByte))
+    }
+    /**
+     * Converts a Array[Byte] to an Input object.
+     */
+    implicit object ArrayByteAsBytesConverter extends AsInputConverter[Array[Byte]]{
+      def toInput(t: Array[Byte]) = TraversableByteConverter.toInput(t.toTraversable)
     }
     /**
      * Converts a Traversable[Byte] to an Input object
@@ -488,13 +450,13 @@ object JavaConverters {
      * Converts a InputStream to an Input object
      */
     implicit object UnmanagedInputStreamConverter extends AsUnmanagedInputConverter[InputStream]{
-      def toUnmanagedInput(is: InputStream) = Resource.fromInputStream(is).unmanaged
+      def toUnmanagedInput(is: InputStream) = new unmanaged.ReadableByteChannelResource(Channels.newChannel(is))
     }
     /**
      * Converts a ReadableByteChannel to an Input object
      */
     implicit object UnmanagedReadableByteChannelUnmanagedStreamConverter extends AsUnmanagedInputConverter[ReadableByteChannel]{
-      def toUnmanagedInput(channel: ReadableByteChannel) = Resource.fromReadableByteChannel(channel).unmanaged
+      def toUnmanagedInput(channel: ReadableByteChannel) = new unmanaged.ReadableByteChannelResource(channel)
     }
   }
   class AsUnmanagedOutput(op: => Output) {
@@ -528,13 +490,13 @@ object JavaConverters {
      * Converts a OutputStream to an Output object
      */
     implicit object UnmanagedOutputStreamConverter extends AsUnmanagedOutputConverter[OutputStream]{
-      def toUnmanagedOutput(out: OutputStream) = Resource.fromOutputStream(out).unmanaged
+      def toUnmanagedOutput(out: OutputStream) = new unmanaged.WritableByteChannelResource(Channels.newChannel(out))
     }
     /**
      * Converts a WritableByteChannel to an Output object
      */
     implicit object UnmanagedWritableByteChannelConverter extends AsUnmanagedOutputConverter[WritableByteChannel]{
-      def toUnmanagedOutput(chan: WritableByteChannel) = Resource.fromWritableByteChannel(chan).unmanaged
+      def toUnmanagedOutput(chan: WritableByteChannel) = new unmanaged.WritableByteChannelResource(chan)
     }
   }
 
@@ -571,7 +533,7 @@ object JavaConverters {
      * Converts an InputStream to an ReadChars object
      */
     implicit object UnmanagedInputStreamConverter extends AsUnmanagedBinaryReadCharsConverter[InputStream]{
-      def toUnmanagedReadChars(in: InputStream, codec:Codec) = Resource.fromInputStream(in).unmanaged.reader(codec)
+      def toUnmanagedReadChars(in: InputStream, codec:Codec) = new unmanaged.ReaderResource(new java.io.InputStreamReader(in, codec.name))
     }
   }
 
@@ -608,53 +570,10 @@ object JavaConverters {
      * Converts a File to an ReadChars object
      */
     implicit object UnmanagedReaderConverter extends AsUnmanagedReadCharsConverter[Reader]{
-      def toUnmanagedReadChars(reader: Reader) = Resource.fromReader(reader).unmanaged
+      def toUnmanagedReadChars(reader: Reader) = new unmanaged.ReaderResource(reader)
     }
   }
-
-  class AsUnmanagedSeekable(op: => Seekable) {
-    /** An object to an Seekable object */
-    def asUnmanagedSeekable: Seekable = op
-  }
-
-  /**
-   * Wrap an arbitrary object as and AsSeekable object allowing the object to be converted to an Seekable object.
-   *
-   * The possible types of src are the subclasses of [[scalax.io.AsSeekableConverter]]
-   */
-  implicit def asUnmanagedSeekableConverter[B](src:B)(implicit converter:AsUnmanagedSeekableConverter[B]) =
-    new AsUnmanagedSeekable(converter.toUnmanagedSeekable(src))
-
-
-  /**
-   * Used by the [[scalax.io.Seekable]] object for converting an arbitrary object to an Seekable Object
-   *
-   * Note: this is a classic use of the type class pattern
-   */
-  trait AsUnmanagedSeekableConverter[-A] {
-    def toUnmanagedSeekable(t:A) : Seekable
-  }
-
-  /**
-   * contains several implementations of [[scalax.io.AsSeekableConverter]].  They will be implicitly resolved allowing
-   * a user of the library to simple call A.asSeekable and the converter will be found without the user needing to look up these classes
-   */
-  object AsUnmanagedSeekableConverter {
-
-    /**
-     * Converts a FileChannel to an Seekable object
-     */
-    implicit object UnmanagedFileChannelConverter extends AsUnmanagedSeekableConverter[FileChannel]{
-      def toUnmanagedSeekable(channel: FileChannel) = Resource.fromSeekableByteChannel(new SeekableFileChannel(channel)).unmanaged
-    }
-    /**
-     * Converts a SeekableByteChannel to an Seekable object
-     */
-    implicit object UnmanagedSeekableByteChannelConverter extends AsUnmanagedSeekableConverter[SeekableByteChannel]{
-      def toUnmanagedSeekable(channel: SeekableByteChannel) = Resource.fromSeekableByteChannel(channel).unmanaged
-    }
-  }
-
+  
   class AsUnmanagedBinaryWriteChars(op: (Codec) => WriteChars) {
     /** An object to an WriteChars object */
     def asUnmanagedBinaryWriteChars(implicit codec:Codec = Codec.default): WriteChars = op(codec)
@@ -686,7 +605,7 @@ object JavaConverters {
      * Converts a OutputStream to an WriteChars object
      */
     implicit object UnmanagedOutputStreamConverter extends AsUnmanagedBinaryWriteCharsConverter[OutputStream]{
-      def toUnmanagedWriteChars(out: OutputStream,codec:Codec) = Resource.fromOutputStream(out).unmanaged.writer(codec)
+      def toUnmanagedWriteChars(out: OutputStream,codec:Codec) = new unmanaged.WriterResource(new java.io.OutputStreamWriter(out, codec.name))
     }
   }
 
@@ -722,7 +641,7 @@ object JavaConverters {
      * Converts a File to an WriteChars object
      */
     implicit object UnmanagedWriterConverter extends AsUnmanagedWriteCharsConverter[Writer]{
-      def toUnmanagedWriteChars(writer: Writer) = Resource.fromWriter(writer).unmanaged
+      def toUnmanagedWriteChars(writer: Writer) = new unmanaged.WriterResource(writer)
     }
   }
 }

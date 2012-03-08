@@ -16,6 +16,7 @@ Test, Ignore
 import Constants.TEXT_VALUE
 import java.io.IOException
 import java.io.OutputStream
+import scalax.io.processing.Processor
 
 trait AbstractOutputTests[InResource, OutResource] extends scalax.test.sugar.AssertionSugar {
   private final val DEFAULT_DATA = "default data"
@@ -24,8 +25,8 @@ trait AbstractOutputTests[InResource, OutResource] extends scalax.test.sugar.Ass
   def open(closeAction:CloseAction[OutResource] = CloseAction.Noop): (Input, Output)
   def errorOnWriteOut:Output
   final def errorStream = new OutputStream(){
-    override def write(b:Array[Byte], off:Int, len:Int) = throw new IOException("error") 
-    override def write(b:Int) = throw new IOException("error") 
+    override def write(b:Array[Byte], off:Int, len:Int) = throw new IOException("error")
+    override def write(b:Int) = throw new IOException("error")
   }
   @Test //@Ignore
   def write_bytes(): Unit = {
@@ -89,16 +90,46 @@ trait AbstractOutputTests[InResource, OutResource] extends scalax.test.sugar.Ass
     val line1 = "line1"
     val line2 = "line2"
     for{
-      out <- output.outputProcessor
+      outp <- output.outputProcessor
+      out = outp.asOutput
     } {
       out.write(line1)
       out.write(line2)
     }
     assertEquals(line1+line2,input.slurpString)
   }
+  @Test
+  def processor_style_writing {
+    import scalax.io.JavaConverters._
+        val (in, out) = open()
+        val process = for {
+      inp <- (1 to 4).asInput.bytes.processor
+      in2 <- "hi".getBytes().asInput.bytes.processor
+      outp <- out.outputProcessor
+      _ <- inp.repeatUntilEmpty()
+      next <- inp.next
+      _ <- outp.write(next.toString)
+      _ <- in2.repeatUntilEmpty()
+      letter <- in2.next
+      _ <- outp.write(letter.toChar.toString)
+      out = outp.asOutput
+    } yield {
+      out.write("-")
+    }
+    assertTrue(in.slurpString.isEmpty)
+    process.execute()
+    assertEquals("1h-i-234", in.slurpString)
+  }
 
+  /**
+   *
+   * @return true
+   *      if the each time the output is opened the underlying data is cleared.
+   *      this is how a file will behave if not opened as append.
+   */
+  def truncatesUnderlyingSinkEachOpen = false
   @Test //@Ignore
-  def openOutput: Unit = {
+  def write_and_processor_write_combo: Unit = {
     var closes = 0;
     val (in,out) = open(CloseAction((c:Any) => closes += 1))
     out match {
@@ -109,28 +140,46 @@ trait AbstractOutputTests[InResource, OutResource] extends scalax.test.sugar.Ass
         assertEquals(1,closes)
 
         for (opened <- out.outputProcessor) {
-          opened.write("hello")
-          opened.write(" ")
-          opened.write("world")
+          opened.write("hello").execute
+          opened.write(" ").execute
+          opened.write("world").execute
         }
         assertEquals(2,closes)
-        assertEquals("whoop!hello world",in.slurpString)
+        val expected =
+          if(truncatesUnderlyingSinkEachOpen) "hello world"
+          else "whoop!hello world"
+        assertEquals(expected,in.slurpString)
       case _ => ()
     }
   }
-  
-  
+
+  @Test
+  def execute_executes_a_traversable_processor {
+    import scalax.io.JavaConverters._
+    val (in, out) = open()
+    val processor2 = for {
+      inp <- (1 to 10).asInput.bytes.processor
+      outp <- out.outputProcessor
+      _ <- outp.write("start")
+      _ <- inp.repeatUntilEmpty()
+      next <- inp.next
+      _ <- outp.write(next.toString)
+    } yield {}
+    assertEquals("", in.slurpString)
+    processor2.execute
+    assertEquals("start12345678910", in.slurpString)
+  }
   @Test
   def scalaIoException_On_Write_Error_by_default{
     intercept[ScalaIOException] {
         errorOnWriteOut.write("hi")
     }
   }
-    
+
   @Test
   def scalaIoException_On_Write_Close_Error_by_default{
     intercept[ScalaIOException] {
-       val output = open(CloseAction(_ => 
+       val output = open(CloseAction(_ =>
          throw new IOException("CloseError")
          ))._2
      output.write("hi")
@@ -151,7 +200,7 @@ trait AbstractOutputTests[InResource, OutResource] extends scalax.test.sugar.Ass
 
   @Test
   def customErrorHandler_On_Write_Error{
-    val testContext = new ErrorHandlingTestContext() 
+    val testContext = new ErrorHandlingTestContext()
 
     val errorOnReadOutput = errorOnWriteOut
 
@@ -167,7 +216,7 @@ trait AbstractOutputTests[InResource, OutResource] extends scalax.test.sugar.Ass
   }
   @Test
   def customErrorHandler_On_Write_Close_Error{
-    val testContext = new ErrorHandlingTestContext() 
+    val testContext = new ErrorHandlingTestContext()
 
     val errorOnCloseOutput = open(CloseAction(_ => throw new IOException("CloseError")))._2
     if (errorOnCloseOutput.isInstanceOf[Resource[_]]) {
@@ -182,9 +231,9 @@ trait AbstractOutputTests[InResource, OutResource] extends scalax.test.sugar.Ass
   }
   @Test
   def customErrorHandler_On_Write_AcquireAndGet {
-    val testContext = new ErrorHandlingTestContext() 
+    val testContext = new ErrorHandlingTestContext()
     val (_,goodOutput) = open()
-    
+
     if (goodOutput.isInstanceOf[Resource[_]]) {
       val customHandlerInput = goodOutput.asInstanceOf[Resource[_]].
         updateContext(testContext.customContext)

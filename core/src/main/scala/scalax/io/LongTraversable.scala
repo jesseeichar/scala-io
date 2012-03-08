@@ -26,7 +26,7 @@ trait LongTraversable[@specialized(Byte,Char) +A] extends Traversable[A]
   protected[this] override def newBuilder = LongTraversable.newBuilder
   def force: LongTraversable[A] = {
     val b = new ListBuffer[A] mapResult (x => new LongTraversableImpl[A](x, context))
-    withIterator{b ++= _} 
+    withIterator{b ++= _}
     b.result()
   }
 
@@ -39,6 +39,7 @@ trait LongTraversable[@specialized(Byte,Char) +A] extends Traversable[A]
  * See the [[scalax.io.LongTraversable]] class for the truly interesting aspects
  */
 object LongTraversable extends TraversableFactory[LongTraversable] {
+  def apply[A](resourceContext: ResourceContext, iter: => Iterator[A]) = newBuilder[A].fromIterator(CloseableIterator(iter), resourceContext)
   implicit def canBuildFrom[A]: CanBuildFrom[Coll, A, LongTraversable[A]] = new GenericCanBuildFrom[A]
   // TODO consider a correct implementation
   def newBuilder[A]: LongTraversableBuilder[A, LongTraversable[A]] =
@@ -49,10 +50,11 @@ object LongTraversable extends TraversableFactory[LongTraversable] {
       override def result(resourceContext: ResourceContext) = new CompositeIterable[A](builderIterators) with LongTraversable[A] {
           def context = resourceContext
       }
-      
+
       def fromIterator(iter: => CloseableIterator[A], resourceContext: ResourceContext): LongTraversable[A] = new LongTraversable[A] {
         def context = resourceContext
         def iterator = iter
+
       }
 
     }

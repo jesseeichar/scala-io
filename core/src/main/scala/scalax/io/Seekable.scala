@@ -10,6 +10,7 @@ package scalax.io
 
 import java.nio.{ByteBuffer, CharBuffer}
 import nio.SeekableFileChannel
+import processing.SeekableProcessor
 import scalax.io._
 import scala.collection.Traversable
 import scala.annotation._
@@ -121,51 +122,7 @@ trait Seekable extends Input with Output {
     finally resource.close()
   }
 
-  /**
-   * Execute the function 'f' passing an Seekable instance that performs all operations
-   * on a single opened connection to the underlying resource. Typically each call to
-   * one of the Seekable's methods results in a new connection.  For example if write it called
-   * typically it will write to the start of the seekable but in open it will write to the
-   * current position.
-   *
-   * Even if the underlying resource is an appending, using open will be more efficient since
-   * the connection only needs to be made a single time.
-   *
-   * @param f the function to execute on the new Output instance (which uses a single connection)
-   * @return the result of the function
-   */
-  def open[U](f: OpenSeekable => U):U = {
-    readWriteChannel { channel =>
-      val nonCloseable = new SeekableByteChannel with Adapter[SeekableByteChannel] {
-        def src = channel
-        def close() {}
-        def isOpen: Boolean = true
-        def write(src: ByteBuffer): Int = channel.write(src)
-
-        def truncate(size: Long): SeekableByteChannel = channel.truncate(size)
-
-        def size: Long = channel.size
-
-        def read(dst: ByteBuffer): Int = channel.read(dst)
-
-        def position(newPosition: Long): SeekableByteChannel = channel.position(newPosition)
-
-        def position: Long = channel.position
-      }
-      val nonSeekable: OpenSeekable = {
-        val newContext = context.copy(newDescName = Some(KnownName("Seekable opened resource")))
-        val sizeFunc = () => Some(channel.size)
-        new SeekableByteChannelResource[SeekableByteChannel](_ => nonCloseable, newContext, CloseAction.Noop, sizeFunc, None) {
-          override def toString: String = "Seekable-opened " + self.toString
-
-          def position: Long = channel.position
-          def position_=(position: Long): Unit = { channel.position(position) }
-
-        }
-      }
-      f(nonSeekable)
-    }
-  }
+  def seekableProcessor = new SeekableProcessor(underlyingChannel(false), context)
 
   /**
    * $patchDesc
@@ -323,6 +280,78 @@ trait Seekable extends Input with Output {
    */
   def insertIntsAsBytes(position : Long, data : Int*) = insert(position, data)(OutputConverter.TraversableIntAsByteConverter)
 
+  /**
+   * Append bytes to the end of a file
+   *
+   * $arrayRecommendation
+   *
+   * $dataParam
+   *
+   * $converterParam
+   */
+  def append[T](data: T)(implicit converter:OutputConverter[T]): Unit = {
+    val bytes = converter.toBytes(data)
+    appendChannel{ writeTo(_, bytes, -1) }
+  }
+
+  /**
+   * $intAsByteExplanation
+   */
+  def appendIntsAsBytes(data:Int*) = {
+    append(data)(OutputConverter.TraversableIntAsByteConverter)
+  }
+
+  /**
+   * Append a string to the end of the Seekable object.
+   *
+   * @param string
+   *          the data to write
+   * @param codec
+   *          the codec of the string to be written. The string will
+   *          be converted to the encoding of {@link codec}
+   */
+  def append(string: String)(implicit codec: Codec = Codec.default): Unit = {
+    append(codec encode string)
+  }
+
+  /**
+   * Append several strings to the end of the Seekable object.
+   *
+   * @param strings
+   *          The strings to write
+   * @param separator
+   *          A string to add between each string.
+   *          It is not added to the before the first string
+   *          or after the last.
+   * @param codec
+   *          The codec of the strings to be written. The strings will
+   *          be converted to the encoding of {@link codec}
+   */
+  def appendStrings(strings: Traversable[String], separator:String = "")(implicit codec: Codec = Codec.default): Unit = {
+    val sepBytes = codec encode separator
+    appendChannel { channel =>
+      (strings foldLeft false){
+        (addSep, string) =>
+          if(addSep) writeTo(channel, sepBytes, Long.MaxValue)
+          writeTo(channel, codec encode string, Long.MaxValue)
+
+          true
+      }
+    }
+  }
+
+  /**
+   * Truncate/Chop the Seekable to the number of bytes declared by the position param
+   */
+  def truncate(position : Long) : Unit = {
+    readWriteChannel{_ truncate position}
+  }
+
+  def truncateString(position : Long)(implicit codec:Codec = Codec.default) : Unit = {
+    val posInBytes = charCountToByteCount(0,position)
+    appendChannel{_ truncate posInBytes}
+  }
+
   private def insertDataInMemory(position : Long, bytes : TraversableOnce[Byte]) = {
     readWriteChannel { channel =>
       channel position position
@@ -419,28 +448,6 @@ trait Seekable extends Input with Output {
       (0 to length by buf.capacity) foreach write
   }
 
-
-  /**
-   * Append bytes to the end of a file
-   *
-   * $arrayRecommendation
-   *
-   * $dataParam
-   *
-   * $converterParam
-   */
-  def append[T](data: T)(implicit converter:OutputConverter[T]): Unit = {
-    val bytes = converter.toBytes(data)
-    appendChannel{ writeTo(_, bytes, -1) }
-  }
-
-  /**
-   * $intAsByteExplanation
-   */
-  def appendIntsAsBytes(data:Int*) = {
-    append(data)(OutputConverter.TraversableIntAsByteConverter)
-  }
-
   // returns (wrote,earlyTermination)
   private def writeTo(c : WritableByteChannel, bytes : TraversableOnce[Byte], length : Long) : (Long,Boolean) = {
       def writeArray(array:Array[Byte]) = {
@@ -498,109 +505,58 @@ trait Seekable extends Input with Output {
       }
   }
 
-  /**
-  * Append a string to the end of the Seekable object.
-  *
-  * @param string
-  *          the data to write
-  * @param codec
-  *          the codec of the string to be written. The string will
-  *          be converted to the encoding of {@link codec}
-  */
-  def append(string: String)(implicit codec: Codec = Codec.default): Unit = {
-      append(codec encode string)
-  }
-
-  /**
-  * Append several strings to the end of the Seekable object.
-  *
-  * @param strings
-  *          The strings to write
-  * @param separator
-  *          A string to add between each string.
-  *          It is not added to the before the first string
-  *          or after the last.
-  * @param codec
-  *          The codec of the strings to be written. The strings will
-  *          be converted to the encoding of {@link codec}
-  */
-  def appendStrings(strings: Traversable[String], separator:String = "")(implicit codec: Codec = Codec.default): Unit = {
-    val sepBytes = codec encode separator
-    appendChannel { channel =>
-      (strings foldLeft false){
-        (addSep, string) =>
-          if(addSep) writeTo(channel, sepBytes, Long.MaxValue)
-          writeTo(channel, codec encode string, Long.MaxValue)
-
-          true
-      }
-    }
-  }
-
-  /**
-   * Truncate/Chop the Seekable to the number of bytes declared by the position param
-   */
-  def truncate(position : Long) : Unit = {
-     readWriteChannel{_ truncate position}
-  }
-
-  def truncateString(position : Long)(implicit codec:Codec = Codec.default) : Unit = {
-    val posInBytes = charCountToByteCount(0,position)
-    appendChannel{_ truncate posInBytes}
-  }
-
-
   protected def underlyingOutput: OutputResource[OutputStream] = {
     val resource = underlyingChannel(false)
     val closer = CloseAction[Any](_=>resource.close())
-    if(this.isInstanceOf[UnmanagedResource])
-        new unmanaged.OutputStreamResource(new ChannelOutputStreamAdapter(resource.get), resource.context, closer)
-    else
-        new OutputStreamResource(new ChannelOutputStreamAdapter(resource.get), resource.context, closer)
+    new OutputStreamResource(new ChannelOutputStreamAdapter(resource.get), resource.context, closer)
   }
 
   /**
    * Open a seekableByteChannelResource to use for creating other long traversables like chars or bytes as its.
    *
+   * This method may throw an exception if the file does not exist
+   *
    * Main feature is it sets position to 0 each call so the resource will always read from 0
    */
-  protected def toByteChannelResource(append:Boolean) = {
+  protected def toByteChannelResource:InputResource[_] = {
     def opened = {
-      val r = underlyingChannel(append)
+      val r = underlyingChannel(false)
       r.get.position(0)
       new ByteChannel {
-        def isOpen = r.get.isOpen
+        private[this] val wrapped = r.get
+        def resetPosition() = wrapped.position(0)
+        def isOpen = wrapped.isOpen
         def close() {r.close()}
-        def write(src: ByteBuffer) = r.get.write(src)
-        def read(dst: ByteBuffer) = r.get.read(dst)
+        def write(src: ByteBuffer) = wrapped.write(src)
+        def read(dst: ByteBuffer) = wrapped.read(dst)
       }
     }
 
 
-    if(this.isInstanceOf[UnmanagedResource]) {
-      new unmanaged.ByteChannelResource(opened,context,CloseAction.Noop, () => None)
-    } else {
+    /*if(this.isInstanceOf[UnmanagedResource]) {
+      new unmanaged.ByteChannelResource(opened,context,CloseAction.Noop, () => None) {
+        override def open = {
+          opened.resetPosition()
+          super.open
+        }
+      }
+    } else {*/
       new ByteChannelResource(opened,context,CloseAction.Noop, () => None)
-    }
+    //}
   }
 
   override def chars(implicit codec: Codec) =
-    toByteChannelResource(false).chars(codec)
-  override def bytesAsInts: LongTraversable[Int] = toByteChannelResource(false).bytesAsInts
-  override def bytes: LongTraversable[Byte] = toByteChannelResource(false).bytes
-  override def blocks(blockSize: Option[Int] = None):LongTraversable[ByteBlock] =  toByteChannelResource(false).blocks(blockSize)
+    toByteChannelResource.chars(codec)
+  override def bytesAsInts: LongTraversable[Int] = toByteChannelResource.bytesAsInts
+  override def bytes: LongTraversable[Byte] = toByteChannelResource.bytes
+  override def blocks(blockSize: Option[Int] = None):LongTraversable[ByteBlock] =  toByteChannelResource.blocks(blockSize)
   private def charCountToByteCount(start: Long, end: Long)(implicit codec: Codec) = {
     val encoder = codec.encoder
     val charBuffer = CharBuffer.allocate(1)
 
     val resource = underlyingChannel(false)
     try {
-      val chars = {
-        if (this.isInstanceOf[UnmanagedResource])
-          new unmanaged.SeekableByteChannelResource(resource.get, resource.context, CloseAction[Any](_ => resource.close), () => Some(resource.get.size))
-        else
-          new SeekableByteChannelResource(_ => resource.get, resource.context, CloseAction[Any](_ => resource.close), () => Some(resource.get.size), None)
-      }.chars(codec)
+      val chars = new SeekableByteChannelResource(_ => resource.get, resource.context, CloseAction[Any](_ => resource.close), () => Some(resource.get.size), None).chars(codec)
 
       val segment = chars.lslice(start, end)
 

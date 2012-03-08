@@ -30,16 +30,6 @@ class OutputStreamResourceTest {
 
         outResource.writer(Codec.ISO8859).write(data)
         assertEquals(data, new String(out.toByteArray(), Codec.ISO8859.name))
-
-        val um = outResource.unmanaged
-        um.writer(Codec.UTF8).write(data)
-        um.close()
-        assertEquals(data, new String(out.toByteArray(), "UTF-8"))
-
-        val um2 = outResource.unmanaged
-        um2.writer(Codec.ISO8859).write(data)
-        um2.close()
-        assertEquals(data, new String(out.toByteArray(), Codec.ISO8859.name))
     }
     test {
       out = new ByteArrayOutputStream()

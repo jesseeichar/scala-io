@@ -134,12 +134,13 @@ object Resources {
    * the term Peristent.  For example fromUnmanagedStream</p>
    */
   def createResourcesThatArentClosed {
-    import scalax.io.{Resource, InputResource, OutputResource, WriteCharsResource}
+    import scalax.io.{Resource, Input, Output, WriteChars}
+    import scalax.io.JavaConverters._
     import java.io.{InputStream, OutputStream, OutputStreamWriter, Writer}
     
-    val stdIn:InputResource[InputStream] = Resource.fromInputStream(System.in).unmanaged
-    val stdOut:OutputResource[OutputStream] = Resource.fromOutputStream(System.out).unmanaged
-    val stdErr:WriteCharsResource[Writer] = Resource.fromWriter(new OutputStreamWriter(System.err)).unmanaged
+    val stdIn:Input = System.in.asUnmanagedInput
+    val stdOut:Output = System.out.asUnmanagedOutput
+    val stdErr:WriteChars = new OutputStreamWriter(System.err).asUnmanagedWriteChars
 
   }
 

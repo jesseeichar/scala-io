@@ -85,7 +85,7 @@ object SeekableSamples {
   }
 
   /**
-   * In addition to Resource.fromFoo methods to create Resources (which are often Seekable objects)  
+   * In addition to Resource.fromFoo methods to create Resources (which are often Seekable objects)
    * There is a second option for converting certain objects directly to an Seekable object.  This example
    * shows how to convert a File to an output object
    */
@@ -117,8 +117,14 @@ object SeekableSamples {
     // connection as it normally offers better performance and uses
     // fewer resources
 
+    // for more details on processing see the processing examples
+    // these examples just give quick impression of how to do
+    // a couple tasks
     // The following will replace the first instanceof "hello" with "Hello"
-    someFile.open{ file =>
+    for {
+      fileProcessor <- someFile.seekableProcessor
+      file = fileProcessor.asSeekable
+    } {
       val index = file.chars.indexOf("hello")
       file.patch(index,"Hello",OverwriteAll)
     }
@@ -127,7 +133,9 @@ object SeekableSamples {
     // while convenient if the codec used is a variable sized codec like
     // UTF8 it can be quite expensive since determining the index in the file
     // requires counting from the beginning of the file each time
-    someFile.open{ file =>
+    for {
+      file <- someFile.seekableProcessor.map(_.asSeekable)
+    } {
       val index = file.chars.indexOf("hello")
       // move to position index
       file.position = index
@@ -143,6 +151,5 @@ object SeekableSamples {
 
       file.insert(index+("Hello World".size),">")
     }
-
   }
 }

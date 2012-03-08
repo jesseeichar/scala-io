@@ -50,17 +50,6 @@ class UnmanagedOpenedResource[+R](val get:R,val context:ResourceContext) extends
 }
 
 /**
- * A flag trait that all UnmanagedResources will be tagged with to differentiate from '''normal'''
- * Resources
- */
-trait UnmanagedResource {
-  /**
-   * Close the resource. Since the resource is unmanaged it may need to be manually closed.
-   */
-  def close():List[Throwable]
-}
-
-/**
  * A trait allowing adding close actions to a Resource.  The purpose of this trait
  * was to allow the correct subclass type to be returned when calling the methods but
  * keeping the Repr type from the main Resource signature
@@ -72,7 +61,7 @@ trait UnmanagedResource {
  * @tparam R The type of object that is managed by this resource
  * @tparam Repr The actual type of the concrete subclass
  */
-trait ResourceOps[+R, +UnmanagedType, +Repr] {
+trait ResourceOps[+R, +Repr] {
   /**
    * Get the Resource context associated with this Resource instance.
    *
@@ -106,24 +95,6 @@ trait ResourceOps[+R, +UnmanagedType, +Repr] {
    * @return a new resource instance with the close action added
    */
   def addCloseAction(newCloseAction: CloseAction[R]):Repr
-  /**
-   * Create a new instance of this resource that will not close the resource after each operation.
-   * Create a Resource that will not close the stream.  The same stream will be reused for each request an never closed.  Use with care.
-   *
-   * The use case would be to read from standard in:
-   *
-   * {{{
-   *    val in = Resource.fromInputStream(System.in).unmanaged.bytes
-   *    val first5 = in.take(5)
-   *    val second5 = in.take(5)
-   * }}}
-   *
-   * If the example was a managed resource Standard in would be closed after first5
-   *
-   * @return return an instance of the same type that is not managed
-   */
-  def unmanaged: UnmanagedType with UnmanagedResource
-
 }
 /**
  * A Resource that can be used to do IO.  Primarily it wraps objects from the java io and makes
@@ -147,7 +118,7 @@ trait ResourceOps[+R, +UnmanagedType, +Repr] {
  * @author  Jesse Eichar
  * @since   1.0
  */
-trait Resource[+R] extends ManagedResourceOperations[R] with ResourceOps[R, Resource[R], Resource[R]] {
+trait Resource[+R] extends ManagedResourceOperations[R] with ResourceOps[R, Resource[R]] {
   self =>
   /**
    * Creates a new instance of the underlying resource (or opens it).
@@ -250,7 +221,7 @@ trait Resource[+R] extends ManagedResourceOperations[R] with ResourceOps[R, Reso
  * @author  Jesse Eichar
  * @since   1.0
  */
-trait InputResource[+R] extends Resource[R] with Input with ResourceOps[R, InputResource[R], InputResource[R]] {
+trait InputResource[+R] extends Resource[R] with Input with ResourceOps[R, InputResource[R]] {
 
     /**
      * Obtain the [[scalax.io.InputStreamResource]](typically) version of this object.
@@ -304,7 +275,7 @@ trait InputResource[+R] extends Resource[R] with Input with ResourceOps[R, Input
  * @author  Jesse Eichar
  * @since   1.0
  */
-trait ReadCharsResource[+R] extends Resource[R] with ReadChars with ResourceOps[R, ReadCharsResource[R], ReadCharsResource[R]]
+trait ReadCharsResource[+R] extends Resource[R] with ReadChars with ResourceOps[R, ReadCharsResource[R]]
 
 /**
  * An Resource object that is a also an [[scalax.io.Output]].  This trait adds methods
@@ -317,7 +288,7 @@ trait ReadCharsResource[+R] extends Resource[R] with ReadChars with ResourceOps[
  * @author  Jesse Eichar
  * @since   1.0
  */
-trait OutputResource[+R] extends Resource[R] with Output with ResourceOps[R, OutputResource[R], OutputResource[R]] {
+trait OutputResource[+R] extends Resource[R] with Output with ResourceOps[R, OutputResource[R]] {
   /**
    * Obtain the [[scalax.io.OutputStreamResource]](typically) version of this object.
    *
@@ -365,7 +336,7 @@ trait OutputResource[+R] extends Resource[R] with Output with ResourceOps[R, Out
  * @author  Jesse Eichar
  * @since   1.0
  */
-trait SeekableResource[+R] extends Seekable with InputResource[R] with OutputResource[R] with ResourceOps[R, SeekableResource[R], SeekableResource[R]]
+trait SeekableResource[+R] extends Seekable with InputResource[R] with OutputResource[R] with ResourceOps[R, SeekableResource[R]]
 
 /**
  * An object that in addition to being a resource is also a [[scalax.io.WriteChars]] Resource.
@@ -375,7 +346,7 @@ trait SeekableResource[+R] extends Seekable with InputResource[R] with OutputRes
  * @author  Jesse Eichar
  * @since   1.0
  */
-trait WriteCharsResource[+R] extends Resource[R] with WriteChars with ResourceOps[R, WriteCharsResource[R], WriteCharsResource[R]]
+trait WriteCharsResource[+R] extends Resource[R] with WriteChars with ResourceOps[R, WriteCharsResource[R]]
 
 /**
  * Defines several factory methods for creating instances of Resource.

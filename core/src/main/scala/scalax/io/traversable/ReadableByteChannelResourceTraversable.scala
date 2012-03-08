@@ -95,11 +95,11 @@ private[traversable] class SeekableByteChannelIterator(
   private[this] val channel = getIn
   @inline
   final def init() = if (!isInitialized) {
+    channel.position(position)
     val sliceLength: Long = (end - start) min Int.MaxValue
     val bufferSize = sizeFunc().map(_ min (sliceLength)).orElse(Some(sliceLength))
     buffer = openResource.context.createNioBuffer(bufferSize, Some(getIn), true)
     isInitialized = true
-    channel.position(position)
   }
   final override def foreach[@specialized(Unit) U](f: Byte => U) =
     while (hasNext) f(next)
@@ -110,7 +110,7 @@ private[traversable] class SeekableByteChannelIterator(
       false
     } else {
       init()
-//      channel.position(position)
+      channel.position(position)
       buffer.clear
       (channel read buffer)
       buffer.flip

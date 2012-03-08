@@ -51,7 +51,7 @@ trait Processor[+A] {
   self =>
 
   protected[processing] def context: ResourceContext
-  
+
   protected def processFactory = new ProcessorFactory(context)
   /**
    * Convert the Processor into a LongTraversable if A is a subclass of Iterator.
@@ -75,10 +75,29 @@ trait Processor[+A] {
   }
 
   /**
-   * Convert this Processor to a Processor containing an Option.  Methods such as next return a potentially empty Processor which will, 
+   * Execute the Processor.  If the result is an iterator then execute() will visit each element
+   * in the iterator to ensure that any processes mapped to that iterator will be executed.
+   */
+  def execute():Unit = {
+    def runEmpty(e:Any):Unit = e match {
+      case lt:LongTraversable[_] => lt.foreach(runEmpty)
+      case _ => ()
+    }
+    val initialized = init
+    try {
+      initialized.execute match {
+        case Some(iter:LongTraversable[_]) =>
+          iter.foreach(runEmpty)
+        case result =>
+          ()
+      }
+    }finally initialized.cleanUp
+  }
+  /**
+   * Convert this Processor to a Processor containing an Option.  Methods such as next return a potentially empty Processor which will,
    * when in a for comprehension, will stop the process at that point.  Converting the processor to an option allows the process handle
    * continue and simply handle the possibility of one input source being empty while other continue to provide data.
-   * 
+   *
    * Consider the following example:
    * {{{
    * for {
@@ -89,7 +108,7 @@ trait Processor[+A] {
    *   attr <- attributes.next.opt.orElse("")
    * } yield new Record(id,attr)
    * }}}
-   * 
+   *
    * The above example processes the streams completely even if one ends prematurely.
    */
   def opt = new Processor[Option[A]] {
@@ -156,10 +175,10 @@ private[processing] trait Opened[+A] {
 /**
  * Factory methods for creating Processor objects
  */
-class ProcessorFactory(resourceContext: ResourceContext) {
+class ProcessorFactory(val resourceContext: ResourceContext) {
   /**
    * Create a new Processor
-   * 
+   *
    * @param opener the function that opens the resource
    * @param valueFactory a function that creates the value from the opened resource
    * @param after method that cleans up the resource
@@ -226,10 +245,10 @@ private[processing] class WithFilter[+A](base:Processor[A], filter: A=>Boolean) 
     private[processing] def init = base.init
     def context = base.context
 
-    override def foreach[U](f: A => U): Unit = 
+    override def foreach[U](f: A => U): Unit =
       base.init.execute.filter(filter).foreach(f)
-    override def map[U](f: A => U) = 
+    override def map[U](f: A => U) =
       processFactory(base.init.execute.filter(filter).map(f))
-    override def flatMap[U](f: A => Processor[U]) = 
+    override def flatMap[U](f: A => Processor[U]) =
       processFactory(base.init.execute.filter(filter).flatMap(f(_).init.execute))
 }

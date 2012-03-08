@@ -15,13 +15,12 @@ class WritableByteChannelResource[+A <: WritableByteChannel] (
     val context:ResourceContext = DefaultResourceContext,
     closeAction: CloseAction[A] = CloseAction.Noop)
   extends OutputResource[A]
-  with ResourceOps[A, OutputResource[A], WritableByteChannelResource[A]]  {
+  with ResourceOps[A, WritableByteChannelResource[A]]  {
 
 
   self => 
 
   override def open():OpenedResource[A] = new CloseableOpenedResource(opener,context, closeAction)
-  override def unmanaged = new scalax.io.unmanaged.WritableByteChannelResource[A](opener, context, closeAction)
   override def updateContext(newContext:ResourceContext) = new WritableByteChannelResource(opener, newContext, closeAction)
   override def addCloseAction(newCloseAction: CloseAction[A]) = 
     new WritableByteChannelResource(opener, context, newCloseAction :+ closeAction)

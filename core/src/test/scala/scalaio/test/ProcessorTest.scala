@@ -290,7 +290,7 @@ trait ProcessorTest extends AssertionSugar {
 
     val traversable1 = prepared.traversable
     val repeats = 4
-    val mappedprocessor: Processor[Iterator[String]] = for {
+    val mappedprocessor: Processor[LongTraversable[String]] = for {
       t1 <- traversable1.processor
       _ <- t1.repeat(repeats)
       next <- t1.next
@@ -316,7 +316,7 @@ trait ProcessorTest extends AssertionSugar {
 
     val traversable1 = prepared.traversable
     val repeats = 4
-    val mappedprocessor: Processor[Iterator[String]] = for {
+    val mappedprocessor: Processor[LongTraversable[String]] = for {
       t1 <- traversable1.processor
       i <- t1.repeatUntilEmpty()
       next <- t1.next
@@ -342,7 +342,7 @@ trait ProcessorTest extends AssertionSugar {
 
     val traversable1 = prepared.traversable
     val repeats = 4
-    val mappedprocessor: Processor[Iterator[String]] = for {
+    val mappedprocessor: Processor[LongTraversable[String]] = for {
       t1 <- traversable1.processor
       i <- t1.repeatUntilEmpty()
       next <- t1.next
@@ -369,7 +369,7 @@ trait ProcessorTest extends AssertionSugar {
 
     val traversable1 = prepared.traversable
     val repeats = 4
-    val mappedprocessor: Processor[Iterator[Int]] = for {
+    val mappedprocessor: Processor[LongTraversable[Int]] = for {
       t1 <- traversable1.processor
       _ <- t1.repeatUntilEmpty()
       next <- t1.next
@@ -452,7 +452,7 @@ trait ProcessorTest extends AssertionSugar {
 
     val traversable1 = prepared.traversable
     val traversable2 = prepared2.traversable
-    val mappedprocessor: Processor[Iterator[List[Int]]] = for {
+    val mappedprocessor: Processor[LongTraversable[List[Int]]] = for {
       t1 <- traversable1.processor
       t2 <- traversable2.processor
       _ <- t1.repeatUntilEmpty()
@@ -485,7 +485,7 @@ trait ProcessorTest extends AssertionSugar {
     val prepared = processorTraversable(100, visitedElements += 1)
 
     val traversable1 = prepared.traversable
-    val mappedprocessor: Processor[Iterator[Int]] = for {
+    val mappedprocessor: Processor[LongTraversable[Int]] = for {
       t1 <- traversable1.processor
       _ <- t1.repeatUntilEmpty()
       next <- t1.next
@@ -511,7 +511,7 @@ trait ProcessorTest extends AssertionSugar {
     val prepared = processorTraversable(100, visitedElements += 1)
 
     val traversable1 = prepared.traversable.zipWithIndex
-    val mappedprocessor: Processor[Iterator[Int]] = for {
+    val mappedprocessor: Processor[LongTraversable[Int]] = for {
       t1 <- traversable1.processor
       _ <- t1.repeatUntilEmpty()
       (next, index) <- t1.next
@@ -559,12 +559,12 @@ trait ProcessorTest extends AssertionSugar {
     val prepared = processorTraversable(100, ())
 
     val traversable = prepared.traversable
-    
+
     val result: Processor[Seq[Int]] = for {
       api <- traversable.processor
       seq <- api.take(5)
     } yield seq
-    
+
     assertEquals(prepared.testData.take(5).toList, result.traversable.toList)
   }
 
@@ -573,16 +573,16 @@ trait ProcessorTest extends AssertionSugar {
     val prepared = processorTraversable(100, ())
 
     val traversable = prepared.traversable.map(i => if(i == 9) '\n' else i.toString.charAt(0))
-    
+
     val result: Processor[Seq[Char]] = for {
       api <- CharProcessor(traversable.processor)
       line <- api.line()
     } yield line
-    
+
     assertEquals(prepared.testData.takeWhile(_ != 9).map(_.toString.charAt(0)).toList, result.traversable.toList)
   }
-  
-  
+
+
   @Test
   def processor_byte_processor {
     val prepared = processorTraversable(100, ())
@@ -590,7 +590,7 @@ trait ProcessorTest extends AssertionSugar {
     val dataFunction = (i:Int) => i.toByte
     val traversable = prepared.traversable.map(dataFunction)
     val testData = prepared.testData.map(dataFunction).toArray
-    
+
     val result = for {
       api <- ByteProcessor(traversable.processor)
       short <- api.nextShort
@@ -602,13 +602,13 @@ trait ProcessorTest extends AssertionSugar {
     val expectedInt = dataIn.readInt()
     val expectedLong = dataIn.readLong()
     result.acquireAndGet{
-      case (short, int,long) => 
+      case (short, int,long) =>
       assertEquals(expectedShort,short)
         assertEquals(expectedInt,int)
         assertEquals(expectedLong,long)
     }
   }
-  
+
   object ByteConverter {
     def swap(value: Short) = {
       val b1 = value & 0xff;
@@ -651,7 +651,7 @@ trait ProcessorTest extends AssertionSugar {
     }
 
   }
-  
+
   @Test
   def processor_little_endian_byte_processor {
     val prepared = processorTraversable(100, ())
@@ -678,8 +678,13 @@ trait ProcessorTest extends AssertionSugar {
         assertEquals(expectedInt, int)
         assertEquals(expectedLong, long)
     }
+
+    @Test
+    def processor_using_embedded_long_traversable {
+
+    }
   }
-  
+
   @Test
   def transfersContext = {
     val customContext = new ResourceContext{}
@@ -692,5 +697,5 @@ trait ProcessorTest extends AssertionSugar {
     } yield n
     assertSame(customContext, p.traversable.context)
   }
-  
+
 }

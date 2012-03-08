@@ -65,30 +65,7 @@ class RandomAccessFileSeekableTest extends AbstractFileSeekableTest {
     Resource.fromRandomAccessFile(new RandomAccessFile(file, "rw")).addCloseAction(closeAction)
   }
 
-
-  /**
-   * Overriding because this resource cannot append
-   */
-  override def openOutput: Unit = {
-    var closes = 0;
-    val (in,out) = open(CloseAction((c:Any) => closes += 1))
-    out match {
-      case out:OutputResource[_] =>
-
-        assertEquals(0,closes)
-        out.write("whoop!")
-        assertEquals(1,closes)
-
-        for (opened <- out.outputProcessor) {
-          opened.write("hello")
-          opened.write(" ")
-          opened.write("world")
-        }
-        assertEquals(2,closes)
-        assertEquals("hello world",in.slurpString)
-      case _ => ()
-    }
-  }
+  override def truncatesUnderlyingSinkEachOpen = true
 }
 
 class StraightCreationSeekableTest extends AbstractFileSeekableTest {

@@ -23,6 +23,7 @@ abstract class FsSeekableTests extends AbstractSeekableTests[Path] with Fixture 
   def openResource(openFunction: () => Unit, closeAction: CloseAction[Path]): Seekable = {
     fixture.root.*("*").foreach(_.deleteRecursively(true,true))
     val path = fixture.path
+    path.createFile(true)
     path
   }
 

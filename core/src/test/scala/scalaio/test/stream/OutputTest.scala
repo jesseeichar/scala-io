@@ -13,15 +13,10 @@ import java.io.{
   ByteArrayInputStream,
   ByteArrayOutputStream
 }
-import org.junit.Test
-import org.junit.Assert._
 import scalax.io._
-import java.sql.Date
-import scalax.io.managed.OutputStreamResource
 
 class OutputTest extends AbstractOutputTests[ByteArrayInputStream, ByteArrayOutputStream] {
   def open(closeAction: CloseAction[ByteArrayOutputStream] = CloseAction.Noop) = {
-    val cache = new Array[Byte](1000)
     val out = new ByteArrayOutputStream()
     def in = new ByteArrayInputStream(out.toByteArray)
 

@@ -34,7 +34,7 @@ import scalax.io.managed.WriterResource
 trait WriteChars {
 
 
-  protected def writer : WriteCharsResource[Writer]
+  protected def writer : Resource[Writer]
   /**
    * Execute the function 'f' passing an WriteChars instance that performs all operations
    * on a single opened connection to the underlying resource. Typically each call to

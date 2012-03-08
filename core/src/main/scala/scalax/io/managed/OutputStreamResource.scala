@@ -13,12 +13,11 @@ class OutputStreamResource[+A <: OutputStream] (
     val context:ResourceContext = DefaultResourceContext,
     closeAction: CloseAction[A] = CloseAction.Noop)
   extends OutputResource[A]
-  with ResourceOps[A, OutputResource[A], OutputStreamResource[A]] {
+  with ResourceOps[A, OutputStreamResource[A]] {
 
   self => 
 
   override def open():OpenedResource[A] = new CloseableOpenedResource(opener,context, closeAction)
-  override def unmanaged = new scalax.io.unmanaged.OutputStreamResource[A](opener, context, closeAction)
   override def updateContext(newContext:ResourceContext) = new OutputStreamResource(opener, newContext, closeAction)
   override def addCloseAction(newCloseAction: CloseAction[A]) = 
     new OutputStreamResource(opener, context, newCloseAction :+ closeAction)

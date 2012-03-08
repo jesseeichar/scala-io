@@ -54,23 +54,67 @@ object MoreOutputExamples {
    */
   def multipleWritesSingleConnection {
     import scalax.io._
+    import processing.Processor
 
     val output:Output = Resource.fromFile("someFile")
 
-    // open the resource and perform two write operations
-    // Since it is a single opened connection the resulting
-    // underlying stream will always have both lines written to
-    // it.  So a file will have two lines.
-    //
-    // In the case where openOutput is not used
-    // but instead two writes are used the resulting file
-    // might only have a single line.  Of course if the
-    // underlying resource is a SocketOutputStream then
-    // the socket connection will be opened twice and
-    // and both lines will be sent to the server
-    for(out <- output.outputProcessor) {
+    // Output processor are used when one needs to perform batch writes on an output object
+    // When a processor object is used a "processing" pipeline is created and the operations
+    // are performed in batch form.
+    // The following example will write 2 lines to the output object (a file in this case)
+    // there are a few ways to use outputProcessors.  Following are a few patterns
+
+    // This next example is the pattern most developers will likely be most comfortable with:
+    for{
+      // create a processor (signalling the start of a batch process)
+      processor <- output.outputProcessor
+      // create an output object from it
+      out = processor.asOutput
+    }{
+      // all writes to out will be on the same open output stream/channel
       out.write("first write\n")
-      out.write("second write\n")
+      out.write("second write")
     }
+
+    // At first glance the next example seems odd
+    // but it does the same as the last example
+    for{
+        // create the processor
+        out <- output.outputProcessor
+        // perform write calls
+        // but realize that the writes do not occur until
+        // the processor are executed (see next example for that)
+        _ <- out.write("first write\n")
+        _ <- out.write("second write")
+    } {} // Nothing yields so the processor executes and the 2 lines are written
+
+    // The next example creates a processing pipeline and then executes it
+    val processor: Processor[Unit] = for{
+        // create the processor
+        out <- output.outputProcessor
+        // perform write calls
+        _ <- out.write("first write\n")
+        _ <- out.write("second write")
+    } yield {}
+    // at this point the writes have not occurred because processor contains the
+    // processing pipeline
+
+    processor.execute  // execute processor
+
+    // Why use the processor style writes? because it processors have both read and
+    // write components.  Write processors allow reading and writing to be interleaved
+    val processor2: Processor[TraversableOnce[Unit]] = for{
+        in <- Resource.fromURL("http://scala-lang.org").lines().processor
+        out <- output.outputProcessor
+        // This examples how the writes can be interleaved with reads, which is not possible if the output operations
+        // did not return processors
+        _ <- out.write("writing scala-lang\n")
+        lineNum <- in.repeatUntilEmpty()
+        _ <- out.write("lineNum: "+lineNum)
+        next <- in.next
+        _ <- out.write(next)
+    } yield {}
+    processor2.execute
+
   }
 }
