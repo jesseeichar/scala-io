@@ -17,7 +17,10 @@ import java.io.IOException
 
 abstract class FsSeekableTests extends AbstractSeekableTests[Path] with Fixture with SeekableTestUtils[Path] {
   def forceErrorOnAccess() = {
-    fixture.root.***.foreach(_.access = "")
+    fixture.root.***.filter(_.isFile).foreach{
+      path =>
+        path .access = ""
+    }
     fixture.root.access = ""
   }
   def openResource(openFunction: () => Unit, closeAction: CloseAction[Path]): Seekable = {

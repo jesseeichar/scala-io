@@ -141,9 +141,13 @@ final class BasicPathSet[+T <: Path](srcFiles: Iterable[T],
       if(toVisit.isEmpty) None
       else if(toVisit.head.isDirectory) {
         val path = toVisit.next()
-        val currDepth = currentDepth(path, root(path))
-        if(depth < 0 || depth > currDepth)
+        if(depth < 0) {
           toVisit.prepend(children(pathFilter,path))
+        } else {
+          val currDepth = currentDepth(path, root(path))
+          if( depth > currDepth)
+            toVisit.prepend(children(pathFilter,path))
+        }
         if (pathFilter(path)) Some(path) else loadNext
       }else {
         val file = toVisit.next()
@@ -162,9 +166,11 @@ final class BasicPathSet[+T <: Path](srcFiles: Iterable[T],
         case Some(p) => p
       }
     }
+
+    override def toString = "PathSetIterator("+(roots map (_.toString) mkString ",")+")"
   }
 
-  override def toString(): String = getClass().getSimpleName+"(...)"
+  override lazy val toString = getClass().getSimpleName+"(Roots:"+srcFiles+")"
 }
 
 private class PathsToVisit[T <: Path](startingIter:Iterator[T]) {
