@@ -678,11 +678,61 @@ trait ProcessorTest extends AssertionSugar {
         assertEquals(expectedInt, int)
         assertEquals(expectedLong, long)
     }
+  }
 
-    @Test
-    def processor_using_embedded_long_traversable {
+  @Test
+  def processor_using_embedded_long_traversable {
+    var visitedElements = 0
+    val prepared = processorTraversable(4, visitedElements += 1)
+    var visitedElements2 = 0
+    val prepared2 = processorTraversable(4*10, visitedElements2 += 1)
 
+    val p = for {
+      p1 <- prepared.traversable.processor
+      p2 <- prepared2.traversable.processor
+      _ <- p1.repeatUntilEmpty()
+      v <- p1.next
+      _ <- p2.repeat(4)
+      v2 <- p2.next
+    } yield {
+      (v,v2)
     }
+
+    assertEquals(0, visitedElements)
+    assertEquals(0, visitedElements2)
+    prepared.assertOpenedClosed(0)
+    prepared2.assertOpenedClosed(0)
+
+    p.execute()
+
+    prepared.assertOpenedClosed(1)
+    prepared2.assertOpenedClosed(1)
+    assertEquals(4, visitedElements)
+    assertEquals(4*4, visitedElements2)
+    visitedElements = 0
+    visitedElements2 = 0
+
+    p.acquireAndGet{lt =>
+      lt.foreach {ll => ll.foreach(_ => ())}
+    }
+
+    assertEquals(4, visitedElements)
+    assertEquals(4*4, visitedElements2)
+    prepared.assertOpenedClosed(2)
+    prepared2.assertOpenedClosed(2)
+    visitedElements = 0
+    visitedElements2 = 0
+
+    val lt = p.traversable
+    lt.head.foreach(_ => ())
+
+    assertEquals(1, visitedElements)
+    assertEquals(4, visitedElements2)
+    prepared.assertOpenedClosed(3)
+    prepared2.assertOpenedClosed(3)
+    visitedElements = 0
+    visitedElements2 = 0
+
   }
 
   @Test
