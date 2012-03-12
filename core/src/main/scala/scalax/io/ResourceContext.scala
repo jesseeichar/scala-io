@@ -26,6 +26,8 @@ trait ResourceContext {
    * Called when opening the resource and an exception occurs. 
    * 
    * The default behaviour is to throw the openException
+   *
+   * @note The error handling is very experimental and could be removed or dramatically altered.  Please give feedback.  An error handling API less likely to change is the Processor API error handling.
    * 
    * @param f the function that would have been executed if the resource opened correctly.  
    *   Can be used as context to decide how to handle the error
@@ -45,6 +47,8 @@ trait ResourceContext {
    * 
    * The default behaviour is to throw a ScalaIOException irregardless of whether the exception occurred during the operation or during closing the
    * resource.
+   *
+   * @note The error handling is very experimental and could be removed or dramatically altered.  Please give feedback.  An error handling API less likely to change is the Processor API error handling.
    *
    * @param accessResult the exception that occurred during the resource access or the result.  
    *
@@ -115,7 +119,7 @@ trait ResourceContext {
    * 
    * Implementation is simply: {{{createNioBuffer(byteBufferSize(dataSize, readOnly), channel, readOnly)}}}
    * 
-   * @param bufferSize size of the buffer to make.  The buffer will always be this size, unless the file is memory-mapped
+   * @param dataSize size of the buffer to make.  The buffer will always be this size, unless the file is memory-mapped
    *                   and the channel is smaller than bufferSize.  In which case it will be the size of the channel.
    * @param channel Optionally the channel that this buffer will be used with.  See section above about memory mapping.
    *                The channel can be used by subclasses to determine the type of buffer to return

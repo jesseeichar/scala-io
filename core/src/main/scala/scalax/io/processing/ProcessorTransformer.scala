@@ -22,27 +22,9 @@ private[this] object ProcessorTransformer {
         def iterator = {
           val opened = from.init
           new CloseableIterator[A] {
-            private[this] val wrapped = opened.execute.map(_.iterator).orNull
-            /* A currently stupid implementation of WithFilter returns null if the element is filtered
- out so nextElem finds the next non-null element or is null */
-            private[this] var nextElem: A = null.asInstanceOf[A]
-
-            def hasNext = {
-              if (wrapped == null) false
-              else if (nextElem != null) true
-              else if (!wrapped.hasNext) false
-              else {
-                nextElem = wrapped.next
-                hasNext
-              }
-            }
-
-            def next = {
-              val n = nextElem
-              nextElem = null.asInstanceOf[A]
-              n
-            }
-
+            private[this] val wrapped = opened.execute.map(_.iterator)getOrElse(CloseableIterator.empty)
+            def hasNext = wrapped.hasNext
+            def next = wrapped.next
             def doClose = opened.cleanUp
           }
         }

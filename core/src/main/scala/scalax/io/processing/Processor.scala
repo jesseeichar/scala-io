@@ -74,6 +74,17 @@ trait Processor[+A] {
     finally initialized.cleanUp
   }
 
+  def onError[U >: A](handler:PartialFunction[Throwable,Option[U]]) = new Processor[U] {
+    protected[processing] def context = self.context
+
+    private[processing] def init = new Opened[U] {
+      private[this] val outer = self.init
+      def execute = try outer.execute
+                    catch handler
+      def cleanUp() = outer.cleanUp
+    }
+  }
+
   /**
    * Execute the Processor.  If the result is an iterator then execute() will visit each element
    * in the iterator to ensure that any processes mapped to that iterator will be executed.

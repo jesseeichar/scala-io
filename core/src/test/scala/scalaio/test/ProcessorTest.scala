@@ -736,7 +736,7 @@ trait ProcessorTest extends AssertionSugar {
   }
 
   @Test
-  def transfersContext = {
+  def processor_transfersContext = {
     val customContext = new ResourceContext{}
     val prepared = processorTraversable(100, () => (), context = customContext)
 
@@ -748,4 +748,23 @@ trait ProcessorTest extends AssertionSugar {
     assertSame(customContext, p.traversable.context)
   }
 
+  @Test
+  def processor_errorHandler {
+    var visitedElements = 0
+    var loops = 0
+    val prepared = processorTraversable(4, visitedElements += 1)
+    val traversable:LongTraversable[Int] = prepared.traversable.map {
+      case 1 => throw new Error("Should be caught")
+      case i => i
+    }
+    for {
+      p <- traversable.processor
+      _ <- p.repeatUntilEmpty()
+      byte <- p.next.onError{case _ => Some(1)}
+    } {
+      loops += 1
+    }
+
+    assertEquals(prepared.testData.size, loops)
+  }
 }
