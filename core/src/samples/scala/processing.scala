@@ -86,7 +86,7 @@ object LongTraversableProcessing {
   /**
    * Demonstrate how to define custom error handling.
    * <p>
-   * All processors have and onError method that allow custom handling of errors during processing.
+   * All processors have an onError method that allow custom handling of errors during processing.
    * </p>
    */
   def errorHandling {
@@ -98,11 +98,14 @@ object LongTraversableProcessing {
     val return1OnError:PartialFunction[Throwable,Option[Byte]] = {
       case _ => Some(1.toByte)
     }
-    val process:Processor[Byte] = for {
+    val process:Processor[Char] = for {
       processor <- bytes.processor
+        // On error handles an error raised during the call of next
+        // it does not catch and handle errors from the yield or
+        // or any processors later in the for-comprehension
       byte <- processor.next onError return1OnError
     } yield {
-      byte
+      byte.toChar
     }
 
     process.acquireAndGet{ byte =>

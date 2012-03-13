@@ -767,4 +767,122 @@ trait ProcessorTest extends AssertionSugar {
 
     assertEquals(prepared.testData.size, loops)
   }
+
+  @Test
+  def processor_exception_will_propagate_up {
+    var visitedElements = 0
+    val prepared = processorTraversable(4, visitedElements += 1)
+    val traversable: LongTraversable[Int] = prepared.traversable.map {
+      case _ => throw new Error("Should be caught")
+    }
+    class MyException extends RuntimeException
+    intercept[MyException] {
+      for {
+        p <- traversable.processor
+        byte <- p.next.onError {
+          case _ => throw new MyException()
+        }
+      } {}
+    }
+    intercept[MyException] {
+      val p = for {
+        p <- traversable.processor
+        byte <- p.next.onError {
+          case _ => throw new MyException()
+        }
+      } yield {}
+      p.execute()
+    }
+  }
+
+  @Test
+  def processor_parent_can_catch_exception_raised_by_child_processor_handler {
+    var visitedElements = 0
+    val prepared = processorTraversable(4, visitedElements += 1)
+    val traversable: LongTraversable[Int] = prepared.traversable.map {
+      case _ => throw new Error("Should be caught")
+    }
+    class MyException extends RuntimeException
+    class ParentException extends RuntimeException
+    intercept[ParentException] {
+      for {
+        p <- traversable.processor.catchError{case _:MyException => throw new ParentException()}
+        byte <- p.next.onError {
+          case _ => throw new MyException()
+        }
+      } {}
+    }
+    intercept[ParentException] {
+      val p = for {
+        p <- traversable.processor.catchError{case _:MyException => throw new ParentException()}
+        byte <- p.next.onError {
+          case _ => throw new MyException()
+        }
+      } yield {}
+
+      p.execute()
+    }
+  }
+
+  @Test
+  def processor_parent_can_catch_exception_raised_during_child_processor_execution {
+    var visitedElements = 0
+    val prepared = processorTraversable(4, visitedElements += 1)
+    val traversable: LongTraversable[Int] = prepared.traversable.map {
+      case _ => throw new Error("Should be caught")
+    }
+    class MyException extends RuntimeException
+    class ParentException extends RuntimeException
+    intercept[ParentException] {
+      for {
+        p <- traversable.processor.catchError{case _ => throw new ParentException()}
+        byte <- p.next
+      } {}
+    }
+    intercept[ParentException] {
+      val p = for {
+        p <- traversable.processor.catchError{case _ => throw new ParentException()}
+        byte <- p.next
+      } yield {}
+
+      p.execute()
+    }
+
+    intercept[ParentException] {
+      for {
+        p <- traversable.processor
+        p2 = for {
+          byte <- p.next
+        } yield byte
+        finalByte <- p2.onError{case _ => throw new ParentException}
+      } {}
+    }
+
+  }
+  @Test
+  def processor_containging_filter_parent_can_catch_exception_raised_during_child_processor_execution {
+    var visitedElements = 0
+    val prepared = processorTraversable(4, visitedElements += 1)
+    val traversable: LongTraversable[Int] = prepared.traversable.map {
+      case _ => throw new Error("Should be caught")
+    }
+    class MyException extends RuntimeException
+    class ParentException extends RuntimeException
+    intercept[ParentException] {
+      for {
+        p <- traversable.processor.catchError{case _ => throw new ParentException()}
+        if true
+        byte <- p.next
+      } {}
+    }
+    intercept[ParentException] {
+      val p = for {
+        p <- traversable.processor.catchError{case _ => throw new ParentException()}
+        if true
+        byte <- p.next
+      } yield {}
+
+      p.execute()
+    }
+  }
 }

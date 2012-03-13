@@ -74,20 +74,67 @@ trait Processor[+A] {
     finally initialized.cleanUp
   }
 
+  /**
+   * Declare an error handler for handling an error when executing the processor.  It is important to realize that
+   * this will catch exceptions caused ONLY by the current processor, not by 'child' Processors.  IE processors
+   * that are executed within a flatmap or map of this processor.
+   *
+   * Example:
+   *
+   * {{{
+   * for {
+   *   mainProcessor <- input.bytes.processor
+   *   // if the read fails 1 will be assigned to first and passed to second as the argument of flatmap
+   *   first <- mainProcessor.read onError {_ => -1}
+   *   // if this read fails an exception will be thrown that will NOT be caught by the above onError method
+   *   second <- mainProcessor.read
+   * } yield (first,second)
+   * }}}
+   *
+   * @param handler
+   *        a partial function that can handle the exceptions thrown during the execution of the process.
+   *        If the handler returns a non-empty Option the that value will be used as the value of the processor,
+   *        If the handler returns None then the processor will be an empty processor
+   *        If the handler throws an exception... then normal semantics of an exception are exhibitted.
+   * @tparam U The value that will be returned from the handler.  Also the type of the returned processor
+   * @return A new processor that will behave the same as this except an error during execution will be handled.
+   */
   def onError[U >: A](handler:PartialFunction[Throwable,Option[U]]):Processor[U] = new Processor[U] {
     protected[processing] def context = self.context
 
-    private[processing] def init = new Opened[U] {
+    override private[processing] def init = new Opened[U] {
       private[this] val outer = self.init
-      def execute = try outer.execute
-                    catch handler
-      def cleanUp() = outer.cleanUp
+      override def execute = try outer.execute
+      catch handler
+      override def cleanUp() = outer.cleanUp
     }
   }
-
+  
+  def catchError(handler:PartialFunction[Throwable,Option[Nothing]]) = new ErrorHandlingProcessor[A](this, handler)
   /**
    * Execute the Processor.  If the result is an iterator then execute() will visit each element
    * in the iterator to ensure that any processes mapped to that iterator will be executed.
+   *
+   * A typical situation where execute is useful is when the Processor is a side effect processor
+   * like a Processor created by an [[scalax.io.processing.OpenOutput]] or [[scalax.io.processing.OpenSeekable]]
+   * object.  Both typically return Processor[Unit] processors which only perform side-effecting behaviours.
+   *
+   * Example:
+   * {{{
+   * val process = for {
+   *   outProcessor <- output.outputProcessor
+   *   inProcessor <- file.asInput.blocks.processor
+   *   _ <- inProcessor.repeatUntilEmpty()
+   *   block <- inProcessor.next
+   *   _ <- outProcessor.write(block)
+   * } yield ()
+   *
+   * // the copy has not yet occurred
+   *
+   * // will look through each element in the process (and sub-elements
+   * if the process contains a LongTraversable)
+   * process.execute()
+   * }}}
    */
   def execute():Unit = {
     def runEmpty(e:Any):Unit = e match {
@@ -143,12 +190,12 @@ trait Processor[+A] {
    *
    * @return A new Processor with the filter applied.
    */
-  def filter(f:A => Boolean) = new WithFilter(this,f)
+  def filter(f:A => Boolean):Processor[A] = new WithFilter(this,f)
 
   /**
    * Same behavior as for filter.
    */
-  def withFilter(f:A => Boolean) = new WithFilter(this,f)
+  def withFilter(f:A => Boolean):Processor[A] = new WithFilter(this,f)
 
   /**
    * Execute the Processor and pass the result to the function, much like acquireAndGet but does not return a result
@@ -262,4 +309,30 @@ private[processing] class WithFilter[+A](base:Processor[A], filter: A=>Boolean) 
       processFactory(base.init.execute.filter(filter).map(f))
     override def flatMap[U](f: A => Processor[U]) =
       processFactory(base.init.execute.filter(filter).flatMap(f(_).init.execute))
+}
+
+private[processing] class ErrorHandlingProcessor[+A](base: Processor[A], handler: PartialFunction[Throwable, Option[Nothing]]) extends Processor[A] {
+  protected[processing] def context = base.context
+
+  override private[processing] def init = new Opened[A] {
+    private[this] val outer = base.init
+    override def execute = try outer.execute
+                           catch handler
+    override def cleanUp() = outer.cleanUp
+  }
+  override def filter(f:A => Boolean) = new WithFilter(this,f).catchError(handler)
+  override def withFilter(f:A => Boolean) = new WithFilter(this,f).catchError(handler)
+  override def foreach[U](f: A => U): Unit = try acquireAndGet(f) catch handler
+  override def map[U](f: A => U) = processFactory[Opened[A], U](init, in => try in.execute.map(f) catch handler, _.cleanUp)
+  override def flatMap[U](f: A => Processor[U]) = {
+    processFactory[(Opened[A], Option[Opened[U]]), U]({
+      val currentOpenProcessor = base.init
+      (currentOpenProcessor, try currentOpenProcessor.execute.map(f(_).init) catch handler)
+    },
+    _._2.flatMap(p => try p.execute catch handler),
+    in => {
+      in._2.map(_.cleanUp); in._1.cleanUp()
+    })
+  }
+
 }
