@@ -74,7 +74,7 @@ trait Processor[+A] {
     finally initialized.cleanUp
   }
 
-  def onError[U >: A](handler:PartialFunction[Throwable,Option[U]]) = new Processor[U] {
+  def onError[U >: A](handler:PartialFunction[Throwable,Option[U]]):Processor[U] = new Processor[U] {
     protected[processing] def context = self.context
 
     private[processing] def init = new Opened[U] {

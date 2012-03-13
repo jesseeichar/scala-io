@@ -1,7 +1,7 @@
 /**
- * Processing LongTraverables using the Processor API
+ * Processing LongTraversables using the Processor API
  */
-object LongTraversableProcssing {
+object LongTraversableProcessing {
   /**
    * Parse a binary file
    * Consider a file that contains data with the following organization (the | are for visual representation only):
@@ -81,5 +81,32 @@ object LongTraversableProcssing {
     
     // now do something with the records.  remember the files have not
     // yet been opened and won't be until the LongTraversable is used
+  }
+
+  /**
+   * Demonstrate how to define custom error handling.
+   * <p>
+   * All processors have and onError method that allow custom handling of errors during processing.
+   * </p>
+   */
+  def errorHandling {
+    import scalax.io.{Resource,LongTraversable}
+    import scalax.io.processing.Processor
+
+    val bytes = Resource.fromFile("somefile").bytes
+
+    val return1OnError:PartialFunction[Throwable,Option[Byte]] = {
+      case _ => Some(1.toByte)
+    }
+    val process:Processor[Byte] = for {
+      processor <- bytes.processor
+      byte <- processor.next onError return1OnError
+    } yield {
+      byte
+    }
+
+    process.acquireAndGet{ byte =>
+      // do something with byte
+    }
   }
 }
