@@ -775,7 +775,6 @@ trait ProcessorTest extends AssertionSugar {
     val traversable: LongTraversable[Int] = prepared.traversable.map {
       case _ => throw new Error("Should be caught")
     }
-    class MyException extends RuntimeException
     intercept[MyException] {
       for {
         p <- traversable.processor
@@ -802,22 +801,18 @@ trait ProcessorTest extends AssertionSugar {
     val traversable: LongTraversable[Int] = prepared.traversable.map {
       case _ => throw new Error("Should be caught")
     }
-    class MyException extends RuntimeException
-    class ParentException extends RuntimeException
     intercept[ParentException] {
       for {
-        p <- traversable.processor.catchError{case _:MyException => throw new ParentException()}
-        byte <- p.next.onError {
-          case _ => throw new MyException()
-        }
+        p <- traversable.processor
+        p2 = for{byte <- p.next.onError { case _ => throw new MyException()}} yield byte
+        byte <- p2.onError{case _:MyException => throw new ParentException()}
       } {}
     }
     intercept[ParentException] {
       val p = for {
-        p <- traversable.processor.catchError{case _:MyException => throw new ParentException()}
-        byte <- p.next.onError {
-          case _ => throw new MyException()
-        }
+        p <- traversable.processor
+        p2 = for{byte <- p.next.onError { case _ => throw new MyException()}} yield byte
+        byte <- p2.onError{case _:MyException => throw new ParentException()}
       } yield {}
 
       p.execute()
@@ -831,58 +826,57 @@ trait ProcessorTest extends AssertionSugar {
     val traversable: LongTraversable[Int] = prepared.traversable.map {
       case _ => throw new Error("Should be caught")
     }
-    class MyException extends RuntimeException
     class ParentException extends RuntimeException
     intercept[ParentException] {
       for {
-        p <- traversable.processor.catchError{case _ => throw new ParentException()}
-        byte <- p.next
+        p <- traversable.processor
+        p2 = for{byte <- p.next} yield byte
+        byte <- p2.onError{case _ => throw new ParentException()}
       } {}
     }
     intercept[ParentException] {
       val p = for {
-        p <- traversable.processor.catchError{case _ => throw new ParentException()}
-        byte <- p.next
+        p <- traversable.processor
+        p2 = for{byte <- p.next} yield byte
+        byte <- p2.onError{case _ => throw new ParentException()}
       } yield {}
 
       p.execute()
     }
-
-    intercept[ParentException] {
-      for {
-        p <- traversable.processor
-        p2 = for {
-          byte <- p.next
-        } yield byte
-        finalByte <- p2.onError{case _ => throw new ParentException}
-      } {}
-    }
-
   }
+
   @Test
   def processor_containging_filter_parent_can_catch_exception_raised_during_child_processor_execution {
     var visitedElements = 0
     val prepared = processorTraversable(4, visitedElements += 1)
     val traversable: LongTraversable[Int] = prepared.traversable.map {
-      case _ => throw new Error("Should be caught")
+      case i if i > 1 => throw new Error("Should be caught")
     }
-    class MyException extends RuntimeException
-    class ParentException extends RuntimeException
     intercept[ParentException] {
       for {
-        p <- traversable.processor.catchError{case _ => throw new ParentException()}
-        if true
-        byte <- p.next
+        p <- traversable.processor
+        p2 = for {
+          b1 <- p.next
+          if true
+          b2 <- p.next
+        } yield b2
+        byte <- p2.onError{case _ => throw new ParentException()}
       } {}
     }
     intercept[ParentException] {
       val p = for {
-        p <- traversable.processor.catchError{case _ => throw new ParentException()}
-        if true
-        byte <- p.next
+        p <- traversable.processor
+        p2 = for {
+          b1 <- p.next
+          if true
+          b2 <- p.next
+        } yield b2
+        byte <- p2.onError{case _ => throw new ParentException()}
       } yield {}
 
       p.execute()
     }
   }
+  class MyException extends RuntimeException
+  class ParentException extends RuntimeException
 }

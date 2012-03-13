@@ -79,7 +79,7 @@ trait Processor[+A] {
    * this will catch exceptions caused ONLY by the current processor, not by 'child' Processors.  IE processors
    * that are executed within a flatmap or map of this processor.
    *
-   * Example:
+   * Examples:
    *
    * {{{
    * for {
@@ -89,6 +89,38 @@ trait Processor[+A] {
    *   // if this read fails an exception will be thrown that will NOT be caught by the above onError method
    *   second <- mainProcessor.read
    * } yield (first,second)
+   * }}}
+   *
+   * to handle errors of groups of processors a '''composite''' processor must be created and the error handler
+   * added to that:
+   *
+   * {{{
+   * for {
+   *   mainProcessor <- input.bytes.processor
+   *   // define a _composite_ processor containing the sub processor
+   *   // that need to have error handling
+   *   groupProcessor = for {
+   *     first <- mainProcessor.read
+   *     second <- mainProcessor.read
+   *   } yield (first,second)
+   *   // attach the error handler
+   *   tuple <- groupProcessor onError {case t => log(t); None}
+   * } yield tuple
+   * }}}
+   *
+   * To handle all errors in one place the yielded processor can have the
+   * error handler attached:
+   *
+   * {{{
+   * val process = for {
+   *   mainProcessor <- input.bytes.processor
+   *   first <- mainProcessor.read
+   *   second <- mainProcessor.read
+   * } yield (first,second)
+   *
+   * process.onError{case _ => log(t); None}
+   *
+   * process.acquireAndGet(...)
    * }}}
    *
    * @param handler
@@ -110,7 +142,6 @@ trait Processor[+A] {
     }
   }
   
-  def catchError(handler:PartialFunction[Throwable,Option[Nothing]]) = new ErrorHandlingProcessor[A](this, handler)
   /**
    * Execute the Processor.  If the result is an iterator then execute() will visit each element
    * in the iterator to ensure that any processes mapped to that iterator will be executed.
@@ -309,30 +340,4 @@ private[processing] class WithFilter[+A](base:Processor[A], filter: A=>Boolean) 
       processFactory(base.init.execute.filter(filter).map(f))
     override def flatMap[U](f: A => Processor[U]) =
       processFactory(base.init.execute.filter(filter).flatMap(f(_).init.execute))
-}
-
-private[processing] class ErrorHandlingProcessor[+A](base: Processor[A], handler: PartialFunction[Throwable, Option[Nothing]]) extends Processor[A] {
-  protected[processing] def context = base.context
-
-  override private[processing] def init = new Opened[A] {
-    private[this] val outer = base.init
-    override def execute = try outer.execute
-                           catch handler
-    override def cleanUp() = outer.cleanUp
-  }
-  override def filter(f:A => Boolean) = new WithFilter(this,f).catchError(handler)
-  override def withFilter(f:A => Boolean) = new WithFilter(this,f).catchError(handler)
-  override def foreach[U](f: A => U): Unit = try acquireAndGet(f) catch handler
-  override def map[U](f: A => U) = processFactory[Opened[A], U](init, in => try in.execute.map(f) catch handler, _.cleanUp)
-  override def flatMap[U](f: A => Processor[U]) = {
-    processFactory[(Opened[A], Option[Opened[U]]), U]({
-      val currentOpenProcessor = base.init
-      (currentOpenProcessor, try currentOpenProcessor.execute.map(f(_).init) catch handler)
-    },
-    _._2.flatMap(p => try p.execute catch handler),
-    in => {
-      in._2.map(_.cleanUp); in._1.cleanUp()
-    })
-  }
-
 }
