@@ -89,8 +89,8 @@ object LongTraversableProcessing {
    * All processors have an onError method that allow custom handling of errors during processing.
    * </p>
    */
-  def errorHandling {
-    import scalax.io.{Resource,LongTraversable}
+  def basicErrorHandling {
+    import scalax.io.Resource
     import scalax.io.processing.Processor
 
     val bytes = Resource.fromFile("somefile").bytes
@@ -108,8 +108,53 @@ object LongTraversableProcessing {
       byte.toChar
     }
 
-    process.acquireAndGet{ byte =>
-      // do something with byte
+    process.acquireAndGet{ char =>
+      // do something with char
     }
   }
+
+  /**
+   * Demonstrate how to handle the error of a sequence of processors in a for-comprehension.
+   * <p>
+   * Since onError returns a potential default value it can only be used to catch the exception raised
+   * by a single processor.  This example demonstrates how to use onError to handle the exceptions raised
+   * by any of several processors
+   * </p>
+   */
+  def groupErrorHandling {
+    import scalax.io.Resource
+    import scalax.io.processing.Processor
+
+    val bytes = Resource.fromFile("somefile").bytes
+
+    val return1OnError:PartialFunction[Throwable,Option[Char]] = {
+      case _ => Some(1.toChar)
+    }
+    val process:Processor[Char] = for {
+      processor <- bytes.processor
+
+      // create a new processor that consists of all the processor
+      // that need to have error handling
+      group = for {
+        byte1 <- processor.next
+        byte2 <- processor.next
+      } yield {byte1 + byte2 toChar}
+      // add the handler to the new processor
+      finalValue <- group onError return1OnError
+    } yield {
+      finalValue
+    }
+
+    process.acquireAndGet{ char =>
+      // do something with char
+    }
+    
+    // similarly the resulting processor can have an error handler attached
+    process onError return1OnError acquireAndGet {char =>
+      // do something
+    }
+  }
+
+
+
 }
