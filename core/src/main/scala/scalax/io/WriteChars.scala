@@ -48,21 +48,7 @@ trait WriteChars {
    * @param f the function to execute on the new Output instance (which uses a single connection)
    * @return the result of the function
    */
-  def open[U](f:WriteChars=> U):U = {
-    writer.acquireAndGet {out =>
-      val nonClosingOutput:WriteChars = new WriterResource[Writer](null,writer.context) {
-        val instance = new OpenedResource[Writer]{
-          def context = writer.context
-          def closeAction[U >: Writer] = CloseAction.Noop
-          val get = new FilterWriter(out){
-            override def close() {}
-          }
-        }
-        override def open():OpenedResource[Writer] = instance
-      }
-      f(nonClosingOutput)
-    }
-  }
+  def writeCharsProcessor = new processing.WriteCharsProcessor(writer)
 
   /**
    * Write several characters to the underlying object

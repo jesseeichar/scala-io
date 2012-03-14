@@ -55,11 +55,13 @@ abstract class AbstractWriteCharsTests extends scalax.test.sugar.AssertionSugar 
         out.write("whoop!")
         assertEquals(1,closes)
 
-        out.open(opened => {
-          opened.write("hello")
-          opened.write(" ")
-          opened.write("world")
-        })
+        for {
+          processor <- out.writeCharsProcessor
+          _ <- processor.write("hello")
+          _ <- processor.write(" ")
+          _ <- processor.write("world")
+        } {}
+
         assertEquals(2,closes)
         assertEquals("whoop!hello world",in.slurpString)
       case _ => ()
