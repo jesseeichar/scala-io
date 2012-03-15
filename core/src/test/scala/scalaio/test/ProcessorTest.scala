@@ -2,14 +2,12 @@ package scalaio.test
 import org.junit.Test
 import org.junit.Assert._
 import scalax.test.sugar.AssertionSugar
-import scalax.io.processing.Processor
 import scalax.io.LongTraversable
-import scalax.io.processing.CharProcessor
-import scalax.io.processing.ByteProcessor
 import java.io.DataInputStream
 import java.io.ByteArrayInputStream
 import scalax.io.ResourceContext
 import scalax.io.DefaultResourceContext
+import scalax.io.processing.{ProcessorFactory, Processor, CharProcessor, ByteProcessor}
 
 trait ProcessorTest extends AssertionSugar {
   self: LongTraversableTest =>
@@ -846,7 +844,7 @@ trait ProcessorTest extends AssertionSugar {
   }
 
   @Test
-  def processor_containging_filter_parent_can_catch_exception_raised_during_child_processor_execution {
+  def processor_containing_filter_parent_can_catch_exception_raised_during_child_processor_execution {
     var visitedElements = 0
     val prepared = processorTraversable(4, visitedElements += 1)
     val traversable: LongTraversable[Int] = prepared.traversable.map {
@@ -879,4 +877,45 @@ trait ProcessorTest extends AssertionSugar {
   }
   class MyException extends RuntimeException
   class ParentException extends RuntimeException
+
+  @Test
+  def processor_with_error_handling_must_pass_resource_context {
+    val customContext = new ResourceContext{}
+    val prepared = processorTraversable(100, () => (), context = customContext)
+
+
+    val p = for {
+      api <- prepared.traversable.processor.onError{case _ => throw new RuntimeException("boom")}
+      _ <- api.repeatUntilEmpty()
+      i <- api.next
+    } yield i
+
+    assertSame(customContext, p.traversable.context)
+    assertSame(customContext, (p.onError{case _ => throw new RuntimeException("boom")}).traversable.context)
+  }
+
+    @Test
+  def processor_async_must_timeout {
+    val factory = new ProcessorFactory(DefaultResourceContext)
+
+    // this can be cause by eizenbugs so repeat test many times
+    for(i <- 1 to 20) {
+      val p = factory{Thread.sleep(500); Some(1)} async 10
+      assertEquals(None, p.acquireAndGet(v => v))
+
+      val p2 = factory{Thread.sleep(10); Some(1)} async 30000
+      assertEquals(Some(1),p2.acquireAndGet(v => v))
+
+      var success = false
+      for {v <- p} success = true
+      assertFalse(success)
+
+      for {v <- p2} success = true
+      assertTrue(success)
+
+      for
+    }
+
+
+  }
 }

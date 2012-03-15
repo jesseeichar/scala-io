@@ -1,5 +1,8 @@
 package scalax.io
-package processing;
+package processing
+
+import actors.Futures
+;
 
 /**
  * A point or step in a IO process workflow.
@@ -73,6 +76,9 @@ trait Processor[+A] {
     try initialized.execute.map(f)
     finally initialized.cleanUp
   }
+
+  def async = new AsyncProcessor(this, context.timeout)
+  def async(timeout:Long) = new AsyncProcessor(this, timeout)
 
   /**
    * Declare an error handler for handling an error when executing the processor.  It is important to realize that
@@ -180,7 +186,7 @@ trait Processor[+A] {
         case result =>
           ()
       }
-    }finally initialized.cleanUp
+    } finally initialized.cleanUp
   }
   /**
    * Convert this Processor to a Processor containing an Option.  Methods such as next return a potentially empty Processor which will,
@@ -340,4 +346,26 @@ private[processing] class WithFilter[+A](base:Processor[A], filter: A=>Boolean) 
       processFactory(base.init.execute.filter(filter).map(f))
     override def flatMap[U](f: A => Processor[U]) =
       processFactory(base.init.execute.filter(filter).flatMap(f(_).init.execute))
+}
+
+class AsyncProcessor[+A] private[processing](base: Processor[A], timeout: Long) extends Processor[A] {
+  def context = base.context
+  private[processing] def init = {
+    val (remainingTime, openedOption) = {
+      val start = System.currentTimeMillis()
+      val opened = Futures.awaitAll(timeout, Futures.future(base.init)).head.asInstanceOf[Option[Opened[A]]]
+      val taken = System.currentTimeMillis() - start
+      (0L max (timeout - taken), opened)
+    }
+    
+    new Opened[A] {
+      def execute = openedOption.flatMap{
+        opened =>
+          val result = Futures.awaitAll(remainingTime, Futures.future(opened.execute)).head.asInstanceOf[Option[Option[A]]]
+          result.flatMap(i => i)
+      }
+
+      def cleanUp() = openedOption.map(_.cleanUp()).getOrElse(Nil)
+    }
+  }
 }

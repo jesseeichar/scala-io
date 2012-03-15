@@ -12,6 +12,14 @@ import java.nio.channels.FileChannel
  */
 trait ResourceContext {
   self =>
+  /**
+   * The number of milliseconds to wait in situations that require a timeout.
+   *
+   * In processing, when a process is executed asynchronously this is the default timeout that is used by the process.
+   *
+   * Also in some situations (as documented) this will be the timeout used.
+   */
+  def timeout = 30 * 1000
 
   /**
    * The recommended size of a byte buffer for the current platform
