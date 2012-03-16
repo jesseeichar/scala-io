@@ -895,31 +895,4 @@ trait ProcessorTest extends AssertionSugar {
     assertSame(customContext, (p.onError{case _ => throw new RuntimeException("boom")}).traversable.context)
   }
 
-    @Test
-  def processor_async_must_timeout {
-    val factory = new ProcessorFactory(DefaultResourceContext)
-
-    // this can be cause by eizenbugs so repeat test many times
-    for(i <- 1 to 20) {
-      val p = factory{Thread.sleep(500); Some(1)} timeout 10
-      intercept[TimeoutException] {
-        p.acquireAndGet(v => v)
-      }
-
-      val p2 = factory{Thread.sleep(10); Some(1)} timeout 30000
-      assertEquals(Some(1),p2.acquireAndGet(v => v))
-
-      var success = false
-
-      intercept[TimeoutException] {
-        for {v <- p} success = true
-      }
-      assertFalse(success)
-
-      for {v <- p2} success = true
-      assertTrue(success)
-    }
-
-
-  }
 }
