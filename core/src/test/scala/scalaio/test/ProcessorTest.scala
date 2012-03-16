@@ -8,6 +8,7 @@ import java.io.ByteArrayInputStream
 import scalax.io.ResourceContext
 import scalax.io.DefaultResourceContext
 import scalax.io.processing.{ProcessorFactory, Processor, CharProcessor, ByteProcessor}
+import java.util.concurrent.TimeoutException
 
 trait ProcessorTest extends AssertionSugar {
   self: LongTraversableTest =>
@@ -900,20 +901,23 @@ trait ProcessorTest extends AssertionSugar {
 
     // this can be cause by eizenbugs so repeat test many times
     for(i <- 1 to 20) {
-      val p = factory{Thread.sleep(500); Some(1)} async 10
-      assertEquals(None, p.acquireAndGet(v => v))
+      val p = factory{Thread.sleep(500); Some(1)} timeout 10
+      intercept[TimeoutException] {
+        p.acquireAndGet(v => v)
+      }
 
-      val p2 = factory{Thread.sleep(10); Some(1)} async 30000
+      val p2 = factory{Thread.sleep(10); Some(1)} timeout 30000
       assertEquals(Some(1),p2.acquireAndGet(v => v))
 
       var success = false
-      for {v <- p} success = true
+
+      intercept[TimeoutException] {
+        for {v <- p} success = true
+      }
       assertFalse(success)
 
       for {v <- p2} success = true
       assertTrue(success)
-
-      for
     }
 
 

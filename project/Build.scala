@@ -62,7 +62,9 @@ object ScalaIoBuild extends Build {
   // ----------------------- Core Project ----------------------- //
   val coreSettings = Seq[Setting[_]](
     name := "scala-io-core",
-    libraryDependencies += "com.github.jsuereth.scala-arm" %% "scala-arm" % BuildConstants.armVersion
+    resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
+    libraryDependencies += "com.github.jsuereth.scala-arm" %% "scala-arm" % BuildConstants.armVersion,
+    libraryDependencies += "com.typesafe.akka" % "akka-actor" % "2.0"
   )
 	lazy val coreProject = Project("core", file("core")).
     configs(Samples).
@@ -105,6 +107,7 @@ object ScalaIoBuild extends Build {
   }
   lazy val Docs = config("docs") extend (Compile)
   val docsSettings = inConfig(Docs)(Defaults.configSettings) ++ Seq[Setting[_]](
+      name := "scala-io-docs",
       scalacOptions in Docs ++= Seq("-doc-title", "Scala IO"),//, "–doc-source-url", "https://raw.github.com/jesseeichar/scala-io/master/core/src/main/scala/"),
       resourceDirectory := new File("documentation/src/main/resources"),
       //siteDir <<= baseDirectory map { base => new File(base, "target/website") },
@@ -115,8 +118,8 @@ object ScalaIoBuild extends Build {
         (sources in (coreProject,Compile),
         sources in (fileProject,Compile)) map { _ ++ _ }
     )
-  lazy val webSiteProject:Project = Project("documentation", file("documentation")).
-    dependsOn(fileProject, fileProject % "docs->compile").
+  lazy val webSiteProject:Project = Project("docs", file("documentation")).
+    dependsOn(coreProject, fileProject, fileProject % "docs->compile").
     settings(sharedSettings ++ docsSettings :_*)
     
 }
