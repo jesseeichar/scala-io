@@ -13,7 +13,7 @@ class ProcessorAsyncTest extends AssertionSugar{
   @Test
   def processor_async_must_timeout {
 
-    // repeat test many times to verify that there are no eizenbugs
+    // repeat test many times to verify that there are no Heisenbugs
     for(i <- 1 to 20) {
       val p = factory{Thread.sleep(500); Some(1)} timeout 10
       intercept[TimeoutException] {

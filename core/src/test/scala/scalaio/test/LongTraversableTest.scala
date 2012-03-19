@@ -7,6 +7,9 @@ import scalax.io._
 import scalax.test.sugar._
 import java.io.IOException
 
+import akka.dispatch._
+import akka.util.duration._
+
 class LongTraversableTest extends DataIndependentLongTraversableTest[Int] with ProcessorTest with AssertionSugar {
   implicit val codec = Codec.UTF8
 
@@ -395,4 +398,89 @@ class LongTraversableTest extends DataIndependentLongTraversableTest[Int] with P
       assertEquals(1, testContext.closeExceptions)
   }
 
+  @Test
+  def async_methods_perform_same_functionality_as_normal_method {
+    val input = independentTraversable
+    def assertSameBehaviour[A](f: LongTraversable[Int] => A, f2:AsyncLongTraversable[Int] => Future[A]) {
+      val expected = f(input)
+      val actual = Await.result(f2(input.async), 10 seconds)
+      assertEquals(expected,actual)
+    }
+
+    assertSameBehaviour(_./:(0)(_ + _), _./:(0)(_ + _))
+    assertSameBehaviour(_.:\(0)(_ + _), _.:\(0)(_ + _))
+    assertSameBehaviour(_.aggregate(0)(_ + _ , _ + _), _.aggregate(0)(_ + _ , _ + _))
+    assertSameBehaviour(_.apply(0), _.apply(0))
+    assertSameBehaviour(_.collectFirst{case a => a}, _.collectFirst{case a => a})
+    assertSameBehaviour(_.containsSlice(Seq(1,2,3)), _.containsSlice(Seq(1,2,3)))
+    assertSameBehaviour(_.containsSlice(Seq(1,2,3), 0), _.containsSlice(Seq(1,2,3), 0))
+    assertSameBehaviour(_.corresponds(Seq(1,2,3))(_ == _), _.corresponds(Seq(1,2,3))(_ == _))
+    assertSameBehaviour(_.corresponds(input)(_ == _), _.corresponds(input)(_ == _))
+    assertSameBehaviour(_.count(n => (n % 2) == 0), _.count(n => (n % 2) == 0))
+    assertSameBehaviour(_.exists(n => (n % 2) == 0), _.exists(n => (n % 2) == 0))
+    assertSameBehaviour(_.find(_ == 6), _.find(_ == 6))
+    assertSameBehaviour(_.fold(0)(_ + _), _.fold(0)(_ + _))
+    assertSameBehaviour(_.foldLeft(0)(_ + _), _.foldLeft(0)(_ + _))
+    assertSameBehaviour(_.foldRight(0)(_ + _), _.foldRight(0)(_ + _))
+    assertSameBehaviour(_.forall(_ < 1000), _.forall(_ < 1000))
+    assertSameBehaviour(_.foreach(_ => ()), _.foreach(_ => ()))
+    assertSameBehaviour(_.head, _.head)
+    assertSameBehaviour(_.headOption, _.headOption)
+    assertSameBehaviour(_.indexOf(2), _.indexOf(2))
+    assertSameBehaviour(_.indexOf(6, 1), _.indexOf(6, 1))
+    assertSameBehaviour(_.isDefinedAt(2), _.isDefinedAt(2))
+    assertSameBehaviour(_.isEmpty, _.isEmpty)
+    assertSameBehaviour(_.last, _.last)
+    assertSameBehaviour(_.lastOption, _.lastOption)
+    assertSameBehaviour(_.lastIndexOf(6), _.lastIndexOf(6))
+    assertSameBehaviour(_.lastIndexOf(6, 3), _.lastIndexOf(6, 3))
+    assertSameBehaviour(_.lastIndexWhere(_ == 6), _.lastIndexWhere(_ == 6))
+    assertSameBehaviour(_.lastIndexWhere(_ == 6, 2), _.lastIndexWhere(_ == 6, 2))
+    assertSameBehaviour(_.lcount(n => (n % 2) == 0), _.lcount(n => (n % 2) == 0))
+    assertSameBehaviour(_.limitFold(0)((_,_) => End(3)), _.limitFold(0)((_,_) => End(3)))
+    assertSameBehaviour(_.lsize, _.lsize)
+    assertSameBehaviour(_.max, _.max)
+    assertSameBehaviour(_.maxBy(i => i), _.maxBy(i => i))
+    assertSameBehaviour(_.min, _.min)
+    assertSameBehaviour(_.minBy(i => i), _.minBy(i => i))
+    assertSameBehaviour(_.mkString("(", ",", ")"), _.mkString("(", ",", ")"))
+    assertSameBehaviour(_.mkString(","), _.mkString(","))
+    assertSameBehaviour(_.mkString, _.mkString)
+    assertSameBehaviour(_.nonEmpty, _.nonEmpty)
+    assertSameBehaviour(_.prefixLength(_ < 10), _.prefixLength(_ < 10))
+    assertSameBehaviour(_.product, _.product)
+    assertSameBehaviour(_.reduce(_ + _), _.reduce(_ + _))
+    assertSameBehaviour(_.reduceOption(_ + _), _.reduceOption(_ + _))
+    assertSameBehaviour(_.reduceLeft(_ + _), _.reduceLeft(_ + _))
+    assertSameBehaviour(_.reduceLeftOption(_ + _), _.reduceLeftOption(_ + _))
+    assertSameBehaviour(_.reduceRight(_ + _), _.reduceRight(_ + _))
+    assertSameBehaviour(_.reduceRightOption(_ + _), _.reduceRightOption(_ + _))
+    assertSameBehaviour(_.sameElements(input.toSeq), _.sameElements(input.toSeq))
+    assertSameBehaviour(_.sameElements(input), _.sameElements(input))
+    assertSameBehaviour(_.segmentLength(_ < 10, 1), _.segmentLength(_ < 10, 1))
+    assertSameBehaviour(_.size, _.size)
+    assertSameBehaviour(_.startsWith(Seq(1,2,3)), _.startsWith(Seq(1,2,3)))
+    assertSameBehaviour(_.startsWith(Seq(1,2,3), 0), _.startsWith(Seq(1,2,3), 0))
+    assertSameBehaviour(_.startsWith(input.drop(1), 1), _.startsWith(input.drop(1), 1))
+    assertSameBehaviour(_.startsWith(input), _.startsWith(input))
+    assertSameBehaviour(_.sum, _.sum)
+    assertSameBehaviour(_.toIndexedSeq, _.toIndexedSeq)
+    assertSameBehaviour(_.toList, _.toList)
+    assertSameBehaviour(_.toSeq, _.toSeq)
+    assertSameBehaviour(_.addString(new StringBuilder("hi"),"(", ",", ")").toString, _.addString(new StringBuilder("hi"),"(", ",", ")").map(_.toString))
+    assertSameBehaviour(_.addString(new StringBuilder("hi"), ",").toString, _.addString(new StringBuilder("hi"), ",").map(_.toString))
+    assertSameBehaviour(_.addString(new StringBuilder("hi")).toString, _.addString(new StringBuilder("hi")).map(_.toString))
+
+    assertSameBehaviour(_.groupBy(n => (n % 2) == 0).map{case (key,value) => (key, value.toSeq)},
+        _.groupBy(n => (n % 2) == 0).map(mapping => mapping.map{case (key,value) => (key, value.toSeq)}))
+  }
+  
+  @Test
+  def async_is_non_blocking {
+    for(_ <- 1 to 20) {     // repeat to be safe against Heisenbugs
+      var executed = false
+      independentTraversable.take(1).map{i => Thread.sleep(1000); executed=true; i}.async.head
+      assertFalse("Expected the non blocking call to not be executed synchronously", executed)
+    }
+  }
 }

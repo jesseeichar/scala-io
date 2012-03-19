@@ -13,11 +13,9 @@ import scala.collection.Iterable
 import scala.collection.Iterator
 import scala.collection.Seq
 import scala.collection.TraversableLike
-import scala.util.control.Breaks.break
-import scala.util.control.Breaks.breakable
 import scala.collection.mutable.Builder
 import scala.collection.GenTraversableOnce
-import scala.util.control.ControlThrowable
+
 /**
  * The control signals for the limitFold method in [[scalax.io.LongTraversable]].
  *
@@ -64,6 +62,13 @@ trait LongTraversableLike[@specialized(Byte,Char) +A, +Repr <: LongTraversableLi
     } else {
       toBuffer.toArray
   }
+
+  /**
+   * Create a processor that provides an API for declaring a processing pipeline of this
+   * LongTraversable in a very flexible way.
+   *
+   * @return a processor for processing a LongTraversable
+   */
   def processor = new processing.CloseableIteratorProcessor(() => iterator, context)
 
   /**
@@ -133,7 +138,7 @@ trait LongTraversableLike[@specialized(Byte,Char) +A, +Repr <: LongTraversableLi
     cnt
   }
 
-  private def build[B >: A](f: CloseableIteratorOps[A] => CloseableIterator[B]) : Repr = newBuilder match {
+  private def build[B >: A](f: CloseableIteratorOps[A] => CloseableIterator[B]): Repr = newBuilder match {
     case ltf:LongTraversableBuilder[A,Repr] => ltf.fromIterator(f(CloseableIteratorOps(iterator)).asInstanceOf[CloseableIterator[A]], context)
     case b => 
       withIterator(iter => b ++= f(CloseableIteratorOps(iter)).asInstanceOf[CloseableIterator[A]])
@@ -410,7 +415,7 @@ withIterator(i => b ++= i.collect(pf))
       -1
     }
 
-  def isDefinedAt(idx: Long): Boolean = (idx >= 0) && (idx < lsize)
+    def isDefinedAt(idx: Long): Boolean = (idx >= 0) && (idx < lsize)
   /**
    * Finds index of first occurrence of some value in this $coll.
    *

@@ -29,7 +29,7 @@ trait LongTraversable[@specialized(Byte,Char) +A] extends Traversable[A]
     withIterator{b ++= _}
     b.result()
   }
-
+  def async:AsyncLongTraversable[A] = new AsyncLongTraversable(this)
   override def toString() = "LongTraversable(...)"
 }
 

@@ -350,6 +350,7 @@ private[processing] class WithFilter[+A](base:Processor[A], filter: A=>Boolean) 
 }
 
 private[processing] class TimingOutProcessor[+A] (base: Processor[A], timeout: Long) extends Processor[A] {
+  private implicit val executionContext = scalax.io.executionContext
   def context = base.context
   private[processing] def init = {
     val (remainingTime, opened) = {
