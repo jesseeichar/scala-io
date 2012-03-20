@@ -9,6 +9,7 @@
 package scalax.io
 
 import java.nio.{ByteBuffer, CharBuffer}
+import managed.{WritableByteChannelResource, SeekableByteChannelResource, OutputStreamResource, ByteChannelResource}
 import nio.SeekableFileChannel
 import processing.SeekableProcessor
 import scalax.io._
@@ -19,7 +20,6 @@ import StandardOpenOption._
 import java.nio.channels.{FileChannel, ByteChannel, WritableByteChannel}
 import java.io.{OutputStream, RandomAccessFile, File}
 import scalax.io.ResourceAdapting.ChannelOutputStreamAdapter
-import scalax.io.managed.{SeekableByteChannelResource, OutputStreamResource, ByteChannelResource}
 
 /**
  * A strategy trait used with the Seekable.patch to control how data is
@@ -505,10 +505,10 @@ trait Seekable extends Input with Output {
       }
   }
 
-  protected def underlyingOutput: OutputResource[OutputStream] = {
+  protected def underlyingOutput: OutputResource[WritableByteChannel] = {
     val resource = underlyingChannel(false)
-    val closer = CloseAction[Any](_=>resource.close())
-    new OutputStreamResource(new ChannelOutputStreamAdapter(resource.get), resource.context, closer)
+    //val closer = CloseAction[Any](_=>resource.close())
+    new WritableByteChannelResource(resource.get, resource.context/*, closer*/)
   }
 
   /**

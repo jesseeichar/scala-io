@@ -3,6 +3,8 @@ package processing
 
 import java.io.OutputStream
 import java.io.FilterOutputStream
+import java.nio.channels.WritableByteChannel
+import java.nio.ByteBuffer
 
 /**
  * A processor that opens an Output Resource allowing for batch processing.  In other words it permits
@@ -75,7 +77,7 @@ import java.io.FilterOutputStream
  *
  * @param resource the resource to use in the process
  */
-class OutputProcessor(resource: OutputResource[OutputStream]) extends Processor[OpenOutput] {
+class OutputProcessor(resource: OutputResource[WritableByteChannel]) extends Processor[OpenOutput] {
   def context = resource.context
 
   def init = new Opened[OpenOutput] {
@@ -94,13 +96,14 @@ class OutputProcessor(resource: OutputResource[OutputStream]) extends Processor[
  *
  * @see scalax.io.processing.OutputProcessor
  */
-class OpenOutput private[processing](outStream: OutputStream, resourceContext:ResourceContext) {
+class OpenOutput private[processing](channel: WritableByteChannel, resourceContext:ResourceContext) {
   private val factory = new ProcessorFactory(resourceContext)
-  private[this] val out = new managed.OutputStreamResource[OutputStream](null, resourceContext, CloseAction.Noop) {
-        override def open():OpenedResource[OutputStream] = new UnmanagedOpenedResource(new FilterOutputStream(outStream){
-            override def close() {}
-          }, resourceContext)
+  val uncloseableChannel = new WritableByteChannel{
+    def isOpen = channel.isOpen
+    def write(src: ByteBuffer) = channel.write(src)
+    override def close() {}
   }
+  private[this] val out = new managed.WritableByteChannelResource[WritableByteChannel](uncloseableChannel, resourceContext, CloseAction.Noop)
 
   val asOutput:Output = out
   /**

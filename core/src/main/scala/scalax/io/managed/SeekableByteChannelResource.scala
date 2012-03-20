@@ -71,7 +71,7 @@ class SeekableByteChannelResource[+A <: SeekableByteChannel] (
     new CloseableOpenedResource(resource,context, closeAction)
   }
 
-  protected override def underlyingOutput: OutputResource[OutputStream] = outputStream
+  protected override def underlyingOutput: OutputResource[WritableByteChannel] = this
   override def blocks(blockSize: Option[Int] = None):LongTraversable[ByteBlock] = 
     new traversable.ChannelBlockLongTraversable(blockSize, context, sizeFunc, open)
 

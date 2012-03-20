@@ -35,7 +35,7 @@ class ByteChannelResource[+A <: ByteChannel] (
     val closer = ResourceAdapting.closeAction(closeAction)
     new OutputStreamResource(nResource,context, closer)
   }
-  protected override def underlyingOutput = outputStream
+  protected override def underlyingOutput = this
   override def reader(implicit sourceCodec: Codec)  = {
     def nResource = new ChannelReaderAdapter(opener, sourceCodec)
     val closer = ResourceAdapting.closeAction(closeAction)

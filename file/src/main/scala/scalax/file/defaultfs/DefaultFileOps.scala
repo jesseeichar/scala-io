@@ -39,7 +39,6 @@ private[file] trait DefaultFileOps {
       }
       r.updateContext(fileSystem.context)
   }
-
   override def channel(openOptions: OpenOption*) = 
     Resource.fromSeekableByteChannel(openChannel(jfile,openOptions)).updateContext(fileSystem.context)
 

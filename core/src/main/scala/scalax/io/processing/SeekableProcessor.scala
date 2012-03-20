@@ -78,7 +78,7 @@ class SeekableProcessor(resourceOpener: => OpenedResource[SeekableByteChannel], 
  *  you should not have difficulty understanding this method.
  * @define converterParamconverterParam @param converter The strategy for writing the data/converting the data to bytes
  */
-class OpenSeekable private[processing] (channel: SeekableByteChannel, resourceContext: ResourceContext) extends OpenOutput(Channels.newOutputStream(channel), resourceContext) {
+class OpenSeekable private[processing] (channel: SeekableByteChannel, resourceContext: ResourceContext) extends OpenOutput(channel, resourceContext) {
   private[this] val factory = new ProcessorFactory(resourceContext)
   private[this] val nonCloseable = new SeekableByteChannel with Adapter[SeekableByteChannel] {
     def src = channel

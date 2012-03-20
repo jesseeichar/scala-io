@@ -46,6 +46,8 @@ class FileStringSeekableTest extends AbstractFileSeekableTest {
     folder.create()
     Resource.fromFile(file.getAbsolutePath).addCloseAction(closeAction)
   }
+  override def truncatesUnderlyingSinkEachOpen = true
+
 }
 
 class FileSeekableTest extends AbstractFileSeekableTest {
@@ -54,6 +56,8 @@ class FileSeekableTest extends AbstractFileSeekableTest {
     folder.create()
     Resource.fromFile(file).addCloseAction(closeAction)
   }
+  override def truncatesUnderlyingSinkEachOpen = true
+
 }
 
 class RandomAccessFileSeekableTest extends AbstractFileSeekableTest {
@@ -80,4 +84,6 @@ class StraightCreationSeekableTest extends AbstractFileSeekableTest {
     }
     Resource.fromSeekableByteChannel(channel).addCloseAction(closeAction)
   }
+  override def truncatesUnderlyingSinkEachOpen = true
+
 }

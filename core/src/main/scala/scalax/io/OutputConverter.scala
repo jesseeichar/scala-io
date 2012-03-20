@@ -9,22 +9,22 @@
 package scalax.io
 
 import collection.immutable.{StringOps, WrappedString}
-import java.io.{OutputStream, OutputStreamWriter}
+import java.io.OutputStreamWriter
 import java.nio.ByteBuffer
-import java.nio.channels.Channels
+import java.nio.channels.{WritableByteChannel, Channels}
 
 /**
  * Functions used by Seekable and Output to either convert data to bytes for writing
  * or write directly to an output stream depending on the requirements of the caller.
  */
-trait OutputConverter[-T] extends Function2[OutputStream,T,Unit] {
+trait OutputConverter[-T] extends Function2[WritableByteChannel,T,Unit] {
   /**
    * Write the data to the OutputStream in the most efficient way possible
    *
    * @param out the output object that the converter write to
    * @param data the data to convert for the OutputStream
    */
-  def apply(out: OutputStream, data: T):Unit =
+  def apply(out: WritableByteChannel, data: T):Unit =
     OutputConverter.TraversableByteConverter(out,toBytes(data))
 
   /**
@@ -88,7 +88,7 @@ object OutputConverter {
    *             single T instead of many
    */
   abstract class NonTraversableAdapter[T](base:OutputConverter[TraversableOnce[T]]) extends OutputConverter[T] {
-    override def apply(out: OutputStream, data: T) = base(out,List(data))
+    override def apply(out: WritableByteChannel, data: T) = base(out,List(data))
     def sizeInBytes = base.sizeInBytes
     def toBytes(data: T) = base.toBytes(List(data))
   }
@@ -102,22 +102,39 @@ object OutputConverter {
    * @param base the basis for creating this OutputConverter.
    */
   abstract class ArrayAdapter[T](base:OutputConverter[TraversableOnce[T]]) extends OutputConverter[Array[T]] {
-    override def apply(out: OutputStream, data: Array[T]) = base(out,data)
+    override def apply(out: WritableByteChannel, data: Array[T]) = base(out,data)
     def sizeInBytes = base.sizeInBytes
     def toBytes(data: Array[T]) = base.toBytes(data)
   }
   implicit object ByteConverter extends NonTraversableAdapter(TraversableByteConverter)
   implicit object ByteArrayConverter extends ArrayAdapter(TraversableByteConverter) {
-    override def apply(out: OutputStream, bytes:Array[Byte]) = if(bytes.length > 0) out.write(bytes)
+    override def apply(out: WritableByteChannel, bytes:Array[Byte]) = if(bytes.length > 0) out.write(ByteBuffer.wrap(bytes))
   }
   implicit object ByteBufferConverter extends OutputConverter[ByteBuffer] {
-	  override def apply(out: OutputStream, bytes:ByteBuffer) = Channels.newChannel(out).write(bytes)
+	  override def apply(out: WritableByteChannel, bytes:ByteBuffer) = out.write(bytes)
       def toBytes(data: ByteBuffer) = new nio.ByteBuffer(data)
       def sizeInBytes = 1	  
   }
   implicit object TraversableByteConverter extends OutputConverter[TraversableOnce[Byte]] {
-    override def apply(out: OutputStream, bytes:TraversableOnce[Byte]) = {
-      bytes foreach {i => out write i.toInt}
+    override def apply(out: WritableByteChannel, bytes:TraversableOnce[Byte]) = {
+      if(bytes.hasDefiniteSize && bytes.size < 8*1024) {
+        out write  ByteBuffer.wrap (bytes.toArray)
+      } else {
+        val buffer = ByteBuffer.allocate(8*1024)
+        bytes foreach {
+          case i if buffer.position() < buffer.capacity() =>
+            buffer.put(i)
+          case i => 
+            buffer.flip()
+            out write buffer
+            buffer.clear()
+            buffer.put(i)
+        }
+        if (buffer.remaining() > 0) {
+          buffer.flip()
+          out write buffer
+        }
+      }
     }
     def toBytes(data: scala.TraversableOnce[Byte]) = data
     def sizeInBytes = 1
@@ -181,8 +198,8 @@ object OutputConverter {
   }
   private class CharConverter(codec : Codec) extends NonTraversableAdapter(new TraversableCharConverter(codec))
   private class TraversableCharConverter(codec : Codec) extends OutputConverter[TraversableOnce[Char]] {
-    override def apply(out: OutputStream, characters:TraversableOnce[Char]) = {
-      val writer = new OutputStreamWriter(out)
+    override def apply(out: WritableByteChannel, characters:TraversableOnce[Char]) = {
+      val writer = new OutputStreamWriter(Channels.newOutputStream(out))  // use nio writing soon
       try {
         characters match {
           case string : StringOps => writer write string

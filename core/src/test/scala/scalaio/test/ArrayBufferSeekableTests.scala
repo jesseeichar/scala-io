@@ -27,7 +27,7 @@ class OpenableArrayBufferSeekableTest extends AbstractSeekableTests[SeekableByte
   }
 
   override def writeErrorRaisedOnClose = true
-
+  override def truncatesUnderlyingSinkEachOpen = true
   override def errorOnWriteOut = Resource.fromSeekableByteChannel(ExplodingSeekable)
 }
 

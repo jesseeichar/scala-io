@@ -204,7 +204,9 @@ abstract class FileOps extends Seekable {
   }
 
   // required method for Output trait
-  override protected def underlyingOutput = outputStream()
+  override protected def underlyingOutput =
+    if (canRead) channel(WriteTruncate : _*)
+    else outputStream().writableByteChannel
   protected def underlyingChannel(append: Boolean) = {
     if(append) {
       channel((ReadWrite :+ Append) :_*).open

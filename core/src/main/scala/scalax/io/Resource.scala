@@ -290,9 +290,9 @@ trait ReadCharsResource[+R] extends Resource[R] with ReadChars with ResourceOps[
  */
 trait OutputResource[+R] extends Resource[R] with Output with ResourceOps[R, OutputResource[R]] {
   /**
-   * Obtain the [[scalax.io.OutputStreamResource]](typically) version of this object.
+   * Obtain the [[scalax.io.OutputResource]](typically) version of this object.
    *
-   * @return the [[scalax.io.OutputStreamResource]](typically) version of this object.
+   * @return the [[scalax.io.OutputResource]](typically) version of this object.
    */
   def outputStream: OutputResource[OutputStream]
   /**

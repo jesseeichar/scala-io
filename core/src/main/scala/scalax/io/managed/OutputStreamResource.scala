@@ -23,7 +23,7 @@ class OutputStreamResource[+A <: OutputStream] (
     new OutputStreamResource(opener, context, newCloseAction :+ closeAction)
 
   override def outputStream = this
-  protected override def underlyingOutput = this
+  protected override def underlyingOutput = writableByteChannel
   override def writer(implicit sourceCodec: Codec):WriterResource[Writer] = {
     def nResource = {
       val a = open()

@@ -12,6 +12,7 @@ import resource._
 import scala.collection.Traversable
 import scalax.io.CloseAction.Noop
 import java.io.{Writer, FilterOutputStream, File, OutputStream}
+import java.nio.channels.WritableByteChannel
 
 /**
  * A trait for objects that can have data written to them. For example an
@@ -34,7 +35,7 @@ import java.io.{Writer, FilterOutputStream, File, OutputStream}
  */
 trait Output {
 
-  protected def underlyingOutput : OutputResource[OutputStream]
+  protected def underlyingOutput : OutputResource[WritableByteChannel]
   /**
    * Execute the function 'f' passing an Output instance that performs all operations
    * on a single opened connection to the underlying resource. Typically each call to
