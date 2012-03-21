@@ -105,13 +105,12 @@ trait AbstractPathSetTests extends scalax.test.sugar.FSAssertionSugar {
 
   @Test //@Ignore
   def test_for_assertSameStructure {
-      val (path,tree) = fixtures()
+      val (_,tree) = fixtures()
 
       intercept[AssertionError] {
         val stream = Nil
         assertSameStructure (stream, tree.children)
       }
   }
-
 
 }

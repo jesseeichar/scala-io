@@ -24,39 +24,46 @@ object ScalaIoBuild extends Build {
   )
 
   // ----------------------- Shared Settings ----------------------- //
-  val publishToSettings = publishTo <<= (version) { version =>
-    if(version.toString endsWith "-SNAPSHOT")
-      Some("nexus.scala-tools.org" at "http://nexus.scala-tools.org/content/repositories/snapshots/")
-    else
-      Some("Scala Tools Nexus" at "http://nexus.scala-tools.org/content/repositories/releases/")
+  val publishToSettings = publishTo <<= version { v: String =>
+    val nexus = "https://oss.sonatype.org/"
+    if (v.trim.endsWith("SNAPSHOT")) Some("snapshots" at nexus + "content/repositories/snapshots")
+    else                             Some("releases" at nexus + "service/local/staging/deploy/maven2")
   }
 
-  val pomExtraSetting = pomExtra :=
-    <licenses>
-      <license>
-        <name>Scala License</name>
-        <url>http://www.scala-lang.org/node/146</url>
-        <distribution>repo</distribution>
-      </license>
-    </licenses>
+  val pomExtraSetting = pomExtra := (
+    <scm>
+      <url>git@github.com:jesseeichar/scala-io.git</url>
+      <connection>scm:git:git@github.com:jesseeichar/scala-io.git</connection>
+    </scm>
+    <developers>
+      <developer>
+        <id>jesseeichar</id>
+        <name>Jesse Eichar</name>
+        <url>http://jsuereth.com</url>
+      </developer>
+    </developers>
+  )
 
   val sharedSettings = Seq[Setting[_]](
    	//scalaHome := Some(file("/Volumes/Box/ScalaProject/scala-full/dists/scala-2.9.2.r25667-b20110921211926")),
     organization := BuildConstants.organization,
     version := BuildConstants.version,
+    licenses := Seq("Scala License" -> url("http://www.scala-lang.org/node/146")),
+    homepage := Some(url("http://jesseeichar.github.com/scala-io-doc/index.html")),
     maxErrors := 20,
     scalacOptions ++= Seq("-optimize","-deprecation"),
     offline := false,
     scalaVersion := BuildConstants.scalaVersion,
+    
+    publishMavenStyle := true,
     publishToSettings,
-    credentials += Credentials(Path.userHome / ".sbt" / ".credentials"),
     pomExtraSetting,
+    
     resolvers += {
       val mapfishRepoUrl = new java.net.URL("http://dev.mapfish.org/ivy2")
       Resolver.url("Mapfish Ivy Repository", mapfishRepoUrl)(Resolver.ivyStylePatterns)
     },
-    libraryDependencies += "com.novocode" % "junit-interface" % "0.8" % "test->default",
-    publishArtifact in Test := true
+    libraryDependencies += "com.novocode" % "junit-interface" % "0.8" % "test->default"
   )
 
   // ----------------------- Core Project ----------------------- //
@@ -64,7 +71,8 @@ object ScalaIoBuild extends Build {
     name := "scala-io-core",
     resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
     libraryDependencies += "com.github.jsuereth.scala-arm" %% "scala-arm" % BuildConstants.armVersion,
-    libraryDependencies += "com.typesafe.akka" % "akka-actor" % "2.0"
+    libraryDependencies += "com.typesafe.akka" % "akka-actor" % "2.0",
+    publishArtifact in Test := true
   )
 	lazy val coreProject = Project("core", file("core")).
     configs(Samples).
@@ -83,7 +91,7 @@ object ScalaIoBuild extends Build {
   val perfSettings: Seq[Setting[_]] = Seq(
     name := "scala-io-performance",
     libraryDependencies += "com.github.jsuereth" %% "sperformance" % "0.1",
-    publishArtifact in Test := false
+    publishArtifact := false
   )
 	lazy val perfProject = Project("perf", file("perf")).
 	  settings (samplesSettings ++ sharedSettings ++ perfSettings : _*).
