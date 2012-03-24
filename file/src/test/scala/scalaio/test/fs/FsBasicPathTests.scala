@@ -230,6 +230,17 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
       }
   }
 
+  @Test
+  def sibling_with_parent_makes_sibling_path {
+    val p = fixture.root \ "c1"
+    assertEquals(fixture.root \ "c2", p sibling ("c2",'/'))
+  }
+  @Test
+  def sibling_without_parent_equals_path {
+    val p = fixture.fs.roots.head \ "a"
+    assertEquals(p, fixture.fs.roots.head sibling p)
+  }
+
   @Test //@Ignore
   def relativize_should_make_a_child_relative_to_parent = {
     val p = fixture.root \ "c1" \ "c2"
@@ -635,10 +646,11 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
     assertEquals(fspath("a/b/c").path, fspath("a") / (",,b,,c,",',') path)
     assertEquals(fspath("a/b/c").path, fspath("a") / (",,b,,c,",',') path)
     assertEquals(fspath("a/b/c").path, fspath("a") \ (",,b,,c,",',') path)
-    assertEquals(fspath("a/b/c").path, (fspath("a") resolve fspath("b/c").path).path)
+    val pathToResolve = "b/c"
+    assertEquals(fspath("a/b/c").path, (fspath("a") resolve (pathToResolve,'/')).path)
     val path = fspath("a")
     assertEquals(path toRealPath(), path \ "." toRealPath())
-    assertEquals(path toRealPath(), path resolve "." toRealPath())
+    assertEquals(path toRealPath(), path.resolve (".",'/').toRealPath())
     intercept[IllegalArgumentException] {
           path \ fixture.fs.separator
     }
@@ -802,7 +814,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
     val pathx = path.resolve(fspath("x"))
 
     assertNotNull(pathx)
-    assertEquals(pathx, path.resolve("x"))
+    assertEquals(pathx, path.resolve("x",'/'))
     assertEquals("x", pathx.segments.last)
     assertEquals(fspath("x"), pathx.relativize(path))
   }

@@ -8,7 +8,7 @@ object implicits {
    */
   def stringToFile = {
     import scalax.file.Path
-    import Path.string2path
+    import scalax.file.ImplicitConversions.string2path
 
     val filePath: Path = "/tmp/file"
   }
@@ -19,7 +19,7 @@ object implicits {
   def javaFileToPath = {
     import java.io.File
     import scalax.file.Path
-    import Path.jfile2path
+    import scalax.file.ImplicitConversions.jfile2path
 
     val filePath: Path = new File ("/tmp/file")
   }

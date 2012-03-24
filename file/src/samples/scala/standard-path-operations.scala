@@ -35,7 +35,7 @@ object StdPathOps {
     // the resolve methods is essentially an alias for \ for those
     // who are uncomfortable with operator type methods.  Also to
     // maintain a familiar feel with NIO Path
-    val child11: Path = path.resolve("child")
+    val child11: Path = path.resolve("child",'/')
     val child12: Path = path.resolve(Path("child", "grandchild"))
 
     // make a Path relative to another path

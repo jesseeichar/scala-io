@@ -30,17 +30,6 @@ import scalax.io.Input
 object Path
 {
   /**
-   * Method to implicitly convert a string to a Path
-   * object
-   */
-  implicit def string2path(s: String)(implicit fileSystem: FileSystem = FileSystem.default): Path = fileSystem.fromString(s)
-  /**
-   * Method to implicitly convert a {@link java.file.File} to a Path
-   * object
-   */
-  implicit def jfile2path(jfile: JFile): Path = FileSystem.default.fromString(jfile.getPath)
-
-  /**
    * Enumeration of the Access modes possible for accessing files
    */
   object AccessModes {
@@ -380,13 +369,16 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    * path and resolves the this and other in the same manner as
    * {@link Path#resolve(Path)}
    *
-   * Examples (path separator assumed to be /):
+   * Examples:
    * {{{
-   * path resolve "a/b/c" // result is Path / a / b / c
-   * path resolve "//..//b//" // result is Path / .. / b
-   *
+   * path resolve ("a/b/c",'/') // result is Path / a / b / c
+   * path resolve ("//..//b//",'/') // result is Path / .. / b
+   * }}}
+   * @param other the string representation of the path with segment separators as indicated by separator
+   * @param separator the separator character used in other
+   * @return a path resolved as a child of this
    */
-  def resolve(other: String): Path = resolve(fileSystem.fromString(other))
+  def resolve(other: String, separator:Char): Path = resolve(fileSystem(other,separator))
 
   /**
    * Make the current path relative to the other path.  If the two paths
@@ -430,12 +422,36 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
     case Some(path) => path.segments :+ name
     case None => Vector(path)
   }
+
+  /**
+   * Resolves other against this path's parent in the same manner as in resolve(Path).
+   *
+   *
+   * If parent does not exist other will be returned.  Otherwise parent.resolve(other) will be returned
+   *
+   * @param other the path from parent to the sibling.
+   * @return a path resolved as a child of parent or None if parent is None
+   */
+  def sibling(other:Path):Path = {
+    parent map (_.resolve(other)) getOrElse (other)
+  }
+
+  /**
+   * Resolves other against this path's parent in the same manner as sibling(Path)
+   *
+   * @param other the path from parent to the sibling.
+   * @param separator the separator character that is used in other
+   * @return a path resolved as a child of parent or other if there is no parent
+   */
+  def sibling(other:String, separator:Char):Path = sibling(fileSystem(other,separator))
+
   /**
    * The parent path segment if it is possible (for example a root will not have a parent)
    * @return the parent path segment if it possible
    * @see parents
    */
   def parent: Option[Path]
+
   /**
    * The path segments of the path excluding the current path segment.  The first
    * segment is the first segment in the path.

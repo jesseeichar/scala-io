@@ -19,7 +19,7 @@ abstract class FsPathObjectTests extends Fixture {
 
   @Test
   def path_object_should_implicitly_create_path_from_string(): Unit = {
-    import Path.string2path
+    import scalax.file.ImplicitConversions.string2path
 
     { // brackets needed so compiler doesn't think later implicit was a mistake
       assertSame(FileSystem.default, "nonsense path".fileSystem)
@@ -32,7 +32,7 @@ abstract class FsPathObjectTests extends Fixture {
 
   @Test
   def path_object_should_implicitly_create_path_from_a_java_file() : Unit = {
-    import Path.jfile2path
+    import scalax.file.ImplicitConversions.jfile2path
 
     assertSame(FileSystem.default, new File("nonsense path").fileSystem)
 

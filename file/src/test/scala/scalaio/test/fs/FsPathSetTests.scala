@@ -152,14 +152,16 @@ abstract class FsPathSetTests extends scalax.test.sugar.AssertionSugar with Abst
 
   @Test
   def pathsets_are_lazily_processed_for_map {
+
     val root = mkTree
     var i = 0
     val search = root * "*" map{p => i += 1; p}
     assertEquals(0,i)
     val filtered = search.filter(_.name.size < 5)
-	assertEquals(0,i)
+	  assertEquals(0,i)
     val flatMapped = search.flatMap(_.name)
     assertEquals(0,i)
+    import scalax.file.ImplicitConversions.string2path
     val collected = search.collect{ case p if p.startsWith("p") => p } 
     assertEquals(0,i)
     

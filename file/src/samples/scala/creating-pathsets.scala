@@ -13,7 +13,7 @@ object CreatingPathSets {
    */
   def standardExamples {
     import scalax.file.Path
-    import Path._
+    import scalax.file.ImplicitConversions._
     import scalax.file.PathSet
     // find all .java files in a tmp or one of its sub-directories
     val descendantJavaFiles : PathSet[Path] = "/tmp" ** "*.java"
@@ -72,5 +72,39 @@ object CreatingPathSets {
     import Path.AccessModes._
     val timeStamped = Path("tmp") ** AttributeMatcher(WriteAccessAttribute(true), ExecuteAccessAttribute(false), LastModifiedAttribute(123456000L))
     val timeStamped2 = Path("tmp") ** ((p:Path) => p.canWrite && p.canExecute && p.lastModified == 123456000L)
+  }
+
+  /**
+   * Illustrate how to do matching using regular expression
+   */
+  def regexBasedPathSets {
+    import scalax.file.Path
+    
+    // this will find all paths that are a child of "." that == eng or fra or deu
+    // notice that the .r at the end, this converts the string to a regular expression
+    // and so the PathFilter that is created using the regular expression to do the match
+    val engORfraORdeu = Path(".") * "(eng)|(fra)|(deu)".r
+
+
+    // in contract to the previous PathSet this consists of the one path which has the name (eng)|(fra)|(deu)
+    // notice that the argument is NOT a regular expression so it is interpretted as a glob expression
+    val engfradeu = Path(".") * "(eng)|(fra)|(deu)"
+
+    // finds all strings.xml files in sub directories of eng fra or deu
+    val strings = Path(".") * "(eng)|(fra)|(deu)".r ** "strings.xml"
+  }
+
+  def globBasedPathSets {
+    import scalax.file.Path
+
+    // All java files in any subdirectory of .
+    val javaFiles = Path(".") ** "*.java"
+
+    // All java or scala files in subdirectory of
+    val jvmFiles = Path(".") ** "*.{java,scala}"
+
+    // A crazy example that illustrates a substantial portion of the glob
+    // syntax
+    val complexSearch = Path(".") ** "a/?/[a-z]/d.{x,y}"
   }
 }
