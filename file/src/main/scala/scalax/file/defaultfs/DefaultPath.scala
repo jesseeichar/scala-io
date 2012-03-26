@@ -110,7 +110,7 @@ class DefaultPath private[file] (val jfile: JFile, override val fileSystem: Defa
       case target : DefaultPath if jfile renameTo target.jfile =>
         () // moved worked as part of guard
       case _ =>
-        target write this.bytes
+        copyDataTo(target)
         delete()
     }
   }
