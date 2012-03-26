@@ -1,7 +1,6 @@
 import scalax.file.Path
 import scalax.io.LongTraversable
-import scalax.io.processing.Processor
-import scalax.io.processing.ProcessorAPI
+import scalax.io.processing.{ByteProcessor, Processor, ProcessorAPI}
 
 /**
  * Read the Shapefile and println one attribute from each record
@@ -11,16 +10,19 @@ import scalax.io.processing.ProcessorAPI
  */
 object ShapefileReader extends App{
   val shpFile = Path.fromString(args(0))
-  val csvFile = shpFile / ".." / (shpFile.simpleName + ".csv")
+  val csvFile = shpFile sibling (shpFile.simpleName + ".csv")
+  val attributeToDisplay = args(1).toInt
   val ds = new ShapefileDatastore(shpFile, csvFile)
-  ds.shpRecords.map (_.attributes(args(1).toInt)).foreach(println)
+  ds.shpRecords.map {record =>
+    (record.num, if (record.attributes.length >= attributeToDisplay) record.attributes(attributeToDisplay) else "No attribute for this record")
+  }.foreach(println)
 }
 
 /**
  * Assumption is that csv and shp file are in sync and therefore 
  * there are the same number of records
  */
-class ShapefileDatastore(val csvFile: Path, val shapefile: Path) {
+class ShapefileDatastore(val shapefile: Path, val csvFile: Path) {
 /*  lazy val metadata = new {
     val headerData = indexFile.bytes.take(100).force
     val size = (headerData(24) - 50) / 8
@@ -37,28 +39,31 @@ class ShapefileDatastore(val csvFile: Path, val shapefile: Path) {
   }*/
   private def correctRecord(recordNum:Int, api:ProcessorAPI[(String,Int)]):Processor[Seq[String]] =
     for((record, num) <- api.next) yield {
-      if(num == recordNum) record.split(",")
+      if(num == recordNum - 1) record.split(",")
       else Seq.empty
     }
 
   val shpRecords = {
     val process = for {
-      shpProcessor <- shapefile.bytes.drop(100).processor
+      shpProcessor <- ByteProcessor(shapefile.bytes.drop(100).processor)
       csvProcessor <- csvFile.lines().zipWithIndex.processor
-      _ <- shpProcessor.repeatUntilEmpty()
-      recordHeader <- shpProcessor.take(8)
-      recordNumber = recordHeader(0)
-      geometry <- shpProcessor.take(recordHeader(4).toInt)
-      shapeType = ShapeType(geometry(0))
+
+      rowCount <- shpProcessor.repeatUntilEmpty()
+      recordNumber <- shpProcessor.nextInt
+      contentLength <- shpProcessor.nextInt.map(_ * 2)
+      shapeCode <- shpProcessor.littleEndianAPI.nextInt
+      shapeType = ShapeType(shapeCode)
+      geometry <- shpProcessor.drop(contentLength - 4)
       attributes <- correctRecord(recordNumber,csvProcessor)
     } yield {
-      ShapefileRecord(recordNumber, geometry.drop(1), attributes)
+      // ignoring geometry for this example
+      ShapefileRecord(recordNumber, shapeType, attributes)
     }
     process.traversable
   }
 }
 
-case class ShapefileRecord(num:Int, data:Seq[Byte], attributes:Seq[String])
+case class ShapefileRecord(num:Int, shapeType: ShapeType, attributes:Seq[String])
 object BoundingBox {
   def apply(headerData: LongTraversable[Byte]): BoundingBox =
     BoundingBox(headerData(36).toInt, headerData(44).toInt, headerData(52).toInt, headerData(60).toInt,
@@ -66,25 +71,25 @@ object BoundingBox {
 }
 case class BoundingBox(xmin: Int, ymin: Int, xmax: Int, ymax: Int, zmin: Int, zmax: Int, mmin: Int, mmax: Int)
 trait ShapeType
-object NullShape
-object Point
-object PointZ
-object PointM
-object MultiPoint
-object MultiPointZ
-object MultiPointM
-object Linestring
-object PolyLine
-object PolyLineZ
-object PolyLineM
-object Polygon
-object PolygonZ
-object PolygonM
-object MultiPatch
+object NullShape extends ShapeType
+object Point extends ShapeType
+object PointZ extends ShapeType
+object PointM extends ShapeType
+object MultiPoint extends ShapeType
+object MultiPointZ extends ShapeType
+object MultiPointM extends ShapeType
+object Linestring extends ShapeType
+object PolyLine extends ShapeType
+object PolyLineZ extends ShapeType
+object PolyLineM extends ShapeType
+object Polygon extends ShapeType
+object PolygonZ extends ShapeType
+object PolygonM extends ShapeType
+object MultiPatch extends ShapeType
 
 object ShapeType {
-  def apply(byte: Byte) = {
-    byte match {
+  def apply(code: Int): ShapeType = {
+    code match {
       case 0 => NullShape
       case 1 => Point
       case 3 => PolyLine

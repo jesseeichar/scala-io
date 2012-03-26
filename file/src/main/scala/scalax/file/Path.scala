@@ -381,6 +381,21 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
   def resolve(other: String, separator:Char): Path = resolve(fileSystem(other,separator))
 
   /**
+   * Constructs a path from other using the same file system as this
+   * path and resolves the this and other in the same manner as
+   * {@link Path#resolve(Path)}
+   *
+   * Examples:
+   * {{{
+   * path resolve ("a/b/c",'/') // result is Path / a / b / c
+   * path resolve ("//..//b//",'/') // result is Path / .. / b
+   * }}}
+   * @param pathSegments the path segments that make up the path
+   * @return a path resolved as a child of this
+   */
+  def resolve(pathSegments: String*): Path = resolve(fileSystem(pathSegments:_*))
+
+  /**
    * Make the current path relative to the other path.  If the two paths
    * are on different drives then the other path is returned. If the two
    * paths have different roots the other path is returned.  If the two paths
@@ -444,6 +459,14 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    * @return a path resolved as a child of parent or other if there is no parent
    */
   def sibling(other:String, separator:Char):Path = sibling(fileSystem(other,separator))
+
+  /**
+   * Resolves other against this path's parent in the same manner as sibling(Path)
+   *
+   * @param pathSegments the path from parent to the sibling.
+   * @return a path resolved as a child of parent or other if there is no parent
+   */
+  def sibling(pathSegments:String*):Path = sibling(fileSystem(pathSegments:_*))
 
   /**
    * The parent path segment if it is possible (for example a root will not have a parent)

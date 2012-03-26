@@ -24,7 +24,7 @@ private[traversable] class ReadableByteChannelIterator(
   protected val start: Long,
   protected val end: Long) extends Sliceable {
 
-  private[this] var buffer: NioByteBuffer = ByteBuffer.allocate(0)
+  private[this] var buffer: NioByteBuffer = _
   private[this] var inConcrete: ReadableByteChannel = _
 
   private[this] val startIndex = start

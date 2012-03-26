@@ -234,6 +234,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
   def sibling_with_parent_makes_sibling_path {
     val p = fixture.root \ "c1"
     assertEquals(fixture.root \ "c2", p sibling ("c2",'/'))
+    assertEquals(fixture.root \ "c2", p sibling ("c2"))
   }
   @Test
   def sibling_without_parent_equals_path {

@@ -16,19 +16,20 @@ import java.nio.channels.WritableByteChannel
 
 
 class SeekableFileChannel(val self : FileChannel) extends SeekableByteChannel with Proxy {
-  def write (src: java.nio.ByteBuffer) = self.write(src)
-  def truncate (size: Long)  = new SeekableFileChannel(self.truncate(size))
-  def size = self.size
-  def read (dst: java.nio.ByteBuffer) = self.read(dst)
-  def position (newPosition: Long) = new SeekableFileChannel(self.position(newPosition))
-  def position = self.position
-  def close = self.close
-  def isOpen = self.isOpen
-  def transferFrom(channel:ReadableByteChannel,position:Long,count:Long) = 
-    self.transferFrom(channel,position,count)
-    def transferTo(position:Long,count:Long, channel:WritableByteChannel) = 
-    	self.transferTo(position,count,channel)
+  private[this] val wrapped = self
+  def write (src: java.nio.ByteBuffer) = wrapped.write(src)
+  def truncate (size: Long)  = new SeekableFileChannel(wrapped.truncate(size))
+  def size = wrapped.size
+  def read (dst: java.nio.ByteBuffer) = wrapped.read(dst)
+  def position (newPosition: Long) = new SeekableFileChannel(wrapped.position(newPosition))
+  def position = wrapped.position
+  def close = wrapped.close
+  def isOpen = wrapped.isOpen
+  def transferFrom(channel:ReadableByteChannel,position:Long,count:Long) =
+    wrapped.transferFrom(channel,position,count)
+    def transferTo(position:Long,count:Long, channel:WritableByteChannel) =
+      wrapped.transferTo(position,count,channel)
 
-  override def write(src : JByteBuffer, pos:Long) = self.write(src, pos)
-  override def read(dst : JByteBuffer, pos:Long) = self.read(dst, pos)
+  override def write(src : JByteBuffer, pos:Long) = wrapped.write(src, pos)
+  override def read(dst : JByteBuffer, pos:Long) = wrapped.read(dst, pos)
 }

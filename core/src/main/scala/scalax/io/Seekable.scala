@@ -524,9 +524,8 @@ trait Seekable extends Input with Output {
       r.get.position(0)
       new ByteChannel {
         private[this] val wrapped = r.get
-        def resetPosition() = wrapped.position(0)
         def isOpen = wrapped.isOpen
-        def close() {r.close()}
+        def close() = r.close()
         def write(src: ByteBuffer) = wrapped.write(src)
         def read(dst: ByteBuffer) = wrapped.read(dst)
       }

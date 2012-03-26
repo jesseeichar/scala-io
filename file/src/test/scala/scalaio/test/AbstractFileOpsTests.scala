@@ -207,7 +207,6 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
     }
   }
 
-
   /*  Removed from API since it may be difficult or even impossible on
       non-native file systems
   @Test //@Ignore
