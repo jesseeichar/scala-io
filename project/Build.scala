@@ -1,5 +1,6 @@
 import sbt._
 import Keys._
+import scala.xml.transform._
 
 object BuildConstants {
   val organization = "com.github.scala-incubator.io"
@@ -43,7 +44,7 @@ object ScalaIoBuild extends Build {
       </developer>
     </developers>
   )
-
+  
   val sharedSettings = Seq[Setting[_]](
    	//scalaHome := Some(file("/Volumes/Box/ScalaProject/scala-full/dists/scala-2.9.2.r25667-b20110921211926")),
     organization := BuildConstants.organization,
@@ -78,8 +79,22 @@ object ScalaIoBuild extends Build {
     configs(Samples).
 	  settings(samplesSettings ++ sharedSettings ++ coreSettings : _*)
   // ----------------------- File Project ----------------------- //
+
+
+  val removeScalaIOTestDependency = new RuleTransformer(new RewriteRule {
+    override def transform(n: xml.Node) = {
+      val isBadDependencyElem = (n.label == "dependency") &&
+        (n \ "artifactId").text.startsWith("scala-io-core") &&
+        (n \ "groupId").text.equals(BuildConstants.organization) &&
+        (n \ "scope").text.equals("test")
+      if (isBadDependencyElem) Nil
+      else n
+    }
+  })
+
   val fileSettings: Seq[Setting[_]] = Seq(
-    name := "scala-io-file"
+    name := "scala-io-file",
+    pomPostProcess := removeScalaIOTestDependency.apply
   )
 	lazy val fileProject = Project("file", file("file")).
     configs(Samples).
