@@ -106,6 +106,10 @@ object OutputConverter {
     def sizeInBytes = base.sizeInBytes
     def toBytes(data: Array[T]) = base.toBytes(data)
   }
+  implicit object ByteBlockConverter extends OutputConverter[ByteBlock] {
+    def sizeInBytes = 1
+    def toBytes(data: ByteBlock):TraversableOnce[Byte] = data.toIterator
+  }
   implicit object ByteConverter extends NonTraversableAdapter(TraversableByteConverter)
   implicit object ByteArrayConverter extends ArrayAdapter(TraversableByteConverter) {
     override def apply(out: WritableByteChannel, bytes:Array[Byte]) = if(bytes.length > 0) out.write(ByteBuffer.wrap(bytes))

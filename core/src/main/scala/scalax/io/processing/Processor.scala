@@ -79,7 +79,9 @@ trait Processor[+A] {
   def timeout(timeout:Long) = new TimingOutProcessor(this, timeout)
   def future = {
     implicit val executionContext = scalax.io.executionContext
-    Future { acquireAndGet(value => value) }
+    Future {
+      deepExecution()
+    }
   }
   /**                         hooks/geocat/data/data/tmp
    * Declare an error handler for handling an error when executing the processor.  It is important to realize that
@@ -92,8 +94,8 @@ trait Processor[+A] {
    * for {
    *   mainProcessor <- input.bytes.processor
    *   // if the read fails 1 will be assigned to first and passed to second as the argument of flatmap
-   *   first <- mainProcessor.read onError {_ => -1}
-   *   // if this read fails an exception will be thrown that will NOT be caught by the above onError method
+   *   first <- mainProcessor.read onFailure {_ => -1}
+   *   // if this read fails an exception will be thrown that will NOT be caught by the above onFailure method
    *   second <- mainProcessor.read
    * } yield (first,second)
    * }}}
@@ -111,7 +113,7 @@ trait Processor[+A] {
    *     second <- mainProcessor.read
    *   } yield (first,second)
    *   // attach the error handler
-   *   tuple <- groupProcessor onError {case t => log(t); None}
+   *   tuple <- groupProcessor onFailure {case t => log(t); None}
    * } yield tuple
    * }}}
    *
@@ -125,7 +127,7 @@ trait Processor[+A] {
    *   second <- mainProcessor.read
    * } yield (first,second)
    *
-   * process.onError{case _ => log(t); None}
+   * process.onFailure{case _ => log(t); None}
    *
    * process.acquireAndGet(...)
    * }}}
@@ -138,7 +140,7 @@ trait Processor[+A] {
    * @tparam U The value that will be returned from the handler.  Also the type of the returned processor
    * @return A new processor that will behave the same as this except an error during execution will be handled.
    */
-  def onError[U >: A](handler:PartialFunction[Throwable,Option[U]]):Processor[U] = new Processor[U] {
+  def onFailure[U >: A](handler:PartialFunction[Throwable,Option[U]]):Processor[U] = new Processor[U] {
     protected[processing] def context = self.context
 
     override private[processing] def init = new Opened[U] {
@@ -174,7 +176,9 @@ trait Processor[+A] {
    * process.execute()
    * }}}
    */
-  def execute():Unit = {
+  def execute():Unit = deepExecution()
+  
+  private def deepExecution():Option[A] = {
     def runEmpty(e:Any):Unit = e match {
       case lt:LongTraversable[_] => lt.foreach(runEmpty)
       case _ => ()
@@ -182,10 +186,11 @@ trait Processor[+A] {
     val initialized = init
     try {
       initialized.execute match {
-        case Some(iter:LongTraversable[_]) =>
+        case result @ Some(iter:LongTraversable[_]) =>
           iter.foreach(runEmpty)
+          result
         case result =>
-          ()
+          result
       }
     } finally initialized.cleanUp
   }

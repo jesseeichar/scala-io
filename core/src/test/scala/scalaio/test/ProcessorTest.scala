@@ -2,13 +2,12 @@ package scalaio.test
 import org.junit.Test
 import org.junit.Assert._
 import scalax.test.sugar.AssertionSugar
-import scalax.io.LongTraversable
-import java.io.DataInputStream
-import java.io.ByteArrayInputStream
-import scalax.io.ResourceContext
-import scalax.io.DefaultResourceContext
 import scalax.io.processing.{ProcessorFactory, Processor, CharProcessor, ByteProcessor}
 import java.util.concurrent.TimeoutException
+import scalax.io.{Resource, LongTraversable, ResourceContext, DefaultResourceContext}
+import java.io.{File, DataInputStream, ByteArrayInputStream}
+import akka.dispatch.Await
+import akka.util.duration._
 
 trait ProcessorTest extends AssertionSugar {
   self: LongTraversableTest =>
@@ -759,7 +758,7 @@ trait ProcessorTest extends AssertionSugar {
     for {
       p <- traversable.processor
       _ <- p.repeatUntilEmpty()
-      byte <- p.next.onError{case _ => Some(1)}
+      byte <- p.next.onFailure{case _ => Some(1)}
     } {
       loops += 1
     }
@@ -777,7 +776,7 @@ trait ProcessorTest extends AssertionSugar {
     intercept[MyException] {
       for {
         p <- traversable.processor
-        byte <- p.next.onError {
+        byte <- p.next.onFailure {
           case _ => throw new MyException()
         }
       } {}
@@ -785,7 +784,7 @@ trait ProcessorTest extends AssertionSugar {
     intercept[MyException] {
       val p = for {
         p <- traversable.processor
-        byte <- p.next.onError {
+        byte <- p.next.onFailure {
           case _ => throw new MyException()
         }
       } yield {}
@@ -803,15 +802,15 @@ trait ProcessorTest extends AssertionSugar {
     intercept[ParentException] {
       for {
         p <- traversable.processor
-        p2 = for{byte <- p.next.onError { case _ => throw new MyException()}} yield byte
-        byte <- p2.onError{case _:MyException => throw new ParentException()}
+        p2 = for{byte <- p.next.onFailure { case _ => throw new MyException()}} yield byte
+        byte <- p2.onFailure{case _:MyException => throw new ParentException()}
       } {}
     }
     intercept[ParentException] {
       val p = for {
         p <- traversable.processor
-        p2 = for{byte <- p.next.onError { case _ => throw new MyException()}} yield byte
-        byte <- p2.onError{case _:MyException => throw new ParentException()}
+        p2 = for{byte <- p.next.onFailure { case _ => throw new MyException()}} yield byte
+        byte <- p2.onFailure{case _:MyException => throw new ParentException()}
       } yield {}
 
       p.execute()
@@ -830,14 +829,14 @@ trait ProcessorTest extends AssertionSugar {
       for {
         p <- traversable.processor
         p2 = for{byte <- p.next} yield byte
-        byte <- p2.onError{case _ => throw new ParentException()}
+        byte <- p2.onFailure{case _ => throw new ParentException()}
       } {}
     }
     intercept[ParentException] {
       val p = for {
         p <- traversable.processor
         p2 = for{byte <- p.next} yield byte
-        byte <- p2.onError{case _ => throw new ParentException()}
+        byte <- p2.onFailure{case _ => throw new ParentException()}
       } yield {}
 
       p.execute()
@@ -859,7 +858,7 @@ trait ProcessorTest extends AssertionSugar {
           if true
           b2 <- p.next
         } yield b2
-        byte <- p2.onError{case _ => throw new ParentException()}
+        byte <- p2.onFailure{case _ => throw new ParentException()}
       } {}
     }
     intercept[ParentException] {
@@ -870,7 +869,7 @@ trait ProcessorTest extends AssertionSugar {
           if true
           b2 <- p.next
         } yield b2
-        byte <- p2.onError{case _ => throw new ParentException()}
+        byte <- p2.onFailure{case _ => throw new ParentException()}
       } yield {}
 
       p.execute()
@@ -886,13 +885,31 @@ trait ProcessorTest extends AssertionSugar {
 
 
     val p = for {
-      api <- prepared.traversable.processor.onError{case _ => throw new RuntimeException("boom")}
+      api <- prepared.traversable.processor.onFailure{case _ => throw new RuntimeException("boom")}
       _ <- api.repeatUntilEmpty()
       i <- api.next
     } yield i
 
     assertSame(customContext, p.traversable.context)
-    assertSame(customContext, (p.onError{case _ => throw new RuntimeException("boom")}).traversable.context)
+    assertSame(customContext, (p.onFailure{case _ => throw new RuntimeException("boom")}).traversable.context)
+  }
+
+  @Test
+  def processor_future_must_process_long_traversables {
+    val prepared = processorTraversable(100, () => ())
+    val out = Resource.fromFile(File.createTempFile("scalaio","xx"))
+
+    val p = for {
+      in <- prepared.traversable.processor
+      outApi <- out.outputProcessor
+      _ <- in.repeatUntilEmpty()
+      nextInt <- in.next
+      _ <- outApi.write(nextInt.toString)
+    } yield ()
+
+    Await.result(p.future, 30 hours)
+    
+    assertEquals(prepared.testData.mkString, out.slurpString)
   }
 
 }

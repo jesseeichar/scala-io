@@ -84,6 +84,17 @@ trait AbstractOutputTests[InResource, OutResource] extends scalax.test.sugar.Ass
     assertEquals(DEFAULT_DATA + "-" + DEFAULT_DATA + "-" + DEFAULT_DATA, input2.slurpString)
   }
 
+  @Test //@Ignore
+  def write_blocks(): Unit = {
+    import JavaConverters._
+    val (input, output) = open()
+    val testData = (1 to 100).flatMap(_.toString.getBytes(Codec.UTF8.charSet)).asInput
+
+    testData.blocks().foreach(block => output.write(block))
+
+    assertEquals(testData.slurpString, input.slurpString)
+  }
+
   @Test//(timeout=3000L)
   def open_multiple_writes {
     val (input, output) = open()

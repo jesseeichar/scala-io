@@ -75,6 +75,19 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
         }
       }
       measure method "bytes" in {
+        having attribute ("version", "scala.io processor read") in {
+          withSizeDef { size =>
+            newInResource(size)
+          } run { in =>
+            var i = 0
+            for {
+              api <- in.bytes.processor
+              next <- api.next
+            } i += 1
+          }
+        }
+      }
+      measure method "bytes" in {
         having attribute ("baseline", "") in {
           having attribute ("version", "java.io while loop with buffer") in {
             withSizeDef { size =>

@@ -86,7 +86,7 @@ object LongTraversableProcessing {
   /**
    * Demonstrate how to define custom error handling.
    * <p>
-   * All processors have an onError method that allow custom handling of errors during processing.
+   * All processors have an onFailure method that allow custom handling of errors during processing.
    * </p>
    */
   def basicErrorHandling {
@@ -103,7 +103,7 @@ object LongTraversableProcessing {
         // On error handles an error raised during the call of next
         // it does not catch and handle errors from the yield or
         // or any processors later in the for-comprehension
-      byte <- processor.next onError return1OnError
+      byte <- processor.next onFailure return1OnError
     } yield {
       byte.toChar
     }
@@ -116,8 +116,8 @@ object LongTraversableProcessing {
   /**
    * Demonstrate how to handle the error of a sequence of processors in a for-comprehension.
    * <p>
-   * Since onError returns a potential default value it can only be used to catch the exception raised
-   * by a single processor.  This example demonstrates how to use onError to handle the exceptions raised
+   * Since onFailure returns a potential default value it can only be used to catch the exception raised
+   * by a single processor.  This example demonstrates how to use onFailure to handle the exceptions raised
    * by any of several processors
    * </p>
    */
@@ -140,7 +140,7 @@ object LongTraversableProcessing {
         byte2 <- processor.next
       } yield {byte1 + byte2 toChar}
       // add the handler to the new processor
-      finalValue <- group onError return1OnError
+      finalValue <- group onFailure return1OnError
     } yield {
       finalValue
     }
@@ -150,7 +150,7 @@ object LongTraversableProcessing {
     }
     
     // similarly the resulting processor can have an error handler attached
-    process onError return1OnError acquireAndGet {char =>
+    process onFailure return1OnError acquireAndGet {char =>
       // do something
     }
   }

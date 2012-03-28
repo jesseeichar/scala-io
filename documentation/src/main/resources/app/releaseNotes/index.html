@@ -1,7 +1,11 @@
 <ul>
 	<li>New options for creating paths to reduce verbosity.  Now:  Path("a/b/c",'/') will create a path by splitting the string with the separator and using the resulting parts as path segments.  I recommend looking at the new documentation of Path and Filesystem.</li>
+    <li>Performance improvement for moving files when renameTo fails (for example between fileSystems).  New performance can be thousands of times faster.</li>
+    <li>Added sibling convenience method to Path allowing Path("a").sibling("b") to create Path("b")</li>
 	<li>New API for processing Input objects.</li>
-	<li>Options to create Resources that don't close underlying resource.  For example if Standard In is to be processed, the stream should not be closed</li>
+	<li>Options to create Resources that don't close underlying resource.  For example if Standard In is to be processed, the stream should not be closed.  System.in.asUnmanagedInput will created an Input object from System.in.  See the examples for several examples of doing this.</li>
+    <li>Added an Async API for Processors</li>
+    <li>Added an experimental Async API for LongTraversable</li>
 	<li>Replaced openOutput, openSeekable, etc... with processors so read write is uniform
 	  <p>The required change is essentially as follows:
 	    <ul>
@@ -11,7 +15,7 @@
 	            out.write(3)
 	            out.write("hi")
 	          }
-          </pre></code>
+            </code></pre>
         </li>
         <li>Now:
           <pre><code>
