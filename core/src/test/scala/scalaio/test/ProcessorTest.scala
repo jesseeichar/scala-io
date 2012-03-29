@@ -907,7 +907,7 @@ trait ProcessorTest extends AssertionSugar {
       _ <- outApi.write(nextInt.toString)
     } yield ()
 
-    Await.result(p.future, 30 hours)
+    Await.result(p.futureExec(), 30 hours)
     
     assertEquals(prepared.testData.mkString, out.slurpString)
   }

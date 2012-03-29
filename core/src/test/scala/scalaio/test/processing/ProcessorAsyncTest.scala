@@ -6,6 +6,7 @@ import org.junit.Assert._
 import scalax.io._
 import processing._
 import java.util.concurrent.TimeoutException
+import akka.util.duration._
 
 class ProcessorAsyncTest extends AssertionSugar{
 
@@ -15,12 +16,12 @@ class ProcessorAsyncTest extends AssertionSugar{
 
     // repeat test many times to verify that there are no Heisenbugs
     for(i <- 1 to 20) {
-      val p = factory{Thread.sleep(500); Some(1)} timeout 10
+      val p = factory{Thread.sleep(500); Some(1)} timeout 10.milliseconds
       intercept[TimeoutException] {
         p.acquireAndGet(v => v)
       }
 
-      val p2 = factory{Thread.sleep(10); Some(1)} timeout 30000
+      val p2 = factory{Thread.sleep(10); Some(1)} timeout 30.seconds
       assertEquals(Some(1), p2.acquireAndGet(v => v))
 
       var success = false

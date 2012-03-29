@@ -7,7 +7,7 @@ import java.util.concurrent.TimeoutException
 object AsyncReadWrite {
 
   /**
-   * Asychronously copy data from one file to another.
+   * Asychronously copy a section of one file to another.
    * <p>
    * The simplest method for performing asynchronous IO in scala-io is to
    * use the processor API to create a process and then turn it into a future.
@@ -17,7 +17,7 @@ object AsyncReadWrite {
    *   the result of the processor as the result of the future.
    * </p>
    */
-  def basicProcessingAsync {
+  def basicProcessingFuture {
     import scalax.io.Resource
 
     val in = Resource.fromFile("/tmp/in")
@@ -28,23 +28,26 @@ object AsyncReadWrite {
     // and flatmap calls are used instead of
     // foreach.
     val processor = for {
-      in <- in.blocks().processor
-      outApi <- out.outputProcessor
-      // keep reading from in until there is no more data
-      _ <- in.repeatUntilEmpty()
-      // read the next block of data from in
-      block <- in.next
-      // write block to output
-      _ <- outApi.write(block)
-    // yield something so that the processor
-    // is not executed as a for loop
-    } yield ()
+      in <- in.bytes.processor
+      // drop the first 5 bytes
+      _ <- in.drop(5)
+      // create a Vector of the next 30 bytes
+      data <- in.take(30)
+      // write the data to the output
+    } yield out.write(data)
 
-    // call future to execute the processor asynchonously
+    // execute the process
+    // note that there is not repeat calls in the process
+    // (like repeatUntilEmpty).  Thus the result is not
+    // a LongTraversable.  if processor was of type
+    // Processor[LongTraversable] futureExec would
+    // have to be used instead.  See futureExec example
+    // for more details.
     processor.future.onComplete {
       case Right(_) => println("Yay done :)")
       case Left(_) => println("Uh oh failure :(")
     }
+
   }
 
   /**
@@ -93,6 +96,7 @@ object AsyncReadWrite {
    */
   def processorWithTimeOuts {
     import scalax.io.Resource
+    import akka.util.duration._
 
     val in = Resource.fromFile("/tmp/in")
     val out = Resource.fromFile("/tmp/out")
@@ -104,8 +108,8 @@ object AsyncReadWrite {
       in <- in.blocks().processor
       outApi <- out.outputProcessor
       _ <- in.repeatUntilEmpty()
-      block <- in.next.timeout(10000)
-      _ <- outApi.write(block).timeout(5000)
+      block <- in.next.timeout(10 seconds)
+      _ <- outApi.write(block).timeout(5 seconds)
     } yield ()
 
     // timeouts work on normal processors
@@ -144,6 +148,66 @@ object AsyncReadWrite {
     val processingTraversable = processor.traversable
 
     processingTraversable.async.mkString("\n")
+  }
+
+  /**
+   * Several ways to use the Processor API to
+   * copy data from one file to another.
+   */
+  def futureExec {
+    import scalax.io.Resource
+
+    val in = Resource.fromFile("/tmp/in")
+    val out = Resource.fromFile("/tmp/out")
+
+    // construct a processor in the normal way
+    // make sure to yield something so that map
+    // and flatmap calls are used instead of
+    // foreach.
+    val processor = for {
+      in <- in.blocks().processor
+      outApi <- out.outputProcessor
+      // keep reading from in until there is no more data
+      _ <- in.repeatUntilEmpty()
+      // read the next block of data from in
+      block <- in.next
+      // write block to output
+      _ <- outApi.write(block)
+    // yield something so that the processor
+    // is not executed as a for loop
+    } yield ()
+
+    // call future to execute the processor asynchonously
+    // Note that because processor is a
+    // LongTraversable (method repeatUntilEmpty is the cause of this)
+    // future will only return the LongTraversable.  To
+    // perform the writes we need the traversable to be traversed
+    processor.futureExec.onComplete {
+      case Right(_) => println("Yay done :)")
+      case Left(_) => println("Uh oh failure :(")
+    }
+
+    // A processor that performs the same task is as follows and
+    // perhaps demonstrates better why futureExec is required a bit
+    // more clearly
+
+    val processor2 = for {
+      in <- in.blocks().processor
+      outApi <- out.outputProcessor
+      _ <- in.repeatUntilEmpty()
+      block <- in.next
+    } yield outApi.asOutput.write(block)
+
+    // in this example it is more clear that the write
+    // is only performed as each element of the traversable
+    // is visited.  Thus to do the entire write
+    // the processor must be executed.
+    processor2.futureExec()
+
+    // A second way to perform the write (and in fact only a portion of the write)
+    processor2.traversable.drop(5).take(5).async.foreach(_ => ()).onSuccess {
+      case _ => println ("Yay, copied 5 blocks to the output")
+    }
   }
 
   /**
