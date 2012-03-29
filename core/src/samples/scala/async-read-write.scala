@@ -133,6 +133,7 @@ object AsyncReadWrite {
    * <p>
    *   A common use of the processing API is to read an input as a
    *   LongTraversable of records.
+   * </p>
    */
   def processorToLongTraversable {
     import scalax.io.Resource
