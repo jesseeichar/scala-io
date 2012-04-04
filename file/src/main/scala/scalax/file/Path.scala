@@ -948,7 +948,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    *           when continueOnFailure is false and a file cannot be deleted
    */
   def deleteRecursively(force : Boolean = false, continueOnFailure:Boolean=false): (Int,Int) = {
-    if (isDirectory) {
+    if (exists && isDirectory) {
       var successes = 0
       var failures = 0
 
@@ -970,7 +970,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
         failures += remaining
       }
       tryDelete(this)
-    } else {
+    } else if (exists) {
       try {
         delete(force)
         (1,0)
@@ -978,6 +978,8 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
         case e:IOException if continueOnFailure =>
         (0,1)
       }
+    } else {
+      (0,0)
     }
   }
 

@@ -46,10 +46,19 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
     val absolutePathToPwd = fixture.fs(".").toAbsolute
     val fs = fixture.fs
     import fs.{separator => sep}
-    
+
     assertEquals(absolutePathToPwd.root.get / "a", fixture.fs(sep,"a"))
     assertEquals(absolutePathToPwd.root.get / "a", fixture.fs.fromString(sep+"a"))
     assertEquals(absolutePathToPwd.root.get / "a", fixture.fs(sep+"a",fs.separator.charAt(0)))
+  }
+  @Test //@Ignore
+  def delete_a_nonexistent_path_returns_delete_value_of_0 : Unit = {
+    val path = fixture.fs.createTempDirectory()
+    path.delete(true)
+    assertTrue(path.nonExistent)
+    val (deleted, remaining) = path.deleteRecursively()
+    assertEquals(0,deleted)
+    assertEquals(0,remaining)
   }
   @Test //@Ignore
   def can_copy_empty_file : Unit = {
@@ -251,7 +260,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
 
   @Test //@Ignore
   def relativize_return_other_when_not_same_fileSystem = {
-    val other = new RamFileSystem()("other")
+    val other:Path = new RamFileSystem().apply("other")
     assertSame(other, fixture.root relativize other)
   }
   @Test //@Ignore
