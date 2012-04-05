@@ -6,15 +6,13 @@ import xml.{XML, NodeSeq, Elem, Node}
 
 
 class Example(project:String, path:File) {
+  parentPage =>
   private val text = IO.read(path, Charset.forName("UTF-8"))
   val base = path.getName.take(path.getName.size - ".scala".size)
   val name = base.mkString.split("-").map{_.capitalize} mkString " "
   
   private def cleanSummary(summary:String) = summary.lines.map { _.trim.replaceAll("\\*\\s*","")}.mkString(" ").replaceAll("\\s\\s"," ").replace(". ",".  ")
-  private def shortSummary(summary:String):String = summary.takeWhile(_ != '.') match {
-    case s if s.size > 100 => s.take(100).mkString+"..."
-    case s => s.mkString
-  }
+  private def shortSummary(summary:String):String = summary.takeWhile(_ != '.').mkString.replaceAll("\"","'")
   lazy val rawDesc = {
     val regex:Regex = """(?s)/\*\*(.+?)\*/\s*object""".r
     val firstMatch = regex.findFirstMatchIn(text)
@@ -25,10 +23,10 @@ class Example(project:String, path:File) {
     }
   }
   lazy val summary = rawDesc.takeWhile{_ != '.'} mkString
-  lazy val description:Node = parseXML(base,if(rawDesc == summary) "" else rawDesc.dropWhile{_ != '.'}.drop(1).mkString)
+  lazy val description:Node = parseXML(base,rawDesc)
   lazy val shortSummaryText:String = shortSummary(summary)
-  lazy val keyword = Keyword(project, name.toLowerCase,name,1,name,"category",Set(name))
-  lazy val page = Page(keyword,description,shortSummaryText,"",pages)
+  lazy val keyword = Keyword(project, name.toLowerCase,name,1,name,"category",project,shortSummaryText, Set(name))
+  lazy val page = Page(keyword,description,"",pages)
   
   lazy val pages:Seq[Page] = {
     
@@ -37,7 +35,7 @@ class Example(project:String, path:File) {
     regex.findAllIn(objText).matchData.toList map {m =>
       val rawName = m.group(3)
       val name = rawName.flatMap {
-        case c if c.isUpperCase => " "+c
+        case c if c.isUpper => " "+c
         case c => c.toString
       }.mkString.capitalize.trim
 
@@ -51,20 +49,8 @@ class Example(project:String, path:File) {
         case ((depth,text),'{') => (depth+1,text+'{')
         case ((depth,text),c) => (depth,text+c)
       }
-      val trimmedCode = {
-        def ws(l:String) = "^(\\s*)".r.findFirstMatchIn(l).get.group(1).size
-        var indent = 0
-        val lines = code.lines.foldLeft ("") {
-          case ("",l) =>
-            indent = ws(l)
-            l.substring(indent) + "\n"
-          case (acc,l) =>
-            acc + l.substring(Math.min(ws(l),indent)) + "\n"
-        }
-        lines mkString
-      }
-      val keyword = Keyword(project,name.toLowerCase.replaceAll("\\s","_"),name,2,name,"example",Keyword.split(code))
-      Page(keyword,summaryXml,shortSummary(summary),code)
+      val keyword = Keyword(project,name.toLowerCase.replaceAll("\\s","_"),name,2,name,"example",parentPage.keyword.id,shortSummary(summary),Keyword.split(code))
+      Page(keyword,summaryXml,code)
     }
   }
   
@@ -77,9 +63,21 @@ class Example(project:String, path:File) {
   }
 }
 
-case class Page(keyword:Keyword, fullSummaryXml:Node, shortSummary:String, code:String, children:Seq[Page]=Nil) {
+case class Page(keyword:Keyword, fullSummaryXml:Node, code:String, children:Seq[Page]=Nil) {
   def html = <span>
-    <div class="example_summary"><span>{fullSummaryXml}</span></div> 
+    <div class="example_summary"><span>{fullSummaryXml}</span></div>
     {if(code.trim().nonEmpty) <div class="example_code"><pre class="brush: scala">{code}</pre></div> else ""}
-</span>
+    {
+      if(children.isEmpty) {
+        <span/>
+      } else {
+        <ul id="content-list" ng:class="sectionId">
+          <li ng:repeat="example in examples" ng:class="getClass(example)">
+            <a href="{{getUrl(example)}}" ng:class="selectedPartial(example)"
+               tabindex="3"> <strong>{"{{example.shortName}}"}</strong> - <em>{"{{example.shortSummary}}"}</em></a>
+          </li>
+        </ul>
+      }
+    }
+  </span>
 }

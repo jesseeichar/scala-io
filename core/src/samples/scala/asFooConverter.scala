@@ -75,7 +75,7 @@ object AsFooConverter {
    * won't be closed as they are with the normal implementations
    * </p>
    */
-  def asPersistenFoo {
+  def asUnmanagedFoo {
     import scalax.io.JavaConverters._
     import scalax.io.{Output, LongTraversable, WriteChars}
     

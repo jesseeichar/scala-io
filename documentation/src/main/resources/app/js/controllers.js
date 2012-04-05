@@ -32,6 +32,8 @@ function DocsController($location, $browser, $window, $cookies) {
         self.partialTitle = 'Error: Page Not Found!';
         delete self.partialId;
       }
+
+      self.examples = angular.Array.filter(self.pages, {parent:self.partialId});
     }
   });
 

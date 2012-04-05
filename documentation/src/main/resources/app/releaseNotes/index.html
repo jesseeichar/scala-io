@@ -6,37 +6,6 @@
 	<li>Options to create Resources that don't close underlying resource.  For example if Standard In is to be processed, the stream should not be closed.  System.in.asUnmanagedInput will created an Input object from System.in.  See the examples for several examples of doing this.</li>
     <li>Added an Async API for Processors</li>
     <li>Added an experimental Async API for LongTraversable</li>
-	<li>Replaced openOutput, openSeekable, etc... with processors so read write is uniform
-	  <p>The required change is essentially as follows:
-	    <ul>
-	      <li>Before:
-	        <pre><code>
-	          output.openOutput{out =>
-	            out.write(3)
-	            out.write("hi")
-	          }
-            </code></pre>
-        </li>
-        <li>Now:
-          <pre><code>
-            for {
-              out <- output.outputProcessor
-            } {
-              out.write(3)
-              out.write(4)
-            }
-          </code></pre>
-          Note: Since out's write operations return Processors they can be interleaved within the for comprehension if needed like:
-          <pre><code>
-            for {
-              out <- output.outputProcessor
-              _ <- out.write(3)
-              _ <- out.write(4)
-            } ()
-          </code></pre>
-        </li>
-      </ul>
-	</li>
 	<li>Added a context object for each resource which allows configuration of the resource's parameters.  Currently there are only a couple of parameters that are
 	  common to all connections.  
 	  <ul>
@@ -46,4 +15,30 @@
 	    <li>An optional descriptive name for each resource for debugging</li>
     </ul>
   </li>
+    <li>Replaced openOutput, openSeekable, etc... with processors so read write is uniform
+        <p>The required change is essentially as follows:
+        <ul>
+            <li>Before:
+<pre><code>output.openOutput{out =>
+    out.write(3)
+    out.write("hi")
+}</code></pre>
+            </li>
+            <li>Now:
+<pre><code>for {
+    outp <- output.outputProcessor
+    out = outp.asOutput
+} {
+    out.write(3)
+    out.write(4)
+}</code></pre>
+        Or: Since out's write operations return Processors they can be interleaved within the for comprehension if needed like:
+<pre><code>for {
+    out <- output.outputProcessor
+    _ <- out.write(3)
+    _ <- out.write(4)
+} ()</code></pre>
+            </li>
+        </ul>
+    </li>
 </ul>

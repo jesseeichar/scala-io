@@ -18,8 +18,8 @@ object PerformanceReport {
       }
       val children = reportDir.listFiles
       val childNames = children.map(childName)
-      val keyword = Keyword("performance",name,formatName(name)+" Performance Report",1,formatName(name),"performance",Set("performance", name.toLowerCase) ++ childNames.map(_.toLowerCase))
-      val childKeywords = childNames.map{n => Keyword("performance",childId(reportDir,n),n.capitalize,2,n.capitalize,"performance graph",Set("performance", n.toLowerCase))} 
+      val keyword = Keyword("performance",name,formatName(name)+" Performance Report",1,formatName(name),"performance", "performance", formatName(name)+" Performance Report", Set("performance", name.toLowerCase) ++ childNames.map(_.toLowerCase))
+      val childKeywords = childNames.map{n => Keyword("performance",childId(reportDir,n),n.capitalize,2,n.capitalize,"performance graph","performance", n.capitalize, Set("performance", n.toLowerCase))}
       
       IO.write(new File(outDir, name+".html"), mainReport(reportDir,name,children).toString, utf8)
       IO.copyDirectory(inDir, outDir)

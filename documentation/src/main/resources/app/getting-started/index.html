@@ -23,9 +23,8 @@ libraryDependencies += "{{props.groupId}}" %% "scala-io-file" % "{{props.version
   </p>
   <p>
     <h3>Maven Example</h3>
-    <ol>
-      <li>Add core or file dependency to you project definition
-        <div><pre>
+     <p>Add core or file dependency to you project definition
+<div><pre>
 &lt;!-- Core -->
 &lt;dependency>
  &lt;groupId>{{props.groupId}}&lt;/groupId>
@@ -39,43 +38,32 @@ libraryDependencies += "{{props.groupId}}" %% "scala-io-file" % "{{props.version
  &lt;artifactId>scala-io-file_{{props.scalaVersion}}&lt;/artifactId>
  &lt;version>{{props.version}}&lt;/version>
 &lt;/dependency>
-      </pre></div>
-        Note that the scala version (_version) needs to be kept up to date manually unlike the sbt version
-      </li>
-      <li>Ensure that you have the scala tools repository added as one of your repositories in your pom.xml
-        <pre>
-&lt;repositories>
-  &lt;repository>
-    &lt;id>scala-tools.org&lt;/id>
-    &lt;name>Scala-Tools Maven2 Repository&lt;/name>
-    &lt;url>http://scala-tools.org/repo-releases&lt;/url>
-  &lt;/repository>
-&lt;/repositories>
-        </pre>
-      </li>
-    </ol>
+</pre></div>
+       Note that the scala version (_{{props.scalaVersion}}) needs to be kept up to date manually unlike the sbt version
+    </p>
 
     There is an example maven project prepackaged at <a href="http://jesseeichar.github.com/scala-io-doc/{{props.version}}/example_projects/example-maven-project.zip">example-maven-project.zip</a>.
     <pre>
 > curl -L http://jesseeichar.github.com/scala-io-doc/{{props.version}}/example_projects/example-maven-project.zip > \
     tmp.zip &amp;&amp; unzip tmp.zip &amp;&amp; rm tmp.zip
 > cd example-maven-project
+# if a SNAPSHOT version edit pom.xml and uncomment the snapshot repository section
 > mvn compile exec:java -Dexec.mainClass="Main"
     </pre>
   </p>
-  http://groups.google.com/group/scala-incubator
+  Any questions you may have can be asked on the mailing list: <a href="http://groups.google.com/group/scala-incubator">http://groups.google.com/group/scala-incubator</a>
   <p>
     <h3>Manual Download Example</h3>
     Naturally a manual download option is also available.  The dependencies are fairly simple:
     <ul>
       <li>
-        <a href="http://scala-tools.org/repo-releases/com/github/jsuereth/scala-arm/scala-arm_{{props.scalaVersion}}/{{props.armVersion}}/scala-arm_{{props.scalaVersion}}-{{props.armVersion}}.jar">Scala ARM</a>
+          <a href="http://search.maven.org/remotecontent?filepath=com/github/jsuereth/scala-arm/scala-arm_{{props.scalaVersion}}/{{props.armVersion}}/scala-arm_{{props.scalaVersion}}-{{props.armVersion}}.jar">Scala Core</a>
       </li>
       <li>
-        <a href="http://scala-tools.org/repo-releases/{{props.ioMavenPath}}/scala-io-core_{{props.scalaVersion}}/{{props.version}}/scala-io-core_{{props.scalaVersion}}-{{props.version}}.jar">Scala Core</a>
+        <a href="{{props.SNAPSHOT_DOWNLOAD_URL}}{{props.ioMavenPath}}/scala-io-core_{{props.scalaVersion}}/{{props.version}}/scala-io-core_{{props.scalaVersion}}-{{props.version}}.jar">Scala Core</a>
       </li>
       <li>
-        <a href="http://scala-tools.org/repo-releases/{{props.ioMavenPath}}/scala-io-file_{{props.scalaVersion}}/{{props.version}}/scala-io-file_{{props.scalaVersion}}-{{props.version}}.jar">Scala File (Optional)</a>
+        <a href="{{props.SNAPSHOT_DOWNLOAD_URL}}{{props.ioMavenPath}}/scala-io-file_{{props.scalaVersion}}/{{props.version}}/scala-io-file_{{props.scalaVersion}}-{{props.version}}.jar">Scala File (Optional)</a>
       </li>
     </ul>
   </p>

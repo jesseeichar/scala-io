@@ -120,12 +120,17 @@ println("SourcePath = "+sourcePath)
   }
   
   def projectPropertiesJS = {
-    val snapshotBlurb = 
-      if (version.endsWith("-SNAPSHOT")) 
-        "These are directions for a SNAPSHOT Release so the http://scala-tools.org/repo-snapshots/ repository must be used instead of the normal releases repo that are in the following directions. Since this is a snapshot release I leave learning how to do that to you."
+    val snapshotBlurb =
+      if (version.endsWith("-SNAPSHOT"))
+        "These are directions for a SNAPSHOT Release so the Maven Snapshot Repository (https://oss.sonatype.org/content/repositories/snapshots) must be used instead of the normal releases repo that are in the following directions. Since this is a snapshot release I leave learning how to do that to you."
       else
         ""
-      
+    val snapshotDownloadURL =
+      if (version.endsWith("-SNAPSHOT"))
+        "https://oss.sonatype.org/content/repositories/snapshots/"
+      else
+        "http://search.maven.org/remotecontent?filepath="
+
     val properties =
     """|var IO_PROPS = {
        |  groupId: "%s",
@@ -133,8 +138,9 @@ println("SourcePath = "+sourcePath)
        |  scalaVersion: "%s",
        |  armVersion: "%s",
        |  ioMavenPath: "%1$s".replace(/\./g,'/'),
-       |  SNAPSHOT_BLURB: "%s"
-       |};""".format(organization, version, buildScalaVersion, armVersion, snapshotBlurb)
+       |  SNAPSHOT_BLURB: "%s",
+       |  SNAPSHOT_DOWNLOAD_URL: "%s",
+       |};""".format(organization, version, buildScalaVersion, armVersion, snapshotBlurb, snapshotDownloadURL)
          
     properties.trim.stripMargin.lines.map(_.trim).mkString
   }

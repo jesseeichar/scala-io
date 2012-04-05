@@ -51,7 +51,7 @@ object AsyncReadWrite {
   }
 
   /**
-   * Asynchronously read the header of a file and print the header in a more legible form
+   * Asynchronously read the header of a file and print the header in a more legible form.
    * <p>
    * The other simplest method for async IO is to create an AsyncLongTraversable from a LongTraversable
    * by calling the async method on LongTraversable.
@@ -212,6 +212,7 @@ object AsyncReadWrite {
   }
 
   /**
+   * Process only a portion of a file asynchronously.
    * A common case is to only process a portion of a file.  For example suppose we want the 5th record.
    * a record size is in the header so we have to read the header for the offset and jump to the 5th record.
    * <p>

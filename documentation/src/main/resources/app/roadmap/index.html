@@ -3,53 +3,28 @@
 won't be forever being developed.  In addition to the major items listed below the common task of
 improving API and removing inconsistency will always be a focus.  As will performance.</p>
 <ol>
-    <li><strong>Large Data Integration Tests</strong>
-        <div>Create test sets that are very large (several GB) and verify that the operations can
-        handle the load and work correctly when skipping data</div>
-    </li>
-    <li><strong>Write Benchmark Tests</strong>
-        <div> Benchmark the integration tests as well as other types of operations (such as
-            large number of small requests on a large dataset).
-            <br/>
-            The idea is to track the performance of each version and ensure it continues to
-            increase each version (and by how much)
-        </div>
-    </li>
-    <li><strong>Add error handling to resources</strong>
-        <div>
-            At the moment unless a resource is used via Josh's ARM API an error reading from a
-            stream results in an exception being thrown.  I want to allow a user to add an error
-            handler on the resource itself rather than having to use a catch block each time the
-            resource is used
-        </div>
-    </li>
-    <li><strong>Add Iteratee style IO processing</strong>
-        <div>
-            This is a very flexible way of handling IO with very good compositional properties
-            but for some (who are not familiar with the pattern) it can be less approachable
-        </div>
-    </li>
-    <li><strong>Add asynchronous callback style IO handling</strong>
-        <div>
-            This will appear much like that which is seen in NodeJS and will be implemented
-            based on the Iteratee IO processing
-        </div>
-    </li>
     <li><strong>Implement Java 7 Implementations</strong>
-        <div>This may be raised in the list of priorities depending on how long each task takes.</div>
+        <div>We need a Java 7 implementation to make sure that various aspects of the Scala-io API integrate nicely.
+        Especially Async API and Seekable channels.</div>
+    </li>
+    <li><strong>Deepen the Async APIs</strong>
+        <div>The Java 7 implementation will no doubt show some shortcomings of the current API.  Scala-io needs
+        to be able to use the Java 7 APIs so that the underlying OS async io capabilities can be used instead of
+        blocking threads.</div>
     </li>
 </ol>
 <strong>Scala IO File</strong>
 <ol>
-    <li><strong>Implement ZipFS</strong>
+    <li><strong>Watch Functionality</strong>
         <div>
-            The goal is to have several different filesystem implementations that have different
-            characteristics to insure that the API is sufficiently flexible and, most importantly,
-            to make sure that the file system implementation API is flexible.  The usage API is
-            design following NIO2 so I am fairly confident that has sufficient flexibility but the
-            implementer's API is also a very important API.
+            Add functionality that monitors filesystem for changes
+        </div>
+    </li>
+    <li><strong>Plugin system</strong>
+        <div>
+            Filesystem plugin system. Will be compatible with Java 7 API and hopefully scala-io can be Java 7 plugins
+            and scala-io should be able to use Java 7 plugins as well.
         </div>
     </li>
     <li><strong>Implement based on Java 7</strong></li>
-    <li><strong>TBD...</strong></li>
 </ol>
