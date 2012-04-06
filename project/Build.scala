@@ -4,7 +4,7 @@ import scala.xml.transform._
 
 object BuildConstants {
   val organization = "com.github.scala-incubator.io"
-  val version = "0.4-SNAPSHOT"
+  val version = "0.4.0"
   val armVersion = "1.1"
   val scalaVersion = "2.9.1"
 }
