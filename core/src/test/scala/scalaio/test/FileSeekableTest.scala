@@ -22,10 +22,11 @@ abstract class AbstractFileSeekableTest extends AbstractSeekableTests[SeekableBy
   def after {
     folder.delete()
   }
-  lazy val file = new File(folder.getRoot, "testfile")
+  lazy val file = new File(new File(folder.getRoot, "parent"),"testfile")
   def forceErrorOnAccess = {
     file.delete()
-    file.getParentFile.setReadOnly()
+    file.createNewFile()
+    file.setReadOnly()
   }
 
   def canAddCloseAction = false
