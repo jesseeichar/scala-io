@@ -212,8 +212,8 @@ trait Resource[+R] extends ManagedResourceOperations[R] with ResourceOps[R, Reso
 
 /**
  * An Resource object that is a also an [[scalax.io.Input]].  This trait adds methods
- * for converting between common io types such as to a [[scalax.io.ReaderResource]] or
- * [[scalax.io.ReadableByteChannelResource]]
+ * for converting between common io types such as to a [[scalax.io.managed.ReaderResource]] or
+ * [[scalax.io.managed.ReadableByteChannelResource]]
  *
  * @tparam R
  *          the type of underlying resource that is created
@@ -224,9 +224,9 @@ trait Resource[+R] extends ManagedResourceOperations[R] with ResourceOps[R, Reso
 trait InputResource[+R] extends Resource[R] with Input with ResourceOps[R, InputResource[R]] {
 
     /**
-     * Obtain the [[scalax.io.InputStreamResource]](typically) version of this object.
+     * Obtain the [[scalax.io.managed.InputStreamResource]](typically) version of this object.
      *
-     * @return the [[scalax.io.InputStreamResource]](typically) version of this object.
+     * @return the [[scalax.io.managed.InputStreamResource]](typically) version of this object.
      */
   def inputStream: InputResource[InputStream]
 
@@ -248,15 +248,15 @@ trait InputResource[+R] extends Resource[R] with Input with ResourceOps[R, Input
     /**
      * Obtain the [[scalax.io.ReadCharsResource]] version of this object.
      *
-     * @param codec the codec used to convert from bytes to characters
+     * @param sourceCodec the codec used to convert from bytes to characters
      *
      * @return the [[scalax.io.ReadCharsResource]] version of this object.
      */
     def reader(implicit sourceCodec: Codec = Codec.default) : ReadCharsResource[Reader]
     /**
-     * Obtain the [[scalax.io.ReadableByteChannelResource]](typically) version of this object.
+     * Obtain the [[scalax.io.managed.ReadableByteChannelResource]](typically) version of this object.
      *
-     * @return the [[scalax.io.ReadableByteChannelResource]](typically) version of this object.
+     * @return the [[scalax.io.managed.ReadableByteChannelResource]](typically) version of this object.
      */
     def readableByteChannel: InputResource[ReadableByteChannel]
     final def size : Option[Long] = sizeFunc()
@@ -279,8 +279,8 @@ trait ReadCharsResource[+R] extends Resource[R] with ReadChars with ResourceOps[
 
 /**
  * An Resource object that is a also an [[scalax.io.Output]].  This trait adds methods
- * for converting between common io types such as to a [[scalax.io.WriterResource]] or
- * [[scalax.io.WritableByteChannelResource]]
+ * for converting between common io types such as to a [[scalax.io.managed.WriterResource]] or
+ * [[scalax.io.managed.WritableByteChannelResource]]
  *
  * @tparam R
  *          the type of underlying resource that is created
@@ -298,15 +298,15 @@ trait OutputResource[+R] extends Resource[R] with Output with ResourceOps[R, Out
   /**
    * Obtain the [[scalax.io.WriteCharsResource]] version of this object.
    *
-   * @param codec the codec used to convert from bytes to characters
+   * @param sourceCodec the codec used to convert from bytes to characters
    *
    * @return the [[scalax.io.WriteCharsResource]] version of this object.
    */
   def writer(implicit sourceCodec: Codec = Codec.default) : WriteCharsResource[Writer]
   /**
-   * Obtain the [[scalax.io.WritableByteChannel]](typically) version of this object.
+   * Obtain the [[scalax.io.managed.WritableByteChannelResource]](typically) version of this object.
    *
-   * @return the [[scalax.io.WritableByteChannel]](typically) version of this object.
+   * @return the [[scalax.io.managed.WritableByteChannelResource]](typically) version of this object.
    */
   def writableByteChannel: OutputResource[WritableByteChannel]
     override def doCopyFrom(input: Input): Unit =
@@ -330,7 +330,7 @@ trait OutputResource[+R] extends Resource[R] with Output with ResourceOps[R, Out
  * An object that can be viewed as a Seekable object. For example
  * a FileChannel.
  *
- * @param R
+ * @tparam R
  *          the type of the underlying Resource
  *
  * @author  Jesse Eichar
@@ -374,7 +374,7 @@ trait WriteCharsResource[+R] extends Resource[R] with WriteChars with ResourceOp
 object Resource {
   // InputStream factory methods
   /**
-   *  Create an [[scalax.io.InputStreamResource]] from an InputStream or subclass
+   *  Create an [[scalax.io.managed.InputStreamResource]] from an InputStream or subclass
    *
    * $openDisclaimer
    *

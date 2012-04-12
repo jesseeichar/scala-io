@@ -86,13 +86,6 @@ trait Input {
    *
    *
    * @param output output sink to copy the data to
-   * @param finalize do not forward request to output's copyFrom method.  
-   * 				 Often only one end of the transaction will know how to efficiently transfer
-   * 				 data so a common pattern is to check the output and see if the
-   * 				 type of the Output object is a known type.  If not then the
-   * 				 output object will be sent the request.  However, to prevent
-   * 				 an infinite loop the finalize will be set to true so the request
-   * 				 is not then forwarded back to copyTo  
    */
   def copyDataTo(output:Output): Unit = output.copyDataFrom(this)
 

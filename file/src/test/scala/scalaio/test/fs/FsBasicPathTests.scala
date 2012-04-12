@@ -493,7 +493,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
       val tree2 = fixture.tree()._1
       val target = fixture.path
       move( tree1, target, tree2, canReplace=false)
-     }
+     }(5)
   }
   @Test //@Ignore
   def path_can_copy_directory_trees() : Unit = {

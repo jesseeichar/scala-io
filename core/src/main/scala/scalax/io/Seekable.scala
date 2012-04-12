@@ -9,17 +9,13 @@
 package scalax.io
 
 import java.nio.{ByteBuffer, CharBuffer}
-import managed.{WritableByteChannelResource, SeekableByteChannelResource, OutputStreamResource, ByteChannelResource}
-import nio.SeekableFileChannel
+import managed.{WritableByteChannelResource, SeekableByteChannelResource, ByteChannelResource}
 import processing.SeekableProcessor
-import scalax.io._
 import scala.collection.Traversable
 import scala.annotation._
 import collection.mutable.{ArrayOps, WrappedArray}
-import StandardOpenOption._
-import java.nio.channels.{FileChannel, ByteChannel, WritableByteChannel}
-import java.io.{OutputStream, RandomAccessFile, File}
-import scalax.io.ResourceAdapting.ChannelOutputStreamAdapter
+import java.nio.channels.{ByteChannel, WritableByteChannel}
+import java.io.File
 
 /**
  * A strategy trait used with the Seekable.patch to control how data is
@@ -308,7 +304,7 @@ trait Seekable extends Input with Output {
    *          the data to write
    * @param codec
    *          the codec of the string to be written. The string will
-   *          be converted to the encoding of {@link codec}
+   *          be converted to the encoding of [[scalax.io.Codec]]
    */
   def append(string: String)(implicit codec: Codec = Codec.default): Unit = {
     append(codec encode string)
@@ -325,7 +321,7 @@ trait Seekable extends Input with Output {
    *          or after the last.
    * @param codec
    *          The codec of the strings to be written. The strings will
-   *          be converted to the encoding of {@link codec}
+   *          be converted to the encoding of [[scalax.io.Codec]]
    */
   def appendStrings(strings: Traversable[String], separator:String = "")(implicit codec: Codec = Codec.default): Unit = {
     val sepBytes = codec encode separator
