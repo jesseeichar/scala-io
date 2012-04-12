@@ -271,7 +271,7 @@ abstract class FileSystem {
     }
 
     result match {
-      case Separator(sep) if !roots.map(_.path).contains(segment) =>
+      case Separator(sep) =>
         val msg = "%s is not permitted as a path 'segment' for this filesystem.  Segment in question: %s.  " +
         		"\nIf you want to create a Path from a system dependent string then use fromString.  " +
         		"If you want to create a child path use resolve instead of / to create the child path.  " +

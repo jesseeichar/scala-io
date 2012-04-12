@@ -19,9 +19,9 @@ import org.junit.Assume.assumeTrue
 
 
 trait AssertionSugar {
+  private def isWindows = System.getProperty("os.name").toLowerCase.contains("win")
   def assumeNotWindows = {
-    val os = System.getProperty("os.name")
-    assumeTrue(!os.toLowerCase.contains("win"))
+    assumeTrue(!isWindows)
   }
   def ignoring[E <: Throwable](test : => Unit)(implicit m:Manifest[E]) : Unit = {
     val error = try {

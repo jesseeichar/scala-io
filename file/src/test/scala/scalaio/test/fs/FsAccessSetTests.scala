@@ -12,8 +12,10 @@ import scalax.file.Path.AccessModes._
 import org.junit.Assert._
 import org.junit.Test
 import scalax.file.attributes._
+import scalax.test.sugar.AssertionSugar
+import scalax.file.defaultfs.DefaultPath
 
-abstract class FsAccessSetTests extends Fixture  {
+abstract class FsAccessSetTests extends Fixture {
 
   @Test
   def access_set_iterate_through_access : Unit = {
@@ -69,19 +71,19 @@ abstract class FsAccessSetTests extends Fixture  {
     file.access = "rw"
     assertEqualAttribute(true, classOf[ReadAccessAttribute])
     assertEqualAttribute(true, classOf[WriteAccessAttribute])
-    assertEqualAttribute(false, classOf[ExecuteAccessAttribute])
+    if (!isWindows || !file.isInstanceOf[DefaultPath]) assertEqualAttribute(false, classOf[ExecuteAccessAttribute])
     assertEqualAttribute(file.lastModified, classOf[LastModifiedAttribute])
 
     file.access -= Write
     assertEqualAttribute(true, classOf[ReadAccessAttribute])
     assertEqualAttribute(false, classOf[WriteAccessAttribute])
-    assertEqualAttribute(false, classOf[ExecuteAccessAttribute])
+    if (!isWindows || !file.isInstanceOf[DefaultPath]) assertEqualAttribute(false, classOf[ExecuteAccessAttribute])
     assertEqualAttribute(file.lastModified, classOf[LastModifiedAttribute])
     
     file.access += Write
     assertEqualAttribute(true, classOf[ReadAccessAttribute])
     assertEqualAttribute(true, classOf[WriteAccessAttribute])
-    assertEqualAttribute(false, classOf[ExecuteAccessAttribute])
+    if (!isWindows || !file.isInstanceOf[DefaultPath]) assertEqualAttribute(false, classOf[ExecuteAccessAttribute])
     assertEqualAttribute(file.lastModified, classOf[LastModifiedAttribute])
     
     val newTime = 1324046126000L;
@@ -101,19 +103,19 @@ abstract class FsAccessSetTests extends Fixture  {
     file.attributes = List(WriteAccessAttribute(true), ReadAccessAttribute(true))
     assertEqualAttribute(true, classOf[ReadAccessAttribute])
     assertEqualAttribute(true, classOf[WriteAccessAttribute])
-    assertEqualAttribute(false, classOf[ExecuteAccessAttribute])
+    if (!isWindows || !file.isInstanceOf[DefaultPath]) assertEqualAttribute(false, classOf[ExecuteAccessAttribute])
     assertEqualAttribute(file.lastModified, classOf[LastModifiedAttribute])
 
     file.attributes = List(WriteAccessAttribute(false))
     assertEqualAttribute(true, classOf[ReadAccessAttribute])
     assertEqualAttribute(false, classOf[WriteAccessAttribute])
-    assertEqualAttribute(false, classOf[ExecuteAccessAttribute])
+    if (!isWindows || !file.isInstanceOf[DefaultPath]) assertEqualAttribute(false, classOf[ExecuteAccessAttribute])
     assertEqualAttribute(file.lastModified, classOf[LastModifiedAttribute])
     
     file.attributes = List(WriteAccessAttribute(true))
     assertEqualAttribute(true, classOf[ReadAccessAttribute])
     assertEqualAttribute(true, classOf[WriteAccessAttribute])
-    assertEqualAttribute(false, classOf[ExecuteAccessAttribute])
+    if (!isWindows || !file.isInstanceOf[DefaultPath]) assertEqualAttribute(false, classOf[ExecuteAccessAttribute])
     assertEqualAttribute(file.lastModified, classOf[LastModifiedAttribute])
     
     val newTime = 1324046126000L;
