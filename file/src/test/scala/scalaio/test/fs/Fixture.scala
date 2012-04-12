@@ -13,6 +13,7 @@ import org.junit.{
   Before, After
 }
 import scalax.file.FileSystem
+import scalax.test.sugar.AssertionSugar
 
 trait Fixture {
 
@@ -33,7 +34,7 @@ trait Fixture {
   @After
   def after() : Unit = try {fixture.after()} catch {case  e => println("error in after:"+e)}
 
-  def isWindows = (System.getProperty("os.name").toLowerCase startsWith "windows") && fixture.fs == FileSystem.default
+  def isWindows = AssertionSugar.isWindows && fixture.fs == FileSystem.default
   def permissions(modes:AccessMode*)=
     if(isWindows) Set(modes:_*) ++ Set(Read, Execute)
     else Set(modes:_*)

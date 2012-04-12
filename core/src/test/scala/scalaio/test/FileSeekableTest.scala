@@ -4,6 +4,7 @@ import org.junit.rules.TemporaryFolder
 import org.junit.{ After, Before }
 import scalax.io._
 import java.io.{IOException, RandomAccessFile, File}
+import scalax.test.sugar.AssertionSugar
 
 abstract class AbstractFileSeekableTest extends AbstractSeekableTests[SeekableByteChannel] with SeekableTestUtils[SeekableByteChannel] {
   var folder: TemporaryFolder = _
@@ -20,8 +21,13 @@ abstract class AbstractFileSeekableTest extends AbstractSeekableTests[SeekableBy
   }
   lazy val file = new File(folder.getRoot, "testfile")
   def forceErrorOnAccess = {
-    file.delete()
-    file.getParentFile.setReadOnly()
+    if(AssertionSugar.isWindows) {
+      file.createNewFile()
+      file.setReadOnly()
+    } else {
+      file.delete()
+      file.getParentFile.setReadOnly()
+    }
   }
 
   def canAddCloseAction = false
