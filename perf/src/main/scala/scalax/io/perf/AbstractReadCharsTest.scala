@@ -36,14 +36,6 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
     having attribute (Keys.WarmupRuns -> 10) in {
 
       measure method "chars" in {
-        withSizeDef { size =>
-          newInResource(size)
-        } run { in =>
-          val f = new CountFunction[Char]
-          in.chars.foreach(f)
-        }
-      }
-      measure method "chars" in {
         having attribute ("baseline", "") in {
           having attribute ("version", "java.io read chars with InputStreamReader") in {
           withSizeDef { size =>
@@ -60,6 +52,14 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
               } while (read > 0)
               reader.close()
           }}
+        }
+      }
+      measure method "chars" in {
+        withSizeDef { size =>
+          newInResource(size)
+        } run { in =>
+          val f = new CountFunction[Char]
+          in.chars.foreach(f)
         }
       }
       measure method "lines newline" in {
@@ -99,14 +99,6 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
         }
       }
       measure method "lines Auto" in {
-        withSizeDef { size =>
-          newInResource(5, size, NewLine.sep)
-        } run { in =>
-          val f = new CountFunction[String]
-          in.lines(Auto).foreach(f)
-        }
-      }
-      measure method "lines Auto" in {
         having attribute ("baseline", "") in {
           having attribute ("version", "io.Source.getLines") in {
           withSizeDef { size =>
@@ -135,12 +127,12 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
           }}
         }
       }
-      measure method "lines CR" in {
+      measure method "lines Auto" in {
         withSizeDef { size =>
-          newInResource(5, size, CarriageReturn.sep)
+          newInResource(5, size, NewLine.sep)
         } run { in =>
           val f = new CountFunction[String]
-          in.lines(CarriageReturn).foreach(f)
+          in.lines(Auto).foreach(f)
         }
       }
       measure method "lines CR" in {
@@ -171,11 +163,12 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
           }}
         }
       }
-      measure method "lines RN" in {
+      measure method "lines CR" in {
         withSizeDef { size =>
-          newInResource(5, size, RNPair.sep)
+          newInResource(5, size, CarriageReturn.sep)
         } run { in =>
-          assert(in.lines(RNPair).forall { _.last != '\n' })
+          val f = new CountFunction[String]
+          in.lines(CarriageReturn).foreach(f)
         }
       }
       measure method "lines RN" in {
@@ -201,12 +194,11 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
           }
         }
       }
-      measure method "lines Single Custom" in {
+      measure method "lines RN" in {
         withSizeDef { size =>
-          newInResource(5, size, "*")
+          newInResource(5, size, RNPair.sep)
         } run { in =>
-          val f = new CountFunction[String]
-          in.lines(Custom("*")).foreach(f)
+          assert(in.lines(RNPair).forall { _.last != '\n' })
         }
       }
       measure method "lines Single Custom" in {
@@ -221,13 +213,13 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
           }
         }}
       }
-      measure method "lines Multi Custom" in {
-          withSizeDef { size =>
-          newInResource(5, size, "**")
-          } run { in =>
+      measure method "lines Single Custom" in {
+        withSizeDef { size =>
+          newInResource(5, size, "*")
+        } run { in =>
           val f = new CountFunction[String]
-                  in.lines(Custom("**")).foreach(f)
-          }
+          in.lines(Custom("*")).foreach(f)
+        }
       }
       measure method "lines Multi Custom" in {
           having attribute ("baseline", "") in {
@@ -241,13 +233,12 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
                   }
               }}
       }
-      measure method "chars drop" in {
+      measure method "lines Multi Custom" in {
         withSizeDef { size =>
-          (size / 2, newInResource(size))
-        } run {
-          case (toDrop, in) =>
-          val f = new CountFunction[Char]
-          in.chars.drop(toDrop).foreach(f)
+          newInResource(5, size, "**")
+        } run { in =>
+          val f = new CountFunction[String]
+          in.lines(Custom("**")).foreach(f)
         }
       }
       measure method "chars drop" in {
@@ -273,13 +264,13 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
           }}
         }
       }
-      measure method "chars take" in {
+      measure method "chars drop" in {
         withSizeDef { size =>
           (size / 2, newInResource(size))
         } run {
-          case (toTake, in) =>
-          val f = new CountFunction[Char]
-          in.chars.take(toTake).foreach(f)
+          case (toDrop, in) =>
+            val f = new CountFunction[Char]
+            in.chars.drop(toDrop).foreach(f)
         }
       }
       measure method "chars take" in {
@@ -301,6 +292,15 @@ abstract class AbstractReadCharsTest extends PerformanceDSLTest {
               in.close
           }
         }}
+      }
+      measure method "chars take" in {
+        withSizeDef { size =>
+          (size / 2, newInResource(size))
+        } run {
+          case (toTake, in) =>
+            val f = new CountFunction[Char]
+            in.chars.take(toTake).foreach(f)
+        }
       }
     }
   }

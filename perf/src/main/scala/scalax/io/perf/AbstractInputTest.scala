@@ -42,6 +42,29 @@ trait AbstractInputTest extends PerformanceDSLTest {
   performance of "Input" in {
     having attribute (Keys.WarmupRuns -> 10) in {
       measure method "bytes" in {
+        having attribute ("baseline", "") in {
+          having attribute ("version", "java.io while loop with buffer") in {
+            withSizeDef { size =>
+              (size, newIn(size))
+            } run {
+              case (size, inFunc) =>
+                val in = inFunc()
+                val buffer = new Array[Byte](Buffers.BufferSize)
+                var read = in.read(buffer)
+                while (read > 0) {
+                  var i = 0
+                  while (i < read) {
+                    buffer(i)
+                    i += 1
+                  }
+                  read = in.read(buffer)
+                }
+                in.close
+            }
+          }
+        }
+      }
+      measure method "bytes" in {
         withSizeDef { size =>
           newInResource(size)
         } run { in =>
@@ -80,37 +103,6 @@ trait AbstractInputTest extends PerformanceDSLTest {
           }
         }
       }
-      measure method "bytes" in {
-        having attribute ("baseline", "") in {
-          having attribute ("version", "java.io while loop with buffer") in {
-            withSizeDef { size =>
-              (size, newIn(size))
-            } run {
-              case (size, inFunc) =>
-                val in = inFunc()
-                val buffer = new Array[Byte](Buffers.BufferSize)
-                var read = in.read(buffer)
-                while (read > 0) {
-                  var i = 0
-                  while (i < read) {
-                    buffer(i)
-                    i += 1
-                  }
-                  read = in.read(buffer)
-                }
-                in.close
-            }
-          }
-        }
-      }
-      measure method "bytesAsInts" in {
-        withSizeDef { size =>
-          newInResource(size)
-        } run { in =>
-          val f = new CountFunction[Int]
-          in.bytesAsInts.foreach(f)
-        }
-      }
       measure method "bytesAsInts" in {
         having attribute ("baseline", "") in {
           having attribute ("version", "java.io while loop impl") in {
@@ -135,11 +127,12 @@ trait AbstractInputTest extends PerformanceDSLTest {
           }
         }
       }
-      measure method "byteArray" in {
+      measure method "bytesAsInts" in {
         withSizeDef { size =>
           newInResource(size)
         } run { in =>
-          in.byteArray
+          val f = new CountFunction[Int]
+          in.bytesAsInts.foreach(f)
         }
       }
       measure method "byteArray" in {
@@ -153,14 +146,11 @@ trait AbstractInputTest extends PerformanceDSLTest {
           }
         }
       }
-      measure method "copyDataTo" in {
+      measure method "byteArray" in {
         withSizeDef { size =>
-          val in = newInResource(size)
-          val out = fromOutputStream(NullOutputStream)
-          (in, out)
-        } run {
-          case (in, out) =>
-            in.copyDataTo(out)
+          newInResource(size)
+        } run { in =>
+          in.byteArray
         }
       }
       measure method "copyDataTo" in {
@@ -177,22 +167,22 @@ trait AbstractInputTest extends PerformanceDSLTest {
           }
         }
       }
+      measure method "copyDataTo" in {
+        withSizeDef { size =>
+          val in = newInResource(size)
+          val out = fromOutputStream(NullOutputStream)
+          (in, out)
+        } run {
+          case (in, out) =>
+            in.copyDataTo(out)
+        }
+      }
       measure method "chars" in {
         withSizeDef { size =>
           newInResource(size)
         } run { in =>
           val f = new CountFunction[Char]
           in.chars.foreach(f)
-        }
-      }
-      measure method "chars" in {
-        having attribute ("version", "io.Source") in {
-          withSizeDef { size =>
-            newIn(size)
-          } run { in =>
-            val f = new CountFunction[Char]
-            io.Source.fromInputStream(in(), "UTF-8").foreach(f)
-          }
         }
       }
       measure method "chars" in {
@@ -217,6 +207,16 @@ trait AbstractInputTest extends PerformanceDSLTest {
                 } while (read > 0)
                 reader.close()
             }
+          }
+        }
+      }
+      measure method "chars" in {
+        having attribute ("version", "io.Source") in {
+          withSizeDef { size =>
+            newIn(size)
+          } run { in =>
+            val f = new CountFunction[Char]
+            io.Source.fromInputStream(in(), "UTF-8").foreach(f)
           }
         }
       }
@@ -258,6 +258,22 @@ trait AbstractInputTest extends PerformanceDSLTest {
         }
       }
       measure method "lines Auto" in {
+        having attribute ("baseline", "") in {
+          having attribute ("version", "Apache IOUtils line") in {
+            withSizeDef { size =>
+              newIn(5, size, NewLine.sep)
+            } run { inFunc =>
+              val in = inFunc()
+              val iter = IOUtils.lineIterator(in, "UTF-8")
+              while (iter.hasNext()) {
+                iter.next()
+              }
+              in.close()
+            }
+          }
+        }
+      }
+      measure method "lines Auto" in {
         withSizeDef { size =>
           newInResource(5, size, NewLine.sep)
         } run { in =>
@@ -277,40 +293,14 @@ trait AbstractInputTest extends PerformanceDSLTest {
           }
         }
       }
-      measure method "lines Auto" in {
-        having attribute ("baseline", "") in {
-          having attribute ("version", "Apache IOUtils line") in {
-            withSizeDef { size =>
-              newIn(5, size, NewLine.sep)
-            } run { inFunc =>
-              val in = inFunc()
-              val iter = IOUtils.lineIterator(in, "UTF-8")
-              while (iter.hasNext()) {
-                iter.next()
-              }
-              in.close()
-            }
-          }
-        }
-      }
       measure method "lines CR" in {
-        withSizeDef { size =>
-          newInResource(5, size, CarriageReturn.sep)
-        } run { in =>
-          val f = new CountFunction[String]
-          in.lines(Line.Terminators.CarriageReturn).foreach(f)
-        }
-      }
-      measure method "lines CR" in {
-        having attribute ("baseline", "") in {
-          having attribute ("version", "io.Source.getLines") in {
-            withSizeDef { size =>
-              val in = newIn(5, size, CarriageReturn.sep)
-              () => scala.io.Source.fromInputStream(in(), "UTF-8")
-            } run { source =>
-              val f = new CountFunction[String]
-              source().getLines().foreach(f)
-            }
+        having attribute ("version", "io.Source.getLines") in {
+          withSizeDef { size =>
+            val in = newIn(5, size, CarriageReturn.sep)
+            () => scala.io.Source.fromInputStream(in(), "UTF-8")
+          } run { source =>
+            val f = new CountFunction[String]
+            source().getLines().foreach(f)
           }
         }
       }
@@ -330,12 +320,12 @@ trait AbstractInputTest extends PerformanceDSLTest {
           }
         }
       }
-      measure method "lines RN" in {
+      measure method "lines CR" in {
         withSizeDef { size =>
-          newInResource(5, size, RNPair.sep)
+          newInResource(5, size, CarriageReturn.sep)
         } run { in =>
           val f = new CountFunction[String]
-          in.lines(Line.Terminators.RNPair).foreach(f)
+          in.lines(Line.Terminators.CarriageReturn).foreach(f)
         }
       }
       measure method "lines RN" in {
@@ -352,6 +342,14 @@ trait AbstractInputTest extends PerformanceDSLTest {
               in.close()
             }
           }
+        }
+      }
+      measure method "lines RN" in {
+        withSizeDef { size =>
+          newInResource(5, size, RNPair.sep)
+        } run { in =>
+          val f = new CountFunction[String]
+          in.lines(Line.Terminators.RNPair).foreach(f)
         }
       }
       measure method "lines RN" in {
@@ -377,14 +375,6 @@ trait AbstractInputTest extends PerformanceDSLTest {
         }
       }
       measure method "lines Single Custom" in {
-        withSizeDef { size =>
-          newInResource(5, size, "%")
-        } run { in =>
-          val f = new CountFunction[String]
-          in.lines(Custom("%")).foreach(f)
-        }
-      }
-      measure method "lines Single Custom" in {
         having attribute ("baseline", "") in {
           having attribute ("version", "tiString split") in {
             withSizeDef { size =>
@@ -397,12 +387,12 @@ trait AbstractInputTest extends PerformanceDSLTest {
           }
         }
       }
-      measure method "lines Multi Custom" in {
+      measure method "lines Single Custom" in {
         withSizeDef { size =>
-          newInResource(5, size, "**")
+          newInResource(5, size, "%")
         } run { in =>
           val f = new CountFunction[String]
-          in.lines(Custom("**")).foreach(f)
+          in.lines(Custom("%")).foreach(f)
         }
       }
       measure method "lines Multi Custom" in {
@@ -416,13 +406,12 @@ trait AbstractInputTest extends PerformanceDSLTest {
           }
         }
       }
-      measure method "bytes drop" in {
+      measure method "lines Multi Custom" in {
         withSizeDef { size =>
-          (size / 2, newInResource(size))
-        } run {
-          case (toDrop, in) =>
-            val f = new CountFunction[Byte]
-            in.bytes.drop(toDrop).foreach(f)
+          newInResource(5, size, "**")
+        } run { in =>
+          val f = new CountFunction[String]
+          in.lines(Custom("**")).foreach(f)
         }
       }
       measure method "bytes drop" in {
@@ -449,13 +438,13 @@ trait AbstractInputTest extends PerformanceDSLTest {
           }
         }
       }
-      measure method "bytes take" in {
+      measure method "bytes drop" in {
         withSizeDef { size =>
           (size / 2, newInResource(size))
         } run {
-          case (toTake, in) =>
+          case (toDrop, in) =>
             val f = new CountFunction[Byte]
-            in.bytes.take(toTake).foreach(f)
+            in.bytes.drop(toDrop).foreach(f)
         }
       }
       measure method "bytes take" in {
@@ -479,12 +468,13 @@ trait AbstractInputTest extends PerformanceDSLTest {
           }
         }
       }
-      measure method "bytes apply" in {
+      measure method "bytes take" in {
         withSizeDef { size =>
-          (size / 4, newInResource(size))
+          (size / 2, newInResource(size))
         } run {
-          case (pos, in) =>
-            in.bytes.apply(pos)
+          case (toTake, in) =>
+            val f = new CountFunction[Byte]
+            in.bytes.take(toTake).foreach(f)
         }
       }
       measure method "bytes apply" in {
@@ -502,12 +492,12 @@ trait AbstractInputTest extends PerformanceDSLTest {
           }
         }
       }
-      measure method "bytes head" in {
+      measure method "bytes apply" in {
         withSizeDef { size =>
-          newInResource(size)
+          (size / 4, newInResource(size))
         } run {
-          case in =>
-            in.bytes.head
+          case (pos, in) =>
+            in.bytes.apply(pos)
         }
       }
       measure method "bytes head" in {
@@ -524,6 +514,14 @@ trait AbstractInputTest extends PerformanceDSLTest {
                 in.close
             }
           }
+        }
+      }
+      measure method "bytes head" in {
+        withSizeDef { size =>
+          newInResource(size)
+        } run {
+          case in =>
+            in.bytes.head
         }
       }
     }

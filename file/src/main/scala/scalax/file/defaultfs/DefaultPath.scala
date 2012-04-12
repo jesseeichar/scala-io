@@ -47,7 +47,7 @@ class DefaultPath private[file] (val jfile: JFile, override val fileSystem: Defa
   def name: String = jfile.getName()
   def path: String = jfile.getPath()
   def toRealPath(linkOptions:LinkOption*) = new DefaultPath(jfile.getCanonicalFile(), fileSystem)
-  override def toFile:Option[java.io.File] = Some(jfile)
+  override def fileOption:Option[java.io.File] = Some(jfile)
   def parent: Option[DefaultPath] = Option(jfile.getParentFile()) map (jf => new DefaultPath(jf,fileSystem))
   def checkAccess(modes: AccessMode*): Boolean = {
     modes forall {

@@ -34,15 +34,6 @@ abstract class AbstractOutputTest extends PerformanceDSLTest {
   performance of "Output" in {
     having attribute (Keys.WarmupRuns -> 10) in {
       measure method "write byte array" in {
-        withSizeDef { size =>
-          (size, generateTestData(size, 1).getBytes("UTF-8"))
-        } run {
-          case (size, data) =>
-            val out = newOutResource
-            out.write(data)
-        }
-      }
-      measure method "write byte array" in {
         having attribute ("baseline", "") in {
           having attribute ("version", "std java io") in {
             withSizeDef { size =>
@@ -56,9 +47,9 @@ abstract class AbstractOutputTest extends PerformanceDSLTest {
           }
         }
       }
-      measure method "write byte buffer" in {
+      measure method "write byte array" in {
         withSizeDef { size =>
-          (size, ByteBuffer.wrap(generateTestData(size, 1).getBytes("UTF-8")))
+          (size, generateTestData(size, 1).getBytes("UTF-8"))
         } run {
           case (size, data) =>
             val out = newOutResource
@@ -79,13 +70,13 @@ abstract class AbstractOutputTest extends PerformanceDSLTest {
           }
         }
       }
-      measure method "write partial byte array" in {
+      measure method "write byte buffer" in {
         withSizeDef { size =>
-          (size, generateTestData(size, 1).getBytes("UTF-8"))
+          (size, ByteBuffer.wrap(generateTestData(size, 1).getBytes("UTF-8")))
         } run {
           case (size, data) =>
             val out = newOutResource
-            out.write(data.slice(size / 4, size / 4))
+            out.write(data)
         }
       }
       measure method "write partial byte array" in {
@@ -102,13 +93,13 @@ abstract class AbstractOutputTest extends PerformanceDSLTest {
           }
         }
       }
-      measure method "write string" in {
+      measure method "write partial byte array" in {
         withSizeDef { size =>
-          (size, generateTestData(size, 1))
+          (size, generateTestData(size, 1).getBytes("UTF-8"))
         } run {
           case (size, data) =>
             val out = newOutResource
-            out.write(data)
+            out.write(data.slice(size / 4, size / 4))
         }
       }
       measure method "write string" in {
@@ -125,13 +116,13 @@ abstract class AbstractOutputTest extends PerformanceDSLTest {
           }
         }
       }
-      measure method "write strings" in {
+      measure method "write string" in {
         withSizeDef { size =>
-          (size, generateTestData(size, 3).split("\n"))
+          (size, generateTestData(size, 1))
         } run {
           case (size, data) =>
             val out = newOutResource
-            out.writeStrings(data)(Codec.UTF8)
+            out.write(data)
         }
       }
       measure method "write strings" in {
@@ -148,13 +139,13 @@ abstract class AbstractOutputTest extends PerformanceDSLTest {
           }
         }
       }
-      measure method "write char array" in {
+      measure method "write strings" in {
         withSizeDef { size =>
-          (size, generateTestData(size, 3).toArray)
+          (size, generateTestData(size, 3).split("\n"))
         } run {
           case (size, data) =>
             val out = newOutResource
-            out.writeChars(data)(Codec.UTF8)
+            out.writeStrings(data)(Codec.UTF8)
         }
       }
       measure method "write char array" in {
@@ -169,6 +160,15 @@ abstract class AbstractOutputTest extends PerformanceDSLTest {
                 out.close()
             }
           }
+        }
+      }
+      measure method "write char array" in {
+        withSizeDef { size =>
+          (size, generateTestData(size, 3).toArray)
+        } run {
+          case (size, data) =>
+            val out = newOutResource
+            out.writeChars(data)(Codec.UTF8)
         }
       }
     }

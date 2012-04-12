@@ -165,7 +165,7 @@ abstract class FileSystem {
    *          Default is glob
    *
    * @return
-   *          a function that matches paths agains the matching specification in syntax and Pattern
+   *          a function that matches paths against the matching specification in syntax and Pattern
    *
    * @see Path#contents
    */

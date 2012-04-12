@@ -222,7 +222,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
   /**
    * Return a java.io.File if possible
    */
-  def toFile:Option[java.io.File] = None
+  def fileOption:Option[java.io.File] = None
   /**
    * Creates a URI from the path.
    * @see java.file.File#toURI

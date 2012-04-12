@@ -47,15 +47,6 @@ abstract class AbstractWriteCharsTest extends PerformanceDSLTest {
     having attribute (Keys.WarmupRuns -> 10) in {
 
       measure method "write string" in {
-        withSizeDef { size =>
-          (size, generateTestData(size, 1))
-        } run {
-          case (size, data) =>
-            val out = newOutResource
-            out.write(data)
-        }
-      }
-      measure method "write string" in {
         having attribute ("baseline", "") in {
           having attribute ("version", "java writer") in {
             withSizeDef { size =>
@@ -81,13 +72,13 @@ abstract class AbstractWriteCharsTest extends PerformanceDSLTest {
           }
         }
       }
-      measure method "write strings" in {
+      measure method "write string" in {
         withSizeDef { size =>
-          (size, generateTestData(size, 3).split("\n"))
+          (size, generateTestData(size, 1))
         } run {
           case (size, data) =>
             val out = newOutResource
-            out.writeStrings(data)
+            out.write(data)
         }
       }
       measure method "write strings" in {
@@ -116,13 +107,13 @@ abstract class AbstractWriteCharsTest extends PerformanceDSLTest {
           }
         }
       }
-      measure method "write char array" in {
+      measure method "write strings" in {
         withSizeDef { size =>
-          (size, generateTestData(size, 3).toArray)
+          (size, generateTestData(size, 3).split("\n"))
         } run {
           case (size, data) =>
             val out = newOutResource
-            out.write(data)
+            out.writeStrings(data)
         }
       }
       measure method "write char array" in {
@@ -148,6 +139,15 @@ abstract class AbstractWriteCharsTest extends PerformanceDSLTest {
                 out.write(data)
                 out.close()
             }
+          }
+        }
+        measure method "write char array" in {
+          withSizeDef { size =>
+            (size, generateTestData(size, 3).toArray)
+          } run {
+            case (size, data) =>
+              val out = newOutResource
+              out.write(data)
           }
         }
       }
