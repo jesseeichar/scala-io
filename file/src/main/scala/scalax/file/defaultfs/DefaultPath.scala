@@ -37,7 +37,8 @@ class DefaultPath private[file] (val jfile: JFile, override val fileSystem: Defa
 {
   self =>
 
-  def toAbsolute: Path = if (isAbsolute) this else fileSystem.fromString(jfile.getAbsolutePath())
+  def toAbsolute: DefaultPath = if (isAbsolute) this else fileSystem.fromString(jfile.getAbsolutePath())
+
   def toURI: URI = jfile.toURI()
   def /(child: String): DefaultPath = {
     fileSystem.checkSegmentForSeparators(child)
@@ -98,7 +99,7 @@ class DefaultPath private[file] (val jfile: JFile, override val fileSystem: Defa
   def doCreateDirectory() = jfile.getAbsoluteFile.mkdir()
   def doCreateFile() = jfile.createNewFile()
 
-  def delete(force : Boolean): Path = {
+  def delete(force : Boolean): this.type = {
     if(exists) {
       if (force) access_= (access + Write)
 

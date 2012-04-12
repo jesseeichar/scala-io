@@ -23,5 +23,4 @@ object implicits {
 
     val filePath: Path = new File ("/tmp/file")
   }
-
 }

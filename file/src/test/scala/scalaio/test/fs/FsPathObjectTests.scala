@@ -31,6 +31,24 @@ abstract class FsPathObjectTests extends Fixture {
   }
 
   @Test
+  def path_object_should_implicitly_create_jfile_from_path(): Unit = {
+    import scalax.file.ImplicitConversions.defaultPath2jfile
+
+    val p = FileSystem.default.createTempFile()
+    val file:java.io.File = p
+    assertSame(p.jfile, file)
+  }
+
+  @Test
+  def path_object_extract_path_segments(): Unit = {
+    fixture.fs("a", "b") match {
+      case Path("a", _) => () // good
+      case _ =>  fail("Path extractor should have extracted path segments")
+    }
+
+  }
+
+  @Test
   def path_object_should_implicitly_create_path_from_a_java_file() : Unit = {
     import scalax.file.ImplicitConversions.jfile2path
 

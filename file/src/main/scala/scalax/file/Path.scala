@@ -12,8 +12,7 @@ import attributes._
 import defaultfs.DefaultPath
 import java.io.{IOException, File => JFile}
 import java.net.{ URI, URL }
-import collection.{ Traversable }
-import java.util.regex.Pattern
+import collection.Traversable
 import Path.AccessModes._
 import Path.fail
 import scalax.io.Output
@@ -51,9 +50,9 @@ object Path
    * @param path
    *          the string to use for creating the Path
    */
-  def fromString(path: String): Path = FileSystem.default.fromString(path)
-  def apply(path: String*): Path = FileSystem.default(path:_*)
-  def apply(pathRepresentation: String, separator:Char): Path = FileSystem.default(pathRepresentation, separator)
+  def fromString(path: String): DefaultPath = FileSystem.default.fromString(path)
+  def apply(path: String*): DefaultPath = FileSystem.default(path:_*)
+  def apply(pathRepresentation: String, separator:Char): DefaultPath = FileSystem.default(pathRepresentation, separator)
 
   /**
    * Create a Path from a URI.
@@ -79,10 +78,10 @@ object Path
   /**
    * Create a Path on the default files system from a {@link java.file.File}
    *
-   * @param path
+   * @param jfile
    *          the file to use for creating the Path
    */
-  def apply(jfile: JFile) = FileSystem.default.fromString(jfile.getPath)
+  def apply(jfile: JFile): DefaultPath = FileSystem.default.fromString(jfile.getPath)
 
   /**
    * Creates an empty file in the provided directory with the provided prefix and suffixes.
@@ -112,7 +111,7 @@ object Path
                    suffix: String = null,
                    dir: String = null,
                    deleteOnExit : Boolean = true,
-                   attributes:Iterable[FileAttribute[_]] = Nil ) : Path = {
+                   attributes:Iterable[FileAttribute[_]] = Nil ): DefaultPath = {
     FileSystem.default.createTempFile(prefix,suffix,dir,deleteOnExit)
   }
 
@@ -145,25 +144,20 @@ object Path
                         suffix: String = null,
                         dir: String = null,
                         deleteOnExit : Boolean = true,
-                        attributes:Iterable[FileAttribute[_]] = Nil): Path = {
+                        attributes:Iterable[FileAttribute[_]] = Nil): DefaultPath = {
     FileSystem.default.createTempDirectory(prefix,suffix,dir,deleteOnExit)
   }
 
   /**
-   * Allows matching on the full path of a Path
-   * <p>
-   *  The match must be exact and in the same case as
-   *  the path but the / and \ are interchangeable
-   * </p>
-   * <pre><code>
-   * Path("c:/dir/file")
-   * Path("c:\\dir\\file")
-   * </code></pre>
+   * Allows matching on the path segments of a Path
+   * {{{
+   * Path("c:","dir", "file")
+   * }}}
    * both of the above examples will match the same path
-   * <p>
-   * For more on matching Paths see {@link Path.Matching}
+   *
+   * For more on matching Paths see [[scalax.file.PathMatcher]]
    */
-  def unapply(pathExpr:Path): Option[String] = None //TODO
+  def unapplySeq(pathExpr:Path): Option[Seq[String]] = Some(pathExpr.segments)
 
   type Closeable = { def close(): Unit }
   private[file] def closeQuietly(target: Closeable) {
@@ -188,7 +182,8 @@ object Path
 abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder[Path] with Ordered[Path]
 {
   self =>
-    
+  import fileSystem.PathType
+
   protected def assertExists = if(!exists) throw new java.io.FileNotFoundException(path+" does not exist")
 
   /**
@@ -207,7 +202,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    *
    * @see normalize
    */
-  def toAbsolute: Path
+  def toAbsolute: PathType
   /**
    * The true/real representation of the current path.
    * 
@@ -223,7 +218,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    * 
    * @return the ''real'' path
    */
-  def toRealPath(linkOptions:LinkOption*): Path
+  def toRealPath(linkOptions:LinkOption*): PathType
   /**
    * Return a java.io.File if possible
    */
@@ -270,7 +265,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    *
    * @see #\(String)
    */
-  def /(child: String): Path
+  def /(child: String): PathType
 
   /**
    * Add several children to this path.  The sep character will be used to split the path string,
@@ -287,28 +282,28 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    * path / ("//",'/') // returns same Path
    * }}}
    */
-  def /(pathRepresentation: String, separator:Char): Path = /(fileSystem.fromSeq(pathRepresentation.split(separator)))
+  def /(pathRepresentation: String, separator:Char): PathType = /(fileSystem.fromSeq(pathRepresentation.split(separator)))
 
   /**
    * Alias for /(String)
    *
    * @see /(String)
    */
-  def \(child: String): Path = /(child)
-  def \(pathRepresentation: String, separator:Char): Path = /(pathRepresentation,separator)
+  def \(child: String): PathType = /(child)
+  def \(pathRepresentation: String, separator:Char): PathType = /(pathRepresentation,separator)
   /**
    * Alias for /(child.name)
    *
    * @return A new path with the specified path appended
    * @see #/(String)
    */
-  final def /(child: Path): Path = child.segments.foldLeft(this){(acc,nextChild) => acc/(nextChild)}
+  final def /(child: Path): PathType = fileSystem.fromSeq(segments ++ child.segments)
 
   /**
    * Alias for /(Path)
    * @see #/(Path)
    */
-  final def \(child: Path) : Path = /(child)
+  final def \(child: Path) : PathType = /(child)
 
   // identity
   /**
@@ -336,7 +331,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    * @see #toAbsolute
    * @see java.file.File#toCanonical
    */
-   lazy val normalize: fileSystem.PathType = {
+   lazy val normalize: PathType = {
      val Empty = Vector.empty
      val reversedNormalizedPath = (Vector[String]() /: segments) {
        case (path,".") => path
@@ -363,7 +358,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    *          the constructed/resolved path
    *
    */
-  def resolve(other: Path): Path = \(other)
+  def resolve(other: Path): PathType = \(other)
 
   /**
    * Constructs a path from other using the same file system as this
@@ -379,7 +374,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    * @param separator the separator character used in other
    * @return a path resolved as a child of this
    */
-  def resolve(other: String, separator:Char): Path = resolve(fileSystem(other,separator))
+  def resolve(other: String, separator:Char): PathType = resolve(fileSystem(other,separator))
 
   /**
    * Constructs a path from other using the same file system as this
@@ -394,7 +389,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    * @param pathSegments the path segments that make up the path
    * @return a path resolved as a child of this
    */
-  def resolve(pathSegments: String*): Path = resolve(fileSystem(pathSegments:_*))
+  def resolve(pathSegments: String*): PathType = resolve(fileSystem(pathSegments:_*))
 
   /**
    * Make the current path relative to the other path.  If the two paths
@@ -422,7 +417,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    *
    * @return the root of the file system
    */
-  lazy val root: Option[Path] = {
+  lazy val root: Option[PathType] = {
     val absolute = toAbsolute // cache so don't need to recalculate
     val startsWith = absolute startsWith _
     fileSystem.cachedRoots.find(startsWith) orElse (fileSystem.roots find (startsWith))
@@ -444,13 +439,13 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    * Resolves other against this path's parent in the same manner as in resolve(Path).
    *
    *
-   * If parent does not exist other will be returned.  Otherwise parent.resolve(other) will be returned
+   * If parent does not exist fileSystem.fromSeq(other.segments) will be returned.  Otherwise parent.resolve(other) will be returned
    *
    * @param other the path from parent to the sibling.
    * @return a path resolved as a child of parent or None if parent is None
    */
-  def sibling(other:Path):Path = {
-    parent map (_.resolve(other)) getOrElse (other)
+  def sibling(other:Path):PathType = {
+    parent map (_.resolve(other).asInstanceOf[PathType]) getOrElse (fileSystem.fromSeq(other.segments))
   }
 
   /**
@@ -460,7 +455,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    * @param separator the separator character that is used in other
    * @return a path resolved as a child of parent or other if there is no parent
    */
-  def sibling(other:String, separator:Char):Path = sibling(fileSystem(other,separator))
+  def sibling(other:String, separator:Char):PathType = sibling(fileSystem(other,separator))
 
   /**
    * Resolves other against this path's parent in the same manner as sibling(Path)
@@ -468,7 +463,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    * @param pathSegments the path from parent to the sibling.
    * @return a path resolved as a child of parent or other if there is no parent
    */
-  def sibling(pathSegments:String*):Path = sibling(fileSystem(pathSegments:_*))
+  def sibling(pathSegments:String*):PathType = sibling(fileSystem(pathSegments:_*))
 
   /**
    * The parent path segment if it is possible (for example a root will not have a parent)
@@ -496,7 +491,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
   lazy val extension: Option[String] =
     name.lastIndexWhere (_ == '.') match {
       case idx if idx != -1 => Some(name.drop(idx + 1))
-      case _ =>None
+      case _ => None
     }
 
   // Boolean tests
@@ -802,7 +797,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    *           If parent directory does not exist
    */
   def createFile( createParents:Boolean = true, failIfExists: Boolean = true,
-                 accessModes:Iterable[AccessMode]=List(Read,Write), attributes:Iterable[FileAttribute[_]]=Nil): Path = {
+                 accessModes:Iterable[AccessMode]=List(Read,Write), attributes:Iterable[FileAttribute[_]]=Nil): PathType = {
 
     exists match {
       case true if failIfExists =>
@@ -824,7 +819,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
       access = accessModes
       if (!res) fail("unable to create file")
     }
-    this
+    this.asInstanceOf[PathType]
   }
 
   /**
@@ -865,7 +860,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    *
    */
   def createDirectory(createParents: Boolean = true, failIfExists: Boolean = true,
-                      accessModes:Iterable[AccessMode]=List(Read,Write,Execute), attributes:Iterable[FileAttribute[_]]=Nil) =  {
+                      accessModes:Iterable[AccessMode]=List(Read,Write,Execute), attributes:Iterable[FileAttribute[_]]=Nil):PathType =  {
     if (failIfExists && exists) fail("Directory '%s' already exists." format name)
     if (exists && isFile) fail("Path "+this+" is a fileand thus cannot be created as a directory")
 
@@ -876,7 +871,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
     }
     this.attributes = attributes
     access = accessModes
-    this
+    this.asInstanceOf[PathType]
   }
 
   // deletions
@@ -922,7 +917,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    * @return this
    * @throws IOException if the file could not be deleted
    */
-  def delete(force : Boolean = false): Path
+  def delete(force : Boolean = false): this.type
 
   /**
    *  Deletes the directory recursively.

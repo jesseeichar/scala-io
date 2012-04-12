@@ -102,7 +102,7 @@ class RamPath(relativeTo: String, val path: String, override val fileSystem: Ram
 
   def doCreateParents(): Unit = this.toAbsolute.parent.foreach(fileSystem.create(_, DirNode, true))
 
-  def delete(force: Boolean): Path = {
+  def delete(force: Boolean): this.type = {
     val n = node
     if (node.forall{n => 
       	n.isInstanceOf[FileNode] || n.asInstanceOf[DirNode].children.isEmpty}) {

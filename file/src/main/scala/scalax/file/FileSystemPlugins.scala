@@ -10,7 +10,7 @@ import java.net.URI
  */
 
 object FileSystemPlugins {
-  def lookup(uri:URI) = {
+  def lookup(uri:URI): Option[Path] = {
     uri.getScheme match {
       case "file" => Some(Path.fromString(uri.getRawPath))
       case "ramfs" => Some(scalax.file.ramfs.RamFileSystem(uri))

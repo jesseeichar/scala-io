@@ -1,5 +1,6 @@
 package scalax.file
 
+import defaultfs.DefaultPath
 import java.io.File
 
 /**
@@ -11,14 +12,17 @@ import java.io.File
  */
 object ImplicitConversions {
   /**
-   * Method to implicitly convert a string to a Path
+   * Method to implicitly convert a string to a [[scalax.file.Path]]
    * object
    */
   implicit def string2path(s: String)(implicit fileSystem: FileSystem = FileSystem.default): Path = fileSystem.fromString(s)
   /**
-   * Method to implicitly convert a {@link java.io.File} to a Path
+   * Method to implicitly convert a [[java.io.File]] to a [[scalax.file.defaultfs.DefaultPath]]
    * object
    */
-  implicit def jfile2path(jfile: File): Path = FileSystem.default.fromString(jfile.getPath)
-
+  implicit def jfile2path(jfile: File): DefaultPath = FileSystem.default.fromString(jfile.getPath)
+  /**
+   * Implicitly convert a [[scalax.file.defaultfs.DefaultPath]] to a [[java.io.File]]
+   */
+  implicit def defaultPath2jfile(path:DefaultPath): File = path.jfile
 }

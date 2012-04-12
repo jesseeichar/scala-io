@@ -194,7 +194,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
       val p = path
       p.outputStream(StandardOpenOption.CreateFull, StandardOpenOption.Write).write("data")
       assertTrue(p.exists)
-      assertTrue(p.parent.forall{_.exists})
+      assertTrue(p.parent.forall{(_:Path).exists})
     }
   }
 
