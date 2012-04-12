@@ -98,6 +98,7 @@ trait AbstractInputTest extends PerformanceDSLTest {
             var i = 0
             for {
               api <- in.bytes.processor
+              _ <- api.repeatUntilEmpty()
               next <- api.next
             } i += 1
           }

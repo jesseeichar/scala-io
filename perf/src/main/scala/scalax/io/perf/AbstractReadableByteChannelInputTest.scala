@@ -1,25 +1,15 @@
 package scalax.io.perf
 
-import Utils._
 import scalax.io._
 import sperformance.Keys
 import sperformance.dsl._
-import util.Random._
 import Resource._
 import Line.Terminators._
-import java.io.ByteArrayInputStream
-import org.apache.commons.io.FileUtils
 import org.apache.commons.io.IOUtils
-import java.io.BufferedInputStream
-import java.io.BufferedOutputStream
-import java.io.InputStreamReader
-import java.nio.charset.Charset
-import java.io.InputStream
 import java.nio.channels.ReadableByteChannel
 import java.nio.ByteBuffer
 import java.nio.channels.Channels
 import scalax.file.Path
-import scalax.io.nio.SeekableFileChannel
 import java.nio.channels.FileChannel
 
 abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
@@ -107,6 +97,7 @@ abstract class AbstractReadableByteChannelInputTest extends PerformanceDSLTest {
             var i = 0
             for {
               api <- in.bytes.processor
+              _ <- api.repeatUntilEmpty()
               next <- api.next
             } i += 1
           }
