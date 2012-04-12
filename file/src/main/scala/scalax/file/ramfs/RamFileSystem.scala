@@ -39,6 +39,7 @@ object RamFileSystem {
 }
 
 class RamFileSystem(val id : RamFileSystem.RamFsId = RamFileSystem.RamFsId(), val separator:String = "/", val context:ResourceContext = DefaultResourceContext) extends FileSystem {
+  type PathType = RamPath
   private var fsTree = new DirNode(separator)
 
   RamFileSystem.register(id,this)
@@ -48,11 +49,11 @@ class RamFileSystem(val id : RamFileSystem.RamFsId = RamFileSystem.RamFsId(), va
 
   val name = "Ram ("+id+")"
   override lazy val urlStreamHandler : Option[URLStreamHandler] = Some(Handler)
-  def fromString(path: String): RamPath = {
+  override def fromString(path: String): RamPath = {
     if(path startsWith separator) fromStrings("",path)
     else fromStrings(pwd.toAbsolute.path, path)
   }
-
+  protected def doCreateFromSeq(segments: Seq[String]) = fromString(segments mkString separator)
   def apply(relativeTo:String, segments: Seq[String]): RamPath = fromStrings(relativeTo,segments.filterNot{_.isEmpty} mkString separator)
 
   protected[ramfs] def fromStrings(relativeTo:String , path: String): RamPath = {
@@ -67,7 +68,7 @@ class RamFileSystem(val id : RamFileSystem.RamFsId = RamFileSystem.RamFsId(), va
     if(newpath == root) root
     else newpath
   }
-  override def roots:Set[Path] = Set (root)
+  override def roots:Set[RamPath] = Set (root)
   def updateContext(newContext:ResourceContext):RamFileSystem = new RamFileSystem(id,separator,newContext)
   override def updateContext(f:ResourceContext => ResourceContext):RamFileSystem = updateContext(f(context))
 
@@ -75,13 +76,13 @@ class RamFileSystem(val id : RamFileSystem.RamFsId = RamFileSystem.RamFsId(), va
                    suffix: String = null,
                    dir: String = null,
                    deleteOnExit : Boolean = true
-                   /*attributes:List[FileAttributes] TODO */ ) : Path = apply(separator,"temp",UUID.randomUUID.toString)
+                   /*attributes:List[FileAttributes] TODO */ ) : RamPath = apply(separator,"temp",UUID.randomUUID.toString)
 
   def createTempDirectory(prefix: String = randomPrefix,
                         suffix: String = null,
                         dir: String = null,
                         deleteOnExit : Boolean = true
-                        /*attributes:List[FileAttributes] TODO */) : Path  = apply(separator,"temp",UUID.randomUUID.toString)
+                        /*attributes:List[FileAttributes] TODO */) : RamPath  = apply(separator,"temp",UUID.randomUUID.toString)
 
   def uri(path:RamPath = root):URI = new URI(RamFileSystem.protocol+"://"+id.id+"!"+path.path.replaceAll("\\\\","/"))
   override def toString = "Ram File System"

@@ -46,7 +46,7 @@ object Resources {
     import scalax.io._
     import scalax.io.managed._
     import java.io._
-    import java.nio.channels._
+    import java.nio.channels.{FileChannel, ReadableByteChannel, WritableByteChannel, Channels}
     import java.net.URL
 
     // see codec examples in scala io core for details on why there is an implicit codec here

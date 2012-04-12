@@ -102,7 +102,7 @@ abstract class FsMatchingTests extends scalax.test.sugar.AssertionSugar with Fix
   }
   @Test //@Ignore
   def globPathMatcher = {
-    implicit var path = fixture.fs("a","b","c","d.x")
+    implicit var path:Path = fixture.fs("a","b","c","d.x")
     implicit val syntax = PathMatcher.StandardSyntax.GLOB
     assertMatch("**/d.x")
     assertMatch("a/**/d.x")
@@ -146,7 +146,7 @@ abstract class FsMatchingTests extends scalax.test.sugar.AssertionSugar with Fix
 
   @Test //@Ignore
   def regexPathMatcher = {
-    implicit var path = fixture.fs("a","b","c","d.x")
+    implicit var path:Path = fixture.fs("a","b","c","d.x")
     implicit val syntax = PathMatcher.StandardSyntax.REGEX
     assertMatch(".*/d.x")
     assertMatch("""(\w/)*d.x""")

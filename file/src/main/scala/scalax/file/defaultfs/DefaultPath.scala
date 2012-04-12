@@ -19,6 +19,7 @@ import Path._
 import Path.AccessModes._
 import java.io.FileFilter
 import scala.annotation.tailrec
+import java.util.regex.Pattern
 
 
 /**
@@ -44,7 +45,6 @@ class DefaultPath private[file] (val jfile: JFile, override val fileSystem: Defa
   }
   def name: String = jfile.getName()
   def path: String = jfile.getPath()
-  override lazy val normalize = super.normalize.asInstanceOf[DefaultPath]
   def toRealPath(linkOptions:LinkOption*) = new DefaultPath(jfile.getCanonicalFile(), fileSystem)
   override def toFile:Option[java.io.File] = Some(jfile)
   def parent: Option[DefaultPath] = Option(jfile.getParentFile()) map (jf => new DefaultPath(jf,fileSystem))
@@ -55,12 +55,18 @@ class DefaultPath private[file] (val jfile: JFile, override val fileSystem: Defa
       case Write    => jfile.canWrite()
     }
   }
+  private[this] val sepRegex = Pattern.compile(Pattern.quote(separator)+"+")
   override lazy val segments = {
     @tailrec
     def fileSegments(f:JFile, acc:Seq[String]):Seq[String] = {
       val parent = f.getParentFile()
       if (parent == null) {
-        f.getPath() +: acc
+        // these shenanigans are because windows can have \ as the root path separator
+        // in this we need that separator so we do this madness (getName()) returns the empty string
+        // so we can't simply call getName
+//        (if (sepRegex.matcher(f.getPath()).find()) separator else f.getPath) +: acc
+        val root = f.getPath().filterNot(_ == separator(0))
+        (if (root.isEmpty) separator else root) +: acc
       } else {
         fileSegments(parent, f.getName +: acc)
       }
@@ -88,7 +94,7 @@ class DefaultPath private[file] (val jfile: JFile, override val fileSystem: Defa
     jfile.setExecutable(accessModes exists {_==Execute})
   }
 
-  def doCreateParents() = jfile.getAbsoluteFile.getParentFile.mkdirs()
+  def doCreateParents() = Option(jfile.getAbsoluteFile.getParentFile).map(_.mkdirs())
   def doCreateDirectory() = jfile.getAbsoluteFile.mkdir()
   def doCreateFile() = jfile.createNewFile()
 

@@ -18,16 +18,22 @@ import scalax.io.DefaultResourceContext
  * @since   1.0
  */
 private[file] class DefaultFileSystem(val context:ResourceContext = DefaultResourceContext) extends FileSystem {
+  type PathType = DefaultPath
   val name = "Default"
-  def separator: String = JFile.separator
-  def fromString(path: String): DefaultPath = apply (new JFile (path))
-  def apply(path: JFile): DefaultPath = new DefaultPath (path, this)
+  val separator: String = JFile.separator
+  protected def doCreateFromSeq(segments: Seq[String]) = {
+    val updatedSegments =
+      if (segments.nonEmpty && segments(0) == separator) presentWorkingDirectory.root.getOrElse(roots.head).path +: segments.tail
+      else segments
+    new DefaultPath(new JFile(updatedSegments mkString separator), this)
+  }
+  def apply(path: JFile): DefaultPath = fromString(path.getPath)
   def roots = JFile.listRoots().toSet.map {(f:JFile) => fromString (f.getPath)}
   def createTempFile(prefix: String = randomPrefix,
                    suffix: String = null,
                    dir: String = null,
                    deleteOnExit : Boolean = true
-                   /*attributes:List[FileAttributes] TODO */ ) : Path = {
+                   /*attributes:List[FileAttributes] TODO */ ) : DefaultPath = {
     val dirFile = if(dir==null) null else new JFile(dir)
     val path = fromString(JFile.createTempFile(prefix, suffix, dirFile).getPath)
     if(deleteOnExit) path.jfile.deleteOnExit
@@ -38,7 +44,7 @@ private[file] class DefaultFileSystem(val context:ResourceContext = DefaultResou
                         suffix: String = null,
                         dir: String = null,
                         deleteOnExit : Boolean = true
-                        /*attributes:List[FileAttributes] TODO */) : Path = {
+                        /*attributes:List[FileAttributes] TODO */) : DefaultPath = {
     val path = createTempFile(prefix, suffix, dir, false)
     path.delete(force=true)
     path.createDirectory()

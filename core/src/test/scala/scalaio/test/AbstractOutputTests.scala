@@ -211,6 +211,8 @@ trait AbstractOutputTests[InResource, OutResource] extends scalax.test.sugar.Ass
 
   @Test
   def customErrorHandler_On_Write_Error{
+    assumeNotWindows
+
     val testContext = new ErrorHandlingTestContext()
 
     val errorOnReadOutput = errorOnWriteOut

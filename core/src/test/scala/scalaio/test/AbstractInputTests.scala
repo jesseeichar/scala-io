@@ -299,6 +299,7 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
   }
   @Test
   def assertNoExceptionsRaisedOnInputMethodCalls() {
+    assumeNotWindows
     val errorOnReadInput = input(ErrorOnRead)
     if (errorOnReadInput.isInstanceOf[Resource[_]]) {
       class MyException extends Exception
@@ -333,6 +334,7 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
   }
   @Test
   def customErrorHandler_On_Read_Error {
+    assumeNotWindows
     val testContext = new ErrorHandlingTestContext()
 
     val errorOnReadInput = input(ErrorOnRead)
@@ -376,6 +378,7 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
 
   @Test
   def custom_ErrorHandler_can_return_default_string {
+    assumeNotWindows
 
     val default = "Default".getBytes("UTF-8")
     val context = new ResourceContext {

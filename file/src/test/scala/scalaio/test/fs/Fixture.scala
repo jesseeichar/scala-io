@@ -25,8 +25,6 @@ trait Fixture {
     fixture = createFixture()
     assert(fixture != null)
     def testFile(javaRoot:java.io.File) = {
-      println(javaRoot)
-      println(javaRoot.getCanonicalPath)
       javaRoot.getCanonicalPath == fixture.root.toRealPath().path
     }
     assert(fixture.root.fileSystem != FileSystem.default || !(java.io.File.listRoots().exists(testFile)), "Root cannot be the true file system root because some tests delete root which could be a major issues as it could delete entire filesystem")

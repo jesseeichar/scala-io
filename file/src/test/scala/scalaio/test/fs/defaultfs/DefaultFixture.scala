@@ -27,7 +27,7 @@ trait DefaultFixture extends Fixture{
     new FileSystemFixture(FileSystem.default, rnd) {
       folder.create()
 
-      override val root = Path(folder.getRoot)
+      override val root = FileSystem.default(folder.getRoot)
       override def after = {
         folder.delete()
         Thread.sleep(500)

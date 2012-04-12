@@ -4,6 +4,7 @@ import scalax.io.{ Resource, Seekable }
 import org.junit.rules.TemporaryFolder
 import org.junit.{ After, Before }
 import org.junit.Assert._
+import org.junit.Assume.assumeTrue
 import scalax.io._
 import scalax.io.managed.SeekableByteChannelResource
 import scalax.io.managed.InputStreamResource
@@ -30,7 +31,7 @@ abstract class AbstractFileSeekableTest extends AbstractSeekableTests[SeekableBy
   }
 
   def canAddCloseAction = false
-  override def scalaIoException_On_Write_Error_by_default{
+  override def scalaIoException_On_Write_Error_by_default {
     intercept[IOException] {
       errorOnWriteOut.write("hi")
     }

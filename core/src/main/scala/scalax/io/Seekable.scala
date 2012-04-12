@@ -485,14 +485,7 @@ trait Seekable extends Input with Output {
             }
 
                 buf.clear()
-                toWrite foreach { b =>
-                  try {
-                	  buf.put(b)
-                  } catch {
-                    case _ =>
-                      println("hi")
-                  }
-                }
+                toWrite foreach (buf.put)
                 buf.flip
                 val currentWrite : Long = c write buf
                 earlyTermination = length <= written + numBytes && remaining.nonEmpty

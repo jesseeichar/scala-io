@@ -9,6 +9,7 @@
 package scalax.file
 
 import attributes._
+import defaultfs.DefaultPath
 import java.io.{IOException, File => JFile}
 import java.net.{ URI, URL }
 import collection.{ Traversable }
@@ -42,7 +43,7 @@ object Path
   /**
    * Lists the roots of the default filesystem
    */
-  def roots: Set[Path] = FileSystem.default.roots
+  def roots: Set[DefaultPath] = FileSystem.default.roots
 
   /**
    * Create a Path from a string
@@ -335,7 +336,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    * @see #toAbsolute
    * @see java.file.File#toCanonical
    */
-   def normalize: Path = {
+   lazy val normalize: fileSystem.PathType = {
      val Empty = Vector.empty
      val reversedNormalizedPath = (Vector[String]() /: segments) {
        case (path,".") => path
@@ -421,9 +422,10 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    *
    * @return the root of the file system
    */
-  def root: Option[Path] = {
+  lazy val root: Option[Path] = {
     val absolute = toAbsolute // cache so don't need to recalculate
-    fileSystem.roots find (absolute startsWith _)
+    val startsWith = absolute startsWith _
+    fileSystem.cachedRoots.find(startsWith) orElse (fileSystem.roots find (startsWith))
   }
   /**
    * The segments in the path including the current element of the path.  If the
@@ -1055,7 +1057,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    *
    *  @param target
    *           the target path to move the filesystem object to.
-   *  @param replaceExisting
+   *  @param replace
    *           if true then replace any existing target object
    *           unless it is a non-empty directory in which case
    *           an IOException is thrown.
@@ -1073,7 +1075,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
   def moveTo[P <: Path](target: P, replace:Boolean=false,
              atomicMove:Boolean=false) : P = {
 
-    if(fileSystem.roots.contains(this)) {
+    if(root == this) {
        throw new IOException("cannot move a root path")
     }
 
@@ -1097,9 +1099,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
          target write bytes
          delete()
        case _ if target.fileSystem != fileSystem && this.isDirectory =>
-         val x = target.exists
          target.createDirectory()
-         val z = descendants() forall {_.exists}
          children() foreach { path =>
              path moveTo (target \ path.relativize(self))
          }

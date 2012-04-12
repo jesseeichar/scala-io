@@ -376,16 +376,20 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
 
   @Test //@Ignore
   def path_can_move_directories_between_file_systems() : Unit = {
-    val f1 = fixture.path.createDirectory()
+    def doMoveTest(otherPathSep:String) = {
+      val f1 = fixture.path.createDirectory()
 
 
-    val otherfs = new RamFileSystem()
-    val otherpath = otherfs("/","a")
+      val otherfs = new RamFileSystem()
+      val otherpath = otherfs("/","a")
 
-    f1.moveTo(otherpath)
+      f1.moveTo(otherpath)
 
-    assertTrue(f1.nonExistent)
-    assertTrue(otherpath.exists)
+      assertTrue(f1.nonExistent)
+      assertTrue(otherpath.exists)
+    }
+    doMoveTest("/")
+    doMoveTest("\\")
   }
   @Test //@Ignore
   def path_can_move_directory_trees_between_file_systems() : Unit = {

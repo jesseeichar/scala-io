@@ -8,11 +8,13 @@
 
 package scalax.file
 
+import defaultfs.DefaultFileSystem
 import java.net.URLStreamHandler
 import PathMatcher.{ GlobPathMatcher, RegexPathMatcher }
 import util.Random.nextInt
 import java.io.{ IOException, File => JFile }
 import scalax.io.ResourceContext
+import java.util.regex.Pattern
 
 /**
  * Factory object for obtaining filesystem objects
@@ -29,7 +31,7 @@ object FileSystem {
    *  and corresponds to the file system that is referenced by
    *  java.file.File objects</p>
    */
-  val default: FileSystem = new scalax.file.defaultfs.DefaultFileSystem()
+  val default: DefaultFileSystem = new scalax.file.defaultfs.DefaultFileSystem()
 
 }
 
@@ -42,7 +44,8 @@ object FileSystem {
  * @since   1.0
  */
 abstract class FileSystem {
-
+  type PathType <: Path
+  lazy val presentWorkingDirectory = apply(".").toAbsolute
   protected val legalChars = ('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9') ++ List('_', '-', '+', '.') toList
   def randomPrefix = {
     val seg = 1 to (nextInt(5) + 2) map { _ => legalChars(nextInt(legalChars.size)) }
@@ -82,29 +85,41 @@ abstract class FileSystem {
   /**
    * Create a path object for the filesystem
    */
-  def fromString(path: String): Path
+  def fromString(path: String): PathType = {
+    val segments = if (separator.size == 1) path.split(separator(0)) else path.split(Pattern.quote(separator))
+    doCreateFromSeq((if(path startsWith separator) List(this.separator) else Nil) ++ segments)
+  }
+  protected def doCreateFromSeq(segments: Seq[String]): PathType
   /**
    * Create a path object for the filesystem from the path segments
    */
-  def fromSeq(segments: Seq[String]): Path = {
-    val head = segments.headOption getOrElse "."
-    if (head == separator && roots.exists(_.path == head)) {
-      segments.drop(1).foreach(checkSegmentForSeparators)
+  def fromSeq(segments: Seq[String]): PathType = {
+    val nonEmpty = segments.filterNot { _.isEmpty }
+    val head = nonEmpty.headOption getOrElse "."
+    if (head == separator) {
+      val parts = nonEmpty.drop(separator.length)
+      parts.foreach(checkSegmentForSeparators)
     } else {
-      segments.foreach(checkSegmentForSeparators)
+      nonEmpty.foreach(checkSegmentForSeparators)
     }
-    fromString(segments.filterNot { _.isEmpty } mkString separator)
+    doCreateFromSeq(nonEmpty)
   }
 
-  def apply(segments: String*): Path = fromSeq(segments)
-  def apply(pathRepresentation: String, separator:Char): Path = {
+  def apply(segments: String*): PathType = fromSeq(segments)
+  def apply(pathRepresentation: String, separator:Char): PathType = {
     val segments = (if(pathRepresentation.charAt(0) == separator) List(this.separator) else Nil) ++ pathRepresentation.split(separator)
     fromSeq(segments)
   }
   /**
    * Returns the list of roots for this filesystem
    */
-  def roots: Set[Path]
+  def roots: Set[PathType]
+
+  /**
+   * Provides fast access to the fileSystem roots that were present
+   * when the fileSystem was created
+   */
+  private[scalax] lazy val cachedRoots: Set[PathType] = roots
   /**
    * Creates a function that returns true if parameter matches the
    * pattern used to create the function.
@@ -188,7 +203,7 @@ abstract class FileSystem {
   def createTempFile(prefix: String = randomPrefix,
     suffix: String = null,
     dir: String = null,
-    deleteOnExit: Boolean = true /*attributes:List[FileAttributes] TODO */ ): Path
+    deleteOnExit: Boolean = true /*attributes:List[FileAttributes] TODO */ ): PathType
   /**
    * Creates an empty directory in the provided directory with the provided prefix and suffixes, if the filesystem
    * supports it.  If not then a UnsupportedOperationException is thrown.
@@ -217,7 +232,7 @@ abstract class FileSystem {
   def createTempDirectory(prefix: String = randomPrefix,
     suffix: String = null,
     dir: String = null,
-    deleteOnExit: Boolean = true /*attributes:List[FileAttributes] TODO */ ): Path
+    deleteOnExit: Boolean = true /*attributes:List[FileAttributes] TODO */ ): PathType
 
   /**
    * Returns a URLStreamHandler if the protocol in the URI is not supported by default JAVA.
@@ -256,7 +271,7 @@ abstract class FileSystem {
     }
 
     result match {
-      case Separator(sep) =>
+      case Separator(sep) if !roots.map(_.path).contains(segment) =>
         val msg = "%s is not permitted as a path 'segment' for this filesystem.  Segment in question: %s.  " +
         		"\nIf you want to create a Path from a system dependent string then use fromString.  " +
         		"If you want to create a child path use resolve instead of / to create the child path.  " +
