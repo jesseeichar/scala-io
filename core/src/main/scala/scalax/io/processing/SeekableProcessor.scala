@@ -281,6 +281,7 @@ class OpenSeekable private[processing] (channel: SeekableByteChannel, resourceCo
   def position: Processor[Long] = factory(Some(channel.position))
 
   def position_=(newPosition: Long): Processor[Unit] = factory(Some(channel.position(newPosition)))
+
   def size = factory(Some(channel.size))
 
   /**
