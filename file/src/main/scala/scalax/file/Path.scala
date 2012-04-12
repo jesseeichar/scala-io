@@ -1075,7 +1075,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
   def moveTo[P <: Path](target: P, replace:Boolean=false,
              atomicMove:Boolean=false) : P = {
 
-    if(root == this) {
+    if(root.exists(_ == this)) {
        throw new IOException("cannot move a root path")
     }
 
@@ -1106,7 +1106,8 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
          delete()
        case IsFile(_) if target.nonExistent || target.isFile => moveFile(target,atomicMove)
        case IsDirectory(_) if target.nonExistent => moveDirectory(target,atomicMove)
-       case _ => throw new Error("not yet handled "+target+","+this)
+       case _ =>
+         throw new Error("not yet handled "+target+","+this)
      }
      target
   }

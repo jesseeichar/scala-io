@@ -23,7 +23,7 @@ private[file] class DefaultFileSystem(val context:ResourceContext = DefaultResou
   val separator: String = JFile.separator
   protected def doCreateFromSeq(segments: Seq[String]) = {
     val updatedSegments =
-      if (segments.nonEmpty && segments(0) == separator) presentWorkingDirectory.root.getOrElse(roots.head).path +: segments.tail
+      if (System.getProperty("os.name").toLowerCase.contains("win") && segments.nonEmpty && segments(0) == separator) presentWorkingDirectory.root.getOrElse(roots.head).path +: segments.tail
       else segments
     new DefaultPath(new JFile(updatedSegments mkString separator), this)
   }

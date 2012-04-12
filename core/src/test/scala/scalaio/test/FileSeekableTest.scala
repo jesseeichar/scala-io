@@ -1,14 +1,9 @@
 package scalaio.test
 
-import scalax.io.{ Resource, Seekable }
 import org.junit.rules.TemporaryFolder
 import org.junit.{ After, Before }
-import org.junit.Assert._
-import org.junit.Assume.assumeTrue
 import scalax.io._
-import scalax.io.managed.SeekableByteChannelResource
-import scalax.io.managed.InputStreamResource
-import java.io.{IOException, RandomAccessFile, File, InputStream}
+import java.io.{IOException, RandomAccessFile, File}
 
 abstract class AbstractFileSeekableTest extends AbstractSeekableTests[SeekableByteChannel] with SeekableTestUtils[SeekableByteChannel] {
   var folder: TemporaryFolder = _
@@ -23,11 +18,10 @@ abstract class AbstractFileSeekableTest extends AbstractSeekableTests[SeekableBy
   def after {
     folder.delete()
   }
-  lazy val file = new File(new File(folder.getRoot, "parent"),"testfile")
+  lazy val file = new File(folder.getRoot, "testfile")
   def forceErrorOnAccess = {
     file.delete()
-    file.createNewFile()
-    file.setReadOnly()
+    file.getParentFile.setReadOnly()
   }
 
   def canAddCloseAction = false

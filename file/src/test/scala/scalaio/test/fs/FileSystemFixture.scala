@@ -45,7 +45,7 @@ case class TestData(fs : FileSystem, numSegments : Int, pathName : String) {
 abstract class FileSystemFixture(val fs : FileSystem, rnd : Random) {
   import rnd.nextInt
   protected def rndInt(i:Int) = nextInt(i-1)+1
-  def root = fs.createTempDirectory()
+  def root: Path = fs.createTempDirectory()
 
   def segment = fs.randomPrefix
 

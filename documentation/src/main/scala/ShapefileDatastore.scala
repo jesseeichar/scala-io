@@ -54,7 +54,10 @@ class ShapefileDatastore(val shapefile: Path, val csvFile: Path) {
       shapeCode <- shpProcessor.littleEndianAPI.nextInt
       shapeType = ShapeType(shapeCode)
       geometry <- shpProcessor.drop(contentLength - 4)
-      attributes <- correctRecord(recordNumber,csvProcessor)
+      attributes <- (for((record, num) <- csvProcessor.next) yield {
+                      if(num == recordNumber - 1) record.split(",")
+                      else Seq.empty[String]
+                    }): Processor[Seq[String]]
     } yield {
       // ignoring geometry for this example
       ShapefileRecord(recordNumber, shapeType, attributes)
