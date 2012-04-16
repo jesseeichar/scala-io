@@ -4,6 +4,7 @@ import sbt.Path.richFile
 import xml.Node
 import java.io.File
 import File.{separator=>sep}
+import BuildConstants._
 
 object C {
   val utf8 = Charset.forName("UTF-8")
@@ -129,7 +130,7 @@ println("SourcePath = "+sourcePath)
       if (version.endsWith("-SNAPSHOT"))
         "https://oss.sonatype.org/content/repositories/snapshots/"
       else
-        "http://search.maven.org/remotecontent?filepath="
+        "https://oss.sonatype.org/content/repositories/releases/"
 
     val properties =
     """|var IO_PROPS = {
@@ -137,10 +138,12 @@ println("SourcePath = "+sourcePath)
        |  version: "%s",
        |  scalaVersion: "%s",
        |  armVersion: "%s",
+       |  scalaArmVersion: "%s",
+       |  akkaVersion: "%s",
        |  ioMavenPath: "%1$s".replace(/\./g,'/'),
        |  SNAPSHOT_BLURB: "%s",
        |  SNAPSHOT_DOWNLOAD_URL: "%s",
-       |};""".format(organization, version, buildScalaVersion, armVersion, snapshotBlurb, snapshotDownloadURL)
+       |};""".format(organization, version, buildScalaVersion, armVersion, armScalaVersion, akkaVersion, snapshotBlurb, snapshotDownloadURL)
          
     properties.trim.stripMargin.lines.map(_.trim).mkString
   }

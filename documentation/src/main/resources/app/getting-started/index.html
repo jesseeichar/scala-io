@@ -57,7 +57,10 @@ libraryDependencies += "{{props.groupId}}" %% "scala-io-file" % "{{props.version
     Naturally a manual download option is also available.  The dependencies are fairly simple:
     <ul>
       <li>
-          <a href="http://search.maven.org/remotecontent?filepath=com/github/jsuereth/scala-arm/scala-arm_{{props.scalaVersion}}/{{props.armVersion}}/scala-arm_{{props.scalaVersion}}-{{props.armVersion}}.jar">Scala Core</a>
+          <a href="http://repo.typesafe.com/typesafe/releases/com/typesafe/akka/akka-actor/{{props.akkaVersion}}/akka-actor-{{props.akkaVersion}}.jar">Akka Actors</a>
+      </li>
+      <li>
+          <a href="https://oss.sonatype.org/content/repositories/releases/com/github/jsuereth/scala-arm/scala-arm_{{props.armScalaVersion}}/{{props.armVersion}}/scala-arm_{{props.armScalaVersion}}-{{props.armVersion}}.jar">Scala Arm</a>
       </li>
       <li>
         <a href="{{props.SNAPSHOT_DOWNLOAD_URL}}{{props.ioMavenPath}}/scala-io-core_{{props.scalaVersion}}/{{props.version}}/scala-io-core_{{props.scalaVersion}}-{{props.version}}.jar">Scala Core</a>
