@@ -1,0 +1,6 @@
+I am happy to announce the release of Scala-IO version 0.4.0.  It is a fairly major release that introduces a "Processing API" for declarative IO processing and some asynchronous capabilities.
+
+The extended release notes are available at: [http://jesseeichar.github.com/scala-io-doc/0.4.0/index.html#!/releaseNotes/index](http://jesseeichar.github.com/scala-io-doc/0.4.0/index.html#!/releaseNotes/index)
+
+
+I am happy to announce the release of Scala-IO version 0.4.0.  It is a fairly major release that introduces a "Processing API" for declarative IO processing and some asynchronous capabilities.
