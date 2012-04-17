@@ -103,7 +103,7 @@ object AccessSegmentOfInput {
      */
     in.bytes.drop(10).take(20).limitFold(10) {
       case (acc, next) if util.Random.nextBoolean => End(acc + next)
-      case (acc, next) => End(acc + next)
+      case (acc, next) => Continue(acc + next)
     }
   }
 
