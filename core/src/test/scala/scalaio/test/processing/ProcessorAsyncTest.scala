@@ -6,7 +6,7 @@ import org.junit.Assert._
 import scalax.io._
 import processing._
 import java.util.concurrent.TimeoutException
-import akka.util.duration._
+import scala.concurrent.util.duration._
 
 class ProcessorAsyncTest extends AssertionSugar{
 

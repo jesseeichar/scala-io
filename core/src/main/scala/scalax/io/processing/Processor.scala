@@ -1,9 +1,9 @@
 package scalax.io
 package processing
 
-import akka.dispatch._
-import akka.util.duration._
-import akka.util.Duration
+import scala.concurrent._
+import util.duration._
+import util.Duration
 
 /**
  * A point or step in a IO process workflow.
@@ -251,15 +251,14 @@ trait Processor[+A] {
    * }}}
    */
   def execute():Unit = {
-    def runEmpty(e:Any):Unit = e match {
-      case lt:LongTraversable[_] => lt.foreach(runEmpty)
-      case _ => ()
+    def runEmpty(e:Any):Unit = if (e.isInstanceOf[LongTraversable[_]]) {
+      e.asInstanceOf[LongTraversable[_]].foreach(runEmpty _)
     }
     val initialized = init
     try {
       initialized.execute match {
         case Some(iter:LongTraversable[_]) =>
-          iter.foreach(runEmpty)
+          iter.foreach(runEmpty _)
         case result =>
           ()
       }

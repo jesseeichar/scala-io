@@ -15,6 +15,8 @@ import scala.reflect.Manifest
 
 import org.junit.Assert.fail
 import org.junit.Assume.assumeTrue
+import scala.reflect.mirror._
+import scala.reflect.api._
 
 
 object AssertionSugar {
@@ -25,22 +27,23 @@ trait AssertionSugar {
   def assumeNotWindows = {
     assumeTrue(!AssertionSugar.isWindows)
   }
-  def ignoring[E <: Throwable](test : => Unit)(implicit m:Manifest[E]) : Unit = {
+  def ignoring[E <: Throwable](test : => Unit)(implicit m:ConcreteTypeTag[E]) : Unit = {
     val error = try {
       test
       Some("Expected "+m.toString+" but instead no exception was raised")
     }catch{
-      case e if (m >:> Manifest.singleType(e)) => None
+      case e if (m.erasure.isAssignableFrom(e.getClass)) => None
       case e => throw e;
     }
   }
-  def intercept[E <: Throwable](test : => Unit)(implicit m:Manifest[E]) : Unit = {
+  def intercept[E <: Throwable : ConcreteTypeTag](test : => Unit) : Unit = {
+    val m = implicitly[ConcreteTypeTag[E]]
     val error = try {
       test
       Some("Expected "+m.toString+" but instead no exception was raised")
     }catch{
       case e:AssertionError if m.erasure != classOf[AssertionError] => throw e
-      case e if (m >:> Manifest.singleType(e)) => None
+      case e if (m.erasure.isAssignableFrom(e.getClass)) => None
       case e =>
         e.printStackTrace
         Some("Expected "+m.toString+" but instead got "+e.getClass)

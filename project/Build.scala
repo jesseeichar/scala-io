@@ -5,10 +5,10 @@ import scala.xml.transform._
 object BuildConstants {
   val organization = "com.github.scala-incubator.io"
   val version = "0.5.0-SNAPSHOT"
-  val armVersion = "1.1"
-  val armScalaVersion = "2.9.1"
+  val armVersion = "1.2"
+  val armScalaVersion = "2.10.0-SNAPSHOT"
   val akkaVersion = "2.0.1"
-  val scalaVersion = "2.9.2"
+  val scalaVersion = "2.10.0-SNAPSHOT"
 }
 
 object ScalaIoBuild extends Build {
@@ -56,26 +56,30 @@ object ScalaIoBuild extends Build {
     maxErrors := 20,
     scalacOptions ++= Seq("-optimize","-deprecation"),
     offline := false,
+//    parallelExecution in Test := false,
     scalaVersion := BuildConstants.scalaVersion,
     
     publishMavenStyle := true,
     publishToSettings,
     pomExtraSetting,
     
+    resolvers += "Scala-Tools Maven2 Snapshots Repository" at "http://scala-tools.org/repo-snapshots",
+    resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
     resolvers += {
       val mapfishRepoUrl = new java.net.URL("http://dev.mapfish.org/ivy2")
       Resolver.url("Mapfish Ivy Repository", mapfishRepoUrl)(Resolver.ivyStylePatterns)
     },
-    libraryDependencies += "com.novocode" % "junit-interface" % "0.8" % "test->default"
+    libraryDependencies += "com.novocode" % "junit-interface" % "0.8" % "test->default",
+    libraryDependencies += "org.scala-lang" % "scala-compiler" % BuildConstants.scalaVersion % "test"
   )
 
   // ----------------------- Core Project ----------------------- //
 
   val coreSettings = Seq[Setting[_]](
     name := "scala-io-core",
-    resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
-    libraryDependencies += "com.github.jsuereth.scala-arm" % ("scala-arm_"+BuildConstants.armScalaVersion) % BuildConstants.armVersion,
-    libraryDependencies += "com.typesafe.akka" % "akka-actor" % BuildConstants.akkaVersion,
+    resolvers += "java.net repo" at "http://download.java.net/maven/2/",
+    libraryDependencies += "com.jsuereth" % ("scala-arm_"+BuildConstants.armScalaVersion) % BuildConstants.armVersion,
+    libraryDependencies += "javax.transaction" % "jta" % "1.0.1B",
     publishArtifact in Test := true
   )
 	lazy val coreProject = Project("core", file("core")).

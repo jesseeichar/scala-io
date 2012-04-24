@@ -14,6 +14,8 @@ import Path.fail
 import java.net.URI
 
 import java.util.regex.Pattern
+import collection.mutable.ArrayBuffer
+import scala.{Some, Option}
 
 class RamPath(relativeTo: String, val path: String, override val fileSystem: RamFileSystem) extends Path(fileSystem) with RamFileOps {
   def node = fileSystem.lookup(this)
@@ -125,12 +127,13 @@ class RamPath(relativeTo: String, val path: String, override val fileSystem: Ram
     if (!isDirectory) throw new NotDirectoryException(this + " is not a directory so descendants can not be called on it")
     
     new BasicPathSet[RamPath](this, factory(filter), depth, false, (pathFilter: PathMatcher[RamPath], parent: RamPath) => {
-      parent.node.collect {
+      val c = parent.node.collect {
         case d: DirNode =>
           d.children.map(n => parent / n.name)
         case p =>
           throw new NotDirectoryException(p+" is not a directory so descendants can not be called on it")
-      }.flatten.toIterator
+      }
+      c.toIterator.flatten
     })
   }
 

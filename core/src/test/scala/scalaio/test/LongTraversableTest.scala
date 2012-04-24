@@ -7,8 +7,8 @@ import scalax.io._
 import scalax.test.sugar._
 import java.io.IOException
 
-import akka.dispatch._
-import akka.util.duration._
+import scala.concurrent._
+import scala.concurrent.util.duration._
 
 class LongTraversableTest extends DataIndependentLongTraversableTest[Int] with ProcessorTest with AssertionSugar {
   implicit val codec = Codec.UTF8

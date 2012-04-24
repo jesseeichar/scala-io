@@ -6,8 +6,8 @@ import scalax.io.processing.{ProcessorFactory, Processor, CharProcessor, BytePro
 import java.util.concurrent.TimeoutException
 import scalax.io.{Resource, LongTraversable, ResourceContext, DefaultResourceContext}
 import java.io.{File, DataInputStream, ByteArrayInputStream}
-import akka.dispatch.Await
-import akka.util.duration._
+import scala.concurrent.Await
+import scala.concurrent.util.duration._
 
 trait ProcessorTest extends AssertionSugar {
   self: LongTraversableTest =>
@@ -824,7 +824,6 @@ trait ProcessorTest extends AssertionSugar {
     val traversable: LongTraversable[Int] = prepared.traversable.map {
       case _ => throw new Error("Should be caught")
     }
-    class ParentException extends RuntimeException
     intercept[ParentException] {
       for {
         p <- traversable.processor

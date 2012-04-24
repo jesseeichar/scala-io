@@ -1,12 +1,10 @@
 package scalax
 
-import akka.dispatch.ExecutionContext
-import akka.actor.ActorSystem
-
+import scala.concurrent.ExecutionContext
 
 /**
  * Scala IO core classes
  */
 package object io {
-  protected[io] lazy val executionContext = ExecutionContext.defaultExecutionContext(ActorSystem.create())
+  protected[io] lazy val executionContext = ExecutionContext.defaultExecutionContext
 }

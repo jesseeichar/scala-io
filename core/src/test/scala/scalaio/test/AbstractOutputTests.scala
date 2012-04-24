@@ -180,10 +180,11 @@ trait AbstractOutputTests[InResource, OutResource] extends scalax.test.sugar.Ass
     processor2.execute
     assertEquals("start12345678910", in.slurpString)
   }
+
   @Test
   def scalaIoException_On_Write_Error_by_default{
     intercept[ScalaIOException] {
-        errorOnWriteOut.write("hi")
+      errorOnWriteOut.write("hi")
     }
   }
 

@@ -7,7 +7,7 @@ import scalax.io.nio.SeekableFileChannel
 import scalax.io._
 import java.nio.channels.ByteChannel
 import java.io._
-import actors.Futures
+import scala.concurrent._
 import java.net._
 import scala.collection.mutable.ArrayBuffer
 

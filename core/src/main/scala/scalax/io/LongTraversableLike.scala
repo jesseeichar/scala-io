@@ -45,12 +45,12 @@ case class End[@specialized(Byte,Char) +A](result: A) extends FoldResult[A]
  *
  * This trait adds methods for accessing the extra portions of the dataset.
  */
-trait LongTraversableLike[@specialized(Byte,Char) +A, +Repr <: LongTraversableLike[A, Repr]] extends TraversableLike[A, Repr] {
+trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A, Repr]] extends TraversableLike[A, Repr] {
   self =>
   def context:ResourceContext
   override protected[this] def thisCollection: LongTraversable[A] = this.asInstanceOf[LongTraversable[A]]
   override protected[this] def toCollection(repr: Repr): LongTraversable[A] = repr.asInstanceOf[LongTraversable[A]]
-  override def toArray[B >: A: ClassManifest] = 
+  override def toArray[B >: A: ClassManifest] =
     if(hasDefiniteSize && size <= Int.MaxValue) { 
       val array = new Array[B](size.toInt)
       var i = 0

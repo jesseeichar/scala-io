@@ -73,11 +73,9 @@ private[io] class CloseableIteratorOps[+A](val iter: CloseableIterator[A]) {
   def modifiedSliding(size: Int, step: Int): CloseableIterator[Seq[A]] = Proxy(iter.sliding(size,step))
   def zipAll[B, A1 >: A, B1 >: B](that: Iterator[B], thisElem: A1, thatElem: B1): CloseableIterator[(A1, B1)] =
     Proxy(iter.zipAll(that,thisElem,thatElem))
-  def zipWithIndex: CloseableIterator[(A, Int)] {var idx: Int} = {
+  def zipWithIndex: CloseableIterator[(A, Int)] = {
     val zipped = iter.zipWithIndex
-    new Proxy[(A, Int),Iterator[(A, Int)] {var idx: Int}](zipped) {
-      var idx = zipped.idx
-    }
+    new Proxy[(A, Int),Iterator[(A, Int)]](zipped)
   }
   def zip[B](that: Iterator[B]): CloseableIterator[(A, B)] =
     Proxy(iter.zip(that))

@@ -1,6 +1,6 @@
 package scalax.io
 
-import akka.dispatch.Future
+import scala.concurrent.Future
 
 /**
  * An additional API for LongTraversable for asynchronous interaction

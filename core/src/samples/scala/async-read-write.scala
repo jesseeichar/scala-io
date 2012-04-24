@@ -96,7 +96,7 @@ object AsyncReadWrite {
    */
   def processorWithTimeOuts {
     import scalax.io.Resource
-    import akka.util.duration._
+    import scala.concurrent.util.duration._
 
     val in = Resource.fromFile("/tmp/in")
     val out = Resource.fromFile("/tmp/out")
