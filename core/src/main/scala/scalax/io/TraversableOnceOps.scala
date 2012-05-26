@@ -8,6 +8,8 @@
 
 package scalax.io
 
+import scala.annotation.tailrec
+
 /**
  * Provides some convenience methods for certain operations on TraversableOnce
  */
@@ -16,9 +18,14 @@ private[io] object TraversableOnceOps {
     data match {
       case t:Traversable[_] => t.asInstanceOf[Traversable[T]].splitAt(index)
       case _ =>
-        def innerSplitAt(iterator:Iterator[T], remaining:Int): (Traversable[Int])
         val iter = data.toIterator
-        splitAt(iter, index)
+//        @tailrec
+//        def take(container:Vector[T], remaining:Int) = if (remaining > 0){
+//          
+//        } else {
+//          
+//        }
+//        iter.c
         (iter.take(index).toList,iter)
     }
   }
