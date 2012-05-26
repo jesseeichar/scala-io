@@ -17,7 +17,8 @@ import java.nio.channels.WritableByteChannel
 
 class SeekableFileChannel(val self : FileChannel) extends SeekableByteChannel with Proxy {
   private[this] val wrapped = self
-  def write (src: java.nio.ByteBuffer) = wrapped.write(src)
+  def write (src: java.nio.ByteBuffer) = 
+    wrapped.write(src)
   def truncate (size: Long)  = new SeekableFileChannel(wrapped.truncate(size))
   def size = wrapped.size
   def read (dst: java.nio.ByteBuffer) = wrapped.read(dst)

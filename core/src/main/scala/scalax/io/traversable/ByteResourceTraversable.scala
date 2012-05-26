@@ -45,9 +45,9 @@ protected[io] class ByteResourceTraversable(
   override def lsize = {
     CloseableIterator.withIterator(iterator,context) {_.size}
   }
-
+ /* TODO fix override
   override def toArray[B >: Byte: ClassManifest]: Array[B] = {
     CloseableIterator.withIterator(iterator,context) {_.toArray}
   }
-
+*/
 }

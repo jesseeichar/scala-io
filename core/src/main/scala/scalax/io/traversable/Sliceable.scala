@@ -59,6 +59,7 @@ private[io] abstract class Sliceable extends CloseableIterator[Byte] {
     }
   }
 
+  /*  TODO reimplement override when I can
   override def toArray[B >: Byte: ClassManifest]: Array[B] = {
     init()
     val in = getIn
@@ -81,4 +82,5 @@ private[io] abstract class Sliceable extends CloseableIterator[Byte] {
       case _ => throw new IllegalStateException(in.getClass+" is neither a ReadableByteChannel or an InputStream, there is a problem with the implementation because only one of those two should be return by getIn")
     }
   }
+  */
 }

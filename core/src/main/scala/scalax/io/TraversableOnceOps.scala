@@ -16,7 +16,9 @@ private[io] object TraversableOnceOps {
     data match {
       case t:Traversable[_] => t.asInstanceOf[Traversable[T]].splitAt(index)
       case _ =>
+        def innerSplitAt(iterator:Iterator[T], remaining:Int): (Traversable[Int])
         val iter = data.toIterator
+        splitAt(iter, index)
         (iter.take(index).toList,iter)
     }
   }

@@ -50,6 +50,8 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A, Repr]] extends Tra
   def context:ResourceContext
   override protected[this] def thisCollection: LongTraversable[A] = this.asInstanceOf[LongTraversable[A]]
   override protected[this] def toCollection(repr: Repr): LongTraversable[A] = repr.asInstanceOf[LongTraversable[A]]
+
+  /*  TODO fix override
   override def toArray[B >: A: ClassManifest] =
     if(hasDefiniteSize && size <= Int.MaxValue) { 
       val array = new Array[B](size.toInt)
@@ -61,7 +63,7 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A, Repr]] extends Tra
       array
     } else {
       toBuffer.toArray
-  }
+  }   */
 
   /**
    * Create a processor that provides an API for declaring a processing pipeline of this
