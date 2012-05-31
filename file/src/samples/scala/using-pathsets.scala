@@ -98,8 +98,8 @@ object UsingPathSets {
     import scalax.file.PathMatcher._
 
     val path: Path = Path("/tmp/")
-    
-    // print name of all files and directories that are children of path 
+
+    // print name of all files and directories that are children of path
     path.children().foreach { path => println(path.name) }
 
     // Print only the files
@@ -111,21 +111,21 @@ object UsingPathSets {
     import scalax.file.PathMatcher._
 
     val path: Path = Path("/tmp/")
-    
+
     // all children of path.  the filesystem is not read touched
     val allChildren = path.children()
-    
+
     // all files of children.  Still no filesystem access
     val files = allChildren.filter(IsFile)
 
     // all files smaller than 1000 bytes.  Still no filesystem access
     val smallFiles = files.filter(_.size.forall(_ < 1000))
-    
+
     // sizes of files.  still not filesystem access
     val sizes = smallFiles.flatMap(_.size)
-    
+
     //val actualSizes = sizes.force
-    
+
   }
   /*
  * Disabled until Java 7 version because implementation is impossible until then

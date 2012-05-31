@@ -1,6 +1,6 @@
 /*                     __                                               *\
 **     ________ ___   / /  ___     Scala API                            **
-**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar             **
+**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar          **
 **  __\ \/ /__/ __ |/ /__/ __ |    http://scala-lang.org/               **
 ** /____/\___/_/ |_/____/_/ | |                                         **
 **                          |/                                          **
@@ -74,7 +74,7 @@ trait SeekableByteChannel extends ByteChannel
 
 object SeekableByteChannel {
   /**
-   * Create a SeekableByteChannel from a file.  
+   * Create a SeekableByteChannel from a file.
    */
   def fromFile(path:String) = (opts:Seq[OpenOption]) => support.FileUtils.openChannel(new java.io.File(path), opts)
 }

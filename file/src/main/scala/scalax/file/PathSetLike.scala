@@ -45,11 +45,11 @@ trait PathSetLike[+T, +Repr <: PathSetLike[T, Repr]] extends IterableLike[T, Rep
    * of paths selected by this finder.
    */
   def \(literal: String) = /(literal)
-  
+
   override /*TraversableLike*/ def map[B, That](f: T => B)(implicit bf: CanBuildFrom[Repr, B, That]): That = {
     val it = () => iterator.map(f)
     bf.apply(repr) match {
-      case ci: AbstractLazyIteratorBasedBuilder[B, That] => 
+      case ci: AbstractLazyIteratorBasedBuilder[B, That] =>
         ci.addIter(it)
         ci.result()
       case b =>
@@ -60,7 +60,7 @@ trait PathSetLike[+T, +Repr <: PathSetLike[T, Repr]] extends IterableLike[T, Rep
   override /*TraversableLike*/ def flatMap[B, That](f: T => collection.GenTraversableOnce[B])(implicit bf: CanBuildFrom[Repr, B, That]): That = {
     val it = () => iterator.flatMap(f)
     bf.apply(repr) match {
-      case ci: AbstractLazyIteratorBasedBuilder[B, That] => 
+      case ci: AbstractLazyIteratorBasedBuilder[B, That] =>
         ci.addIter(it)
         ci.result()
       case b =>
@@ -71,7 +71,7 @@ trait PathSetLike[+T, +Repr <: PathSetLike[T, Repr]] extends IterableLike[T, Rep
   override def filter(f: T => Boolean) = {
     val it = () => iterator.filter(f)
     newBuilder match {
-      case ci: AbstractLazyIteratorBasedBuilder[T, Repr] => 
+      case ci: AbstractLazyIteratorBasedBuilder[T, Repr] =>
         ci.addIter(it)
         ci.result()
       case b =>
@@ -82,7 +82,7 @@ trait PathSetLike[+T, +Repr <: PathSetLike[T, Repr]] extends IterableLike[T, Rep
   override def collect [B, That] (pf: PartialFunction[T, B])(implicit bf: CanBuildFrom[Repr, B, That]): That = {
     val it = () => iterator.collect(pf)
     bf(repr) match {
-      case ci: AbstractLazyIteratorBasedBuilder[B, That] => 
+      case ci: AbstractLazyIteratorBasedBuilder[B, That] =>
         ci.addIter(it)
         ci.result()
       case b =>

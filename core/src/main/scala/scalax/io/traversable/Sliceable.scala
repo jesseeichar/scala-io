@@ -40,8 +40,8 @@ private[io] abstract class Sliceable extends CloseableIterator[Byte] {
   def lsize = {
     def fileSize = sizeFunc() match {
       case Some(size) => size min (end - start)
-      case None => 
-          var result = 0L  
+      case None =>
+          var result = 0L
             while(hasNext){
               result += 1
               next
@@ -81,6 +81,5 @@ private[io] abstract class Sliceable extends CloseableIterator[Byte] {
         out.toByteArray().asInstanceOf[Array[B]]
       case _ => throw new IllegalStateException(in.getClass+" is neither a ReadableByteChannel or an InputStream, there is a problem with the implementation because only one of those two should be return by getIn")
     }
-  }
-  */
+  }*/
 }

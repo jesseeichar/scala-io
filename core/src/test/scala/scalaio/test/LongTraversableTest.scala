@@ -362,26 +362,26 @@ class LongTraversableTest extends DataIndependentLongTraversableTest[Int] with P
       traversable().withIterator { i => i }
     }
   }
- 
-   
+
+
   @Test
   def scalaIoException_On_Read_Error_by_default{
     intercept[ScalaIOException] {
         traversable(callback = _ => throw new IOException("Bang")).head
     }
   }
-    
+
   @Test
   def scalaIoException_On_Close_Error_by_default{
     intercept[ScalaIOException] {
-        traversable(closeFunction = () => 
+        traversable(closeFunction = () =>
           throw new IOException("Bang")
           ).head
     }
   }
   @Test
   def customErrorHandler_On_Read_Error{
-    val testContext = new ErrorHandlingTestContext() 
+    val testContext = new ErrorHandlingTestContext()
 
     val errorOnReadInput = traversable(callback = _ => throw new IOException("Bang"), resourceContext = testContext.customContext)
       errorOnReadInput.headOption
@@ -390,7 +390,7 @@ class LongTraversableTest extends DataIndependentLongTraversableTest[Int] with P
   }
   @Test
   def customErrorHandler_On_Close_Error{
-    val testContext = new ErrorHandlingTestContext() 
+    val testContext = new ErrorHandlingTestContext()
 
     val errorOnCloseInput = traversable(closeFunction = () => throw new IOException("Bang"), resourceContext = testContext.customContext)
       errorOnCloseInput.headOption
@@ -474,7 +474,7 @@ class LongTraversableTest extends DataIndependentLongTraversableTest[Int] with P
     assertSameBehaviour(_.groupBy(n => (n % 2) == 0).map{case (key,value) => (key, value.toSeq)},
         _.groupBy(n => (n % 2) == 0).map(mapping => mapping.map{case (key,value) => (key, value.toSeq)}))
   }
-  
+
   @Test
   def async_is_non_blocking {
     for(_ <- 1 to 20) {     // repeat to be safe against Heisenbugs

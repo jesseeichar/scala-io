@@ -1,6 +1,6 @@
 /*                     __                                               *\
 **     ________ ___   / /  ___     Scala API                            **
-**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar             **
+**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar          **
 **  __\ \/ /__/ __ |/ /__/ __ |    http://scala-lang.org/               **
 ** /____/\___/_/ |_/____/_/ | |                                         **
 **                          |/                                          **
@@ -36,7 +36,7 @@ import java.io.{Reader, File}
 trait ReadChars {
   /**
    * Get the Resource context that configures how the underlying resource is accessed
-   * 
+   *
    * @return the associated ResourceContext
    */
   def context:ResourceContext
@@ -71,5 +71,3 @@ trait ReadChars {
   def slurpString = chars.mkString
 
 }
-
-

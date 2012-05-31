@@ -6,7 +6,7 @@ package seekable
  */
 object SeekablePerformanceSuite {
 
-  def main(args: Array[String]): Unit = {  
+  def main(args: Array[String]): Unit = {
     Main.runTests(
         () => new SmallMediumSetFileSeekable,
         () => new SmallSetFileSeekable,

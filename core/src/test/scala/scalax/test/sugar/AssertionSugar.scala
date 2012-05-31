@@ -1,6 +1,6 @@
 /*                     __                                               *\
 **     ________ ___   / /  ___     Scala API                            **
-**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar             **
+**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar          **
 **  __\ \/ /__/ __ |/ /__/ __ |    http://scala-lang.org/               **
 ** /____/\___/_/ |_/____/_/ | |                                         **
 **                          |/                                          **
@@ -84,17 +84,17 @@ object LargeResource {
 
 object KEY extends Enumeration {
   val TEXT = Value("LOTS_OF_TEXT.txt")
-  
+
   val TEXT_CREATION = (writer:Writer) => {
     def lines(c:Int = 1000000) : Stream[String] = {
       util.Random.nextString(30) #:: (if(c > 0) lines(c - 1) else Stream.empty)
     }
-    
+
     lines().foreach{l=>
-    	writer.write(l)
-    	writer.write("\n")
+      writer.write(l)
+      writer.write("\n")
     }
     writer.close()
-    
+
   }
 }

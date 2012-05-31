@@ -1,6 +1,6 @@
 /*                     __                                               *\
 **     ________ ___   / /  ___     Scala API                            **
-**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar             **
+**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar          **
 **  __\ \/ /__/ __ |/ /__/ __ |    http://scala-lang.org/               **
 ** /____/\___/_/ |_/____/_/ | |                                         **
 **                          |/                                          **
@@ -34,7 +34,7 @@ import java.io.IOException
  * @since   1.0
  */
 case class NotFileException(path:String) extends IOException with ControlThrowable {
-  override lazy val toString = path + "is not a file"  
+  override lazy val toString = path + "is not a file"
 }
 
 /**
@@ -57,5 +57,5 @@ case class NotFileException(path:String) extends IOException with ControlThrowab
  * @since   1.0
  */
 case class NotDirectoryException(path:String) extends IOException with ControlThrowable{
-  override lazy val toString = path + "is not a directory"  
+  override lazy val toString = path + "is not a directory"
 }

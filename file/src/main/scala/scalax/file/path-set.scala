@@ -19,8 +19,8 @@ object PathFinder {
 }
 trait PathFinder[+T] {
   /**The union of the paths found by this <code>PathSet</code> with the paths found by 'paths'.
-   * Note that if the same element is added twice it will be present twice in the PathFinder 
-   * (in most implementations).  Consider: (Path("a") +++ Path("a")).iterator.  the iterator 
+   * Note that if the same element is added twice it will be present twice in the PathFinder
+   * (in most implementations).  Consider: (Path("a") +++ Path("a")).iterator.  the iterator
    * will return Path("a") twice. */
   def +++[U >: T](includes: PathFinder[U]): PathFinder[U]
 
@@ -76,7 +76,7 @@ final class BasicPathSet[+T <: Path](srcFiles: Iterable[T],
                                pathFilter : PathMatcher[T],
                                depth:Int,
                                self:Boolean,
-                               children : (PathMatcher[T],T) => Iterator[T]) 
+                               children : (PathMatcher[T],T) => Iterator[T])
   extends PathSet[T] {
 
   def this (parent : T,
@@ -98,7 +98,7 @@ final class BasicPathSet[+T <: Path](srcFiles: Iterable[T],
   }
 
   def **[F](filter: F)(implicit factory:PathMatcherFactory[F]): PathSet[T] = {
-	  val nextFilter = factory(filter)
+    val nextFilter = factory(filter)
       new BasicPathSet(this, nextFilter, -1, false, children)
   }
 
@@ -124,7 +124,7 @@ final class BasicPathSet[+T <: Path](srcFiles: Iterable[T],
     private[this] def root(p:T) = p.parents.find(p => roots.exists(_.path == p.path))
 
     private[this] def currentDepth(p:Path, root:Option[Path]) = {
-      val basicDepth = root.map {r => 
+      val basicDepth = root.map {r =>
         p.relativize(r).segments.size
         } getOrElse Int.MaxValue
       if(self) basicDepth - 1 else basicDepth
@@ -180,7 +180,7 @@ private class PathsToVisit[T <: Path](startingIter:Iterator[T]) {
   @inline
   final def isEmpty = !hasNext
   @tailrec
-  final def hasNext:Boolean = 
+  final def hasNext:Boolean =
     if(curr.hasNext) true
     else if(iterators.isEmpty) false
     else {
@@ -188,9 +188,9 @@ private class PathsToVisit[T <: Path](startingIter:Iterator[T]) {
       iterators = iterators.tail
       hasNext
   }
-  
+
   final def next() = curr.next()
-  
+
   final def prepend(iter:Iterator[T]) = {
     val tmp = curr
     curr = iter.buffered
@@ -208,7 +208,7 @@ private class IterablePathSet[T](iter: => Iterator[T]) extends PathSet[T] {
   })
   def /(literal: String): PathSet[T] = mapping {
     case p : Path if !(p / literal exists) => PathFinder.empty
-    case other => other / literal 
+    case other => other / literal
   }
 
   def *[F](filter: F)(implicit factory: PathMatcherFactory[F]): PathSet[T] = mapping(_ * factory(filter))
@@ -228,7 +228,7 @@ private class IterablePathSet[T](iter: => Iterator[T]) extends PathSet[T] {
 /*
  private[file] trait SourceBasedPathSet[+T <: PathSet[_]] {
   self:PathSet[T] =>
-    
+
   override def force : Iterable[T] = Iterable.empty ++ this
   def /(literal: String): PathSet[T] = mapSources{_ / literal}
 
@@ -246,9 +246,9 @@ private class IterablePathSet[T](iter: => Iterator[T]) extends PathSet[T] {
 }
 
 private class MappablePathSet[+T <: PathSet[_]](original:PathFinder[T])
-		extends PathSet[T] with SourceBasedPathSet[T] {
-	def iterator: Iterator[T] = original.iterator
-	def mapSources[U >: T](f: PathFinder[U] => PathFinder[U]):PathSet[U] = new MappablePathSet[U](f(original))
+    extends PathSet[T] with SourceBasedPathSet[T] {
+  def iterator: Iterator[T] = original.iterator
+  def mapSources[U >: T](f: PathFinder[U] => PathFinder[U]):PathSet[U] = new MappablePathSet[U](f(original))
 }
 private class AdditivePathSet[+T <: PathSet[_]](original:PathFinder[T], more:PathFinder[T])
         extends PathSet[T] with SourceBasedPathSet[T] {

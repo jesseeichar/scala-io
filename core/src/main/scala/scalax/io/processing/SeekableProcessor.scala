@@ -96,7 +96,7 @@ class OpenSeekable private[processing] (channel: SeekableByteChannel, resourceCo
 
     def position: Long = channel.position
   }
-  
+
   val asSeekable: Seekable {
     def position: Long
     def position_=(newPosition: Long): Unit

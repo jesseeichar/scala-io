@@ -559,4 +559,3 @@ trait Seekable extends Input with Output {
     } finally resource.close()
   }
 }
-

@@ -12,12 +12,12 @@ class WriterResource[+A <: Writer] (
   extends WriteCharsResource[A]
   with ResourceOps[A, WriterResource[A]]  {
 
-  self => 
+  self =>
 
   override def open():OpenedResource[A] = new CloseableOpenedResource(opener,context, closeAction)
-  override def updateContext(newContext:ResourceContext) = 
+  override def updateContext(newContext:ResourceContext) =
     new WriterResource(opener, newContext, closeAction)
-  override def addCloseAction(newCloseAction: CloseAction[A]) = 
+  override def addCloseAction(newCloseAction: CloseAction[A]) =
     new WriterResource(opener, context, newCloseAction :+ closeAction)
 
   protected def writer = this

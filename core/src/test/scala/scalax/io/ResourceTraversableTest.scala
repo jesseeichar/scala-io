@@ -1,6 +1,6 @@
 /*                     __                                               *\
 **     ________ ___   / /  ___     Scala API                            **
-**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar             **
+**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar          **
 **  __\ \/ /__/ __ |/ /__/ __ |    http://scala-lang.org/               **
 ** /____/\___/_/ |_/____/_/ | |                                         **
 **                          |/                                          **
@@ -28,7 +28,7 @@ class ResourceTraversableTest extends LongTraversableTest {
     def in = new ByteArrayInputStream(dataFunc(tsize) map {_.toByte} toArray) {
       override def close() = {
        closeFunction()
-       super.close 
+       super.close
       }
     }
     def stream = Channels.newChannel(in)

@@ -14,7 +14,7 @@ object BuildConstants {
 object ScalaIoBuild extends Build {
   // ----------------------- Root Project ----------------------- //
 
-	lazy val root:Project = Project("root", file(".")).
+  lazy val root:Project = Project("root", file(".")).
     aggregate(coreProject,fileProject,perfProject,webSiteProject).
     settings(sharedSettings ++ Seq(publishArtifact := false, name := "Scala IO") :_*)
 
@@ -46,9 +46,9 @@ object ScalaIoBuild extends Build {
       </developer>
     </developers>
   )
-  
+
   val sharedSettings = Seq[Setting[_]](
-   	//scalaHome := Some(file("/Volumes/Box/ScalaProject/scala-full/dists/scala-2.9.2.r25667-b20110921211926")),
+     //scalaHome := Some(file("/Volumes/Box/ScalaProject/scala-full/dists/scala-2.9.2.r25667-b20110921211926")),
     organization := BuildConstants.organization,
     version := BuildConstants.version,
     licenses := Seq("Scala License" -> url("http://www.scala-lang.org/node/146")),
@@ -58,11 +58,10 @@ object ScalaIoBuild extends Build {
     offline := false,
 //    parallelExecution in Test := false,
     scalaVersion := BuildConstants.scalaVersion,
-    
+
     publishMavenStyle := true,
     publishToSettings,
     pomExtraSetting,
-    
     resolvers += "Scala-Tools Maven2 Snapshots Repository" at "http://scala-tools.org/repo-snapshots",
     resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
     resolvers += {
@@ -82,9 +81,9 @@ object ScalaIoBuild extends Build {
     libraryDependencies += "javax.transaction" % "jta" % "1.0.1B",
     publishArtifact in Test := true
   )
-	lazy val coreProject = Project("core", file("core")).
+  lazy val coreProject = Project("core", file("core")).
     configs(Samples).
-	  settings(samplesSettings ++ sharedSettings ++ coreSettings : _*)
+    settings(samplesSettings ++ sharedSettings ++ coreSettings : _*)
   // ----------------------- File Project ----------------------- //
 
 
@@ -103,22 +102,22 @@ object ScalaIoBuild extends Build {
     name := "scala-io-file",
     pomPostProcess := removeScalaIOTestDependency.apply
   )
-	lazy val fileProject = Project("file", file("file")).
+  lazy val fileProject = Project("file", file("file")).
     configs(Samples).
-	  settings (samplesSettings ++ sharedSettings ++ fileSettings : _*).
-	  dependsOn(coreProject, coreProject % "test->test")
-    
+    settings (samplesSettings ++ sharedSettings ++ fileSettings : _*).
+    dependsOn(coreProject, coreProject % "test->test")
+
   // ----------------------- Performace Project ---------------------//
-  
+
   val perfSettings: Seq[Setting[_]] = Seq(
     name := "scala-io-performance",
     libraryDependencies += "com.github.jsuereth" %% "sperformance" % "0.1",
     publishArtifact := false
   )
-	lazy val perfProject = Project("perf", file("perf")).
-	  settings (samplesSettings ++ sharedSettings ++ perfSettings : _*).
-	  dependsOn(coreProject,coreProject % "compile->test", fileProject % "compile->test")
-  
+  lazy val perfProject = Project("perf", file("perf")).
+    settings (samplesSettings ++ sharedSettings ++ perfSettings : _*).
+    dependsOn(coreProject,coreProject % "compile->test", fileProject % "compile->test")
+
 
   // ------------------------------ Docs Project ------------------------------ //
   lazy val docsSite = TaskKey[Unit]("docs-site","Generate documentation web-site")
@@ -151,5 +150,5 @@ object ScalaIoBuild extends Build {
   lazy val webSiteProject:Project = Project("docs", file("documentation")).
     dependsOn(coreProject, fileProject, fileProject % "docs->compile").
     settings(sharedSettings ++ docsSettings :_*)
-    
+
 }

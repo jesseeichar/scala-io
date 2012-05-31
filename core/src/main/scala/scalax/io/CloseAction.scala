@@ -73,7 +73,7 @@ trait CloseAction[-A] {
    * @param other an action to ''prepend'' to this action
    * @return an action consisting of first executing ''other'' then ''this''
    */
-	def +:[B <: A](other:CloseAction[B]):CloseAction[B] = other match {
+  def +:[B <: A](other:CloseAction[B]):CloseAction[B] = other match {
     case Noop => this
     case _ => new Prepend(other,this)
   }
@@ -83,7 +83,7 @@ trait CloseAction[-A] {
    * @param other an action to ''append'' to this action
    * @return an action consisting of first executing ''this'' then ''other''
    */
-	def :+[B <: A](other:CloseAction[B]):CloseAction[B] = other match {
+  def :+[B <: A](other:CloseAction[B]):CloseAction[B] = other match {
     case Noop => this
     case _ => new Append(other,this)
   }

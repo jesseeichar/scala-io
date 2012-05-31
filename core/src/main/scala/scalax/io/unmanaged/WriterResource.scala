@@ -18,6 +18,6 @@ class WriterResource[+A <: Writer] (
   override def addCloseAction(newCloseAction: CloseAction[A]) =
     new WriterResource(resource, context, newCloseAction :+ closeAction)
 
-  
+
   override def writer = this
 }

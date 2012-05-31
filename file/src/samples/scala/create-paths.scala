@@ -7,7 +7,7 @@ object CreatePath {
   def explicitCreation = {
     import scalax.file.{Path, FileSystem}
     val path1: Path = Path ("/tmp/file1",'/')
-    
+
     // when an absolute path is desired don't forget "/"
     val path2: Path = Path ("/","tmp","file1")
 

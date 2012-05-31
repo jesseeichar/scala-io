@@ -48,12 +48,12 @@ object ExceptionHandling {
    * is also known so a default value can be provided.
    * </p><p>
    * This pattern can be quite tricky because the internals of how Scala-IO works needs to be known.
-   * For example if providing a default for slurpString then one must know that bytes must be 
-   * returned as the default rather than a string.  
+   * For example if providing a default for slurpString then one must know that bytes must be
+   * returned as the default rather than a string.
    * </p>
    * <p>
    * Also if the scala-io implementation changes the code could break.  Defaults work better when
-   * working with acquireAndGet or acquireFor  
+   * working with acquireAndGet or acquireFor
    * </p>
    */
   def returnDefaultValueOnFailure {
@@ -113,7 +113,7 @@ object ExceptionHandling {
       override def openErrorHandler[A, U](f: A => U, openException: Throwable): Option[U] = {
         f match {
           case f: FunctionWithDefault[_, U] =>
-            // perform logging 
+            // perform logging
             Some(f.defaultValue)
           case _ => super.openErrorHandler(f, openException)
         }
@@ -121,7 +121,7 @@ object ExceptionHandling {
       override def errorHandler[A, U](f: A => U, accessResult: Either[Throwable, U], closingExceptions: List[Throwable]): U = {
         f match {
           case f: FunctionWithDefault[_, U] =>
-            // perform logging 
+            // perform logging
             f.defaultValue
           case _ => super.errorHandler(f, accessResult, closingExceptions)
         }

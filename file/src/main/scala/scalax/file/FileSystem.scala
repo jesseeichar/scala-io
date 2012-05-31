@@ -1,6 +1,6 @@
 /*                     __                                               *\
 **     ________ ___   / /  ___     Scala API                            **
-**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar             **
+**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar          **
 **  __\ \/ /__/ __ |/ /__/ __ |    http://scala-lang.org/               **
 ** /____/\___/_/ |_/____/_/ | |                                         **
 **                          |/                                          **
@@ -273,10 +273,10 @@ abstract class FileSystem {
     result match {
       case Separator(sep) =>
         val msg = "%s is not permitted as a path 'segment' for this filesystem.  Segment in question: %s.  " +
-        		"\nIf you want to create a Path from a system dependent string then use fromString.  " +
-        		"If you want to create a child path use resolve instead of / to create the child path.  " +
-        		"It should be noted that the string after '/' must be a single segment but resolve accepts " +
-        		"""full strings. Examples:\n\tPath.fromString("c:\a\b")\n\tpath / ("a/b/c",'/')\n\tpath resolve "a\b\c" """
+          "\nIf you want to create a Path from a system dependent string then use fromString.  " +
+          "If you want to create a child path use resolve instead of / to create the child path.  " +
+          "It should be noted that the string after '/' must be a single segment but resolve accepts " +
+          "full strings. Examples: \n\tPath.fromString(\"c: \\a\\b\")\n\tpath / (\"a/b/c\", '/')\n\tpath resolve \"a\\b\\c\""
         throw new IllegalArgumentException(msg.format(sep , segment))
       case CommonSeparator(sep) => {
          logger.warning(sep + " should not be used as a character in a path segment because it is a commonly used path separator on many filesystems.  Segment in question: "+segment)
@@ -292,4 +292,3 @@ abstract class FileSystem {
   protected lazy val logger = java.util.logging.Logger.getLogger(getClass.getPackage().getName())
 
 }
-

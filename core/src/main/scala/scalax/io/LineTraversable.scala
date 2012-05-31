@@ -1,6 +1,6 @@
 /*                     __                                               *\
 **     ________ ___   / /  ___     Scala API                            **
-**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar             **
+**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar          **
 **  __\ \/ /__/ __ |/ /__/ __ |    http://scala-lang.org/               **
 ** /____/\___/_/ |_/____/_/ | |                                         **
 **                          |/                                          **
@@ -24,13 +24,13 @@ class LineTraversable(source: => CloseableIterator[Char], terminator: Terminator
   def context = resourceContext
   protected[io] def iterator = terminator match {
     case Auto => new AutoCharIter(source,includeTerminator)
-    case t:SimpleTerminator if t.sep.size == 1 => new SingleCharIter(source, t.sep.head, includeTerminator) 
-    case t:SimpleTerminator => new MultiCharIter(source, t.sep, includeTerminator) 
+    case t:SimpleTerminator if t.sep.size == 1 => new SingleCharIter(source, t.sep.head, includeTerminator)
+    case t:SimpleTerminator => new MultiCharIter(source, t.sep, includeTerminator)
   }
 }
 
-private[io] class SingleCharIter(private[this] val sourceIter: CloseableIterator[Char], 
-                                 private[this] val term:Char, 
+private[io] class SingleCharIter(private[this] val sourceIter: CloseableIterator[Char],
+                                 private[this] val term:Char,
                                  private[this] val includeTerm:Boolean) extends CloseableIterator[String] {
   private[this] val sb = new StringBuilder
 
@@ -50,12 +50,12 @@ private[io] class SingleCharIter(private[this] val sourceIter: CloseableIterator
     if(includeTerm) sb append term
     sb.toString
   }
-  
+
   def doClose = sourceIter.close()
 }
 
-private[io] class MultiCharIter(private[this] val sourceIter: CloseableIterator[Char], 
-                                private[this] val term:String, 
+private[io] class MultiCharIter(private[this] val sourceIter: CloseableIterator[Char],
+                                private[this] val term:String,
                                 private[this] val includeTerm:Boolean) extends CloseableIterator[String] {
   private[this] val sb = new StringBuilder
 
@@ -79,12 +79,12 @@ private[io] class MultiCharIter(private[this] val sourceIter: CloseableIterator[
   def doClose = sourceIter.close()
 }
 
-private[io] class AutoCharIter(private[this] val sourceIter: CloseableIterator[Char], 
+private[io] class AutoCharIter(private[this] val sourceIter: CloseableIterator[Char],
                                private[this] val includeTerm:Boolean) extends CloseableIterator[String] {
 
   private[this] val sb = new StringBuilder
-  private[this] val iter = new CharBufferedIterator(sourceIter) 
-  
+  private[this] val iter = new CharBufferedIterator(sourceIter)
+
   @inline
   private[this] final def getc() = {
     if(iter.hasNext) {
@@ -95,7 +95,7 @@ private[io] class AutoCharIter(private[this] val sourceIter: CloseableIterator[C
             iter.next
             "\r\n"
           } else {
-            "\r"        
+            "\r"
           }
         }
         else {

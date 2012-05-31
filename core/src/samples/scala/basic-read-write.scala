@@ -152,7 +152,7 @@ object BasicIO {
     import scalax.io._
     import scalax.io.managed._
     import java.io._
-    
+
     val in: InputStreamResource[FileInputStream] = Resource.fromInputStream(new FileInputStream("file"))
 
     // declare the Codec explicitly
