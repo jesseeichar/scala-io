@@ -3,10 +3,10 @@ package processing
 
 /**
  * ProcessorAPI for processing Byte input sources.
- * 
+ *
  * Note: ProcessorAPI[Byte] will normally parse bytes as BigEndian bytes
  */
-case class ByteProcessor(base:CloseableIteratorProcessor[Byte]) 
+case class ByteProcessor(base:CloseableIteratorProcessor[Byte])
     extends SpecificApiFactory[Byte, ByteProcessorAPI](base) {
     protected def create(iter: CloseableIterator[Byte]) = new ByteProcessorAPI(iter, base.context)
 }
@@ -14,14 +14,14 @@ case class ByteProcessor(base:CloseableIteratorProcessor[Byte])
  * An api for reading data from the a Byte input source.  Contains methods for reading shorts, longs, etc... All datatypes (like long) read from
  * this API are big-endian.  For reading the data as little-endian data types this object provides a method to create a similar API object that
  * creates the data types by interpreting the bytes little endian.
- * 
+ *
  *  @see scalax.io.processing.ProcessorAPI
  *  @see scalax.io.processing.CharProcessorAPI
  */
 class ByteProcessorAPI private[processing](private[this] val iter: CloseableIterator[Byte], context: ResourceContext) extends ProcessorAPI[Byte](iter, context) {
-  
+
   /**
-   * Create an API object for reading numeric values interpretted with little-endianness. 
+   * Create an API object for reading numeric values interpretted with little-endianness.
    */
   def littleEndianAPI = new LittleEndianAPI(this, processFactory)
 
@@ -102,16 +102,16 @@ class LittleEndianAPI private[processing](@inline private[this] val wrapped: Byt
    */
   def nextInt = processorFactory {
       wrapped.iterator.takeIfPossible(4) match {
-        case bytes if bytes.nonEmpty => 
+        case bytes if bytes.nonEmpty =>
           Some(
-              (((bytes(3) & 0xff) << 24) | 
-               ((bytes(2) & 0xff) << 16) | 
-               ((bytes(1) & 0xff) << 8) | 
+              (((bytes(3) & 0xff) << 24) |
+               ((bytes(2) & 0xff) << 16) |
+               ((bytes(1) & 0xff) << 8) |
                (bytes(0) & 0xff)))
         case _ => None
       }
     }
-    
+
   /**
    * Read a little-endian long
    */

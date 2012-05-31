@@ -4,7 +4,7 @@ package processing
 /**
  * ProcessorAPI for processing char input sources
  */
-case class CharProcessor(base:CloseableIteratorProcessor[Char]) 
+case class CharProcessor(base:CloseableIteratorProcessor[Char])
     extends SpecificApiFactory[Char, CharProcessorAPI](base) {
     protected def create(iter: CloseableIterator[Char]) = new CharProcessorAPI(iter, base.context)
 }
@@ -32,5 +32,5 @@ class CharProcessorAPI private[processing](iter: CloseableIterator[Char],
       }
       processFactory(Some(new LineTraversable(wrapped, lineTerminator, includeTerminator, resourceContext).headOption.getOrElse("").toSeq))
   }
-  
+
 }

@@ -33,36 +33,36 @@ object LongTraversableProcessing {
       // Convert the rows data to a string
       new String(rowData.toArray, Codec.UTF8.charSet)
     }
-    
+
     // rowTranformer is designed to be used to define the structure of a file or other data
     // it does not actually process the file.
     // At this point the file has not been opened yet
     val rowTraversable:LongTraversable[String] = rowTransformer.traversable[String]
-    
+
     // Since LongTraversable's are lazy, the file still has not been opened
     // only the actual calling of foreach (next line) will trigger the file read.
     rowTraversable.foreach(println)
   }
-  
+
   /**
    * Combine multiple LongTraversable objects into one by combining them through several
    * transformers.
-   * 
+   *
    * Consider a hypothetical csv like format where the attributes are split between
-   * two files.  The first file has 3 columns. 
+   * two files.  The first file has 3 columns.
    * |title|id|
    * Each Id must be unique in this file
-   * 
+   *
    * the second file also has 2 columns
    * |id|data|
    * the second file can have multiple rows with the same id but they must be adjacent to the other rows with the same
    * ids.
-   * 
-   * This example combines the two files into a single LongTraversable[Record]  
+   *
+   * This example combines the two files into a single LongTraversable[Record]
    */
   def parseMultipleFiles {
     import scalax.io.{Resource,Codec,LongTraversable}
-    
+
     case class Record(id:Int, title:String, attributes:Iterable[String])
 
     val recordTransformer = for{
@@ -76,9 +76,9 @@ object LongTraversableProcessing {
       } yield {
         Record(id.toInt, title, attributes.toSeq)
       }
-      
+
     val records: LongTraversable[Record] = recordTransformer.traversable
-    
+
     // now do something with the records.  remember the files have not
     // yet been opened and won't be until the LongTraversable is used
   }
@@ -148,7 +148,7 @@ object LongTraversableProcessing {
     process.acquireAndGet{ char =>
       // do something with char
     }
-    
+
     // similarly the resulting processor can have an error handler attached
     process onFailure return1OnError acquireAndGet {char =>
       // do something

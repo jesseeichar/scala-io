@@ -1,6 +1,6 @@
 /*                     __                                               *\
 **     ________ ___   / /  ___     Scala API                            **
-**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar             **
+**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar          **
 **  __\ \/ /__/ __ |/ /__/ __ |    http://scala-lang.org/               **
 ** /____/\___/_/ |_/____/_/ | |                                         **
 **                          |/                                          **
@@ -164,7 +164,7 @@ object Path
     try target.close() catch { case e: IOException => }
   }
 
-  private[file] def fail(msg: String) = 
+  private[file] def fail(msg: String) =
     throw new IOException(msg)
 }
 
@@ -205,17 +205,17 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
   def toAbsolute: PathType
   /**
    * The true/real representation of the current path.
-   * 
+   *
    * The full and true path of this path will be resolved, links will be handled according to the link options
-   * . and .. etc... will be resolved and if this path is relative it will be made absolute.  
-   * 
+   * . and .. etc... will be resolved and if this path is relative it will be made absolute.
+   *
    * If no linkOptions are supplied this method will follow links
-   * 
+   *
    * @note in Java 6 linkOptions are ignored because only Java.io.File apis are used but in Java 7 linkOptions are
    * correctly handled
-   * 
+   *
    * @param linkOptions How to handle link options
-   * 
+   *
    * @return the ''real'' path
    */
   def toRealPath(linkOptions:LinkOption*): PathType
@@ -327,7 +327,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    * path with all relative segments are resolved.
    *
    * For example /home/user/../another is <em>not</em> a valid normalized path.
-   * 
+   *
    * @see #toAbsolute
    * @see java.file.File#toCanonical
    */
@@ -700,7 +700,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
   }
   def attributes_= (attrs:Iterable[FileAttribute[_]]) = {
     var timeStamp:Option[Long] = None
-    
+
     val newAccess = attrs.foldLeft(access.toSet) {
       case (modes, LastModifiedAttribute(newLastModified)) =>
         timeStamp = Some(newLastModified)
@@ -713,7 +713,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
       case (modes, ExecuteAccessAttribute(false)) => modes - Execute
       case (modes, att) => throw new IllegalArgumentException(att+" is not a supported FileAttribute for "+fileSystem+" file system")
     }
-    
+
     if(newAccess != access) access = newAccess
     timeStamp.foreach(t => lastModified = t)
   }
@@ -990,7 +990,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    *           if true then copy the File attributes of the object
    *           as well as the data.  True by default
    *  @param depth
-   *           The depth of the copy if the path is a Directory. 
+   *           The depth of the copy if the path is a Directory.
    *           A depth of 0 means only the current Path is copied
    *           A depth of 1 means all children are copied as well, etc...
    *           default is entire tree
@@ -1011,7 +1011,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
              replaceExisting : Boolean=false,
              depth:Int = Int.MaxValue): P = {
 
-  	if (this.normalize == target.normalize) return target
+    if (this.normalize == target.normalize) return target
 
     if (!createParents && target.parent.map(_.nonExistent).getOrElse(true)) fail("Parent directory of destination file does not exist.")
     if (target.exists && !replaceExisting) fail("Destination file already exists, force creation or choose another file.")

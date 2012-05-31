@@ -1,6 +1,6 @@
 /*                     __                                               *\
 **     ________ ___   / /  ___     Scala API                            **
-**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar             **
+**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar          **
 **  __\ \/ /__/ __ |/ /__/ __ |    http://scala-lang.org/               **
 ** /____/\___/_/ |_/____/_/ | |                                         **
 **                          |/                                          **
@@ -124,12 +124,12 @@ trait Output {
   def writeStrings(strings: Traversable[String], separator:String = "")(implicit codec: Codec = Codec.default): Unit = {
       underlyingOutput.writer.writeStrings(strings,separator)
   }
-  
+
   /**
    * Copy data from an input to this output.  Input will call this method from copyTo if
    * it does not know how to efficiently copy the data.  This method thus will copy as effiently as
    * possible and if all else fails simply write the bytes
-   * 
+   *
    * @param input the source to read data from
    */
   private[io] final def copyDataFrom(input:Input):Unit = doCopyFrom(input)
@@ -140,4 +140,3 @@ trait Output {
    */
   protected def doCopyFrom(input:Input) = write (input.bytes)
 }
-

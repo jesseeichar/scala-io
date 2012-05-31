@@ -15,11 +15,11 @@ class OutputStreamResource[+A <: OutputStream] (
   extends OutputResource[A]
   with ResourceOps[A, OutputStreamResource[A]] {
 
-  self => 
+  self =>
 
   override def open():OpenedResource[A] = new CloseableOpenedResource(opener,context, closeAction)
   override def updateContext(newContext:ResourceContext) = new OutputStreamResource(opener, newContext, closeAction)
-  override def addCloseAction(newCloseAction: CloseAction[A]) = 
+  override def addCloseAction(newCloseAction: CloseAction[A]) =
     new OutputStreamResource(opener, context, newCloseAction :+ closeAction)
 
   override def outputStream = this

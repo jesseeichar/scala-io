@@ -102,7 +102,7 @@ trait DataIndependentLongTraversableTest[T] {
   }
 
   @Test //@Ignore
-  def should_handle_init = 
+  def should_handle_init =
     assertSizeAndType(independentTraversable(), _ init, false)
 
   @Test //@Ignore
@@ -117,7 +117,7 @@ trait DataIndependentLongTraversableTest[T] {
   }
 
   @Test //@Ignore
-  def should_handle_tail = 
+  def should_handle_tail =
     assertSizeAndType(independentTraversable(), _ tail)
 
   @Test //@Ignore
@@ -256,8 +256,8 @@ trait DataIndependentLongTraversableTest[T] {
     val (e1, e2) = expected.splitAt(splitPoint1)
     assertEquals(e1.toList, a1.toList)
     assertEquals(e2.toList, a2.toList)
-    
-    
+
+
   }
   @Test
   def indexOf {

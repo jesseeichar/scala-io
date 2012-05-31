@@ -21,5 +21,3 @@ case class LastModifiedAttribute(override val value:Long) extends FileAttribute[
 case class ReadAccessAttribute(readable:Boolean) extends FileAttribute[Boolean]("read", readable)
 case class WriteAccessAttribute(writable:Boolean) extends FileAttribute[Boolean]("write", writable)
 case class ExecuteAccessAttribute(executable:Boolean) extends FileAttribute[Boolean]("execute", executable)
-
-

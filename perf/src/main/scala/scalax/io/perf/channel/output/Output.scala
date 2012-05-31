@@ -20,16 +20,16 @@ import java.io.File
 import java.io.FileInputStream
 import java.nio.channels.Channels
 
-class SmallMediumSetsInMemoryWritableByteChannelTest 
-	extends AbstractWritableByteChannelOutputTest 
-	with MemoryBase with SmallMediumDataSet 
-	
+class SmallMediumSetsInMemoryWritableByteChannelTest
+  extends AbstractWritableByteChannelOutputTest
+  with MemoryBase with SmallMediumDataSet
+
 object SmallMediumSetsInMemoryWritableByteChannelRunner {
   def main(args: Array[String]) {
     Main.runTests(() => new SmallMediumSetsInMemoryWritableByteChannelTest)
   }
 }
- 
+
 // ----------------------------------------------------------------
 
 class SmallMediumSetsToFileSeekableByteChannelTest
@@ -49,10 +49,10 @@ object SmallMediumSetsToFileSeekableByteChannelRunner {
 
 // ----------------------------------------------------------------
 
-class SmallMediumSetsToFileWritableByteChannelTest 
-	extends AbstractWritableByteChannelOutputTest 
-	with FileBase with SmallMediumDataSet
-	
+class SmallMediumSetsToFileWritableByteChannelTest
+  extends AbstractWritableByteChannelOutputTest
+  with FileBase with SmallMediumDataSet
+
 object SmallMediumSetsToFileWritableByteChannelRunner {
   def main(args: Array[String]) {
     Main.runTests(() => new SmallMediumSetsToFileWritableByteChannelTest)
@@ -61,10 +61,10 @@ object SmallMediumSetsToFileWritableByteChannelRunner {
 
 // ----------------------------------------------------------------
 
-class SmallSetsInMemoryWritableByteChannelTest 
-	extends AbstractWritableByteChannelOutputTest 
-	with MemoryBase with SmallDataSet 
-	
+class SmallSetsInMemoryWritableByteChannelTest
+  extends AbstractWritableByteChannelOutputTest
+  with MemoryBase with SmallDataSet
+
 object SmallSetsInMemoryWritableByteChannelTest {
   def main(args: Array[String]) {
     Main.runTests(() => new SmallSetsInMemoryWritableByteChannelTest)
@@ -73,9 +73,9 @@ object SmallSetsInMemoryWritableByteChannelTest {
 
 // ----------------------------------------------------------------
 
-class SmallSetsToFileSeekableByteChannelTest 
-	extends AbstractWritableByteChannelOutputTest 
-	with SeekableBase with SmallDataSet {
+class SmallSetsToFileSeekableByteChannelTest
+  extends AbstractWritableByteChannelOutputTest
+  with SeekableBase with SmallDataSet {
   override def newOutResource = {
     val out = newOut
     Resource.fromSeekableByteChannel(out())
@@ -91,13 +91,12 @@ object SmallSetsToFileSeekableByteChannelTest {
 
 // ----------------------------------------------------------------
 
-class SmallSetsToFileWritableByteChannelTest  
-	extends AbstractWritableByteChannelOutputTest 
-	with FileBase with SmallDataSet 
+class SmallSetsToFileWritableByteChannelTest
+  extends AbstractWritableByteChannelOutputTest
+  with FileBase with SmallDataSet
 
 object SmallSetsToFileWritableByteChannelTest {
   def main(args: Array[String]) {
     Main.runTests(() => new SmallSetsToFileWritableByteChannelTest)
   }
 }
-

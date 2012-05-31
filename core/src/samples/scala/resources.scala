@@ -137,7 +137,7 @@ object Resources {
     import scalax.io.{Resource, Input, Output, WriteChars}
     import scalax.io.JavaConverters._
     import java.io.{InputStream, OutputStream, OutputStreamWriter, Writer}
-    
+
     val stdIn:Input = System.in.asUnmanagedInput
     val stdOut:Output = System.out.asUnmanagedOutput
     val stdErr:WriteChars = new OutputStreamWriter(System.err).asUnmanagedWriteChars

@@ -17,17 +17,17 @@ class SeekableByteChannelResource[+A <: SeekableByteChannel] (
     protected val openOptions:Option[Seq[OpenOption]] = None)
   extends SeekableResource[A]
   with ResourceOps[A, SeekableByteChannelResource[A]]  {
-  
 
-  self => 
+
+  self =>
 
   private def rawOpen() = opener(openOptions getOrElse ReadWrite)
   def writeAppendOpen = opener(openOptions getOrElse WriteAppend)
 
   override def open():OpenedResource[A] = new CloseableOpenedResource(rawOpen(),context, closeAction)
-  override def updateContext(newContext:ResourceContext) = 
+  override def updateContext(newContext:ResourceContext) =
     new SeekableByteChannelResource(opener, newContext, closeAction, sizeFunc, openOptions)
-  override def addCloseAction(newCloseAction: CloseAction[A]) = 
+  override def addCloseAction(newCloseAction: CloseAction[A]) =
     new SeekableByteChannelResource(opener, context, newCloseAction :+ closeAction, sizeFunc, openOptions)
 
   override def inputStream = {
@@ -53,7 +53,7 @@ class SeekableByteChannelResource[+A <: SeekableByteChannel] (
 
   def writableByteChannel = new WritableByteChannelResource(writeAppendOpen, context, closeAction)
   def readableByteChannel = new ReadableByteChannelResource(rawOpen(),context, closeAction,sizeFunc)
-  
+
   protected override def underlyingChannel(append:Boolean) = {
     val resource:A = append match {
       case true =>
@@ -72,7 +72,7 @@ class SeekableByteChannelResource[+A <: SeekableByteChannel] (
   }
 
   protected override def underlyingOutput: OutputResource[WritableByteChannel] = this
-  override def blocks(blockSize: Option[Int] = None):LongTraversable[ByteBlock] = 
+  override def blocks(blockSize: Option[Int] = None):LongTraversable[ByteBlock] =
     new traversable.ChannelBlockLongTraversable(blockSize, context, sizeFunc, open)
 
   override def bytesAsInts:LongTraversable[Int] = ResourceTraversable.seekableByteChannelBased[Byte,Int](this.open, context, sizeFunc, initialConv = ResourceTraversable.toIntConv)
@@ -80,4 +80,3 @@ class SeekableByteChannelResource[+A <: SeekableByteChannel] (
 
   override def toString: String = "SeekableByteChannelResource("+context.descName.name+")"
 }
-

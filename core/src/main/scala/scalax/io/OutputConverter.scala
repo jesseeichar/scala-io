@@ -115,9 +115,9 @@ object OutputConverter {
     override def apply(out: WritableByteChannel, bytes:Array[Byte]) = if(bytes.length > 0) out.write(ByteBuffer.wrap(bytes))
   }
   implicit object ByteBufferConverter extends OutputConverter[ByteBuffer] {
-	  override def apply(out: WritableByteChannel, bytes:ByteBuffer) = out.write(bytes)
+    override def apply(out: WritableByteChannel, bytes:ByteBuffer) = out.write(bytes)
       def toBytes(data: ByteBuffer) = new nio.ByteBuffer(data)
-      def sizeInBytes = 1	  
+      def sizeInBytes = 1
   }
   implicit object TraversableByteConverter extends OutputConverter[TraversableOnce[Byte]] {
     override def apply(out: WritableByteChannel, bytes:TraversableOnce[Byte]) = {
@@ -128,7 +128,7 @@ object OutputConverter {
         bytes foreach {
           case i if buffer.position() < buffer.capacity() =>
             buffer.put(i)
-          case i => 
+          case i =>
             buffer.flip()
             out write buffer
             buffer.clear()

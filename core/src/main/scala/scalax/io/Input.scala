@@ -36,7 +36,7 @@ import java.io.{InputStream, File}
 trait Input {
   /**
    * Get the Resource context that configures how the underlying resource is accessed
-   * 
+   *
    * @return the associated ResourceContext
    */
   def context:ResourceContext
@@ -54,19 +54,19 @@ trait Input {
   * @return an non-strict traversable over all the bytes
   */
   def bytes : LongTraversable[Byte]
-  
+
   /**
    * Read the input as blocks of bytes.  This method should be avoided unless the maximum performance is
    * absolutely required because bytes provides very good performance and is a better API for most applications.
-   * 
+   *
    * However since it better reflects how data is read with most input sources (like InputStreams and ReadableByteChannels);
    * blocks is slightly more performance than bytes and therefore
    * can be used when performance is the most important consideration.
-   * 
+   *
    * @param blockSize block size can optionally be specified but the default is normally acceptable.
    */
   def blocks(blockSize: Option[Int] = None): LongTraversable[ByteBlock]
-  
+
   /**
   * Obtains a Traversable for conveniently processing the file as Ints.
   *
@@ -134,5 +134,5 @@ trait Input {
    *          The codec representing the desired encoding of the characters
    */
   def slurpString(implicit codec: Codec = Codec.default) = new String(byteArray, codec.name)
-  
+
 }

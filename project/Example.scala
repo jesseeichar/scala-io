@@ -10,7 +10,7 @@ class Example(project:String, path:File) {
   private val text = IO.read(path, Charset.forName("UTF-8"))
   val base = path.getName.take(path.getName.size - ".scala".size)
   val name = base.mkString.split("-").map{_.capitalize} mkString " "
-  
+
   private def cleanSummary(summary:String) = summary.lines.map { _.trim.replaceAll("\\*\\s*","")}.mkString(" ").replaceAll("\\s\\s"," ").replace(". ",".  ")
   private def shortSummary(summary:String):String = summary.takeWhile(_ != '.').mkString.replaceAll("\"","'")
   lazy val rawDesc = {
@@ -27,9 +27,9 @@ class Example(project:String, path:File) {
   lazy val shortSummaryText:String = shortSummary(summary)
   lazy val keyword = Keyword(project, name.toLowerCase,name,1,name,"category",project,shortSummaryText, Set(name))
   lazy val page = Page(keyword,description,"",pages)
-  
+
   lazy val pages:Seq[Page] = {
-    
+
     val objText = text.drop(text.indexOf("object"))
     val regex:Regex = """(?s)(/\*\*(.+?)\*/\s*)?def\s+(\S+)\s*=?\s*\{""".r
     regex.findAllIn(objText).matchData.toList map {m =>
@@ -53,7 +53,7 @@ class Example(project:String, path:File) {
       Page(keyword,summaryXml,code)
     }
   }
-  
+
   private def parseXML(name:String,xml:String)= {
       try {
         XML.loadString("<span>"+xml+"</span>")

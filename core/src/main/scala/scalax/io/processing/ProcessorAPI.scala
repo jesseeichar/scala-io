@@ -8,7 +8,7 @@ package processing
  *
  * '''Also see the section below about data specific APIs'''
  *
- * The processing package contains classes for processing and the ProcessorAPI is the core of 
+ * The processing package contains classes for processing and the ProcessorAPI is the core of
  * the Processing API.
  *
  * The concept behind the processing API is to declare the format in a largely declarative manner and read the contents
@@ -114,10 +114,10 @@ package processing
  * it is empty.  If it is then the api2 will be created again and the process will be repeated until api2 is again empty. etc...
  *
  * All the normal behaviour of for-comprehensions are supported as well, including guards, pattern matching etc...
- * 
+ *
  * In addition to this class, one can wrap this API with a type Specific API for a particular type a.  For example
  * support A is bytes, ByteProcessorAPI can be used to gain access to APIs that are specific to working with Bytes.
- * 
+ *
  * @see scalax.io.processing.SpecificApiFactory
  * @see scalax.io.processing.ProcessorAPI
  * @see scalax.io.processing.CharProcessorAPI
@@ -220,7 +220,7 @@ class ProcessorAPI[+A](private[this] val iter: CloseableIterator[A], val resourc
    * If there is an element left in the input source a Processor containing that element will be returned, otherwise
    * the returned processor will be empty.
    *
-   * Since next will return an empty processor it will terminate the looping in a for-comprehension and the resulting Processor 
+   * Since next will return an empty processor it will terminate the looping in a for-comprehension and the resulting Processor
    * could be an empty processor.  This can be a problem when reading from multiple input sources.  the opt method can be used to
    * modify the returned processor so that it returns a Processor[Option[_]] that is never empty.  COnsider the following examples
    *
@@ -248,8 +248,8 @@ class ProcessorAPI[+A](private[this] val iter: CloseableIterator[A], val resourc
    *
    * The reason is that in example 1 (next), next returns an empty processor when input2 is empty and thus the println
    * is not executed.  In example 2 the Processor is never empty it is either Some or None.
-   * 
-   * @note if the process has a repeatUntilEmpty() method call, next.opt should be preferred over next.  
+   *
+   * @note if the process has a repeatUntilEmpty() method call, next.opt should be preferred over next.
    *       See repeatUntilEmpty for a more detailed description of why
    *
    * @return An empty processor if there are no more elements in the input source or a processor containing the next element
@@ -260,13 +260,13 @@ class ProcessorAPI[+A](private[this] val iter: CloseableIterator[A], val resourc
   /**
    * Create a Processor that simply repeats until this processor and all of the other input sources that are passed
    * in are empty or ended.  Each repetition generates an integer that can be used to count the number of repetitions
-   * if desired. 
-   * 
+   * if desired.
+   *
    * @note repeatUntilEmpty can very easily result in infinite loops because it depends on the following components
    * of the process/workflow correctly retrieving elements from the input source so that it eventually empties
-   * 
+   *
    * The following examples are ways that one can create infinite loops (or loops that last up to Long.MaxValue):
-   * 
+   *
    * {{{
    * for {
    *   processor1 <- input.bytes.processor
@@ -274,13 +274,13 @@ class ProcessorAPI[+A](private[this] val iter: CloseableIterator[A], val resourc
    *   processor1Loops <- processor1.repeatUntilEmpty()
    *     // if processor2 is emptied before processor1 there is an infinite loop because
    *     // this section will be the loop and since processor1 is not accessed here we have a loop
-   *     // to be safer next1 should be in this section  
+   *     // to be safer next1 should be in this section
    *   processor2Loops <- processor2.repeatUntilEmpty()
    *   next1 <- processor1.next.opt
    *   next2 <- processor2.next.opt
    * } yield (next1, next2)
    * }}}
-   * 
+   *
    * {{{
    * for {
    *   processor1 <- input.bytes.processor
@@ -294,7 +294,7 @@ class ProcessorAPI[+A](private[this] val iter: CloseableIterator[A], val resourc
    *   next2 <- processor2.next
    * } yield (next1, next2)
    * }}}
-   * 
+   *
    * {{{
    * for {
    *   processor1 <- input.bytes.processor
@@ -309,7 +309,7 @@ class ProcessorAPI[+A](private[this] val iter: CloseableIterator[A], val resourc
    *
    * A safe implementation using repeatUntilEmpty should only execute methods that produce non-empty Processors
    * or should be done with extreme care.
-   * 
+   *
    * for {
    *   processor1 <- input.bytes.processor
    *   processor2 <- input.bytes.processor
@@ -322,18 +322,18 @@ class ProcessorAPI[+A](private[this] val iter: CloseableIterator[A], val resourc
    * }}}
 
    * @param otherProcessorAPIs other processors to empty (in addition to this) before ending the loop
-   * 
+   *
    * @return A Processor containing a sequence of whatever elements are returned by the for-comprehension
    */
   def repeatUntilEmpty(otherProcessorAPIs: ProcessorAPI[_]*) = new RepeatUntilEmpty(Long.MaxValue, processFactory, (this +: otherProcessorAPIs): _*)
-  
+
   /**
    * Loops n times or until the provided input sources are all empty.
-   * 
+   *
    * This method is similar to repeatUntilEmpty except it limits the number of repetitions that can be performed.
-   * 
+   *
    * @param times the maximum number of loops
-   * @param otherProcessorAPIs other input sources to monitor for empty before prematurely ending the loop.  
+   * @param otherProcessorAPIs other input sources to monitor for empty before prematurely ending the loop.
    *                           If this and otherProcessorAPIs are all empty then the looping will be ended
    */
   def repeat(times: Int, otherProcessorAPIs: ProcessorAPI[_]*) = new RepeatUntilEmpty(times, processFactory, (this +: otherProcessorAPIs): _*)

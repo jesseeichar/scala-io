@@ -9,7 +9,7 @@ import java.io.{InputStreamReader, BufferedInputStream, Reader, InputStream}
  * A ManagedResource for accessing and using ByteChannels.  Class can be created using the [[scalax.io.Resource]] object.
  */
 class ReadableByteChannelResource[+A <: ReadableByteChannel] (
-    resource: A, 
+    resource: A,
     resourceContext:ResourceContext = DefaultResourceContext,
     closeAction: CloseAction[A] = CloseAction.Noop)
   extends Input {

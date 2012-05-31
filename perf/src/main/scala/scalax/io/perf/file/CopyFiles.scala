@@ -55,7 +55,7 @@ class CopyFilesPerformanceTest extends PerformanceDSLTest with DefaultFixture{
       }
     }
   }
-  
+
   override def tearDown = {
   println("CopyFilesPerformanceTest: tearingDown created files")
     fixture.after()

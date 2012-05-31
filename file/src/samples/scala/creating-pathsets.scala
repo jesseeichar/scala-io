@@ -51,23 +51,23 @@ object CreatingPathSets {
     import Path._
     import scalax.file.PathSet
     import scalax.file.PathMatcher._
-    
+
 
     // two ways to select all files
     val files = Path("tmp") ** IsFile
     val files2 = Path("tmp") ** ((_:Path).isFile)
-    
+
     // select all directories
     val directories = Path("tmp") ** IsDirectory
     val directories2 = Path("tmp") ** ((_:Path).isDirectory)
-    
+
     // find all writeable, executable files
     import Path.AccessModes._
-    val writeable = Path("tmp") ** AccessMatcher(Write, Execute) // can put multiple 
+    val writeable = Path("tmp") ** AccessMatcher(Write, Execute) // can put multiple
     import scalax.file.attributes._
     val writeable2 = Path("tmp") ** AttributeMatcher(WriteAccessAttribute(true), ExecuteAccessAttribute(true))
     val writeable3 = Path("tmp") ** ((_:Path).canWrite)
-    
+
     // find all files with a particular datestamp that are writeable but not executable
     import Path.AccessModes._
     val timeStamped = Path("tmp") ** AttributeMatcher(WriteAccessAttribute(true), ExecuteAccessAttribute(false), LastModifiedAttribute(123456000L))
@@ -79,7 +79,7 @@ object CreatingPathSets {
    */
   def regexBasedPathSets {
     import scalax.file.Path
-    
+
     // this will find all paths that are a child of "." that == eng or fra or deu
     // notice that the .r at the end, this converts the string to a regular expression
     // and so the PathFilter that is created using the regular expression to do the match

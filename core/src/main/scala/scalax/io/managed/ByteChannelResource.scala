@@ -17,14 +17,14 @@ class ByteChannelResource[+A <: ByteChannel] (
   with OutputResource[A]
   with ResourceOps[A, ByteChannelResource[A]] {
 
-  self => 
-  
+  self =>
+
   override def open():OpenedResource[A] = new CloseableOpenedResource(opener,context, closeAction)
 
   override def updateContext(newContext:ResourceContext) = new ByteChannelResource(opener, newContext, closeAction, sizeFunc)
-  override def addCloseAction(newCloseAction: CloseAction[A]) = 
+  override def addCloseAction(newCloseAction: CloseAction[A]) =
     new ByteChannelResource(opener, context, newCloseAction :+ closeAction, sizeFunc)
-  
+
   override def inputStream = {
     def nResource = new ChannelInputStreamAdapter(opener)
     val closer = ResourceAdapting.closeAction(closeAction)
@@ -49,10 +49,10 @@ class ByteChannelResource[+A <: ByteChannel] (
 
   override def writableByteChannel = new WritableByteChannelResource(opener, context, closeAction)
   override def readableByteChannel = new ReadableByteChannelResource(opener, context, closeAction, sizeFunc)
-  
-  override def blocks(blockSize: Option[Int] = None): LongTraversable[ByteBlock] = 
+
+  override def blocks(blockSize: Option[Int] = None): LongTraversable[ByteBlock] =
     new traversable.ChannelBlockLongTraversable(blockSize, context, sizeFunc, open)
-  
+
   override def bytesAsInts = ResourceTraversable.byteChannelBased[Byte,Int](this.open, context, sizeFunc, initialConv = ResourceTraversable.toIntConv)
   override def bytes = ResourceTraversable.byteChannelBased[Byte,Byte](this.open, context, sizeFunc)
   override def chars(implicit codec: Codec) = reader(codec).chars  // TODO optimize for byteChannel

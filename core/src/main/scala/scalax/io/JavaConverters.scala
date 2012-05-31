@@ -142,7 +142,7 @@ object JavaConverters {
    */
   implicit def asOutputConverter[B](src:B)(implicit converter:AsOutputConverter[B]) =
     new AsOutput(converter.toOutput(src))
-    
+
   /**
    * Used by the [[scalax.io.Output]] object for converting an arbitrary object to an Output Object
    *
@@ -151,13 +151,13 @@ object JavaConverters {
   trait AsOutputConverter[-A] {
     def toOutput(t:A) : Output
   }
-  
+
   /**
    * contains several implementations of [[scalax.io.AsOutputConverter]].  They will be implicitly resolved allowing
    * a user of the library to simple call A.asOutput and the converter will be found without the user needing to look up these classes
    */
   object AsOutputConverter {
-  
+
     /**
      * Converts a File to an Output object
      */
@@ -175,10 +175,10 @@ object JavaConverters {
    * Converts a WritableByteChannel to an Output object
    */
   implicit object WritableByteChannelConverter extends AsOutputConverter[WritableByteChannel]{
-	  def toOutput(chan: WritableByteChannel) = Resource.fromWritableByteChannel(chan)
+    def toOutput(chan: WritableByteChannel) = Resource.fromWritableByteChannel(chan)
   }
 }
-  
+
   class AsBinaryReadChars(op: Codec => ReadChars) {
     /** An object to an ReadChars object */
     def asBinaryReadChars(implicit codec:Codec = Codec.default): ReadChars = op(codec)
@@ -192,7 +192,7 @@ object JavaConverters {
   implicit def asReadCharsConverter[B](src:B)(implicit converter:AsBinaryReadCharsConverter[B]) =
     new AsBinaryReadChars(codec => converter.toReadChars(src,codec))
 
-      
+
   /**
    * Used by the [[scalax.io.ReadChars]] object for converting an arbitrary object to an ReadChars Object
    *
@@ -201,7 +201,7 @@ object JavaConverters {
   trait AsBinaryReadCharsConverter[-A] {
     def toReadChars(t:A,codec:Codec) : ReadChars
   }
-  
+
   /**
    * contains several implementations of [[scalax.io.AsReadCharsConverterFromBinary]].  They will be implicitly resolved allowing
    * a user of the library to simple call A.asBinaryReadChars and the converter will be found without the user needing to look up these classes
@@ -297,7 +297,7 @@ object JavaConverters {
   implicit def asSeekableConverter[B](src:B)(implicit converter:AsSeekableConverter[B]) =
     new AsSeekable(converter.toSeekable(src))
 
-    
+
   /**
    * Used by the [[scalax.io.Seekable]] object for converting an arbitrary object to an Seekable Object
    *
@@ -306,13 +306,13 @@ object JavaConverters {
   trait AsSeekableConverter[-A] {
     def toSeekable(t:A) : Seekable
   }
-  
+
   /**
    * contains several implementations of [[scalax.io.AsSeekableConverter]].  They will be implicitly resolved allowing
    * a user of the library to simple call A.asSeekable and the converter will be found without the user needing to look up these classes
    */
   object AsSeekableConverter {
-  
+
     /**
      * Converts a File to an Seekable object
      */
@@ -351,7 +351,7 @@ object JavaConverters {
    */
   implicit def asWriteCharsConverter[B](src:B)(implicit converter:AsBinaryWriteCharsConverter[B]) =
     new AsBinaryWriteChars(codec => converter.toWriteChars(src,codec))
-    
+
   /**
    * Used by the [[scalax.io.WriteChars]] object for converting an arbitrary object to an WriteChars Object
    *
@@ -360,13 +360,13 @@ object JavaConverters {
   trait AsBinaryWriteCharsConverter[-A] {
     def toWriteChars(t:A,codec:Codec) : WriteChars
   }
-  
+
   /**
    * contains several implementations of [[scalax.io.AsWriteCharsConverter]].  They will be implicitly resolved allowing
    * a user of the library to simple call A.asWriteChars and the converter will be found without the user needing to look up these classes
    */
   object AsBinaryWriteCharsConverter {
-  
+
     /**
      * Converts a File to an WriteChars object
      */
@@ -573,7 +573,7 @@ object JavaConverters {
       def toUnmanagedReadChars(reader: Reader) = new unmanaged.ReaderResource(reader)
     }
   }
-  
+
   class AsUnmanagedBinaryWriteChars(op: (Codec) => WriteChars) {
     /** An object to an WriteChars object */
     def asUnmanagedBinaryWriteChars(implicit codec:Codec = Codec.default): WriteChars = op(codec)

@@ -1,6 +1,6 @@
 /*                     __                                               *\
 **     ________ ___   / /  ___     Scala API                            **
-**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar             **
+**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar          **
 **  __\ \/ /__/ __ |/ /__/ __ |    http://scala-lang.org/               **
 ** /____/\___/_/ |_/____/_/ | |                                         **
 **                          |/                                          **
@@ -64,7 +64,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
   def can_copy_empty_file : Unit = {
      val tree = fixture.tree(3)._1
      val out = fixture.path(1).createDirectory(true,false)
-     tree.**((_:Path).isFile).foreach { p => 
+     tree.**((_:Path).isFile).foreach { p =>
        val to = out / p.relativize(tree)
        p.copyTo(to)
      }
@@ -74,15 +74,15 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
   def can_copy_directory_tree_with_copyTo: Unit = {
     val tree = fixture.tree(3)._1
     val out = fixture.path(1)
-    
+
     tree.copyTo(out)
-    
+
     val copiedFiles = out.***.toList.map((_:Path).relativize(out))
     val treeFiles = tree.***.map((_:Path).relativize(tree))
     assertTrue(treeFiles.size == copiedFiles.size)
     assertTrue(treeFiles.forall(p => copiedFiles.contains(p)))
   }
-  
+
   @Test //@Ignore
   def two_paths_are_equal_if_from_same_filesystem : Unit = {
     val path = fixture.path
@@ -188,15 +188,15 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
     assertEquals(fspath("xx").toURL.toString, fspath("xx").toURI.toString)
   }
 
-  
+
   @Test //@Ignore
   def write_will_create_Path_as_needed= {
      val xx = fixture.path / fixture.segment
      xx.write("testing")
-     
+
      assertTrue(xx.exists)
      assertEquals(xx.slurpString, "testing")
-     
+
      xx.write("newData")
      assertEquals(xx.slurpString, "newData")
   }
@@ -205,7 +205,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
     val path = fixture.fs("xx")
     try {
       path.write("testing")
-      
+
       assertTrue(path.exists)
       assertEquals(path.slurpString, "testing")
     } finally {
@@ -463,11 +463,11 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
     import f.path
     intercept[IOException] {
       // cannot replace non_empty directory
-	  val dir = path.createDirectory()
-	  dir \ "f__" createFile ()
+    val dir = path.createDirectory()
+    dir \ "f__" createFile ()
       path.createFile() moveTo (dir, replace=true)
     }
-	// but can replace empty directories
+  // but can replace empty directories
     path.createFile() moveTo (path.createDirectory(), replace=true)
   }
   @Test //@Ignore
@@ -645,9 +645,9 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
   }
   @Test //@Ignore
   def creating_path_from_string_should_clean_path() {
-	  assertEquals(fspath("a/b/c/./../d").path, fspath("a/b//c/./../d").path)
-	  assertEquals(fspath("a/b/c/./../d").path, fspath("a/b//c/./../d/").path)
-	  assertEquals(fspath("a/b/c/./../d").path, fspath("a/b//c/./../d//").path)
+    assertEquals(fspath("a/b/c/./../d").path, fspath("a/b//c/./../d").path)
+    assertEquals(fspath("a/b/c/./../d").path, fspath("a/b//c/./../d/").path)
+    assertEquals(fspath("a/b/c/./../d").path, fspath("a/b//c/./../d//").path)
   }
 
   @Test //@Ignore
@@ -672,15 +672,15 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
 
   @Test //@Ignore
   def path_separator_in_path_segment_throws_exception() {
-	  val sep = fixture.fs.separator
+    val sep = fixture.fs.separator
     intercept[IllegalArgumentException] {
-	  fixture.fs.apply("with","a",""+sep,"does","it","work","?")
+    fixture.fs.apply("with","a",""+sep,"does","it","work","?")
     }
     intercept[IllegalArgumentException] {
-	  fixture.fs.apply("with","a") \ sep 
+    fixture.fs.apply("with","a") \ sep
     }
     intercept[IllegalArgumentException] {
-    	fixture.fs.fromSeq(Seq("with","a",""+sep,"does","it","work","?"))
+      fixture.fs.fromSeq(Seq("with","a",""+sep,"does","it","work","?"))
     }
   }
 
@@ -755,14 +755,14 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
     assertTrue("canExecute was not copied when it should not have", f2.canExecute)
 
     if(f2.isDirectory) {
-	    if(f2.children().nonEmpty) {
-	      try {
-	        f2.delete()
-	        fail("Expected an exception because delete is not intended to delete recursively")
-	      } catch {
-	        case e:IOException => assertFalse("Error should be a known error and have good message", e.getMessage().contains("unknown"))
-	      }
-	    }
+      if(f2.children().nonEmpty) {
+        try {
+          f2.delete()
+          fail("Expected an exception because delete is not intended to delete recursively")
+        } catch {
+          case e:IOException => assertFalse("Error should be a known error and have good message", e.getMessage().contains("unknown"))
+        }
+      }
     } else {
       intercept[NotDirectoryException]{
         // can't call children on a file

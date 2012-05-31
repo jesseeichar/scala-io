@@ -76,7 +76,7 @@ class CloseableIteratorPerformanceTest extends PerformanceDSLTest {
 
           val byteFunc: Function1[Byte, Unit] = new Function1[Byte, Unit] {
             private[this] var i = 0
-            def apply(b: Byte) = 
+            def apply(b: Byte) =
               b + 1
           }
 
@@ -152,4 +152,3 @@ class RawIter(max: Int) {
     byte
   }
 }
-

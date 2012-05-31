@@ -1,6 +1,6 @@
 /**
  * Examples for creating Output/Input/ReadChars/WriteChars/etc using the asFooConverter pattern.
- * 
+ *
  * There are two patterns for creating IO objects.  One is using the Resources API.  This is often the best for
  * creating resources from closeable objects such as InputStreams.  The Resource API takes a code block for constructing
  * the resource and can there for recreate the resource when needed.
@@ -20,7 +20,7 @@ object AsFooConverter {
   def asInput {
     import scalax.io.Codec
     import scalax.io.JavaConverters._
-    
+
     val webpage:String = new java.net.URL("http://www.scala-lang.org").asInput.slurpString(Codec.UTF8)
     val bytes:Array[Byte] = List[Byte](1,2,3,4).asInput.byteArray
   }
@@ -40,7 +40,7 @@ object AsFooConverter {
    */
   def asSeekable {
     import scalax.io.JavaConverters._
-    
+
     new java.io.File("io").asSeekable.insert(2,List[Byte](1,2,3))
   }
   /**
@@ -78,11 +78,11 @@ object AsFooConverter {
   def asUnmanagedFoo {
     import scalax.io.JavaConverters._
     import scalax.io.{Output, LongTraversable, WriteChars}
-    
+
     val hi:String = new java.io.StringReader("hi").asUnmanagedReadChars.slurpString
     val bytes:LongTraversable[Byte] = System.in.asUnmanagedInput.bytes
     val lines:LongTraversable[String] = System.in.asUnmanagedBinaryReadChars.lines()
-    val out:Output = System.out.asUnmanagedOutput 
+    val out:Output = System.out.asUnmanagedOutput
     val writeChars:WriteChars = System.out.asUnmanagedBinaryWriteChars
   }
 }

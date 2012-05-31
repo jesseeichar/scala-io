@@ -13,15 +13,15 @@ class ReaderResource[+A <: Reader] (
   extends ReadCharsResource[A]
   with ResourceOps[A, ReaderResource[A]] {
 
-  self => 
+  self =>
 
   override def open():OpenedResource[A] = new CloseableOpenedResource(opener,context, closeAction)
-  override def updateContext(newContext:ResourceContext) = 
+  override def updateContext(newContext:ResourceContext) =
     new ReaderResource(opener, newContext, closeAction)
-  override def addCloseAction(newCloseAction: CloseAction[A]) = 
+  override def addCloseAction(newCloseAction: CloseAction[A]) =
     new ReaderResource(opener, context, newCloseAction :+ closeAction)
 
-  override def chars : LongTraversable[Char]= 
+  override def chars : LongTraversable[Char]=
     ResourceTraversable.readerBased(this.open, context)
 
   override def toString: String = "ReaderResource("+context.descName.name+")"

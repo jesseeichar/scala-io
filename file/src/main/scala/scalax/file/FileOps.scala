@@ -1,6 +1,6 @@
 /*                     __                                               *\
 **     ________ ___   / /  ___     Scala API                            **
-**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar             **
+**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar          **
 **  __\ \/ /__/ __ |/ /__/ __ |    http://scala-lang.org/               **
 ** /____/\___/_/ |_/____/_/ | |                                         **
 **                          |/                                          **
@@ -77,10 +77,10 @@ import java.nio.ByteBuffer
  */
 abstract class FileOps extends Seekable {
   self : Path =>
-      
+
   /**
    * Obtains an input stream resource for reading from the file
-   * 
+   *
    * The Resource will be configured with the associated fileSystem's ResourceContext
    */
   def inputStream(): InputStreamResource[InputStream]
@@ -88,7 +88,7 @@ abstract class FileOps extends Seekable {
   * Obtains an OutputStreamResource for writing to the file
   *
   * The Resource will be configured with the associated fileSystem's ResourceContext
-  * 
+  *
   * All {@link OpenOption} can be used except Read which will be ignored if present
   *
   *  @param openOptions
@@ -100,7 +100,7 @@ abstract class FileOps extends Seekable {
   /**
    * Obtains a ByteChannel for read/write access to the file.  If no OpenOptions are
    * specified the underlying file will be opened with read/write/create/truncate options.
-   * 
+   *
    * The Resource will be configured with the associated fileSystem's ResourceContext
    *
    * All {@link OpenOption} can be used
@@ -120,7 +120,7 @@ abstract class FileOps extends Seekable {
    * All {@link OpenOption} can be used
    *
    * The Resource will be configured with the associated fileSystem's ResourceContext
-   * 
+   *
    * @param openOptions
    *          the options that define how the file is opened when using the stream
    *          Default is read/write/create/truncate
@@ -215,4 +215,3 @@ abstract class FileOps extends Seekable {
     }
   }
 }
-

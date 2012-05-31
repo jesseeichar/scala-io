@@ -1,6 +1,6 @@
 /*                     __                                               *\
 **     ________ ___   / /  ___     Scala API                            **
-**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar             **
+**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar          **
 **  __\ \/ /__/ __ |/ /__/ __ |    http://scala-lang.org/               **
 ** /____/\___/_/ |_/____/_/ | |                                         **
 **                          |/                                          **
@@ -20,7 +20,7 @@ class CloseActionTest extends AssertionSugar with IOSugar {
 
   val source = "sample"
 
-  def resource(closeAction:CloseAction[InputStream]) = 
+  def resource(closeAction:CloseAction[InputStream]) =
     Resource.fromInputStream(source.inputStream).addCloseAction(closeAction)
 
   @Test

@@ -1,6 +1,6 @@
 /*                     __                                               *\
 **     ________ ___   / /  ___     Scala API                            **
-**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar             **
+**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar          **
 **  __\ \/ /__/ __ |/ /__/ __ |    http://scala-lang.org/               **
 ** /____/\___/_/ |_/____/_/ | |                                         **
 **                          |/                                          **
@@ -25,7 +25,7 @@ object Line {
      * It can detect N,R and RN line terminators
      */
     case object Auto extends Terminator
-    
+
     abstract class SimpleTerminator(val sep:String) extends Terminator
     /*
      * The \n line terminator

@@ -42,22 +42,22 @@ trait PathSet[+T] extends Iterable[T]
 object PathSet {
   /**
    * Create a PathSet from a collection of Paths.  The resulting PathSet will permit iteration
-   * over all the Paths put into the set.  
-   * 
+   * over all the Paths put into the set.
+   *
    * However unlike a PathSet made from a single Path; the resulting PathSet can contain the same
    * Path multiple times.  Consider the following:
-   * 
+   *
    * PathSet(Path("a"),Path("a") / "b").***
-   * 
+   *
    * This PathSet will return all the children of a and a/b.  Therefore children of a/b will be present twice.
-   * 
+   *
    * It is equivalent to:  (Path("a") +++ (Path("a") / "b")).children()
    */
-  def apply[T <: Path](elements:T*) = 
+  def apply[T <: Path](elements:T*) =
     new BasicPathSet(
-        elements, PathMatcher.All, 0, true, 
+        elements, PathMatcher.All, 0, true,
         (m:PathMatcher[Path],e:Path) => (e.children(m)).iterator)
-  
+
   def pathSetCanBuildFrom[A] = new CanBuildFrom[PathSet[A], A, PathSet[A]] {
     def apply(from: PathSet[A]) = newBuilder
     def apply() = newBuilder

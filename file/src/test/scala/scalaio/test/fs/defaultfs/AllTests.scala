@@ -45,4 +45,3 @@ class BasicPathTest extends scalaio.test.fs.FsBasicPathTests with DefaultFixture
 class AccessSetTest extends scalaio.test.fs.FsAccessSetTests with DefaultFixture
 class PathObjectTest extends scalaio.test.fs.FsPathObjectTests with DefaultFixture
 class PathSetTest extends scalaio.test.fs.FsPathSetTests with DefaultFixture
-
