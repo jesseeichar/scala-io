@@ -9,6 +9,7 @@
 package scalax.io
 
 import scala.annotation.tailrec
+import scala.collection.immutable.VectorBuilder
 
 /**
  * Provides some convenience methods for certain operations on TraversableOnce
@@ -19,14 +20,13 @@ private[io] object TraversableOnceOps {
       case t:Traversable[_] => t.asInstanceOf[Traversable[T]].splitAt(index)
       case _ =>
         val iter = data.toIterator
-//        @tailrec
-//        def take(container:Vector[T], remaining:Int) = if (remaining > 0){
-//          
-//        } else {
-//          
-//        }
-//        iter.c
-        (iter.take(index).toList,iter)
+        val builder = new VectorBuilder[T]()
+        var i = 0
+        while(i < index && iter.hasNext) {
+          builder += iter.next()
+          i += 1
+        }
+        (builder.result,iter)
     }
   }
   def drop[T](data:TraversableOnce[T], length:Int) = {

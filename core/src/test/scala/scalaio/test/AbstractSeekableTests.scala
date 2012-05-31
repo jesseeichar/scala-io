@@ -110,7 +110,7 @@ abstract class AbstractSeekableTests[Resource] extends AbstractInputTests with A
     }
     def run[T](msg: String, pos: Int, data: String) {
       val bytes = data.getBytes(UTF8.name)
-    //  test("Array: "+msg, _.insert(pos,bytes), pos, bytes)
+      test("Array: "+msg, _.insert(pos,bytes), pos, bytes)
       test("Iterator: " + msg, _.insert(pos, bytes.toIterator), pos, bytes)
       test("List: "+msg,_.insert(pos,bytes.toList), pos, bytes)
       test("String: "+msg,_.insert(pos,data), pos, bytes)
