@@ -41,4 +41,3 @@ object PathURLStreamHandlerFactory extends URLStreamHandlerFactory {
     else null
   }
 }
-

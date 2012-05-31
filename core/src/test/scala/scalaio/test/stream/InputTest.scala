@@ -82,4 +82,3 @@ class InputTest extends AbstractInputTests with DataIndependentLongTraversableTe
     assertEquals(bytes, blockBytes)
   }
 }
-

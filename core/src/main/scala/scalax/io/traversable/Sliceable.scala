@@ -40,8 +40,8 @@ private[io] abstract class Sliceable extends CloseableIterator[Byte] {
   def lsize = {
     def fileSize = sizeFunc() match {
       case Some(size) => size min (end - start)
-      case None => 
-          var result = 0L  
+      case None =>
+          var result = 0L
             while(hasNext){
               result += 1
               next

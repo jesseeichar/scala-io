@@ -292,4 +292,3 @@ abstract class FileSystem {
   protected lazy val logger = java.util.logging.Logger.getLogger(getClass.getPackage().getName())
 
 }
-

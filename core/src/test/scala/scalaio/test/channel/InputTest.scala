@@ -97,4 +97,3 @@ class InputTest extends AbstractInputTests with DataIndependentLongTraversableTe
   }
 
 }
-

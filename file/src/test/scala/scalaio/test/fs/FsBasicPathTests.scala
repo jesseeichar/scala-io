@@ -64,7 +64,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
   def can_copy_empty_file : Unit = {
      val tree = fixture.tree(3)._1
      val out = fixture.path(1).createDirectory(true,false)
-     tree.**((_:Path).isFile).foreach { p => 
+     tree.**((_:Path).isFile).foreach { p =>
        val to = out / p.relativize(tree)
        p.copyTo(to)
      }
@@ -74,15 +74,15 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
   def can_copy_directory_tree_with_copyTo: Unit = {
     val tree = fixture.tree(3)._1
     val out = fixture.path(1)
-    
+
     tree.copyTo(out)
-    
+
     val copiedFiles = out.***.toList.map((_:Path).relativize(out))
     val treeFiles = tree.***.map((_:Path).relativize(tree))
     assertTrue(treeFiles.size == copiedFiles.size)
     assertTrue(treeFiles.forall(p => copiedFiles.contains(p)))
   }
-  
+
   @Test //@Ignore
   def two_paths_are_equal_if_from_same_filesystem : Unit = {
     val path = fixture.path
@@ -188,15 +188,15 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
     assertEquals(fspath("xx").toURL.toString, fspath("xx").toURI.toString)
   }
 
-  
+
   @Test //@Ignore
   def write_will_create_Path_as_needed= {
      val xx = fixture.path / fixture.segment
      xx.write("testing")
-     
+
      assertTrue(xx.exists)
      assertEquals(xx.slurpString, "testing")
-     
+
      xx.write("newData")
      assertEquals(xx.slurpString, "newData")
   }
@@ -205,7 +205,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
     val path = fixture.fs("xx")
     try {
       path.write("testing")
-      
+
       assertTrue(path.exists)
       assertEquals(path.slurpString, "testing")
     } finally {
@@ -677,7 +677,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
     fixture.fs.apply("with","a",""+sep,"does","it","work","?")
     }
     intercept[IllegalArgumentException] {
-    fixture.fs.apply("with","a") \ sep 
+    fixture.fs.apply("with","a") \ sep
     }
     intercept[IllegalArgumentException] {
       fixture.fs.fromSeq(Seq("with","a",""+sep,"does","it","work","?"))

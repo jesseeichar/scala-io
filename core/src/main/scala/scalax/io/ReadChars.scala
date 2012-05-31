@@ -36,7 +36,7 @@ import java.io.{Reader, File}
 trait ReadChars {
   /**
    * Get the Resource context that configures how the underlying resource is accessed
-   * 
+   *
    * @return the associated ResourceContext
    */
   def context:ResourceContext
@@ -71,5 +71,3 @@ trait ReadChars {
   def slurpString = chars.mkString
 
 }
-
-

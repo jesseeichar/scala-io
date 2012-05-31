@@ -63,7 +63,7 @@ class UnmanagedResourceTests extends scalax.test.sugar.AssertionSugar {
   def unmanagedInput {
     val context = new InputContext()
     import scalax.io.JavaConverters._
-    
+
     context.assertRead(context.in.asUnmanagedInput)(_.toByte, _.bytes.take(1).head)
     context.assertRead(Channels.newChannel(context.in).asUnmanagedInput)(_.toByte, _.bytes.take(1).head)
     context.assertRead(context.seekable(StandardOpenOption.ReadWrite: _*).asUnmanagedInput)(_.toByte, _.bytes.take(1).head)
@@ -110,7 +110,7 @@ class UnmanagedResourceTests extends scalax.test.sugar.AssertionSugar {
   def unmanagedOutput {
     val context = new OutputContext()
     import scalax.io.JavaConverters._
-    
+
     context.assertWrite(context.out.asUnmanagedOutput)((i, r) => r.write(i))
     context.assertWrite(Channels.newChannel(context.out).asUnmanagedOutput)((i, r) => r.write(i))
     context.assertWrite(new OutputStreamWriter(context.out).asUnmanagedWriteChars)((i, r) => r.write(List(i.toChar)))

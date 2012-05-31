@@ -23,18 +23,18 @@ trait ResourceContext {
   final val recommendedCharBufferSize = 1024
 
   /**
-   * Called when opening the resource and an exception occurs. 
-   * 
+   * Called when opening the resource and an exception occurs.
+   *
    * The default behaviour is to throw the openException
    *
    * @note The error handling is very experimental and could be removed or dramatically altered.  Please give feedback.  An error handling API less likely to change is the Processor API error handling.
-   * 
-   * @param f the function that would have been executed if the resource opened correctly.  
+   *
+   * @param f the function that would have been executed if the resource opened correctly.
    *   Can be used as context to decide how to handle the error
    * @param openException the exception that was raised while opening the resource.
-   * 
+   *
    * @return if a default value can be determined by inspecting f or openException then this
-   *         method can return that value.  The value will be returned in lieu of the 
+   *         method can return that value.  The value will be returned in lieu of the
    *         result calling f.   If a value cannot be returned an exception should be thrown.  DO NOT RETURN null!
    */
   def openErrorHandler[A,U](f: A => U , openException:Throwable):Option[U] = throw openException
@@ -44,18 +44,18 @@ trait ResourceContext {
    *
    * If no exception occurred during the access of the resource the mainException will be a Right(...) containing the result and the closingExceptions
    * will contain the list of exceptions raised while closing the resource (and the CloseActions)
-   * 
+   *
    * The default behaviour is to throw a ScalaIOException irregardless of whether the exception occurred during the operation or during closing the
    * resource.
    *
    * @note The error handling is very experimental and could be removed or dramatically altered.  Please give feedback.  An error handling API less likely to change is the Processor API error handling.
    *
-   * @param accessResult the exception that occurred during the resource access or the result.  
+   * @param accessResult the exception that occurred during the resource access or the result.
    *
    * @param closingExceptions the exceptions raised while closing the resource.
-   * 
+   *
    * @return the value of accessResult if it has a result or optionally a default value if a default value can be determined from problemFunction or
-   * the accessResult (possibly the resulting error).  If a value cannot be returned an exception should be thrown.  DO NOT RETURN null!  
+   * the accessResult (possibly the resulting error).  If a value cannot be returned an exception should be thrown.  DO NOT RETURN null!
    */
   def errorHandler[A,U](problemFunction:A => U, accessResult: Either[Throwable,U], closingExceptions: List[Throwable]):U =
     throw new ScalaIOException(accessResult.left.toOption, closingExceptions)
@@ -94,14 +94,14 @@ trait ResourceContext {
    * Creates a buffer for channels.  This is java specific API and is not cross platform.  Subclasses override this method in order to
    * enable memory mapping of files.
    *
-   * The default implementation will create a direct ByteBuffer unless 
+   * The default implementation will create a direct ByteBuffer unless
    * <ol>
    *    <li>the channel is a filechannel</li>
    *    <li>the channel size is smaller than bufferSize</li>
    *    <li>It is in read-only mode</li>
    * </ol>
    * If all these criteria are met then the file will be memory-mapped.
-   * 
+   *
    * @param bufferSize size of the buffer to make.  The buffer will always be this size, unless the file is memory-mapped
    *                   and the channel is smaller than bufferSize.  In which case it will be the size of the channel.
    * @param channel Optionally the channel that this buffer will be used with.  See section above about memory mapping.
@@ -114,11 +114,11 @@ trait ResourceContext {
     case _ => ByteBuffer.allocateDirect(bufferSize)
   }
   /**
-   * 
-   * Creates the byte buffer.  
-   * 
+   *
+   * Creates the byte buffer.
+   *
    * Implementation is simply: {{{createNioBuffer(byteBufferSize(dataSize, readOnly), channel, readOnly)}}}
-   * 
+   *
    * @param dataSize size of the buffer to make.  The buffer will always be this size, unless the file is memory-mapped
    *                   and the channel is smaller than bufferSize.  In which case it will be the size of the channel.
    * @param channel Optionally the channel that this buffer will be used with.  See section above about memory mapping.
@@ -129,26 +129,26 @@ trait ResourceContext {
 
   /**
    * Mutate the current instance by modifying the behavior of some of the functions.
-   * 
+   *
    * A typical use is as follows:
-   * 
+   *
    * {{{
    * context.copy(newErrorHandler = Some( myErrorHandler ) )
    * }}}
-   * 
-   * This example will return a new copy of the context with a new error handler configured. 
+   *
+   * This example will return a new copy of the context with a new error handler configured.
    * All other methods will behave the same as the original context.
-   * 
-   * @param newByteBufferSize A new strategy for determining the size of a byte buffer to make.  
-   *        The default value is None which will keep the behaviour of the current context 
+   *
+   * @param newByteBufferSize A new strategy for determining the size of a byte buffer to make.
+   *        The default value is None which will keep the behaviour of the current context
    * @param newCharBufferSize A new strategy for determining the size of a character buffer to make
-   *        The default value is None which will keep the behaviour of the current context 
+   *        The default value is None which will keep the behaviour of the current context
    * @param newCreateNioBuffer A new strategy for creating an nio ByteBuffer
-   *        The default value is None which will keep the behaviour of the current context 
+   *        The default value is None which will keep the behaviour of the current context
    * @param newErrorHandler A new strategy for handling errors encountered by the associated resource
-   *        The default value is None which will keep the behaviour of the current context 
+   *        The default value is None which will keep the behaviour of the current context
    * @param newDescName A new descriptive name for the associated resources
-   *        The default value is None which will keep the behaviour of the current context 
+   *        The default value is None which will keep the behaviour of the current context
    */
   def copy[A,U](
     newByteBufferSize: Option[(Option[Long], Boolean) => Int] = None,

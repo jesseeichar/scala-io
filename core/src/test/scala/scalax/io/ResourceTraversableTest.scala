@@ -28,7 +28,7 @@ class ResourceTraversableTest extends LongTraversableTest {
     def in = new ByteArrayInputStream(dataFunc(tsize) map {_.toByte} toArray) {
       override def close() = {
        closeFunction()
-       super.close 
+       super.close
       }
     }
     def stream = Channels.newChannel(in)

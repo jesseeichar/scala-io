@@ -74,7 +74,7 @@ trait SeekableByteChannel extends ByteChannel
 
 object SeekableByteChannel {
   /**
-   * Create a SeekableByteChannel from a file.  
+   * Create a SeekableByteChannel from a file.
    */
   def fromFile(path:String) = (opts:Seq[OpenOption]) => support.FileUtils.openChannel(new java.io.File(path), opts)
 }

@@ -4,7 +4,7 @@ import scalax.io.processing.{ByteProcessor, Processor, ProcessorAPI}
 
 /**
  * Read the Shapefile and println one attribute from each record
- * 
+ *
  * param 1 == path to shapefile to read
  * param 2 == index of attribute to print
  */
@@ -19,7 +19,7 @@ object ShapefileReader extends App{
 }
 
 /**
- * Assumption is that csv and shp file are in sync and therefore 
+ * Assumption is that csv and shp file are in sync and therefore
  * there are the same number of records
  */
 class ShapefileDatastore(val shapefile: Path, val csvFile: Path) {
@@ -30,12 +30,12 @@ class ShapefileDatastore(val shapefile: Path, val csvFile: Path) {
     val bbox = BoundingBox(headerData)
     def recordIndex(recordNum: Int) = (recordNum * 8) + 100
   }*/
-  
+
   /*private val readRecordHeader = (bytes:Seq[Byte]) => {
     SizeBlockMapResult(Shapefile)
   }
-  def shpRecords = shapefile.channel().bytes.drop(100).blockMap(8){ bytes => 
-    
+  def shpRecords = shapefile.channel().bytes.drop(100).blockMap(8){ bytes =>
+
   }*/
   private def correctRecord(recordNum:Int, api:ProcessorAPI[(String,Int)]):Processor[Seq[String]] =
     for((record, num) <- api.next) yield {

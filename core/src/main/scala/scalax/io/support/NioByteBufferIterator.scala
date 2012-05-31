@@ -16,4 +16,3 @@ class NioByteBufferIterator(var buffer: ByteBuffer) extends Iterator[Byte] {
   @inline
   final def next = buffer.get()
 }
-

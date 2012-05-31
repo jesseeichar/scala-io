@@ -25,7 +25,7 @@ import java.io.{FileInputStream, File => JFile}
 private[file] trait DefaultFileOps {
   self : DefaultPath =>
 
-  override def inputStream = 
+  override def inputStream =
     Resource.fromInputStream(new FileInputStream(jfile)).updateContext(fileSystem.context)
 
   override def outputStream(openOptions: OpenOption*) = {
@@ -39,10 +39,10 @@ private[file] trait DefaultFileOps {
       }
       r.updateContext(fileSystem.context)
   }
-  override def channel(openOptions: OpenOption*) = 
+  override def channel(openOptions: OpenOption*) =
     Resource.fromSeekableByteChannel(openChannel(jfile,openOptions)).updateContext(fileSystem.context)
 
-  override def fileChannel(openOptions: OpenOption*):Some[SeekableByteChannelResource[SeekableFileChannel]] = 
+  override def fileChannel(openOptions: OpenOption*):Some[SeekableByteChannelResource[SeekableFileChannel]] =
     Some(Resource.fromSeekableByteChannel(openChannel(jfile,openOptions)).updateContext(fileSystem.context))
 
 

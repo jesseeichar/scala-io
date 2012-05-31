@@ -28,9 +28,9 @@ sealed trait FoldResult[@specialized(Byte,Char) +A]{def result: A}
 
 /**
  * Signal indicating that the fold should continue to process another value
- * 
- * @param skip the number of bytes to skip before processing a byte.  
- * IE if skip == 3 then the next 3 bytes will be skipped 
+ *
+ * @param skip the number of bytes to skip before processing a byte.
+ * IE if skip == 3 then the next 3 bytes will be skipped
  */
 case class Continue[@specialized(Byte,Char) +A](result: A,skip:Long = 0L) extends FoldResult[A]
 
@@ -50,11 +50,11 @@ trait LongTraversableLike[@specialized(Byte,Char) +A, +Repr <: LongTraversableLi
   def context:ResourceContext
   override protected[this] def thisCollection: LongTraversable[A] = this.asInstanceOf[LongTraversable[A]]
   override protected[this] def toCollection(repr: Repr): LongTraversable[A] = repr.asInstanceOf[LongTraversable[A]]
-  override def toArray[B >: A: ClassManifest] = 
-    if(hasDefiniteSize && size <= Int.MaxValue) { 
+  override def toArray[B >: A: ClassManifest] =
+    if(hasDefiniteSize && size <= Int.MaxValue) {
       val array = new Array[B](size.toInt)
       var i = 0
-      foreach { a => 
+      foreach { a =>
         array(i) = a
         i += 1
       }
@@ -100,7 +100,7 @@ trait LongTraversableLike[@specialized(Byte,Char) +A, +Repr <: LongTraversableLi
               case Continue(result,newSkip) =>
                 skip = newSkip
                 result
-              case End(result) => 
+              case End(result) =>
                 continue = false
                 result
             }
@@ -109,16 +109,16 @@ trait LongTraversableLike[@specialized(Byte,Char) +A, +Repr <: LongTraversableLi
         result
     }
   }
-  
+
   /**
-   * Use the underlying iterator for this traversable.  
-   * 
-   * @note  If the iterator is returned from this block an exception will be thrown 
+   * Use the underlying iterator for this traversable.
+   *
+   * @note  If the iterator is returned from this block an exception will be thrown
    * because the iterator is invalid outside of this block and the behaviour is undefined
-   * 
+   *
    * @note withIterator catches all exceptions and calls the error handler to handle the exceptions
    *     So exceptions must not be thrown in f as control flow exceptions.
-   *  
+   *
    * @throws AssertionError if the iterator is returned
    */
   def withIterator[U](f: CloseableIterator[A] => U): U = CloseableIterator.withIterator(iterator,context)(f)
@@ -140,7 +140,7 @@ trait LongTraversableLike[@specialized(Byte,Char) +A, +Repr <: LongTraversableLi
 
   private def build[B >: A](f: CloseableIteratorOps[A] => CloseableIterator[B]): Repr = newBuilder match {
     case ltf:LongTraversableBuilder[A,Repr] => ltf.fromIterator(f(CloseableIteratorOps(iterator)).asInstanceOf[CloseableIterator[A]], context)
-    case b => 
+    case b =>
       withIterator(iter => b ++= f(CloseableIteratorOps(iter)).asInstanceOf[CloseableIterator[A]])
       b.result()
   }
@@ -152,61 +152,61 @@ trait LongTraversableLike[@specialized(Byte,Char) +A, +Repr <: LongTraversableLi
   override /*TraversableLike*/ def drop(n: Int): Repr = ldrop(n)
   override /*TraversableLike*/ def dropWhile(p: A => Boolean): Repr = build(_.dropWhile(p))
   override /*TraversableLike*/ def takeWhile(p: A => Boolean): Repr = build(_.takeWhile(p))
-  
+
   /**
    * The long equivalent of Traversable.take
    */
   def ltake(n: Long): Repr =  lslice(0, n)
   override /*TraversableLike*/ def take(n: Int): Repr = ltake(n)
-  
+
   def lslice(from: Long, until:Long): Repr = build(_.lslice(from,until))
   override /*TraversableLike*/ def slice(from:Int, until:Int) = lslice(from,until)
-  
 
-  override /*TraversableLike*/ def forall(p: A => Boolean): Boolean = 
+
+  override /*TraversableLike*/ def forall(p: A => Boolean): Boolean =
     withIterator(_ forall p)
-  override /*TraversableLike*/ def exists(p: A => Boolean): Boolean = 
+  override /*TraversableLike*/ def exists(p: A => Boolean): Boolean =
     withIterator(_ exists p)
-  override /*TraversableLike*/ def find(p: A => Boolean): Option[A] = 
+  override /*TraversableLike*/ def find(p: A => Boolean): Option[A] =
     withIterator(_ find p)
-  override /*TraversableLike*/ def isEmpty: Boolean = 
+  override /*TraversableLike*/ def isEmpty: Boolean =
     !withIterator(_.hasNext)
-    
+
   override /*TraversableLike*/ def foldRight[B](z: B)(op: (A, B) => B): B =
     withIterator(_.foldRight(z)(op))
-  override /*TraversableLike*/ def reduceRight[B >: A](op: (A, B) => B): B = 
+  override /*TraversableLike*/ def reduceRight[B >: A](op: (A, B) => B): B =
     withIterator(_.reduceRight(op))
-    
+
   override /*TraversableLike*/ def filter(p: A => Boolean): Repr = build(_ filter p)
   override /*TraversableLike*/ def map[B, That](f: A => B)(implicit bf: CanBuildFrom[Repr, B, That]): That = bf(repr) match {
     case ltf:LongTraversableBuilder[B,That] => ltf.fromIterator(CloseableIteratorOps(iterator).map(f), context)
-    case b => 
+    case b =>
       withIterator(i => b++= i.map(f))
       b.result()
   }
-    override /*TraversableLike*/ def ++:[B >: A, That](that: Traversable[B])(implicit bf: CanBuildFrom[Repr, B, That]): That = 
+    override /*TraversableLike*/ def ++:[B >: A, That](that: Traversable[B])(implicit bf: CanBuildFrom[Repr, B, That]): That =
     bf(repr) match {
       case ltf:LongTraversableBuilder[B,That] => ltf.fromIterator(CloseableIteratorOps(iterator) ++ that, context)
-      case b => 
+      case b =>
         withIterator(it => b ++= it)
         b ++= that
-        b.result()      
+        b.result()
       }
-override /*TraversableLike*/ def flatMap[B, That](f: A => GenTraversableOnce[B])(implicit bf: CanBuildFrom[Repr, B, That]): That = 
+override /*TraversableLike*/ def flatMap[B, That](f: A => GenTraversableOnce[B])(implicit bf: CanBuildFrom[Repr, B, That]): That =
   bf(repr) match {
     case ltf:LongTraversableBuilder[B,That] => ltf.fromIterator(CloseableIteratorOps(iterator).flatMap(f), context)
-    case b => 
+    case b =>
       withIterator(i => b ++= i.flatMap(f))
       b.result()
   }
-  override /*TraversableLike*/ def collect[B, That](pf: PartialFunction[A, B])(implicit bf: CanBuildFrom[Repr, B, That]): That =  
+  override /*TraversableLike*/ def collect[B, That](pf: PartialFunction[A, B])(implicit bf: CanBuildFrom[Repr, B, That]): That =
   bf(repr) match {
     case ltf:LongTraversableBuilder[B,That] => ltf.fromIterator(CloseableIteratorOps(iterator).collect(pf),context)
-    case b => 
-      
+    case b =>
+
 withIterator(i => b ++= i.collect(pf))
       b.result()
-  } 
+  }
 
     /**
    * Returns a $coll formed from this $coll and another iterable collection
@@ -237,7 +237,7 @@ withIterator(i => b ++= i.collect(pf))
   def zip[B,A1 >: A, That](that: LongTraversable[B])(implicit bf:LongTraversableBuilder[(A1,B),That]): That =
     doZip(that.iterator)(bf)
 
-  private def doZip[B,A1 >: A, That](those: => Iterator[B])(bf:LongTraversableBuilder[(A1,B),That]): That = 
+  private def doZip[B,A1 >: A, That](those: => Iterator[B])(bf:LongTraversableBuilder[(A1,B),That]): That =
     bf.fromIterator(CloseableIteratorOps(self.iterator).zip(those), context)
 
   /**
@@ -284,7 +284,7 @@ withIterator(i => b ++= i.collect(pf))
   def zipAll[B, A1 >: A, That](that: LongTraversable[B], thisElem: A1, thatElem: B)(implicit bf:LongTraversableBuilder[(A1,B),That]): That =
     doZipAll(that.iterator, thisElem, thatElem)(bf)
 
-  private def doZipAll[B, A1 >: A, That](those: => Iterator[B], thisElem: A1, thatElem: B)(bf:LongTraversableBuilder[(A1,B),That]): That = 
+  private def doZipAll[B, A1 >: A, That](those: => Iterator[B], thisElem: A1, thatElem: B)(bf:LongTraversableBuilder[(A1,B),That]): That =
     bf.fromIterator(CloseableIteratorOps(self.iterator).zipAll(those, thisElem, thatElem), context)
 
   /**
@@ -335,7 +335,7 @@ withIterator(i => b ++= i.collect(pf))
    * The long equivalent of Traversable.splitAt
    */
   def lsplitAt(n: Long): (Repr, Repr) = (ltake(n), ldrop(n))
-    
+
 
   def sameElements[B >: A](that: Iterable[B]): Boolean =
     withIterator(_.sameElements(that.iterator))
@@ -353,7 +353,7 @@ withIterator(i => b ++= i.collect(pf))
    *  @return the element of this $coll at index `idx`, where `0` indicates the first element.
    *  @throws `IndexOutOfBoundsException` if `idx` does not satisfy `0 <= idx < length`.
    */
-  def apply(idx: Long): A = 
+  def apply(idx: Long): A =
     ldrop(idx).head
 
   /**
@@ -405,7 +405,7 @@ withIterator(i => b ++= i.collect(pf))
    *  @return  the index `>= from` of the first element of this $coll that satisfies the predicate `p`,
    *           or `-1`, if none exists.
    */
-  def indexWhere(p: A => Boolean, from: Long): Long = 
+  def indexWhere(p: A => Boolean, from: Long): Long =
     ldrop(from).withIterator { it =>
       var i = from
       while (it.hasNext) {
@@ -493,7 +493,7 @@ withIterator(i => b ++= i.collect(pf))
    *           or `-1`, if none exists.
    */
   def lastIndexWhere(p: A => Boolean, end: Long): Long = {
-    
+
     (if(end<0) this else ltake(end+1)).withIterator { iter =>
       var last = -1L
       var i = 0L;
@@ -607,7 +607,7 @@ withIterator(i => b ++= i.collect(pf))
           var i = from
           var buffer = Vector(iter.take(that.size).toSeq:_*)
           var found = buffer.startsWith(that)
-          
+
           while (!found && iter.hasNext) {
             i += 1
             buffer = buffer.tail :+ iter.next()
@@ -652,7 +652,7 @@ withIterator(i => b ++= i.collect(pf))
    */
   def sliding[That](size: Int, step: Int = 1)(implicit bf: CanBuildFrom[Repr, Seq[A], That]): That = bf(repr) match {
     case ltf:LongTraversableBuilder[Seq[A],That] => ltf.fromIterator(CloseableIteratorOps(iterator).modifiedSliding(size,step), context)
-    case b => 
+    case b =>
       b ++= withIterator(iter => CloseableIteratorOps(iter).modifiedSliding(size,step))
       b.result()
   }
@@ -682,9 +682,9 @@ withIterator(i => b ++= i.collect(pf))
   def distinct : Repr
   def intersect [B >: A] ( that : Seq[B] ) : Repr
    */
-  
+
   override def init = build(_.init)
-  
+
   def force:Repr
 
   /**
@@ -699,7 +699,7 @@ withIterator(i => b ++= i.collect(pf))
 }
 
 object LongTraversableBuilder {
-  implicit def longTraversableBuilder[A]:LongTraversableBuilder[A,LongTraversable[A]] = 
+  implicit def longTraversableBuilder[A]:LongTraversableBuilder[A,LongTraversable[A]] =
       LongTraversable.newBuilder[A]
 
 }

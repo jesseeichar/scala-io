@@ -18,7 +18,7 @@ class WebsiteModel(
     buildScalaVersion:String,
     docDirectory:File,
     indexDir:File) {
-      
+
 println("SourcePath = "+sourcePath)
 
   val version = BuildConstants.version
@@ -35,14 +35,14 @@ println("SourcePath = "+sourcePath)
     val overview = new File(app,"overview")
     val performance = new File(app,"performance")
   }
-  
+
   def write(to:File,data:String) = {
     IO.write(to, data,utf8)
   }
 
   def buildSite = {
     println("Building website at "+Dir.app)
-    
+
     IO.delete(Dir.app)
     indexDir.listFiles.filter(f => f.isDirectory && f.getName.endsWith("-SNAPSHOT")).
       foreach (IO.delete)
@@ -51,23 +51,23 @@ println("SourcePath = "+sourcePath)
     ExampleProjects.prepare(new File(sourcePath, "src"+sep+"main"+sep+Dir.examples.name), Dir.examples)
 
     websiteResources.listFiles foreach {
-      case r if r.getName == "app" => 
+      case r if r.getName == "app" =>
         IO.copyDirectory(r,Dir.app)
-      case r if r.isDirectory => 
+      case r if r.isDirectory =>
         IO.copyDirectory(r,indexDir)
       case r =>
         IO.copyFile(r, new File(indexDir, r.getName))
     }
 
     IO.copyDirectory(docDirectory,Dir.api)
-    
+
     val corePages = pages(new File("core"))
     val filePages = pages(new File("file"))
     val performanceKeywords = Keyword.performance +: PerformanceReport.buildSite(Dir.performance,new File("perf/results/graphs"))
     val keywords = List(Keyword.overview, Keyword.gettingStarted, Keyword.releaseNotes, Keyword.roadmap) ++ (Keyword.core +: corePages.map(_.keyword)) ++ (Keyword.file +: filePages.map(_.keyword)) ++ performanceKeywords
     val keywordJSON = keywords.mkString("IO_PAGES=[",",\n\t","]")
     write(new File(Dir.js,"keywords.js"), keywordJSON)
-    
+
     corePages.foreach {page =>
       val file = new File(Dir.core,page.keyword.id+".html")
       write(file,page.html.toString)
@@ -79,22 +79,22 @@ println("SourcePath = "+sourcePath)
     write(new File(Dir.js,"projectProperties.js"), projectPropertiesJS)
     writeOverview()
     writeIndexjson()
-    
+
     println("website build is complete")
   }
-  
+
   def writeIndexjson() = {
     val names = indexDir.listFiles.toSeq.filter(_.isDirectory).filterNot(_.getName startsWith ".").map(f => "\""+f.getName+"\"")
     val sortedNames = names.sorted.reverse
     val json = sortedNames.mkString("[",",","]")
     IO.write(new File(indexDir,"version-index.json"), json, utf8)
-    
-    val html = 
+
+    val html =
     <html>
       <head><meta http-equiv="REFRESH" content={"0;url="+sortedNames(0)+"/index.html"}/></head>
       <body>Redirecting to <a href={sortedNames(0)+"/index.html"}>documentation for latest version</a></body>
     </html>
-    
+
     IO.write(new File(indexDir, "latest.html"), html.toString, utf8)
   }
 
@@ -119,7 +119,7 @@ println("SourcePath = "+sourcePath)
       example.page +: example.pages
     }
   }
-  
+
   def projectPropertiesJS = {
     val snapshotBlurb =
       if (version.endsWith("-SNAPSHOT"))
@@ -144,8 +144,7 @@ println("SourcePath = "+sourcePath)
        |  SNAPSHOT_BLURB: "%s",
        |  SNAPSHOT_DOWNLOAD_URL: "%s",
        |};""".format(organization, version, buildScalaVersion, armVersion, armScalaVersion, akkaVersion, snapshotBlurb, snapshotDownloadURL)
-         
+
     properties.trim.stripMargin.lines.map(_.trim).mkString
   }
 }
-

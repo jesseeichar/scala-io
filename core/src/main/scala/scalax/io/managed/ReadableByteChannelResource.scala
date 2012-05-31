@@ -18,12 +18,12 @@ class ReadableByteChannelResource[+A <: ReadableByteChannel] (
   extends InputResource[A]
   with ResourceOps[A, ReadableByteChannelResource[A]] {
 
-  self => 
+  self =>
 
   override def open():OpenedResource[A] = new CloseableOpenedResource(opener, context, closeAction)
-  override def updateContext(newContext:ResourceContext) = 
+  override def updateContext(newContext:ResourceContext) =
     new ReadableByteChannelResource(opener, newContext, closeAction, sizeFunc)
-  override def addCloseAction(newCloseAction: CloseAction[A]) = 
+  override def addCloseAction(newCloseAction: CloseAction[A]) =
     new ReadableByteChannelResource(opener, context, newCloseAction :+ closeAction, sizeFunc)
 
   override def inputStream:InputResource[InputStream] = {
@@ -40,7 +40,7 @@ class ReadableByteChannelResource[+A <: ReadableByteChannel] (
   override def bytesAsInts = ResourceTraversable.byteChannelBased[Byte,Int](this.open, context, sizeFunc, initialConv = ResourceTraversable.toIntConv)
   override def bytes = ResourceTraversable.byteChannelBased[Byte,Byte](this.open, context, sizeFunc)
   override def chars(implicit codec: Codec) = reader(codec).chars  // TODO optimize for byteChannel
-  override def blocks(blockSize: Option[Int] = None): LongTraversable[ByteBlock] = 
+  override def blocks(blockSize: Option[Int] = None): LongTraversable[ByteBlock] =
     new traversable.ChannelBlockLongTraversable(blockSize, context, sizeFunc, open)
 
   override def toString: String = "ReadableByteChannelResource ("+context.descName.name+")"

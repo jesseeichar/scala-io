@@ -34,7 +34,7 @@ import java.io.IOException
  * @since   1.0
  */
 case class NotFileException(path:String) extends IOException with ControlThrowable {
-  override lazy val toString = path + "is not a file"  
+  override lazy val toString = path + "is not a file"
 }
 
 /**
@@ -57,5 +57,5 @@ case class NotFileException(path:String) extends IOException with ControlThrowab
  * @since   1.0
  */
 case class NotDirectoryException(path:String) extends IOException with ControlThrowable{
-  override lazy val toString = path + "is not a directory"  
+  override lazy val toString = path + "is not a directory"
 }

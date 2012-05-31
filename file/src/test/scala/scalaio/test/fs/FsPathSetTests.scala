@@ -129,7 +129,7 @@ abstract class FsPathSetTests extends scalax.test.sugar.AssertionSugar with Abst
   def `pathsets can be combined using ---` {
     val root = mkTree
     import scalax.file.PathMatcher.NameIs
-    
+
     assertSameContents(root.descendants{- NameIs("d2.css")} toList, (root ***) --- (root ** "*.css"))
     assertSameContents(Nil, (root / "a") --- (root / "a"))
 
@@ -162,16 +162,16 @@ abstract class FsPathSetTests extends scalax.test.sugar.AssertionSugar with Abst
     val flatMapped = search.flatMap(_.name)
     assertEquals(0,i)
     import scalax.file.ImplicitConversions.string2path
-    val collected = search.collect{ case p if p.startsWith("p") => p } 
+    val collected = search.collect{ case p if p.startsWith("p") => p }
     assertEquals(0,i)
-    
+
     val size = search.force.size
     assertEquals(size,i)
-    
+
     i = 0
     filtered.size
     assertEquals(size,i)
-    
+
     i = 0
     flatMapped.size
     assertEquals(size,i)
@@ -180,24 +180,24 @@ abstract class FsPathSetTests extends scalax.test.sugar.AssertionSugar with Abst
     collected.size
     assertEquals(size,i)
   }
-  
+
   @Test //@Ignore
   def a_PathSet_can_be_made_from_a_collection_of_paths {
     val root = mkTree
     val set = PathSet(root / "a",root / "a" / "b", root / "z")
-    
+
     val andChildren = set * "*" toList
-    
+
     val pathJoin = (root / "a") +++ (root / "a" / "b") +++ (root / "z")
     val pathJoinChildren = (pathJoin * "*").toList
-    
+
     assertEquals(pathJoinChildren.size, andChildren.size)
     pathJoinChildren.foreach(p => assertTrue(andChildren contains p))
-    
+
     assertEquals(3, andChildren.size)
     assertTrue(andChildren contains (root / "a" / "b"))
     assertTrue(andChildren contains (root / "a" / "b" / "c"))
     assertTrue(andChildren contains (root / "z" / "y"))
   }
-  
+
 }

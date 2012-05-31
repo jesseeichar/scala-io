@@ -118,9 +118,9 @@ private[io] object ResourceTraversable {
   /**
    * The strategy defined for reading the input bytes and converting them
    * to the output type
-   * 
+   *
    * @param A the type of object created by parsing the read byte array
-   * @param I 
+   * @param I
    */
   trait InputParser[+A,B] {
     /**
@@ -131,10 +131,10 @@ private[io] object ResourceTraversable {
      * Create the initial iterator.  The returned iterator will be passed to the apply
      * and the iterator will not be shared between threads so it is acceptable to reuse
      * the same iterator to reduce the number of object creations.
-     * 
-     * @param input the object that collects the raw input data.  The object B should be mutable 
-     *       and the contents should be updated, the reason for this is to have acceptable performance 
-     *       during tight read loops 
+     *
+     * @param input the object that collects the raw input data.  The object B should be mutable
+     *       and the contents should be updated, the reason for this is to have acceptable performance
+     *       during tight read loops
      */
     def iterator(input:B):I
     /**
@@ -154,7 +154,7 @@ private[io] object ResourceTraversable {
     }
   }
   val IdentityByteConversion = identity[Byte]_
-  
+
   val DefaultCharParser = new InputParser[Char,Array[Char]] {
     type I = ArrayIterator[Char]
     def iterator(input:Array[Char]) = new ArrayIterator(input,0)
@@ -209,7 +209,7 @@ private[io] object ResourceTraversable {
     def iterator(input:NioByteBuffer) = new NioByteBufferIterator(input)
     def apply(iter: NioByteBufferIterator, length: Int) = iter
   }
-    
+
   def byteChannelBased[A,B](opener : => OpenedResource[ReadableByteChannel],
                             resourceContext: ResourceContext,
                 sizeFunc:() => Option[Long],
@@ -229,7 +229,7 @@ private[io] object ResourceTraversable {
           private[this] final val channel = openedResource.get
           private[this] final val buffer = openedResource.context.createNioBuffer(sizeFunc(), Some(channel), true)
           private[this] final val iter = parser.iterator(buffer)
-          
+
           def read() = {
             buffer.clear
             val read = channel read buffer
@@ -257,7 +257,7 @@ private[io] object ResourceTraversable {
         protected val conv = initialConv
         protected val start = startIndex
         protected val end = endIndex
-        
+
         override lazy val hasDefiniteSize= sizeFunc().nonEmpty
         override def lsize = sizeFunc() match {
           case Some(size) => size
@@ -268,7 +268,7 @@ private[io] object ResourceTraversable {
       }
     }
   }
-  
+
   def seekableByteChannelBased[A,B](opener : => OpenedResource[SeekableByteChannel],
                           resourceContext: ResourceContext,
                           sizeFunc:() => Option[Long],
@@ -288,9 +288,9 @@ private[io] object ResourceTraversable {
             private[this] final val channel = openedResource.get
             private[this] final val buffer = openedResource.context.createNioBuffer(Some(channel.size), Some(channel), true)
             private[this] final val iter = parser.iterator(buffer)
-    
+
             var position = 0L
-    
+
             @inline
             final def read() = {
               channel.position(position)
@@ -299,26 +299,26 @@ private[io] object ResourceTraversable {
               buffer.flip
               parser(iter,0) // length is ignored so just pass 0
             }
-            
+
             def initializePosition(pos: Long) = {
               position = pos
               channel.position(pos)
             }
-    
+
             def skip(count: Long) {
               if (count > 0) {
                 position += count
                 channel.position(position)
               }
             }
-    
+
             def close(): List[Throwable] = openedResource.close()
           }
-    
+
           protected val conv = initialConv
           protected val start = startIndex
           protected val end = endIndex
-          
+
           override lazy val hasDefiniteSize= sizeFunc().nonEmpty
           override def lsize = sizeFunc() match {
             case Some(size) => size

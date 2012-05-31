@@ -19,12 +19,12 @@ class InputStreamResource[+A <: InputStream] (
   extends InputResource[A]
   with ResourceOps[A, InputStreamResource[A]] {
 
-  self => 
+  self =>
 
   def open():OpenedResource[A] = new CloseableOpenedResource(opener,context, closeAction)
-  
+
   def updateContext(newContext:ResourceContext) = new InputStreamResource(opener, newContext, closeAction, sizeFunc)
-  override def addCloseAction(newCloseAction: CloseAction[A]) = 
+  override def addCloseAction(newCloseAction: CloseAction[A]) =
     new InputStreamResource(opener, context, newCloseAction :+ closeAction, sizeFunc)
 
   def inputStream = this
@@ -52,7 +52,7 @@ class InputStreamResource[+A <: InputStream] (
     def toChannelOpen = {
       val opened = open
       val closer = CloseAction((_:ReadableByteChannel) => if(false) opened.close()) // WTF see other InputStreamResource
-      
+
       new CloseableOpenedResource (Channels.newChannel(opened.get), context, closer)
     }
     new traversable.ChannelBlockLongTraversable(blockSize, context, sizeFunc, toChannelOpen)

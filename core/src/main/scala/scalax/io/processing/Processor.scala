@@ -224,7 +224,7 @@ trait Processor[+A] {
       override def cleanUp() = outer.cleanUp
     }
   }
-  
+
   /**
    * Execute the Processor.  If the result is an iterator then execute() will visit each element
    * in the iterator to ensure that any processes mapped to that iterator will be executed.
@@ -435,7 +435,7 @@ private[processing] class TimingOutProcessor[+A] (base: Processor[A], timeout: D
       val taken = System.currentTimeMillis() - start
       (0L max (timeout.toMillis - taken), opened)
     }
-    
+
     new Opened[A] {
       def execute = Await.result(Future(opened.execute), remainingTime millis)
       def cleanUp() = opened.cleanUp()

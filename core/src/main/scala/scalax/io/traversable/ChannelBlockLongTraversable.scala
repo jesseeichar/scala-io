@@ -20,7 +20,7 @@ class ChannelBlockLongTraversable(blockSize: Option[Int], val context: ResourceC
       case Some(size) => context.createNioBuffer(size, Some(channel), true)
       case None => context.createNioBuffer(sizeFunc(), Some(channel), true)
     }
-    // bytes read the last read.  -1 
+    // bytes read the last read.  -1
     private[this] var state: State = ContinueState
     private[this] var block = new ByteBufferWrapperByteBlock(buffer)
 
@@ -50,7 +50,7 @@ class ChannelBlockLongTraversable(blockSize: Option[Int], val context: ResourceC
           acc :+ next.force
         }
     }
-    
+
     def iterator = CloseableIterator(data.iterator)
   }
 }

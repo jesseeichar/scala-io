@@ -3,7 +3,7 @@ import sbt._
 object ExampleProjects {
   def prepare(exampleDir:File, outputDir:File) = {
     val files = exampleDir.listFiles.filterNot(_.isHidden).map{dir =>
-      IO.withTemporaryDirectory {tmpDir => 
+      IO.withTemporaryDirectory {tmpDir =>
         val files = dir.***.get.filterNot(_ == dir)
         val mappings = files.filter(_.isFile) x relativeTo(List(exampleDir))
         mappings.foreach { case (file,relativeName) =>

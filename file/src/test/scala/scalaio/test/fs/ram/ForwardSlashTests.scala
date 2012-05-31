@@ -18,4 +18,3 @@ class ForwardSlashBasicPathTest extends scalaio.test.fs.FsBasicPathTests with Fo
 class ForwardSlashAccessSetTest extends scalaio.test.fs.FsAccessSetTests with ForwardSlashRamFixture
 class ForwardSlashPathObjectTest extends scalaio.test.fs.FsPathObjectTests with ForwardSlashRamFixture
 class ForwardSlashPathSetTest extends scalaio.test.fs.FsPathSetTests with ForwardSlashRamFixture
-

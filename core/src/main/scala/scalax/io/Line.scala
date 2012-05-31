@@ -25,7 +25,7 @@ object Line {
      * It can detect N,R and RN line terminators
      */
     case object Auto extends Terminator
-    
+
     abstract class SimpleTerminator(val sep:String) extends Terminator
     /*
      * The \n line terminator

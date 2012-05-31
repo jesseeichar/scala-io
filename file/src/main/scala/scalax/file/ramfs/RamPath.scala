@@ -23,7 +23,7 @@ class RamPath(relativeTo: String, val path: String, override val fileSystem: Ram
 
   def /(child: String): RamPath = {
     fileSystem.checkSegmentForSeparators(child)
-    fileSystem.fromStrings(relativeTo, path + separator + child) 
+    fileSystem.fromStrings(relativeTo, path + separator + child)
   }
 
   lazy val name: String = path.split(Pattern.quote(separator)).lastOption getOrElse (path)
@@ -104,7 +104,7 @@ class RamPath(relativeTo: String, val path: String, override val fileSystem: Ram
 
   def delete(force: Boolean): this.type = {
     val n = node
-    if (node.forall{n => 
+    if (node.forall{n =>
         n.isInstanceOf[FileNode] || n.asInstanceOf[DirNode].children.isEmpty}) {
       if (exists && !fileSystem.delete(this, force)) {
         fail("Could not delete " + path)
@@ -123,7 +123,7 @@ class RamPath(relativeTo: String, val path: String, override val fileSystem: Ram
 
   def descendants[U >: Path, F](filter: F, depth: Int, options: Traversable[LinkOption])(implicit factory: PathMatcherFactory[F]) = {
     if (!isDirectory) throw new NotDirectoryException(this + " is not a directory so descendants can not be called on it")
-    
+
     new BasicPathSet[RamPath](this, factory(filter), depth, false, (pathFilter: PathMatcher[RamPath], parent: RamPath) => {
       parent.node.collect {
         case d: DirNode =>

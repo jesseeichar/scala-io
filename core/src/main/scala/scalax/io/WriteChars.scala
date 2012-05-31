@@ -88,5 +88,3 @@ trait WriteChars {
     }
   }
 }
-
-

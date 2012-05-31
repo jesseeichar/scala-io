@@ -15,11 +15,11 @@ object Keyword {
   val core = Keyword("core","index","Scala IO Core API",0,"Core API","overview", "", "", Set("core"))
   val file = Keyword("file","index","Scala IO File API",0,"File API","overview", "", "", Set("file"))
   val releaseNotes = Keyword("releaseNotes","index","Release Notes for "+BuildConstants.version,0,"Release Notes","overview", "", "", Set("release notes"))
-  
+
   def split(text:String):Set[String] = {
     val words = text.split("""\s+""").filter(_.trim.nonEmpty).toSet
     words.filter(Stopwords.EN contains _)
   }
-  
+
 
 }

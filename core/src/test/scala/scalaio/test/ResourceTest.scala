@@ -177,17 +177,17 @@ class ResourceTest {
       open += chan
       chan
     }
-    
+
     Resource.fromSeekableByteChannel(opener).size
     assertTrue(open.isEmpty)
-    
+
     Resource.fromByteChannel(opener).size
     assertTrue(open.isEmpty)
-    
+
     Resource.fromReadableByteChannel(opener).size
     assertTrue(open.isEmpty)
-    
-    
+
+
   }
 
 }

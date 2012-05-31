@@ -20,7 +20,7 @@ class CloseActionTest extends AssertionSugar with IOSugar {
 
   val source = "sample"
 
-  def resource(closeAction:CloseAction[InputStream]) = 
+  def resource(closeAction:CloseAction[InputStream]) =
     Resource.fromInputStream(source.inputStream).addCloseAction(closeAction)
 
   @Test

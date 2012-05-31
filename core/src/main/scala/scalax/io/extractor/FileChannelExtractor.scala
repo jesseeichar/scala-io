@@ -6,7 +6,7 @@ import scalax.io.nio.SeekableFileChannel
 import scalax.io.Adapter
 
 object FileChannelExtractor {
-  def unapply(obj:Any):Option[FileChannel] = 
+  def unapply(obj:Any):Option[FileChannel] =
     obj match {
     case fin:FileInputStream => Some(fin.getChannel)
     case sfc:SeekableFileChannel => Some(sfc.self)

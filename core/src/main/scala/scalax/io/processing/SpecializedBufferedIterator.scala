@@ -5,9 +5,9 @@ import scala.collection.immutable.VectorBuilder
 private[processing] class SpecializedBufferedIterator[@specialized(Byte,Int,Char) +A](private[this] val sourceIter: CloseableIterator[A]) {
   private[this] var pushedBack:List[A] = Nil
   private[this] var ended: Boolean = false
-  
+
   final def end() = ended = true
-  
+
   /**
    * Will return an Array containing the i elements if i elements remain in the input source. Otherwise an empty
    * array will be returned
@@ -42,7 +42,7 @@ private[processing] class SpecializedBufferedIterator[@specialized(Byte,Int,Char
     }
     result.result()
   }
-  
+
   final def take(i: Int) = {
     var result = new VectorBuilder[A]()
     var count = 0
@@ -52,7 +52,7 @@ private[processing] class SpecializedBufferedIterator[@specialized(Byte,Int,Char
     }
     result.result()
   }
-  
+
   final def drop(i: Int) = {
     var count = 0
     while (count < i && hasNext) {
