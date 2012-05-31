@@ -1,6 +1,6 @@
 /*                     __                                               *\
 **     ________ ___   / /  ___     Scala API                            **
-**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar             **
+**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar          **
 **  __\ \/ /__/ __ |/ /__/ __ |    http://scala-lang.org/               **
 ** /____/\___/_/ |_/____/_/ | |                                         **
 **                          |/                                          **
@@ -32,7 +32,6 @@ object FileSystem {
    *  java.file.File objects</p>
    */
   val default: DefaultFileSystem = new scalax.file.defaultfs.DefaultFileSystem()
-
 }
 
 /**
@@ -50,8 +49,9 @@ abstract class FileSystem {
   def randomPrefix = {
     val seg = 1 to (nextInt(5) + 2) map { _ => legalChars(nextInt(legalChars.size)) }
     val lastChar = legalChars(nextInt(legalChars.size - 1))
-    seg :+ lastChar mkString ""
+    seg : + lastChar mkString ""
   }
+
   /**
    * Get the Resource context associated with this FileSystem instance.
    *
@@ -60,7 +60,8 @@ abstract class FileSystem {
    *
    * @return the associated ResourceContext
    */
-  def context:ResourceContext
+  def context: ResourceContext
+
   /**
    * Create a new FileSystem instance that is configured with the new ResourceContext
    *
@@ -68,7 +69,8 @@ abstract class FileSystem {
    *
    * @return a new instance configured with the new context
    */
-  def updateContext(newContext:ResourceContext):FileSystem
+  def updateContext(newContext: ResourceContext): FileSystem
+
   /**
    * Update the current ResourceContext and return a new FileSystem instance with the updated context
    *
@@ -76,12 +78,14 @@ abstract class FileSystem {
    *
    * @return a new instance configured with the new context
    */
-  def updateContext(f:ResourceContext => ResourceContext):FileSystem = updateContext(f(context))
+  def updateContext(f: ResourceContext => ResourceContext): FileSystem = updateContext(f(context))
 
   /** A name identifying the filesystem */
   def name: String
+
   /** The path segment separator string for the filesystem */
   def separator: String
+
   /**
    * Create a path object for the filesystem
    */
@@ -89,7 +93,9 @@ abstract class FileSystem {
     val segments = if (separator.size == 1) path.split(separator(0)) else path.split(Pattern.quote(separator))
     doCreateFromSeq((if(path startsWith separator) List(this.separator) else Nil) ++ segments)
   }
+
   protected def doCreateFromSeq(segments: Seq[String]): PathType
+
   /**
    * Create a path object for the filesystem from the path segments
    */
@@ -106,10 +112,11 @@ abstract class FileSystem {
   }
 
   def apply(segments: String*): PathType = fromSeq(segments)
-  def apply(pathRepresentation: String, separator:Char): PathType = {
+  def apply(pathRepresentation: String, separator: Char): PathType = {
     val segments = (if(pathRepresentation.charAt(0) == separator) List(this.separator) else Nil) ++ pathRepresentation.split(separator)
     fromSeq(segments)
   }
+
   /**
    * Returns the list of roots for this filesystem
    */
@@ -120,6 +127,7 @@ abstract class FileSystem {
    * when the fileSystem was created
    */
   private[scalax] lazy val cachedRoots: Set[PathType] = roots
+
   /**
    * Creates a function that returns true if parameter matches the
    * pattern used to create the function.
@@ -176,6 +184,7 @@ abstract class FileSystem {
       case _ => throw new IOException(syntax + " is not a recognized syntax for the " + name + " filesystem")
     }
   }
+
   /**
    * Creates an empty file in the provided directory with the provided prefix and suffixes,
    * if the filesystem supports it.  If not then a UnsupportedOperationException is thrown.
@@ -203,7 +212,8 @@ abstract class FileSystem {
   def createTempFile(prefix: String = randomPrefix,
     suffix: String = null,
     dir: String = null,
-    deleteOnExit: Boolean = true /*attributes:List[FileAttributes] TODO */ ): PathType
+    deleteOnExit: Boolean = true /*attributes: List[FileAttributes] TODO */ ): PathType
+
   /**
    * Creates an empty directory in the provided directory with the provided prefix and suffixes, if the filesystem
    * supports it.  If not then a UnsupportedOperationException is thrown.
@@ -232,7 +242,7 @@ abstract class FileSystem {
   def createTempDirectory(prefix: String = randomPrefix,
     suffix: String = null,
     dir: String = null,
-    deleteOnExit: Boolean = true /*attributes:List[FileAttributes] TODO */ ): PathType
+    deleteOnExit: Boolean = true /*attributes: List[FileAttributes] TODO */ ): PathType
 
   /**
    * Returns a URLStreamHandler if the protocol in the URI is not supported by default JAVA.
@@ -273,11 +283,11 @@ abstract class FileSystem {
     result match {
       case Separator(sep) =>
         val msg = "%s is not permitted as a path 'segment' for this filesystem.  Segment in question: %s.  " +
-        		"\nIf you want to create a Path from a system dependent string then use fromString.  " +
-        		"If you want to create a child path use resolve instead of / to create the child path.  " +
-        		"It should be noted that the string after '/' must be a single segment but resolve accepts " +
-        		"""full strings. Examples:\n\tPath.fromString("c:\a\b")\n\tpath / ("a/b/c",'/')\n\tpath resolve "a\b\c" """
-        throw new IllegalArgumentException(msg.format(sep , segment))
+          "\nIf you want to create a Path from a system dependent string then use fromString.  " +
+          "If you want to create a child path use resolve instead of / to create the child path.  " +
+          "It should be noted that the string after '/' must be a single segment but resolve accepts " +
+          "full strings. Examples: \n\tPath.fromString(\"c: \\a\\b\")\n\tpath / (\"a/b/c\", '/')\n\tpath resolve \"a\\b\\c\""
+        throw new IllegalArgumentException(msg.format(sep, segment))
       case CommonSeparator(sep) => {
          logger.warning(sep + " should not be used as a character in a path segment because it is a commonly used path separator on many filesystems.  Segment in question: "+segment)
          if(logger.isLoggable(java.util.logging.Level.FINE)) {
@@ -290,6 +300,4 @@ abstract class FileSystem {
   }
 
   protected lazy val logger = java.util.logging.Logger.getLogger(getClass.getPackage().getName())
-
 }
-
