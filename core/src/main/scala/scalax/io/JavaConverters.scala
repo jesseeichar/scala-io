@@ -175,7 +175,7 @@ object JavaConverters {
    * Converts a WritableByteChannel to an Output object
    */
   implicit object WritableByteChannelConverter extends AsOutputConverter[WritableByteChannel]{
-	  def toOutput(chan: WritableByteChannel) = Resource.fromWritableByteChannel(chan)
+    def toOutput(chan: WritableByteChannel) = Resource.fromWritableByteChannel(chan)
   }
 }
   

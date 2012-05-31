@@ -88,8 +88,8 @@ object KEY extends Enumeration {
     }
     
     lines().foreach{l=>
-    	writer.write(l)
-    	writer.write("\n")
+      writer.write(l)
+      writer.write("\n")
     }
     writer.close()
     

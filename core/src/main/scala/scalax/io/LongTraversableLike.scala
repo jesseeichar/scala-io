@@ -186,12 +186,12 @@ trait LongTraversableLike[@specialized(Byte,Char) +A, +Repr <: LongTraversableLi
   }
     override /*TraversableLike*/ def ++:[B >: A, That](that: Traversable[B])(implicit bf: CanBuildFrom[Repr, B, That]): That = 
     bf(repr) match {
-	    case ltf:LongTraversableBuilder[B,That] => ltf.fromIterator(CloseableIteratorOps(iterator) ++ that, context)
-	    case b => 
-	      withIterator(it => b ++= it)
-	      b ++= that
-	      b.result()      
-	    }
+      case ltf:LongTraversableBuilder[B,That] => ltf.fromIterator(CloseableIteratorOps(iterator) ++ that, context)
+      case b => 
+        withIterator(it => b ++= it)
+        b ++= that
+        b.result()      
+      }
 override /*TraversableLike*/ def flatMap[B, That](f: A => GenTraversableOnce[B])(implicit bf: CanBuildFrom[Repr, B, That]): That = 
   bf(repr) match {
     case ltf:LongTraversableBuilder[B,That] => ltf.fromIterator(CloseableIteratorOps(iterator).flatMap(f), context)
@@ -285,7 +285,7 @@ withIterator(i => b ++= i.collect(pf))
     doZipAll(that.iterator, thisElem, thatElem)(bf)
 
   private def doZipAll[B, A1 >: A, That](those: => Iterator[B], thisElem: A1, thatElem: B)(bf:LongTraversableBuilder[(A1,B),That]): That = 
-  	bf.fromIterator(CloseableIteratorOps(self.iterator).zipAll(those, thisElem, thatElem), context)
+    bf.fromIterator(CloseableIteratorOps(self.iterator).zipAll(those, thisElem, thatElem), context)
 
   /**
    * Zips this $coll with its indices.
@@ -609,13 +609,13 @@ withIterator(i => b ++= i.collect(pf))
           var found = buffer.startsWith(that)
           
           while (!found && iter.hasNext) {
-	          i += 1
-	          buffer = buffer.tail :+ iter.next()
-	          found = buffer.startsWith(that)
-	        }
-	        if(found) i else -1
-	      }
-	    }
+            i += 1
+            buffer = buffer.tail :+ iter.next()
+            found = buffer.startsWith(that)
+          }
+          if(found) i else -1
+        }
+      }
     }
 
   /**
@@ -699,8 +699,8 @@ withIterator(i => b ++= i.collect(pf))
 }
 
 object LongTraversableBuilder {
-	implicit def longTraversableBuilder[A]:LongTraversableBuilder[A,LongTraversable[A]] = 
-			LongTraversable.newBuilder[A]
+  implicit def longTraversableBuilder[A]:LongTraversableBuilder[A,LongTraversable[A]] = 
+      LongTraversable.newBuilder[A]
 
 }
 trait LongTraversableBuilder[-A,+Repr] extends Builder[A, Repr] {

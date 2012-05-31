@@ -27,7 +27,7 @@ println("SourcePath = "+sourcePath)
   val self = this
   object Dir {
     val app = new File(indexDir,version)
-	val examples = new File(app, "example_projects")
+  val examples = new File(app, "example_projects")
     val js = new File(app,"js")
     val core = new File(app,"core")
     val file = new File(app,"file")

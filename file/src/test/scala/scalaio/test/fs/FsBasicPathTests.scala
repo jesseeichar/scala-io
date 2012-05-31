@@ -463,11 +463,11 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
     import f.path
     intercept[IOException] {
       // cannot replace non_empty directory
-	  val dir = path.createDirectory()
-	  dir \ "f__" createFile ()
+    val dir = path.createDirectory()
+    dir \ "f__" createFile ()
       path.createFile() moveTo (dir, replace=true)
     }
-	// but can replace empty directories
+  // but can replace empty directories
     path.createFile() moveTo (path.createDirectory(), replace=true)
   }
   @Test //@Ignore
@@ -645,9 +645,9 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
   }
   @Test //@Ignore
   def creating_path_from_string_should_clean_path() {
-	  assertEquals(fspath("a/b/c/./../d").path, fspath("a/b//c/./../d").path)
-	  assertEquals(fspath("a/b/c/./../d").path, fspath("a/b//c/./../d/").path)
-	  assertEquals(fspath("a/b/c/./../d").path, fspath("a/b//c/./../d//").path)
+    assertEquals(fspath("a/b/c/./../d").path, fspath("a/b//c/./../d").path)
+    assertEquals(fspath("a/b/c/./../d").path, fspath("a/b//c/./../d/").path)
+    assertEquals(fspath("a/b/c/./../d").path, fspath("a/b//c/./../d//").path)
   }
 
   @Test //@Ignore
@@ -672,15 +672,15 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
 
   @Test //@Ignore
   def path_separator_in_path_segment_throws_exception() {
-	  val sep = fixture.fs.separator
+    val sep = fixture.fs.separator
     intercept[IllegalArgumentException] {
-	  fixture.fs.apply("with","a",""+sep,"does","it","work","?")
+    fixture.fs.apply("with","a",""+sep,"does","it","work","?")
     }
     intercept[IllegalArgumentException] {
-	  fixture.fs.apply("with","a") \ sep 
+    fixture.fs.apply("with","a") \ sep 
     }
     intercept[IllegalArgumentException] {
-    	fixture.fs.fromSeq(Seq("with","a",""+sep,"does","it","work","?"))
+      fixture.fs.fromSeq(Seq("with","a",""+sep,"does","it","work","?"))
     }
   }
 
@@ -755,14 +755,14 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
     assertTrue("canExecute was not copied when it should not have", f2.canExecute)
 
     if(f2.isDirectory) {
-	    if(f2.children().nonEmpty) {
-	      try {
-	        f2.delete()
-	        fail("Expected an exception because delete is not intended to delete recursively")
-	      } catch {
-	        case e:IOException => assertFalse("Error should be a known error and have good message", e.getMessage().contains("unknown"))
-	      }
-	    }
+      if(f2.children().nonEmpty) {
+        try {
+          f2.delete()
+          fail("Expected an exception because delete is not intended to delete recursively")
+        } catch {
+          case e:IOException => assertFalse("Error should be a known error and have good message", e.getMessage().contains("unknown"))
+        }
+      }
     } else {
       intercept[NotDirectoryException]{
         // can't call children on a file

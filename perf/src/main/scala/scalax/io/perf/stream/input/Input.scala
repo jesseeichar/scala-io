@@ -23,9 +23,9 @@ import java.io.FileOutputStream
 // ----------------------------------------------------------------
 
 class SmallMediumSetsFromFileInputStreamTest 
-	extends AbstractInputTest 
-	with FileBase with SmallMediumDataSet
-	
+  extends AbstractInputTest 
+  with FileBase with SmallMediumDataSet
+  
 object SmallMediumSetsFromFileInputStreamRunner {
   def main(args: Array[String]) {
     Main.runTests(() => new SmallMediumSetsFromFileInputStreamTest)
@@ -35,8 +35,8 @@ object SmallMediumSetsFromFileInputStreamRunner {
 // ----------------------------------------------------------------
 
 class SmallMediumSetsFromMemoryInputStreamTest 
-	extends AbstractInputTest 
-	with MemoryBase  with SmallMediumDataSet
+  extends AbstractInputTest 
+  with MemoryBase  with SmallMediumDataSet
 
 object SmallMediumSetsFromMemoryInputStreamRunner {
   def main(args: Array[String]) {
@@ -47,8 +47,8 @@ object SmallMediumSetsFromMemoryInputStreamRunner {
 // ----------------------------------------------------------------
 
 class SmallSetsFromFileInputStreamTest  
-	extends AbstractInputTest 
-	with FileBase with SmallDataSet 
+  extends AbstractInputTest 
+  with FileBase with SmallDataSet 
 
 object SmallSetsFromFileInputStreamRunner {
   def main(args: Array[String]) {
@@ -59,9 +59,9 @@ object SmallSetsFromFileInputStreamRunner {
 // ----------------------------------------------------------------
 
 class SmallSetsInMemoryInputStreamTest 
-	extends AbstractInputTest 
-	with MemoryBase with SmallDataSet
-	
+  extends AbstractInputTest 
+  with MemoryBase with SmallDataSet
+  
 object SmallSetsInMemoryInputStreamTest {
   def main(args: Array[String]) {
     Main.runTests(() => new SmallSetsInMemoryInputStreamTest)

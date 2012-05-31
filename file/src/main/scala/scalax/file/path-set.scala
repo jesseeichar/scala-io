@@ -98,7 +98,7 @@ final class BasicPathSet[+T <: Path](srcFiles: Iterable[T],
   }
 
   def **[F](filter: F)(implicit factory:PathMatcherFactory[F]): PathSet[T] = {
-	  val nextFilter = factory(filter)
+    val nextFilter = factory(filter)
       new BasicPathSet(this, nextFilter, -1, false, children)
   }
 
@@ -246,9 +246,9 @@ private class IterablePathSet[T](iter: => Iterator[T]) extends PathSet[T] {
 }
 
 private class MappablePathSet[+T <: PathSet[_]](original:PathFinder[T])
-		extends PathSet[T] with SourceBasedPathSet[T] {
-	def iterator: Iterator[T] = original.iterator
-	def mapSources[U >: T](f: PathFinder[U] => PathFinder[U]):PathSet[U] = new MappablePathSet[U](f(original))
+    extends PathSet[T] with SourceBasedPathSet[T] {
+  def iterator: Iterator[T] = original.iterator
+  def mapSources[U >: T](f: PathFinder[U] => PathFinder[U]):PathSet[U] = new MappablePathSet[U](f(original))
 }
 private class AdditivePathSet[+T <: PathSet[_]](original:PathFinder[T], more:PathFinder[T])
         extends PathSet[T] with SourceBasedPathSet[T] {

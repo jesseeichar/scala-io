@@ -105,7 +105,7 @@ class RamPath(relativeTo: String, val path: String, override val fileSystem: Ram
   def delete(force: Boolean): this.type = {
     val n = node
     if (node.forall{n => 
-      	n.isInstanceOf[FileNode] || n.asInstanceOf[DirNode].children.isEmpty}) {
+        n.isInstanceOf[FileNode] || n.asInstanceOf[DirNode].children.isEmpty}) {
       if (exists && !fileSystem.delete(this, force)) {
         fail("Could not delete " + path)
       }

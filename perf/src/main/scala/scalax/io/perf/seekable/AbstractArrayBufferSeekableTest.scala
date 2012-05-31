@@ -11,8 +11,8 @@ import scalax.io.OpenOption
 import scalax.io.SeekableByteChannel
 import Utils._
 abstract class AbstractArrayBufferSeekableTest extends AbstractSeekableTest {
-	type Source = ArrayBuffer[Byte]
-	  def setup(size:Int, 
+  type Source = ArrayBuffer[Byte]
+    def setup(size:Int, 
       lines: Int = 2, 
       term: String = NewLine.sep):Source = {
       ArrayBuffer(generateTestData(size, lines, term).getBytes(Codec.UTF8.name):_*)

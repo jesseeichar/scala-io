@@ -1011,7 +1011,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
              replaceExisting : Boolean=false,
              depth:Int = Int.MaxValue): P = {
 
-  	if (this.normalize == target.normalize) return target
+    if (this.normalize == target.normalize) return target
 
     if (!createParents && target.parent.map(_.nonExistent).getOrElse(true)) fail("Parent directory of destination file does not exist.")
     if (target.exists && !replaceExisting) fail("Destination file already exists, force creation or choose another file.")

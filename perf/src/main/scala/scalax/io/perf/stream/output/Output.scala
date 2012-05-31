@@ -21,9 +21,9 @@ import java.io.FileInputStream
 import java.nio.channels.Channels
 
 class SmallMediumSetsInMemoryOutputStreamTest 
-	extends AbstractOutputTest 
-	with MemoryBase with SmallMediumDataSet 
-	
+  extends AbstractOutputTest 
+  with MemoryBase with SmallMediumDataSet 
+  
 object SmallMediumSetsInMemoryOutputStreamRunner {
   def main(args: Array[String]) {
     Main.runTests(() => new SmallMediumSetsInMemoryOutputStreamTest)
@@ -33,9 +33,9 @@ object SmallMediumSetsInMemoryOutputStreamRunner {
 // ----------------------------------------------------------------
 
 class SmallMediumSetsToFileOutputStreamTest 
-	extends AbstractOutputTest 
-	with FileBase with SmallMediumDataSet
-	
+  extends AbstractOutputTest 
+  with FileBase with SmallMediumDataSet
+  
 object SmallMediumSetsToFileOutputStreamRunner {
   def main(args: Array[String]) {
     Main.runTests(() => new SmallMediumSetsToFileOutputStreamTest)
@@ -45,9 +45,9 @@ object SmallMediumSetsToFileOutputStreamRunner {
 // ----------------------------------------------------------------
 
 class SmallSetsInMemoryOutputStreamTest 
-	extends AbstractOutputTest 
-	with MemoryBase with SmallDataSet 
-	
+  extends AbstractOutputTest 
+  with MemoryBase with SmallDataSet 
+  
 object SmallSetsInMemoryOutputStreamTest {
   def main(args: Array[String]) {
     Main.runTests(() => new SmallSetsInMemoryOutputStreamTest)
@@ -57,8 +57,8 @@ object SmallSetsInMemoryOutputStreamTest {
 // ----------------------------------------------------------------
 
 class SmallSetsToFileOutputStreamTest  
-	extends AbstractOutputTest 
-	with FileBase with SmallDataSet 
+  extends AbstractOutputTest 
+  with FileBase with SmallDataSet 
 
 object SmallSetsToFileOutputStreamTest {
   def main(args: Array[String]) {

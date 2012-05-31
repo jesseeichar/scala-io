@@ -13,10 +13,10 @@ class SeekableBackedInputTest extends InputTest {
 
   override def sizeIsDefined = true
   override protected def textResource(sep: String, openFunction: () => Unit, closeFunction: () => Unit): Input =
-    		  construct(text(sep), openFunction, closeFunction)
+          construct(text(sep), openFunction, closeFunction)
 
   override protected def customDataResource(data: String, openFunction: () => Unit, closeFunction: () => Unit): Input =
-		  construct(data.getBytes(Codec.UTF8.charSet), openFunction, closeFunction)
+      construct(data.getBytes(Codec.UTF8.charSet), openFunction, closeFunction)
 
   override protected def imageResource(openFunction: () => Unit, closeFunction: () => Unit): Input = {
     construct(Resource.fromInputStream(Constants.IMAGE.openStream()).bytes, openFunction, closeFunction)

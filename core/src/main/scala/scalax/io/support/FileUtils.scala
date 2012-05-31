@@ -159,22 +159,22 @@ object FileUtils {
   }*/
 
     val inFileChan = FileChannelExtractor.unapply(in)
-	val outFileChan = FileChannelExtractor.unapply(out)
-	val readableByteChan = ReadableByteChannelExtractor.unapply(in)
-	val writableByteChan = WritableByteChannelExtractor.unapply(out)
-	
-	if(inFileChan.nonEmpty && outFileChan.nonEmpty) {
-	  outFileChan.get.transferFrom(inFileChan.get,0,Long.MaxValue)
-	} else if(in.isInstanceOf[InputStream] && out.isInstanceOf[OutputStream]){
-	   FileUtils.copy(in.asInstanceOf[InputStream], out.asInstanceOf[OutputStream])
-	} else if(readableByteChan.nonEmpty && outFileChan.nonEmpty) {
-	  outFileChan.get.transferFrom(readableByteChan.get, 0, Long.MaxValue)
-	} else if(inFileChan.nonEmpty && writableByteChan.nonEmpty) {
-	  inFileChan.get.transferTo(0, Long.MaxValue, writableByteChan.get)
-	} else if(out.isInstanceOf[WritableByteChannel] && readableByteChan.nonEmpty) {
-	  FileUtils.copy(readableByteChan.get, out.asInstanceOf[WritableByteChannel])
-	} else {
-	  failureCase
-	}
+  val outFileChan = FileChannelExtractor.unapply(out)
+  val readableByteChan = ReadableByteChannelExtractor.unapply(in)
+  val writableByteChan = WritableByteChannelExtractor.unapply(out)
+  
+  if(inFileChan.nonEmpty && outFileChan.nonEmpty) {
+    outFileChan.get.transferFrom(inFileChan.get,0,Long.MaxValue)
+  } else if(in.isInstanceOf[InputStream] && out.isInstanceOf[OutputStream]){
+     FileUtils.copy(in.asInstanceOf[InputStream], out.asInstanceOf[OutputStream])
+  } else if(readableByteChan.nonEmpty && outFileChan.nonEmpty) {
+    outFileChan.get.transferFrom(readableByteChan.get, 0, Long.MaxValue)
+  } else if(inFileChan.nonEmpty && writableByteChan.nonEmpty) {
+    inFileChan.get.transferTo(0, Long.MaxValue, writableByteChan.get)
+  } else if(out.isInstanceOf[WritableByteChannel] && readableByteChan.nonEmpty) {
+    FileUtils.copy(readableByteChan.get, out.asInstanceOf[WritableByteChannel])
+  } else {
+    failureCase
+  }
   }
 }

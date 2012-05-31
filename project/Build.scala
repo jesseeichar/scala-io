@@ -14,7 +14,7 @@ object BuildConstants {
 object ScalaIoBuild extends Build {
   // ----------------------- Root Project ----------------------- //
 
-	lazy val root:Project = Project("root", file(".")).
+  lazy val root:Project = Project("root", file(".")).
     aggregate(coreProject,fileProject,perfProject,webSiteProject).
     settings(sharedSettings ++ Seq(publishArtifact := false, name := "Scala IO") :_*)
 
@@ -48,7 +48,7 @@ object ScalaIoBuild extends Build {
   )
   
   val sharedSettings = Seq[Setting[_]](
-   	//scalaHome := Some(file("/Volumes/Box/ScalaProject/scala-full/dists/scala-2.9.2.r25667-b20110921211926")),
+     //scalaHome := Some(file("/Volumes/Box/ScalaProject/scala-full/dists/scala-2.9.2.r25667-b20110921211926")),
     organization := BuildConstants.organization,
     version := BuildConstants.version,
     licenses := Seq("Scala License" -> url("http://www.scala-lang.org/node/146")),
@@ -78,9 +78,9 @@ object ScalaIoBuild extends Build {
     libraryDependencies += "com.typesafe.akka" % "akka-actor" % BuildConstants.akkaVersion,
     publishArtifact in Test := true
   )
-	lazy val coreProject = Project("core", file("core")).
+  lazy val coreProject = Project("core", file("core")).
     configs(Samples).
-	  settings(samplesSettings ++ sharedSettings ++ coreSettings : _*)
+    settings(samplesSettings ++ sharedSettings ++ coreSettings : _*)
   // ----------------------- File Project ----------------------- //
 
 
@@ -99,10 +99,10 @@ object ScalaIoBuild extends Build {
     name := "scala-io-file",
     pomPostProcess := removeScalaIOTestDependency.apply
   )
-	lazy val fileProject = Project("file", file("file")).
+  lazy val fileProject = Project("file", file("file")).
     configs(Samples).
-	  settings (samplesSettings ++ sharedSettings ++ fileSettings : _*).
-	  dependsOn(coreProject, coreProject % "test->test")
+    settings (samplesSettings ++ sharedSettings ++ fileSettings : _*).
+    dependsOn(coreProject, coreProject % "test->test")
     
   // ----------------------- Performace Project ---------------------//
   
@@ -111,9 +111,9 @@ object ScalaIoBuild extends Build {
     libraryDependencies += "com.github.jsuereth" %% "sperformance" % "0.1",
     publishArtifact := false
   )
-	lazy val perfProject = Project("perf", file("perf")).
-	  settings (samplesSettings ++ sharedSettings ++ perfSettings : _*).
-	  dependsOn(coreProject,coreProject % "compile->test", fileProject % "compile->test")
+  lazy val perfProject = Project("perf", file("perf")).
+    settings (samplesSettings ++ sharedSettings ++ perfSettings : _*).
+    dependsOn(coreProject,coreProject % "compile->test", fileProject % "compile->test")
   
 
   // ------------------------------ Docs Project ------------------------------ //

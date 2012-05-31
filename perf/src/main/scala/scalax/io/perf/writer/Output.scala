@@ -20,9 +20,9 @@ import java.io.FileInputStream
 import java.nio.channels.Channels
 
 class SmallMediumSetsInMemoryWriteCharsTest 
-	extends AbstractWriteCharsTest 
-	with MemoryBase with SmallMediumDataSet 
-	
+  extends AbstractWriteCharsTest 
+  with MemoryBase with SmallMediumDataSet 
+  
 object SmallMediumSetsInMemoryWriteCharsRunner {
   def main(args: Array[String]) {
     Main.runTests(() => new SmallMediumSetsInMemoryWriteCharsTest)
@@ -32,9 +32,9 @@ object SmallMediumSetsInMemoryWriteCharsRunner {
 // ----------------------------------------------------------------
 
 class SmallMediumSetsToFileWriteCharsTest 
-	extends AbstractWriteCharsTest 
-	with FileBase with SmallMediumDataSet
-	
+  extends AbstractWriteCharsTest 
+  with FileBase with SmallMediumDataSet
+  
 object SmallMediumSetsToFileWriteCharsRunner {
   def main(args: Array[String]) {
     Main.runTests(() => new SmallMediumSetsToFileWriteCharsTest)
@@ -44,9 +44,9 @@ object SmallMediumSetsToFileWriteCharsRunner {
 // ----------------------------------------------------------------
 
 class SmallSetsInMemoryWriteCharsTest 
-	extends AbstractWriteCharsTest 
-	with MemoryBase with SmallDataSet 
-	
+  extends AbstractWriteCharsTest 
+  with MemoryBase with SmallDataSet 
+  
 object SmallSetsInMemoryWriteCharsTest {
   def main(args: Array[String]) {
     Main.runTests(() => new SmallSetsInMemoryWriteCharsTest)
@@ -56,8 +56,8 @@ object SmallSetsInMemoryWriteCharsTest {
 // ----------------------------------------------------------------
 
 class SmallSetsToFileWriteCharsTest  
-	extends AbstractWriteCharsTest 
-	with FileBase with SmallDataSet 
+  extends AbstractWriteCharsTest 
+  with FileBase with SmallDataSet 
 
 object SmallSetsToFileWriteCharsTest {
   def main(args: Array[String]) {

@@ -133,8 +133,8 @@ private[io] object ResourceTraversable {
      * the same iterator to reduce the number of object creations.
      * 
      * @param input the object that collects the raw input data.  The object B should be mutable 
-     * 		  and the contents should be updated, the reason for this is to have acceptable performance 
-     * 		  during tight read loops 
+     *       and the contents should be updated, the reason for this is to have acceptable performance 
+     *       during tight read loops 
      */
     def iterator(input:B):I
     /**
@@ -168,13 +168,13 @@ private[io] object ResourceTraversable {
   val IdentityCharConversion = identity[Char]_
   def readerBased[A](opener: => OpenedResource[Reader],
                     resourceContext: ResourceContext,
-				    parser: InputParser[Char,Array[Char]] = DefaultCharParser,
+            parser: InputParser[Char,Array[Char]] = DefaultCharParser,
                     initialConv: Char => A = IdentityCharConversion,
                     startIndex: Long = 0,
                     endIndex: Long = Long.MaxValue) = {
 
     if (parser == DefaultCharParser && initialConv == IdentityCharConversion) {
-    	new traversable.ReaderResourceTraversable(opener, resourceContext, startIndex, endIndex).asInstanceOf[LongTraversable[A]]
+      new traversable.ReaderResourceTraversable(opener, resourceContext, startIndex, endIndex).asInstanceOf[LongTraversable[A]]
     } else {
       new ResourceTraversable[A] {
         type In = Reader
@@ -212,7 +212,7 @@ private[io] object ResourceTraversable {
     
   def byteChannelBased[A,B](opener : => OpenedResource[ReadableByteChannel],
                             resourceContext: ResourceContext,
-		  					sizeFunc:() => Option[Long],
+                sizeFunc:() => Option[Long],
                             parser : InputParser[A,NioByteBuffer] = DefaultByteBufferParser,
                             initialConv: A => B = IdentityByteConversion,
                             startIndex : Long = 0,

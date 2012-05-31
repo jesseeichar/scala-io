@@ -235,8 +235,8 @@ trait InputResource[+R] extends Resource[R] with Input with ResourceOps[R, Input
       case outR: OutputResource[_] =>
         var failedToCopy = false
         for {
-        	inChan <- this
-        	outChan <- outR
+          inChan <- this
+          outChan <- outR
         } {
           FileUtils.tryCopy(failedToCopy=true)(inChan, outChan)
         }
@@ -315,7 +315,7 @@ trait OutputResource[+R] extends Resource[R] with Output with ResourceOps[R, Out
       case inR: InputResource[_] =>
         var failedToCopy = false
         for {
-        	inChan <- inR
+          inChan <- inR
             outChan <- this
         } {
           FileUtils.tryCopy(failedToCopy=true)(inChan, outChan)
