@@ -40,10 +40,13 @@ class ProcessorAsyncTest extends AssertionSugar{
   def processor_future_should_complete {
 
     var success = false
-    val future = (factory{Thread.sleep(10); Some(1)}).future.onComplete{
+    val future = (factory{Thread.sleep(10); Some(1)}).future
+    
+    future.onComplete{
       case Left(e) => success = false
       case Right(r) => success = true
     }
+    
     while(!future.isCompleted) {
       Thread.sleep(30);
     }

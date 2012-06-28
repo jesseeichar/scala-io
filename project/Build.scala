@@ -8,7 +8,7 @@ object BuildConstants {
   val armVersion = "1.2"
   val armScalaVersion = "2.10.0-SNAPSHOT"
   val akkaVersion = "2.0.1"
-  val scalaVersion = "2.10.0-M3"
+  val scalaVersion = "2.10.0-SNAPSHOT"
 }
 
 object ScalaIoBuild extends Build {
