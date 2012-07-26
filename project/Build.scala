@@ -75,7 +75,6 @@ object ScalaIoBuild extends Build {
     name := "scala-io-core",
     resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
     libraryDependencies += "com.github.jsuereth.scala-arm" % ("scala-arm_"+BuildConstants.armScalaVersion) % BuildConstants.armVersion,
-    libraryDependencies += "com.typesafe.akka" % "akka-actor" % BuildConstants.akkaVersion,
     publishArtifact in Test := true
   )
   lazy val coreProject = Project("core", file("core")).

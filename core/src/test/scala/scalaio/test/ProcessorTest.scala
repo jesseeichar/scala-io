@@ -6,8 +6,6 @@ import scalax.io.processing.{ProcessorFactory, Processor, CharProcessor, BytePro
 import java.util.concurrent.TimeoutException
 import scalax.io.{Resource, LongTraversable, ResourceContext, DefaultResourceContext}
 import java.io.{File, DataInputStream, ByteArrayInputStream}
-import akka.dispatch.Await
-import akka.util.duration._
 
 trait ProcessorTest extends AssertionSugar {
   self: LongTraversableTest =>
@@ -892,24 +890,6 @@ trait ProcessorTest extends AssertionSugar {
 
     assertSame(customContext, p.traversable.context)
     assertSame(customContext, (p.onFailure{case _ => throw new RuntimeException("boom")}).traversable.context)
-  }
-
-  @Test
-  def processor_future_must_process_long_traversables {
-    val prepared = processorTraversable(100, () => ())
-    val out = Resource.fromFile(File.createTempFile("scalaio","xx"))
-
-    val p = for {
-      in <- prepared.traversable.processor
-      outApi <- out.outputProcessor
-      _ <- in.repeatUntilEmpty()
-      nextInt <- in.next
-      _ <- outApi.write(nextInt.toString)
-    } yield ()
-
-    Await.result(p.futureExec(), 30 hours)
-
-    assertEquals(prepared.testData.mkString, out.slurpString)
   }
 
 }

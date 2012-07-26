@@ -9,16 +9,16 @@ object ReadWriteFiles {
    * the {/core} operations for Input,Output,Seekable etc....
    */
   def basicReadWrite {
-    import scalax.file.Path
-    implicit val codec = scalax.io.Codec.UTF8
+import scalax.file.Path
+implicit val codec = scalax.io.Codec.UTF8
 
-    // Take the first set of non-empty lines, keeping the terminator for each line
-    val nonEmptySpan = Path("file").lines(includeTerminator = true).
-      dropWhile{_.isEmpty}.
-      takeWhile{_.nonEmpty}
+// Take the first set of non-empty lines, keeping the terminator for each line
+val nonEmptySpan = Path("file").lines(includeTerminator = true).
+  dropWhile{_.isEmpty}.
+  takeWhile{_.nonEmpty}
 
-    // Write result from previous read to a new file
-    Path("nonEmpty").writeStrings(nonEmptySpan)
+// Write result from previous read to a new file
+Path("nonEmpty").writeStrings(nonEmptySpan)
   }
   /**
    * Safe way to read and write a file.  Normal try-catch will also work,

@@ -1,7 +1,7 @@
 package scalaio.test
 import org.junit.Test
 import org.junit.Assert._
-import scalax.io.{AsyncLongTraversable, LongTraversable}
+import scalax.io.{LongTraversable}
 
 trait DataIndependentLongTraversableTest[T] {
   protected def sizeIsDefined = false

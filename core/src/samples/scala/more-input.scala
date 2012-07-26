@@ -13,7 +13,9 @@ object MoreInputExamples {
    */
   def basicInput {
     import scalax.io._
-
+    // Create a resource from a file.  This is a convenience method and the string can be
+    // a relative path or a absolute path.  While this is convenient it is not portable
+    // so it is recommened to use the File API to create a Path object and read from that
     val input:Input = Resource.fromFile("someFile")
 
     // read all bytes into an in memory arry

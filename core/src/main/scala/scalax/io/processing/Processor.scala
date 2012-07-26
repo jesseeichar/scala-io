@@ -1,10 +1,6 @@
 package scalax.io
 package processing
 
-import akka.dispatch._
-import akka.util.duration._
-import akka.util.Duration
-
 /**
  * A point or step in a IO process workflow.
  *
@@ -78,85 +74,6 @@ trait Processor[+A] {
     finally initialized.cleanUp
   }
 
-  /**
-   * Create a modified processor that will throw a [[java.util.concurrent.TimeoutException]]
-   * if the process takes longer than the provided timeout.
-   *
-   * @param timeout the length of time before the timeout exception is thrown
-   * @return a new processor with a timeout associated with it
-   */
-  def timeout(timeout:Duration) = new TimingOutProcessor(this, timeout)
-
-  /**
-   * Start the execution of the process in another thread and return a
-   * future for accessing the result when it is ready.
-   *
-   * It is important to realize that if the result of the process is
-   * a LongTraversable the processing will not in fact be executed
-   * because LongTraversables are non-strict (lazy).
-   *
-   * In the case where the Processor has a resulting type of
-   * LongTraversable, one must execute either futureExec which will
-   * execute all LongTraversables recursively in the process or
-   * obtain the LongTraversable (normally by calling the traversable method)
-   * and visit each element in the LongTraversable.
-   * (See [[scalax.io.LongTraversable]].async)
-   *
-   * See futureExec docs for examples when to use futureExec.
-   *
-   * @return A Future that will return the result of executing the process
-   */
-  def future = {
-    implicit val executionContext = scalax.io.executionContext
-    Future { acquireAndGet(value => value) }
-  }
-
-  /**
-   * Call execute asynchronously.
-   *
-   * The use of this method over future is that this will recursively
-   * visit each element of a LongTraversable if the Processor contains a
-   * LongTraversable.
-   *
-   * For Example:
-   *
-   * {{{
-   * val processor = for {
-      in <- in.blocks().processor
-      outApi <- out.outputProcessor
-      _ <- in.repeatUntilEmpty()
-      block <- in.next
-      _ <- outApi.write(block)
-    } yield ()
-
-     processor.futureExec()
-   * }}}
-   *
-   * The example illustrates a case where futureExec is desired because
-   * (as a result of the repeatUntilEmpty) the contained object
-   * is a LongTraversable.  If future is executed the write will
-   * not be executed because the writes occur only when an element in
-   * the LongTraversable is visited.
-   *
-   * An equivalent way of writing the previous example is:
-   *
-   * {{{
-     val processor2 = for {
-       in <- in.blocks().processor
-       outApi <- out.outputProcessor
-       _ <- in.repeatUntilEmpty()
-       block <- in.next
-     } yield outApi.asOutput.write(block)
-
-     processor.futureExec()
-   * }}}
-   *
-   * @return a future so one can observe when the process is finished
-   */
-  def futureExec() = {
-    implicit val executionContext = scalax.io.executionContext
-    Future { execute() }
-  }
   /**
    * Declare an error handler for handling an error when executing the processor.  It is important to realize that
    * this will catch exceptions caused ONLY by the current processor, not by 'child' Processors.  IE processors
@@ -423,22 +340,4 @@ private[processing] class WithFilter[+A](base:Processor[A], filter: A=>Boolean) 
       processFactory(base.init.execute.filter(filter).map(f))
     override def flatMap[U](f: A => Processor[U]) =
       processFactory(base.init.execute.filter(filter).flatMap(f(_).init.execute))
-}
-
-private[processing] class TimingOutProcessor[+A] (base: Processor[A], timeout: Duration) extends Processor[A] {
-  private implicit val executionContext = scalax.io.executionContext
-  def context = base.context
-  private[processing] def init = {
-    val (remainingTime, opened) = {
-      val start = System.currentTimeMillis()
-      val opened = Await.result(Future(base.init), timeout)
-      val taken = System.currentTimeMillis() - start
-      (0L max (timeout.toMillis - taken), opened)
-    }
-
-    new Opened[A] {
-      def execute = Await.result(Future(opened.execute), remainingTime millis)
-      def cleanUp() = opened.cleanUp()
-    }
-  }
 }

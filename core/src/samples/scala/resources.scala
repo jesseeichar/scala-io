@@ -20,7 +20,7 @@ object Resources {
    * </p>
    */
   def wrapCloseables {
-    import java.io.RandomAccessFile
+/*    import java.io.RandomAccessFile
 
     val fileResource = _root_.resource.managed(new RandomAccessFile("foo.txt","rw"))
 
@@ -36,7 +36,7 @@ object Resources {
         errors.foreach {_.printStackTrace}
       case Right(b) =>
         println("I got a byte :) "+b)
-    }
+    }*/
 
   }
   /**
