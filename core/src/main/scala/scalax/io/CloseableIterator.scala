@@ -105,7 +105,7 @@ object CloseableIterator {
     def close(resource:CloseableIterator[A]) = try {
       closeExceptions = resource.close()
     } catch {
-      case t => closeExceptions = List(t)
+      case t: Throwable => closeExceptions = List(t)
     }
 
     /** Handle error that occurs during resource access */
@@ -116,7 +116,7 @@ object CloseableIterator {
 
     resourceEither match {
       case Left(t) =>
-        context.openErrorHandler(f, t) getOrElse (throw t)
+        throw context.openErrorHandler(t)
       case Right(resource) =>
         val result =
           try Right(f(resource))
@@ -126,7 +126,7 @@ object CloseableIterator {
         val handleError = result.left.toOption ++ closeExceptions nonEmpty
 
         val finalResult = if (handleError) {
-            context.errorHandler(f, result, closeExceptions)
+            context.errorHandler(result, closeExceptions)
         } else {
           result.right.get
         }

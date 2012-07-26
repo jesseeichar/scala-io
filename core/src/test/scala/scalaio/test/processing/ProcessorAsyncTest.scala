@@ -41,6 +41,8 @@ class ProcessorAsyncTest extends AssertionSugar{
 
     var success = false
     val future = (factory{Thread.sleep(10); Some(1)}).future
+
+    implicit val executionContext = scalax.io.executionContext
     
     future.onComplete{
       case Left(e) => success = false

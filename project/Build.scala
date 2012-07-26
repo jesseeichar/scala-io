@@ -5,8 +5,8 @@ import scala.xml.transform._
 object BuildConstants {
   val organization = "com.github.scala-incubator.io"
   val version = "0.5.0-SNAPSHOT"
-  val armVersion = "1.2"
-  val armScalaVersion = "2.10.0-SNAPSHOT"
+  val armVersion = "1.3-SNAPSHOT"
+  val armScalaVersion = "2.10"
   val akkaVersion = "2.0.1"
   val scalaVersion = "2.10.0-SNAPSHOT"
 }
@@ -62,14 +62,14 @@ object ScalaIoBuild extends Build {
     publishMavenStyle := true,
     publishToSettings,
     pomExtraSetting,
-    resolvers += "Scala-Tools Maven2 Snapshots Repository" at "http://scala-tools.org/repo-snapshots",
+    resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
     resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
     resolvers += {
       val mapfishRepoUrl = new java.net.URL("http://dev.mapfish.org/ivy2")
       Resolver.url("Mapfish Ivy Repository", mapfishRepoUrl)(Resolver.ivyStylePatterns)
     },
     libraryDependencies += "com.novocode" % "junit-interface" % "0.8" % "test->default",
-    libraryDependencies += "org.scala-lang" % "scala-compiler" % BuildConstants.scalaVersion % "test"
+    libraryDependencies += "org.scala-lang" % "scala-reflect" % BuildConstants.scalaVersion % "test"
   )
 
   // ----------------------- Core Project ----------------------- //

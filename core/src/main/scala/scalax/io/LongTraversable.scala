@@ -12,6 +12,7 @@ import scala.collection._
 import scala.collection.generic._
 import scala.collection.mutable.{ Builder, ListBuffer }
 import scala.collection.mutable.Queue
+import scala.concurrent.ExecutionContext
 
 /**
  * A traversable for use on very large datasets which cannot be indexed with Ints but instead
@@ -29,7 +30,7 @@ trait LongTraversable[@specialized(Byte,Char) +A] extends Traversable[A]
     withIterator{b ++= _}
     b.result()
   }
-  def async:AsyncLongTraversable[A] = new AsyncLongTraversable(this)
+  def async(implicit executionContext:ExecutionContext = scalax.io.executionContext):AsyncLongTraversable[A] = new AsyncLongTraversable(this)(executionContext)
   override def toString() = "LongTraversable(...)"
 }
 

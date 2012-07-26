@@ -15,6 +15,7 @@ import scala.collection.Seq
 import scala.collection.TraversableLike
 import scala.collection.mutable.Builder
 import scala.collection.GenTraversableOnce
+import scala.reflect.ClassTag
 
 /**
  * The control signals for the limitFold method in [[scalax.io.LongTraversable]].
@@ -50,8 +51,7 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A, Repr]] extends Tra
   def context:ResourceContext
   override protected[this] def thisCollection: LongTraversable[A] = this.asInstanceOf[LongTraversable[A]]
   override protected[this] def toCollection(repr: Repr): LongTraversable[A] = repr.asInstanceOf[LongTraversable[A]]
-  /*  TODO fix override 
-  override def toArray[B >: A: ClassManifest] =
+  override def toArray[B >: A: ClassTag] =
     if(hasDefiniteSize && size <= Int.MaxValue) {
       val array = new Array[B](size.toInt)
       var i = 0
@@ -62,7 +62,7 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A, Repr]] extends Tra
       array
     } else {
       toBuffer.toArray
-  }   */
+  }
 
   /**
    * Create a processor that provides an API for declaring a processing pipeline of this
@@ -687,15 +687,6 @@ withIterator(i => b ++= i.collect(pf))
   override def init = build(_.init)
 
   def force:Repr
-
-  /**
-   * LongTraversable is a view so this method is not necessary
-   */
-//  override def view = super.view
-  /**
-   * LongTraversable is a view so this method is not necessary
-   */
-//  override def view(from: Int, until: Int) = view.slice(from, until)
 
 }
 

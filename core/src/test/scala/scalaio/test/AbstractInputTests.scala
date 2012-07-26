@@ -304,9 +304,8 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
     if (errorOnReadInput.isInstanceOf[Resource[_]]) {
       class MyException extends Exception
       val context = new ResourceContext {
-        override def openErrorHandler[A, U](f: A => U, openException: Throwable): Option[U] =
-          throw new MyException
-        override def errorHandler[A, U](f: A => U, accessResult: Either[Throwable, U], closingExceptions: List[Throwable]): U =
+        override def openErrorHandler(openException: Throwable) = throw new MyException
+        override def errorHandler[U](accessResult: Either[Throwable, U], closingExceptions: List[Throwable]): U =
           throw new MyException
       }
       val input = errorOnReadInput.asInstanceOf[Resource[_]].
@@ -332,72 +331,6 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
       intercept[MyException](input.lines(Line.Terminators.Auto, false)(Codec.UTF8).foreach(_ => ()))
     }
   }
-  @Test
-  def customErrorHandler_On_Read_Error {
-    assumeNotWindows
-    val testContext = new ErrorHandlingTestContext()
-
-    val errorOnReadInput = input(ErrorOnRead)
-    if (errorOnReadInput.isInstanceOf[Resource[_]]) {
-      val customHandlerInput = errorOnReadInput.asInstanceOf[Resource[_]].
-        updateContext(testContext.customContext).
-        asInstanceOf[Input]
-      customHandlerInput.bytes.headOption
-      assertEquals(1, testContext.accessExceptions + testContext.openExceptions) // Sometimes access error occurs during opening resource like with files
-      assertEquals(0, testContext.closeExceptions)
-    }
-  }
-  @Test
-  def customErrorHandler_On_Close_Error {
-    val testContext = new ErrorHandlingTestContext()
-
-    val errorOnCloseInput = input(ErrorOnClose)
-    if (errorOnCloseInput.isInstanceOf[Resource[_]]) {
-      val customHandlerInput = errorOnCloseInput.asInstanceOf[Resource[_]].
-        updateContext(testContext.customContext).
-        asInstanceOf[Input]
-      customHandlerInput.bytes.headOption
-      assertEquals(0, testContext.accessExceptions)
-      assertTrue(testContext.closeExceptions >= 1)
-    }
-  }
-  @Test
-  def customErrorHandler_On_AcquireAndGet {
-    val testContext = new ErrorHandlingTestContext()
-
-    val goodInput = input(Image)
-
-    if (goodInput.isInstanceOf[Resource[_]]) {
-      val customHandlerInput = goodInput.asInstanceOf[Resource[_]].
-        updateContext(testContext.customContext)
-      customHandlerInput.acquireAndGet(_ => assert(false))
-      assertEquals(1, testContext.accessExceptions)
-      assertEquals(0, testContext.closeExceptions)
-    }
-  }
-
-  @Test
-  def custom_ErrorHandler_can_return_default_string {
-    assumeNotWindows
-
-    val default = "Default".getBytes("UTF-8")
-    val context = new ResourceContext {
-      override def openErrorHandler[A, U](f: A => U, openException: Throwable): Option[U] = {
-        Some(default.asInstanceOf[U])
-      }
-      override def errorHandler[A, U](f: A => U, accessResult: Either[Throwable, U], closingExceptions: List[Throwable]): U = {
-        default.asInstanceOf[U]
-      }
-    }
-    val resource = input(ErrorOnRead)
-    if (resource.isInstanceOf[Resource[_]]) {
-      val customHandlerInput = resource.asInstanceOf[Resource[_]].
-        updateContext(context).
-        asInstanceOf[Input]
-
-      assertEquals("Default", customHandlerInput.slurpString())
-    }
-  }
 
   @Test
   def input_closed_after_each_action {
@@ -418,7 +351,7 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
       opens = 0
       closes = 0
     }
-
+    
     assertCorrectOpens(in.blocks(None).force)
     assertCorrectOpens(in.blocks(None).headOption)
     assertCorrectOpens(in.byteArray)

@@ -5,11 +5,10 @@ import java.io.Closeable
 import java.io.InputStream
 import java.nio.channels.Channels
 import java.nio.channels.ReadableByteChannel
-
 import scala.Option.option2Iterable
-
 import scalax.io.extractor.FileChannelExtractor
 import scalax.io.nio.SeekableFileChannel
+import scala.reflect.ClassTag
 
 /**
  * resourceOpener must either be a InputStream or a ReadableByteChannel (or subclass).  Anything else will throw an exception
@@ -45,9 +44,8 @@ protected[io] class ByteResourceTraversable(
   override def lsize = {
     CloseableIterator.withIterator(iterator,context) {_.size}
   }
- /* TODO fix override
-  override def toArray[B >: Byte: ClassManifest]: Array[B] = {
+  override def toArray[B >: Byte: ClassTag]: Array[B] = {
     CloseableIterator.withIterator(iterator,context) {_.toArray}
-  }*/
+  }
 
 }

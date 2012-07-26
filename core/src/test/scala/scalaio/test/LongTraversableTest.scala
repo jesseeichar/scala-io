@@ -379,25 +379,7 @@ class LongTraversableTest extends DataIndependentLongTraversableTest[Int] with P
           ).head
     }
   }
-  @Test
-  def customErrorHandler_On_Read_Error{
-    val testContext = new ErrorHandlingTestContext()
-
-    val errorOnReadInput = traversable(callback = _ => throw new IOException("Bang"), resourceContext = testContext.customContext)
-      errorOnReadInput.headOption
-      assertEquals(1, testContext.accessExceptions)
-      assertEquals(0, testContext.closeExceptions)
-  }
-  @Test
-  def customErrorHandler_On_Close_Error{
-    val testContext = new ErrorHandlingTestContext()
-
-    val errorOnCloseInput = traversable(closeFunction = () => throw new IOException("Bang"), resourceContext = testContext.customContext)
-      errorOnCloseInput.headOption
-      assertEquals(0, testContext.accessExceptions)
-      assertEquals(1, testContext.closeExceptions)
-  }
-
+  
   @Test
   def async_methods_perform_same_functionality_as_normal_method {
     val input = independentTraversable
@@ -407,6 +389,7 @@ class LongTraversableTest extends DataIndependentLongTraversableTest[Int] with P
       assertEquals(expected,actual)
     }
 
+    implicit val context = scalax.io.executionContext
     assertSameBehaviour(_./:(0)(_ + _), _./:(0)(_ + _))
     assertSameBehaviour(_.:\(0)(_ + _), _.:\(0)(_ + _))
     assertSameBehaviour(_.aggregate(0)(_ + _ , _ + _), _.aggregate(0)(_ + _ , _ + _))

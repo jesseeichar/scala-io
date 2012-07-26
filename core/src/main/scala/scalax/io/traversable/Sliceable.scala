@@ -8,6 +8,7 @@ import java.nio.channels.Channels
 import java.io.ByteArrayOutputStream
 import java.nio.channels.ReadableByteChannel
 import java.io.InputStream
+import scala.reflect.ClassTag
 
 /**
  * Note: This is for implementation if subclases like the InputStreamIterator iterator
@@ -59,8 +60,7 @@ private[io] abstract class Sliceable extends CloseableIterator[Byte] {
     }
   }
 
-  /*  TODO reimplement override when I can
-  override def toArray[B >: Byte: ClassManifest]: Array[B] = {
+  override def toArray[B >: Byte: ClassTag]: Array[B] ={
     init()
     val in = getIn
     val sliceLength: Long = (end - start) min Int.MaxValue
@@ -81,5 +81,5 @@ private[io] abstract class Sliceable extends CloseableIterator[Byte] {
         out.toByteArray().asInstanceOf[Array[B]]
       case _ => throw new IllegalStateException(in.getClass+" is neither a ReadableByteChannel or an InputStream, there is a problem with the implementation because only one of those two should be return by getIn")
     }
-  }*/
+  }
 }

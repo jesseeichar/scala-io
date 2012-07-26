@@ -36,6 +36,7 @@ object AsyncReadWrite {
       // write the data to the output
     } yield out.write(data)
 
+    implicit val context = scalax.io.executionContext
     // execute the process
     // note that there is not repeat calls in the process
     // (like repeatUntilEmpty).  Thus the result is not
@@ -79,6 +80,7 @@ object AsyncReadWrite {
     // have started in a seperate thread
     val headFuture = lines.async.head
 
+    implicit val context = scalax.io.executionContext
     // When the data has been read from the file the result will be passed to the
     // function registered with onSuccess
     headFuture.onSuccess{
@@ -119,6 +121,7 @@ object AsyncReadWrite {
         None
     }.execute()
 
+    implicit val context = scalax.io.executionContext
     // timeouts work on normal processors
     processor.future.onFailure {
       case e:TimeoutException =>
@@ -178,6 +181,7 @@ object AsyncReadWrite {
     // is not executed as a for loop
     } yield ()
 
+    implicit val context = scalax.io.executionContext
     // call future to execute the processor asynchonously
     // Note that because processor is a
     // LongTraversable (method repeatUntilEmpty is the cause of this)
@@ -267,6 +271,7 @@ object AsyncReadWrite {
         End(Value(recordLength, sofar :+ next))
     }
 
+    implicit val context = scalax.io.executionContext
     // Last step is to handle the result from the process
     desiredRecord.onComplete{
       case Right(Value(_, record)) => () // do something

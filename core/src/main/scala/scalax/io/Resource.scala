@@ -175,7 +175,7 @@ trait Resource[+R] extends ManagedResourceOperations[R] with ResourceOps[R, Reso
     def close(resource:OpenedResource[R]) = try {
       closeExceptions = resource.close()
     } catch {
-      case t => closeExceptions = List(t)
+      case t: Throwable => closeExceptions = List(t)
     }
 
     /** Handle error that occurs during resource access */
@@ -186,8 +186,7 @@ trait Resource[+R] extends ManagedResourceOperations[R] with ResourceOps[R, Reso
 
     resourceEither match {
       case Left(t) =>
-        val handlerValue = context.openErrorHandler(f, t).map(Right(_))
-        handlerValue getOrElse Left(List(t))
+        Left(List(context.openErrorHandler(t)))
       case Right(resource) =>
         val result =
           try Right(f(resource.get))
@@ -198,9 +197,9 @@ trait Resource[+R] extends ManagedResourceOperations[R] with ResourceOps[R, Reso
 
         if (handleError) {
           try {
-            Right(context.errorHandler(f, result, closeExceptions))
+            Right(context.errorHandler(result, closeExceptions))
           } catch {
-            case t => Left(List(t))
+            case t: Throwable => Left(List(t))
           }
         } else {
           Right(result.right.get)

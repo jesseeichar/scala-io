@@ -1,6 +1,7 @@
 package scalax.io
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext
 
 /**
  * An additional API for LongTraversable for asynchronous interaction
@@ -26,8 +27,7 @@ import scala.concurrent.Future
  * Date: 3/18/12
  * Time: 8:26 PM
  */
-class AsyncLongTraversable[+A](traversable:LongTraversable[A]) {
-  private[this] implicit val executionContext = scalax.io.executionContext
+class AsyncLongTraversable[+A](traversable:LongTraversable[A])(implicit val executionContext:ExecutionContext) {
   def /:[B](z: B)(op: (B, A) => B) = Future{traversable./:(z)(op)}
   def :\[B](z: B)(op: (A, B) => B) = Future{traversable.:\(z)(op)}
   def addString(b: StringBuilder, start: String, sep: String, end: String) = Future{traversable.addString(b,start,sep,end)}
