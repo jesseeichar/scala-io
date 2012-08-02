@@ -28,7 +28,7 @@ class CloseActionTest extends AssertionSugar with IOSugar {
     var c = 0
     val resource2 = resource(CloseAction((_:Any) => c += 1))
 
-    assertEquals(source, resource2.slurpString)
+    assertEquals(source, resource2.string)
     assertEquals(1, c)
     resource2.bytes.force
     assertEquals(2, c)
@@ -45,7 +45,7 @@ class CloseActionTest extends AssertionSugar with IOSugar {
     val closer = CloseAction((_:Any) => c += 1) :+ CloseAction((_:Any) => {assertEquals(1,c);d += 1})
     val resource2 = resource(closer)
 
-    assertEquals(source, resource2.slurpString)
+    assertEquals(source, resource2.string)
     assertEquals(1, c)
     assertEquals(1, d)
   }

@@ -30,7 +30,7 @@ object MoreInputExamples {
 
     // read all bytes into a string
     // note: codec can be passed implicitely as well
-    input.slurpString(Codec.UTF8)
+    input.string(Codec.UTF8)
   }
 
   /**

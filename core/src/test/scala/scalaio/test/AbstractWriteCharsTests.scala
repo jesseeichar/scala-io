@@ -26,7 +26,7 @@ abstract class AbstractWriteCharsTests extends scalax.test.sugar.AssertionSugar 
     val (input, output) = open()
     output write DEFAULT_DATA
 
-    assertEquals(DEFAULT_DATA, input.slurpString)
+    assertEquals(DEFAULT_DATA, input.string)
   }
 
 
@@ -35,12 +35,12 @@ abstract class AbstractWriteCharsTests extends scalax.test.sugar.AssertionSugar 
     val (input, output) = open()
 
     output.writeStrings (DEFAULT_DATA :: DEFAULT_DATA :: DEFAULT_DATA :: Nil, "")
-    assertEquals(DEFAULT_DATA + DEFAULT_DATA + DEFAULT_DATA, input.slurpString)
+    assertEquals(DEFAULT_DATA + DEFAULT_DATA + DEFAULT_DATA, input.string)
 
     val (input2, output2) = open()
 
     output2 writeStrings (DEFAULT_DATA :: DEFAULT_DATA :: DEFAULT_DATA :: Nil, "-")
-    assertEquals(DEFAULT_DATA + "-" + DEFAULT_DATA + "-" + DEFAULT_DATA, input2.slurpString)
+    assertEquals(DEFAULT_DATA + "-" + DEFAULT_DATA + "-" + DEFAULT_DATA, input2.string)
   }
 
 
@@ -63,7 +63,7 @@ abstract class AbstractWriteCharsTests extends scalax.test.sugar.AssertionSugar 
         } {}
 
         assertEquals(2,closes)
-        assertEquals("whoop!hello world",in.slurpString)
+        assertEquals("whoop!hello world",in.string)
       case _ => ()
     }
   }

@@ -24,12 +24,12 @@ object FileLockingAndBlockExecution {
 
     // By default the entire file is locked with exclusive access
     val result: Option[String] = file.withLock() { s =>
-      s.slurpString
+      s.string
     }
 
     // if the filesystem does not support locking then None will be returned
     result match {
-      case None => file.slurpString // oh well this is the best I can do
+      case None => file.string // oh well this is the best I can do
       case Some(data) => data
     }
 
@@ -65,7 +65,7 @@ object FileLockingAndBlockExecution {
       // create a processor
       processor <- file.seekableProcessor()
       // read in the full text of the file
-      string <- processor.slurpString()
+      string <- processor.string()
       // capitize all letter L
       _ <- processor.write(string.replaceAll("l", "L"))
     } ()

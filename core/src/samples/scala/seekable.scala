@@ -102,7 +102,7 @@ object SeekableSamples {
     implicit val codec = Codec.UTF8
 
     seekable.append("data is being written to file")
-    val data:String = seekable.slurpString
+    val data:String = seekable.string
   }
   /**
    * Multiple Random accesses from a file opened only a single time

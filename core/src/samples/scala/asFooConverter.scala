@@ -21,7 +21,7 @@ object AsFooConverter {
     import scalax.io.Codec
     import scalax.io.JavaConverters._
 
-    val webpage:String = new java.net.URL("http://www.scala-lang.org").asInput.slurpString(Codec.UTF8)
+    val webpage:String = new java.net.URL("http://www.scala-lang.org").asInput.string(Codec.UTF8)
     val bytes:Array[Byte] = List[Byte](1,2,3,4).asInput.byteArray
   }
   /**
@@ -63,7 +63,7 @@ object AsFooConverter {
     import JavaConverters._
 
     val lines:Traversable[String] = new java.io.File("io").asBinaryReadChars(Codec.UTF8).lines()
-    val hello:String = new java.io.StringReader("hello").asReadChars.slurpString
+    val hello:String = new java.io.StringReader("hello").asReadChars.string
     val wrapTraversable: LongTraversable[String] = "hello".asReadChars.lines(Custom(";"))
   }
 
@@ -79,7 +79,7 @@ object AsFooConverter {
     import scalax.io.JavaConverters._
     import scalax.io.{Output, LongTraversable, WriteChars}
 
-    val hi:String = new java.io.StringReader("hi").asUnmanagedReadChars.slurpString
+    val hi:String = new java.io.StringReader("hi").asUnmanagedReadChars.string
     val bytes:LongTraversable[Byte] = System.in.asUnmanagedInput.bytes
     val lines:LongTraversable[String] = System.in.asUnmanagedBinaryReadChars.lines()
     val out:Output = System.out.asUnmanagedOutput
