@@ -30,7 +30,7 @@ object ExceptionHandling {
     }
 
     // after creating a resource assign context object to the Resource
-    Resource.fromFile("someFile").updateContext(context).slurpString
+    Resource.fromFile("someFile").updateContext(context).string
 
     // Remember Resources are immutable, so a new instance is created by updateContext
     // the following will not work:
@@ -48,7 +48,7 @@ object ExceptionHandling {
    * is also known so a default value can be provided.
    * </p><p>
    * This pattern can be quite tricky because the internals of how Scala-IO works needs to be known.
-   * For example if providing a default for slurpString then one must know that bytes must be
+   * For example if providing a default for string then one must know that bytes must be
    * returned as the default rather than a string.
    * </p>
    * <p>
@@ -59,7 +59,7 @@ object ExceptionHandling {
   def returnDefaultValueOnFailure {
     import scalax.io._
 
-    // slurpString reads bytes and converts them to a string. so the default value has
+    // string reads bytes and converts them to a string. so the default value has
     // to be a byte array.
     val default = "Default".getBytes("UTF-8")
     // In this context the default will be returned if there the access fails
@@ -85,7 +85,7 @@ object ExceptionHandling {
     }
 
     // Now the default value should be returned if the resource access throws an exception.
-    val string = Resource.fromFile("file").updateContext(context).slurpString
+    val string = Resource.fromFile("file").updateContext(context).string
   }
 
   /**

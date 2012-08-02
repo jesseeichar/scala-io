@@ -5,6 +5,6 @@ object Main extends App {
   val tmpPath = Path.createTempFile("scala-lang-site.html")
   new java.net.URL("http://www.scala-lang.org").asInput.copyDataTo(tmpPath)
 
-  println(tmpPath.slurpString)
+  println(tmpPath.string)
   tmpPath.delete()
 }

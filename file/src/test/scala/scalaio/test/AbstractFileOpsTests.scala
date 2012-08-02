@@ -39,9 +39,9 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
     } {
       assertEquals("initial read works", demoData take 2, stream.chars take 2 mkString)
       stream.truncate(2)
-      assertEquals("chop works", demoData take 2, stream.slurpString)
+      assertEquals("chop works", demoData take 2, stream.string)
       stream.append(demoData drop 2)
-      assertEquals("append works",demoData, stream.slurpString)
+      assertEquals("append works",demoData, stream.string)
     }
   }
 
@@ -53,9 +53,9 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
     } {
       assertEquals("initial read works", demoData take 2, stream.chars take 2 mkString)
       stream.truncate(2)
-      assertEquals("chop works", demoData take 2, stream.slurpString)
+      assertEquals("chop works", demoData take 2, stream.string)
       stream.append(demoData drop 2)
-      assertEquals("append works",demoData, stream.slurpString)
+      assertEquals("append works",demoData, stream.string)
     }
   }
 
@@ -72,7 +72,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
     repeat {
       val p = path
       p.outputStream(Append).write("more")
-      assertEquals(demoData+"more", p.slurpString)
+      assertEquals(demoData+"more", p.string)
     }
   }
 
@@ -81,7 +81,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
     repeat {
       val p = path
       p.outputStream(Read).write("more")
-      assertEquals("more", p.slurpString)
+      assertEquals("more", p.string)
     }
   }
 
@@ -90,7 +90,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
     repeat {
       val p = path
       p.outputStream(Truncate,Write).open().close()
-      assertEquals("", p.slurpString)
+      assertEquals("", p.string)
     }
   }
 
@@ -99,7 +99,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
     repeat {
       val p = path
       p.outputStream(Truncate,Write,Append).open().close()
-      assertEquals("", p.slurpString)
+      assertEquals("", p.string)
     }
   }
 
@@ -122,7 +122,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
       intercept[Exception] {
         p.outputStream(CreateNew).open().close()
       }
-      assertEquals(demoData, p.slurpString)
+      assertEquals(demoData, p.string)
   }
 
   @Test //@Ignore
@@ -134,7 +134,7 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
       assertFalse(p.exists)
       intercept[IOException] {
         // file should have been deleted so this should throw exception
-        p.slurpString
+        p.string
       }
     }
   }

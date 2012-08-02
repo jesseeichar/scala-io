@@ -156,18 +156,18 @@ object BasicIO {
     val in: InputStreamResource[FileInputStream] = Resource.fromInputStream(new FileInputStream("file"))
 
     // declare the Codec explicitly
-    val string:String = in.slurpString(Codec.UTF8)
+    val string:String = in.string(Codec.UTF8)
     val chars: LongTraversable[Char] = in.chars(Codec("UTF8"))
 
     // create a ReadChars so that Codec only needs to be specified once
     val readChars: ReadCharsResource[Reader] = in.reader(Codec.ISO8859)
-    val string2:String = readChars.slurpString
+    val string2:String = readChars.string
     val chars2: LongTraversable[Char] = readChars.chars
 
     // Finally you can delcare an implicit val once and all calls will implicitly use that codec
     implicit val codec = Codec.UTF8
 
-    val string3:String = in.slurpString
+    val string3:String = in.string
     val chars3: LongTraversable[Char] = in.chars
     val readChars2: ReadCharsResource[Reader] = in.reader
 
@@ -226,7 +226,7 @@ object BasicIO {
     // You can convert an InputStreamResource to a _ReadChars_ type if desired.  That means that the codec needs to be
     // defined just once.
     val someReader: ReadChars = url.reader(Codec.UTF8)
-    val consonants = url.slurpString.filterNot (c => "aeiou" contains c)
+    val consonants = url.string.filterNot (c => "aeiou" contains c)
 
     // ok now as bytes
     val (small, large) = url.byteArray partition (_ < 128)

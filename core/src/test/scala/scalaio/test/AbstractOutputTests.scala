@@ -45,7 +45,7 @@ trait AbstractOutputTests[InResource, OutResource] extends scalax.test.sugar.Ass
 
     output write DEFAULT_DATA
 
-    assertEquals(DEFAULT_DATA, input.slurpString)
+    assertEquals(DEFAULT_DATA, input.string)
   }
 
   @Test //@Ignore
@@ -56,7 +56,7 @@ trait AbstractOutputTests[InResource, OutResource] extends scalax.test.sugar.Ass
 
     output writeChars charSeq
 
-    assertEquals(DEFAULT_DATA, input.slurpString)
+    assertEquals(DEFAULT_DATA, input.string)
   }
 
   @Test //@Ignore
@@ -66,7 +66,7 @@ trait AbstractOutputTests[InResource, OutResource] extends scalax.test.sugar.Ass
 
     output writeChars DEFAULT_DATA.toList
 
-    assertEquals(DEFAULT_DATA, input.slurpString)
+    assertEquals(DEFAULT_DATA, input.string)
   }
 
 
@@ -76,12 +76,12 @@ trait AbstractOutputTests[InResource, OutResource] extends scalax.test.sugar.Ass
     val (input, output) = open()
 
     output writeStrings (DEFAULT_DATA :: DEFAULT_DATA :: DEFAULT_DATA :: Nil)
-    assertEquals(DEFAULT_DATA + DEFAULT_DATA + DEFAULT_DATA, input.slurpString)
+    assertEquals(DEFAULT_DATA + DEFAULT_DATA + DEFAULT_DATA, input.string)
 
     val (input2, output2) = open()
 
     output2 writeStrings (DEFAULT_DATA :: DEFAULT_DATA :: DEFAULT_DATA :: Nil, "-")
-    assertEquals(DEFAULT_DATA + "-" + DEFAULT_DATA + "-" + DEFAULT_DATA, input2.slurpString)
+    assertEquals(DEFAULT_DATA + "-" + DEFAULT_DATA + "-" + DEFAULT_DATA, input2.string)
   }
 
   @Test //@Ignore
@@ -92,7 +92,7 @@ trait AbstractOutputTests[InResource, OutResource] extends scalax.test.sugar.Ass
 
     testData.blocks().foreach(block => output.write(block))
 
-    assertEquals(testData.slurpString, input.slurpString)
+    assertEquals(testData.string, input.string)
   }
 
   @Test//(timeout=3000L)
@@ -107,7 +107,7 @@ trait AbstractOutputTests[InResource, OutResource] extends scalax.test.sugar.Ass
       out.write(line1)
       out.write(line2)
     }
-    assertEquals(line1+line2,input.slurpString)
+    assertEquals(line1+line2,input.string)
   }
   @Test
   def processor_style_writing {
@@ -127,9 +127,9 @@ trait AbstractOutputTests[InResource, OutResource] extends scalax.test.sugar.Ass
     } yield {
       out.write("-")
     }
-    assertTrue(in.slurpString.isEmpty)
+    assertTrue(in.string.isEmpty)
     process.execute()
-    assertEquals("1h-i-234", in.slurpString)
+    assertEquals("1h-i-234", in.string)
   }
 
   /**
@@ -159,7 +159,7 @@ trait AbstractOutputTests[InResource, OutResource] extends scalax.test.sugar.Ass
         val expected =
           if(truncatesUnderlyingSinkEachOpen) "hello world"
           else "whoop!hello world"
-        assertEquals(expected,in.slurpString)
+        assertEquals(expected,in.string)
       case _ => ()
     }
   }
@@ -176,9 +176,9 @@ trait AbstractOutputTests[InResource, OutResource] extends scalax.test.sugar.Ass
       next <- inp.next
       _ <- outp.write(next.toString)
     } yield {}
-    assertEquals("", in.slurpString)
+    assertEquals("", in.string)
     processor2.execute
-    assertEquals("start12345678910", in.slurpString)
+    assertEquals("start12345678910", in.string)
   }
   @Test
   def scalaIoException_On_Write_Error_by_default{

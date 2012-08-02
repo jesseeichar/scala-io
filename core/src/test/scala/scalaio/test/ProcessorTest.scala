@@ -909,7 +909,7 @@ trait ProcessorTest extends AssertionSugar {
 
     Await.result(p.futureExec(), 30 hours)
 
-    assertEquals(prepared.testData.mkString, out.slurpString)
+    assertEquals(prepared.testData.mkString, out.string)
   }
 
 }

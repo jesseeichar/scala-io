@@ -133,6 +133,6 @@ trait Input {
    * @param codec
    *          The codec representing the desired encoding of the characters
    */
-  def slurpString(implicit codec: Codec = Codec.default) = new String(byteArray, codec.name)
+  def string(implicit codec: Codec = Codec.default) = new String(byteArray, codec.name)
 
 }

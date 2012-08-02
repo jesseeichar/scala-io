@@ -35,7 +35,7 @@ object ReadWriteFiles {
 
     val file: FileOps =  Path("file")
     val result:Either[Throwable,String] = catching (classOf[NotFileException],
-                                          classOf[FileNotFoundException]) either { file.slurpString}
+                                          classOf[FileNotFoundException]) either { file.string}
 
     result match {
       case Left(error) => println("oops not a file maybe a directory: "+error.getMessage)

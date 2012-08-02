@@ -54,7 +54,7 @@ abstract class AbstractReadCharsTests extends scalax.test.sugar.AssertionSugar {
 
   @Test(timeout = 3000)
   def read_all_chars_into_String(): Unit = {
-    val read = readChars(TextNewLine).slurpString
+    val read = readChars(TextNewLine).string
     val expected = TEXT_VALUE
 
     assertEquals(expected, read)

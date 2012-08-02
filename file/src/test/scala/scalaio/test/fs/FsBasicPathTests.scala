@@ -195,10 +195,10 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
      xx.write("testing")
 
      assertTrue(xx.exists)
-     assertEquals(xx.slurpString, "testing")
+     assertEquals(xx.string, "testing")
 
      xx.write("newData")
-     assertEquals(xx.slurpString, "newData")
+     assertEquals(xx.string, "newData")
   }
   @Test //@Ignore
   def will_create_path_when_relative_parent_does_not_exist = {
@@ -207,7 +207,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
       path.write("testing")
 
       assertTrue(path.exists)
-      assertEquals(path.slurpString, "testing")
+      assertEquals(path.string, "testing")
     } finally {
       path.deleteIfExists(true)
     }
@@ -219,7 +219,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
     xx.write("hello")
 
     def assertContents(s:String) {
-      val read = Resource.fromInputStream(xx.toURL.openStream).slurpString
+      val read = Resource.fromInputStream(xx.toURL.openStream).string
       assertEquals(s, read)
     }
 
@@ -353,7 +353,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
     assertTrue(f1.nonExistent)
     assertTrue(otherpath.exists)
     assertArrayEquals(data.getBytes(codec.charSet), otherpath.byteArray)
-    assertEquals(data, otherpath.slurpString)
+    assertEquals(data, otherpath.string)
   }
 
 
@@ -370,8 +370,8 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
 
     assertTrue(f1.exists)
     assertTrue(otherpath.exists)
-    assertEquals(data, otherpath.slurpString)
-    assertEquals(data, f1.slurpString)
+    assertEquals(data, otherpath.string)
+    assertEquals(data, f1.string)
   }
 
   @Test //@Ignore
