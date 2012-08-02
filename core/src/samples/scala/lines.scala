@@ -48,8 +48,9 @@ object LinesExamples {
     import scalax.io._
     import Line.Terminators.Custom
 
-    val readChars:ReadChars = Resource.fromFile("file").reader
-    val lines = readChars.lines(Custom("**"))
+    val resource = Resource.fromFile("file")
+    // read each segment ending in ** but do not include **
+    val lines = resource.lines(terminator=Custom("**"), includeTerminator=false)
     println(lines.size)
   }
 }

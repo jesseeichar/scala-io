@@ -39,48 +39,127 @@ object Resources {
     }
 
   }
+  
   /**
-   * Several examples of creating Resources
+   * Create Resource from an Input Stream. Perform some conversions to obtain other types of Resources
    */
-  def createResources {
+  def inputStreamResource {
     import scalax.io._
     import scalax.io.managed._
     import java.io._
     import java.nio.channels.{FileChannel, ReadableByteChannel, WritableByteChannel, Channels}
     import java.net.URL
 
-    // see codec examples in scala io core for details on why there is an implicit codec here
-    implicit val codec = scalax.io.Codec.UTF8
-
-    // get various input streams, readers an channels
     val inputStream: InputStream = new URL("http://someurl.com").openStream
-    val in: InputStreamResource[InputStream] = Resource.fromInputStream(inputStream)
-    val readableChannel: Resource[ReadableByteChannel] = in.readableByteChannel
-    val reader: ReadCharsResource [Reader] = in.reader
 
-    // get various output streams and channels
+    // create a Resource object from an input stream.  It extends the Input Trait
+    val in: InputStreamResource[InputStream] = Resource.fromInputStream(inputStream)
+    // read a byte from input stream (although it is easier to use the Input API)
+    val value = in acquireFor { _.read }
+
+    // create a Resource object based on a ReadableByteChannel from the InputStreamResource
+    // This extends Input Trait.
+    // Why do this?  Some time one needs to send a ReadableByteChannel to a Java API
+    // This way one can make the API call in a managed way.
+    val readableChannel: Resource[ReadableByteChannel] = in.readableByteChannel
+    // call a Legacy API in a managed way:
+    object X {
+      def toString(channel:ReadableByteChannel) = channel.toString
+    }
+    println(readableChannel acquireFor X.toString)
+
+    // Similarly an InputStreamResource can be converted to a ReadCharsResource with an
+    // underlying Reader object as the resource.  It should be noted that ReadCharsResource
+    // extends the ReadChars Trait for reading lines, strings and characters
+    val reader: ReadCharsResource [Reader] = in.reader
+    // do something with reader like above
+  }
+  
+  /**
+   * Create Resource from an Output Stream. Perform some conversions to obtain other types of Resources
+   */
+  def outputStreamResource {
+     import scalax.io._
+     import scalax.io.managed._
+     import java.io._
+     import java.nio.channels.{FileChannel, ReadableByteChannel, WritableByteChannel, Channels}
+     import java.net.URL
+    
     val outputStream: FileOutputStream = new FileOutputStream("file")
+    
+    // create a resource from a FileOutputStream.  The Resource extends Output Trait
     val out: OutputStreamResource[OutputStream] = Resource.fromOutputStream(outputStream)
 
-    val writableChannel: Resource[WritableByteChannel] = out.writableByteChannel
+    // Convert the output resource to a Resource based on a WritableByteChannel.  The Resource extends Output Trait
+    val writableChannel: WritableByteChannelResource[WritableByteChannel] = out.writableByteChannel
+    
+    // Convert the output resource to a WriterResource which extends the WriteChars Trait and is based on a Writer
     val writer: WriterResource[Writer] = out.writer
+  }
+  /**
+   * Create Resource from an files and RandomAccessFiles.  These channels extend 
+   * Seekable Trait which is a subtrait of Input and Output Traits
+   */
+  def seekableByteChannelResource {
+     import scalax.io._
+     import scalax.io.managed._
+     import java.io._
+     import java.nio.channels.{FileChannel, ReadableByteChannel, WritableByteChannel, Channels}
+     import java.net.URL
 
-    // examples getting ByteChannels
-    // default is a read/write/create channel
-    val channel: SeekableByteChannelResource[SeekableByteChannel] = Resource.fromFile("file")
-    val channel2: SeekableByteChannelResource[SeekableByteChannel] =
-        Resource.fromRandomAccessFile(new RandomAccessFile("file","rw"))
-    val seekable: Seekable = channel2
-    val inOut: Input with Output = channel
+     // One way to create a SeekableByteChannel which is a Seekable object
+     val channel: SeekableByteChannelResource[SeekableByteChannel] = Resource.fromFile("file")
 
-    val channel3: ByteChannelResource[FileChannel] =
-      Resource.fromByteChannel(new RandomAccessFile("file","rw").getChannel)
-    val inOut2: Input with Output = channel2
+     // A second way to create a SeekableByteChannel which is a Seekable object
+     val channel2: SeekableByteChannelResource[SeekableByteChannel] =
+         Resource.fromRandomAccessFile(new RandomAccessFile("file","rw"))
 
-    val readableByteChannel = Channels.newChannel(new FileInputStream("file"))
-    val readChannel : ReadableByteChannelResource[ReadableByteChannel] =
-              Resource.fromReadableByteChannel(readableByteChannel)
-    val in2:Input = readChannel
+     // demonstrate that resources are Seekable and Input and Output objects
+     val seekable: Seekable = channel2
+     val inOut: Input with Output = channel
+
+     // It is important to create the Resource correctly.  The following has an underlying Resource
+     // of type FileChannel but it is not Seekable, it is just an Input and Output Subclass
+     val channel3: ByteChannelResource[FileChannel] =
+       Resource.fromByteChannel(new RandomAccessFile("file","rw").getChannel)
+     val inOut2: Input with Output = channel2
+     
+     // ByteChannels also have conversion methods to outputStream, inputStream, 
+     // reader, writer, etc...
+     val outputStreamResource = channel3.outputStream
+     channel2.writer
+     channel.inputStream
+     channel.readableByteChannel
+   }
+
+   /**
+    * Several examples of creating Resources
+    */
+   def readableByteChannelResources {
+     import scalax.io._
+     import scalax.io.managed._
+     import java.io._
+     import java.nio.channels.{FileChannel, ReadableByteChannel, WritableByteChannel, Channels}
+     import java.net.URL
+
+     // see codec examples in scala io core for details on why there is an implicit codec here
+     implicit val codec = scalax.io.Codec.UTF8
+
+     val readableByteChannel = Channels.newChannel(new FileInputStream("file"))
+     val readChannel : ReadableByteChannelResource[ReadableByteChannel] =
+               Resource.fromReadableByteChannel(readableByteChannel)
+     val in2:Input = readChannel
+   }
+
+  /**
+   * Several examples of creating Resources
+   */
+  def writableByteChannelResources {
+    import scalax.io._
+    import scalax.io.managed._
+    import java.io._
+    import java.nio.channels.{FileChannel, ReadableByteChannel, WritableByteChannel, Channels}
+    import java.net.URL
 
     val writableByteChannel = Channels.newChannel(new FileOutputStream("file"))
     val writeChannel : WritableByteChannelResource[WritableByteChannel] =

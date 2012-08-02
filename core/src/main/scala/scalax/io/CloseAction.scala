@@ -107,7 +107,7 @@ trait CloseAction[-A] {
     try {
       closeImpl(resource)
     } catch {
-      case e => List(e)
+      case e: Throwable => List(e)
     }
   }
 }

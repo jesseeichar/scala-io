@@ -12,7 +12,7 @@ object BasicIO {
    * The right way to convert java IO objects to Scala IO objects
    */
   def javaToScalaRightWay {
-    import scalax.io.Resource
+        import scalax.io.Resource
     val in = Resource.fromReader(new StringReader("hello"))
 
     val numVowels = in.chars.filter("aeiou" contains _).size
@@ -63,7 +63,7 @@ object BasicIO {
     // Note that in these example streams are closed automatically
     // Also note that normally a constructed stream is not passed to factory method because most factory methods are by-name parameters (=> R)
     // this means that the objects here can be reused without worrying about the stream being previously emptied
-    val url = new URL("www.scala-lang.org")
+    val url = new URL("http://www.scala-lang.org")
 
     val input:Input = Resource.fromInputStream(url.openStream())
 
@@ -102,19 +102,19 @@ object BasicIO {
   def basicOutput {
     import scalax.io._
     import scalax.io.Resource
-    import java.io.{
-      ByteArrayOutputStream,FileOutputStream,
-      PrintStream, OutputStreamWriter
-    }
+    import java.io.FileOutputStream
 
-    // Note: The file API is nearly finished allowing one to write directly to files without the
-    // cumbersome new FileOutputStream shown below.  This is the "pure" Scala IO solution
-    Resource.fromOutputStream(new FileOutputStream("scala.html")) write "data".getBytes()
-    Resource.fromOutputStream(new FileOutputStream("scala.html")) write Array[Byte](1,2,3)
+    val out = Resource.fromOutputStream(new FileOutputStream("daily-scala.out"))
+    
+    // Write some bytes to the output object
+    // each write will typically overwrite the previous data
+    // the processing API can be used is you do not want this behaviour
+    out write "data".getBytes()
+    out write Array[Byte](1,2,3)
 
     // strings and bytes can both be written to Output objects but strings need a Codec
     // for encoding the strings.  As usual the codec can be explicit or implicitly declared
-    Resource.fromOutputStream(new ByteArrayOutputStream()).write("howdy")(Codec.UTF8)
+    out.write("howdy")(Codec.UTF8)
 
     implicit val defaultCodec: Codec = Codec.UTF8
 
@@ -123,22 +123,7 @@ object BasicIO {
     // cannot be created so a WriteChars object is created
     // WriteChars have the benefit of not needing to have a codec declared since the underlying writer
     // takes care of encoding
-    Resource.fromWriter(new OutputStreamWriter(new ByteArrayOutputStream())).write("howdy")
-
-
-    Resource.fromOutputStream(new PrintStream(new ByteArrayOutputStream())).writer.write("howdy")
-
-    // Channels can also be wrapped in Resource objects and accessed as normal Input/Output objects
-    val resource = Resource.fromWritableByteChannel(new FileOutputStream("file").getChannel)
-  }
-
-  /**
-   * Demonstration of how to convert Input/Output to buffered counterparts
-   */
-  def bufferedIO {
-
-    // The next version will have a new strategy for buffering.
-    ()
+    out.write("howdy")
   }
 
   /**
