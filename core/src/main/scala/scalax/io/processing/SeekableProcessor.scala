@@ -360,5 +360,5 @@ class OpenSeekable private[processing] (channel: SeekableByteChannel, resourceCo
    * @param codec
    *          The codec representing the desired encoding of the characters
    */
-  def slurpString(implicit codec: Codec = Codec.default) = factory(Some(asSeekable.slurpString(codec)))
+  def string(implicit codec: Codec = Codec.default) = factory(Some(asSeekable.string(codec)))
 }

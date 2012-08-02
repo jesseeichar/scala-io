@@ -56,7 +56,7 @@ abstract class AbstractSeekableTests[Resource] extends AbstractInputTests with A
 
     seekable.patch(1, "x", OverwriteSome(1))(Codec.ISO8859)
 
-    assertEquals("axc", seekable.slurpString)
+    assertEquals("axc", seekable.string)
   }
 
   private def testPatchString(msg: String, from: Int, data: String, length: Option[Int]) = {
@@ -72,7 +72,7 @@ abstract class AbstractSeekableTests[Resource] extends AbstractInputTests with A
       case Some(length) => seekable.patch(from, data, OverwriteSome(length))
       case None => seekable.patch(from, data, OverwriteAll)
     }
-    assertEquals(msg, expected, seekable.slurpString)
+    assertEquals(msg, expected, seekable.string)
   }
 
   @Test //@Ignore
@@ -81,7 +81,7 @@ abstract class AbstractSeekableTests[Resource] extends AbstractInputTests with A
 
     seekable.patch(1, "x".getBytes(UTF8.name).toIterator, OverwriteAll)
 
-    assertEquals("axc", seekable.slurpString)
+    assertEquals("axc", seekable.string)
   }
 
   @Test //@Ignore
@@ -148,7 +148,7 @@ abstract class AbstractSeekableTests[Resource] extends AbstractInputTests with A
 
     def test[T](datatype: String, f: (Seekable, Long, Array[Byte], Overwrite) => T) = {
       val seekable = openSeekable()
-      assertEquals(TEXT_VALUE, seekable.slurpString)
+      assertEquals(TEXT_VALUE, seekable.string)
 
       val expected = lengthInChars match {
         case None => TEXT_VALUE.getBytes(UTF8.name) patch (from, data, data.size)
@@ -178,7 +178,7 @@ abstract class AbstractSeekableTests[Resource] extends AbstractInputTests with A
     val seekable = openSeekable()
     val expected = TEXT_VALUE + data
     seekable.append(data)
-    assertEquals(expected, seekable.slurpString)
+    assertEquals(expected, seekable.string)
   }
 
   @Test //@Ignore
@@ -189,13 +189,13 @@ abstract class AbstractSeekableTests[Resource] extends AbstractInputTests with A
       val seekable = openSeekable()
       val expected = TEXT_VALUE + (data mkString sep)
       seekable.appendStrings(data, sep)
-      assertEquals(expected, seekable.slurpString)
+      assertEquals(expected, seekable.string)
     }
 
     val seekable = openSeekable()
     val expected = TEXT_VALUE + (data mkString "")
     seekable.appendStrings(data)
-    assertEquals(expected, seekable.slurpString)
+    assertEquals(expected, seekable.string)
 
     test("123")
     test(",")
@@ -206,7 +206,7 @@ abstract class AbstractSeekableTests[Resource] extends AbstractInputTests with A
     val seekable = openSeekable()
     val expected = TEXT_VALUE take 2
     seekable.truncateString(2)
-    assertEquals(expected, seekable.slurpString)
+    assertEquals(expected, seekable.string)
   }
 
   @Test //@Ignore
@@ -214,12 +214,12 @@ abstract class AbstractSeekableTests[Resource] extends AbstractInputTests with A
     val seekable = openSeekable()
     val expected = TEXT_VALUE take 2
     seekable.truncate((UTF8 encode expected)size)
-    assertEquals(expected, seekable.slurpString)
+    assertEquals(expected, seekable.string)
 
     seekable.truncate(0)
-    assertEquals("", seekable.slurpString)
+    assertEquals("", seekable.string)
     seekable.append("more")
-    assertEquals("more", seekable.slurpString)
+    assertEquals("more", seekable.string)
 
   }
 
@@ -235,7 +235,7 @@ abstract class AbstractSeekableTests[Resource] extends AbstractInputTests with A
         case 1 => seekable.append(bytes.toList)
         case 2 => seekable.append(bytes.toIterator)
       }
-      assertEquals("append " + _type, expected, seekable.slurpString)
+      assertEquals("append " + _type, expected, seekable.string)
     }
     0 to 2 foreach test
   }
@@ -262,7 +262,7 @@ abstract class AbstractSeekableTests[Resource] extends AbstractInputTests with A
           opened.write('_')
         }
         assertEquals(2, closes)
-        assertEquals("hello_world", seekable.slurpString)
+        assertEquals("hello_world", seekable.string)
 
         closes = 0
         for{
@@ -274,7 +274,7 @@ abstract class AbstractSeekableTests[Resource] extends AbstractInputTests with A
           _ <- processor.write('_')
         } ()
         assertEquals(1, closes)
-        assertEquals("world_hello", seekable.slurpString)
+        assertEquals("world_hello", seekable.string)
 
       case _ => ()
     }
@@ -296,21 +296,21 @@ abstract class AbstractSeekableTests[Resource] extends AbstractInputTests with A
           opened.truncate(0)
           opened.write(data)
 
-          assertEquals(data, opened.slurpString)
+          assertEquals(data, opened.string)
 
           val pos = opened.chars.indexOfSlice("wonderful")
           opened.patch(pos,"fantastic", OverwriteSome("wonderful".size))
 
-          assertEquals("it is a fantastic world", opened.slurpString)
+          assertEquals("it is a fantastic world", opened.string)
 
           val worldPos = opened.bytes.indexOfSlice("world".getBytes(Codec.UTF8.charSet))
           assertEquals("it is a fantastic world".getBytes(Codec.UTF8.charSet).indexOfSlice("world".getBytes(Codec.UTF8.charSet)), worldPos)
           opened.position = worldPos
           opened.write("place to be")
-          assertEquals(expectedEnd, opened.slurpString)
+          assertEquals(expectedEnd, opened.string)
         }
         assertEquals(1, closes)
-        assertEquals(expectedEnd, seekable.slurpString)
+        assertEquals(expectedEnd, seekable.string)
       case _ => ()
     }
   }
@@ -387,7 +387,7 @@ abstract class AbstractSeekableTests[Resource] extends AbstractInputTests with A
     assertEquals(0, closes)
     assertCorrectOpens(lines.force)
 
-    assertCorrectOpens(seekable.slurpString())
+    assertCorrectOpens(seekable.string())
     assertCorrectOpens(seekable.write("hi"))
 
 

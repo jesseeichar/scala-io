@@ -36,10 +36,10 @@ class InputStreamResourceTest extends AssertionSugar with IOSugar {
   def convert_to_reader_should_respect_codec {
     val data = "\u00E0"
     def test(inResource:InputResource[_]) {
-      assertEquals(data, inResource.reader(codec).slurpString)
-      assertEquals(2, inResource.reader(Codec.ISO8859).slurpString.size)
-      assertEquals(data, inResource.readableByteChannel.reader(codec).slurpString)
-      assertEquals(2, inResource.readableByteChannel.reader(Codec.ISO8859).slurpString.size)
+      assertEquals(data, inResource.reader(codec).string)
+      assertEquals(2, inResource.reader(Codec.ISO8859).string.size)
+      assertEquals(data, inResource.readableByteChannel.reader(codec).string)
+      assertEquals(2, inResource.readableByteChannel.reader(Codec.ISO8859).string.size)
 
       assertEquals(data, inResource.chars(codec).mkString)
       assertEquals(2, inResource.chars(Codec.ISO8859).mkString.size)
@@ -91,7 +91,7 @@ class InputStreamResourceTest extends AssertionSugar with IOSugar {
     assertEquals(source, chars)
 
     val in3 = new InputStreamCloseCounter(source.inputStream)
-    val string = in3.asInput.slurpString
+    val string = in3.asInput.string
     assertEquals(1,in3.closes)
     assertEquals(source, string)
   }

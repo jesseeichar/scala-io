@@ -68,6 +68,6 @@ trait ReadChars {
    * Loads all the characters into memory. There is no protection against
    * loading very large files/amounts of data.
    */
-  def slurpString = chars.mkString
+  def string = chars.mkString
 
 }

@@ -48,7 +48,7 @@ class ResourceTest {
     val resource = Resource.fromFile(file.getAbsolutePath)
     val bytes = resource.byteArray
     assertArrayEquals(dataAsBytes,bytes)
-    assertEquals(data,resource.slurpString)
+    assertEquals(data,resource.string)
   }
 
 
@@ -91,12 +91,12 @@ class ResourceTest {
     def testInReuse(fileResource:InputResource[_]) {
 
       val reader = fileResource.reader
-      reader.slurpString
-      reader.slurpString
+      reader.string
+      reader.string
 
       val in = fileResource.inputStream
-      in.slurpString
-      in.slurpString
+      in.string
+      in.string
     }
 
     testOutReuse(Resource.fromFile(file))

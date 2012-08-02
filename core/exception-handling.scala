@@ -30,7 +30,7 @@ object ExceptionHandling {
     }
 
     // after creating a resource assign context object to the Resource
-    Resource.fromFile("someFile").updateContext(context).slurpString
+    Resource.fromFile("someFile").updateContext(context).string
 
     // Remember Resources are immutable, so a new instance is created by updateContext
     // the following will not work:

@@ -163,7 +163,7 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
 
   @Test(timeout = 3000) //@Ignore
   def read_all_chars_into_String(): Unit = {
-    val read = input(TextNewLine).slurpString(UTF8)
+    val read = input(TextNewLine).string(UTF8)
 
     val expected = TEXT_VALUE
 
@@ -317,8 +317,8 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
       intercept[MyException](input.blocks(Some(1000000)).foreach(_ => ()))
       intercept[MyException](input.blocks(Some(2)).force)
       intercept[MyException](input.byteArray)
-      intercept[MyException](input.slurpString())
-      intercept[MyException](input.slurpString(Codec.ISO8859))
+      intercept[MyException](input.string())
+      intercept[MyException](input.string(Codec.ISO8859))
       intercept[MyException](input.bytes.foreach(_ => ()))
       intercept[MyException](input.bytes.force)
       intercept[MyException](input.bytesAsInts.force)
@@ -364,6 +364,6 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
     assertCorrectOpens(in.copyDataTo(Resource.fromOutputStream(new ByteArrayOutputStream())))
     assertCorrectOpens(in.lines()(Codec.UTF8).force)
     assertCorrectOpens(in.lines()(Codec.UTF8).headOption)
-    assertCorrectOpens(in.slurpString())
+    assertCorrectOpens(in.string())
   }
 }
