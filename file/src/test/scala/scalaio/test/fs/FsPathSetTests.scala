@@ -15,6 +15,7 @@ import scalax.file.ramfs.RamFileSystem
 import scalaio.test.Node
 import scalaio.test.AbstractPathSetTests
 import scalax.file.PathSet
+import scalax.file.PathMatcher
 
 abstract class FsPathSetTests extends scalax.test.sugar.AssertionSugar with AbstractPathSetTests with Fixture {
     protected def fixtures(depth:Int=4) : (Path, Node) = fixture.tree(depth)
@@ -200,4 +201,24 @@ abstract class FsPathSetTests extends scalax.test.sugar.AssertionSugar with Abst
     assertTrue(andChildren contains (root / "z" / "y"))
   }
 
+  def match_path_name {
+    def doAssertion(StartsWithH: PathMatcher[Path]) {
+      fixture.fs("a") / "b" / "c" / "Hit" match {
+        case StartsWithH(path) => ()
+        case _ => fail("should have matched path")
+      }
+      fixture.fs("Hit") match {
+        case StartsWithH(path) => ()
+        case _ => fail("should have matched path")
+      }
+      fixture.fs("a") / "b" / "c" / "xHit" match {
+        case StartsWithH(path) => fail("should not have matched path")
+        case _ => ()
+      }
+    }
+    doAssertion(PathMatcher.RegexNameMatcher("H.+"))
+    doAssertion(fixture.fs.matcher("(.*/)?H.+", PathMatcher.StandardSyntax.REGEX))
+    doAssertion(PathMatcher.GlobNameMatcher("H*"))
+
+  }
 }
