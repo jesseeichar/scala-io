@@ -10,12 +10,12 @@ import java.nio.{ ByteBuffer => NioByteBuffer }
 import java.nio.ByteBuffer
 import scala.annotation.tailrec
 import scalax.io.extractor.FileChannelExtractor
-import scalax.io.nio.SeekableFileChannel
 import java.io.Closeable
 import scalax.io.support.FileUtils
 import java.nio.channels.Channels
 import java.io.ByteArrayOutputStream
 import scalax.io.extractor.FileChannelExtractor
+import java.nio.channels.SeekableByteChannel
 
 private[traversable] class ReadableByteChannelIterator(
   protected val sizeFunc: () => Option[Long],

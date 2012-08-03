@@ -3,7 +3,6 @@ package scalaio.test
 import org.junit.Assert._
 import org.junit.rules.TemporaryFolder
 import org.junit.{After, Before, Rule, Test}
-import scalax.io.nio.SeekableFileChannel
 import scalax.io._
 import java.nio.channels.ByteChannel
 import java.io._

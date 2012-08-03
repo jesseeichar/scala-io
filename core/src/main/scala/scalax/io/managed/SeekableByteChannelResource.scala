@@ -5,6 +5,7 @@ import scalax.io.ResourceAdapting.{ChannelInputStreamAdapter, ChannelWriterAdapt
 import java.io.{OutputStream, Reader, Writer, InputStream}
 import java.nio.channels.{ReadableByteChannel, WritableByteChannel}
 import StandardOpenOption._
+import java.nio.channels.SeekableByteChannel
 
 /**
  * A ManagedResource for accessing and using SeekableByteChannels.  Class can be created using the [[scalax.io.Resource]] object.

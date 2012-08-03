@@ -17,7 +17,6 @@ import java.nio.channels.{
 import java.io._
 import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
-import nio.SeekableFileChannel
 import java.net.{URLConnection, URL}
 import CloseAction._
 import StandardOpenOption._
@@ -26,6 +25,7 @@ import collection.immutable.List._
 import util.control.Exception
 import extractor._
 import support.FileUtils
+import java.nio.channels.SeekableByteChannel
 
 trait OpenedResource[+R] {
   def get:R
@@ -488,14 +488,14 @@ object Resource {
    *
    * @return a SeekableByteChannelResource
    */
-  def fromRandomAccessFile(opener: => RandomAccessFile) : SeekableByteChannelResource[SeekableFileChannel] = {
+  def fromRandomAccessFile(opener: => RandomAccessFile) : SeekableByteChannelResource[FileChannel] = {
     def open = (opts:Seq[OpenOption]) => support.FileUtils.openChannel(opener,opts)
     def sizeFunc = () => allCatch.opt{
       resource.managed(opener).acquireAndGet {
           _.length match {case len if len > -1 => len}
       }
     }
-    new SeekableByteChannelResource[SeekableFileChannel](open, new ResourceContext{override def descName=PrefixedName("RandomAccessFile")},Noop, sizeFunc,Some(ReadWrite))
+    new SeekableByteChannelResource[FileChannel](open, new ResourceContext{override def descName=PrefixedName("RandomAccessFile")},Noop, sizeFunc,Some(ReadWrite))
   }
 
   /**
@@ -538,10 +538,10 @@ object Resource {
    * @return a SeekableByteChannelResource
    * @throws java.io.IOException if file does not exist
    */
-  def fromFile(file:File): SeekableByteChannelResource[SeekableByteChannel] = {
+  def fromFile(file:File): SeekableByteChannelResource[FileChannel] = {
     def open = (opts:Seq[OpenOption]) => support.FileUtils.openChannel(file,opts)
     def sizeFunc = () => allCatch.opt{file.length}
-    new SeekableByteChannelResource[SeekableFileChannel](open,new ResourceContext{override def descName=KnownName(file.getPath)},Noop,sizeFunc, None)
+    new SeekableByteChannelResource[FileChannel](open,new ResourceContext{override def descName=KnownName(file.getPath)},Noop,sizeFunc, None)
   }
   /**
    * Create a file from string then create a Seekable Resource from a File
@@ -551,7 +551,7 @@ object Resource {
    * @return a SeekableByteChannelResource
    * @throws java.io.IOException if file does not exist
    */
-  def fromFile(file:String): SeekableByteChannelResource[SeekableByteChannel] =
+  def fromFile(file:String): SeekableByteChannelResource[FileChannel] =
     fromFile(new File(file))
 
   /**

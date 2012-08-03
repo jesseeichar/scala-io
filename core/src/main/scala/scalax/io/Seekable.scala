@@ -16,6 +16,7 @@ import scala.annotation._
 import collection.mutable.{ArrayOps, WrappedArray}
 import java.nio.channels.{ByteChannel, WritableByteChannel}
 import java.io.File
+import java.nio.channels.SeekableByteChannel
 
 /**
  * A strategy trait used with the Seekable.patch to control how data is
@@ -365,7 +366,7 @@ trait Seekable extends Input with Output {
         channel read buffers._1
         buffers._1.flip
 
-        channel.write(buffers._2, channel.position - bytes.size)
+        nio.ChannelUtils.write(channel, buffers._2, channel.position - bytes.size)
 
         buffers = buffers.swap
       }
@@ -436,9 +437,9 @@ trait Seekable extends Input with Output {
         if(length < done + buf.capacity()) buf.limit((length - done).toInt)
 
         buf.clear()
-        val read = channel.read(buf, srcIndex + done)
+        val read = nio.ChannelUtils.read(channel, buf, srcIndex + done)
         buf.flip()
-        val written = channel.write(buf, destIndex + done)
+        val written = nio.ChannelUtils.write(channel, buf, destIndex + done)
       }
 
       (0 to length by buf.capacity) foreach write

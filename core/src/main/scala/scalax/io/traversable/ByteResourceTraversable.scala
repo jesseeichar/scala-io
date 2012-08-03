@@ -7,8 +7,8 @@ import java.nio.channels.Channels
 import java.nio.channels.ReadableByteChannel
 import scala.Option.option2Iterable
 import scalax.io.extractor.FileChannelExtractor
-import scalax.io.nio.SeekableFileChannel
 import scala.reflect.ClassTag
+import java.nio.channels.SeekableByteChannel
 
 /**
  * resourceOpener must either be a InputStream or a ReadableByteChannel (or subclass).  Anything else will throw an exception
@@ -28,7 +28,7 @@ protected[io] class ByteResourceTraversable(
     val resource = resourceOpener
     resource.get match {
       case FileChannelExtractor(seekable) if allowSeekable =>
-        new SeekableByteChannelIterator(sizeFunc, new SeekableFileChannel(seekable), resource, start, end)
+        new SeekableByteChannelIterator(sizeFunc, seekable, resource, start, end)
       case seekable: SeekableByteChannel if allowSeekable =>
         new SeekableByteChannelIterator(sizeFunc, seekable, resource, start, end)
       case stream: InputStream =>

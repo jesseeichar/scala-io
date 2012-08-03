@@ -6,9 +6,8 @@ import java.io.RandomAccessFile
 import java.io.Reader
 import java.io.Writer
 import java.net.URL
-
-import scalax.io.nio.SeekableFileChannel
 import java.nio.channels.{ReadableByteChannel, FileChannel, WritableByteChannel, Channels}
+import java.nio.channels.SeekableByteChannel
 
 object JavaConverters {
   class AsInput(op: => Input) {
@@ -329,7 +328,7 @@ object JavaConverters {
      * Converts a FileChannel to an Seekable object
      */
     implicit object FileChannelConverter extends AsSeekableConverter[FileChannel]{
-      def toSeekable(channel: FileChannel) = Resource.fromSeekableByteChannel(new SeekableFileChannel(channel))
+      def toSeekable(channel: FileChannel) = Resource.fromSeekableByteChannel(channel)
     }
     /**
      * Converts a SeekableByteChannel to an Seekable object

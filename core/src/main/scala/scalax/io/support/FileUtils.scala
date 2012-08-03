@@ -3,7 +3,6 @@ package support
 
 import StandardOpenOption._
 import java.nio.channels.FileChannel
-import nio.SeekableFileChannel
 import java.io.{IOException, FileOutputStream, RandomAccessFile, File}
 import java.nio.channels.ReadableByteChannel
 import java.nio.channels.WritableByteChannel
@@ -25,8 +24,7 @@ object FileUtils {
     })
   }
 
-  def openChannel(raf: RandomAccessFile, openOptions: Seq[OpenOption]): SeekableFileChannel = {
-    new SeekableFileChannel({
+  def openChannel(raf: RandomAccessFile, openOptions: Seq[OpenOption]): FileChannel = {
       if (openOptions contains DeleteOnClose)
         throw new UnsupportedOperationException("DeleteOnClose is not supported on FileChannels pre Java 7 implementations.")
       if ((openOptions contains Truncate) && (openOptions exists {
@@ -37,11 +35,9 @@ object FileUtils {
         raf.seek(raf.length)
 
       raf.getChannel
-    })
-
   }
 
-  def openChannel(jfile:File, openOptions: Seq[OpenOption]):SeekableFileChannel= {
+  def openChannel(jfile:File, openOptions: Seq[OpenOption]): FileChannel= {
     val (_, options) = preOpen(jfile,openOptions,false)
     if (options contains DeleteOnClose) {
      throw new UnsupportedOperationException("DeleteOnClose is not supported on FileChannels pre Java 7 implementations.")

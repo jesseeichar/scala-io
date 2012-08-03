@@ -4,6 +4,7 @@
  * the strategies that can be used to obtain the underlying Java resource for the Java library.
  */
 import scalax.io.managed.SeekableByteChannelResource
+import java.nio.channels.SeekableByteChannel
 object JavaInterop {
 
   /**

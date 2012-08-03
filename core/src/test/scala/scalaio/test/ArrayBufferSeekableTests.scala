@@ -7,6 +7,7 @@ import scalax.io._
 import scalax.io.managed.SeekableByteChannelResource
 import java.nio.ByteBuffer
 import org.junit.Assert._
+import java.nio.channels.SeekableByteChannel
 
 class OpenableArrayBufferSeekableTest extends AbstractSeekableTests[SeekableByteChannel] with SeekableTestUtils[SeekableByteChannel] {
   var buffer = ArrayBuffer[Byte]()
@@ -36,13 +37,9 @@ object ExplodingSeekable extends ArrayBufferSeekableChannel(ArrayBuffer[Byte]())
 
   override def position(newPosition: Long) = throw new Error("Boom")
 
-  override def read(dst: ByteBuffer, pos: Long) = throw new Error("Boom")
-
-  override def write(src: ByteBuffer, pos: Long) = throw new Error("Boom")
-
   override def write(src: java.nio.ByteBuffer): Int = throw new Error("Boom")
 
-  override def truncate(size: Long): scalax.io.SeekableByteChannel = throw new Error("Boom")
+  override def truncate(size: Long): SeekableByteChannel = throw new Error("Boom")
 }
 
 class SeekableArrayBufferSeekableTest extends AbstractSeekableTests[SeekableByteChannel] with SeekableTestUtils[SeekableByteChannel] {

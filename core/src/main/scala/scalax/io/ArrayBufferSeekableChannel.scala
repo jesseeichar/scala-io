@@ -16,7 +16,7 @@ import scalax.io.StandardOpenOption._
 class ArrayBufferSeekableChannel(data:ArrayBuffer[Byte],
                                  openOptions: OpenOption*)
                                 (forceDeleteAction: (ArrayBufferSeekableChannel)=>Unit = _ => (),
-                                 closeAction:(ArrayBufferSeekableChannel) => Unit = _ => ()) extends SeekableByteChannel {
+                                 closeAction:(ArrayBufferSeekableChannel) => Unit = _ => ()) extends java.nio.channels.SeekableByteChannel {
 
   var closed = false
   var position = 0L
@@ -41,7 +41,7 @@ class ArrayBufferSeekableChannel(data:ArrayBuffer[Byte],
 
     traversable.size
   }
-  override def truncate (size: Long):scalax.io.SeekableByteChannel = {
+  override def truncate (size: Long):java.nio.channels.SeekableByteChannel = {
     data.reduceToSize(size.toInt)
     position = min(data.size, size)
     this
@@ -57,7 +57,7 @@ class ArrayBufferSeekableChannel(data:ArrayBuffer[Byte],
       -1
     }
   }
-  override def position (newPosition: Long):ArrayBufferSeekableChannel = {
+  override def position (newPosition: Long):java.nio.channels.SeekableByteChannel = {
     // TODO maybe new exception?
     if(newPosition > Int.MaxValue) throw new IOException(newPosition + " is larger than a Ram file can be");
     position = newPosition.toInt

@@ -5,6 +5,7 @@ import org.junit.{ After, Before }
 import scalax.io._
 import java.io.{IOException, RandomAccessFile, File}
 import scalax.test.sugar.AssertionSugar
+import java.nio.channels.SeekableByteChannel
 
 abstract class AbstractFileSeekableTest extends AbstractSeekableTests[SeekableByteChannel] with SeekableTestUtils[SeekableByteChannel] {
   var folder: TemporaryFolder = _
@@ -82,7 +83,8 @@ class StraightCreationSeekableTest extends AbstractFileSeekableTest {
     folder.create()
     def channel = {
       openFunction()
-      SeekableByteChannel.fromFile(file.getAbsolutePath)
+      val path = file.getAbsolutePath
+      (opts:Seq[OpenOption]) => support.FileUtils.openChannel(new java.io.File(path), opts)
     }
     Resource.fromSeekableByteChannel(channel).addCloseAction(closeAction)
   }

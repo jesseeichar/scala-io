@@ -108,10 +108,10 @@ object Resources {
      import java.net.URL
 
      // One way to create a SeekableByteChannel which is a Seekable object
-     val channel: SeekableByteChannelResource[SeekableByteChannel] = Resource.fromFile("file")
+     val channel: SeekableByteChannelResource[FileChannel] = Resource.fromFile("file")
 
      // A second way to create a SeekableByteChannel which is a Seekable object
-     val channel2: SeekableByteChannelResource[SeekableByteChannel] =
+     val channel2: SeekableByteChannelResource[FileChannel] =
          Resource.fromRandomAccessFile(new RandomAccessFile("file","rw"))
 
      // demonstrate that resources are Seekable and Input and Output objects

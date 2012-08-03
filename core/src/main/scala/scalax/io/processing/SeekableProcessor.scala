@@ -4,6 +4,7 @@ package processing
 import Line.Terminators._
 import java.nio.channels.Channels
 import java.nio.ByteBuffer
+import java.nio.channels.SeekableByteChannel
 
 /**
  * A processor that opens an Output Resource allowing for batch processing.  In other words it permits
