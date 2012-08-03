@@ -36,7 +36,7 @@ class ProcessorAsyncTest extends AssertionSugar{
     }
   }
 
-  @Test(timeout=1000L)
+  @Test(timeout=30000L)
   def processor_future_should_complete {
 
     var success = false
@@ -45,14 +45,17 @@ class ProcessorAsyncTest extends AssertionSugar{
     implicit val executionContext = scalax.io.executionContext
     
     future.onComplete{
-      case Left(e) => success = false
+      case Left(e) => 
+        println(e)
+        success = false
       case Right(r) => success = true
     }
     
     while(!future.isCompleted) {
       Thread.sleep(30);
     }
-
+    
+    assertTrue(future.isCompleted)
     assertTrue(success)
   }
 }

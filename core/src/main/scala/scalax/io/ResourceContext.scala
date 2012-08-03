@@ -106,8 +106,8 @@ trait ResourceContext {
    * @param readOnly if the use of the buffer will be readonly on the channel provided
    */
   def createNioBuffer(bufferSize: Int, channel: Option[Channel], readOnly: Boolean): java.nio.ByteBuffer = channel match {
-    case Some(channel: FileChannel) if readOnly && channel.size <= bufferSize =>
-      channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size)
+//    case Some(channel: FileChannel) if readOnly && channel.size <= bufferSize =>
+//      channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size)
     case _ => ByteBuffer.allocateDirect(bufferSize)
   }
   /**

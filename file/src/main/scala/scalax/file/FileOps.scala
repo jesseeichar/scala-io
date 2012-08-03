@@ -12,7 +12,7 @@ import java.io.{
     InputStream, OutputStream
 }
 import java.nio.channels.{
-    ByteChannel, FileChannel
+    ByteChannel, FileChannel, SeekableByteChannel
 }
 import scalax.io._
 import processing.SeekableProcessor
@@ -20,7 +20,7 @@ import scalax.io.managed._
 import scala.collection.Traversable
 import scalax.io.StandardOpenOption._
 import scalax.io.Resource._
-import scalax.io.{Codec, SeekableByteChannel, OpenOption, Seekable, LongTraversable}
+import scalax.io.{Codec, OpenOption, Seekable, LongTraversable}
 import java.nio.ByteBuffer
 
 /**

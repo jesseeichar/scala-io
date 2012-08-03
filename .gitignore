@@ -9,3 +9,10 @@ project/plugins/src_managed/
 derby.log
 .idea
 *.iml
+.history
+.cache
+.classpath
+.externalToolBuilders
+.project
+.scala_dependencies
+.settings/
