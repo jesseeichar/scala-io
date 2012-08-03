@@ -36,18 +36,21 @@ class ProcessorAsyncTest extends AssertionSugar{
     }
   }
 
-  @Test(timeout=1000L)
+  @Test(timeout=30000L)
   def processor_future_should_complete {
 
     var success = false
     val future = (factory{Thread.sleep(10); Some(1)}).future.onComplete{
-      case Left(e) => success = false
+      case Left(e) => 
+        println(e)
+        success = false
       case Right(r) => success = true
     }
     while(!future.isCompleted) {
       Thread.sleep(30);
     }
-
+    
+    assertTrue(future.isCompleted)
     assertTrue(success)
   }
 }

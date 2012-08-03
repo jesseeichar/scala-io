@@ -12,9 +12,9 @@ package defaultfs
 import scalax.io._
 import scalax.io.managed._
 import StandardOpenOption._
-import scalax.io.nio.SeekableFileChannel
 import scalax.io.support.FileUtils._
 import java.io.{FileInputStream, File => JFile}
+import java.nio.channels.FileChannel
 
 /**
  * <b>Not part of API.</b>
@@ -42,14 +42,14 @@ private[file] trait DefaultFileOps {
   override def channel(openOptions: OpenOption*) =
     Resource.fromSeekableByteChannel(openChannel(jfile,openOptions)).updateContext(fileSystem.context)
 
-  override def fileChannel(openOptions: OpenOption*):Some[SeekableByteChannelResource[SeekableFileChannel]] =
+  override def fileChannel(openOptions: OpenOption*):Some[SeekableByteChannelResource[FileChannel]] =
     Some(Resource.fromSeekableByteChannel(openChannel(jfile,openOptions)).updateContext(fileSystem.context))
 
 
   def withLock[R](start: Long = 0, size: Long = -1, shared: Boolean = false, context:ResourceContext)(block: Seekable => R): Option[R] = {
     val self = this
     fileChannel().get.acquireAndGet{ fc =>
-      Option(fc.self.tryLock(start,size,shared)).map{_ => block(self)}
+      Option(fc.tryLock(start,size,shared)).map{_ => block(self)}
     }
   }
 }
