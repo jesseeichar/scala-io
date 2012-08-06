@@ -8,47 +8,32 @@
 
 package scalax.io
 
-/**
- * A flag interface for indicating that the object
- * represents a filesystem dependent option for opening
- * a file. Typically several options are declared together.
- *
- * The StandardOpenOption object defines
- * several such options that are supported by most
- * filesystems.  The filesystem should define which options
- * are accepted
- *
- * @author  Jesse Eichar
- * @since   1.0
- */
-trait OpenOption
-
+import java.nio.file.{StandardOpenOption => JStandardOpenOption}
 /**
  * Several options that are supported by most filesystems.
  *
  * @author  Jesse Eichar
  * @since   1.0
  */
-object StandardOpenOption extends Enumeration {
-  def OpenOption = new Val(nextId,null) with OpenOption
-
+object StandardOpenOption {
+  
   /**
    * Append to an existing file.
    * A file will not be created if the file does not exist
    */
-   val Append = OpenOption
+   val Append = JStandardOpenOption.APPEND
   /**
    * Creating a file if it does not exist, but parent directories will not be created
    */
-  val Create = OpenOption
+  val Create = JStandardOpenOption.CREATE
   /**
    * Creating a new file and fail if the file already exists
    */
-  val CreateNew = OpenOption
+  val CreateNew = JStandardOpenOption.CREATE_NEW
   /**
    * Creating a new file and all parent directories
    */
-  val CreateFull = OpenOption
+  val CreateFull = new OpenOption{}
   /**
    * Delete file on close.
    * <p>
@@ -57,35 +42,35 @@ object StandardOpenOption extends Enumeration {
    * then the file will be deleted on VM termination (if possible)
    * </p>
    */
-  val DeleteOnClose = OpenOption
+  val DeleteOnClose = JStandardOpenOption.DELETE_ON_CLOSE
   /**
    * Requires that every update to the file's content (but not metadata)
    * be written synchronously to the underlying storage device
    */
-  val DSync = OpenOption
+  val DSync = JStandardOpenOption.DSYNC
   /**
    * Open a file for read access
    */
-  val Read = OpenOption
+  val Read = JStandardOpenOption.READ
   /**
    * A hint to create a sparse file if used with {@link #CreateNew}
    */
-  val Sparse = OpenOption
+  val Sparse = JStandardOpenOption.SPARSE
   /**
    * Requires that every update to the file's content or metadata be
    * written synchronously to the underlying storage device
    */
-  val Sync = OpenOption
+  val Sync = JStandardOpenOption.SYNC
   /**
    * If file exists and is opened for Write access then truncate the file to
    * 0 bytes.  Ignored if opened for Read access.  Truncate takes precedence over
    * Append.
    */
-  val Truncate = OpenOption
+  val Truncate = JStandardOpenOption.TRUNCATE_EXISTING
   /**
    * Open file for write access
    */
-  val Write = OpenOption
+  val Write = JStandardOpenOption.WRITE
 
   /**
    * Collection of options: {@link #CreateFull}, {@link #Truncate}, {@link #Write}

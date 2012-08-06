@@ -9,9 +9,9 @@ package scalaio.test.fs
 \*                                                                      */
 
 import scalax.file.Path.AccessModes._
+import scalax.file._
 import org.junit.Assert._
 import org.junit.Test
-import scalax.file.attributes._
 import scalax.test.sugar.AssertionSugar
 import scalax.file.defaultfs.DefaultPath
 

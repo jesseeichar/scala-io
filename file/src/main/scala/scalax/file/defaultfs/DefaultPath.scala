@@ -10,8 +10,7 @@ package scalax.file
 package defaultfs
 
 
-import java.io.{
-  File => JFile}
+import java.nio.file.{Path => JPath, Files => JFiles}
 import java.net.URI
 import collection.Traversable
 import scalax.io._
@@ -20,6 +19,11 @@ import Path.AccessModes._
 import java.io.FileFilter
 import scala.annotation.tailrec
 import java.util.regex.Pattern
+import java.nio.file.attribute.PosixFilePermissions
+import java.nio.file.attribute.{
+  FileTime, PosixFilePermission
+}
+import java.nio.file.StandardCopyOption
 
 
 /**
@@ -28,105 +32,113 @@ import java.util.regex.Pattern
  * A file reference that locates a file using a system independent path.
  * The file is not required to exist.
  * </p>
- *  @author  Paul Phillips
  *  @author  Jesse Eichar
  *  @since   1.0
  */
 //private[file]
-class DefaultPath private[file] (val jfile: JFile, override val fileSystem: DefaultFileSystem) extends Path(fileSystem) with DefaultFileOps
+class DefaultPath private[file] (val jfile: JPath, override val fileSystem: DefaultFileSystem) extends Path(fileSystem) with DefaultFileOps
 {
   self =>
 
-  def toAbsolute: DefaultPath = if (isAbsolute) this else fileSystem.fromString(jfile.getAbsolutePath())
+  override def toAbsolute: DefaultPath = if (isAbsolute) this else new DefaultPath(jfile.toAbsolutePath, fileSystem)
 
-  def toURI: URI = jfile.toURI()
-  def /(child: String): DefaultPath = {
+  override def toURI: URI = jfile.toUri
+  override def /(child: String): DefaultPath = {
     fileSystem.checkSegmentForSeparators(child)
-    fileSystem(new JFile(jfile, child))
+    fileSystem(jfile.resolve(child))
   }
-  def name: String = jfile.getName()
-  def path: String = jfile.getPath()
-  def toRealPath(linkOptions:LinkOption*) = new DefaultPath(jfile.getCanonicalFile(), fileSystem)
-  override def fileOption:Option[java.io.File] = Some(jfile)
-  def parent: Option[DefaultPath] = Option(jfile.getParentFile()) map (jf => new DefaultPath(jf,fileSystem))
-  def checkAccess(modes: AccessMode*): Boolean = {
+  override def name: String = jfile.getFileName.toString
+  override def path: String = jfile.toString
+  override def toRealPath(linkOptions:LinkOption*) = new DefaultPath(jfile.toRealPath(linkOptions.map(_.toJavaLinkOptions):_*), fileSystem)
+  override def fileOption:Option[java.io.File] = Option(jfile.toFile)
+  override def parent: Option[DefaultPath] = Option(jfile.getParent()) map (jf => new DefaultPath(jf,fileSystem))
+  override def checkAccess(modes: AccessMode*): Boolean = {
     modes forall {
-      case Execute  => jfile.canExecute()
-      case Read     => jfile.canRead()
-      case Write    => jfile.canWrite()
+      case Execute  => JFiles.isExecutable(jfile)
+      case Read     => JFiles.isReadable(jfile)
+      case Write    => JFiles.isWritable(jfile)
     }
   }
   private[this] val sepRegex = Pattern.compile(Pattern.quote(separator)+"+")
-  override lazy val segments = {
-    @tailrec
-    def fileSegments(f:JFile, acc:Seq[String]):Seq[String] = {
-      val parent = f.getParentFile()
-      if (parent == null) {
-        // these shenanigans are because windows can have \ as the root path separator
-        // in this we need that separator so we do this madness (getName()) returns the empty string
-        // so we can't simply call getName
-//        (if (sepRegex.matcher(f.getPath()).find()) separator else f.getPath) +: acc
-        val root = f.getPath().filterNot(_ == separator(0))
-        (if (root.isEmpty) separator else root) +: acc
-      } else {
-        fileSegments(parent, f.getName +: acc)
+  override lazy val segments = new Seq[String] {
+    override def length = jfile.getNameCount
+    override def apply(i: Int) = jfile.getName(i).toString
+    override def iterator = new Iterator[String]{
+      var i = 0
+      def hasNext = i < jfile.getNameCount
+      def next = {
+        i += 1
+        jfile.getName(i-1).toString
       }
     }
-    fileSegments(jfile, Vector.empty[String])
   }
-  override def canWrite  = jfile.canWrite
-  override def canRead = jfile.canRead
-  override def canExecute = jfile.canExecute
-  def exists = jfile.exists()
-  override def nonExistent = try !jfile.exists() catch { case ex: SecurityException => false }
-  def isFile = jfile.isFile()
-  def isDirectory = jfile.isDirectory()
-  def isAbsolute = jfile.isAbsolute()
-  def isHidden = jfile.isHidden()
-  def lastModified = jfile.lastModified()
-  def lastModified_=(time: Long) = {jfile setLastModified time; time}
-  def size = if(jfile.exists) Some(jfile.length()) else None
+  override def canWrite  = JFiles.isWritable(jfile)
+  override def canRead = JFiles.isReadable(jfile)
+  override def canExecute = JFiles.isExecutable(jfile)
+  // TODO LinkOptions
+  override def exists = JFiles.exists(jfile)
+  // TODO LinkOptions
+  override def nonExistent = JFiles.notExists(jfile)
+  // TODO LinkOptions
+  override def isFile = JFiles.isRegularFile(jfile)
+  // TODO LinkOptions
+  override def isDirectory = JFiles.isDirectory(jfile)
+  override def isAbsolute = jfile.isAbsolute()
+  override def isHidden = JFiles.isHidden(jfile)
+  override def lastModified = JFiles.getLastModifiedTime(jfile).toMillis
+  override def lastModified_=(time: Long) = {JFiles.setLastModifiedTime(jfile, FileTime.fromMillis(time)); time}
+  override def size: Option[Long] = if(exists) Some(JFiles.size(jfile)) else None
 
-  def access_=(accessModes:Iterable[AccessMode]) = {
+  override def access_=(accessModes:Iterable[AccessMode]) = {
     if (nonExistent) fail("Path %s does not exist".format(path))
-
-    jfile.setReadable(accessModes exists {_==Read})
-    jfile.setWritable(accessModes exists {_==Write})
-    jfile.setExecutable(accessModes exists {_==Execute})
+    val permissions = accessModes.flatMap {
+      case Write => PosixFilePermission.GROUP_WRITE :: PosixFilePermission.OTHERS_WRITE :: PosixFilePermission.OWNER_WRITE :: Nil
+      case Read => PosixFilePermission.GROUP_READ :: PosixFilePermission.OTHERS_READ :: PosixFilePermission.OWNER_READ :: Nil
+      case Execute => PosixFilePermission.GROUP_EXECUTE :: PosixFilePermission.OTHERS_EXECUTE :: PosixFilePermission.OWNER_EXECUTE:: Nil
+      case _ => Nil
+    }
+    import collection.JavaConverters._
+    JFiles.setPosixFilePermissions(jfile, permissions.toSet.asJava)
   }
+// TODO Exceptions
+// TODO FileAttributes
+  override def doCreateParents() = Option(jfile.toAbsolutePath.getParent()).foreach(f => JFiles.createDirectories(f))
+// TODO Exceptions
+// TODO FileAttributes
+  override def doCreateDirectory() = JFiles.createDirectory(jfile.toAbsolutePath)
+// TODO Exceptions
+// TODO FileAttributes
+  override def doCreateFile() = JFiles.createDirectory(jfile.toAbsolutePath)
 
-  def doCreateParents() = Option(jfile.getAbsoluteFile.getParentFile).map(_.mkdirs())
-  def doCreateDirectory() = jfile.getAbsoluteFile.mkdir()
-  def doCreateFile() = jfile.createNewFile()
-
-  def delete(force : Boolean): this.type = {
+  override def delete(force : Boolean): this.type = {
     if(exists) {
       if (force) access_= (access + Write)
 
       if(!canWrite) fail("File is not writeable so the file cannot be deleted")
-      if(!jfile.delete) {
-        if(children().nonEmpty) fail("use deleteRecursively if you want to delete directory and descendants")
-        else fail("Unable to delete file for unknown reason")
-      }
+      JFiles.delete(jfile)
     }
     this
   }
 
-  protected def moveFile(target: Path, atomicMove:Boolean) : Unit = {
+  // TODO Full copy options
+  override protected def moveFile(target: Path, atomicMove:Boolean) : Unit = {
+    val copyOptions = if (atomicMove) Seq(java.nio.file.StandardCopyOption.ATOMIC_MOVE) else Nil
     target match {
-      case target : DefaultPath if jfile renameTo target.jfile =>
-        () // moved worked as part of guard
+      case target: DefaultPath =>
+        JFiles.move(jfile, target.jfile, copyOptions:_*)
       case _ =>
         copyDataTo(target)
         delete()
     }
   }
 
-  protected def moveDirectory(target:Path, atomicMove : Boolean) : Unit = {
+  // TODO Full copy options
+  override protected def moveDirectory(target:Path, atomicMove : Boolean) : Unit = {
+    val copyOptions = if (atomicMove) Seq(java.nio.file.StandardCopyOption.ATOMIC_MOVE) else Nil
     val y = target.exists
     target match {
-      case target : DefaultPath if (jfile renameTo target.jfile) =>
-        () // moved worked as part of guard
+      case target: DefaultPath =>
+        JFiles.move(jfile, target.jfile, copyOptions:_*)
       case _ =>
         val x = target.exists
         target.createDirectory()
@@ -139,13 +151,22 @@ class DefaultPath private[file] (val jfile: JFile, override val fileSystem: Defa
   }
 
   override def toString() = "Path(%s)".format(path)
-  def descendants[U >: Path, F](filter:F, depth:Int, options:Traversable[LinkOption])(implicit factory:PathMatcherFactory[F]) = {
+  override def descendants[U >: Path, F](filter:F, depth:Int, options:Traversable[LinkOption])(implicit factory:PathMatcherFactory[F]) = {
     if (!isDirectory) throw new NotDirectoryException(this + " is not a directory so descendants can not be called on it")
 
     new BasicPathSet[DefaultPath](this, factory(filter), depth, false, { (p:PathMatcher[DefaultPath], path:DefaultPath) =>
-      val files = path.jfile.listFiles
-      if(files == null) Iterator.empty
-      else files.toIterator.map (fileSystem.apply)
+      // TODO Native filters
+      new CloseableIterator[DefaultPath] {
+        val stream = JFiles.newDirectoryStream(path.jfile)
+        val iter = stream.iterator
+        def doClose = try {stream.close; Nil} catch {case e:Throwable => List(e)}
+        def hasNext = iter.hasNext
+        def next = {
+          // TODO LinkOptions
+          new DefaultPath(iter.next, fileSystem)
+        }
+      }
     })
   }
 }
+

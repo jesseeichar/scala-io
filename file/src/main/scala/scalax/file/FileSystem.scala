@@ -15,6 +15,8 @@ import util.Random.nextInt
 import java.io.{ IOException, File => JFile }
 import scalax.io.ResourceContext
 import java.util.regex.Pattern
+import java.nio.file.attribute.FileAttribute
+import java.nio.file.{FileSystems => JFileSystems}
 
 /**
  * Factory object for obtaining filesystem objects
@@ -31,8 +33,21 @@ object FileSystem {
    *  and corresponds to the file system that is referenced by
    *  java.file.File objects</p>
    */
-  val default: DefaultFileSystem = new scalax.file.defaultfs.DefaultFileSystem()
+  val default: DefaultFileSystem = new scalax.file.defaultfs.DefaultFileSystem(JFileSystems.getDefault)
 
+  private lazy val shutdownHook = {
+    val thread = new Thread {
+	    var paths = Vector[Path]()
+	    override def run {
+	      paths.foreach(_.deleteRecursively(true, true))
+	    }
+	  }
+    Runtime.getRuntime.addShutdownHook(thread)
+    thread
+  }
+  def deleteOnShutdown(path: Path) = {
+    shutdownHook.paths = shutdownHook.paths :+ path
+  }
 }
 
 /**
@@ -195,15 +210,19 @@ abstract class FileSystem {
    *          temporary folder
    *          Default is null (system/user temp folder)
    * @param deleteOnExit
-   *          If true then the file will be deleted when the JVM is shutdown
+   *          If true then the directory and all contained folders will be deleted
+   *          when the JVM is shutdown.
    *          Default is true
+   * @param attributes
+   *          The file attributes to assign to the created file
    * @throws java.lang.UnsupportedOperationException
    *          If the filesystem does not support temporary files
    */
   def createTempFile(prefix: String = randomPrefix,
-    suffix: String = null,
-    dir: String = null,
-    deleteOnExit: Boolean = true /*attributes:List[FileAttributes] TODO */ ): PathType
+    suffix: Option[String] = None,
+    dir: Option[String] = None,
+    deleteOnExit: Boolean = true,
+    attributes:Set[FileAttribute[_]] = Set.empty): PathType
   /**
    * Creates an empty directory in the provided directory with the provided prefix and suffixes, if the filesystem
    * supports it.  If not then a UnsupportedOperationException is thrown.
@@ -213,9 +232,6 @@ abstract class FileSystem {
    * @param prefix
    *          the starting characters of the directory name.
    *          Default is a randomly generated prefix
-   * @param suffix
-   *          the last characters of the directory name
-   *          Default is null (no suffix)
    * @param dir
    *          the directory to create the directory in.  If null or
    *          not declared the directory will be created in the system
@@ -225,14 +241,16 @@ abstract class FileSystem {
    *          If true then the directory and all contained folders will be deleted
    *          when the JVM is shutdown.
    *          Default is true
+   * @param attributes
+   *          The file attributes to assign to the created file
    *
    * @throws java.lang.UnsupportedOperationException
    *          If the filesystem does not support temporary files
    */
   def createTempDirectory(prefix: String = randomPrefix,
-    suffix: String = null,
-    dir: String = null,
-    deleteOnExit: Boolean = true /*attributes:List[FileAttributes] TODO */ ): PathType
+    dir: Option[String] = None,
+    deleteOnExit: Boolean = true,
+    attributes:Set[FileAttribute[_]] = Set.empty ): PathType
 
   /**
    * Returns a URLStreamHandler if the protocol in the URI is not supported by default JAVA.

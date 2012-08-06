@@ -1,9 +1,11 @@
 package scalax.file
-import scala.collection.IterableLike
 import scala.collection.generic.CanBuildFrom
 import scalax.io.AbstractLazyIteratorBasedBuilder
+import scala.collection.TraversableLike
+import scalax.io.CloseableIterator
+import scalax.io.CloseableIteratorOps
 
-trait PathSetLike[+T, +Repr <: PathSetLike[T, Repr]] extends IterableLike[T, Repr] with PathFinder[T] {
+trait PathSetLike[+T, +Repr <: PathSetLike[T, Repr]] extends PathFinder[T] with TraversableLike[T, Repr] {
   self =>
 
   override protected[this] def thisCollection: PathSet[T] = this.asInstanceOf[PathSet[T]]
@@ -47,47 +49,82 @@ trait PathSetLike[+T, +Repr <: PathSetLike[T, Repr]] extends IterableLike[T, Rep
   def \(literal: String) = /(literal)
 
   override /*TraversableLike*/ def map[B, That](f: T => B)(implicit bf: CanBuildFrom[Repr, B, That]): That = {
-    val it = () => iterator.map(f)
     bf.apply(repr) match {
       case ci: AbstractLazyIteratorBasedBuilder[B, That] =>
-        ci.addIter(it)
+        ci.addIter(() => CloseableIteratorOps(iterator).map(f))
         ci.result()
       case b =>
-        b ++= it()
+        withIterator(it => b ++= it.map(f))
         b.result()
     }
   }
   override /*TraversableLike*/ def flatMap[B, That](f: T => collection.GenTraversableOnce[B])(implicit bf: CanBuildFrom[Repr, B, That]): That = {
-    val it = () => iterator.flatMap(f)
     bf.apply(repr) match {
       case ci: AbstractLazyIteratorBasedBuilder[B, That] =>
-        ci.addIter(it)
+        ci.addIter(() => CloseableIteratorOps(iterator).flatMap(f))
         ci.result()
       case b =>
-        b ++= it()
+        withIterator(it => b ++= it.flatMap(f))
         b.result()
     }
   }
   override def filter(f: T => Boolean) = {
-    val it = () => iterator.filter(f)
     newBuilder match {
       case ci: AbstractLazyIteratorBasedBuilder[T, Repr] =>
-        ci.addIter(it)
+        ci.addIter(() => CloseableIteratorOps(iterator).filter(f))
         ci.result()
       case b =>
-        b ++= it()
+        withIterator(it => b ++= it.filter(f)) 
         b.result()
     }
   }
   override def collect [B, That] (pf: PartialFunction[T, B])(implicit bf: CanBuildFrom[Repr, B, That]): That = {
-    val it = () => iterator.collect(pf)
     bf(repr) match {
       case ci: AbstractLazyIteratorBasedBuilder[B, That] =>
-        ci.addIter(it)
+        ci.addIter(() => CloseableIteratorOps(iterator).collect(pf))
         ci.result()
       case b =>
-        b ++= it()
+        withIterator(it => b ++= it.collect(pf))
         b.result()
     }
   }
+  
+  override def foreach[U] (f: T => U): Unit = withIterator{i => while (i.hasNext) f(i.next)}
+  override def head = withIterator{_.next}
+  override def headOption = withIterator{i => if(i.hasNext) Some(i.next) else None}
+  override /*TraversableLike*/ def drop(n: Int): Repr = slice(n,Int.MaxValue)
+  override /*TraversableLike*/ def dropWhile(p: T => Boolean): Repr = build(_.dropWhile(p))
+  override /*TraversableLike*/ def takeWhile(p: T => Boolean): Repr = build(_.takeWhile(p))
+  override /*TraversableLike*/ def take(n: Int): Repr = slice(0, n)
+  override /*TraversableLike*/ def slice(from:Int, until:Int) = build(_.lslice(from,until))
+  override /*TraversableLike*/ def forall(p: T => Boolean): Boolean =
+    withIterator(_ forall p)
+  override /*TraversableLike*/ def exists(p: T => Boolean): Boolean =
+    withIterator(_ exists p)
+  override /*TraversableLike*/ def find(p: T => Boolean): Option[T] =
+    withIterator(_ find p)
+  override /*TraversableLike*/ def isEmpty: Boolean =
+    !withIterator(_.hasNext)
+
+  override /*TraversableLike*/ def foldRight[B](z: B)(op: (T, B) => B): B =
+    withIterator(_.foldRight(z)(op))
+  override /*TraversableLike*/ def reduceRight[B >: T](op: (T, B) => B): B =
+    withIterator(_.reduceRight(op))
+
+  private def build[B >: T](f: CloseableIteratorOps[T] => CloseableIterator[B]): Repr = newBuilder match {
+      case ci: AbstractLazyIteratorBasedBuilder[B, Repr] =>
+        ci.addIter(() => f(CloseableIteratorOps(iterator)))
+        ci.result()
+      case b =>
+        withIterator(it => b ++= f(CloseableIteratorOps(it)).asInstanceOf[CloseableIterator[T]]) 
+        b.result()
+    }
+
+  protected def withIterator[R](f: CloseableIterator[T] => R) = {
+    val i = iterator
+    try f(i)
+    finally i.close
+  } 
+  
+  protected def iterator: CloseableIterator[T]
 }

@@ -1,6 +1,7 @@
 package scalax.io
 package support
 
+import java.nio.file.{Files => JFiles}
 import StandardOpenOption._
 import java.nio.channels.FileChannel
 import java.io.{IOException, FileOutputStream, RandomAccessFile, File}
@@ -11,17 +12,23 @@ import java.io.OutputStream
 import scalax.io.extractor.ReadableByteChannelExtractor
 import scalax.io.extractor.WritableByteChannelExtractor
 import scalax.io.extractor.FileChannelExtractor
+import java.nio.file.Path
 
 object FileUtils {
-  def openOutputStream(jfile: File, openOptions: Seq[OpenOption]) = {
+  def openOutputStream(jfile: Path, openOptions: Seq[OpenOption]) = {
     Resource.fromOutputStream({
-      val (append, options) = preOpen(jfile, openOptions, true)
-      if (options contains DeleteOnClose) {
-        new DeletingFileOutputStream(jfile, append)
-      } else {
-        new FileOutputStream(jfile, append)
-      }
+      JFiles.newOutputStream(jfile, openOptions:_*);
     })
+  }
+  def openOutputStream(jfile: File, openOptions: Seq[OpenOption]) = {
+	  Resource.fromOutputStream({
+		  val (append, options) = preOpen(jfile, openOptions, true)
+				  if (options contains DeleteOnClose) {
+					  new DeletingFileOutputStream(jfile, append)
+				  } else {
+					  new FileOutputStream(jfile, append)
+				  }
+	  })
   }
 
   def openChannel(raf: RandomAccessFile, openOptions: Seq[OpenOption]): FileChannel = {

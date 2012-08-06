@@ -69,7 +69,7 @@ trait AbstractPathSetTests extends scalax.test.sugar.FSAssertionSugar {
     val (path,tree) = fixtures()
 
     intercept[NoSuchElementException] {
-      (path \ "testfile").createDirectory().descendants().iterator.next
+      (path \ "testfile").createDirectory().descendants().head
     }
   }
 

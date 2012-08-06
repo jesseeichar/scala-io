@@ -51,8 +51,8 @@ trait CloseableIterator[@specialized(Byte,Char) +A] extends Iterator[A] {
   }
 }
 
-private[io] object CloseableIteratorOps { def apply[A](iter: CloseableIterator[A]) = new CloseableIteratorOps(iter) }
-private[io] class CloseableIteratorOps[+A](val iter: CloseableIterator[A]) {
+object CloseableIteratorOps { def apply[A](iter: CloseableIterator[A]) = new CloseableIteratorOps(iter) }
+class CloseableIteratorOps[+A](val iter: CloseableIterator[A]) {
   def collect[B, That](pf: PartialFunction[A, B]) = Proxy(iter.collect(pf))
   def map[B](f: A => B) = Proxy(iter.map(f))
   def flatMap[B](f: (A) => GenTraversableOnce[B]) = Proxy(iter.flatMap(f))

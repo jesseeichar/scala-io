@@ -8,16 +8,21 @@
 
 package scalax.file
 
-import attributes._
+import java.io.{File => JFile}
+import java.io.IOException
+import java.net.URI
+import java.net.URL
+
+import scala.collection.Traversable
+
+import PathMatcher.IsDirectory
+import PathMatcher.IsFile
+import PathMatcher.NonExistent
 import defaultfs.DefaultPath
-import java.io.{IOException, File => JFile}
-import java.net.{ URI, URL }
-import collection.Traversable
-import Path.AccessModes._
-import Path.fail
+import scalax.io.CloseableIterator
+import scalax.io.Input
 import scalax.io.Output
 import scalax.io.StandardOpenOption
-import scalax.io.Input
 
 /**
  * The object for constructing Path objects and for containing implicits from strings and
@@ -108,13 +113,12 @@ object Path
    *          Default is Nil(default system file attributes)
    */
   def createTempFile(prefix: String = FileSystem.default.randomPrefix,
-                   suffix: String = null,
-                   dir: String = null,
+                   suffix: Option[String] = None,
+                   dir: Option[String] = None,
                    deleteOnExit : Boolean = true,
-                   attributes:Iterable[FileAttribute[_]] = Nil ): DefaultPath = {
-    FileSystem.default.createTempFile(prefix,suffix,dir,deleteOnExit)
+                   attributes:Set[FileAttribute[_]] = Set.empty ): DefaultPath = {
+    FileSystem.default.createTempFile(prefix,suffix,dir,deleteOnExit, attributes)
   }
-
 
   /**
    * Creates an empty directory in the provided directory with the provided prefix and suffixes.
@@ -141,11 +145,10 @@ object Path
    *          Default is Nil(default system file attributes)
    */
   def createTempDirectory(prefix: String = FileSystem.default.randomPrefix,
-                        suffix: String = null,
-                        dir: String = null,
-                        deleteOnExit : Boolean = true,
-                        attributes:Iterable[FileAttribute[_]] = Nil): DefaultPath = {
-    FileSystem.default.createTempDirectory(prefix,suffix,dir,deleteOnExit)
+                   dir: Option[String] = None,
+                   deleteOnExit : Boolean = true,
+                   attributes:Set[FileAttribute[_]] = Set.empty ): DefaultPath = {
+    FileSystem.default.createTempDirectory(prefix,dir,deleteOnExit, attributes)
   }
 
   /**
@@ -183,6 +186,8 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
 {
   self =>
   import fileSystem.PathType
+  import Path._
+  import Path.AccessModes._
 
   protected def assertExists = if(!exists) throw new java.io.FileNotFoundException(path+" does not exist")
 
@@ -691,33 +696,16 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    */
   def access : AccessSet = new AccessSet(this)
 
-  def attributes : Set[FileAttribute[_]] = {
-    Set(LastModifiedAttribute(lastModified),
-         ReadAccessAttribute(canRead),
-         WriteAccessAttribute(canWrite),
-         ExecuteAccessAttribute(canExecute))
-
+  /**
+   * Return the FileAttributes object for advanced reading and setting 
+   * of the file's attributes
+   */
+  def attributes : FileAttributes
+  def attributes_=[T <: BasicFileAttributes](newAttributes: T) : this.type = {
+    attributes update newAttributes
+    this
   }
-  def attributes_= (attrs:Iterable[FileAttribute[_]]) = {
-    var timeStamp:Option[Long] = None
-
-    val newAccess = attrs.foldLeft(access.toSet) {
-      case (modes, LastModifiedAttribute(newLastModified)) =>
-        timeStamp = Some(newLastModified)
-        modes
-      case (modes, ReadAccessAttribute(true)) => modes + Read
-      case (modes, ReadAccessAttribute(false)) => modes - Read
-      case (modes, WriteAccessAttribute(true)) => modes + Write
-      case (modes, WriteAccessAttribute(false)) => modes - Write
-      case (modes, ExecuteAccessAttribute(true)) => modes + Execute
-      case (modes, ExecuteAccessAttribute(false)) => modes - Execute
-      case (modes, att) => throw new IllegalArgumentException(att+" is not a supported FileAttribute for "+fileSystem+" file system")
-    }
-
-    if(newAccess != access) access = newAccess
-    timeStamp.foreach(t => lastModified = t)
-  }
-
+  
   // creations
   private def createContainingDir(createParents: Boolean) = {
     def testWrite(parent:Option[Path]) = {
@@ -754,12 +742,12 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    * NOT PUBLIC API: Create a directory for the current path without considering if the parents
    * has been previously created.   This method should fail if the parent does not exist
    */
-  protected def doCreateDirectory():Boolean
+  protected def doCreateDirectory():Unit
   /**
    * NOT PUBLIC API: Create a file for the current path without considering if the parents
    * has been previously created.   This method should fail if the parent does not exist
    */
-  protected def doCreateFile():Boolean
+  protected def doCreateFile():Unit
   /**
    * Create the file referenced by this path.
    *
@@ -796,6 +784,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    *           If the process does not have write permission to the parent directory
    *           If parent directory does not exist
    */
+// TODO Exceptions
   def createFile( createParents:Boolean = true, failIfExists: Boolean = true,
                  accessModes:Iterable[AccessMode]=List(Read,Write), attributes:Iterable[FileAttribute[_]]=Nil): PathType = {
 
@@ -805,7 +794,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
       case true if isDirectory =>
         fail("Path "+this+" is a directory and thus cannot be created as a file")
       case true =>
-        this.attributes = attributes
+        attributes.foreach{att => this.attributes(att.name) = att.value}
         access = accessModes
       case _ =>
       createContainingDir (createParents)
@@ -815,9 +804,8 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
       assert(parent.forall{p => p.isDirectory}, "parent must be executable")
       assert(parent.forall{p => p.canExecute}, "parent must be executable")
 
-      val res = doCreateFile()
+      doCreateFile()
       access = accessModes
-      if (!res) fail("unable to create file")
     }
     this.asInstanceOf[PathType]
   }
@@ -869,7 +857,8 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
 
       val res = doCreateDirectory()
     }
-    this.attributes = attributes
+    attributes.foreach{att => this.attributes(att.name) = att.value}
+
     access = accessModes
     this.asInstanceOf[PathType]
   }
@@ -1037,7 +1026,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
     }
 
     if(copyAttributes) {
-      target.attributes = attributes
+    	this.attributes.get[BasicFileAttributes].foreach(att => target.attributes = att) 
     }
     target
   }
@@ -1204,15 +1193,15 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
   def descendants[U >: Path, F](filter:F = PathMatcher.All,
            depth:Int = -1, options:Traversable[LinkOption]=Nil)(implicit factory:PathMatcherFactory[F]): PathSet[Path]
 
-  def **[F](filter: F)(implicit factory:PathMatcherFactory[F]): PathSet[Path] = {
+  override def **[F](filter: F)(implicit factory:PathMatcherFactory[F]): PathSet[Path] = {
     descendants(factory(filter))
   }
-  def *** : PathSet[Path] = descendants()
+  override def *** : PathSet[Path] = descendants()
 
-  def +++[U >: Path](includes: PathFinder[U]): PathSet[U] =  new IterablePathSet[U](iterator) +++ includes
-  def ---[U >: Path](excludes: PathFinder[U]): PathSet[Path] = new IterablePathSet[Path](iterator) --- excludes
+  override def +++[U >: Path](includes: PathFinder[U]): PathSet[U] =  new IterablePathSet[U](iterator) +++ includes
+  override def ---[U >: Path](excludes: PathFinder[U]): PathSet[Path] = new IterablePathSet[Path](iterator) --- excludes
 
-  def iterator : Iterator[Path] = Iterator(this)
+  override def iterator : CloseableIterator[Path] = CloseableIterator(Iterator(this))
 
 
 /* ****************** The following require jdk7's nio.file ************************** */

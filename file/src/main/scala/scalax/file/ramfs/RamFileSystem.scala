@@ -15,6 +15,7 @@ import java.net.{
 import java.util.UUID
 import java.io.{IOException, FileNotFoundException}
 import scalax.io.{ResourceContext, DefaultResourceContext}
+import java.nio.file.attribute.FileAttribute
 
 object RamFileSystem {
   case class RamFsId(id:String = UUID.randomUUID.toString)
@@ -72,17 +73,25 @@ class RamFileSystem(val id : RamFileSystem.RamFsId = RamFileSystem.RamFsId(), va
   def updateContext(newContext:ResourceContext):RamFileSystem = new RamFileSystem(id,separator,newContext)
   override def updateContext(f:ResourceContext => ResourceContext):RamFileSystem = updateContext(f(context))
 
-  def createTempFile(prefix: String = randomPrefix,
-                   suffix: String = null,
-                   dir: String = null,
-                   deleteOnExit : Boolean = true
-                   /*attributes:List[FileAttributes] TODO */ ) : RamPath = apply(separator,"temp",UUID.randomUUID.toString)
+  override def createTempFile(prefix: String,
+                   suffix: Option[String],
+                   dir: Option[String],
+                   deleteOnExit: Boolean,
+                   attributes:Set[FileAttribute[_]] ) : RamPath = {
+    val path = apply(separator,"temp",UUID.randomUUID.toString)
+    if (deleteOnExit) FileSystem.deleteOnShutdown(path)
+    path
+  }
 
-  def createTempDirectory(prefix: String = randomPrefix,
-                        suffix: String = null,
-                        dir: String = null,
-                        deleteOnExit : Boolean = true
-                        /*attributes:List[FileAttributes] TODO */) : RamPath  = apply(separator,"temp",UUID.randomUUID.toString)
+  override def createTempDirectory(prefix: String,
+                   dir: Option[String],
+                   deleteOnExit: Boolean,
+                   attributes:Set[FileAttribute[_]]) : RamPath  = {
+    val path = apply(separator,"temp",UUID.randomUUID.toString)
+    if (deleteOnExit) FileSystem.deleteOnShutdown(path)
+    path
+
+  }
 
   def uri(path:RamPath = root):URI = new URI(RamFileSystem.protocol+"://"+id.id+"!"+path.path.replaceAll("\\\\","/"))
   override def toString = "Ram File System"

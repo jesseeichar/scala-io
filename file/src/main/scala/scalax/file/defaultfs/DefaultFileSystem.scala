@@ -9,51 +9,60 @@
 package scalax.file
 package defaultfs
 
-import java.io.{File=>JFile}
+import java.io.{File => JFile}
+import java.nio.file.{FileSystem=>JFileSystem, Path => JPath, Files => JFiles}
 import scalax.io.ResourceContext
 import scalax.io.DefaultResourceContext
+import java.nio.file.attribute.FileAttribute
 
 /**
  * @author  Jesse Eichar
  * @since   1.0
  */
-private[file] class DefaultFileSystem(val context:ResourceContext = DefaultResourceContext) extends FileSystem {
+private[file] class DefaultFileSystem(jFileSystem: JFileSystem, val context:ResourceContext = DefaultResourceContext) extends FileSystem {
   type PathType = DefaultPath
   val name = "Default"
-  val separator: String = JFile.separator
+  val separator: String = jFileSystem.getSeparator
   protected def doCreateFromSeq(segments: Seq[String]) = {
     val updatedSegments =
       if (System.getProperty("os.name").toLowerCase.contains("win") && segments.nonEmpty && segments(0) == separator) presentWorkingDirectory.root.getOrElse(roots.head).path +: segments.tail
       else segments
-    new DefaultPath(new JFile(updatedSegments mkString separator), this)
+    new DefaultPath(jFileSystem.getPath(updatedSegments.head, updatedSegments.tail:_*), this)
   }
+  def apply(path: JPath): DefaultPath = fromString(path.toString)
   def apply(path: JFile): DefaultPath = fromString(path.getPath)
   def roots = JFile.listRoots().toSet.map {(f:JFile) => fromString (f.getPath)}
-  def createTempFile(prefix: String = randomPrefix,
-                   suffix: String = null,
-                   dir: String = null,
-                   deleteOnExit : Boolean = true
-                   /*attributes:List[FileAttributes] TODO */ ) : DefaultPath = {
-    val dirFile = if(dir==null) null else new JFile(dir)
-    val path = fromString(JFile.createTempFile(prefix, suffix, dirFile).getPath)
-    if(deleteOnExit) path.jfile.deleteOnExit
+  override def createTempFile(prefix: String,
+                   suffix: Option[String],
+                   dir: Option[String],
+                   deleteOnExit: Boolean,
+                   attributes:Set[FileAttribute[_]] ) : DefaultPath = {
+
+    val jpath = dir match {
+      case Some(dir) => JFiles.createTempFile(jFileSystem.getPath(dir), prefix, suffix getOrElse null, attributes.toSeq:_*)
+      case None => JFiles.createTempFile(prefix, suffix getOrElse null, attributes.toSeq:_*)
+    }
+    
+    val path = apply(jpath)
+    if (deleteOnExit) FileSystem.deleteOnShutdown(path)
     path
   }
 
-  def createTempDirectory(prefix: String = randomPrefix,
-                        suffix: String = null,
-                        dir: String = null,
-                        deleteOnExit : Boolean = true
-                        /*attributes:List[FileAttributes] TODO */) : DefaultPath = {
-    val path = createTempFile(prefix, suffix, dir, false)
-    path.delete(force=true)
-    path.createDirectory()
-    if(deleteOnExit) {
-      Runtime.getRuntime.addShutdownHook(new Thread{override def run:Unit = path.deleteRecursively(true) })
+  override def createTempDirectory(prefix: String,
+                        dir: Option[String],
+                        deleteOnExit: Boolean,
+                        attributes:List[FileAttribute[_]] ) : DefaultPath = {
+    val jpath = dir match {
+      case Some(dir) => JFiles.createTempDirectory(jFileSystem.getPath(dir), prefix, attributes.toSeq:_*)
+      case None => JFiles.createTempDirectory(prefix, attributes.toSeq:_*)
     }
+    
+    val path = apply(jpath)
+    if (deleteOnExit) FileSystem.deleteOnShutdown(path)
     path
+
   }
-  def updateContext(newContext:ResourceContext):DefaultFileSystem = new DefaultFileSystem(newContext)
+  def updateContext(newContext:ResourceContext):DefaultFileSystem = new DefaultFileSystem(jFileSystem, newContext)
   override def updateContext(f:ResourceContext => ResourceContext):DefaultFileSystem = updateContext(f(context))
   override def toString = "Default File System"
 }

@@ -16,7 +16,7 @@ import scalaio.test.Node
 
 trait FSAssertionSugar extends AssertionSugar{
 
-  def assertSameStructure(path : Iterable[Path], tree : Seq[Node], maxDepth : Int = Int.MaxValue)
+  def assertSameStructure(path : Traversable[Path], tree : Seq[Node], maxDepth : Int = Int.MaxValue)
                          (implicit filter : Node => Boolean = _ => true) {
     val pathList = path.toList
     val sep = path.headOption.map { _.separator} getOrElse Node.Sep

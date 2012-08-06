@@ -102,15 +102,15 @@ object PathMatcher {
    *          the access modes that must be applicable
    *          on the path object.
    */
-  final class AttributeMatcher (attributes: scalax.file.attributes.FileAttribute[_]*) extends PathMatcher[Path] {
+  final class AttributeMatcher (attributes: FileAttribute[_]*) extends PathMatcher[Path] {
     def apply(path: Path) = {
       val currentAttributes = path.attributes
-      attributes.forall {att => currentAttributes exists{_ == att}}
+      attributes.forall {att => currentAttributes(att.name) exists{_ == att.value}}
     }
     override def toString = "AttributeMatcher: " + (attributes mkString ",")
   }
   object AttributeMatcher {
-      def apply(attributes: scalax.file.attributes.FileAttribute[_]*) = new AttributeMatcher(attributes:_*)
+      def apply(attributes: FileAttribute[_]*) = new AttributeMatcher(attributes:_*)
   }
 
   class FunctionMatcher[T <: Path](f: T => Boolean, name:String = "") extends PathMatcher[T] {

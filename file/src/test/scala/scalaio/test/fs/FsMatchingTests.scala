@@ -15,7 +15,6 @@ import Path.AccessModes._
 import org.junit.Test
 import org.junit.Assert._
 import ramfs.RamFileSystem
-import scalax.file.attributes._
 
 abstract class FsMatchingTests extends scalax.test.sugar.AssertionSugar with Fixture {
   implicit val codec = Codec.UTF8

@@ -7,17 +7,17 @@
 \*                                                                      */
 
 package scalax.file
-import java.io.Closeable
 import java.nio.channels.ByteChannel
 import collection.{Iterator, IterableView}
 import annotation.tailrec
 import scala.collection.generic.CanBuildFrom
 import scalax.io.AbstractLazyIteratorBasedBuilder
+import scalax.io.{CloseableIterator, CloseableIteratorOps}
 
 object PathFinder {
-  def empty = new BasicPathSet[Nothing](Nil,PathMatcher.All, -1,false, (_:PathMatcher[Nothing],_:Nothing) => Iterator.empty)
+  def empty = new BasicPathSet[Nothing](Nil,PathMatcher.All, -1,false, (_:PathMatcher[Nothing],_:Nothing) => CloseableIterator.empty)
 }
-trait PathFinder[+T] {
+trait PathFinder[+T] extends TraversableOnce[T] {
   /**The union of the paths found by this <code>PathSet</code> with the paths found by 'paths'.
    * Note that if the same element is added twice it will be present twice in the PathFinder
    * (in most implementations).  Consider: (Path("a") +++ Path("a")).iterator.  the iterator
@@ -49,12 +49,11 @@ trait PathFinder[+T] {
    */
   def \(literal: String) : PathFinder[T]
 
+  def iterator:CloseableIterator[T]
   /*
    * Makes the paths selected by this finder into base directories.
    */
 //  def asBase: PathFinder[T]
-
-  def iterator : Iterator[T]
 }
 
 /**
@@ -72,18 +71,18 @@ trait PathFinder[+T] {
  *          A function to use for retrieving the children of a particular path
  *          This method is used to retrieve the children of each directory
  */
-final class BasicPathSet[+T <: Path](srcFiles: Iterable[T],
+final class BasicPathSet[+T <: Path](srcFiles: Traversable[T],
                                pathFilter : PathMatcher[T],
                                depth:Int,
                                self:Boolean,
-                               children : (PathMatcher[T],T) => Iterator[T])
+                               children : (PathMatcher[T],T) => CloseableIterator[T])
   extends PathSet[T] {
 
   def this (parent : T,
             pathFilter : PathMatcher[T],
             depth:Int,
             self:Boolean,
-            children : (PathMatcher[T],T) => Iterator[T]) = this(List(parent), pathFilter, depth, self, children)
+            children : (PathMatcher[T],T) => CloseableIterator[T]) = this(List(parent), pathFilter, depth, self, children)
 
   override def filter(f: T => Boolean) = {
     if(pathFilter == PathMatcher.All) {
@@ -116,7 +115,7 @@ final class BasicPathSet[+T <: Path](srcFiles: Iterable[T],
     /**Excludes all paths from <code>excludePaths</code> from the paths selected by this <code>PathSet</code>.*/
     def ---[U >: T](excludes: PathFinder[U]): PathSet[T] = new IterablePathSet[T](iterator).---(excludes)
 
-  def iterator: Iterator[T] = new Iterator[T] {
+  override def iterator: CloseableIterator[T] = new CloseableIterator[T] {
     private[this] val roots = srcFiles.toSet
     private[this] val toVisit = if(self) new PathsToVisit(roots.toIterator) else new PathsToVisit(roots.flatMap {p => children(pathFilter,p)}.toIterator)
     private[this] var nextElem : Option[T] = None
@@ -129,8 +128,8 @@ final class BasicPathSet[+T <: Path](srcFiles: Iterable[T],
         } getOrElse Int.MaxValue
       if(self) basicDepth - 1 else basicDepth
     }
-
-    def hasNext() = if(nextElem.isDefined) true
+    override def doClose = toVisit.close()
+    override def hasNext() = if(nextElem.isDefined) true
                     else {
                       nextElem = loadNext()
                       nextElem.isDefined
@@ -155,7 +154,7 @@ final class BasicPathSet[+T <: Path](srcFiles: Iterable[T],
       }
     }
 
-    def next() = {
+    override def next() = {
       def error() = throw new NoSuchElementException("There are no more children in this stream")
       if(!hasNext) error()
       val t = nextElem
@@ -191,20 +190,33 @@ private class PathsToVisit[T <: Path](startingIter:Iterator[T]) {
 
   final def next() = curr.next()
 
-  final def prepend(iter:Iterator[T]) = {
+  final def prepend(iter:CloseableIterator[T]) = {
     val tmp = curr
     curr = iter.buffered
     if(tmp.hasNext)
       iterators = tmp :: iterators
   }
+  
+  final def close() = {
+    var errors = List[Throwable]()
+   iterators.foreach{_ match {
+	     case ci: CloseableIterator[_] => 
+	       try ci.close catch {case e: Throwable => errors ::= e}
+	     case it => ()
+	   }
+   }
+   iterators = null
+   curr = null
+   errors
+  }
 }
 
 
-private class IterablePathSet[T](iter: => Iterator[T]) extends PathSet[T] {
+private class IterablePathSet[T](iter: => CloseableIterator[T]) extends PathSet[T] {
   def iterator = iter
-  def mapping[U >: T](f: PathFinder[T] => PathFinder[_]):PathSet[U] = new IterablePathSet(iter.flatMap {
+  def mapping[U >: T](f: PathFinder[T] => PathFinder[_]):PathSet[U] = new IterablePathSet(CloseableIteratorOps(iter).flatMap {
     case pf:PathFinder[T] => f(pf).asInstanceOf[PathFinder[U]].iterator
-    case o:U => Iterator.empty
+    case o:U => CloseableIterator.empty
   })
   def /(literal: String): PathSet[T] = mapping {
     case p : Path if !(p / literal exists) => PathFinder.empty
@@ -219,53 +231,11 @@ private class IterablePathSet[T](iter: => Iterator[T]) extends PathSet[T] {
 
   def ---[U >: T](excludes: PathFinder[U]): PathSet[T] = {
     val excludeSet = excludes.iterator.toSet
-    new IterablePathSet(iter filterNot (excludeSet.contains))
+    new IterablePathSet(CloseableIteratorOps(iter) filterNot (excludeSet.contains))
   }
 
-  def +++[U >: T](includes: PathFinder[U]): PathSet[U] = new IterablePathSet[U](iter ++ includes.iterator)
-
+  def +++[U >: T](includes: PathFinder[U]): PathSet[U] = new IterablePathSet[U](CloseableIteratorOps(iter) ++ includes.iterator)
 }
-/*
- private[file] trait SourceBasedPathSet[+T <: PathSet[_]] {
-  self:PathSet[T] =>
-
-  override def force : Iterable[T] = Iterable.empty ++ this
-  def /(literal: String): PathSet[T] = mapSources{_ / literal}
-
-  def *[F](filter: F)(implicit factory: PathMatcherFactory[F]): PathSet[T] = mapSources{_ * factory(filter)}
-
-  def ***  = mapSources{_ ***}
-
-  def **[F](filter: F)(implicit factory: PathMatcherFactory[F]): PathSet[T] = mapSources{_ ** factory(filter)}
-
-  def ---[U >: T](excludes: PathFinder[U]): PathSet[T] = new SubtractivePathSet[T,U](this,excludes)
-
-  def +++[U >: T <: PathFinder[_]](includes: PathFinder[U]): PathSet[U] = new AdditivePathSet[U](this, includes)
-
-  def mapSources[U >: T <: PathSet[_]](f: PathFinder[U] => PathFinder[U]):PathSet[U]
-}
-
-private class MappablePathSet[+T <: PathSet[_]](original:PathFinder[T])
-    extends PathSet[T] with SourceBasedPathSet[T] {
-  def iterator: Iterator[T] = original.iterator
-  def mapSources[U >: T](f: PathFinder[U] => PathFinder[U]):PathSet[U] = new MappablePathSet[U](f(original))
-}
-private class AdditivePathSet[+T <: PathSet[_]](original:PathFinder[T], more:PathFinder[T])
-        extends PathSet[T] with SourceBasedPathSet[T] {
-  def iterator: Iterator[T] = original.iterator ++ more.iterator
-
-  def mapSources[U >: T <: PathSet[_]](f: PathFinder[U] => PathFinder[U]):PathSet[U] = new AdditivePathSet[U](f(original),f(more))
-}
-
-private class SubtractivePathSet[+T <: PathSet[_],U >: T](original:PathFinder[T], excludes:PathFinder[U])
-        extends PathSet[T] with SourceBasedPathSet[T] {
-  self =>
-  def iterator: Iterator[T] = {
-    val excludeSet = excludes.iterator.toSet
-    original.iterator filterNot (excludeSet.contains)
-  }
-  def mapSources[U >: T <: PathSet[_]](f: PathFinder[U] => PathFinder[U]):PathSet[U] = new MappablePathSet[U](f(self))
-}*/
 
 /*
  * Will uncomment this for the jdk7 version

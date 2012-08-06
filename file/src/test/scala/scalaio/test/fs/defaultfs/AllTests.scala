@@ -11,6 +11,7 @@ package scalaio.test.fs.defaultfs
 import scalax.file.FileSystem
 import org.junit.Test
 import org.junit.Ignore
+import scala.util.control.Breaks
 
 class RandomPrefixTest {
   @Test
@@ -28,9 +29,10 @@ class FsDirectoryStreamTest extends scalaio.test.fs.FsPathSetTests with DefaultF
       println("start overflow bug test")
       FileSystem.default.roots.headOption foreach {path =>
           val start = System.currentTimeMillis()
-          val iter = (path ** "*.scala").iterator
-          while(iter.hasNext && System.currentTimeMillis() - start < 30000) {
-            iter.next
+          Breaks.breakable {
+            (path ** "*.scala").foreach { p =>
+              if (System.currentTimeMillis() - start > 30000) Breaks.break;
+            }
           }
       }
       println("done overflow bug test and it passed... yay")

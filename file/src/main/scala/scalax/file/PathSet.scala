@@ -27,7 +27,7 @@ import scala.collection.generic.TraversableFactory
  * @author  Jesse Eichar
  * @since   1.0
  */
-trait PathSet[+T] extends Iterable[T]
+trait PathSet[+T] extends Traversable[T]
   with PathSetLike[T,PathSet[T]] {
 
   protected[this] override def newBuilder = PathSet.newBuilder
