@@ -82,7 +82,8 @@ abstract class FileSystemFixture(val fs : FileSystem, rnd : Random) {
            files <- 0 until filesPerLevel) {
           val p = path(d, newRoot).createFile(failIfExists = false)
 
-          p.relativize(root).segments.drop(1).foldLeft (structure){
+          val relative = p.relativize(root)
+          relative.segments.drop(1).foldLeft (structure){
             (parent, label) =>
               Node(parent.path + Node.Sep+ label, Some(parent))
           }

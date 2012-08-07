@@ -36,7 +36,7 @@ abstract class FsPathObjectTests extends Fixture {
 
     val p = FileSystem.default.createTempFile()
     val file:java.io.File = p
-    assertSame(p.jfile, file)
+    assertSame(p.jpath, file)
   }
 
   @Test

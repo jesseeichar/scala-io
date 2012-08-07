@@ -16,6 +16,9 @@ package object file {
 	type LinkOption = java.nio.file.LinkOption
 	type CopyOption = java.nio.file.CopyOption
 	
+	implicit def javanioFileTime2ScalaIOFileTime(time:java.nio.file.attribute.FileTime) = FileTime(time)
+	implicit def ScalaIOFileTime2javanioFileTime(time:FileTime) = time.jfileTime
+	
 	def addAsFileAttributesToTupleSeq(tuple:Seq[(String,Any)]) = new {
 	  def asFileAttributes = tuple.map(att => FileAttributeImpl(att._1, att._2))
 	}

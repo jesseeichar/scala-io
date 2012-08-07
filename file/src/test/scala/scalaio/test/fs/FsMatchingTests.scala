@@ -14,7 +14,6 @@ import PathMatcher._
 import Path.AccessModes._
 import org.junit.Test
 import org.junit.Assert._
-import ramfs.RamFileSystem
 import java.nio.file.attribute.DosFileAttributeView
 import scalax.file.FileAttributeImpl
 
@@ -154,9 +153,10 @@ abstract class FsMatchingTests extends scalax.test.sugar.AssertionSugar with Fix
     assertMisMatch("a/**")
     assertMisMatch("?/**")
 
-    path = new RamFileSystem(separator="\\")("a/","b")
-    assertMatch("""a\//b""")
-    assertMisMatch("""a//b""")
+    // TODO RAMFS When we have a ram fs
+//    path = new RamFileSystem(separator="\\")("a/","b")
+//    assertMatch("""a\//b""")
+//    assertMisMatch("""a//b""")
   }
 
   @Test //@Ignore
@@ -166,8 +166,9 @@ abstract class FsMatchingTests extends scalax.test.sugar.AssertionSugar with Fix
     assertMatch(".*/d.x")
     assertMatch("""(\w/)*d.x""")
 
-    path = new RamFileSystem(separator="\\")("a/","b")
-    assertMatch("""a\//b""")
+    // TODO RAMFS
+//    path = new RamFileSystem(separator="\\")("a/","b")
+//    assertMatch("""a\//b""")
   }
 
   @Test //@Ignore

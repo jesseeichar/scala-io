@@ -11,7 +11,6 @@ package scalaio.test.fs
 import org.junit.Assert._
 import scalax.file.Path
 import org.junit.Test
-import scalax.file.ramfs.RamFileSystem
 import scalaio.test.Node
 import scalaio.test.AbstractPathSetTests
 import scalax.file.PathSet
@@ -122,9 +121,9 @@ abstract class FsPathSetTests extends scalax.test.sugar.AssertionSugar with Abst
     assertSameContents(Nil, ((root * "a") +++ (root * "z")) / "*")
     // TODO asBase
 
-    val ramfs = new RamFileSystem()
-    ramfs.root / "g"/"h"/"i.xml" createFile()
-    assertSameContents(List(root / "a"/"b"/"c"/"d.scala", ramfs.root / "g"/"h"/"i.xml"), (root ** "*.scala") +++ (ramfs.root ** "*.xml"))
+    val ramfs = zipfs
+    ramfs.roots.head / "g"/"h"/"i.xml" createFile()
+    assertSameContents(List(root / "a"/"b"/"c"/"d.scala", ramfs.roots.head / "g"/"h"/"i.xml"), (root ** "*.scala") +++ (ramfs.roots.head ** "*.xml"))
   }
   @Test //@Ignore
   def `pathsets can be combined using ---` {
@@ -145,9 +144,9 @@ abstract class FsPathSetTests extends scalax.test.sugar.AssertionSugar with Abst
     assertSameContents(Nil, ((root * "*") --- (root * "z")) / "*")
     // TODO asBase
 
-    val ramfs = new RamFileSystem()
-    ramfs.root / "a"/"b"/"c"/"d.scala" createFile()
-    assertSameContents(List(root / "a"/"b"/"c"/"d.scala"), (root ** "*.scala") --- (ramfs.root ***))
+    val ramfs = zipfs
+    ramfs.roots.head / "a"/"b"/"c"/"d.scala" createFile()
+    assertSameContents(List(root / "a"/"b"/"c"/"d.scala"), (root ** "*.scala") --- (ramfs.roots.head ***))
 
   }
 

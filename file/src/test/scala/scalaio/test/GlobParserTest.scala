@@ -10,12 +10,12 @@ package scalaio.test
 
 import org.junit.Assert._
 import org.junit.Test
-import scalax.file.ramfs.RamFileSystem
 import scalax.file.FileSystem
 import scalax.file.GlobParser
 import java.util.regex.Pattern
+import scalax.test.sugar.FSAssertionSugar
 
-class GlobParserTest {
+class GlobParserTest extends FSAssertionSugar {
   def compareGlob(glob:String, regex:String)(implicit fs:FileSystem) {
     val parser = new GlobParser(fs)
     val result = parser(glob)
@@ -24,7 +24,7 @@ class GlobParserTest {
   @Test
   def testGlobToRegEx :Unit = {
     val sep = "/"
-    implicit val fs = new RamFileSystem(separator=sep)
+    implicit val fs = zipfs
 
     val noSep = "[^"+sep+"]"
     compareGlob("**",".*")

@@ -14,6 +14,9 @@ import java.io.{
 import java.nio.channels.{
     ByteChannel, FileChannel, SeekableByteChannel
 }
+import java.nio.file.{Files => JFiles}
+
+import scalax.io.support.FileUtils._
 import scalax.io._
 import processing.SeekableProcessor
 import scalax.io.managed._
@@ -83,7 +86,9 @@ abstract class FileOps extends Seekable {
    *
    * The Resource will be configured with the associated fileSystem's ResourceContext
    */
-  def inputStream(): InputStreamResource[InputStream]
+  def inputStream(): InputStreamResource[InputStream] = {
+    Resource.fromInputStream(JFiles.newInputStream(jpath)).updateContext(fileSystem.context)
+  }
   /**
   * Obtains an OutputStreamResource for writing to the file
   *
@@ -96,7 +101,17 @@ abstract class FileOps extends Seekable {
   *           The Write option is implicitly added to the set of options
   *           Default is write/create/truncate
   */
-  def outputStream(openOptions:OpenOption*) : OutputStreamResource[OutputStream]
+  def outputStream(openOptions:OpenOption*) : OutputStreamResource[OutputStream] = {
+      val r = openOptions match {
+          case Seq() =>
+              openOutputStream(jpath,ReadWrite)
+          case opts if opts forall {opt => opt != Write && opt != Append} =>
+              openOutputStream(jpath,openOptions :+ Write)
+          case _ =>
+            openOutputStream(jpath,openOptions)
+      }
+      r.updateContext(fileSystem.context)
+  }
   /**
    * Obtains a ByteChannel for read/write access to the file.  If no OpenOptions are
    * specified the underlying file will be opened with read/write/create/truncate options.
@@ -109,7 +124,9 @@ abstract class FileOps extends Seekable {
    *           the options that define how the file is opened when using the stream
    *           Default is options only
    */
-  def channel(openOptions:OpenOption*): SeekableByteChannelResource[SeekableByteChannel]
+  def channel(openOptions:OpenOption*): SeekableByteChannelResource[SeekableByteChannel] = {
+    Resource.fromSeekableByteChannel(openChannel(jpath,openOptions)).updateContext(fileSystem.context)
+  }
   /**
    * Obtains a FileChannel for read/write access to the file.  Not all filesystems
    * can support FileChannels therefore None will be returned if the filesystem
@@ -125,7 +142,14 @@ abstract class FileOps extends Seekable {
    *          the options that define how the file is opened when using the stream
    *          Default is read/write/create/truncate
    */
-  def fileChannel(openOptions:OpenOption*): Option[SeekableByteChannelResource[SeekableByteChannel]]
+  def fileChannel(openOptions:OpenOption*): Option[SeekableByteChannelResource[FileChannel]] = {
+    try {
+      jpath.toFile // test that it is a file and therefore has a FileChannel
+      Some(Resource.fromSeekableByteChannel(openChannel(jpath,openOptions).asInstanceOf[FileChannel]).updateContext(fileSystem.context))
+    } catch {
+      case e:UnsupportedOperationException => None
+    }
+  }
 
   /**
    * Runs several operations as efficiently as possible. If the filesystem
@@ -178,7 +202,12 @@ abstract class FileOps extends Seekable {
    * @return the result
    *          the result from the block or None if the filesystem does not support locking
    */
-  def withLock[R](start: Long = 0, size: Long = -1, shared: Boolean = false, context:ResourceContext = fileSystem.context)(block: Seekable => R): Option[R]
+  def withLock[R](start: Long = 0, size: Long = -1, shared: Boolean = false, context:ResourceContext = fileSystem.context)(block: Seekable => R): Option[R] = {
+    val self = this
+    fileChannel().get.acquireAndGet{ fc =>
+      Option(fc.tryLock(start,size,shared)).map{_ => block(self)}
+    }
+  }
 
   // API ends here.
   // required for path

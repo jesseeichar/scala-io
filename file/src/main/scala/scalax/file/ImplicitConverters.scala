@@ -1,8 +1,5 @@
 package scalax.file
 
-import defaultfs.DefaultPath
-import java.io.File
-
 /**
  * Contains the implicit conversion methods for converting to Paths and related objects
  *
@@ -21,7 +18,7 @@ object ImplicitConverters {
   /**
    * Method to implicitly convert add an asPath method to [[java.io.File]]
    */
-  implicit def jfileAsPath(jfile: File) = new {
+  implicit def jfileAsPath(jfile: java.io.File) = new {
     def asPath = FileSystem.default(jfile.getPath)
   }
   
@@ -35,14 +32,14 @@ object ImplicitConverters {
   /**
    * Implicitly convert a an asJavaFile method to [[scalax.file.defaultfs.DefaultPath]]
    */
-  implicit def defaultPathAsJFile(path: DefaultPath) = new {
-    def asJavaFile = path.jfile.toFile
+  implicit def defaultPathAsJFile(path: Path) = new {
+    def asJavaFile = path.jpath.toFile
   }
   
   /**
    * Implicitly convert a an asJFile method to [[scalax.file.defaultfs.DefaultPath]]
    */
-  implicit def defaultPathAsJPath(path: DefaultPath) = new {
-	  def asJavaPath = path.jfile
+  implicit def defaultPathAsJPath(path: Path) = new {
+	  def asJavaPath = path.jpath
   }
 }

@@ -17,11 +17,9 @@ import java.nio.file.Files
 
 object FileUtils {
   def openOutputStream(jfile: Path, openOptions: Seq[OpenOption]) = {
-    if(openOptions.contains(StandardOpenOption.CreateFull)) {
-      JFiles.createDirectories(jfile.getParent)
-    }
+    val newOpts = checkForCreateFull(jfile, openOptions)
     Resource.fromOutputStream({
-      JFiles.newOutputStream(jfile, openOptions:_*);
+      JFiles.newOutputStream(jfile, newOpts:_*);
     })
   }
 
@@ -44,10 +42,18 @@ object FileUtils {
     openChannel(jfile.toPath, openOptions)
   }
   def openChannel(path:Path, openOptions: Seq[OpenOption]): SeekableByteChannel = {
-    if(openOptions.contains(StandardOpenOption.CreateFull)) {
+    val newOpts = checkForCreateFull(path, openOptions)
+    Files.newByteChannel(path, newOpts:_*)
+  }
+  
+  def checkForCreateFull(path:Path, openOptions: Seq[OpenOption]) = {
+    val (createFull, rest) = openOptions.partition(_ == StandardOpenOption.CreateFull)
+    if(createFull.nonEmpty) {
       JFiles.createDirectories(path.getParent)
+      rest :+ StandardOpenOption.Create
+    } else {
+      rest
     }
-    Files.newByteChannel(path, openOptions:_*)
   }
 
   def copy(in:InputStream, out:OutputStream) = {

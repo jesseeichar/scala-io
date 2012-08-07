@@ -13,9 +13,17 @@ import scala.reflect.{
 import org.junit.Assert._
 import scalax.file.Path
 import scalaio.test.Node
+import scalax.file.FileSystem
 
 trait FSAssertionSugar extends AssertionSugar{
 
+  def zipfs = {
+    val to = Path.createTempFile()
+    val src = Path(classOf[FSAssertionSugar].getResource("/resources/testzipfile.zip").toURI).get
+    src.copyTo(to, replaceExisting=true)
+    val zipfs = FileSystem.newFileSystem(to)
+    zipfs
+  }
   def assertSameStructure(path : Traversable[Path], tree : Seq[Node], maxDepth : Int = Int.MaxValue)
                          (implicit filter : Node => Boolean = _ => true) {
     val pathList = path.toList

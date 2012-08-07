@@ -10,7 +10,6 @@ package scalaio.test.fs
 
 import scalax.io._
 import scalax.file._
-import scalax.file.ramfs._
 import Path.AccessModes._
 import PathMatcher._
 import scalax.io.Resource
@@ -79,7 +78,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
 
     val copiedFiles = out.***.toList.map((_:Path).relativize(out))
     val treeFiles = tree.***.map((_:Path).relativize(tree))
-    assertTrue(treeFiles.size == copiedFiles.size)
+    assertEquals(treeFiles.size, copiedFiles.size)
     assertTrue(treeFiles.forall(p => copiedFiles.contains(p)))
   }
 
@@ -92,7 +91,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
     assertEquals(path, path2)
     assertEquals(path, path3)
 
-    val fs = new RamFileSystem(separator = fixture.fs.separator)
+    val fs = zipfs
     val rampath = fs.fromSeq(path.segments)
     val equals = rampath == path
     assertFalse(equals)
@@ -106,7 +105,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
   @Test //@Ignore
   def adding_similar_path_from_two_fs_should_have_different_hashcodes {
     val path = List("a","b","c","d","e")
-    val fs = new RamFileSystem(separator = fixture.fs.separator)
+    val fs = zipfs
 
     val set = Set(fs.fromSeq(path),fixture.fs.fromSeq(path))
 
@@ -260,7 +259,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
 
   @Test //@Ignore
   def relativize_return_other_when_not_same_fileSystem = {
-    val other:Path = new RamFileSystem().apply("other")
+    val other:Path = zipfs.apply("other")
     assertSame(other, fixture.root relativize other)
   }
   @Test //@Ignore
@@ -345,7 +344,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
     val f1 = fixture.path
     f1.write(data)
 
-    val otherfs = new RamFileSystem()
+    val otherfs = zipfs
     val otherpath = otherfs("/","a")
 
     f1.moveTo(otherpath)
@@ -363,7 +362,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
     val f1 = fixture.path
     f1.write(data)
 
-    val otherfs:FileSystem = new RamFileSystem()
+    val otherfs:FileSystem = zipfs
     val otherpath = otherfs("/","a")
 
     f1.copyTo(otherpath)
@@ -380,7 +379,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
       val f1 = fixture.path.createDirectory()
 
 
-      val otherfs = new RamFileSystem()
+      val otherfs = zipfs
       val otherpath = otherfs("/","a")
 
       f1.moveTo(otherpath)
@@ -396,7 +395,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
     val f1 = fixture.path.createDirectory()
     f1 \ "b" createFile()
 
-    val otherfs = new RamFileSystem()
+    val otherfs = zipfs
     val otherpath = otherfs("/","a")
 
     f1.moveTo(otherpath)
@@ -749,7 +748,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
     f1 copyTo f2
 
     assertTrue("lastModified attribute was not copied: f1="+f1.lastModified+", f2="+f2.lastModified,
-               f1.lastModified - f2.lastModified < 0.000001)
+               f1.lastModified.toMillis - f2.lastModified.toMillis < 0.000001)
     assertTrue(f2.exists)
     assertTrue(f1.exists)
     assertTrue("canExecute was not copied when it should not have", f2.canExecute)
@@ -771,11 +770,11 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
     }
     f2.deleteRecursively(force=true)
     assertTrue("failed to delete f2", f2.nonExistent)
-    f1.lastModified = 10000
+    f1.lastModified = FileTime.fromMillis(10000L)
     f1.access(Path.AccessModes.Execute) = true
     f1 copyTo (f2, copyAttributes=false)
 
-    assertTrue("lastModified attribute was copied when it should not have", f1.lastModified < f2.lastModified)
+    assertTrue("lastModified attribute was copied when it should not have", f1.lastModified.toMillis < f2.lastModified.toMillis)
     if(f2.isFile && !isWindows) assertFalse("canExecute was copied when it should not have", f2.canExecute)
 
 

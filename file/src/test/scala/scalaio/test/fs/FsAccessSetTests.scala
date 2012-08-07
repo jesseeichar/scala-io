@@ -13,10 +13,9 @@ import scalax.file._
 import org.junit.Assert._
 import org.junit.Test
 import scalax.test.sugar.AssertionSugar
-import scalax.file.defaultfs.DefaultPath
 import collection.JavaConverters._
 import java.nio.file.attribute.PosixFilePermissions
-import java.nio.file.attribute.FileTime
+import java.nio.file.attribute.PosixFilePermission
 
 abstract class FsAccessSetTests extends Fixture {
 
@@ -66,14 +65,18 @@ abstract class FsAccessSetTests extends Fixture {
     val attValue = file.attributes(att) getOrElse { throw new AssertionError(att + " was not one of " + file.attributes) }
     assertEquals(value, attValue)
   }
+  def assertEqualPosixAttribute(value: String)(implicit file: Path) = {
+	  val attValue = file.attributes("posix:permissions") getOrElse { throw new AssertionError("posix:permissions was not one of " + file.attributes) }
+	  assertEquals(value, PosixFilePermissions.toString(attValue.asInstanceOf[java.util.Set[PosixFilePermission]]))
+  }
 
   def assertReadOnly(isReadOnly: Boolean)(implicit file: Path) = {
     if (file.attributes.supportsView[DosFileAttributeView]) {
-      assertEqualAttribute(isReadOnly, "read-only")
+      assertEqualAttribute(isReadOnly, "dos:read-only")
     }
     if (file.attributes.supportsView[PosixFileAttributeView]) {
       val perm = if (isReadOnly) "r--r--r--" else "rw-rw-rw-"
-      assertEqualAttribute(perm, "posix:permissions")
+      assertEqualPosixAttribute(perm)
     }
   }
   
@@ -82,7 +85,7 @@ abstract class FsAccessSetTests extends Fixture {
   def attributes_can_read_access {
     implicit val file = fixture.path.createFile()
 
-    assertEqualAttribute(file.lastModified, "lastModified")
+    assertEqualAttribute(file.lastModified, "basic:lastModifiedTime")
     file.access = "rw"
     assertReadOnly(false)
     
@@ -92,9 +95,9 @@ abstract class FsAccessSetTests extends Fixture {
     file.access += Write
     assertReadOnly(false)
 
-    val newTime = 1324046126000L;
+    val newTime = FileTime.fromMillis(1324046126000L)
     file.lastModified = newTime
-    assertEqualAttribute(newTime, "lastModified")
+    assertEqualAttribute(newTime, "basic:lastModifiedTime")
     assertEquals(newTime, file.lastModified)
   }
 
@@ -103,31 +106,31 @@ abstract class FsAccessSetTests extends Fixture {
     implicit val file = fixture.path.createFile()
 
 	if (file.attributes.supportsView[PosixFileAttributeView]) {
-	  file.attributes = Set(FileAttributeImpl("posix:permissions", "rw-rw-rw-"))
+	  file.attributes = Set(FileAttributeImpl("posix:permissions", PosixFilePermissions fromString "rw-rw-rw-"))
 	} else if (file.attributes.supportsView[DosFileAttributeView]) {
-	  file.attributes = Set(FileAttributeImpl("read-only", false))
+	  file.attributes = Set(FileAttributeImpl("dos:read-only", false))
     }
     
     assertReadOnly(false)
 
 	if (file.attributes.supportsView[PosixFileAttributeView]) {
-	  file.attributes = Set(FileAttributeImpl("posix:permissions", "r--r--r--"))
+	  file.attributes = Set(FileAttributeImpl("posix:permissions", PosixFilePermissions fromString "r--r--r--"))
 	} else if (file.attributes.supportsView[DosFileAttributeView]) {
-	  file.attributes = Set(FileAttributeImpl("read-only", true))
+	  file.attributes = Set(FileAttributeImpl("dos:read-only", true))
     }
 
     assertReadOnly(true)
     
     if (file.attributes.supportsView[PosixFileAttributeView]) {
-	  file.attributes = Set(FileAttributeImpl("posix:permissions", "rw-rw-rw-"))
+	  file.attributes = Set(FileAttributeImpl("posix:permissions", PosixFilePermissions fromString "rw-rw-rw-"))
 	} else if (file.attributes.supportsView[DosFileAttributeView]) {
-	  file.attributes = Set(FileAttributeImpl("read-only", false))
+	  file.attributes = Set(FileAttributeImpl("dos:read-only", false))
     }
 
     assertReadOnly(false)
 
     if (file.attributes.supportsView[PosixFileAttributeView]) {
-	  file.attributes.view[PosixFileAttributeView].get.setPermissions(PosixFilePermissions.fromString("r--r--r--"))
+	  file.attributes.view[PosixFileAttributeView].get.setPermissions(PosixFilePermissions fromString "r--r--r--")
 	} else if (file.attributes.supportsView[DosFileAttributeView]) {
 	  file.attributes.view[DosFileAttributeView].get.setReadOnly(true)
     }
@@ -147,7 +150,7 @@ abstract class FsAccessSetTests extends Fixture {
     val newTime = FileTime.fromMillis(1324046126000L);
     file.attributes.view[BasicFileAttributeView].get.setTimes(newTime, newTime, newTime)
 
-    assertEqualAttribute(newTime, "lastModified")
+    assertEqualAttribute(newTime, "basic:lastModifiedTime")
     assertEquals(newTime, file.lastModified)
   }
 }

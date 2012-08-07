@@ -8,15 +8,15 @@
 
 package scalax.file
 
-import java.io.IOException
+import collection.JavaConverters._
+import java.io.{IOException, File => JFile}
 import java.net.URLStreamHandler
-import java.nio.file.{FileSystems => JFileSystems}
+import java.nio.file.{FileSystems => JFileSystems, FileSystem => JFileSystem, Path => JPath, Files => JFiles}
 import java.util.regex.Pattern
 import scala.util.Random.nextInt
 import PathMatcher.GlobPathMatcher
 import PathMatcher.RegexPathMatcher
-import defaultfs.DefaultFileSystem
-import scalax.io.ResourceContext
+import scalax.io.{ResourceContext, DefaultResourceContext}
 import java.net.URI
 
 /**
@@ -28,15 +28,15 @@ import java.net.URI
  * @since   1.0
  */
 object FileSystem {
-  def get(fileSystemURI: URI) = JFileSystems.getFileSystem(fileSystemURI)
-  def newFileSystem(path:Path, loader:Option[ClassLoader] = None) = JFileSystems.newFileSystem(x$1, x$2)
+  def get(fileSystemURI: URI) = new FileSystem(JFileSystems.getFileSystem(fileSystemURI))
+  def newFileSystem(path:Path, loader:Option[ClassLoader] = None) = new FileSystem(JFileSystems.newFileSystem(path.jpath, loader getOrElse null))
   /**
    *  The default filesystem
    *  <p> In a typical system this is the main system drive
    *  and corresponds to the file system that is referenced by
    *  java.file.File objects</p>
    */
-  val default: DefaultFileSystem = new scalax.file.defaultfs.DefaultFileSystem(JFileSystems.getDefault)
+  val default: FileSystem = new FileSystem(JFileSystems.getDefault)
 
   private lazy val shutdownHook = {
     val thread = new Thread {
@@ -58,11 +58,14 @@ object FileSystem {
  * for accessing files and directories.  Also is used for obtaining metadata
  * about the filesystem.
  *
+ * @param context the Resource context associated with this FileSystem instance.
+ *                Note: as FileSystems are immutable objects a given Resource instance will always be associated with
+ *                the same ResourceContext
  * @author  Jesse Eichar
  * @since   1.0
  */
-abstract class FileSystem {
-  type PathType <: Path
+class FileSystem(protected[file] val jFileSystem: JFileSystem, val context:ResourceContext = DefaultResourceContext) {
+  self =>
   lazy val presentWorkingDirectory = apply(".").toAbsolute
   protected val legalChars = ('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9') ++ List('_', '-', '+', '.') toList
   def randomPrefix = {
@@ -71,22 +74,13 @@ abstract class FileSystem {
     seg :+ lastChar mkString ""
   }
   /**
-   * Get the Resource context associated with this FileSystem instance.
-   *
-   * @note as FileSystems are immutable objects a given Resource instance will always be associated with
-   * the same ResourceContext
-   *
-   * @return the associated ResourceContext
-   */
-  def context:ResourceContext
-  /**
    * Create a new FileSystem instance that is configured with the new ResourceContext
    *
    * @param newContext a new ResourceContext
    *
    * @return a new instance configured with the new context
    */
-  def updateContext(newContext:ResourceContext):FileSystem
+  def updateContext(newContext:ResourceContext):FileSystem = new FileSystem(jFileSystem, newContext)
   /**
    * Update the current ResourceContext and return a new FileSystem instance with the updated context
    *
@@ -97,21 +91,26 @@ abstract class FileSystem {
   def updateContext(f:ResourceContext => ResourceContext):FileSystem = updateContext(f(context))
 
   /** A name identifying the filesystem */
-  def name: String
+  def name: String = jFileSystem.provider.getScheme
   /** The path segment separator string for the filesystem */
-  def separator: String
+  val separator: String = jFileSystem.getSeparator
   /**
    * Create a path object for the filesystem
    */
-  def fromString(path: String): PathType = {
+  def fromString(path: String): Path = {
     val segments = if (separator.size == 1) path.split(separator(0)) else path.split(Pattern.quote(separator))
     doCreateFromSeq((if(path startsWith separator) List(this.separator) else Nil) ++ segments)
   }
-  protected def doCreateFromSeq(segments: Seq[String]): PathType
+  private def doCreateFromSeq(segments: Seq[String]): Path = {
+    val updatedSegments =
+      if (System.getProperty("os.name").toLowerCase.contains("win") && segments.nonEmpty && segments(0) == separator) presentWorkingDirectory.root.getOrElse(roots.head).path +: segments.tail
+      else segments
+    new Path(jFileSystem.getPath(updatedSegments.head, updatedSegments.tail:_*), this)
+  }
   /**
    * Create a path object for the filesystem from the path segments
    */
-  def fromSeq(segments: Seq[String]): PathType = {
+  def fromSeq(segments: Seq[String]): Path = {
     val nonEmpty = segments.filterNot { _.isEmpty }
     val head = nonEmpty.headOption getOrElse "."
     if (head == separator) {
@@ -123,21 +122,23 @@ abstract class FileSystem {
     doCreateFromSeq(nonEmpty)
   }
 
-  def apply(segments: String*): PathType = fromSeq(segments)
-  def apply(pathRepresentation: String, separator:Char): PathType = {
+  def apply(segments: String*): Path = fromSeq(segments)
+  def apply(path: JPath): Path = fromString(path.toString)
+  def apply(path: JFile): Path = fromString(path.getPath)
+  def apply(pathRepresentation: String, separator:Char): Path = {
     val segments = (if(pathRepresentation.charAt(0) == separator) List(this.separator) else Nil) ++ pathRepresentation.split(separator)
     fromSeq(segments)
   }
   /**
    * Returns the list of roots for this filesystem
    */
-  def roots: Set[PathType]
+  def roots: Set[Path] = jFileSystem.getRootDirectories.asScala.map{jp => new Path(jp, self)}.toSet
 
   /**
    * Provides fast access to the fileSystem roots that were present
    * when the fileSystem was created
    */
-  private[scalax] lazy val cachedRoots: Set[PathType] = roots
+  private[scalax] lazy val cachedRoots: Set[Path] = roots
   /**
    * Creates a function that returns true if parameter matches the
    * pattern used to create the function.
@@ -225,7 +226,17 @@ abstract class FileSystem {
     suffix: Option[String] = None,
     dir: Option[String] = None,
     deleteOnExit: Boolean = true,
-    attributes:Set[FileAttribute[_]] = Set.empty): PathType
+    attributes:Set[FileAttribute[_]] = Set.empty): Path = {
+
+    val jpath = dir match {
+      case Some(dir) => JFiles.createTempFile(jFileSystem.getPath(dir), prefix, suffix getOrElse null, attributes.toSeq:_*)
+      case None => JFiles.createTempFile(prefix, suffix getOrElse null, attributes.toSeq:_*)
+    }
+    
+    val path = apply(jpath)
+    if (deleteOnExit) FileSystem.deleteOnShutdown(path)
+    path
+  } 
   /**
    * Creates an empty directory in the provided directory with the provided prefix and suffixes, if the filesystem
    * supports it.  If not then a UnsupportedOperationException is thrown.
@@ -253,18 +264,27 @@ abstract class FileSystem {
   def createTempDirectory(prefix: String = randomPrefix,
     dir: Option[String] = None,
     deleteOnExit: Boolean = true,
-    attributes:Set[FileAttribute[_]] = Set.empty ): PathType
+    attributes:Set[FileAttribute[_]] = Set.empty ): Path = {
+    val jpath = dir match {
+      case Some(dir) => JFiles.createTempDirectory(jFileSystem.getPath(dir), prefix, attributes.toSeq:_*)
+      case None => JFiles.createTempDirectory(prefix, attributes.toSeq:_*)
+    }
+    
+    val path = apply(jpath)
+    if (deleteOnExit) FileSystem.deleteOnShutdown(path)
+    path
+  }
 
   /**
    * Return the names of the supported Attribute views for that file system
    */
-  def supportedFileAttributeViews: Set[String]
+  def supportedFileAttributeViews: Set[String] = jFileSystem.supportedFileAttributeViews.asScala.toSet
   /**
    * Returns a URLStreamHandler if the protocol in the URI is not supported by default JAVA.
    * This handler is used to construct URLs for the Paths as well as by scalax.file.PathURLStreamHandlerFactory
    * The default behavoir is to return None this assumes that the default protocol handlers can handle the protocol
    */
-  def urlStreamHandler: Option[URLStreamHandler] = None
+  //def urlStreamHandler: Option[URLStreamHandler] = None
 
   /**
    * Checks if the separator or a "Common" separator is in the segment.
@@ -315,5 +335,4 @@ abstract class FileSystem {
   }
 
   protected lazy val logger = java.util.logging.Logger.getLogger(getClass.getPackage().getName())
-
 }

@@ -27,26 +27,26 @@ private[file] trait DefaultFileOps {
 
   // TODO OpenOptions
   override def inputStream =
-    Resource.fromInputStream(JFiles.newInputStream(jfile)).updateContext(fileSystem.context)
+    Resource.fromInputStream(JFiles.newInputStream(jpath)).updateContext(fileSystem.context)
 
   override def outputStream(openOptions: OpenOption*) = {
       val r = openOptions match {
           case Seq() =>
-              openOutputStream(jfile,ReadWrite)
+              openOutputStream(jpath,ReadWrite)
           case opts if opts forall {opt => opt != Write && opt != Append} =>
-              openOutputStream(jfile,openOptions :+ Write)
+              openOutputStream(jpath,openOptions :+ Write)
           case _ =>
-            openOutputStream(jfile,openOptions)
+            openOutputStream(jpath,openOptions)
       }
       r.updateContext(fileSystem.context)
   }
   override def channel(openOptions: OpenOption*) =
-    Resource.fromSeekableByteChannel(JFiles.newByteChannel(jfile,openOptions:_*)).updateContext(fileSystem.context)
+    Resource.fromSeekableByteChannel(JFiles.newByteChannel(jpath,openOptions:_*)).updateContext(fileSystem.context)
 
   override def fileChannel(openOptions: OpenOption*):Option[SeekableByteChannelResource[FileChannel]] = {
     try {
-      jfile.toFile // test that it is a file and therefore has a FileChannel
-      Some(Resource.fromSeekableByteChannel(openChannel(jfile,openOptions).asInstanceOf[FileChannel]).updateContext(fileSystem.context))
+      jpath.toFile // test that it is a file and therefore has a FileChannel
+      Some(Resource.fromSeekableByteChannel(openChannel(jpath,openOptions).asInstanceOf[FileChannel]).updateContext(fileSystem.context))
     } catch {
       case e:UnsupportedOperationException => None
     }

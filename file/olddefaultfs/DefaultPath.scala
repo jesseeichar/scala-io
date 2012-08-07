@@ -36,58 +36,58 @@ import java.nio.file.StandardCopyOption
  *  @since   1.0
  */
 //private[file]
-class DefaultPath private[file] (val jfile: JPath, override val fileSystem: DefaultFileSystem) extends Path(fileSystem) with DefaultFileOps
+class DefaultPath private[file] (val jpath: JPath, override val fileSystem: FileSystem) extends Path(fileSystem) with DefaultFileOps
 {
   self =>
 
-  override def toAbsolute: DefaultPath = if (isAbsolute) this else new DefaultPath(jfile.toAbsolutePath, fileSystem)
+  override def toAbsolute: DefaultPath = if (isAbsolute) this else new DefaultPath(jpath.toAbsolutePath, fileSystem)
 
-  override def toURI: URI = jfile.toUri
+  override def toURI: URI = jpath.toUri
   override def /(child: String): DefaultPath = {
     fileSystem.checkSegmentForSeparators(child)
-    fileSystem(jfile.resolve(child))
+    fileSystem(jpath.resolve(child))
   }
-  override def name: String = jfile.getFileName.toString
-  override def path: String = jfile.toString
-  override def toRealPath(linkOptions:LinkOption*) = new DefaultPath(jfile.toRealPath(linkOptions:_*), fileSystem)
-  override def fileOption:Option[java.io.File] = Option(jfile.toFile)
-  override def parent: Option[DefaultPath] = Option(jfile.getParent()) map (jf => new DefaultPath(jf,fileSystem))
+  override def name: String = jpath.getFileName.toString
+  override def path: String = jpath.toString
+  override def toRealPath(linkOptions:LinkOption*) = new DefaultPath(jpath.toRealPath(linkOptions:_*), fileSystem)
+  override def fileOption:Option[java.io.File] = Option(jpath.toFile)
+  override def parent: Option[DefaultPath] = Option(jpath.getParent()) map (jf => new DefaultPath(jf,fileSystem))
   override def checkAccess(modes: AccessMode*): Boolean = {
     modes forall {
-      case Execute  => JFiles.isExecutable(jfile)
-      case Read     => JFiles.isReadable(jfile)
-      case Write    => JFiles.isWritable(jfile)
+      case Execute  => JFiles.isExecutable(jpath)
+      case Read     => JFiles.isReadable(jpath)
+      case Write    => JFiles.isWritable(jpath)
     }
   }
   private[this] val sepRegex = Pattern.compile(Pattern.quote(separator)+"+")
   override lazy val segments = new Seq[String] {
-    override def length = jfile.getNameCount
-    override def apply(i: Int) = jfile.getName(i).toString
+    override def length = jpath.getNameCount
+    override def apply(i: Int) = jpath.getName(i).toString
     override def iterator = new Iterator[String]{
       var i = 0
-      def hasNext = i < jfile.getNameCount
+      def hasNext = i < jpath.getNameCount
       def next = {
         i += 1
-        jfile.getName(i-1).toString
+        jpath.getName(i-1).toString
       }
     }
   }
-  override def canWrite  = JFiles.isWritable(jfile)
-  override def canRead = JFiles.isReadable(jfile)
-  override def canExecute = JFiles.isExecutable(jfile)
+  override def canWrite  = JFiles.isWritable(jpath)
+  override def canRead = JFiles.isReadable(jpath)
+  override def canExecute = JFiles.isExecutable(jpath)
   // TODO LinkOptions
-  override def exists = JFiles.exists(jfile)
+  override def exists = JFiles.exists(jpath)
   // TODO LinkOptions
-  override def nonExistent = JFiles.notExists(jfile)
+  override def nonExistent = JFiles.notExists(jpath)
   // TODO LinkOptions
-  override def isFile = JFiles.isRegularFile(jfile)
+  override def isFile = JFiles.isRegularFile(jpath)
   // TODO LinkOptions
-  override def isDirectory = JFiles.isDirectory(jfile)
-  override def isAbsolute = jfile.isAbsolute()
-  override def isHidden = JFiles.isHidden(jfile)
-  override def lastModified = JFiles.getLastModifiedTime(jfile).toMillis
-  override def lastModified_=(time: Long) = {JFiles.setLastModifiedTime(jfile, FileTime.fromMillis(time)); time}
-  override def size: Option[Long] = if(exists) Some(JFiles.size(jfile)) else None
+  override def isDirectory = JFiles.isDirectory(jpath)
+  override def isAbsolute = jpath.isAbsolute()
+  override def isHidden = JFiles.isHidden(jpath)
+  override def lastModified = JFiles.getLastModifiedTime(jpath).toMillis
+  override def lastModified_=(time: Long) = {JFiles.setLastModifiedTime(jpath, FileTime.fromMillis(time)); time}
+  override def size: Option[Long] = if(exists) Some(JFiles.size(jpath)) else None
 
   override def access_=(accessModes:Iterable[AccessMode]) = {
     if (nonExistent) fail("Path %s does not exist".format(path))
@@ -99,27 +99,27 @@ class DefaultPath private[file] (val jfile: JPath, override val fileSystem: Defa
     	case _ => Nil
     	}
     	import collection.JavaConverters._
-    	JFiles.setPosixFilePermissions(jfile, permissions.toSet.asJava)
+    	JFiles.setPosixFilePermissions(jpath, permissions.toSet.asJava)
     } else if (attributes.supportsView[DosFileAttributeView]) {
       attributes.view[DosFileAttributeView]().get.setReadOnly(!accessModes.exists(_ == Write))
     }
   }
 // TODO Exceptions
 // TODO FileAttributes
-  override def doCreateParents() = Option(jfile.toAbsolutePath.getParent()).foreach(f => JFiles.createDirectories(f))
+  override def doCreateParents() = Option(jpath.toAbsolutePath.getParent()).foreach(f => JFiles.createDirectories(f))
 // TODO Exceptions
 // TODO FileAttributes
-  override def doCreateDirectory() = JFiles.createDirectory(jfile.toAbsolutePath)
+  override def doCreateDirectory() = JFiles.createDirectory(jpath.toAbsolutePath)
 // TODO Exceptions
 // TODO FileAttributes
-  override def doCreateFile() = JFiles.createDirectory(jfile.toAbsolutePath)
+  override def doCreateFile() = JFiles.createDirectory(jpath.toAbsolutePath)
 
   override def delete(force : Boolean): this.type = {
     if(exists) {
       if (force) access_= (access + Write)
 
       if(!canWrite) fail("File is not writeable so the file cannot be deleted")
-      JFiles.delete(jfile)
+      JFiles.delete(jpath)
     }
     this
   }
@@ -129,7 +129,7 @@ class DefaultPath private[file] (val jfile: JPath, override val fileSystem: Defa
     val copyOptions = if (atomicMove) Seq(java.nio.file.StandardCopyOption.ATOMIC_MOVE) else Nil
     target match {
       case target: DefaultPath =>
-        JFiles.move(jfile, target.jfile, copyOptions:_*)
+        JFiles.move(jpath, target.jpath, copyOptions:_*)
       case _ =>
         copyDataTo(target)
         delete()
@@ -142,7 +142,7 @@ class DefaultPath private[file] (val jfile: JPath, override val fileSystem: Defa
     val y = target.exists
     target match {
       case target: DefaultPath =>
-        JFiles.move(jfile, target.jfile, copyOptions:_*)
+        JFiles.move(jpath, target.jpath, copyOptions:_*)
       case _ =>
         val x = target.exists
         target.createDirectory()
@@ -161,7 +161,7 @@ class DefaultPath private[file] (val jfile: JPath, override val fileSystem: Defa
     new BasicPathSet[DefaultPath](this, factory(filter), depth, false, { (p:PathMatcher[DefaultPath], path:DefaultPath) =>
       // TODO Native filters
       new CloseableIterator[DefaultPath] {
-        val stream = JFiles.newDirectoryStream(path.jfile)
+        val stream = JFiles.newDirectoryStream(path.jpath)
         val iter = stream.iterator
         def doClose = try {stream.close; Nil} catch {case e:Throwable => List(e)}
         def hasNext = iter.hasNext

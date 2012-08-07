@@ -10,16 +10,16 @@ package scalaio.test
 
 import org.junit.Assert._
 import org.junit.Test
-import scalax.file.ramfs.RamFileSystem
 import scalax.file.PathMatcherFactory._
 import scalax.file.{PathMatcher, Path, PathMatcherFactory}
 import scalax.file.PathMatcher.NameIs
+import scalax.test.sugar.FSAssertionSugar
 
-class PathMatcherFactoryTest  {
+class PathMatcherFactoryTest extends FSAssertionSugar {
 
   @Test
   def `function path matcher converts a function to a PathMatcher` : Unit = {
-    val fs = new RamFileSystem()
+    val fs = zipfs
     val namePath = fs("world","name")
     val notNamePath = fs("world","not")
     val nameis = FunctionToMatcher{_.name == "name"}
@@ -31,7 +31,7 @@ class PathMatcherFactoryTest  {
 
   @Test
   def `function path matcher converts a PathMatcher to a PathMatcher` : Unit = {
-    val fs = new RamFileSystem()
+    val fs = zipfs
     val namePath = fs("world","name")
     val notNamePath = fs("world","not")
     val nameis = FunctionToMatcher(FunctionToMatcher{_.name == "name"})
@@ -48,7 +48,7 @@ class PathMatcherFactoryTest  {
 
     @Test
     def `method with implicit factory and default` : Unit = {
-      val fs = new RamFileSystem()
+      val fs = zipfs
       val namePath = fs("world","name")
       val notNamePath = fs("world","not")
       val nameis = NameIs("name")
