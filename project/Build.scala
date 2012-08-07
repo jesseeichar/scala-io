@@ -15,7 +15,7 @@ object ScalaIoBuild extends Build {
   // ----------------------- Root Project ----------------------- //
 
   lazy val root:Project = Project("root", file(".")).
-    aggregate(coreProject,fileProject,perfProject,webSiteProject).
+    aggregate(coreProject,fileProject,perfProject,webSiteProject,ramfsProject).
     settings(sharedSettings ++ Seq(publishArtifact := false, name := "Scala IO") :_*)
 
   // ----------------------- Samples Settings ----------------------- //
@@ -107,16 +107,27 @@ object ScalaIoBuild extends Build {
     settings (samplesSettings ++ sharedSettings ++ fileSettings : _*).
     dependsOn(coreProject, coreProject % "test->test")
 
-  // ----------------------- Performace Project ---------------------//
+  // ----------------------- Ramfs Project ---------------------//
 
-  val perfSettings: Seq[Setting[_]] = Seq(
-    name := "scala-io-performance",
-    libraryDependencies += "com.github.jsuereth" % "sperformance_2.10" % "0.1",
+  val RamfsSettings: Seq[Setting[_]] = Seq(
+    name := "scala-io-ram-fs",
     publishArtifact := false
   )
-  lazy val perfProject = Project("perf", file("perf")).
-    settings (samplesSettings ++ sharedSettings ++ perfSettings : _*).
-    dependsOn(coreProject,coreProject % "compile->test", fileProject % "compile->test")
+  lazy val ramfsProject = Project("scala-io-ramfs", file("ramfs")).
+    settings (sharedSettings : _*).
+    dependsOn(coreProject,fileProject)
+
+
+    // ----------------------- Performace Project ---------------------//
+
+    val perfSettings: Seq[Setting[_]] = Seq(
+      name := "scala-io-performance",
+      libraryDependencies += "com.github.jsuereth" % "sperformance_2.10" % "0.1",
+      publishArtifact := false
+    )
+    lazy val perfProject = Project("perf", file("perf")).
+      settings (samplesSettings ++ sharedSettings ++ perfSettings : _*).
+      dependsOn(coreProject,coreProject % "compile->test", fileProject % "compile->test")
 
 
   // ------------------------------ Docs Project ------------------------------ //

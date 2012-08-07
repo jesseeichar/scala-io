@@ -8,24 +8,44 @@
 
 package scalax.io
 
-import _root_.resource.{ManagedResourceOperations}
-import scala.util.control.Exception.allCatch
-import java.nio.channels.{
-  ByteChannel, ReadableByteChannel, WritableByteChannel,
-  Channels
-}
-import java.io._
-import java.nio.ByteBuffer
+import java.io.Closeable
+import java.io.File
+import java.io.InputStream
+import java.io.OutputStream
+import java.io.RandomAccessFile
+import java.io.Reader
+import java.io.Writer
+import java.net.URL
+import java.net.URLConnection
+import java.nio.channels.ByteChannel
 import java.nio.channels.FileChannel
-import java.net.{URLConnection, URL}
-import CloseAction._
-import StandardOpenOption._
-import managed._
-import collection.immutable.List._
-import util.control.Exception
-import extractor._
+import java.nio.channels.ReadableByteChannel
+import java.nio.channels.WritableByteChannel
+import java.nio.file.Path
+import scala.Option.option2Iterable
+import scala.util.control.Exception.allCatch
+import CloseAction.Noop
+import StandardOpenOption.Read
+import StandardOpenOption.ReadWrite
+import managed.ByteChannelResource
+import managed.InputStreamResource
+import managed.OutputStreamResource
+import managed.ReadableByteChannelResource
+import managed.ReaderResource
+import managed.SeekableByteChannelResource
+import managed.WritableByteChannelResource
+import managed.WriterResource
+import resource.ManagedResourceOperations
+import scalax.io.managed.ByteChannelResource
+import scalax.io.managed.InputStreamResource
+import scalax.io.managed.OutputStreamResource
+import scalax.io.managed.ReadableByteChannelResource
+import scalax.io.managed.ReaderResource
+import scalax.io.managed.SeekableByteChannelResource
+import scalax.io.managed.WritableByteChannelResource
+import scalax.io.managed.WriterResource
 import support.FileUtils
-import java.nio.channels.SeekableByteChannel
+import java.nio.file.Files
 
 trait OpenedResource[+R] {
   def get:R
@@ -539,7 +559,7 @@ object Resource {
    * @throws java.io.IOException if file does not exist
    */
   def fromFile(file:File): SeekableByteChannelResource[FileChannel] = {
-    def open = (opts:Seq[OpenOption]) => support.FileUtils.openChannel(file,opts)
+    def open = (opts:Seq[OpenOption]) => support.FileUtils.openChannel(file,opts).asInstanceOf[FileChannel]
     def sizeFunc = () => allCatch.opt{file.length}
     new SeekableByteChannelResource[FileChannel](open,new ResourceContext{override def descName=KnownName(file.getPath)},Noop,sizeFunc, None)
   }
@@ -553,6 +573,13 @@ object Resource {
    */
   def fromFile(file:String): SeekableByteChannelResource[FileChannel] =
     fromFile(new File(file))
+    
+  def fromPath(path:Path): SeekableByteChannelResource[SeekableByteChannel] = {
+    def open = (opts:Seq[OpenOption]) => support.FileUtils.openChannel(path,opts)
+    def sizeFunc = () => allCatch.opt{Files.size(path)}
+    new SeekableByteChannelResource[SeekableByteChannel](open,new ResourceContext{override def descName=KnownName(path.toString)},Noop,sizeFunc, None)
+
+  }
 
   /**
    * Create an InputStreamResource from a resource on the classpath.  The classloader from the provided class is used to resolve

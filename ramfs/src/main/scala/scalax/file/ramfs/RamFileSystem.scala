@@ -93,6 +93,7 @@ class RamFileSystem(val id : RamFileSystem.RamFsId = RamFileSystem.RamFsId(), va
 
   }
 
+  override def supportedFileAttributeViews: Set[String] = Set("posix")
   def uri(path:RamPath = root):URI = new URI(RamFileSystem.protocol+"://"+id.id+"!"+path.path.replaceAll("\\\\","/"))
   override def toString = "Ram File System"
 

@@ -6,6 +6,8 @@
  * sets
  * </p>
  */
+import scalax.file.FileAttributeImpl
+
 object CreatingPathSets {
 
   /**
@@ -48,10 +50,11 @@ object CreatingPathSets {
    */
   def pathMatcherPathSets {
     import scalax.file.Path
+    import scalax.file.FileAttributeImpl
     import Path._
     import scalax.file.PathSet
     import scalax.file.PathMatcher._
-
+    import java.nio.file.attribute.PosixFilePermissions
 
     // two ways to select all files
     val files = Path("tmp") ** IsFile
@@ -64,13 +67,14 @@ object CreatingPathSets {
     // find all writeable, executable files
     import Path.AccessModes._
     val writeable = Path("tmp") ** AccessMatcher(Write, Execute) // can put multiple
-    import scalax.file.attributes._
-    val writeable2 = Path("tmp") ** AttributeMatcher(WriteAccessAttribute(true), ExecuteAccessAttribute(true))
+    
+    
+    val writeable2 = Path("tmp") ** AttributeMatcher(FileAttributeImpl("read-only", true))
     val writeable3 = Path("tmp") ** ((_:Path).canWrite)
 
     // find all files with a particular datestamp that are writeable but not executable
     import Path.AccessModes._
-    val timeStamped = Path("tmp") ** AttributeMatcher(WriteAccessAttribute(true), ExecuteAccessAttribute(false), LastModifiedAttribute(123456000L))
+    val timeStamped = Path("tmp") ** AttributeMatcher(PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("_wx_wx---")), FileAttributeImpl("lastModified", 123456000L) )
     val timeStamped2 = Path("tmp") ** ((p:Path) => p.canWrite && p.canExecute && p.lastModified == 123456000L)
   }
 

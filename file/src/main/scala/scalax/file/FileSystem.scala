@@ -8,15 +8,16 @@
 
 package scalax.file
 
-import defaultfs.DefaultFileSystem
+import java.io.IOException
 import java.net.URLStreamHandler
-import PathMatcher.{ GlobPathMatcher, RegexPathMatcher }
-import util.Random.nextInt
-import java.io.{ IOException, File => JFile }
-import scalax.io.ResourceContext
-import java.util.regex.Pattern
-import java.nio.file.attribute.FileAttribute
 import java.nio.file.{FileSystems => JFileSystems}
+import java.util.regex.Pattern
+import scala.util.Random.nextInt
+import PathMatcher.GlobPathMatcher
+import PathMatcher.RegexPathMatcher
+import defaultfs.DefaultFileSystem
+import scalax.io.ResourceContext
+import java.net.URI
 
 /**
  * Factory object for obtaining filesystem objects
@@ -27,6 +28,8 @@ import java.nio.file.{FileSystems => JFileSystems}
  * @since   1.0
  */
 object FileSystem {
+  def get(fileSystemURI: URI) = JFileSystems.getFileSystem(fileSystemURI)
+  def newFileSystem(path:Path, loader:Option[ClassLoader] = None) = JFileSystems.newFileSystem(x$1, x$2)
   /**
    *  The default filesystem
    *  <p> In a typical system this is the main system drive
@@ -252,6 +255,10 @@ abstract class FileSystem {
     deleteOnExit: Boolean = true,
     attributes:Set[FileAttribute[_]] = Set.empty ): PathType
 
+  /**
+   * Return the names of the supported Attribute views for that file system
+   */
+  def supportedFileAttributeViews: Set[String]
   /**
    * Returns a URLStreamHandler if the protocol in the URI is not supported by default JAVA.
    * This handler is used to construct URLs for the Paths as well as by scalax.file.PathURLStreamHandlerFactory

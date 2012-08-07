@@ -43,12 +43,15 @@ object implicits {
    */
   def implicitConverters = {
     import java.io.File
+    import java.nio.file.{Paths, Path => JPath}
     import scalax.file.defaultfs.DefaultPath
     import scalax.file.Path
     import scalax.file.ImplicitConverters._
 
     val path: DefaultPath = new File("/tmp/file").asPath
-    val fileAgain: File = path.asFile
+    val path2: DefaultPath = Paths.get("/tmp/file").asPath
+    val fileAgain: File = path.asJavaFile
+    val javaPath: JPath = path.asJavaPath
     val pathFromString: Path = "hi".asPath
   }
 }

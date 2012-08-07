@@ -119,7 +119,7 @@ object UsingPathSets {
     val files = allChildren.filter(IsFile)
 
     // all files smaller than 1000 bytes.  Still no filesystem access
-    val smallFiles = files.filter(_.size.forall(_ < 1000))
+    val smallFiles = files.filter(path => path.size.forall(_ < 1000))
 
     // sizes of files.  still not filesystem access
     val sizes = smallFiles.flatMap(_.size)

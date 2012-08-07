@@ -49,7 +49,7 @@ class DefaultPath private[file] (val jfile: JPath, override val fileSystem: Defa
   }
   override def name: String = jfile.getFileName.toString
   override def path: String = jfile.toString
-  override def toRealPath(linkOptions:LinkOption*) = new DefaultPath(jfile.toRealPath(linkOptions.map(_.toJavaLinkOptions):_*), fileSystem)
+  override def toRealPath(linkOptions:LinkOption*) = new DefaultPath(jfile.toRealPath(linkOptions:_*), fileSystem)
   override def fileOption:Option[java.io.File] = Option(jfile.toFile)
   override def parent: Option[DefaultPath] = Option(jfile.getParent()) map (jf => new DefaultPath(jf,fileSystem))
   override def checkAccess(modes: AccessMode*): Boolean = {
@@ -91,14 +91,18 @@ class DefaultPath private[file] (val jfile: JPath, override val fileSystem: Defa
 
   override def access_=(accessModes:Iterable[AccessMode]) = {
     if (nonExistent) fail("Path %s does not exist".format(path))
-    val permissions = accessModes.flatMap {
-      case Write => PosixFilePermission.GROUP_WRITE :: PosixFilePermission.OTHERS_WRITE :: PosixFilePermission.OWNER_WRITE :: Nil
-      case Read => PosixFilePermission.GROUP_READ :: PosixFilePermission.OTHERS_READ :: PosixFilePermission.OWNER_READ :: Nil
-      case Execute => PosixFilePermission.GROUP_EXECUTE :: PosixFilePermission.OTHERS_EXECUTE :: PosixFilePermission.OWNER_EXECUTE:: Nil
-      case _ => Nil
+    if (attributes.supportsView[PosixFileAttributeView]) {
+    	val permissions = accessModes.flatMap {
+    	case Write => PosixFilePermission.GROUP_WRITE :: PosixFilePermission.OTHERS_WRITE :: PosixFilePermission.OWNER_WRITE :: Nil
+    	case Read => PosixFilePermission.GROUP_READ :: PosixFilePermission.OTHERS_READ :: PosixFilePermission.OWNER_READ :: Nil
+    	case Execute => PosixFilePermission.GROUP_EXECUTE :: PosixFilePermission.OTHERS_EXECUTE :: PosixFilePermission.OWNER_EXECUTE:: Nil
+    	case _ => Nil
+    	}
+    	import collection.JavaConverters._
+    	JFiles.setPosixFilePermissions(jfile, permissions.toSet.asJava)
+    } else if (attributes.supportsView[DosFileAttributeView]) {
+      attributes.view[DosFileAttributeView]().get.setReadOnly(!accessModes.exists(_ == Write))
     }
-    import collection.JavaConverters._
-    JFiles.setPosixFilePermissions(jfile, permissions.toSet.asJava)
   }
 // TODO Exceptions
 // TODO FileAttributes
@@ -168,5 +172,7 @@ class DefaultPath private[file] (val jfile: JPath, override val fileSystem: Defa
       }
     })
   }
+  
+  override val attributes = new DefaultFileAttributes(this)
 }
 

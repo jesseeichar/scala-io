@@ -17,8 +17,8 @@ object CreateTemporary {
     // files.
     // The default filesystem does
     val tmpFile2: Path = Path.createTempFile(prefix = "tmpFile",
-      suffix = "tmp",
-      dir = "/tmp",
+      suffix = Some("tmp"),
+      dir = Some("/tmp"),
       deleteOnExit = false)
 
     // a file system can also be used to create temporary files/directories
@@ -40,8 +40,7 @@ object CreateTemporary {
     // files/directories.
     // The default filesystem does
     val tmpFile2: Path = Path.createTempDirectory(prefix = "tmpFile",
-      suffix = "tmp",
-      dir = "/tmp",
+      dir = Some("/tmp"),
       deleteOnExit = false)
 
     // a file system can also be used to create temporary files/directories

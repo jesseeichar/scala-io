@@ -126,5 +126,5 @@ trait PathSetLike[+T, +Repr <: PathSetLike[T, Repr]] extends PathFinder[T] with 
     finally i.close
   } 
   
-  protected def iterator: CloseableIterator[T]
+  def iterator: CloseableIterator[T]
 }

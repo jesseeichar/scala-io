@@ -20,7 +20,8 @@ object PathsToJavaFile {
     val somePath = Path("/somedir/somefile.txt")
     somePath match {
       case defaultPath:DefaultPath =>
-        val file:File = defaultPath.jfile
+        val jpath:java.nio.file.Path = defaultPath.jfile
+        val file:File = defaultPath.jfile.toFile
         // do something with file
       case  _ =>
         // handle non-file case

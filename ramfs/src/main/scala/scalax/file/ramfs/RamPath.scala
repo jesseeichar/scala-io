@@ -10,12 +10,11 @@ package scalax.file
 package ramfs
 import Path.AccessModes._
 import Path.fail
-
 import java.net.URI
-
 import java.util.regex.Pattern
 import collection.mutable.ArrayBuffer
 import scala.{Some, Option}
+import scalax.io.CloseableIterator
 
 class RamPath(relativeTo: String, val path: String, override val fileSystem: RamFileSystem) extends Path(fileSystem) with RamFileOps {
   def node = fileSystem.lookup(this)
@@ -80,7 +79,7 @@ class RamPath(relativeTo: String, val path: String, override val fileSystem: Ram
     time
   }
 
-  def size = node collect {
+  def size:Option[Long] = node collect {
     case f: FileNode => f.data.size.toLong
   }
 
@@ -98,9 +97,9 @@ class RamPath(relativeTo: String, val path: String, override val fileSystem: Ram
       }
   }
 
-  def doCreateFile(): Boolean = fileSystem.create(this, FileNode, false)
+  def doCreateFile(): Unit = if(!fileSystem.create(this, FileNode, false)) fail("Unable to create file "+path)
 
-  def doCreateDirectory(): Boolean = fileSystem.create(this, DirNode, false)
+  def doCreateDirectory(): Unit = if(!fileSystem.create(this, DirNode, false)) fail("Unable to create directory "+path)
 
   def doCreateParents(): Unit = this.toAbsolute.parent.foreach(fileSystem.create(_, DirNode, true))
 
@@ -133,8 +132,10 @@ class RamPath(relativeTo: String, val path: String, override val fileSystem: Ram
         case p =>
           throw new NotDirectoryException(p+" is not a directory so descendants can not be called on it")
       }
-      c.toIterator.flatten
+      CloseableIterator(c.toIterator.flatten)
     })
   }
+  
+  override def attributes = new RamFileAttributes(this)
 
 }

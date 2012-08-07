@@ -34,6 +34,7 @@ private[ramfs] object DirNode extends NodeFac {
 }
 
 private[ramfs] trait Node {
+  val attributes = collection.mutable.HashMap[String,Any]()
   var name:String
   var lastModified:Long
   var (canRead, canWrite, canExecute) = initAccess;

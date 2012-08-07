@@ -17,7 +17,7 @@ import scalax.io.{CloseableIterator, CloseableIteratorOps}
 object PathFinder {
   def empty = new BasicPathSet[Nothing](Nil,PathMatcher.All, -1,false, (_:PathMatcher[Nothing],_:Nothing) => CloseableIterator.empty)
 }
-trait PathFinder[+T] extends TraversableOnce[T] {
+trait PathFinder[+T] {
   /**The union of the paths found by this <code>PathSet</code> with the paths found by 'paths'.
    * Note that if the same element is added twice it will be present twice in the PathFinder
    * (in most implementations).  Consider: (Path("a") +++ Path("a")).iterator.  the iterator

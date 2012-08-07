@@ -15,7 +15,7 @@ import StandardOpenOption._
 import scalax.io.support.FileUtils._
 import java.io.{FileInputStream, File => JFile}
 import java.nio.channels.FileChannel
-
+import java.nio.file.{Path => JPath, Files => JFiles}
 /**
  * <b>Not part of API.</b>
  *
@@ -25,8 +25,9 @@ import java.nio.channels.FileChannel
 private[file] trait DefaultFileOps {
   self : DefaultPath =>
 
+  // TODO OpenOptions
   override def inputStream =
-    Resource.fromInputStream(new FileInputStream(jfile)).updateContext(fileSystem.context)
+    Resource.fromInputStream(JFiles.newInputStream(jfile)).updateContext(fileSystem.context)
 
   override def outputStream(openOptions: OpenOption*) = {
       val r = openOptions match {
@@ -40,10 +41,17 @@ private[file] trait DefaultFileOps {
       r.updateContext(fileSystem.context)
   }
   override def channel(openOptions: OpenOption*) =
-    Resource.fromSeekableByteChannel(openChannel(jfile,openOptions)).updateContext(fileSystem.context)
+    Resource.fromSeekableByteChannel(JFiles.newByteChannel(jfile,openOptions:_*)).updateContext(fileSystem.context)
 
-  override def fileChannel(openOptions: OpenOption*):Some[SeekableByteChannelResource[FileChannel]] =
-    Some(Resource.fromSeekableByteChannel(openChannel(jfile,openOptions)).updateContext(fileSystem.context))
+  override def fileChannel(openOptions: OpenOption*):Option[SeekableByteChannelResource[FileChannel]] = {
+    try {
+      jfile.toFile // test that it is a file and therefore has a FileChannel
+      Some(Resource.fromSeekableByteChannel(openChannel(jfile,openOptions).asInstanceOf[FileChannel]).updateContext(fileSystem.context))
+    } catch {
+      case e:UnsupportedOperationException => None
+    }
+  }
+    
 
 
   def withLock[R](start: Long = 0, size: Long = -1, shared: Boolean = false, context:ResourceContext)(block: Seekable => R): Option[R] = {

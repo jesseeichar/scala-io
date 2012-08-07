@@ -13,102 +13,41 @@ import scalax.io.extractor.ReadableByteChannelExtractor
 import scalax.io.extractor.WritableByteChannelExtractor
 import scalax.io.extractor.FileChannelExtractor
 import java.nio.file.Path
+import java.nio.file.Files
 
 object FileUtils {
   def openOutputStream(jfile: Path, openOptions: Seq[OpenOption]) = {
+    if(openOptions.contains(StandardOpenOption.CreateFull)) {
+      JFiles.createDirectories(jfile.getParent)
+    }
     Resource.fromOutputStream({
       JFiles.newOutputStream(jfile, openOptions:_*);
     })
   }
-  def openOutputStream(jfile: File, openOptions: Seq[OpenOption]) = {
-	  Resource.fromOutputStream({
-		  val (append, options) = preOpen(jfile, openOptions, true)
-				  if (options contains DeleteOnClose) {
-					  new DeletingFileOutputStream(jfile, append)
-				  } else {
-					  new FileOutputStream(jfile, append)
-				  }
-	  })
-  }
 
   def openChannel(raf: RandomAccessFile, openOptions: Seq[OpenOption]): FileChannel = {
       if (openOptions contains DeleteOnClose)
-        throw new UnsupportedOperationException("DeleteOnClose is not supported on FileChannels pre Java 7 implementations.")
+        throw new UnsupportedOperationException("DeleteOnClose is not supported for RandomAccessChannels.")
       if ((openOptions contains Truncate) && (openOptions exists {
         opt => opt == Write || opt == Append
-      }))
+      })){
         raf.setLength(0)
-      if (openOptions contains Append)
+      }
+      if (openOptions contains Append) {
         raf.seek(raf.length)
+      }
 
       raf.getChannel
   }
 
-  def openChannel(jfile:File, openOptions: Seq[OpenOption]): FileChannel= {
-    val (_, options) = preOpen(jfile,openOptions,false)
-    if (options contains DeleteOnClose) {
-     throw new UnsupportedOperationException("DeleteOnClose is not supported on FileChannels pre Java 7 implementations.")
-    } else {
-      openChannel(randomAccessFile(jfile,options),options)
-    }
+  def openChannel(jfile:File, openOptions: Seq[OpenOption]): SeekableByteChannel = {
+    openChannel(jfile.toPath, openOptions)
   }
-
-  private def preOpen(jfile:File, openOptions: Seq[OpenOption],processTruncate:Boolean) : (Boolean, Seq[OpenOption]) = {
-     val options = if(openOptions.isEmpty) WriteTruncate
-                    else openOptions
-
-      var append = false
-      options foreach {
-        case Append =>
-          append = true
-        case Create if !jfile.exists =>
-          jfile.createNewFile()
-        case CreateFull if !jfile.exists =>
-          var parent = Option(jfile.getParentFile) orElse Option(jfile.getAbsoluteFile().getParentFile())
-          parent.getOrElse(throw new IOException("unable to get parent file of"+jfile)).mkdirs()
-          jfile.createNewFile()
-        case CreateNew =>
-          if (jfile.exists)
-            throw new IOException(jfile+" already exists, openOption '"+CreateNew+"' cannot be used with an existing file")
-        case Truncate if processTruncate && (options.exists {opt => opt == Write || opt == Append} && (jfile.length > 0))=>
-          new FileOutputStream(jfile).close()  // truncate file
-
-        case _ => ()
+  def openChannel(path:Path, openOptions: Seq[OpenOption]): SeekableByteChannel = {
+    if(openOptions.contains(StandardOpenOption.CreateFull)) {
+      JFiles.createDirectories(path.getParent)
     }
-
-    (append,options)
-  }
-
-  private def randomAccessFile(jfile:File, openOptions: Seq[OpenOption]) = {
-    val unsortedChars = openOptions collect {
-      case Write | Append => 'w'
-      case Read => 'r'
-      case Sync => 's'
-      case DSync => 'd'
-    }
-
-
-    // only values acceptable to RandomAccessFile are r rw rwd or rws
-    // so need to do some massaging
-    val sortedChars = unsortedChars.distinct.sortWith {
-      (x, y) =>
-        def value(x: Char) = x match {
-          case 'r' => 0
-          case 'w' => 1
-          case 's' => 2
-          case 'd' => 3
-        }
-        value(x) < value(y)
-    }
-
-    val chars = if (sortedChars.mkString endsWith "sd") sortedChars.takeWhile(_ != 's')
-    else sortedChars
-
-    if (chars contains 'r') {
-      new RandomAccessFile(jfile, chars mkString)
-    } else {
-      new RandomAccessFile(jfile, 'r' + chars.mkString)
-    }
+    Files.newByteChannel(path, openOptions:_*)
   }
 
   def copy(in:InputStream, out:OutputStream) = {

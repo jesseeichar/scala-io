@@ -14,6 +14,9 @@ import org.junit.Assert._
 import org.junit.Test
 import scalax.test.sugar.AssertionSugar
 import scalax.file.defaultfs.DefaultPath
+import collection.JavaConverters._
+import java.nio.file.attribute.PosixFilePermissions
+import java.nio.file.attribute.FileTime
 
 abstract class FsAccessSetTests extends Fixture {
 
@@ -59,68 +62,92 @@ abstract class FsAccessSetTests extends Fixture {
     assertTrue(file.canWrite)
   }
 
+  def assertEqualAttribute[T](value: T, att: String)(implicit file: Path) = {
+    val attValue = file.attributes(att) getOrElse { throw new AssertionError(att + " was not one of " + file.attributes) }
+    assertEquals(value, attValue)
+  }
+
+  def assertReadOnly(isReadOnly: Boolean)(implicit file: Path) = {
+    if (file.attributes.supportsView[DosFileAttributeView]) {
+      assertEqualAttribute(isReadOnly, "read-only")
+    }
+    if (file.attributes.supportsView[PosixFileAttributeView]) {
+      val perm = if (isReadOnly) "r--r--r--" else "rw-rw-rw-"
+      assertEqualAttribute(perm, "posix:permissions")
+    }
+  }
+  
+
   @Test
   def attributes_can_read_access {
-    val file = fixture.path.createFile()
+    implicit val file = fixture.path.createFile()
 
-    def assertEqualAttribute[T, U <: FileAttribute[T]](value:T, att: Class[U]) = {
-      val attValue = file.attributes find {a => att.isAssignableFrom(a.getClass)} getOrElse {throw new AssertionError(att+" was not one of "+file.attributes)}
-      assertEquals(value, attValue.value)
-    }
-
+    assertEqualAttribute(file.lastModified, "lastModified")
     file.access = "rw"
-    assertEqualAttribute(true, classOf[ReadAccessAttribute])
-    assertEqualAttribute(true, classOf[WriteAccessAttribute])
-    if (!isWindows || !file.isInstanceOf[DefaultPath]) assertEqualAttribute(false, classOf[ExecuteAccessAttribute])
-    assertEqualAttribute(file.lastModified, classOf[LastModifiedAttribute])
-
+    assertReadOnly(false)
+    
     file.access -= Write
-    assertEqualAttribute(true, classOf[ReadAccessAttribute])
-    assertEqualAttribute(false, classOf[WriteAccessAttribute])
-    if (!isWindows || !file.isInstanceOf[DefaultPath]) assertEqualAttribute(false, classOf[ExecuteAccessAttribute])
-    assertEqualAttribute(file.lastModified, classOf[LastModifiedAttribute])
+    assertReadOnly(true)
 
     file.access += Write
-    assertEqualAttribute(true, classOf[ReadAccessAttribute])
-    assertEqualAttribute(true, classOf[WriteAccessAttribute])
-    if (!isWindows || !file.isInstanceOf[DefaultPath]) assertEqualAttribute(false, classOf[ExecuteAccessAttribute])
-    assertEqualAttribute(file.lastModified, classOf[LastModifiedAttribute])
+    assertReadOnly(false)
 
     val newTime = 1324046126000L;
-     file.lastModified = newTime
-    assertEqualAttribute(newTime, classOf[LastModifiedAttribute])
+    file.lastModified = newTime
+    assertEqualAttribute(newTime, "lastModified")
     assertEquals(newTime, file.lastModified)
   }
 
   @Test
   def setting_attributes_can_update {
-    val file = fixture.path.createFile()
-    def assertEqualAttribute[T, U <: FileAttribute[T]](value:T, att: Class[U]) = {
-      val attValue = file.attributes find {a => att.isAssignableFrom(a.getClass)} getOrElse {throw new AssertionError(att+" was not one of "+file.attributes)}
-      assertEquals(value, attValue.value)
+    implicit val file = fixture.path.createFile()
+
+	if (file.attributes.supportsView[PosixFileAttributeView]) {
+	  file.attributes = Set(FileAttributeImpl("posix:permissions", "rw-rw-rw-"))
+	} else if (file.attributes.supportsView[DosFileAttributeView]) {
+	  file.attributes = Set(FileAttributeImpl("read-only", false))
+    }
+    
+    assertReadOnly(false)
+
+	if (file.attributes.supportsView[PosixFileAttributeView]) {
+	  file.attributes = Set(FileAttributeImpl("posix:permissions", "r--r--r--"))
+	} else if (file.attributes.supportsView[DosFileAttributeView]) {
+	  file.attributes = Set(FileAttributeImpl("read-only", true))
     }
 
-    file.attributes = List(WriteAccessAttribute(true), ReadAccessAttribute(true))
-    assertEqualAttribute(true, classOf[ReadAccessAttribute])
-    assertEqualAttribute(true, classOf[WriteAccessAttribute])
-    if (!isWindows || !file.isInstanceOf[DefaultPath]) assertEqualAttribute(false, classOf[ExecuteAccessAttribute])
-    assertEqualAttribute(file.lastModified, classOf[LastModifiedAttribute])
+    assertReadOnly(true)
+    
+    if (file.attributes.supportsView[PosixFileAttributeView]) {
+	  file.attributes = Set(FileAttributeImpl("posix:permissions", "rw-rw-rw-"))
+	} else if (file.attributes.supportsView[DosFileAttributeView]) {
+	  file.attributes = Set(FileAttributeImpl("read-only", false))
+    }
 
-    file.attributes = List(WriteAccessAttribute(false))
-    assertEqualAttribute(true, classOf[ReadAccessAttribute])
-    assertEqualAttribute(false, classOf[WriteAccessAttribute])
-    if (!isWindows || !file.isInstanceOf[DefaultPath]) assertEqualAttribute(false, classOf[ExecuteAccessAttribute])
-    assertEqualAttribute(file.lastModified, classOf[LastModifiedAttribute])
+    assertReadOnly(false)
 
-    file.attributes = List(WriteAccessAttribute(true))
-    assertEqualAttribute(true, classOf[ReadAccessAttribute])
-    assertEqualAttribute(true, classOf[WriteAccessAttribute])
-    if (!isWindows || !file.isInstanceOf[DefaultPath]) assertEqualAttribute(false, classOf[ExecuteAccessAttribute])
-    assertEqualAttribute(file.lastModified, classOf[LastModifiedAttribute])
+    if (file.attributes.supportsView[PosixFileAttributeView]) {
+	  file.attributes.view[PosixFileAttributeView].get.setPermissions(PosixFilePermissions.fromString("r--r--r--"))
+	} else if (file.attributes.supportsView[DosFileAttributeView]) {
+	  file.attributes.view[DosFileAttributeView].get.setReadOnly(true)
+    }
 
-    val newTime = 1324046126000L;
-    file.attributes = List(LastModifiedAttribute(newTime))
-    assertEqualAttribute(newTime, classOf[LastModifiedAttribute])
+    assertReadOnly(true)
+    
+    if (file.attributes.supportsView[PosixFileAttributeView]) {
+    	file.attributes.view[PosixFileAttributeView].get.setPermissions(PosixFilePermissions.fromString("rw-rw-rw-"))
+    } else if (file.attributes.supportsView[DosFileAttributeView]) {
+    	file.attributes.view[DosFileAttributeView].get.setReadOnly(false)
+    }
+    
+    assertReadOnly(false)
+
+    
+
+    val newTime = FileTime.fromMillis(1324046126000L);
+    file.attributes.view[BasicFileAttributeView].get.setTimes(newTime, newTime, newTime)
+
+    assertEqualAttribute(newTime, "lastModified")
     assertEquals(newTime, file.lastModified)
   }
 }

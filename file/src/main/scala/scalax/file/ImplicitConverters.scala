@@ -22,13 +22,27 @@ object ImplicitConverters {
    * Method to implicitly convert add an asPath method to [[java.io.File]]
    */
   implicit def jfileAsPath(jfile: File) = new {
-    def asPath = FileSystem.default.fromString(jfile.getPath)
+    def asPath = FileSystem.default(jfile.getPath)
+  }
+  
+  /**
+   * Method to implicitly convert add an asPath method to [[java.nio.file.Path]]
+   */
+  implicit def jfileAsPath(jfile: java.nio.file.Path) = new {
+	  def asPath = FileSystem.default(jfile)
   }
 
   /**
-   * Implicitly convert a an asJFile method to [[scalax.file.defaultfs.DefaultPath]]
+   * Implicitly convert a an asJavaFile method to [[scalax.file.defaultfs.DefaultPath]]
    */
   implicit def defaultPathAsJFile(path: DefaultPath) = new {
-    def asFile = path.jfile
+    def asJavaFile = path.jfile.toFile
+  }
+  
+  /**
+   * Implicitly convert a an asJFile method to [[scalax.file.defaultfs.DefaultPath]]
+   */
+  implicit def defaultPathAsJPath(path: DefaultPath) = new {
+	  def asJavaPath = path.jfile
   }
 }

@@ -15,6 +15,8 @@ import Path.AccessModes._
 import org.junit.Test
 import org.junit.Assert._
 import ramfs.RamFileSystem
+import java.nio.file.attribute.DosFileAttributeView
+import scalax.file.FileAttributeImpl
 
 abstract class FsMatchingTests extends scalax.test.sugar.AssertionSugar with Fixture {
   implicit val codec = Codec.UTF8
@@ -80,17 +82,31 @@ abstract class FsMatchingTests extends scalax.test.sugar.AssertionSugar with Fix
   def attributeMatcher = {
     val path = fixture.path
     path.createFile()
-    def test (value:FileAttribute[_]) = {
-      path.attributes = List(value)
-      assertTrue(path.attributes exists {_ == value})
+    def test (attribute:FileAttribute[_]) = {
+      path.attributes.update(attribute)
+      assertTrue(path.attributes exists attribute)
+      assertTrue(PathMatcher.AttributeMatcher(attribute)(path))
     }
-    test(WriteAccessAttribute(true))
-    test(WriteAccessAttribute(false))
-    test(ExecuteAccessAttribute(true))
-    test(ExecuteAccessAttribute(true))
-    test(ReadAccessAttribute(true))
-    test(ReadAccessAttribute(true))
-    test(LastModifiedAttribute(1324046126000L))
+    test(FileAttributeImpl("lastModifiedTime",1324046126000L))
+    test(FileAttributeImpl("lastModifiedTime",System.currentTimeMillis))
+    test(FileAttributeImpl("lastAccessTime",1324046126000L))
+    test(FileAttributeImpl("lastAccessTime",System.currentTimeMillis))
+    test(FileAttributeImpl("creationTime",1324046126000L))
+    test(FileAttributeImpl("creationTime",System.currentTimeMillis))
+    assertTrue(path.attributes("size").nonEmpty)
+    assertTrue(path.attributes("isRegularFile").nonEmpty)
+    assertTrue(path.attributes("isDirectory").nonEmpty)
+    assertTrue(path.attributes("isSymbolicLink").nonEmpty)
+    assertTrue(path.attributes("isOther").nonEmpty)
+    assertTrue(path.attributes("fileKey").nonEmpty)
+    if (path.attributes.supportsView[DosFileAttributeView]) {
+      test(FileAttributeImpl("hidden",true))
+      test(FileAttributeImpl("hidden",false))
+      test(FileAttributeImpl("readonly",true))
+      test(FileAttributeImpl("readonly",false))
+      test(FileAttributeImpl("system",true))
+      test(FileAttributeImpl("archive",false))
+    }
   }
 
   def assertMatch(exp:String)(implicit path:Path, syntax:String) = {

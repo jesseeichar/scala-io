@@ -701,8 +701,8 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    * of the file's attributes
    */
   def attributes : FileAttributes
-  def attributes_=[T <: BasicFileAttributes](newAttributes: T) : this.type = {
-    attributes update newAttributes
+  def attributes_=(newAttributes: TraversableOnce[FileAttribute[_]]) : this.type = {
+    newAttributes.foreach(att => attributes.update(att))
     this
   }
   
@@ -1026,7 +1026,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
     }
 
     if(copyAttributes) {
-    	this.attributes.get[BasicFileAttributes].foreach(att => target.attributes = att) 
+    	this.attributes.all.foreach(target.attributes.update(_)) 
     }
     target
   }
