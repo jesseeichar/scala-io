@@ -1,7 +1,5 @@
 package scalax.file
 
-import scalax.io.OpenOption
-
 /**
  * Contains the common Link Options
  *

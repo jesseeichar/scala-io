@@ -19,7 +19,7 @@ import java.io.IOException
 class ByteChannelResourceInputTest extends InputTest {
   def resource(sep:String, openFunction: () => Unit, closeFunction: () => Unit) =
     Resource.fromReadableByteChannel(Channels.newChannel(stringBasedStream(sep, openFunction, closeFunction)))
-  protected override def input(t: Type, openFunction: () => Unit, closeFunction: () => Unit):Input = t match {
+  protected override def input(t: Type, openFunction: () => Unit, closeFunction: () => Unit):Input = (t: @unchecked) match {
     case t@TextNewLine => resource(t.sep, openFunction, closeFunction)
     case t@TextPair => resource(t.sep, openFunction, closeFunction)
     case t@TextCarriageReturn => resource(t.sep, openFunction, closeFunction)
