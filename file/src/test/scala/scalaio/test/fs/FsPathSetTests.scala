@@ -31,7 +31,7 @@ abstract class FsPathSetTests extends scalax.test.sugar.AssertionSugar with Abst
     val list1 = x1 toList
     val list2 = x2 toList
 
-    def relativize(l:List[Path]) = l.map{_.relativize(fixture.root)}
+    def relativize(l:List[Path]) = l.map{fixture.root.relativize(_)}
 
     assertEquals("Expected "+relativize(list1)+" but got "+relativize(list2),list1.size, list2.size)
     assertTrue("Expected "+relativize(list1)+" but got "+relativize(list2), list1.forall{list2 contains _});

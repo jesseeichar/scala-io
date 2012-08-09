@@ -95,7 +95,8 @@ private[traversable] class SeekableByteChannelIterator(
   private[this] val channel = getIn
   @inline
   final def init() = if (!isInitialized) {
-    channel.position(position)
+    if(channel.position != position) channel.position(position)
+
     val sliceLength: Long = (end - start) min Int.MaxValue
     val bufferSize = sizeFunc().map(_ min (sliceLength)).orElse(Some(sliceLength))
     buffer = openResource.context.createNioBuffer(bufferSize, Some(getIn), true)

@@ -79,7 +79,7 @@ trait AbstractPathSetTests extends scalax.test.sugar.FSAssertionSugar {
 
     val stream = path.children()
 
-    assertTrue(stream forall {p => p.relativize(path).segments.size == 1})
+    assertTrue(stream forall {p => path.relativize(p).segments.size == 1})
 
     assertSameStructure (stream, tree.children, 1)
   }

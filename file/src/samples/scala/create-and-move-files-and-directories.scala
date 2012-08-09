@@ -1,5 +1,3 @@
-import scalax.file.ramfs.RamFileSystem
-
 /**
  * Demonstrate creating simple paths and moving them withing the filesystem and
  * to other filesystems.
@@ -60,12 +58,11 @@ object CreateAndMoveFilesAndDirectories {
    */
   def moveBetweenFileSystems {
     import scalax.file._
-    import ramfs.RamFileSystem
 
-    val fs = RamFileSystem()
-    val ramPath = fs("/","tmp")
+    val zipfs = FileSystem.newFileSystem(Path("myzip.zip"))
+    val zipPath = zipfs("/","tmp")
     val path = Path("file")  // default filesystem
 
-    path.moveTo(ramPath)
+    path.moveTo(zipPath)
   }
 }

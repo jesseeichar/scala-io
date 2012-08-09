@@ -16,7 +16,6 @@ import scala.annotation._
 import collection.mutable.{ArrayOps, WrappedArray}
 import java.nio.channels.{ByteChannel, WritableByteChannel}
 import java.io.File
-import java.nio.channels.SeekableByteChannel
 
 /**
  * A strategy trait used with the Seekable.patch to control how data is

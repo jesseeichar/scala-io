@@ -38,13 +38,13 @@ trait AssertionSugar {
     val m = implicitly[ClassTag[E]]
     val error = try {
       test
-      Some("Expected "+m.toString+" but instead no exception was raised")
+      Some("Expected "+m.runtimeClass.toString+" but instead no exception was raised")
     }catch{
       case e:AssertionError if m.runtimeClass != classOf[AssertionError] => throw e
       case e if (m.runtimeClass.isAssignableFrom(e.getClass)) => None
       case e: Throwable =>
         e.printStackTrace
-        Some("Expected "+m.toString+" but instead got "+e.getClass)
+        Some("Expected "+m.runtimeClass.toString+" but instead got "+e.getClass)
     }
 
     error match {

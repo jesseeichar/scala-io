@@ -14,17 +14,11 @@ object PathsToJavaFile {
    */
   def pathToJavaFile {
     import scalax.file.Path
-    import scalax.file.defaultfs.DefaultPath
     import java.io.File
 
     val somePath = Path("/somedir/somefile.txt")
-    somePath match {
-      case defaultPath:DefaultPath =>
-        val jpath:java.nio.file.Path = defaultPath.jfile
-        val file:File = defaultPath.jfile.toFile
-        // do something with file
-      case  _ =>
-        // handle non-file case
-    }
+    val jpath: java.nio.file.Path = somePath.jpath
+    val file: File = somePath.jpath.toFile
+
   }
 }

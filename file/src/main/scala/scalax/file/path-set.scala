@@ -124,7 +124,7 @@ final class BasicPathSet[+T <: Path](srcFiles: Traversable[T],
 
     private[this] def currentDepth(p:Path, root:Option[Path]) = {
       val basicDepth = root.map {r =>
-        p.relativize(r).segments.size
+        r.relativize(p).segments.size
         } getOrElse Int.MaxValue
       if(self) basicDepth - 1 else basicDepth
     }

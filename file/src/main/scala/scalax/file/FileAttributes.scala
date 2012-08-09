@@ -19,7 +19,9 @@ class FileAttributes(path: Path) {
     }
   }
   def exists[A](att: FileAttribute[A])(implicit linkOptions:Seq[LinkOption] = Seq.empty): Boolean = {
-    apply(att.name)(linkOptions) exists {_ == att.value}
+    apply(att.name)(linkOptions) exists {v =>
+      v == att.value
+      }
   }
 
   def get[T <: BasicFileAttributes : ClassTag](implicit linkOptions:Seq[LinkOption] = Seq.empty): Option[T] =
@@ -30,7 +32,11 @@ class FileAttributes(path: Path) {
 
   def update[A](attribute:FileAttribute[A], linkOptions:LinkOption*): this.type = update(attribute.name, attribute.value, linkOptions:_*)
   def update(name: String, newVal: Any, linkOptions:LinkOption*): this.type = {
-    JFiles.setAttribute(jpath, name, newVal, linkOptions:_*)
+    val finalVal = newVal match {
+      case time: FileTime => time.jfileTime
+      case v => v
+    }
+    JFiles.setAttribute(jpath, name, finalVal, linkOptions:_*)
     this
   }
 

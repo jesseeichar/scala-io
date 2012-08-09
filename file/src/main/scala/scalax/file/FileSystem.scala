@@ -64,7 +64,7 @@ object FileSystem {
  * @author  Jesse Eichar
  * @since   1.0
  */
-class FileSystem(protected[file] val jFileSystem: JFileSystem, val context:ResourceContext = DefaultResourceContext) {
+class FileSystem(protected[file] val jFileSystem: JFileSystem, val context:ResourceContext = DefaultResourceContext) extends Equals {
   self =>
   lazy val presentWorkingDirectory = apply(".").toAbsolute
   protected val legalChars = ('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9') ++ List('_', '-', '+', '.') toList
@@ -335,4 +335,13 @@ class FileSystem(protected[file] val jFileSystem: JFileSystem, val context:Resou
   }
 
   protected lazy val logger = java.util.logging.Logger.getLogger(getClass.getPackage().getName())
+  
+   override def equals(other: Any) = other match {
+    case x : FileSystem =>
+      (this canEqual x) && (jFileSystem == x.jFileSystem)
+    case _        => false
+  }
+  def canEqual(other: Any): Boolean = other.isInstanceOf[FileSystem]
+  override def hashCode() = 41 * (37 + jFileSystem.hashCode())
+
 }

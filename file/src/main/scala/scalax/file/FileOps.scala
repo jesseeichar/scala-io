@@ -104,7 +104,7 @@ abstract class FileOps extends Seekable {
   def outputStream(openOptions:OpenOption*) : OutputStreamResource[OutputStream] = {
       val r = openOptions match {
           case Seq() =>
-              openOutputStream(jpath,ReadWrite)
+              openOutputStream(jpath,WriteTruncate)
           case opts if opts forall {opt => opt != Write && opt != Append} =>
               openOutputStream(jpath,openOptions :+ Write)
           case _ =>
@@ -238,7 +238,7 @@ abstract class FileOps extends Seekable {
     else outputStream().writableByteChannel
   protected def underlyingChannel(append: Boolean) = {
     if(append) {
-      channel((ReadWrite :+ Append) :_*).open
+      channel(Seq(Append) :_*).open
     } else {
       channel(ReadWrite : _*).open
     }

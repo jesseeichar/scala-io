@@ -7,7 +7,6 @@ import java.io.Reader
 import java.io.Writer
 import java.net.URL
 import java.nio.channels.{ReadableByteChannel, FileChannel, WritableByteChannel, Channels}
-import java.nio.channels.SeekableByteChannel
 
 object JavaConverters {
   class AsInput(op: => Input) {

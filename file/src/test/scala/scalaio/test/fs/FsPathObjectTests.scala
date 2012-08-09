@@ -36,7 +36,7 @@ abstract class FsPathObjectTests extends Fixture {
 
     val p = FileSystem.default.createTempFile()
     val file:java.io.File = p
-    assertSame(p.jpath, file)
+    assertSame(p.jpath.toFile.getCanonicalPath, file.getCanonicalPath)
   }
 
   @Test
@@ -65,11 +65,11 @@ abstract class FsPathObjectTests extends Fixture {
 
   @Test
   def path_object_can_create_paths_from_a_uri() : Unit = {
-    assertSame(FileSystem.default, Path(new URI("file:///tmp/")).get.fileSystem)
+    assertEquals(FileSystem.default, Path(new URI("file:///tmp/")).get.fileSystem)
     val path = fixture.path
     val uri = path.toURI
     val fromURI = Path(uri).get
-    assertSame(fixture.fs, fromURI.fileSystem)
+    assertEquals(fixture.fs, fromURI.fileSystem)
     assertEquals(path, fromURI)
   }
 }

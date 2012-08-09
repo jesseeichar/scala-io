@@ -1,7 +1,6 @@
 package scalax.file
 
 import scalax.io.OpenOption
-import java.nio.file.LinkOption
 
 /**
  * Contains the common Link Options

@@ -49,7 +49,7 @@ object FileUtils {
   def checkForCreateFull(path:Path, openOptions: Seq[OpenOption]) = {
     val (createFull, rest) = openOptions.partition(_ == StandardOpenOption.CreateFull)
     if(createFull.nonEmpty) {
-      JFiles.createDirectories(path.getParent)
+      Option(path.getParent) foreach {JFiles.createDirectories(_)}
       rest :+ StandardOpenOption.Create
     } else {
       rest

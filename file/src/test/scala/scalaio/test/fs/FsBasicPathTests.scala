@@ -64,7 +64,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
      val tree = fixture.tree(3)._1
      val out = fixture.path(1).createDirectory(true,false)
      tree.**((_:Path).isFile).foreach { p =>
-       val to = out / p.relativize(tree)
+       val to = out / tree.relativize(p)
        p.copyTo(to)
      }
   }
@@ -76,8 +76,8 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
 
     tree.copyTo(out)
 
-    val copiedFiles = out.***.toList.map((_:Path).relativize(out))
-    val treeFiles = tree.***.map((_:Path).relativize(tree))
+    val copiedFiles = out.***.toList.map(out.relativize(_:Path))
+    val treeFiles = tree.***.map(tree.relativize(_:Path))
     assertEquals(treeFiles.size, copiedFiles.size)
     assertTrue(treeFiles.forall(p => copiedFiles.contains(p)))
   }
@@ -184,7 +184,8 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
 
   @Test //@Ignore
   def convert_to_uri = {
-    assertEquals(fspath("xx").toURL.toString, fspath("xx").toURI.toString)
+    assertEquals(fspath("xx").toURL.toString, fspath("xx").toURI.toURL.toString)
+    assertEquals(Path(fspath("xx").toURI).get, fspath("xx").toAbsolute)
   }
 
 
@@ -253,7 +254,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
   @Test //@Ignore
   def relativize_should_make_a_child_relative_to_parent = {
     val p = fixture.root \ "c1" \ "c2"
-    assertEquals(2, (p relativize fixture.root).segments.size)
+    assertEquals(2, (fixture.root relativize p).segments.size)
     assertFalse(fixture.root.path == p.path)
   }
 
@@ -289,7 +290,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
   @Test //@Ignore
   def slash_method_should_create_child_path = {
     val p = fixture.root \ "c1" \ "c2"
-    assertEquals(2, (p relativize fixture.root).segments.size)
+    assertEquals(2, (fixture.root relativize p).segments.size)
   }
   @Test //@Ignore
   def path_should_support_standard_comparisons() : Unit = {
@@ -661,9 +662,9 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
     assertEquals(fspath("a/b/c").path, fspath("a") \ (",,b,,c,",',') path)
     val pathToResolve = "b/c"
     assertEquals(fspath("a/b/c").path, (fspath("a") resolve (pathToResolve,'/')).path)
-    val path = fspath("a")
-    assertEquals(path toRealPath(), path \ "." toRealPath())
-    assertEquals(path toRealPath(), path.resolve (".",'/').toRealPath())
+    val path = fixture.path(3)
+    assertEquals(path normalize, path \ "." normalize)
+    assertEquals(path normalize, path.resolve (".",'/').normalize)
     intercept[IllegalArgumentException] {
           path \ fixture.fs.separator
     }
@@ -775,8 +776,6 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
     f1 copyTo (f2, copyAttributes=false)
 
     assertTrue("lastModified attribute was copied when it should not have", f1.lastModified.toMillis < f2.lastModified.toMillis)
-    if(f2.isFile && !isWindows) assertFalse("canExecute was copied when it should not have", f2.canExecute)
-
 
     f2 copyTo f2 // noop
     intercept[IOException] {
@@ -789,7 +788,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
       if(!isWindows) {
         val access = exists.access.toList
         exists.access = List(Read)
-        intercept[IOException] {
+        intercept[SecurityException] {
           f2.copyTo (exists, replaceExisting=true)
         }
         exists.access = access
@@ -801,7 +800,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
     }
 
     if (canReplace) overwrite
-    else intercept[IOException] {overwrite}
+    else intercept[SecurityException] {overwrite}
 
     // TODO check attributes/access of copied file/directory
   }
@@ -829,7 +828,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
     assertNotNull(pathx)
     assertEquals(pathx, path.resolve("x",'/'))
     assertEquals("x", pathx.segments.last)
-    assertEquals(fspath("x"), pathx.relativize(path))
+    assertEquals(fspath("x"), path.relativize(pathx))
   }
 
   def creatableAndDeletable(testData: TestData):Unit = {

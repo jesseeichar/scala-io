@@ -17,7 +17,6 @@ import java.nio.{ByteBuffer => NioByteBuffer}
 import scala.Option.option2Iterable
 import support.ArrayIterator
 import support.NioByteBufferIterator
-import java.nio.channels.SeekableByteChannel
 
 /**
  * A way of abstracting over the source Resource's type

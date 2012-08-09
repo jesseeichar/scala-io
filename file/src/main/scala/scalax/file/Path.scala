@@ -239,7 +239,7 @@ class Path private[file] (val jpath:JPath, val fileSystem: FileSystem) extends F
    */
   def toFile:Option[java.io.File] = Option(jpath.toFile)
   /**
-   * Creates a URI from the path.
+   * Creates a URI from the path.  The uri will be the absolute path
    * @see java.file.File#toURI
    */
   def toURI: URI = jpath.toUri
@@ -328,7 +328,7 @@ class Path private[file] (val jpath:JPath, val fileSystem: FileSystem) extends F
    * The name of the file.  This includes the extension of the file
    * @return the name of the file
    */
-  def name: String = jpath.getFileName.toString
+  def name: String = Option(jpath.getFileName).map(_.toString) getOrElse ""
   /**
    * The name of the file excluding of the file
    * @return name of the file excluding of the file
@@ -427,7 +427,8 @@ class Path private[file] (val jpath:JPath, val fileSystem: FileSystem) extends F
    * @return relative path from the current path to the other path
    */
   def relativize(other: Path): Path = {
-	new Path(jpath.relativize(other.jpath), fileSystem)
+    if (fileSystem != other.fileSystem) other
+    else new Path(jpath.relativize(other.jpath), fileSystem)
   }
 
   // derived from identity
@@ -734,6 +735,7 @@ class Path private[file] (val jpath:JPath, val fileSystem: FileSystem) extends F
     modifier.headOption match {
       case Some('-') => access = (access -- actualModes)
       case Some('+') => access = (access ++ actualModes)
+      case Some(c) => throw new IllegalArgumentException("Only + and - are acceptable mode modifiers.  Found: "+c)
       case None => access = actualModes
     }
   }
@@ -747,13 +749,14 @@ class Path private[file] (val jpath:JPath, val fileSystem: FileSystem) extends F
    */
   def access : AccessSet = new AccessSet(this)
 
+  private val fileAttribute = new FileAttributes(this)
   /**
    * Return the FileAttributes object for advanced reading and setting 
    * of the file's attributes
    */
-  def attributes : FileAttributes = new FileAttributes(this)
+  def attributes : FileAttributes = fileAttribute
   def attributes_=(newAttributes: TraversableOnce[FileAttribute[_]]) : this.type = {
-    newAttributes.foreach(att => attributes.update(att))
+    newAttributes.foreach(att => fileAttribute.update(att))
     this
   }
   
@@ -761,9 +764,8 @@ class Path private[file] (val jpath:JPath, val fileSystem: FileSystem) extends F
   private def createContainingDir(createParents: Boolean) = {
     def testWrite(parent:Option[Path]) = {
       parent match {
-        case Some(p) if !p.canWrite => fail("Cannot write parent directory: "+p+" of "+ path)
+        case Some(p) if !p.canWrite => fail("Cannot write to parent directory: "+p+" of "+ path)
         case Some(p) if !p.isDirectory => fail("parent path is not a directory")
-        case Some(p) if !p.canExecute => fail("Cannot execute in parent directory: "+p+" of "+ path)
         case Some(p) => ()
         case None => fail("Parent directory cannot be created: '"+path+"'")
       }
@@ -798,7 +800,7 @@ class Path private[file] (val jpath:JPath, val fileSystem: FileSystem) extends F
    * NOT PUBLIC API: Create a file for the current path without considering if the parents
    * has been previously created.   This method should fail if the parent does not exist
    */
-  private def doCreateFile():Unit = JFiles.createDirectory(jpath.toAbsolutePath)
+  private def doCreateFile():Unit = JFiles.createFile(jpath.toAbsolutePath)
   /**
    * Create the file referenced by this path.
    *
@@ -853,7 +855,6 @@ class Path private[file] (val jpath:JPath, val fileSystem: FileSystem) extends F
       assert(parent.forall{p => p.exists}, "parent must exist for a file to be created within it")
       assert(parent.forall{p => p.canWrite}, "parent must be writeable")
       assert(parent.forall{p => p.isDirectory}, "parent must be executable")
-      assert(parent.forall{p => p.canExecute}, "parent must be executable")
 
       doCreateFile()
       access = accessModes
@@ -900,18 +901,26 @@ class Path private[file] (val jpath:JPath, val fileSystem: FileSystem) extends F
    */
   def createDirectory(createParents: Boolean = true, failIfExists: Boolean = true,
                       accessModes:Iterable[AccessMode]=List(Read,Write,Execute), attributes:Iterable[FileAttribute[_]]=Nil):Path =  {
-    if (failIfExists && exists) fail("Directory '%s' already exists." format name)
-    if (exists && isFile) fail("Path "+this+" is a fileand thus cannot be created as a directory")
-
-    if(root != Some(this) && nonExistent) {
-      createContainingDir (createParents)
-
-      val res = doCreateDirectory()
+	  val exsts = exists(Seq(LinkOptions.NoFollowLinks))
+    if (failIfExists && exsts) fail("Directory '%s' already exists." format name)
+    val notDir = !isDirectory
+    if (exsts && notDir) {
+      fail("Path "+this+" is a file (or symlink) and thus cannot be created as a directory")
     }
-    attributes.foreach{att => this.attributes(att.name) = att.value}
 
-    access = accessModes
-    this
+    if (exsts) {
+      this
+    } else {
+      if (root != Some(this) && nonExistent) {
+        createContainingDir(createParents)
+
+        val res = doCreateDirectory()
+      }
+      attributes.foreach { att => this.attributes(att.name) = att.value }
+
+      access = accessModes
+      this
+	}
   }
 
   // deletions
@@ -1052,6 +1061,7 @@ class Path private[file] (val jpath:JPath, val fileSystem: FileSystem) extends F
    *  @throws IOException
    *           if the copy could not be satisfied because the target could
    *           not be written to or if this path cannot be copied
+   *  @throws SecurityEx
    */
   def copyTo[P <: Path](target: P,
              createParents : Boolean=true,
@@ -1063,7 +1073,19 @@ class Path private[file] (val jpath:JPath, val fileSystem: FileSystem) extends F
     val linkOptions = if (!followLinks) Seq(LinkOptions.NoFollowLinks) else Seq.empty
     if (exists(linkOptions) && target.exists(linkOptions) && isSame(target)) return target
   
+    if(!canRead) throw new SecurityException("Source path: "+path+" does not permit read, therefore copying is denied")
+
+      target.createContainingDir(createParents)
+
+      if(target.parent.exists{p => p.exists && !p.canWrite}) {
+        throw new SecurityException("Containing directory of target path: "+target+" does not permit write, therefore copying is denied")
+      }
+
+      if (replaceExisting && !target.canWrite) throw new SecurityException("target path: "+target+" does not permit writing, therefore replacing the file is not permitted")
+      
     if (isDirectory) {
+      if (target.exists && !replaceExisting) fail("target exists but replaceExisting is false")
+      
       target.createDirectory(createParents, false)
       if(depth > 0) {
         descendants(depth=depth, linkOptions = linkOptions).foreach{p =>
@@ -1072,11 +1094,7 @@ class Path private[file] (val jpath:JPath, val fileSystem: FileSystem) extends F
           p.copyTo(to, depth=0, followLinks=followLinks, replaceExisting=replaceExisting)
         }
       }
-    }
-    else {
-      if(createParents) {
-        target.parent.foreach{_.createDirectory(true,false)}
-      }
+    } else {
       var copyOptions = collection.mutable.Buffer[CopyOption]()
       if (copyAttributes) copyOptions += StandardCopyOption.copyAttributes 
       if (replaceExisting) copyOptions += StandardCopyOption.replaceExisting 
@@ -1103,6 +1121,10 @@ class Path private[file] (val jpath:JPath, val fileSystem: FileSystem) extends F
    *           unless it is a non-empty directory in which case
    *           an IOException is thrown.
    *           False by default
+   *  @param createParents
+   *           If the parent of target does not exist it will be 
+   *           created if createParents is true
+   *           True by default
    *  @param atomicMove
    *           it will guarantee atomicity of the move
    *           False by default
@@ -1114,45 +1136,68 @@ class Path private[file] (val jpath:JPath, val fileSystem: FileSystem) extends F
    *           not be written to or if this path cannot be moved
    */
   def moveTo[P <: Path](target: P, replace:Boolean=false,
+		  	 createParents:Boolean = true,
              atomicMove:Boolean=false) : P = {
 
-    if(root.exists(_ == this)) {
-       throw new IOException("cannot move a root path")
+    if (root.exists(_ == this)) {
+      throw new IOException("cannot move a root path")
     }
 
-    if( target.exists && replace) {
+    if (target.exists && replace) {
       target match {
-        case _ if target.isDirectory && target.children().nonEmpty => fail("can not replace a non-empty directory: "+target)
+        case _ if target.isDirectory && target.children().nonEmpty => fail("can not replace a non-empty directory: " + target)
         case _ => target.delete()
       }
     }
 
     import PathMatcher._
 
-   this match {
-       case NonExistent(_) => fail("attempted to move "+path+" but it does not exist")
-       case _ if target.normalize == normalize => ()
-       case _ if !replace && target.exists => fail(target+" exists but replace parameter is false")
-       case IsFile(_) if target.isDirectory => fail("cannot overwrite a directory with a file")
-       case IsDirectory(_) if target.isFile => fail("cannot overwrite a file with a directory")
-       // TODO move between two fileSystems
-       case IsFile(_) if target.fileSystem != fileSystem =>
-         target write bytes
-         delete()
-       case _ if target.fileSystem != fileSystem && this.isDirectory =>
-         target.createDirectory()
-         children() foreach { path =>
-             path moveTo (target \ path.relativize(self))
-         }
-         delete()
-       case IsFile(_) if target.nonExistent || target.isFile => doMove(target,atomicMove)
-       case IsDirectory(_) if target.nonExistent => doMove(target,atomicMove)
-       case _ =>
-         throw new Error("not yet handled "+target+","+this)
-     }
-     target
+    implicit val linkOptions = Seq(LinkOptions.NoFollowLinks)
+    if (nonExistent) {
+      fail("attempted to move " + path + " but it does not exist")
+    }
+    if (target.normalize == normalize) {
+      return target
+    }
+    if (!replace && target.exists) {
+      fail(target + " exists but replace parameter is false")
+    }
+    if (isFile && target.isDirectory) {
+      fail("cannot overwrite a directory with a file")
+    }
+    if (isDirectory && target.isFile) {
+      fail("cannot overwrite a file with a directory")
+    }
+
+    if (createParents) {
+      target.toAbsolute.parent.collect {
+        case parent if parent.nonExistent => parent.createDirectory()
+      }
+    }
+    if (this.isDirectory && (target.fileSystem != fileSystem || jpath.toFile == null || target.jpath == null)) {
+      forceMoveDir(target, atomicMove)
+    } else if (isFile && (target.nonExistent || target.isFile)) {
+      doMove(target, atomicMove)
+    } else if (isDirectory) {
+      if (!jpath.toFile.renameTo(target.jpath.toFile)) {
+        forceMoveDir(target, atomicMove)
+      }
+    } else {
+      throw new Error("not yet handled " + target + "," + this)
+    }
+    target
   }
 
+  private def forceMoveDir(target:Path, atomicMove:Boolean) = {
+    if (atomicMove) {
+      fail("Cannot perform an atomic move from %s to %s".format(this, target))
+    }
+    target.createDirectory()
+    children() foreach { path =>
+      path moveTo (target \ self.relativize(path))
+    }
+    delete()
+  }
   /**
    * Called to move the current path to another location <strong>on the same filesystem</strong>
    */
@@ -1161,15 +1206,15 @@ class Path private[file] (val jpath:JPath, val fileSystem: FileSystem) extends F
     JFiles.move(jpath, target.jpath, copyOptions:_*)
   }
   
-  override def toString() = "Path(%s)".format(path)
+  override def toString() = "%s(%s)".format(fileSystem.name, path)
   override def equals(other: Any) = other match {
     case x : Path =>
       val eqFS = fileSystem == x.fileSystem
-      val eqSeg = segments == x.segments
+      val eqSeg = jpath == x.jpath
       eqFS && eqSeg
     case _        => false
   }
-  override def hashCode() = (7 + segments.hashCode()) * 37 + fileSystem.hashCode()
+  override def hashCode() = (7 + jpath.hashCode()) * 37 + fileSystem.hashCode()
 
   /**
    * Create a matcher from this path's filesystem

@@ -69,7 +69,7 @@ object StdPathOps {
    * Query paths for basic information such as readable/writable, size etc...
    */
   def queryBasicData {
-    import scalax.file.Path
+    import scalax.file.{Path, FileTime}
     import java.net.{URI,URL}
 
     val path: Path = Path("file")
@@ -95,11 +95,11 @@ object StdPathOps {
     val notExists: Boolean = path.nonExistent
 
     val hidden: Boolean = path.isHidden
-    val isSymLink: Boolean = path.isSymlink
+    val isSymLink: Boolean = path.isSymboliclink
 
     // query last modified information
-    val lastModified: Long = path.lastModified
-    path.lastModified = System.currentTimeMillis
+    val lastModified: FileTime = path.lastModified
+    path.lastModified = FileTime.fromMillis(System.currentTimeMillis)
 
     val length = path.size
 

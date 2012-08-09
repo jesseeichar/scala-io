@@ -54,9 +54,9 @@ object ScalaIoBuild extends Build {
     licenses := Seq("Scala License" -> url("http://www.scala-lang.org/node/146")),
     homepage := Some(url("http://jesseeichar.github.com/scala-io-doc/index.html")),
     maxErrors := 20,
-    scalacOptions ++= Seq("-optimize","-deprecation"),
+//    scalacOptions ++= Seq("-optimize","-deprecation"),
     offline := false,
-//    parallelExecution in Test := false,
+    parallelExecution in Test := false,
     scalaVersion := BuildConstants.scalaVersion,
 
     publishMavenStyle := true,

@@ -16,6 +16,7 @@ import org.junit.Test
 import org.junit.Assert._
 import java.nio.file.attribute.DosFileAttributeView
 import scalax.file.FileAttributeImpl
+import java.util.concurrent.TimeUnit
 
 abstract class FsMatchingTests extends scalax.test.sugar.AssertionSugar with Fixture {
   implicit val codec = Codec.UTF8
@@ -83,15 +84,22 @@ abstract class FsMatchingTests extends scalax.test.sugar.AssertionSugar with Fix
     path.createFile()
     def test (attribute:FileAttribute[_]) = {
       path.attributes.update(attribute)
+      attribute.value match {
+        case time: FileTime => 
+          val millis = path.attributes(attribute.name).get.asInstanceOf[FileTime].toMillis
+          assertEquals(time.toMillis, millis)
+        case _ => 
+          assertEquals(attribute.value, path.attributes(attribute.name).get)
+      }
       assertTrue(path.attributes exists attribute)
       assertTrue(PathMatcher.AttributeMatcher(attribute)(path))
     }
-    test(FileAttributeImpl("lastModifiedTime",1324046126000L))
-    test(FileAttributeImpl("lastModifiedTime",System.currentTimeMillis))
-    test(FileAttributeImpl("lastAccessTime",1324046126000L))
-    test(FileAttributeImpl("lastAccessTime",System.currentTimeMillis))
-    test(FileAttributeImpl("creationTime",1324046126000L))
-    test(FileAttributeImpl("creationTime",System.currentTimeMillis))
+    
+    def currentTimeSeconds = FileTime.fromMillis(FileTime.fromMillis(System.currentTimeMillis).to(TimeUnit.SECONDS) * 1000)
+    test(FileAttributeImpl("lastModifiedTime",FileTime.fromMillis(1324046126000L)))
+    test(FileAttributeImpl("lastModifiedTime",currentTimeSeconds))
+    test(FileAttributeImpl("lastAccessTime",FileTime.fromMillis(1324046126000L)))
+    test(FileAttributeImpl("lastAccessTime",currentTimeSeconds))
     assertTrue(path.attributes("size").nonEmpty)
     assertTrue(path.attributes("isRegularFile").nonEmpty)
     assertTrue(path.attributes("isDirectory").nonEmpty)
