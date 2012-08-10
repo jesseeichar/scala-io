@@ -8,6 +8,7 @@
 
 package scalax.io
 
+import language.postfixOps
 import org.junit.Assert._
 import org.junit.{
   Test, Ignore

@@ -8,6 +8,7 @@
 
 package scalax.io
 
+import language.postfixOps
 import scala.collection.generic.CanBuildFrom
 import scala.collection.Iterable
 import scala.collection.Iterator

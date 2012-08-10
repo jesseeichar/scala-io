@@ -166,11 +166,6 @@ object Path
    */
   def unapplySeq(pathExpr:Path): Option[Seq[String]] = Some(pathExpr.segments)
 
-  type Closeable = { def close(): Unit }
-  private[file] def closeQuietly(target: Closeable) {
-    try target.close() catch { case e: IOException => }
-  }
-
   private[file] def fail(msg: String) =
     throw new IOException(msg)
 }

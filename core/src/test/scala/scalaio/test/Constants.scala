@@ -1,5 +1,6 @@
 package scalaio.test
 
+import language.reflectiveCalls
 import java.io.{
 InputStreamReader, BufferedReader
 }

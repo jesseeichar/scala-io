@@ -1,5 +1,6 @@
 package scalaio.test.channel
 
+import language.reflectiveCalls
 import java.nio.channels.Channels
 import scalax.io.ArrayBufferSeekableChannel
 import scala.collection.mutable.ArrayBuffer

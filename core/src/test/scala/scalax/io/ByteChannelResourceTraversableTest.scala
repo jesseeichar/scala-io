@@ -8,6 +8,7 @@
 
 package scalax.io
 
+import language.reflectiveCalls
 import scalaio.test.AbstractInputTests._
 import java.io.ByteArrayInputStream
 import java.nio.channels.Channels
@@ -50,7 +51,7 @@ class SeekableByteChannelResourceInputTest extends InputTest {
     openFunction()
     new ArrayBufferSeekableChannel(ArrayBuffer.apply(data:_*),StandardOpenOption.ReadWrite:_*)(closeAction = _ => closeFunction())
   })
-  protected override def input(t: Type, openFunction: () => Unit, closeFunction: () => Unit):Input = t match {
+  protected override def input(t: Type, openFunction: () => Unit, closeFunction: () => Unit):Input = (t: @unchecked) match {
     case t@TextNewLine => wrap(text(t.sep), openFunction, closeFunction)
     case t@TextPair => wrap(text(t.sep), openFunction, closeFunction)
     case t@TextCarriageReturn => wrap(text(t.sep), openFunction, closeFunction)

@@ -19,7 +19,8 @@ object AsyncReadWrite {
    */
   def basicProcessingFuture {
     import scalax.io.Resource
-
+    import scala.util.{Success, Failure}
+    
     val in = Resource.fromFile("/tmp/in")
     val out = Resource.fromFile("/tmp/out")
 
@@ -45,8 +46,8 @@ object AsyncReadWrite {
     // have to be used instead.  See futureExec example
     // for more details.
     processor.future.onComplete {
-      case Right(_) => println("Yay done :)")
-      case Left(_) => println("Uh oh failure :(")
+      case Success(_) => println("Yay done :)")
+      case Failure(_) => println("Uh oh failure :(")
     }
 
   }
@@ -160,6 +161,7 @@ object AsyncReadWrite {
    */
   def futureExec {
     import scalax.io.Resource
+    import scala.util.{Success, Failure}
 
     val in = Resource.fromFile("/tmp/in")
     val out = Resource.fromFile("/tmp/out")
@@ -188,8 +190,8 @@ object AsyncReadWrite {
     // future will only return the LongTraversable.  To
     // perform the writes we need the traversable to be traversed
     processor.futureExec.onComplete {
-      case Right(_) => println("Yay done :)")
-      case Left(_) => println("Uh oh failure :(")
+      case Success(_) => println("Yay done :)")
+      case Failure(_) => println("Uh oh failure :(")
     }
 
     // A processor that performs the same task is as follows and
@@ -226,6 +228,7 @@ object AsyncReadWrite {
    */
   def asyncLongTraversableFolding {
     import scalax.io.{Resource, Continue, End}
+    import scala.util.{Success, Failure}
 
     val bytes = Resource.fromFile("/tmp/file").bytes
 
@@ -274,8 +277,8 @@ object AsyncReadWrite {
     implicit val context = scalax.io.executionContext
     // Last step is to handle the result from the process
     desiredRecord.onComplete{
-      case Right(Value(_, record)) => () // do something
-      case Left(error) => () // uh oh need to handle error
+      case Success(Value(_, record)) => () // do something
+      case Failure(error) => () // uh oh need to handle error
     }
   }
 

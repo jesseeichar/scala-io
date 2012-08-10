@@ -213,7 +213,7 @@ trait Resource[+R] extends ManagedResourceOperations[R] with ResourceOps[R, Reso
           catch handleAccessError
           finally close(resource)
 
-        val handleError = result.left.toOption ++ closeExceptions nonEmpty
+        val handleError = (result.left.toOption ++ closeExceptions).nonEmpty
 
         if (handleError) {
           try {

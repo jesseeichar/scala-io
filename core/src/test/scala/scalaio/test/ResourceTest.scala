@@ -1,5 +1,6 @@
 package scalaio.test
 
+import language.postfixOps
 import org.junit.Assert._
 import org.junit.rules.TemporaryFolder
 import org.junit.{After, Before, Rule, Test}

@@ -8,6 +8,7 @@ package scalaio.test
 **                          |/                                          **
 \*                                                                      */
 
+import language.postfixOps
 import scalax.io._
 import Line.Terminators._
 

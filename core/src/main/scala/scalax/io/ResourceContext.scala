@@ -3,6 +3,8 @@ import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.channels.Channel
 import java.nio.channels.FileChannel
+import scala.reflect.TypeTag
+import scala.reflect.ClassTag
 
 /**
  * The context a resource uses for obtaining configuration information.  This
@@ -35,7 +37,7 @@ trait ResourceContext {
    *         method can return that value.  The value will be returned in lieu of the
    *         result calling f.   If a value cannot be returned an exception should be thrown.  DO NOT RETURN null!
    */
-  def openErrorHandler(openException:Throwable): Throwable = throw openException
+  def openErrorHandler(openException: Throwable): Throwable = throw openException
   /**
    * Called when an exception is raised during an IO operation.  The resource will be closed and all exceptions (including the closing exceptions)
    * will be passed to this errorHandler.
@@ -54,7 +56,7 @@ trait ResourceContext {
    *
    * @return the value of accessResult if it has a result. If a value cannot be returned an exception should be thrown.  DO NOT RETURN null!
    */
-  def errorHandler[U](accessResult: Either[Throwable,U], closingExceptions: List[Throwable]):U =
+  def errorHandler[U](accessResult: Either[Throwable, U], closingExceptions: List[Throwable]): U =
     throw new ScalaIOException(accessResult.left.toOption, closingExceptions)
 
   /**
@@ -106,8 +108,8 @@ trait ResourceContext {
    * @param readOnly if the use of the buffer will be readonly on the channel provided
    */
   def createNioBuffer(bufferSize: Int, channel: Option[Channel], readOnly: Boolean): java.nio.ByteBuffer = channel match {
-//    case Some(channel: FileChannel) if readOnly && channel.size <= bufferSize =>
-//      channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size)
+    //    case Some(channel: FileChannel) if readOnly && channel.size <= bufferSize =>
+    //      channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size)
     case _ => ByteBuffer.allocateDirect(bufferSize)
   }
   /**
@@ -123,6 +125,30 @@ trait ResourceContext {
    * @param readOnly if the use of the buffer will be read-only on the channel provided
    */
   final def createNioBuffer(dataSize: Option[Long], channel: Option[Channel], readOnly: Boolean): java.nio.ByteBuffer = createNioBuffer(byteBufferSize(dataSize, readOnly), channel, readOnly)
+  /**
+   * The readWrite options to use by default
+   *
+   * @param resourceToOpen The type of object the options will be used for.
+   */
+  def readWriteOpenOptions(resourceToOpen: Class[_]): Seq[OpenOption] = StandardOpenOption.ReadWrite
+  /**
+   * The append options to use by default
+   *
+   * @param resourceToOpen The type of object the options will be used for.
+   */
+  def appendOpenOptions(resourceToOpen: Class[_]): Seq[OpenOption] = StandardOpenOption.WriteAppend
+  /**
+   * The read-only options to use by default
+   *
+   * @param resourceToOpen The type of object the options will be used for.
+   */
+  def readOnlyOpenOptions(resourceToOpen: Class[_]): Seq[OpenOption] = Seq(StandardOpenOption.Read)
+  /**
+   * The write-only options to use by default
+   *
+   * @param resourceToOpen The type of object the options will be used for.
+   */
+  def writeOnlyOpenOptions(resourceToOpen: Class[_]): Seq[OpenOption] = StandardOpenOption.WriteTruncate
 
   /**
    * Mutate the current instance by modifying the behavior of some of the functions.
@@ -152,18 +178,23 @@ trait ResourceContext {
     newCharBufferSize: Option[(Option[Int], Boolean) => Int] = None,
     newCreateNioBuffer: Option[(Int, Option[Channel], Boolean) => ByteBuffer] = None,
     newOpenErrorHandler: Option[Throwable => Throwable] = None,
-    newErrorHandler: Option[(Either[Throwable,U], List[Throwable]) => U] = None,
-    newDescName: Option[ResourceDescName] = None) = new ResourceContext {
-    override def errorHandler[U2](accessResult: Either[Throwable,U2], closingExceptions: List[Throwable]): U2 = {
-       newErrorHandler match {
-         case Some(handler) =>
-           val castResult = accessResult.asInstanceOf[Either[Throwable,U]]
-           handler(castResult, closingExceptions).asInstanceOf[U2]
-         case None =>
-           self.errorHandler(accessResult, closingExceptions)
-       }
+    newErrorHandler: Option[(Either[Throwable, U], List[Throwable]) => U] = None,
+    newDescName: Option[ResourceDescName] = None,
+    newReadWriteOpenOptions: Option[Class[_] => Seq[OpenOption]] = None,
+    newAppendOpenOptions: Option[Class[_] => Seq[OpenOption]] = None,
+    newReadOnlyOpenOptions: Option[Class[_] => Seq[OpenOption]] = None,
+    newWriteOnlyOpenOptions: Option[Class[_] => Seq[OpenOption]] = None
+    ) = new ResourceContext {
+    override def errorHandler[U2](accessResult: Either[Throwable, U2], closingExceptions: List[Throwable]): U2 = {
+      newErrorHandler match {
+        case Some(handler) =>
+          val castResult = accessResult.asInstanceOf[Either[Throwable, U]]
+          handler(castResult, closingExceptions).asInstanceOf[U2]
+        case None =>
+          self.errorHandler(accessResult, closingExceptions)
+      }
     }
-    override def openErrorHandler(openException:Throwable): Throwable = {
+    override def openErrorHandler(openException: Throwable): Throwable = {
       newOpenErrorHandler match {
         case Some(handler) => handler(openException)
         case None => self.openErrorHandler(openException)
@@ -174,6 +205,10 @@ trait ResourceContext {
     override def charBufferSize(dataSize: Option[Int], readOnly: Boolean): Int = (newCharBufferSize getOrElse (self.charBufferSize _))(dataSize, readOnly)
     override def createNioBuffer(bufferSize: Int, channel: Option[Channel], readOnly: Boolean): java.nio.ByteBuffer =
       newCreateNioBuffer.map(_(bufferSize, channel, readOnly)) getOrElse self.createNioBuffer(bufferSize, channel, readOnly)
+    override def readWriteOpenOptions(resourceToOpen: Class[_]): Seq[OpenOption] = (newReadWriteOpenOptions getOrElse (self.readWriteOpenOptions _))(resourceToOpen)
+    override def appendOpenOptions(resourceToOpen: Class[_]): Seq[OpenOption] = (newAppendOpenOptions getOrElse (self.appendOpenOptions _))(resourceToOpen)
+    override def readOnlyOpenOptions(resourceToOpen: Class[_]): Seq[OpenOption] = (newReadOnlyOpenOptions getOrElse (self.readOnlyOpenOptions _))(resourceToOpen)
+    override def writeOnlyOpenOptions(resourceToOpen: Class[_]): Seq[OpenOption] = (newWriteOnlyOpenOptions getOrElse (self.writeOnlyOpenOptions _))(resourceToOpen)
   }
 }
 

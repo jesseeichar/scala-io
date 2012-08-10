@@ -351,7 +351,7 @@ trait Seekable extends Input with Output {
   private def insertDataInMemory(position : Long, bytes : TraversableOnce[Byte]) = {
     readWriteChannel { channel =>
       channel position position
-      val dataToMove = (channel.size - position) min MaxPermittedInMemory toInt
+      val dataToMove = (channel.size - position).min (MaxPermittedInMemory).toInt
       var buffers = (ByteBuffer allocateDirect dataToMove, ByteBuffer allocateDirect dataToMove)
 
       channel read buffers._1

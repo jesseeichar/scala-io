@@ -8,6 +8,8 @@
 
 package scalaio.test.fs
 
+import language.postfixOps
+import language.reflectiveCalls
 import util.Random
 import scalaio.test.{
   Constants, Node
@@ -108,11 +110,11 @@ abstract class FileSystemFixture(val fs : FileSystem, rnd : Random) {
            data = testData(t, create)
            test(data)
         } catch {
-          case e =>
+          case e:Throwable =>
 //            println(count+" tests passed before a failure case was encountered: \n"+data)
             throw e
         } finally {
-          if(data!=null) try{data.delete()}catch{case _ =>}
+          if(data!=null) try{data.delete()}catch{case _:Throwable =>}
         }
   }
   /**

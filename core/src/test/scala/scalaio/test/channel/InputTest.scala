@@ -8,6 +8,7 @@
 
 package scalaio.test.channel
 
+import language.reflectiveCalls
 import scalaio.test._
 import java.io.ByteArrayInputStream
 import scalax.io.{Codec, Resource}
@@ -68,7 +69,7 @@ class InputTest extends AbstractInputTests with DataIndependentLongTraversableTe
       Channels.newChannel(Constants.IMAGE.openStream(closeFunction))
     })
   }
-  protected def input(t: Type, openFunction: () => Unit, closeFunction: () => Unit) = t match {
+  protected def input(t: Type, openFunction: () => Unit, closeFunction: () => Unit) = (t: @unchecked) match {
     case t@TextNewLine => textResource(t.sep, openFunction, closeFunction)
     case t@TextPair => textResource(t.sep, openFunction, closeFunction)
     case t@TextCarriageReturn => textResource(t.sep, openFunction, closeFunction)

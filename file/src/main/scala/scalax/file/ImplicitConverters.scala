@@ -1,5 +1,7 @@
 package scalax.file
 
+import language.implicitConversions
+
 /**
  * Contains the implicit conversion methods for converting to Paths and related objects
  *

@@ -8,6 +8,7 @@
 
 package scalax.file
 
+import language.reflectiveCalls
 import collection.JavaConverters._
 import java.io.{IOException, File => JFile}
 import java.net.URLStreamHandler
@@ -67,7 +68,7 @@ object FileSystem {
 class FileSystem(protected[file] val jFileSystem: JFileSystem, val context:ResourceContext = DefaultResourceContext) extends Equals {
   self =>
   lazy val presentWorkingDirectory = apply(".").toAbsolute
-  protected val legalChars = ('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9') ++ List('_', '-', '+', '.') toList
+  protected val legalChars = (('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9') ++ List('_', '-', '+', '.')).toList
   def randomPrefix = {
     val seg = 1 to (nextInt(5) + 2) map { _ => legalChars(nextInt(legalChars.size)) }
     val lastChar = legalChars(nextInt(legalChars.size - 1))

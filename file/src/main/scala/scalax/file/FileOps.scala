@@ -215,7 +215,7 @@ abstract class FileOps extends Seekable {
   // required methods for Input trait
   override def chars(implicit codec: Codec): LongTraversable[Char] = inputStream().chars(codec)
 
-  protected override def toByteChannelResource():InputResource[ByteChannel] = channel(Read)/*{
+  protected override def toByteChannelResource():InputResource[ByteChannel] = channel(context.readWriteOpenOptions(classOf[ByteChannel]):_*)/*{
     def resource = {
       val r = channel(Read).open
       r.get.position(0)

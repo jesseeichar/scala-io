@@ -1,5 +1,6 @@
 package scalaio.test
 
+import language.postfixOps
 import org.junit.Assert._
 import org.junit.Test
 import scalax.io.JavaConverters._
@@ -32,7 +33,7 @@ class LongTraversableTest extends DataIndependentLongTraversableTest[Int] with P
           i
         }
         def hasNext: Boolean = iter.hasNext
-        def doClose() = try{closeFunction(); Nil}catch {case e => List(e)}
+        def doClose() = try{closeFunction(); Nil}catch {case e:Throwable => List(e)}
       }
     }
     if (conv != identity) lt.map(conv)

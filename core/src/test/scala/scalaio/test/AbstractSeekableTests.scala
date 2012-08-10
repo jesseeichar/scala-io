@@ -8,6 +8,8 @@
 
 package scalaio.test
 
+import language.postfixOps
+import language.reflectiveCalls
 import scalax.io._
 import Codec.UTF8
 import org.junit.{
@@ -99,7 +101,7 @@ abstract class AbstractSeekableTests[Resource] extends AbstractInputTests with A
       try {
         f(seekable)
       } catch {
-        case e =>
+        case e:Throwable =>
           val error = new Error(msg + " failed due to: " + e, e)
           error.setStackTrace(e.getStackTrace)
           throw error
@@ -213,7 +215,7 @@ abstract class AbstractSeekableTests[Resource] extends AbstractInputTests with A
   def truncate: Unit = {
     val seekable = openSeekable()
     val expected = TEXT_VALUE take 2
-    seekable.truncate((UTF8 encode expected)size)
+    seekable.truncate((UTF8 encode expected).size)
     assertEquals(expected, seekable.string)
 
     seekable.truncate(0)

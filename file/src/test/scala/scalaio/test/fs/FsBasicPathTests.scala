@@ -8,6 +8,7 @@
 
 package scalaio.test.fs
 
+import language.postfixOps
 import scalax.io._
 import scalax.file._
 import Path.AccessModes._

@@ -8,6 +8,7 @@
 
 package scalaio.test.stream
 
+import language.reflectiveCalls
 import scalaio.test._
 import java.io.ByteArrayInputStream
 import scalax.io.{Codec, Resource}
@@ -39,7 +40,7 @@ class InputTest extends AbstractInputTests with DataIndependentLongTraversableTe
     finalText.getBytes(Codec.UTF8.charSet)
   }
 
-  protected def input(t: Type, openFunction: () => Unit, closeFunction: () => Unit) = t match {
+  protected def input(t: Type, openFunction: () => Unit, closeFunction: () => Unit) = (t: @unchecked) match {
     case t@TextNewLine => fromInputStream(stringBasedStream(t.sep, openFunction, closeFunction))
     case t@TextPair => fromInputStream(stringBasedStream(t.sep, openFunction, closeFunction))
     case t@TextCarriageReturn => fromInputStream(stringBasedStream(t.sep, openFunction, closeFunction))

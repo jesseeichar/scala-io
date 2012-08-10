@@ -7,6 +7,8 @@
 \*                                                                      */
 
 package scalax.file
+
+import language.postfixOps
 import java.nio.channels.ByteChannel
 import collection.{Iterator, IterableView}
 import annotation.tailrec
@@ -66,7 +68,12 @@ trait PathFinder[+T] {
  * @pathFilter
  *          A filter to restrict the contents of the PathSet
  * @depth
- *          The depth that the stream should traverse
+ *          The depth that the stream should traverse.  
+ *          srcFiles are not included.  
+ *          Example: If includeSrcFiles is true
+ *          and depth=0 src files will be visited
+ * @includeSrcFiles
+ *          If true also visit srcFiles during traversal
  * @children
  *          A function to use for retrieving the children of a particular path
  *          This method is used to retrieve the children of each directory
@@ -74,20 +81,20 @@ trait PathFinder[+T] {
 final class BasicPathSet[+T <: Path](srcFiles: Traversable[T],
                                pathFilter : PathMatcher[T],
                                depth:Int,
-                               self:Boolean,
+                               includeSrcFiles:Boolean,
                                children : (PathMatcher[T],T) => CloseableIterator[T])
   extends PathSet[T] {
 
   def this (parent : T,
             pathFilter : PathMatcher[T],
             depth:Int,
-            self:Boolean,
-            children : (PathMatcher[T],T) => CloseableIterator[T]) = this(List(parent), pathFilter, depth, self, children)
+            includeSrcFiles:Boolean,
+            children : (PathMatcher[T],T) => CloseableIterator[T]) = this(List(parent), pathFilter, depth, includeSrcFiles, children)
 
   override def filter(f: T => Boolean) = {
     if(pathFilter == PathMatcher.All) {
       val newFilter = new PathMatcher.FunctionMatcher(f)
-      new BasicPathSet[T](srcFiles,newFilter,depth,self,children)
+      new BasicPathSet[T](srcFiles,newFilter,depth,includeSrcFiles,children)
     } else {
       super.filter(f)
     }
@@ -116,8 +123,10 @@ final class BasicPathSet[+T <: Path](srcFiles: Traversable[T],
     def ---[U >: T](excludes: PathFinder[U]): PathSet[T] = new IterablePathSet[T](iterator).---(excludes)
 
   override def iterator: CloseableIterator[T] = new CloseableIterator[T] {
-    private[this] val roots = srcFiles.toSet
-    private[this] val toVisit = if(self) new PathsToVisit(roots.toIterator) else new PathsToVisit(roots.flatMap {p => children(pathFilter,p)}.toIterator)
+    private[this] val roots = srcFiles.toSeq.distinct
+	private[this] val rootsIter = CloseableIterator(roots.toIterator)
+    
+    private[this] val toVisit = if(includeSrcFiles) new PathsToVisit(Seq(() => rootsIter)) else new PathsToVisit(roots.map {p => () => children(pathFilter,p)})
     private[this] var nextElem : Option[T] = None
 
     private[this] def root(p:T) = p.parents.find(p => roots.exists(_.path == p.path))
@@ -126,7 +135,7 @@ final class BasicPathSet[+T <: Path](srcFiles: Traversable[T],
       val basicDepth = root.map {r =>
         r.relativize(p).segments.size
         } getOrElse Int.MaxValue
-      if(self) basicDepth - 1 else basicDepth
+      if(includeSrcFiles) basicDepth - 1 else basicDepth
     }
     override def doClose = toVisit.close()
     override def hasNext() = if(nextElem.isDefined) true
@@ -172,42 +181,76 @@ final class BasicPathSet[+T <: Path](srcFiles: Traversable[T],
   override lazy val toString = getClass().getSimpleName+"(Roots:"+srcFiles+")"
 }
 
-private class PathsToVisit[T <: Path](startingIter:Iterator[T]) {
-  private[this] var curr = startingIter.buffered
-  private[this] var iterators:List[Iterator[T]] = Nil
-  def head = curr.head
+private class PathsToVisit[T <: Path](iters: Seq[() => CloseableIterator[T]]) {
+  private sealed trait Cell {
+    def get: CloseableIterator[T]
+  }
+  private case class Unopened(func: () => CloseableIterator[T]) extends Cell{
+    def get = func()
+  }
+  private case class Opened(val get: CloseableIterator[T]) extends Cell
+  
+  private[this] var headElem:T = _
+  private[this] var hdDefined: Boolean = false
+  private[this] var curr = iters.head()
+  private[this] var iterators:Seq[Cell] = iters.tail map (Unopened(_))
+  
+  var closeErrors = List[Throwable]()
+  
+  def head = {
+    if (!hdDefined) {
+      hasNext
+      headElem = next()
+      hdDefined = true
+    }
+    headElem
+  }
+  
   @inline
   final def isEmpty = !hasNext
   @tailrec
   final def hasNext:Boolean =
-    if(curr.hasNext) true
+    if(hdDefined || curr.hasNext) true
     else if(iterators.isEmpty) false
     else {
-      curr = iterators.head.buffered
+      closeErrors =  close (curr) ::: closeErrors
+      curr = iterators.head.get
       iterators = iterators.tail
       hasNext
   }
 
-  final def next() = curr.next()
+  final def next() = if (hdDefined) {
+        hdDefined = false
+        headElem
+      } else {
+        curr.next()
+      }
 
   final def prepend(iter:CloseableIterator[T]) = {
     val tmp = curr
-    curr = iter.buffered
-    if(tmp.hasNext)
-      iterators = tmp :: iterators
+    curr = iter
+    if (tmp.hasNext)
+      iterators = Opened(tmp) +: iterators
+    if (hdDefined) {
+      iterators = new Opened(CloseableIterator(Iterator.single(headElem))) +: iterators
+      hdDefined = false
+    }
   }
   
-  final def close() = {
-    var errors = List[Throwable]()
-   iterators.foreach{_ match {
-	     case ci: CloseableIterator[_] => 
-	       try ci.close catch {case e: Throwable => errors ::= e}
-	     case it => ()
-	   }
-   }
-   iterators = null
-   curr = null
-   errors
+  final def close(): List[Throwable] = {
+    closeErrors = close(curr) ::: closeErrors
+    curr = null
+    hdDefined = false
+    iterators.foreach { 
+      case Opened(iter) => closeErrors = close(iter) ::: closeErrors
+      case _ => Nil
+    }
+    iterators = null
+    closeErrors
+  }
+
+  def close(iter: CloseableIterator[T]): List[Throwable] = { 
+      try iter.close catch { case e: Throwable => List(e) }
   }
 }
 

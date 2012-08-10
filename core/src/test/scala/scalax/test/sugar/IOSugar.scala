@@ -8,6 +8,7 @@
 
 package scalax.test.sugar
 
+import language.implicitConversions
 import java.io._
 import scalax.io.Codec
 

@@ -123,7 +123,7 @@ object CloseableIterator {
           catch handleAccessError
           finally close(resource)
 
-        val handleError = result.left.toOption ++ closeExceptions nonEmpty
+        val handleError = (result.left.toOption ++ closeExceptions).nonEmpty
 
         val finalResult = if (handleError) {
             context.errorHandler(result, closeExceptions)
@@ -172,7 +172,7 @@ private[io] class InitIterator[@specialized(Byte) +A](iter:CloseableIterator[A])
     if(iter.hasNext) {
       nextEl = iter.next()
     }
-    def hasNext = {
+    override def hasNext = {
       if(iter.hasNext) true
       else if (!iter.hasNext ) false
       else {
@@ -180,11 +180,11 @@ private[io] class InitIterator[@specialized(Byte) +A](iter:CloseableIterator[A])
         iter.hasNext
       }
     }
-    def next = {
+    override def next = {
       var tmp = nextEl
       nextEl = iter.next()
       tmp
     }
 
-    def doClose = iter.close()
+    override def doClose = iter.close()
 }

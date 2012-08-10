@@ -6,7 +6,7 @@ object BuildConstants {
   val organization = "com.github.scala-incubator.io"
   val version = "0.5.0-SNAPSHOT"
   val armVersion = "1.3-SNAPSHOT"
-  val armScalaVersion = "2.10"
+  val armScalaVersion = "2.10.0-SNAPSHOT"
   val akkaVersion = "2.0.1"
   val scalaVersion = "2.10.0-SNAPSHOT"
 }
@@ -54,7 +54,7 @@ object ScalaIoBuild extends Build {
     licenses := Seq("Scala License" -> url("http://www.scala-lang.org/node/146")),
     homepage := Some(url("http://jesseeichar.github.com/scala-io-doc/index.html")),
     maxErrors := 20,
-//    scalacOptions ++= Seq("-optimize","-deprecation"),
+    scalacOptions ++= Seq("-optimize","-deprecation", "-feature"),
     offline := false,
     parallelExecution in Test := false,
     scalaVersion := BuildConstants.scalaVersion,

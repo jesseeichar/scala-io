@@ -32,7 +32,7 @@ trait Fixture {
   }
 
   @After
-  def after() : Unit = try {fixture.after()} catch {case  e => println("error in after:"+e)}
+  def after() : Unit = try {fixture.after()} catch {case  e:Throwable => println("error in after:"+e)}
 
   def isWindows = AssertionSugar.isWindows && fixture.fs == FileSystem.default
   def permissions(modes:AccessMode*)=

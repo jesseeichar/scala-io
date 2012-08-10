@@ -8,6 +8,7 @@
 
 package scalaio.test
 
+import language.reflectiveCalls
 import scalax.io._
 import scalax.test.sugar._
 import org.junit.Assert._

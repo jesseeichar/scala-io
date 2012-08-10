@@ -1,5 +1,7 @@
 package scalax
 
+import language.implicitConversions
+
 package object file {
 	type FileAttribute[A] = java.nio.file.attribute.FileAttribute[A]
 

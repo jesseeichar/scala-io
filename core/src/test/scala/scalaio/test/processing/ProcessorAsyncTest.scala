@@ -7,6 +7,8 @@ import scalax.io._
 import processing._
 import java.util.concurrent.TimeoutException
 import scala.concurrent.util.duration._
+import scala.util.{Success, Failure}
+
 
 class ProcessorAsyncTest extends AssertionSugar{
 
@@ -45,10 +47,10 @@ class ProcessorAsyncTest extends AssertionSugar{
     implicit val executionContext = scalax.io.executionContext
     
     future.onComplete{
-      case Left(e) => 
+      case Right(e) => 
         println(e)
         success = false
-      case Right(r) => success = true
+      case Left(r) => success = true
     }
     
     while(!future.isCompleted) {

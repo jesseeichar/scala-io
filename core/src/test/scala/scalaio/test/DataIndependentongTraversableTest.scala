@@ -1,4 +1,6 @@
 package scalaio.test
+
+import language.postfixOps
 import org.junit.Test
 import org.junit.Assert._
 import scalax.io.{AsyncLongTraversable, LongTraversable}
@@ -94,7 +96,7 @@ trait DataIndependentLongTraversableTest[T] {
   @Test //@Ignore
   def should_handle_groupBy = {
     def f(t: Traversable[T]) = t groupBy { _.toString()(0) }
-    val list = f(independentExpectedData toList)
+    val list = f(independentExpectedData.toList)
     val applied = f(independentTraversable()) map { case (k, v) => (k, v.toList) }
 
     assertEquals(list.size, applied.size)
@@ -103,7 +105,7 @@ trait DataIndependentLongTraversableTest[T] {
 
   @Test //@Ignore
   def should_handle_init =
-    assertSizeAndType(independentTraversable(), _ init, false)
+    assertSizeAndType(independentTraversable(), _.init, false)
 
   @Test //@Ignore
   def should_handle_slice = assertSizeAndType(independentTraversable(), _ slice (3, 10))
@@ -118,7 +120,7 @@ trait DataIndependentLongTraversableTest[T] {
 
   @Test //@Ignore
   def should_handle_tail =
-    assertSizeAndType(independentTraversable(), _ tail)
+    assertSizeAndType(independentTraversable(), _.tail)
 
   @Test //@Ignore
   def should_handle_take = {

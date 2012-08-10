@@ -10,6 +10,7 @@
 
 package scalax.io
 
+import language.implicitConversions
 import java.nio.charset.{
     Charset, CharsetDecoder, CharsetEncoder,
     CharacterCodingException, CodingErrorAction => Action

@@ -1,5 +1,6 @@
 package scalax.file
 
+import language.implicitConversions
 import java.io.File
 import java.nio.file.{Path => JPath}
 

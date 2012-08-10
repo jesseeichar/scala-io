@@ -1,5 +1,6 @@
 package scalax.io.traversable
 
+import language.reflectiveCalls
 import scalax.io.CloseableIterator
 import scalax.io.support.Misc.safeSum
 import scalax.io.extractor.FileChannelExtractor
@@ -37,7 +38,7 @@ private[io] abstract class Sliceable extends CloseableIterator[Byte] {
   /** Return the underlying ReadableByteChannel or InputStream.  any other object is an error*/
   protected def getIn: Any
 
-  override def size = lsize min Integer.MAX_VALUE toInt
+  override def size = (lsize min Integer.MAX_VALUE).toInt
   def lsize = {
     def fileSize = sizeFunc() match {
       case Some(size) => size min (end - start)

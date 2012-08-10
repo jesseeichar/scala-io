@@ -7,5 +7,5 @@ package scalax.file
  * @since 1.0
  */
 object LinkOptions {
-  val NoFollowLinks = LinkOption.NOFOLLOW_LINKS
+  val NoFollowLinks = java.nio.file.LinkOption.NOFOLLOW_LINKS
 }

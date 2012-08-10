@@ -1,4 +1,6 @@
 package scalaio.test
+
+import language.reflectiveCalls
 import scalax.io.SeekableResource
 import scalax.io.Seekable
 import scalax.io.Input
@@ -9,6 +11,7 @@ import scalax.io.Resource
 import scalaio.test.AbstractInputTests._
 import java.io.InputStream
 import scalax.io.Codec
+
 trait SeekableTestUtils[ResourceType] {
   protected def forceErrorOnAccess():Unit
   protected def openResource(openFunction: () => Unit, closeAction: CloseAction[ResourceType]): Seekable
@@ -28,7 +31,7 @@ trait SeekableTestUtils[ResourceType] {
     resource
   }
 
-  def input(t: Type, openFunction: () => Unit, closeFunction: () => Unit) = t match {
+  def input(t: Type, openFunction: () => Unit, closeFunction: () => Unit) = (t: @unchecked) match {
     case t @ TextNewLine => text(t.sep,openFunction,closeFunction)
     case t @ TextPair => text(t.sep,openFunction,closeFunction)
     case t @ TextCarriageReturn => text(t.sep,openFunction,closeFunction)

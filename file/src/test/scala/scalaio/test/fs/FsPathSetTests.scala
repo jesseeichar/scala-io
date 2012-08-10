@@ -8,6 +8,7 @@
 
 package scalaio.test.fs
 
+import language.postfixOps
 import org.junit.Assert._
 import scalax.file.Path
 import org.junit.Test

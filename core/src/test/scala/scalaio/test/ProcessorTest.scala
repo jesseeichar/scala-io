@@ -1,4 +1,8 @@
 package scalaio.test
+
+import language.postfixOps
+import language.reflectiveCalls
+
 import org.junit.Test
 import org.junit.Assert._
 import scalax.test.sugar.AssertionSugar
@@ -906,7 +910,7 @@ trait ProcessorTest extends AssertionSugar {
       _ <- outApi.write(nextInt.toString)
     } yield ()
 
-    Await.result(p.futureExec(), 30 hours)
+    Await.result(p.futureExec(), 30.hours)
 
     assertEquals(prepared.testData.mkString, out.string)
   }
