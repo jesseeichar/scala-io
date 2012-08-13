@@ -138,23 +138,24 @@ final class BasicPathSet[+T <: Path](srcFiles: Traversable[T],
       if(includeSrcFiles) basicDepth - 1 else basicDepth
     }
     override def doClose = toVisit.close()
-    override def hasNext() = if(nextElem.isDefined) true
-                    else {
-                      nextElem = loadNext()
-                      nextElem.isDefined
-                    }
+    override def hasNext() = if (nextElem.isDefined) {
+      true
+    } else {
+      nextElem = loadNext()
+      nextElem.isDefined
+    }
 
     @tailrec
     private[this] def loadNext() : Option[T] = {
       if(toVisit.isEmpty) None
-      else if(toVisit.head.isDirectory) {
+      else if(toVisit.head.isDirectory && toVisit.head.canRead) {
         val path = toVisit.next()
-        if(depth < 0) {
-          toVisit.prepend(children(pathFilter,path))
+        if(depth < 0 || depth == Int.MaxValue) {
+          toVisit.prepend(() => children(pathFilter,path))
         } else {
           val currDepth = currentDepth(path, root(path))
           if( depth > currDepth)
-            toVisit.prepend(children(pathFilter,path))
+            toVisit.prepend(() => children(pathFilter,path))
         }
         if (pathFilter(path)) Some(path) else loadNext
       }else {
@@ -192,8 +193,8 @@ private class PathsToVisit[T <: Path](iters: Seq[() => CloseableIterator[T]]) {
   
   private[this] var headElem:T = _
   private[this] var hdDefined: Boolean = false
-  private[this] var curr = iters.head()
-  private[this] var iterators:Seq[Cell] = iters.tail map (Unopened(_))
+  private[this] var curr:CloseableIterator[T] = _
+  private[this] var iterators:Seq[Cell] = iters map (Unopened(_))
   
   var closeErrors = List[Throwable]()
   
@@ -210,47 +211,58 @@ private class PathsToVisit[T <: Path](iters: Seq[() => CloseableIterator[T]]) {
   final def isEmpty = !hasNext
   @tailrec
   final def hasNext:Boolean =
-    if(hdDefined || curr.hasNext) true
+    if(curr != null && (hdDefined || curr.hasNext)) true
     else if(iterators.isEmpty) false
     else {
-      closeErrors =  close (curr) ::: closeErrors
+      close (curr)
       curr = iterators.head.get
       iterators = iterators.tail
       hasNext
   }
 
-  final def next() = if (hdDefined) {
-        hdDefined = false
-        headElem
-      } else {
-        curr.next()
-      }
+  final def next() = {
+    if (!hasNext) {
+      throw new NoSuchElementException("")
+    }
+    if (hdDefined) {
+      hdDefined = false
+      headElem
+    } else {
+      curr.next()
+    }
+  }
 
-  final def prepend(iter:CloseableIterator[T]) = {
-    val tmp = curr
-    curr = iter
-    if (tmp.hasNext)
-      iterators = Opened(tmp) +: iterators
+  final def prepend(iter:() => CloseableIterator[T]) = {
+    if (curr.hasNext) {
+      iterators = Opened(curr) +: iterators
+    } else { 
+      close(curr)
+    }
+    
+	curr = null
+      
     if (hdDefined) {
       iterators = new Opened(CloseableIterator(Iterator.single(headElem))) +: iterators
       hdDefined = false
     }
+    
+    iterators = Unopened(iter) +: iterators
   }
   
   final def close(): List[Throwable] = {
-    closeErrors = close(curr) ::: closeErrors
+    close(curr)
     curr = null
     hdDefined = false
     iterators.foreach { 
-      case Opened(iter) => closeErrors = close(iter) ::: closeErrors
+      case Opened(iter) => close(iter)
       case _ => Nil
     }
     iterators = null
     closeErrors
   }
 
-  def close(iter: CloseableIterator[T]): List[Throwable] = { 
-      try iter.close catch { case e: Throwable => List(e) }
+  def close(iter: CloseableIterator[T]): Unit = {
+      try { if(iter != null) iter.close} catch { case e: Throwable => closeErrors = e :: closeErrors}
   }
 }
 
@@ -259,7 +271,7 @@ private class IterablePathSet[T](iter: => CloseableIterator[T]) extends PathSet[
   def iterator = iter
   def mapping[U >: T](f: PathFinder[T] => PathFinder[_]):PathSet[U] = new IterablePathSet(CloseableIteratorOps(iter).flatMap {
     case pf:PathFinder[T] => f(pf).asInstanceOf[PathFinder[U]].iterator
-    case o:U => CloseableIterator.empty
+    case o => CloseableIterator.empty
   })
   def /(literal: String): PathSet[T] = mapping {
     case p : Path if !(p / literal exists) => PathFinder.empty

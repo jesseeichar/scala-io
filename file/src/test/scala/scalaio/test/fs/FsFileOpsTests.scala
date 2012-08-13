@@ -18,5 +18,4 @@ abstract class FsFileOpsTests extends AbstractFileOpsTests with Fixture {
     ops write data
     path
   }
-
 }

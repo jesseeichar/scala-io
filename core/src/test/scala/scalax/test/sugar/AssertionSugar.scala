@@ -53,8 +53,6 @@ trait AssertionSugar {
     }
   }
 
-  def repeat[U] (f : => U)(implicit times : Int = 50) = 1 to times foreach {_ => f}
-
   def largeResource(key:KEY.Value):java.io.File = LargeResource.largeResource(key)
   def largeResource(key: String)(f: Writer => Unit):java.io.File = LargeResource.largeResource(key)(f)
   val Key=KEY

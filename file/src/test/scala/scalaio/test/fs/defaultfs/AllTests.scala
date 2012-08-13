@@ -24,23 +24,38 @@ class RandomPrefixTest {
 }
 class FsMatchingTest extends scalaio.test.fs.FsMatchingTests with DefaultFixture
 class FsDirectoryStreamTest extends scalaio.test.fs.FsPathSetTests with DefaultFixture {
-    @Test @Ignore // ignore because if it passes it does nearly a full scan of harddrive so only when the issue is known to fail do we want to test this
+    @Test // ignore because if it passes it does nearly a full scan of harddrive so only when the issue is known to fail do we want to test this
     def stackOverflowBug : Unit = {
+      val testTime = 30000
       println("start overflow bug test")
       FileSystem.default.roots.headOption foreach {path =>
           val start = System.currentTimeMillis()
+          var dots:Seq[Int] = 1 to 100
           Breaks.breakable {
-            (path ** "*.scala").foreach { p =>
-              if (System.currentTimeMillis() - start > 30000) Breaks.break;
+            (path.***).foreach { p =>
+              val elapsed = (System.currentTimeMillis() - start)
+              if (dots.head == Math.round(elapsed / 1000)) {
+                if (dots.head % 5 == 0) {
+                  print(" "+(Math.round(testTime - elapsed)/1000)+"s ")
+                } else {
+            	  print('.')
+                }
+            	dots = dots.tail
+              }
+              
+              if (elapsed > testTime) Breaks.break;
             }
           }
       }
-      println("done overflow bug test and it passed... yay")
+      println("\ndone overflow bug test and it passed... yay")
       // no error is a pass
   }
 
 }
-class FsFileOpsTest extends scalaio.test.fs.FsFileOpsTests with DefaultFixture
+class FsFileOpsTest extends scalaio.test.fs.FsFileOpsTests with DefaultFixture {
+  @Test
+  def placeholder = ()
+}
 class FileSystemTest extends scalaio.test.fs.FsFileSystemTests with DefaultFixture
 class SeekableTest extends scalaio.test.fs.FsSeekableTests with DefaultFixture
 class BasicPathTest extends scalaio.test.fs.FsBasicPathTests with DefaultFixture

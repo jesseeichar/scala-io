@@ -310,7 +310,7 @@ class Path private[file] (val jpath:JPath, val fileSystem: FileSystem) extends F
    * @return A new path with the specified path appended
    * @see #/(String)
    */
-  final def /(child: Path): Path = fileSystem.fromSeq(segments ++ child.segments)
+  final def /(child: Path): Path = new Path(jpath.resolve(child.jpath), fileSystem)
 
   /**
    * Alias for /(Path)
@@ -572,7 +572,7 @@ class Path private[file] (val jpath:JPath, val fileSystem: FileSystem) extends F
    * 					default is to follow symbolic links 
    * @return false if the path does not exist in the file system
    */
-  def nonExistent(implicit linkOptions:Seq[LinkOption] = Seq.empty) = JFiles.notExists(jpath, linkOptions:_*)
+  def nonExistent(implicit linkOptions:Seq[LinkOption] = Seq.empty) = !JFiles.exists(jpath, linkOptions:_*)
   /**
    * True if the path exists and is a file
    *
@@ -1189,7 +1189,7 @@ class Path private[file] (val jpath:JPath, val fileSystem: FileSystem) extends F
     }
     target.createDirectory()
     children() foreach { path =>
-      path moveTo (target \ self.relativize(path))
+      path moveTo (target resolve (self.relativize(path).segments:_*) )
     }
     delete()
   }
@@ -1293,8 +1293,16 @@ class Path private[file] (val jpath:JPath, val fileSystem: FileSystem) extends F
     new BasicPathSet[Path](this, factory(filter), depth, false, { (p:PathMatcher[Path], path:Path) =>
       // TODO Native filters
       new CloseableIterator[Path] {
-        val baseFile = path.readSymbolicLink getOrElse path
-        val stream = JFiles.newDirectoryStream(baseFile.jpath)
+        val baseFile = {
+          val nonSymlink = path.readSymbolicLink getOrElse path
+          if (nonSymlink.exists) {
+            nonSymlink
+          } else {
+            path.parent.map(_ / nonSymlink) getOrElse {throw new IOException("Unable to resolve symlink: "+path+".  Resolved to: "+nonSymlink)}
+          }
+        }
+        val stream = JFiles.newDirectoryStream(baseFile.jpath.toAbsolutePath())
+
         val iter = stream.iterator
         def doClose = try {stream.close; Nil} catch {case e:Throwable => List(e)}
         def hasNext = iter.hasNext

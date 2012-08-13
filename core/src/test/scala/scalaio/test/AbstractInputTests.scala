@@ -171,7 +171,7 @@ abstract class AbstractInputTests extends scalax.test.sugar.AssertionSugar {
     assertEquals(expected, read)
   }
 
-  @Test(timeout = 3000) //@Ignore
+  @Test(timeout = 30000) //@Ignore
   def read_lines_Auto_stackoverflow_bug: Unit = {
     import JavaConverters._
 

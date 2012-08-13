@@ -51,7 +51,6 @@ trait AbstractPathSetTests extends scalax.test.sugar.FSAssertionSugar {
 
   @Test //@Ignore
   def permits_filtering : Unit = {
-    repeat {
       val (path,tree) = fixtures()
 
       val stream = path.descendants{(_:Path).name.length < 5}
@@ -61,7 +60,6 @@ trait AbstractPathSetTests extends scalax.test.sugar.FSAssertionSugar {
       val matcher = GlobPathMatcher("**/"+name)
       assertEquals(1,path.descendants(matcher).size)
       assertEquals(path.descendants().size - 1,path.descendants(- matcher).size)
-    }
   }
 
   @Test //@Ignore

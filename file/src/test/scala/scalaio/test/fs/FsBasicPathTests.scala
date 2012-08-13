@@ -473,32 +473,28 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
   }
   @Test //@Ignore
   def path_can_move_directories() : Unit = {
-    repeat {move(fixture.path.createDirectory (), fixture.path, fixture.path.createDirectory ())}
+    move(fixture.path.createDirectory (), fixture.path, fixture.path.createDirectory ())
   }
   @Test //@Ignore
   def path_can_copy_files() : Unit = {
-    repeat {
       val source = fixture.path.createFile ()
       source.write(Array(1,2,3,4))
       copy( source, fixture.path(2), fixture.path.createFile ())
-    }
   }
   @Test //@Ignore
   def path_can_copy_directories() : Unit = {
-    repeat {copy( fixture.path.createDirectory (), fixture.path(2), fixture.path.createDirectory ())}
+    copy( fixture.path.createDirectory (), fixture.path(2), fixture.path.createDirectory ())
   }
   @Test //@Ignore
   def path_can_move_directory_trees() : Unit = {
-    repeat {
       val tree1 = fixture.tree()._1
       val tree2 = fixture.tree()._1
       val target = fixture.path
       move( tree1, target, tree2, canReplace=false)
-     }(5)
   }
   @Test //@Ignore
   def path_can_copy_directory_trees() : Unit = {
-    repeat {copy( fixture.tree()._1, fixture.path(2), fixture.tree()._1, canReplace=false)}
+    copy( fixture.tree()._1, fixture.path(2), fixture.tree()._1, canReplace=false)
   }
   @Test //@Ignore
   def path_children_only_lists_directly_contained_files() : Unit = {
@@ -914,6 +910,8 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
     case Read if isWindows=> verifyAccess (readTest(path))(true)
     case Read => verifyAccess (readTest(path))(is)
   }
+  
+  
   /*
     AccessModes.values intersect (access) foreach { a => verifyTest(access, path, is) }
 

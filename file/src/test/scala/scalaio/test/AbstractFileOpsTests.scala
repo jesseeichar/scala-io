@@ -62,46 +62,22 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
 
   @Test //@Ignore
   def outputStream_adds_default_write {
-    repeat {
       // no exception? good!
       path.outputStream().write("hi")
-    }
   }
 
   @Test //@Ignore
   def outputStream_can_be_append {
-    repeat {
       val p = path
       p.outputStream(Append).write("more")
       assertEquals(demoData+"more", p.string)
-    }
-  }
-
-  @Test //@Ignore
-  def outputStream_with_read_will_add_write {
-    repeat {
-      val p = path
-      p.outputStream(Read).write("more")
-      assertEquals("more", p.string)
-    }
   }
 
   @Test //@Ignore
   def truncate_deletes_previous_file {
-    repeat {
       val p = path
       p.outputStream(Truncate,Write).open().close()
       assertEquals("", p.string)
-    }
-  }
-
-  @Test //@Ignore
-  def truncate_takes_precedence_over_Append {
-    repeat {
-      val p = path
-      p.outputStream(Truncate,Write,Append).open().close()
-      assertEquals("", p.string)
-    }
   }
 
   @Test //@Ignore
@@ -128,8 +104,6 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
 
   @Test //@Ignore
   def delete_on_close_deletes_after_operation {
-    implicit val times = 1
-    repeat {
       val p = path
       p.outputStream(DeleteOnClose).write("hello")
       assertFalse(p.exists)
@@ -137,75 +111,71 @@ trait AbstractFileOpsTests extends scalax.test.sugar.AssertionSugar {
         // file should have been deleted so this should throw exception
         p.string
       }
-    }
   }
 
   @Test //@Ignore
   def default_channel_open_options_are_read_write {
-    repeat {
       val p = path
       // no exception? good!
       p.channel().bytesAsInts.take(2).force
       p.channel().write("hi")
-    }
   }
 
   @Test //@Ignore
   def openning_channel_supports_several_openOptions {
-    repeat {
       // Need to have mixed orders so that we can be sure the sorting takes place
       path.channel(DSync,Write,Write,Truncate,Sync,Create,Read,Read).bytesAsInts.take(2).force
       // wish there was a way to test channel...
-    }
   }
   @Test //@Ignore
   def default_filechannel_open_options_are_read_write {
-    repeat {
       val p = path
       for {resource <- p.fileChannel() } {
         // no exception? good!
         resource.bytesAsInts.take(2).force
         resource.write("hi")
       }
-    }
   }
 
   @Test //@Ignore
   def default_simple_write_also_has_read {
-    repeat {
       val p = path
       p. channel().bytesAsInts.take(2).force
       p.channel().write("hi")
-    }
   }
 
   @Test //@Ignore
   def default_simple_write_will_not_truncate {
-    repeat {
       val p = path
       val before = p.channel().bytesAsInts.size
       p.channel().write(List(1,2,3) map {_.toByte})
       assertEquals(before, p.channel().bytesAsInts.size)
-    }
   }
 
   @Test //@Ignore
   def createFull_open_option_creates_parents {
-    repeat {
       val p = path
       p.outputStream(StandardOpenOption.CreateFull, StandardOpenOption.Write).write("data")
       assertTrue(p.exists)
       assertTrue(p.parent.forall{(_:Path).exists})
-    }
   }
 
   @Test //@Ignore
+  def child_nonExistent_if_parent_is_file {
+    val rootPath = path
+	assert(rootPath.exists)
+    val p = rootPath \ "child"
+    assert(p.nonExistent)
+  }
+  
+  @Test //@Ignore
   def create_open_option_will_not {
-    repeat {
-      val p = path \ "child"
-      assert (p.nonExistent)
-      intercept[IOException] { p.outputStream(StandardOpenOption.Create, StandardOpenOption.Write).write("data") }
-    }
+    val rootPath = path
+	rootPath.delete(true)
+	assert(rootPath.nonExistent)
+    val p = rootPath \ "child"
+    assert(p.nonExistent)
+    intercept[IOException] { p.outputStream(StandardOpenOption.Create, StandardOpenOption.Write).write("data") }
   }
 
   /*  Removed from API since it may be difficult or even impossible on

@@ -86,8 +86,9 @@ abstract class FileOps extends Seekable {
    *
    * The Resource will be configured with the associated fileSystem's ResourceContext
    */
-  def inputStream(): InputStreamResource[InputStream] = {
-    Resource.fromInputStream(JFiles.newInputStream(jpath)).updateContext(fileSystem.context)
+  def inputStream(openOptions:OpenOption*): InputStreamResource[InputStream] = {
+    val options = if (openOptions.isEmpty) fileSystem.context.readWriteOpenOptions(classOf[SeekableByteChannel]) else openOptions
+    Resource.fromInputStream(JFiles.newInputStream(jpath, options:_*)).updateContext(fileSystem.context)
   }
   /**
   * Obtains an OutputStreamResource for writing to the file
@@ -102,15 +103,15 @@ abstract class FileOps extends Seekable {
   *           Default is write/create/truncate
   */
   def outputStream(openOptions:OpenOption*) : OutputStreamResource[OutputStream] = {
-      val r = openOptions match {
+      val options = openOptions match {
           case Seq() =>
-              openOutputStream(jpath,WriteTruncate)
+              fileSystem.context.writeOnlyOpenOptions(classOf[SeekableByteChannel])
           case opts if opts forall {opt => opt != Write && opt != Append} =>
-              openOutputStream(jpath,openOptions :+ Write)
+              openOptions :+ Write
           case _ =>
-            openOutputStream(jpath,openOptions)
+            openOptions
       }
-      r.updateContext(fileSystem.context)
+      openOutputStream(jpath,options).updateContext(fileSystem.context)
   }
   /**
    * Obtains a ByteChannel for read/write access to the file.  If no OpenOptions are
@@ -125,7 +126,8 @@ abstract class FileOps extends Seekable {
    *           Default is options only
    */
   def channel(openOptions:OpenOption*): SeekableByteChannelResource[SeekableByteChannel] = {
-    Resource.fromSeekableByteChannel(openChannel(jpath,openOptions)).updateContext(fileSystem.context)
+    val options = if (openOptions.isEmpty) fileSystem.context.readWriteOpenOptions(classOf[SeekableByteChannel]) else openOptions
+    Resource.fromSeekableByteChannel(openChannel(jpath,options)).updateContext(fileSystem.context)
   }
   /**
    * Obtains a FileChannel for read/write access to the file.  Not all filesystems
@@ -145,7 +147,9 @@ abstract class FileOps extends Seekable {
   def fileChannel(openOptions:OpenOption*): Option[SeekableByteChannelResource[FileChannel]] = {
     try {
       jpath.toFile // test that it is a file and therefore has a FileChannel
-      Some(Resource.fromSeekableByteChannel(openChannel(jpath,openOptions).asInstanceOf[FileChannel]).updateContext(fileSystem.context))
+
+      val options = if (openOptions.isEmpty) fileSystem.context.readWriteOpenOptions(classOf[SeekableByteChannel]) else openOptions
+      Some(Resource.fromSeekableByteChannel(openChannel(jpath,options).asInstanceOf[FileChannel]).updateContext(fileSystem.context))
     } catch {
       case e:UnsupportedOperationException => None
     }
@@ -213,7 +217,10 @@ abstract class FileOps extends Seekable {
   // required for path
 
   // required methods for Input trait
-  override def chars(implicit codec: Codec): LongTraversable[Char] = inputStream().chars(codec)
+  override def chars(implicit codec: Codec): LongTraversable[Char] = channel(Read).chars(codec)
+  override def bytesAsInts: LongTraversable[Int] = channel(Read).bytesAsInts
+  override def bytes: LongTraversable[Byte] = channel(Read).bytes
+  override def blocks(blockSize: Option[Int] = None):LongTraversable[ByteBlock] =  channel(Read).blocks(blockSize)
 
   protected override def toByteChannelResource():InputResource[ByteChannel] = channel(context.readWriteOpenOptions(classOf[ByteChannel]):_*)/*{
     def resource = {
