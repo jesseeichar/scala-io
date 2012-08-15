@@ -9,7 +9,7 @@
 package scalax.file
 
 import scala.collection.mutable.{Set => MSet}
-import Path.AccessModes._
+import AccessModes._
 
 class AccessSet(owner:Path) extends MSet[AccessMode] {
 
@@ -27,7 +27,7 @@ class AccessSet(owner:Path) extends MSet[AccessMode] {
     iterator.contains(elem)
   }
 
-  def iterator = Path.AccessModes.values.iterator filter {
+  def iterator = AccessModes.values.iterator filter {
     case Read => owner.canRead
     case Write => owner.canWrite
     case Execute => owner.canExecute

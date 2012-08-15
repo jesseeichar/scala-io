@@ -11,7 +11,7 @@ package scalaio.test.fs
 import scalax.io._
 import scalax.file._
 import PathMatcher._
-import Path.AccessModes._
+import AccessModes._
 import org.junit.Test
 import org.junit.Assert._
 import java.nio.file.attribute.DosFileAttributeView
@@ -69,7 +69,7 @@ abstract class FsMatchingTests extends scalax.test.sugar.AssertionSugar with Fix
       enabled.foreach{p => assert(AccessMatcher(p).unapply(path).isDefined, "Expected '"+p+"' but was not found with matcher")}
       disabled.foreach{p => assert(AccessMatcher(p).unapply(path).isEmpty, "Did not expect '"+p+"' but was found by matcher")}
     }
-    import Path.AccessModes.{values => modes}
+    import scalax.file.AccessModes.{values => modes}
     modes foreach {p =>
       val a = permissions(p)
       test(a,modes -- a)}

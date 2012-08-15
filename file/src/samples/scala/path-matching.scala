@@ -36,7 +36,7 @@ object PathMatching {
 
     // Now match based on the permissions of the path
     // Set up matchers we want to use
-    import Path.AccessModes._
+    import scalax.file.AccessModes._
     val RWE = new AccessMatcher(Read, Write, Execute)
     val RW = new AccessMatcher(Read, Write)
     val R = new AccessMatcher(Read)

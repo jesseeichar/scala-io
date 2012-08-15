@@ -8,7 +8,8 @@
 
 package scalaio.test.fs
 
-import scalax.file.Path.AccessModes._
+import scalax.file.AccessMode
+import scalax.file.AccessModes._
 import org.junit.{
   Before, After
 }

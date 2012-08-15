@@ -9,7 +9,7 @@
 package scalaio.test
 
 import scalax.file._
-import Path.AccessModes._
+import AccessModes._
 import PathMatcher.GlobPathMatcher
 
 import org.junit.Assert._

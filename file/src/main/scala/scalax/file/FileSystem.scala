@@ -190,11 +190,18 @@ class FileSystem(protected[file] val jFileSystem: JFileSystem, val context:Resou
    * @see Path#contents
    */
   def matcher(pattern: String, syntax: String = PathMatcher.StandardSyntax.GLOB): PathMatcher[Path] = {
-    syntax match {
-      case PathMatcher.StandardSyntax.GLOB => GlobPathMatcher(pattern)
-      case PathMatcher.StandardSyntax.REGEX => RegexPathMatcher(pattern)
-      case _ => throw new IOException(syntax + " is not a recognized syntax for the " + name + " filesystem")
+    try {
+      val matcher = jFileSystem.getPathMatcher(syntax + ":" + pattern)
+      new PathMatcher.NativePathMatcher(matcher)
+    } catch {
+      case _: UnsupportedOperationException =>
+        syntax match {
+          case PathMatcher.StandardSyntax.GLOB => GlobPathMatcher(pattern)
+          case PathMatcher.StandardSyntax.REGEX => RegexPathMatcher(pattern)
+          case _ => throw new UnsupportedOperationException(syntax + " is not a recognized syntax for the " + name + " filesystem")
+        }
     }
+
   }
   /**
    * Creates an empty file in the provided directory with the provided prefix and suffixes,

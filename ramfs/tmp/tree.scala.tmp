@@ -46,6 +46,39 @@ private[ramfs] class FileNode(var name:String) extends Node {
     var data = ArrayBuffer[Byte]()
     var lastModified = System.currentTimeMillis
     def inputStream : InputStream = new ByteArrayInputStream(data.toArray)
+
+    def outputResource(owner:RamPath, openOptions: OpenOption*) : OutputStream = {
+      require (owner.node exists {_ == this})
+      if (!canWrite) {
+        throw new IOException("Not permitted to write to this file")
+      }
+
+      def newResource = {
+        val out = new ByteArrayOutputStream(){
+          override def close() {
+            super.close()
+            if(openOptions contains DeleteOnClose) {
+              owner.delete(force=true);
+            } else {
+              data = ArrayBuffer(this.toByteArray:_*)
+            }
+          }
+        }
+
+        if(openOptions contains Append) out.write(data.toArray,0,data.size);
+
+        out
+      }
+
+      if(openOptions contains Truncate) data.clear()
+
+      newResource
+    }
+
+    def channel(owner:RamPath, openOptions: OpenOption*) = {
+      def newchannel = new ArrayBufferSeekableChannel(this.data,openOptions:_*)(_ => owner.delete(force=true), _ => ())
+      newchannel
+    }
   }
 
 private[ramfs] class DirNode(var name:String) extends Node {

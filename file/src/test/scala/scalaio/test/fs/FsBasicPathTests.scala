@@ -11,7 +11,7 @@ package scalaio.test.fs
 import language.postfixOps
 import scalax.io._
 import scalax.file._
-import Path.AccessModes._
+import AccessModes._
 import PathMatcher._
 import scalax.io.Resource
 import org.junit.Assert._
@@ -742,7 +742,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
     intercept[IOException] {
       f1 copyTo (f2, createParents=false)
     }
-    f1.access(Path.AccessModes.Execute) = true
+    f1.access(scalax.file.AccessModes.Execute) = true
     f1 copyTo f2
 
     assertTrue("lastModified attribute was not copied: f1="+f1.lastModified+", f2="+f2.lastModified,
@@ -769,7 +769,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
     f2.deleteRecursively(force=true)
     assertTrue("failed to delete f2", f2.nonExistent)
     f1.lastModified = FileTime.fromMillis(10000L)
-    f1.access(Path.AccessModes.Execute) = true
+    f1.access(scalax.file.AccessModes.Execute) = true
     f1 copyTo (f2, copyAttributes=false)
 
     assertTrue("lastModified attribute was copied when it should not have", f1.lastModified.toMillis < f2.lastModified.toMillis)
@@ -883,12 +883,12 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
     val path = fspath(pathName)
     assertEquals(Nil, path.access.toList)
     intercept[IOException] {
-      path.access = Path.AccessModes.Write :: Nil
+      path.access = scalax.file.AccessModes.Write :: Nil
     }
     path.createFile()
     path.write("some test data")
     path.access = access
-    (Path.AccessModes.values -- access) foreach { a => matchAccess(a, path, false) }
+    (scalax.file.AccessModes.values -- access) foreach { a => matchAccess(a, path, false) }
 
     access foreach { a => matchAccess(a, path, true) }
   }

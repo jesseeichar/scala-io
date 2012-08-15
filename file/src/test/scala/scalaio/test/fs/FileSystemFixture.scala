@@ -37,7 +37,7 @@ case class TestData(fs : FileSystem, numSegments : Int, pathName : String) {
     }
     this
   }
-  lazy val access = Path.AccessModes.values filter {_ => Random.nextBoolean()} toSeq
+  lazy val access = scalax.file.AccessModes.values filter {_ => Random.nextBoolean()} toSeq
 
   override def toString() = {
     "TestData( fs = %s, numSegments = %s, pathName = %s, exists = %s, access = %s)".format(fs, numSegments, pathName, path.exists, access)

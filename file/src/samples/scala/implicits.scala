@@ -1,4 +1,6 @@
 
+import language.reflectiveCalls
+
 /**
  * Using implicit conversions to convert between strings Java Files
  * and Scala Paths
@@ -31,7 +33,7 @@ object implicits {
   def pathTojavaFile = {
     import java.io.File
     import scalax.file.FileSystem
-    import scalax.file.ImplicitConversions.defaultPath2jfile
+    import scalax.file.ImplicitConversions.scalaPath2jfile
 
     // DefaultPath objects can be converted to java.io.File objects
     val file: File = FileSystem.default("somefile")
@@ -50,7 +52,7 @@ object implicits {
     val path: Path = new File("/tmp/file").asPath
     val path2: Path = Paths.get("/tmp/file").asPath
     val fileAgain: File = path.asJavaFile
-    val javaPath: JPath = path.asJavaPath
+    val javaPath: JPath = path.jpath
     val pathFromString: Path = "hi".asPath
   }
 }

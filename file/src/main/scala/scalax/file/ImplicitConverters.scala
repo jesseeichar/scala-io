@@ -14,34 +14,49 @@ object ImplicitConverters {
    * Method to implicitly add an asPath method to String
    */
   implicit def stringAsPath(s: String) = new {
-    def asPath(implicit fileSystem: FileSystem = FileSystem.default):Path = fileSystem.fromString(s)
+    def asPath(implicit fileSystem: FileSystem = FileSystem.default):Path = ImplicitConversions.string2path(s)(fileSystem)
   }
 
   /**
-   * Method to implicitly convert add an asPath method to [[java.io.File]]
+   * Method to implicitly add an asPath method to [[java.io.File]]
    */
   implicit def jfileAsPath(jfile: java.io.File) = new {
-    def asPath = FileSystem.default(jfile.getPath)
+    def asPath = ImplicitConversions.jfile2path(jfile)
   }
   
   /**
-   * Method to implicitly convert add an asPath method to [[java.nio.file.Path]]
+   * Method to implicitly add an asPath method to [[java.nio.file.Path]]
    */
-  implicit def jfileAsPath(jfile: java.nio.file.Path) = new {
-	  def asPath = FileSystem.default(jfile)
+  implicit def jpathAsPath(jpath: java.nio.file.Path) = new {
+	  def asPath = ImplicitConversions.jpath2path(jpath)
   }
-
   /**
-   * Implicitly convert a an asJavaFile method to [[scalax.file.defaultfs.DefaultPath]]
+   * Method to implicitly add an asJavaFile method to [[scalax.file.Path]]
    */
-  implicit def defaultPathAsJFile(path: Path) = new {
-    def asJavaFile = path.jpath.toFile
+  implicit def scalaPathAsJFile(path: Path) = new {
+    def asJavaFile = ImplicitConversions.scalaPath2jfile(path)
   }
   
   /**
-   * Implicitly convert a an asJFile method to [[scalax.file.defaultfs.DefaultPath]]
+   * Method to implicitly add an asJavaPathMatcher method to [[scalax.file.PathMatcher]]
    */
-  implicit def defaultPathAsJPath(path: Path) = new {
-	  def asJavaPath = path.jpath
+  implicit def scalaPathMatcherAsJavaPathMatcher(matcher: PathMatcher[Path]) = new {
+	  def asJavaPathMatcher = ImplicitConversions.scalaPathMatcher2jpathMatcher(matcher)
   }
+  /**
+   * Method to implicitly add an asScalaPathMatcher method to [[java.nio.file.PathMatcher]]
+   */
+  implicit def javaPathMatcherAsScalaPathMatcher(matcher: java.nio.file.PathMatcher) = new {
+	  def asScalaPathMatcher = ImplicitConversions.javaPathMatcher2scalaPathMatcher(matcher)
+  }
+  
+  
+  /**
+   * Method to implicitly add an asScalaFileSystem method to [[java.nio.file.FileSystem]]
+   */
+  implicit def javaFileSystemAsScalaFileSystem(fs: java.nio.file.FileSystem) = new {
+	  def asScalaFileSystem = ImplicitConversions.jfileSystem2FileSystem(fs)
+  }
+  
+  
 }

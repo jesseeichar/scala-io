@@ -519,13 +519,35 @@ object Resource {
   }
 
   /**
-   * Creates an Input Resource from a URL
+   * Creates an Input Resource from a URL.
+   * 
+   * Note:  The Input object is obtained from the URL's openStream method.  
+   * This means that the normal java system properties for controlling
+   * aspects of the stream such as Authentication can be used.
+   * 
+   * An example of using authentication might be:
+   * 
+   * {{{
+   * val username = "myusername"
+   * val password = "mypassword".toCharArray()
+   * 
+   * class MyAuthenticator extends Authenticator {
+   *   def getPasswordAuthentication = new PasswordAuthentication(kuser, password);
+   * }
+   * 
+   * Authenticator.setDefault(new MyAuthenticator());
+   * 
+   * println(Resource.fromURL(args(0)).string)
+   * }}}
    *
    * @param url the url to use for constructing a InputStreamResource
-   *
+   * @param connectionConfiguration 
+   * 				a function for configuring the connection before getting the input stream
+   * 				By default this is a noop
+   * 
    * @return an InputStreamResource
    */
-  def fromURL(url:URL): InputStreamResource[InputStream] = {
+  def fromURL(url:URL, connectionConfiguration: URLConnection => Unit = (_:URLConnection) => ()): InputStreamResource[InputStream] = {
     val sizeFunc = () => allCatch.opt {
       val conn: URLConnection = url.openConnection
       try {
@@ -537,19 +559,28 @@ object Resource {
         conn.getInputStream.close()
       }
     }
+    def openStream = {
+      val conn = url.openConnection()
+      connectionConfiguration(conn)
+      conn.getInputStream()
+    }
     new InputStreamResource(url.openStream,new ResourceContext{override def descName=KnownName(url.toExternalForm)},Noop,sizeFunc)
   }
 
   /**
    * Converts the string to a URL and creates an Input Resource from the URL
+   * 
+   * Read fromURL(URL) for more details
    *
    * @param url the url string to use for constructing a InputStreamResource
-   *
+   * @param connectionConfiguration 
+   * 				a function for configuring the connection before getting the input stream
+   * 				By default this is a noop
    * @return an InputStreamResource
    *
    * @throws java.net.MalformedURLException if the url string is not a valid URL
    */
-  def fromURL(url:String): InputStreamResource[InputStream] = fromURL(new URL(url))
+  def fromURLString(url:String, connectionConfiguration: URLConnection => Unit = (_:URLConnection) => ()): InputStreamResource[InputStream] = fromURL(new URL(url), connectionConfiguration)
   /**
    * Creates a Seekable Resource from a File
    *

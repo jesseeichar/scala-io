@@ -1,7 +1,7 @@
 package scalax.file
 package ramfs
 
-class RamFileAttributes(path: RamPath) extends FileAttributes {
+class RamFileAttributes(path: Path) extends FileAttributes(path) {
   override def all(linkOptions:LinkOption*): Set[FileAttribute[_]] =  path.node.toList.flatMap(_.attributes.map{case (key,value) => FileAttributeImpl(key,value)}).toSet
   override def apply[A](name: String, linkOptions:LinkOption*): Option[A] = path.node.flatMap(_.attributes.get(name).asInstanceOf[Option[A]]) 
   override def get[T <: BasicFileAttributes](c: Class[T], linkOptions:LinkOption*): Option[T] = None

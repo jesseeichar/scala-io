@@ -1,141 +1,82 @@
-/*                     __                                               *\
-**     ________ ___   / /  ___     Scala API                            **
-**    / __/ __// _ | / /  / _ |    (c) 2009-2010, Jesse Eichar          **
-**  __\ \/ /__/ __ |/ /__/ __ |    http://scala-lang.org/               **
-** /____/\___/_/ |_/____/_/ | |                                         **
-**                          |/                                          **
-\*                                                                      */
+package scalax.file.ramfs
 
-package scalax.file
-package ramfs
-import Path.AccessModes._
-import Path.fail
+import java.io.File
+import java.nio.file.{ Path, FileSystem, WatchService, LinkOption, WatchEvent, WatchKey }
+import WatchEvent._
 import java.net.URI
+import java.util.{ Iterator => JIterator }
 import java.util.regex.Pattern
-import collection.mutable.ArrayBuffer
-import scala.{Some, Option}
-import scalax.io.CloseableIterator
 
-class RamPath(relativeTo: String, val path: String, override val fileSystem: RamFileSystem) extends Path(fileSystem) with RamFileOps {
-  def node = fileSystem.lookup(this)
+class RamPath(relativeTo: String, val path: String, fs: RamFileSystem) extends Path {
 
-  lazy val toAbsolute: RamPath = fileSystem.fromStrings("", relativeTo + separator + path)
-  lazy val toURI: URI = fileSystem.uri(this)
-
-  def /(child: String): RamPath = {
-    fileSystem.checkSegmentForSeparators(child)
-    fileSystem.fromStrings(relativeTo, path + separator + child)
-  }
-
-  lazy val name: String = path.split(Pattern.quote(separator)).lastOption getOrElse (path)
-  def toRealPath(linkOptions:LinkOption*) = toAbsolute.normalize
-  lazy val parent: Option[RamPath] = {
-    val segs = {
-      val raw = path.split(Pattern quote separator).toList
+  val sep = fs.getSeparator
+  lazy val name =  path.split(Pattern.quote(sep)).lastOption getOrElse (path)
+  lazy val segments = {
+      val raw = path.split(Pattern quote sep).toList
       val noEmpty = raw.filterNot {
         _.isEmpty
       }
       if (raw.headOption.exists {
         _.isEmpty
-      }) separator +: noEmpty
+      }) sep +: noEmpty
       else noEmpty
-    };
-    (segs dropRight 1) match {
-      case Nil => None
-      case segs => Some(fileSystem(relativeTo, segs))
+    }
+  override def getFileSystem(): FileSystem = fs
+
+  override def isAbsolute: Boolean = relativeTo == ""
+
+  override def getRoot(): RamPath = fs.root
+
+  override def getFileName(): RamPath = {
+    val basePath = path.dropRight(name.length)
+    fs.fromStrings(relativeTo+sep+basePath, name)
+  }
+
+  override def getParent(): RamPath = {
+    (segments dropRight 1) match {
+      case Nil => null
+      case segs => fs.fromStrings(relativeTo, segments mkString sep)
     }
   }
 
-  def checkAccess(modes: AccessMode*): Boolean = node match {
-    case None =>
-      false
-    case Some(node) =>
-      modes forall {
-        case Execute => node.canExecute
-        case Read => node.canRead
-        case Write => node.canWrite
-      }
-  }
+  override def getNameCount(): Int = segments.size
 
-  def exists = node.isDefined
+  override def getName(index: Int): RamPath = fs.fromStrings((relativeTo :+ segments.take(index-1)) mkString sep, segments(index) )
 
-  def isFile = node.map(FileNode.accepts).getOrElse(false)
+  override def subpath(beginIndex: Int, endIndex: Int): RamPath = null.asInstanceOf[RamPath]
 
-  def isDirectory = node.map(DirNode.accepts).getOrElse(false)
+  override def startsWith(other: Path): Boolean = false
 
-  def isAbsolute = relativeTo == ""
+  override def startsWith(other: String): Boolean = false
+  override def endsWith(other: Path): Boolean = false
 
-  def isHidden = false
+  override def endsWith(other: String): Boolean = false
 
-  //TODO
-  def lastModified = node map {
-    _.lastModified
-  } getOrElse 0
+  override def normalize(): RamPath = null.asInstanceOf[RamPath]
 
-  def lastModified_=(time: Long) = {
-    node foreach {
-      _.lastModified = time
-    }
-    time
-  }
+  override def resolve(other: Path): RamPath = null.asInstanceOf[RamPath]
 
-  def size:Option[Long] = node collect {
-    case f: FileNode => f.data.size.toLong
-  }
+  override def resolve(other: String): RamPath = null.asInstanceOf[RamPath]
 
-  def access_=(accessModes: Iterable[AccessMode]) = node match {
-    case None => fail("Path %s does not exist".format(path))
-    case Some(node) =>
-      node.canRead = accessModes exists {
-        _ == Read
-      }
-      node.canWrite = accessModes exists {
-        _ == Write
-      }
-      node.canExecute = accessModes exists {
-        _ == Execute
-      }
-  }
+  override def resolveSibling(other: Path): RamPath = null.asInstanceOf[RamPath]
 
-  def doCreateFile(): Unit = if(!fileSystem.create(this, FileNode, false)) fail("Unable to create file "+path)
+  override def resolveSibling(other: String): RamPath = null.asInstanceOf[RamPath]
 
-  def doCreateDirectory(): Unit = if(!fileSystem.create(this, DirNode, false)) fail("Unable to create directory "+path)
+  override def relativize(other: Path): RamPath = null.asInstanceOf[RamPath]
 
-  def doCreateParents(): Unit = this.toAbsolute.parent.foreach(fileSystem.create(_, DirNode, true))
+  override def toUri(): URI = null.asInstanceOf[URI]
 
-  def delete(force: Boolean): this.type = {
-    val n = node
-    if (node.forall{n =>
-        n.isInstanceOf[FileNode] || n.asInstanceOf[DirNode].children.isEmpty}) {
-      if (exists && !fileSystem.delete(this, force)) {
-        fail("Could not delete " + path)
-      }
-    } else {
-      fail("Directory is not empty, cannot delete")
-    }
-    this
-  }
+  override def toAbsolutePath(): RamPath = null.asInstanceOf[RamPath]
 
-  protected def moveFile(target: Path, atomicMove: Boolean): Unit = fileSystem.move(this, target.asInstanceOf[RamPath])
+  override def toRealPath(options: LinkOption*): Path = null.asInstanceOf[RamPath]
 
-  protected def moveDirectory(target: Path, atomicMove: Boolean): Unit = fileSystem.move(this, target.asInstanceOf[RamPath])
+  override def toFile(): File = null.asInstanceOf[File]
 
-  override def toString() = "RamPath(%s)".format(path)
+  override def register(watcher: WatchService, events: Array[Kind[_]], modifiers: Modifier*): WatchKey = null.asInstanceOf[WatchKey]
 
-  def descendants[U >: Path, F](filter: F, depth: Int, options: Traversable[LinkOption])(implicit factory: PathMatcherFactory[F]) = {
-    if (!isDirectory) throw new NotDirectoryException(this + " is not a directory so descendants can not be called on it")
+  override def register(watcher: WatchService, events: Kind[_]*): WatchKey = null.asInstanceOf[WatchKey]
 
-    new BasicPathSet[RamPath](this, factory(filter), depth, false, (pathFilter: PathMatcher[RamPath], parent: RamPath) => {
-      val c = parent.node.collect {
-        case d: DirNode =>
-          d.children.map(n => parent / n.name)
-        case p =>
-          throw new NotDirectoryException(p+" is not a directory so descendants can not be called on it")
-      }
-      CloseableIterator(c.toIterator.flatten)
-    })
-  }
-  
-  override def attributes = new RamFileAttributes(this)
+  override def iterator(): JIterator[Path] = null.asInstanceOf[JIterator[Path]]
 
+  override def compareTo(other: Path): Int = 0
 }

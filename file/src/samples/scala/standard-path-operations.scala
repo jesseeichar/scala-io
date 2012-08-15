@@ -84,7 +84,7 @@ object StdPathOps {
 
     // next check if file is read and write
 
-    import Path.AccessModes._
+    import scalax.file.AccessModes._
 
     val readWrite: Boolean = path.checkAccess(Read, Write)
 

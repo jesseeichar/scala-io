@@ -32,7 +32,7 @@ abstract class FsPathObjectTests extends Fixture {
 
   @Test
   def path_object_should_implicitly_create_jfile_from_path(): Unit = {
-    import scalax.file.ImplicitConversions.defaultPath2jfile
+    import scalax.file.ImplicitConversions.scalaPath2jfile
 
     val p = FileSystem.default.createTempFile()
     val file:java.io.File = p

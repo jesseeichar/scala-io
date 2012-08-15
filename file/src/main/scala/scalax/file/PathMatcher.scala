@@ -83,13 +83,13 @@ object PathMatcher {
    *          the access modes that must be applicable
    *          on the path object.
    */
-  final class AccessMatcher (accessModes: Path.AccessModes.AccessMode*) extends PathMatcher[Path] {
+  final class AccessMatcher (accessModes: AccessMode*) extends PathMatcher[Path] {
     val accessModeSet = Set(accessModes:_*)
     def apply(path:Path) = accessModeSet.intersect(path.access).size == accessModeSet.size
     override def toString = "AccessMatcher: "+(accessModeSet mkString ",")
   }
   object AccessMatcher {
-    def apply(accessModes: Path.AccessModes.AccessMode*) = new AccessMatcher(accessModes:_*)
+    def apply(accessModes: AccessMode*) = new AccessMatcher(accessModes:_*)
   }
   /**
    * Matches a path if the attributes have the same values
@@ -197,4 +197,8 @@ object PathMatcher {
     /** Regex matcher sytax */
     final val REGEX = "regex"
   }
-}
+  
+   class NativePathMatcher(underlying:java.nio.file.PathMatcher) extends PathMatcher {
+     def apply(path: Path): Boolean = underlying matches path.jpath
+   }
+ }

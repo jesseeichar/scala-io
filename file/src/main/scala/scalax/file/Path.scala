@@ -34,16 +34,7 @@ import scalax.io.StandardOpenOption
  */
 object Path
 {
-  /**
-   * Enumeration of the Access modes possible for accessing files
-   */
-  object AccessModes {
-    sealed trait AccessMode
-    case object Execute extends AccessMode
-    case object Read extends AccessMode
-    case object Write extends AccessMode
-    def values:Set[AccessMode] = Set(Execute, Read, Write)
-  }
+
   /**
    * Lists the roots of the default filesystem
    */
@@ -185,7 +176,7 @@ class Path private[file] (val jpath:JPath, val fileSystem: FileSystem) extends F
 {
   self =>
   import Path._
-  import Path.AccessModes._
+  import AccessModes._
 
   protected def assertExists = if(!exists) throw new java.io.FileNotFoundException(path+" does not exist")
 
@@ -205,7 +196,7 @@ class Path private[file] (val jpath:JPath, val fileSystem: FileSystem) extends F
    *
    * @see normalize
    */
-  def toAbsolute: Path =if (isAbsolute) this else new Path(jpath.toAbsolutePath, fileSystem)
+  def toAbsolute: Path = if (isAbsolute) this else new Path(jpath.toAbsolutePath, fileSystem)
   /**
    * The true/real representation of the current path.
    *

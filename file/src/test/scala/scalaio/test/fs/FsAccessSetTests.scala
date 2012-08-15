@@ -8,7 +8,7 @@ package scalaio.test.fs
 **                          |/                                          **
 \*                                                                      */
 
-import scalax.file.Path.AccessModes._
+import scalax.file.AccessModes._
 import scalax.file._
 import org.junit.Assert._
 import org.junit.Test
