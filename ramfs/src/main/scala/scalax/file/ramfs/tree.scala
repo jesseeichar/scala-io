@@ -9,6 +9,9 @@
 package scalax.file
 package ramfs
 
+import java.nio.file.attribute.PosixFilePermission
+import PosixFilePermission._
+import RamAttributes.RamAttribute
 import scala.collection.mutable.ArrayBuffer
 import java.io.{
   OutputStream, InputStream, ByteArrayOutputStream, ByteArrayInputStream, IOException
@@ -34,25 +37,53 @@ private[ramfs] object DirNode extends NodeFac {
 }
 
 private[ramfs] trait Node {
-  val attributes = collection.mutable.HashMap[String,Any]()
+  val attributes = collection.mutable.HashMap[RamAttribute,Object]()
+  attributes ++= initAccess
+  
   var name:String
-  var lastModified:Long
-  var (canRead, canWrite, canExecute) = initAccess;
-  protected def initAccess = (true, true, false)
+  def canRead = attributes(RamAttributes.permissions).asInstanceOf[Set[PosixFilePermission]].contains(OWNER_READ)
+  def canWrite = attributes(RamAttributes.permissions).asInstanceOf[Set[PosixFilePermission]].contains(OWNER_WRITE)
+  def canExecute = attributes(RamAttributes.permissions).asInstanceOf[Set[PosixFilePermission]].contains(OWNER_EXECUTE)
+
+  def lastModified = attributes(RamAttributes.lastModified).asInstanceOf[java.lang.Long]
+  def lastModified_=(newVal: Long) = attributes(RamAttributes.lastModified) = newVal:java.lang.Long
+  def lastAccessTime = attributes(RamAttributes.lastAccessTime).asInstanceOf[java.lang.Long]  
+  def lastAccessTime_=(newVal: Long) = attributes(RamAttributes.lastAccessTime) = newVal:java.lang.Long
+  def creationTime = attributes(RamAttributes.creationTime).asInstanceOf[java.lang.Long]  
+  def creationTime_=(newVal: Long) = attributes(RamAttributes.creationTime) = newVal:java.lang.Long
+
+  protected def initAccess = Map[RamAttribute, Object](
+    RamAttributes.lastModified -> (System.currentTimeMillis:java.lang.Long),
+    RamAttributes.lastAccessTime -> (System.currentTimeMillis:java.lang.Long),
+    RamAttributes.creationTime -> (System.currentTimeMillis:java.lang.Long),
+    RamAttributes.hidden -> (false:java.lang.Boolean),
+
+    RamAttributes.permissions -> Set(OWNER_READ, OWNER_WRITE, GROUP_READ, OTHERS_READ)
+  )
   override def toString = getClass.getSimpleName+": "+name
 }
 
 private[ramfs] class FileNode(var name:String) extends Node {
     var data = ArrayBuffer[Byte]()
-    var lastModified = System.currentTimeMillis
-    def inputStream : InputStream = new ByteArrayInputStream(data.toArray)
+    def channel(openOptions:OpenOption*) = new ArrayBufferSeekableChannel(data, openOptions:_*)(_ => data.clear, _ => lastAccessTime = System.currentTimeMillis)
+    def inputStream : InputStream = {
+      new ByteArrayInputStream(data.toArray){
+        override def close = {
+  		  lastAccessTime = System.currentTimeMillis
+  		  super.close()
+        }
+      }
+    }
   }
 
 private[ramfs] class DirNode(var name:String) extends Node {
-  override protected def initAccess = (true, true, true)
+  override protected def initAccess = {
+    super.initAccess ++ Map (
+      RamAttributes.permissions -> Set(OWNER_READ, OWNER_WRITE, OWNER_EXECUTE, GROUP_READ, GROUP_EXECUTE, OTHERS_READ, OTHERS_EXECUTE)
+    )
+  }
 
   val children = ArrayBuffer[Node]()
-  var lastModified = System.currentTimeMillis
   val self = this;
 
   def lookup(path:Seq[String]) : Option[Node]= {

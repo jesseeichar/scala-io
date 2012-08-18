@@ -343,13 +343,7 @@ class Path private[file] (val jpath:JPath, val fileSystem: FileSystem) extends F
        case (path,"..") => path dropRight 1
        case (path,seg) => path :+ seg
      }
-/*     val prefix = if(isAbsolute) root.map{_.path}.getOrElse("")
-                  else ""
-     if(reversedNormalizedPath startsWith prefix) {*/
-       fileSystem.fromSeq(reversedNormalizedPath)
-     /*} else {
-       fileSystem.fromSeq(prefix +: reversedNormalizedPath)
-     }*/
+     fileSystem.fromSeq(reversedNormalizedPath)
    }
   /**
    * Resolve this path with other.  In the simplest case
