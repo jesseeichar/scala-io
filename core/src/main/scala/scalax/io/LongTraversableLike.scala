@@ -179,6 +179,7 @@ trait LongTraversableLike[+A, +Repr <: LongTraversableLike[A, Repr]] extends Tra
     withIterator(_.reduceRight(op))
 
   override /*TraversableLike*/ def filter(p: A => Boolean): Repr = build(_ filter p)
+  override /*TraversableLike*/ def filterNot(p: A => Boolean): Repr = filter(!p(_))
   override /*TraversableLike*/ def map[B, That](f: A => B)(implicit bf: CanBuildFrom[Repr, B, That]): That = bf(repr) match {
     case ltf:LongTraversableBuilder[B,That] => ltf.fromIterator(CloseableIteratorOps(iterator).map(f), context)
     case b =>
