@@ -7,7 +7,6 @@ object BuildConstants {
   val version = "0.5.0-SNAPSHOT"
   val armVersion = "1.3-SNAPSHOT"
   val armScalaVersion = "2.10"
-  val akkaVersion = "2.0.1"
   val scalaVersion = "2.10.0-SNAPSHOT"
 }
 
@@ -51,6 +50,7 @@ object ScalaIoBuild extends Build {
      //scalaHome := Some(file("/Volumes/Box/ScalaProject/scala-full/dists/scala-2.9.2.r25667-b20110921211926")),
     organization := BuildConstants.organization,
     version := BuildConstants.version,
+    crossVersion := CrossVersion.full,
     licenses := Seq("Scala License" -> url("http://www.scala-lang.org/node/146")),
     homepage := Some(url("http://jesseeichar.github.com/scala-io-doc/index.html")),
     maxErrors := 20,
