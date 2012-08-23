@@ -6,14 +6,18 @@ import scala.util.{Try, Success, Failure}
 import util.Duration
 
 class TestIter(file:String) {
-  val buffer = ByteBuffer.allocateDirect(8 * 1024)
-  val channel = AsynchronousFileChannel.open(Paths.get(file))
+  def close = channel.close
+  
+  private[this] val buffer = ByteBuffer.allocateDirect(8 * 1024)
+  buffer.position(buffer.capacity())
+  private[this] val channel = AsynchronousFileChannel.open(Paths.get(file))
+  private[this] var pos = 0L
   def available = channel.isOpen()
   def load [U](listener: Try[Integer] => U) = synchronized {
     if(loadListener != null) throw new ReadPendingException()
     loadListener = listener
     buffer.clear
-    channel.read(buffer, 0, null, handler)
+    channel.read(buffer, pos, null, handler)
   }
   def hasNext = buffer.remaining > 0
   def next = buffer.get()
@@ -21,6 +25,9 @@ class TestIter(file:String) {
   private[this] var loadListener:Try[Integer] => Any = _
   private[this] val handler = new CompletionHandler[Integer, Null] {
     def completed(bytesRead: Integer, p2: Null): Unit = {
+      if (bytesRead < buffer.capacity) channel.close
+      pos += bytesRead
+      buffer.flip
       val listener = synchronized {
     	  val l = loadListener
 	      loadListener = null
@@ -29,6 +36,7 @@ class TestIter(file:String) {
       listener.apply(Success(bytesRead))
     }
      def failed(exc: Throwable, attachment: Null): Unit = synchronized {
+       channel.close
        val listener = synchronized {
     	  val l = loadListener
 	      loadListener = null
