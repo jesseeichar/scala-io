@@ -9,8 +9,8 @@ object InputComposition {
   def zipAndCompare {
     import scalax.io.Resource
 
-    val googleCom = Resource.fromURL("http://google.com").chars
-    val googleCH = Resource.fromURL("http://google.ch").chars
+    val googleCom = Resource.fromURLString("http://google.com").chars
+    val googleCH = Resource.fromURLString("http://google.ch").chars
 
     googleCom.zip(googleCH).filter{case (com,ch) => com != ch}
   }
@@ -21,8 +21,8 @@ object InputComposition {
   def blockCompare {
     import scalax.io.Resource
 
-    val googleCom = Resource.fromURL("http://google.com").bytes
-    val googleCH = Resource.fromURL("http://google.ch").bytes
+    val googleCom = Resource.fromURLString("http://google.com").bytes
+    val googleCH = Resource.fromURLString("http://google.ch").bytes
 
     val blocks = googleCom.sliding(100,100).zip(googleCH.sliding(100,100))
 

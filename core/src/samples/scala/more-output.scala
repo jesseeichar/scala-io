@@ -104,7 +104,7 @@ object MoreOutputExamples {
     // Why use the processor style writes? because it processors have both read and
     // write components.  Write processors allow reading and writing to be interleaved
     val processor2: Processor[TraversableOnce[Unit]] = for{
-        in <- Resource.fromURL("http://scala-lang.org").lines().processor
+        in <- Resource.fromURLString("http://scala-lang.org").lines().processor
         out <- output.outputProcessor
         // This examples how the writes can be interleaved with reads, which is not possible if the output operations
         // did not return processors

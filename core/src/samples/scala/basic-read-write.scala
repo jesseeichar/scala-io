@@ -185,10 +185,10 @@ object BasicIO {
     // see codec examples in scala io core for details on why there is an implicit codec here
     implicit val codec = scalax.io.Codec.UTF8
 
-    val url:Input = Resource.fromURL("file://someFile")
+    val url:Input = Resource.fromURLString("file://someFile")
 
     // Actual type is InputStreamResource[InputStream] but that is only needed if you want to convert to a reader
-    val url2: InputStreamResource[InputStream] = Resource.fromURL("file://someFile")
+    val url2: InputStreamResource[InputStream] = Resource.fromURLString("file://someFile")
     val sum: Int = url.bytesAsInts.reduceLeft (_ + _)
   }
 
@@ -207,7 +207,7 @@ object BasicIO {
     // see codec examples in scala io core for details on why there is an implicit codec here
     implicit val codec = scalax.io.Codec.UTF8
 
-    val url: InputStreamResource[InputStream] = fromURL("http://www.scala-lang.org")
+    val url: InputStreamResource[InputStream] = fromURLString("http://www.scala-lang.org")
     // You can convert an InputStreamResource to a _ReadChars_ type if desired.  That means that the codec needs to be
     // defined just once.
     val someReader: ReadChars = url.reader(Codec.UTF8)
@@ -227,7 +227,7 @@ object BasicIO {
     // see codec examples in scala io core for details on why there is an implicit codec here
     implicit val codec = scalax.io.Codec.UTF8
 
-    val url:Input = fromURL("file://someFile")
+    val url:Input = fromURLString("file://someFile")
     val doubled: Traversable[String] = for ( c <- url.chars ) yield "" + c + c
   }
 
@@ -242,7 +242,7 @@ object BasicIO {
     // see codec example for why codec is required
     implicit val codec = Codec.UTF8
 
-    val url:Input = fromURL("file://someFile")
+    val url:Input = fromURLString("file://someFile")
 
     // by default the line terminator is stripped and is
     // auto detected
