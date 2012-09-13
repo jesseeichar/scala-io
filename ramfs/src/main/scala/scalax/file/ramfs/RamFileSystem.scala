@@ -7,42 +7,49 @@ import java.nio.file.attribute.{UserPrincipalLookupService, FileAttribute}
 import java.nio.file.spi.FileSystemProvider
 import java.lang.{ Iterable => JIterable }
 import java.util.{ UUID, Set => JSet }
-import java.net.URI
+import java.net.{URI, URLDecoder, URLEncoder}
 import scalax.file.ImplicitConverters._
 import scalax.file.PathMatcher.{ StandardSyntax, RegexPathMatcher, GlobPathMatcher }
 import collection.JavaConverters._
 import java.nio.file.AccessMode
+import java.util.regex.Pattern
 
 case class RamFsId(id: String = UUID.randomUUID.toString)
 
 object RamFileSystem {
+  
   val provider = new RamFsProvider()
+  def createURI(id:String, separator:String) = new URI((provider.getScheme+"://%s:%s@ramfs/").format(id, URLEncoder.encode(separator, "UTF8")))
+  
   private val fileSystems = scala.collection.mutable.WeakHashMap[RamFsId, RamFileSystem]()
   def existsFileSystem(uri: URI) = fileSystems.contains(RamFsId(uri.getUserInfo))
-  def apply(separator: String = "/"): RamFileSystem = new RamFileSystem(separator = separator)()
-  def apply(fsId: RamFsId): RamFileSystem = synchronized {
-    fileSystems.get(fsId).getOrElse(new RamFileSystem(fsId)())
+  def apply(fsId: RamFsId, separator:String = "/"): RamFileSystem = synchronized {
+    fileSystems.get(fsId).getOrElse(new RamFileSystem(fsId, separator)())
   }
-  def apply(uri: URI): RamPath = {
+  def apply(uri:URI): RamFileSystem = {
     require(uri.toString contains '@', "Ramfile system URIs must be of form: ramfs://fsId@path, was: " + uri + " (did not contain a !)")
     require(uri.getScheme equalsIgnoreCase "ramfs", "Ramfile system URIs must start with ramfs, was: " + uri)
 
-    val id = RamFsId(uri.getUserInfo)
-    val fs = apply(id)
+    val Pattern = ("""ramfs://(.+):?(.*)@ramfs/.*""").r
+    val Pattern(rawid, rawsep) = uri.getRawAuthority().split(":",2)
+    val id = RamFsId(rawid)
+    apply(id, rawsep)
+
+  }
+  def createPath(uri: URI): RamPath = {
+    val fs = apply(uri)
     val path = uri.getRawPath split "/"
-    val relativeTo = if (path(0) == fs.root.path) "" else fs.pwd.toAbsolutePath.toString
-    fs.fromStrings(relativeTo, path mkString fs.getSeparator)
+    fs.fromStrings(path mkString fs.getSeparator)
   }
   private def register(fsId: RamFsId, fs: RamFileSystem) = synchronized {
     fileSystems(fsId) = fs
   }
 }
-class RamFileSystem(val id: RamFsId = RamFsId(), separator: String = "/", workingDir: String = "")(fileStore: RamFileStore = new RamFileStore(id)) extends FileSystem {
+class RamFileSystem(val id: RamFsId = RamFsId(), val separator:String = "/", workingDir: String = "")(fileStore: RamFileStore = new RamFileStore(id)) extends FileSystem {
   RamFileSystem.register(id, this)
-
   private var fsTree = new DirNode(separator)
-  val root = new RamPath("", fsTree.name, this)
-  val pwd = fromStrings("", workingDir)
+  val root = new RamPath(fsTree.name.split(separator).toVector, this)
+  val pwd = fromStrings(workingDir)
 
   override def provider: FileSystemProvider = RamFileSystem.provider
   override def close: Unit = ()
@@ -63,18 +70,13 @@ class RamFileSystem(val id: RamFsId = RamFsId(), separator: String = "/", workin
     }
   }
 
-  protected[ramfs] def fromStrings(relativeTo: String, path: String): RamPath = {
-    def process(path: String) = {
-      import java.util.regex.Pattern.quote
-      val p = path.replace(separator + separator, separator);
-      if ((p endsWith separator) && (p.length > 1)) p.drop(1)
-      else p
-    }
-    val newpath = new RamPath(process(relativeTo), process(path), this)
+  protected[ramfs] def fromStrings(path: String): RamPath = {
+    val cleanPath = path.split(Pattern.quote(separator)).toVector.filter(_.nonEmpty)
+    val newpath = new RamPath(cleanPath, this)
     if (newpath == root) root
     else newpath
   }
-  override def getPath(first: String, more: String*): RamPath = fromStrings(workingDir, (first +: more).filterNot { _.isEmpty } mkString separator)
+  override def getPath(first: String, more: String*): RamPath = fromStrings((first +: more).filterNot { _.isEmpty } mkString separator)
 
   override def getPathMatcher(syntaxAndPattern: String): PathMatcher = {
     val Array(syntax, pattern) = syntaxAndPattern.split(":", 2)

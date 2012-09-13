@@ -16,9 +16,14 @@ abstract class FsFileSystemTests extends scalax.test.sugar.AssertionSugar with F
     implicit val codec = Codec.UTF8
 
     @Test
-    def fileSystem_apply_creates_a_path() : Unit = {
+    def default_fileSystem_apply_creates_a_path() : Unit = {
         val path = Path.fromString(getClass.getClassLoader.getResource("resources/text").getFile)
         assertTrue(path.exists)
         assertTrue(path.canRead)
+    }
+    @Test
+    def fileSystem_apply_creates_a_path() : Unit = {
+        val path = fixture.fs("a,b,c,d,e", ',')
+        assertEquals(5,path.segments.length)
     }
 }

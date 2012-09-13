@@ -16,7 +16,7 @@ class RamFsProvider extends file.spi.FileSystemProvider {
     RamFileSystem(RamFsId(uri.getUserInfo()))
   }
   override def getFileSystem(uri: URI): FileSystem = RamFileSystem(RamFsId(uri.getUserInfo()))
-  override def getPath(uri: URI): Path = RamFileSystem(uri)
+  override def getPath(uri: URI): Path = RamFileSystem.createPath(uri)
   override def isSameFile(path: Path, path2: Path): Boolean = (path, path2) match {
     case (p1:RamPath, p2:RamPath) =>
       p1.toRealPath().compareTo(p2.toRealPath()) == 0
@@ -98,11 +98,32 @@ class RamFsProvider extends file.spi.FileSystemProvider {
     }
   }
   override def setAttribute(path: Path, attribute: String, value: Any, options: LinkOption*): Unit = {
-    
+   // TODO ;jaslf 
   }
-  override def newDirectoryStream(dir: Path, filter: DirectoryStream.Filter[_ >: Path]): DirectoryStream[Path] = null.asInstanceOf[DirectoryStream[Path]]
-  override def getFileAttributeView[V <: FileAttributeView](path: Path, typeOf: Class[V], options: LinkOption*): V = null.asInstanceOf[V]
-  override def readAttributes[A <: BasicFileAttributes](path: Path, typeOf: Class[A], options: LinkOption*): A = null.asInstanceOf[A]
+  override def getFileAttributeView[V <: FileAttributeView](path: Path, typeOf: Class[V], options: LinkOption*): V = {
+    val ramP = ramPath(path)
+    if(!ramP.exists) throw new FileNotFoundException(path+" Does not exist")
+
+    val Basic = classOf[BasicFileAttributeView]
+
+    typeOf match {
+      case Basic => new RamBasicFileView(ramP).asInstanceOf[V]
+      case _ => null.asInstanceOf[V]
+    }
+  }
+  override def readAttributes[A <: BasicFileAttributes](path: Path, typeOf: Class[A], options: LinkOption*): A = {
+    val ramP = ramPath(path)
+    if(!ramP.exists) throw new FileNotFoundException(path+" Does not exist")
+
+    val Basic = classOf[BasicFileAttributes]
+
+    typeOf match {
+      case Basic => new BasicRamFileAttributes(ramP).asInstanceOf[A]
+      case _ => null.asInstanceOf[A]
+    }
+  }
+  override def newDirectoryStream(dir: Path, filter: DirectoryStream.Filter[_ >: Path]): DirectoryStream[Path] = 
+    new RamDirectoryStream(ramPath(dir), filter)
 
   // -------------  Support methods --------------------//
   def readAttribute(path: RamPath, att: RamAttributes.RamAttribute) = {

@@ -77,7 +77,7 @@ abstract class FileSystemFixture(val fs : FileSystem, rnd : Random) {
   def tree(depth : Int = rndInt(5)+2, filesPerLevel:Int = rndInt(5)) : (Path, Node) = {
 
     val newRoot = path(1)
-    newRoot.createDirectory(true)
+    newRoot.createDirectory(true, false)
 
     val structure = Node((newRoot.segments mkString Node.Sep).replaceAll(Node.Sep+"+",Node.Sep), None)
       for (d <- 1 until depth;
@@ -147,5 +147,7 @@ abstract class FileSystemFixture(val fs : FileSystem, rnd : Random) {
    */
   def image = copyResource(Resource.fromInputStream(Constants.IMAGE.openStream()))
 
-  def after() : Unit = root.deleteRecursively(force=true)
+  def after() : Unit = {
+    root.deleteRecursively(force=true)
+  }
 }

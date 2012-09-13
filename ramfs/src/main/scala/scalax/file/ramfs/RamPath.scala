@@ -7,46 +7,31 @@ import java.net.URI
 import java.util.{ Iterator => JIterator }
 import java.util.regex.Pattern
 
-class RamPath(relativeTo: String, protected[ramfs] val path: String, fs: RamFileSystem) extends Path {
+class RamPath(protected[ramfs] val segments: Vector[String], fs: RamFileSystem) extends Path {
   def exists = fs.lookup(this).isDefined
   val sep = fs.getSeparator
-  lazy val name = path.split(Pattern.quote(sep)).lastOption getOrElse (path)
-  lazy val segments = {
-    val raw = path.split(Pattern quote sep).toList
-    val noEmpty = raw.filterNot {
-      _.isEmpty
-    }
-    if (raw.headOption.exists {
-      _.isEmpty
-    }) sep +: noEmpty
-    else noEmpty
-  }
+  lazy val name = segments.last
+  val path = segments mkString sep
   override def getFileSystem(): RamFileSystem = fs
 
-  override def isAbsolute: Boolean = relativeTo == ""
+  override def isAbsolute: Boolean = segments.startsWith(fs.root.segments)
 
   override def getRoot(): RamPath = fs.root
 
-  override def getFileName(): RamPath = {
-    val basePath = path.dropRight(name.length)
-    fs.fromStrings(relativeTo + sep + basePath, name)
-  }
+  override def getFileName(): RamPath = new RamPath(Vector(name), fs)
 
-  override def getParent(): RamPath = {
-    (segments dropRight 1) match {
-      case Nil => null
-      case segs => fs.fromStrings(relativeTo, segments mkString sep)
-    }
+  override def getParent(): RamPath = if (segments.size > 1) {
+   new RamPath(segments.dropRight(1), fs) 
+  } else {
+    null
   }
 
   override def getNameCount(): Int = segments.size
 
-  override def getName(index: Int): RamPath = fs.fromStrings((relativeTo :+ segments.take(index - 1)) mkString sep, segments(index))
+  override def getName(index: Int): RamPath = new RamPath(Vector(segments(index)), fs)
 
   override def subpath(beginIndex: Int, endIndex: Int): RamPath = {
-    val base = (relativeTo :+ segments.take(beginIndex - 1)) mkString sep
-    val path = segments.slice(beginIndex, endIndex) mkString sep
-    fs.fromStrings(base, path)
+    new RamPath(segments.slice(beginIndex, endIndex), fs)
   }
 
   override def startsWith(other: Path): Boolean = path.startsWith(other.toString())
@@ -62,37 +47,34 @@ class RamPath(relativeTo: String, protected[ramfs] val path: String, fs: RamFile
       case (path, "..") => path dropRight 1
       case (path, seg) => path :+ seg
     }
-    fs.fromStrings(relativeTo, reversedNormalizedPath mkString sep)
+    new RamPath(reversedNormalizedPath.reverse, fs)
   }
 
   override def resolve(other: Path): RamPath = other match {
     case ramPath: RamPath if ramPath.getFileSystem == fs =>
-      val base = relativeTo + sep + path
-      fs.fromStrings(base, ramPath.toString())
+      new RamPath(segments ++ ramPath.segments, fs)
     case _ => throw new java.io.IOException("Can only resolve with paths in the same filesystem")
   }
 
   override def resolve(other: String): RamPath = {
-    val base = relativeTo + sep + path
-    fs.fromStrings(base, other)
+    fs.fromStrings(path + sep + other)
   }
 
   override def resolveSibling(other: Path): RamPath = other match {
     case ramPath: RamPath if ramPath.getFileSystem == fs =>
-      val base = (relativeTo +: segments.dropRight(1)) mkString sep
-      fs.fromStrings(base, ramPath.toString())
+      val newSegments = 
+        if(segments.nonEmpty) segments.dropRight(1) ++ ramPath.segments
+        else ramPath.segments
+      new RamPath(newSegments, fs)
     case _ => throw new java.io.IOException("Can only resolve with paths in the same filesystem")
   }
 
-  override def resolveSibling(other: String): RamPath = {
-    val base = (relativeTo +: segments.dropRight(1)) mkString sep
-    fs.fromStrings(base, other)
-  }
+  override def resolveSibling(other: String): RamPath = resolveSibling(fs.getPath(other))
 
   override def relativize(other: Path): RamPath = other match {
-    case ramPath: RamPath if ramPath.getFileSystem == fs =>
-      val base = (relativeTo +: segments.drop(ramPath.segments.size)) mkString sep
-      fs.fromStrings(base, ramPath.toString())
+    case ramPath: RamPath if ramPath.getFileSystem == fs && ramPath.segments.startsWith(segments)=>
+      val newSegments = ramPath.segments.drop(segments.size)
+      new RamPath(newSegments, fs)
     case _ => throw new java.io.IOException("Can only relativize with paths in the same filesystem")
   }
 
@@ -100,12 +82,9 @@ class RamPath(relativeTo: String, protected[ramfs] val path: String, fs: RamFile
     new URI((fs.provider.getScheme())+"://"+(fs.id)+"@"+(path.replaceAll("\\\\","/")))
   }
 
-  override def toAbsolutePath(): RamPath = new RamPath("", relativeTo+sep+path, fs)
+  override def toAbsolutePath(): RamPath = this
 
-  override def toRealPath(options: LinkOption*): Path = {
-    // TODO support links
-    new RamPath("", relativeTo+sep+path, fs)
-  }
+  override def toRealPath(options: LinkOption*): Path = this
 
   override def toFile(): File = null.asInstanceOf[File]
 
@@ -114,10 +93,8 @@ class RamPath(relativeTo: String, protected[ramfs] val path: String, fs: RamFile
     def hasNext = index < segments.size
     def next = {
       if (!hasNext) throw new NoSuchElementException()
-      val base = (relativeTo +: segments.take(index)) mkString sep
-      val p = segments(index)
-	  index += 1
-	  new RamPath(base, p, fs)
+      index += 1
+	  new RamPath(segments.take(index), fs)
     }
     def remove = throw new UnsupportedOperationException()
   }
