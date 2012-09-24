@@ -139,11 +139,10 @@ println("SourcePath = "+sourcePath)
        |  scalaVersion: "%s",
        |  armVersion: "%s",
        |  scalaArmVersion: "%s",
-       |  akkaVersion: "%s",
        |  ioMavenPath: "%1$s".replace(/\./g,'/'),
        |  SNAPSHOT_BLURB: "%s",
        |  SNAPSHOT_DOWNLOAD_URL: "%s",
-       |};""".format(organization, version, buildScalaVersion, armVersion, armScalaVersion, akkaVersion, snapshotBlurb, snapshotDownloadURL)
+       |};""".format(organization, version, buildScalaVersion, armVersion, armScalaVersion, snapshotBlurb, snapshotDownloadURL)
 
     properties.trim.stripMargin.lines.map(_.trim).mkString
   }
