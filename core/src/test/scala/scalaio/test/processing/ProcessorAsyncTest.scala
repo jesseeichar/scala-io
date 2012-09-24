@@ -47,9 +47,7 @@ class ProcessorAsyncTest extends AssertionSugar{
     implicit val executionContext = scalax.io.executionContext
     
     future.onComplete{
-      case Failure(e) => 
-        println(e)
-        success = false
+      case Failure(e) => success = false
       case Success(r) => success = true
     }
     

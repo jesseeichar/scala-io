@@ -20,7 +20,7 @@ object AsyncReadWrite {
   def basicProcessingFuture {
     import scalax.io.Resource
     import scala.util.{Success, Failure}
-    
+
     val in = Resource.fromFile("/tmp/in")
     val out = Resource.fromFile("/tmp/out")
 
