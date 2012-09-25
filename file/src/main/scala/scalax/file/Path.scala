@@ -110,8 +110,8 @@ object Path
   def createTempFile(prefix: String = FileSystem.default.randomPrefix,
                    suffix: String = null,
                    dir: String = null,
-                   deleteOnExit : Boolean = true,
-                   attributes:Iterable[FileAttribute[_]] = Nil ): DefaultPath = {
+                   deleteOnExit: Boolean = true,
+                   attributes: TraversableOnce[FileAttribute[_]] = Nil): DefaultPath = {
     FileSystem.default.createTempFile(prefix,suffix,dir,deleteOnExit)
   }
 
@@ -143,8 +143,8 @@ object Path
   def createTempDirectory(prefix: String = FileSystem.default.randomPrefix,
                         suffix: String = null,
                         dir: String = null,
-                        deleteOnExit : Boolean = true,
-                        attributes:Iterable[FileAttribute[_]] = Nil): DefaultPath = {
+                        deleteOnExit: Boolean = true,
+                        attributes: TraversableOnce[FileAttribute[_]] = Nil): DefaultPath = {
     FileSystem.default.createTempDirectory(prefix,suffix,dir,deleteOnExit)
   }
 
@@ -698,7 +698,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
          ExecuteAccessAttribute(canExecute))
 
   }
-  def attributes_= (attrs:Iterable[FileAttribute[_]]) = {
+  def attributes_= (attrs: TraversableOnce[FileAttribute[_]]) = {
     var timeStamp:Option[Long] = None
 
     val newAccess = attrs.foldLeft(access.toSet) {
@@ -797,7 +797,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    *           If parent directory does not exist
    */
   def createFile( createParents:Boolean = true, failIfExists: Boolean = true,
-                 accessModes:Iterable[AccessMode]=List(Read,Write), attributes:Iterable[FileAttribute[_]]=Nil): PathType = {
+                 accessModes: Iterable[AccessMode] = List(Read,Write), attributes: TraversableOnce[FileAttribute[_]] = Nil): PathType = {
 
     exists match {
       case true if failIfExists =>
@@ -860,7 +860,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
    *
    */
   def createDirectory(createParents: Boolean = true, failIfExists: Boolean = true,
-                      accessModes:Iterable[AccessMode]=List(Read,Write,Execute), attributes:Iterable[FileAttribute[_]]=Nil):PathType =  {
+                      accessModes: Iterable[AccessMode] = List(Read,Write,Execute), attributes: TraversableOnce[FileAttribute[_]] = Nil): PathType =  {
     if (failIfExists && exists) fail("Directory '%s' already exists." format name)
     if (exists && isFile) fail("Path "+this+" is a fileand thus cannot be created as a directory")
 
