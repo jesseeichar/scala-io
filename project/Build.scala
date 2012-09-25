@@ -14,7 +14,7 @@ object ScalaIoBuild extends Build {
   // ----------------------- Root Project ----------------------- //
 
   lazy val root:Project = Project("root", file(".")).
-    aggregate(coreProject,fileProject,perfProject,webSiteProject,ramfsProject).
+    aggregate(coreProject,fileProject,webSiteProject).
     settings(sharedSettings ++ Seq(publishArtifact := false, name := "Scala IO") :_*)
 
   // ----------------------- Samples Settings ----------------------- //

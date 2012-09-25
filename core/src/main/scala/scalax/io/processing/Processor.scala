@@ -3,8 +3,7 @@ package processing
 
 import language.existentials 
 import scala.concurrent._
-import util.duration._
-import util.Duration
+import duration._
 
 /**
  * A point or step in a IO process workflow.
