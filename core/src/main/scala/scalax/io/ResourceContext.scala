@@ -3,7 +3,6 @@ import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.channels.Channel
 import java.nio.channels.FileChannel
-import scala.reflect.TypeTag
 import scala.reflect.ClassTag
 
 /**

@@ -111,7 +111,7 @@ object Path
                    suffix: Option[String] = None,
                    dir: Option[String] = None,
                    deleteOnExit : Boolean = true,
-                   attributes:Set[FileAttribute[_]] = Set.empty ): Path = {
+                   attributes: TraversableOnce[FileAttribute[_]] = Nil ): Path = {
     FileSystem.default.createTempFile(prefix,suffix,dir,deleteOnExit, attributes)
   }
 
@@ -142,7 +142,7 @@ object Path
   def createTempDirectory(prefix: String = FileSystem.default.randomPrefix,
                    dir: Option[String] = None,
                    deleteOnExit : Boolean = true,
-                   attributes:Set[FileAttribute[_]] = Set.empty ): Path = {
+                   attributes: TraversableOnce[FileAttribute[_]] = Nil ): Path = {
     FileSystem.default.createTempDirectory(prefix,dir,deleteOnExit, attributes)
   }
 
@@ -819,7 +819,7 @@ class Path private[file] (val jpath:JPath, val fileSystem: FileSystem) extends F
    */
 // TODO Exceptions
   def createFile( createParents:Boolean = true, failIfExists: Boolean = true,
-                 accessModes:Iterable[AccessMode]=List(Read,Write), attributes:Iterable[FileAttribute[_]]=Nil): Path = {
+                 accessModes: Iterable[AccessMode] = List(Read,Write), attributes: TraversableOnce[FileAttribute[_]] = Nil): Path = {
 
     exists match {
       case true if failIfExists =>
@@ -880,7 +880,7 @@ class Path private[file] (val jpath:JPath, val fileSystem: FileSystem) extends F
    *
    */
   def createDirectory(createParents: Boolean = true, failIfExists: Boolean = true,
-                      accessModes:Iterable[AccessMode]=List(Read,Write,Execute), attributes:Iterable[FileAttribute[_]]=Nil):Path =  {
+                      accessModes:Iterable[AccessMode]=List(Read,Write,Execute), attributes:TraversableOnce[FileAttribute[_]]=Nil):Path =  {
 	  val exsts = exists(Seq(LinkOptions.NoFollowLinks))
     if (failIfExists && exsts) fail("Directory '%s' already exists." format name)
     val notDir = !isDirectory

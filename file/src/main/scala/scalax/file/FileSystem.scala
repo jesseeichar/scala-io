@@ -234,11 +234,11 @@ class FileSystem(protected[file] val jFileSystem: JFileSystem, val context:Resou
     suffix: Option[String] = None,
     dir: Option[String] = None,
     deleteOnExit: Boolean = true,
-    attributes:Set[FileAttribute[_]] = Set.empty): Path = {
+    attributes:TraversableOnce[FileAttribute[_]] = Set.empty): Path = {
 
     val jpath = dir match {
-      case Some(dir) => JFiles.createTempFile(jFileSystem.getPath(dir), prefix, suffix getOrElse null, attributes.toSeq:_*)
-      case None => JFiles.createTempFile(prefix, suffix getOrElse null, attributes.toSeq:_*)
+      case Some(dir) => JFiles.createTempFile(jFileSystem.getPath(dir), prefix, suffix getOrElse null, attributes.toSet.toSeq:_*)
+      case None => JFiles.createTempFile(prefix, suffix getOrElse null, attributes.toSet.toSeq:_*)
     }
     
     val path = apply(jpath)
@@ -272,10 +272,10 @@ class FileSystem(protected[file] val jFileSystem: JFileSystem, val context:Resou
   def createTempDirectory(prefix: String = randomPrefix,
     dir: Option[String] = None,
     deleteOnExit: Boolean = true,
-    attributes:Set[FileAttribute[_]] = Set.empty ): Path = {
+    attributes:TraversableOnce[FileAttribute[_]] = Nil ): Path = {
     val jpath = dir match {
-      case Some(dir) => JFiles.createTempDirectory(jFileSystem.getPath(dir), prefix, attributes.toSeq:_*)
-      case None => JFiles.createTempDirectory(prefix, attributes.toSeq:_*)
+      case Some(dir) => JFiles.createTempDirectory(jFileSystem.getPath(dir), prefix, attributes.toSet.toSeq:_*)
+      case None => JFiles.createTempDirectory(prefix, attributes.toSet.toSeq:_*)
     }
     
     val path = apply(jpath)
