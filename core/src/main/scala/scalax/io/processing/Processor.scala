@@ -2,8 +2,7 @@ package scalax.io
 package processing
 
 import scala.concurrent._
-import util.duration._
-import util.Duration
+import duration._
 
 /**
  * A point or step in a IO process workflow.

@@ -7,7 +7,7 @@ import java.util.concurrent.TimeoutException
 import scalax.io.{Resource, LongTraversable, ResourceContext, DefaultResourceContext}
 import java.io.{File, DataInputStream, ByteArrayInputStream}
 import scala.concurrent.Await
-import scala.concurrent.util.duration._
+import scala.concurrent.duration._
 
 trait ProcessorTest extends AssertionSugar {
   self: LongTraversableTest =>
