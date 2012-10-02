@@ -85,7 +85,10 @@ class DefaultPath private[file] (val jfile: JFile, override val fileSystem: Defa
   def isHidden = jfile.isHidden()
   def lastModified = jfile.lastModified()
   def lastModified_=(time: Long) = {jfile setLastModified time; time}
-  def size = if(jfile.exists) Some(jfile.length()) else None
+  def size = if(jfile.exists) jfile.length() match {
+    case 0 => None
+    case nonzero => Some(nonzero)
+  }  else None
 
   def access_=(accessModes:Iterable[AccessMode]) = {
     if (nonExistent) fail("Path %s does not exist".format(path))
