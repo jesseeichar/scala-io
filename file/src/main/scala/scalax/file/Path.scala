@@ -626,7 +626,10 @@ class Path private[file] (val jpath:JPath, val fileSystem: FileSystem) extends F
    * @return The size of the file/directory in bytes
    * @see java.file.File#length()
    */
-  def size: Option[Long] = if(exists) Some(JFiles.size(jpath)) else None
+  def size: Option[Long] = if(exists) JFiles.size(jpath) match {
+    case 0 => None
+    case nonzero => Some(nonzero)
+  }
   // Boolean path comparisons
   /**
    * True if this path ends with the other path
