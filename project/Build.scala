@@ -76,8 +76,7 @@ object ScalaIoBuild extends Build {
   val coreSettings = Seq[Setting[_]](
     name := "scala-io-core",
     resolvers += "java.net repo" at "http://download.java.net/maven/2/",
-    libraryDependencies += "com.jsuereth" % ("scala-arm_"+BuildConstants.armScalaVersion) % BuildConstants.armVersion,
-    libraryDependencies += "javax.transaction" % "jta" % "1.0.1B",
+    libraryDependencies += "com.jsuereth" % ("scala-arm_"+BuildConstants.armScalaVersion) % BuildConstants.armVersion exclude ("javax.transaction", "jta"),
     publishArtifact in Test := true
   )
   lazy val coreProject = Project("core", file("core")).
