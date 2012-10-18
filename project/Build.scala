@@ -4,10 +4,10 @@ import scala.xml.transform._
 
 object BuildConstants {
   val organization = "com.github.scala-incubator.io"
-  val version = "0.5.0-SNAPSHOT"
+  val version = "0.4.1"
   val armVersion = "1.2"
-  val armScalaVersion = "2.10.0-M7"
-  val scalaVersion = "2.10.0-SNAPSHOT"
+  val armScalaVersion = "2.10.0-RC1"
+  val scalaVersion = "2.10.0-RC1"
 }
 
 object ScalaIoBuild extends Build {
