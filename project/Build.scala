@@ -4,10 +4,10 @@ import scala.xml.transform._
 
 object BuildConstants {
   val organization = "com.github.scala-incubator.io"
-  val version = "0.4.1"
+  val version = "0.4.0"
   val armVersion = "1.2"
-  val armScalaVersion = "2.10.0-RC1"
-  val scalaVersion = "2.10.0-RC1"
+  val armScalaVersion = "2.10"
+  val scalaVersion = "2.10.0"
 }
 
 object ScalaIoBuild extends Build {
@@ -63,6 +63,7 @@ object ScalaIoBuild extends Build {
     pomExtraSetting,
     resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
     resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
+    resolvers += "Java.net" at "http://download.java.net/maven/2/",
     resolvers += {
       val mapfishRepoUrl = new java.net.URL("http://dev.mapfish.org/ivy2")
       Resolver.url("Mapfish Ivy Repository", mapfishRepoUrl)(Resolver.ivyStylePatterns)
@@ -76,7 +77,8 @@ object ScalaIoBuild extends Build {
   val coreSettings = Seq[Setting[_]](
     name := "scala-io-core",
     resolvers += "java.net repo" at "http://download.java.net/maven/2/",
-    libraryDependencies += "com.jsuereth" % ("scala-arm_"+BuildConstants.armScalaVersion) % BuildConstants.armVersion exclude ("javax.transaction", "jta"),
+    libraryDependencies += "com.jsuereth" % ("scala-arm_"+BuildConstants.armScalaVersion) % BuildConstants.armVersion,
+    libraryDependencies += "javax.transaction" % "jta" % "1.0.1B",
     publishArtifact in Test := true
   )
   lazy val coreProject = Project("core", file("core")).
