@@ -678,6 +678,7 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
     modifier.headOption match {
       case Some('-') => access = (access -- actualModes)
       case Some('+') => access = (access ++ actualModes)
+      case Some(c) => throw new IllegalArgumentException(c+" is not one of + or -")
       case None => access = actualModes
     }
   }
@@ -949,23 +950,22 @@ abstract class Path (val fileSystem: FileSystem) extends FileOps with PathFinder
       var successes = 0
       var failures = 0
 
-      def tryDelete(p:Path) = {
+      def safeExecute(record:Boolean, f: => Unit) = {
         try {
-          p.delete(force)
-          successes += 1
+          f
+          if (record) successes += 1
         } catch {
-          case e:IOException if continueOnFailure =>
-          failures += 1
+          case e:IOException if continueOnFailure => if (record) failures += 1
         }
         (successes, failures)
       }
-
-      children{(_:Path).isFile} foreach tryDelete
-      children{(_:Path).isDirectory} foreach { path =>
+      def tryDelete(p: Path) = safeExecute(true, p.delete(force))
+      safeExecute (false, children{(_:Path).isFile} foreach tryDelete)
+      safeExecute (false, children{(_:Path).isDirectory} foreach { path =>
         val (deleted, remaining) = path.deleteRecursively(force,continueOnFailure)
         successes += deleted
         failures += remaining
-      }
+      })
       tryDelete(this)
     } else if (exists) {
       try {
