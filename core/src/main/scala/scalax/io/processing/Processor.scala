@@ -3,7 +3,7 @@ package processing
 
 import language.existentials 
 import scala.concurrent._
-import scala.concurrent.duration._
+import duration._
 
 /**
  * A point or step in a IO process workflow.
@@ -436,7 +436,7 @@ private[processing] class TimingOutProcessor[+A] (base: Processor[A], timeout: D
     }
 
     new Opened[A] {
-      def execute = Await.result(Future(opened.execute), remainingTime.millis)
+      def execute = Await.result(Future(opened.execute), remainingTime millis)
       def cleanUp() = opened.cleanUp()
     }
   }

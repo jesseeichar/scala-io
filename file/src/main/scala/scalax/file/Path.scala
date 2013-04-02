@@ -47,6 +47,14 @@ object Path
    *          the string to use for creating the Path
    */
   def fromString(path: String): Path = FileSystem.default.fromString(path)
+  def fromClasspath(path:String, cls: Class[_]): Path = {
+    val fileString = cls.getClassLoader.getResource(path).getFile
+    if ((System.getProperty("os.name").toLowerCase contains "win") && fileString.matches("/\\w:/.+")) {
+      Path.fromString(fileString.drop(1).replace("/","\\"))
+    } else {
+      Path.fromString(fileString)
+    }
+  }
   def apply(path: String*): Path = FileSystem.default(path:_*)
   def apply(pathRepresentation: String, separator:Char): Path = FileSystem.default(pathRepresentation, separator)
 
@@ -140,8 +148,9 @@ object Path
    *          Default is Nil(default system file attributes)
    */
   def createTempDirectory(prefix: String = FileSystem.default.randomPrefix,
+                        suffix: String = null,
                    dir: Option[String] = None,
-                   deleteOnExit : Boolean = true,
+                        deleteOnExit: Boolean = true,
                    attributes: TraversableOnce[FileAttribute[_]] = Nil ): Path = {
     FileSystem.default.createTempDirectory(prefix,dir,deleteOnExit, attributes)
   }
@@ -627,9 +636,9 @@ class Path private[file] (val jpath:JPath, val fileSystem: FileSystem) extends F
    * @see java.file.File#length()
    */
   def size: Option[Long] = if(exists) JFiles.size(jpath) match {
-    case 0 => None
+    case i if i < 0 => None
     case nonzero => Some(nonzero)
-  }
+  } else None
   // Boolean path comparisons
   /**
    * True if this path ends with the other path
@@ -883,7 +892,7 @@ class Path private[file] (val jpath:JPath, val fileSystem: FileSystem) extends F
    *
    */
   def createDirectory(createParents: Boolean = true, failIfExists: Boolean = true,
-                      accessModes:Iterable[AccessMode]=List(Read,Write,Execute), attributes:TraversableOnce[FileAttribute[_]]=Nil):Path =  {
+                      accessModes: Iterable[AccessMode] = List(Read,Write,Execute), attributes: TraversableOnce[FileAttribute[_]] = Nil): Path =  {
 	  val exsts = exists(Seq(LinkOptions.NoFollowLinks))
     if (failIfExists && exsts) fail("Directory '%s' already exists." format name)
     val notDir = !isDirectory
@@ -989,23 +998,22 @@ class Path private[file] (val jpath:JPath, val fileSystem: FileSystem) extends F
       var successes = 0
       var failures = 0
 
-      def tryDelete(p:Path) = {
+      def safeExecute(record:Boolean, f: => Unit) = {
         try {
-          p.delete(force)
-          successes += 1
+          f
+          if (record) successes += 1
         } catch {
-          case e:IOException if continueOnFailure =>
-          failures += 1
+          case e:IOException if continueOnFailure => if (record) failures += 1
         }
         (successes, failures)
       }
-
-      children{(_:Path).isFile} foreach tryDelete
-      children{(_:Path).isDirectory} foreach { path =>
+      def tryDelete(p: Path) = safeExecute(true, p.delete(force))
+      safeExecute (false, children{(_:Path).isFile} foreach tryDelete)
+      safeExecute (false, children{(_:Path).isDirectory} foreach { path =>
         val (deleted, remaining) = path.deleteRecursively(force,continueOnFailure)
         successes += deleted
         failures += remaining
-      }
+      })
       tryDelete(this)
     } else if (exists) {
       try {

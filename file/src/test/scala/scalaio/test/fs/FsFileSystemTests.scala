@@ -17,7 +17,7 @@ abstract class FsFileSystemTests extends scalax.test.sugar.AssertionSugar with F
 
     @Test
     def default_fileSystem_apply_creates_a_path() : Unit = {
-        val path = Path.fromString(getClass.getClassLoader.getResource("resources/text").getFile)
+        val path = Path.fromClasspath("resources/text", getClass)
         assertTrue(path.exists)
         assertTrue(path.canRead)
     }

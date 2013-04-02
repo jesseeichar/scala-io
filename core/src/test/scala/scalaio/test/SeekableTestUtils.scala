@@ -60,7 +60,7 @@ trait SeekableTestUtils[ResourceType] {
     copyResource(resource, openFunction, closeFunction)
   }
   def copyResource(source : InputStreamResource[InputStream],openFunction: () => Unit,closeFunction:() => Unit) : Seekable = {
-      val dest = openResource(openFunction, CloseAction(_ => closeFunction))
+      val dest = openResource(openFunction, CloseAction(_ => closeFunction()))
       dest truncate 0
       dest write (source.bytes)
       dest

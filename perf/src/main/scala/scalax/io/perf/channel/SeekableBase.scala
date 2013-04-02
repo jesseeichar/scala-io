@@ -11,7 +11,6 @@ import _root_.scalax.io.Line.Terminators.NewLine
 import Utils._
 import _root_.scalax.io.Input
 import _root_.scalax.io.Resource
-import _root_.scalax.io.nio.SeekableFileChannel
 
 trait SeekableBase {
 
@@ -19,12 +18,12 @@ trait SeekableBase {
     val file = File.createTempFile(getClass().getSimpleName(), "txt")
     val data = generateTestData(size, lines, term)
     FileUtils.writeStringToFile(file, data, "UTF-8")
-    () => new SeekableFileChannel(new FileInputStream(file).getChannel())
+    () => new FileInputStream(file).getChannel()
   }
 
   def newOut = {
     val file = File.createTempFile(getClass().getSimpleName(), "txt")
-    () => new SeekableFileChannel(new FileOutputStream(file).getChannel())
+    () => new FileOutputStream(file).getChannel()
   }
 
 }

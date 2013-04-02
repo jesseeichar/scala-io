@@ -9,6 +9,7 @@ object ExampleProjects {
         mappings.foreach { case (file,relativeName) =>
           val data = IO.read(file).
             replaceAll("@SCALA_VERSION@",BuildConstants.scalaVersion).
+            replaceAll("@SCALA_BASE_VERSION@",BuildConstants.scalaVersion.take(BuildConstants.scalaVersion.lastIndexOf('.'))).
             replaceAll("@IO_VERSION@",BuildConstants.version)
           IO.write(new File(tmpDir, relativeName), data)
         }

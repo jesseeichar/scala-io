@@ -276,7 +276,7 @@ object AsyncReadWrite {
 
     implicit val context = scalax.io.executionContext
     // Last step is to handle the result from the process
-    desiredRecord.onComplete{
+    desiredRecord.onComplete {
       case Success(Value(_, record)) => () // do something
       case Failure(error) => () // uh oh need to handle error
     }

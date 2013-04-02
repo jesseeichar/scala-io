@@ -12,11 +12,9 @@ import Resource._
 import StandardOpenOption._
 import Line.Terminators._
 import scalax.file._
-import defaultfs.DefaultPath
 import support.FileUtils
 import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
-import nio.SeekableFileChannel
 
 abstract class AbstractSeekableTest extends PerformanceDSLTest {
   implicit val codec = Codec.UTF8

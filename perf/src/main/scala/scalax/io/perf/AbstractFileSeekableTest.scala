@@ -9,11 +9,9 @@ import Resource._
 import StandardOpenOption._
 import Line.Terminators._
 import scalax.file._
-import defaultfs.DefaultPath
 import support.FileUtils
 import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
-import nio.SeekableFileChannel
 
 trait AbstractFileSeekableTest extends AbstractSeekableTest {
 
@@ -21,11 +19,11 @@ trait AbstractFileSeekableTest extends AbstractSeekableTest {
   def Inc: Int
   def From: Int
 
-  override type Source = DefaultPath
+  override type Source = Path
   override def setup(size: Int,
     lines: Int = 2,
     term: String = NewLine.sep): Source = {
-    val path = FileSystem.default.createTempFile().asInstanceOf[DefaultPath]
+    val path = FileSystem.default.createTempFile().asInstanceOf[Path]
     path.write(generateTestData(size, lines, term))
     path
   }
@@ -39,7 +37,7 @@ trait AbstractFileSeekableTest extends AbstractSeekableTest {
    */
   def newIn(source: Source,
     openOptions: Seq[OpenOption] = ReadWrite): () => SeekableByteChannel = () => {
-    FileUtils.openChannel(source.jfile, openOptions)
+    FileUtils.openChannel(source.toFile.get, openOptions)
   }
 
   def nioInsert(data: Array[Byte], pos: Int, size: Int) = {
