@@ -52,7 +52,9 @@ abstract class FsPathObjectTests extends Fixture {
   def path_object_should_implicitly_create_path_from_a_java_file() : Unit = {
     import scalax.file.ImplicitConversions.jfile2path
 
-    assertSame(FileSystem.default, new File("nonsense path").fileSystem)
+    val dfs = FileSystem.default
+    val fs1 = new File("nonsense path").fileSystem
+    assertSame(dfs, fs1)
 
     implicit val fs = fixture.fs
     assertSame(FileSystem.default, new File("path").fileSystem)

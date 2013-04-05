@@ -274,7 +274,14 @@ private class IterablePathSet[T](iter: => CloseableIterator[T]) extends PathSet[
     case o => CloseableIterator.empty
   })
   def /(literal: String): PathSet[T] = mapping {
-    case p : Path if !(p / literal exists) => PathFinder.empty
+    case p : Path => 
+      try {
+        val child = p / literal
+         if (!child.exists) PathFinder.empty
+         else p / literal
+      } catch {
+        case e:Exception => PathFinder.empty
+      }
     case other => other / literal
   }
 
@@ -285,11 +292,15 @@ private class IterablePathSet[T](iter: => CloseableIterator[T]) extends PathSet[
   def **[F](filter: F)(implicit factory: PathMatcherFactory[F]): PathSet[T] = mapping{_ ** factory(filter)}
 
   def ---[U >: T](excludes: PathFinder[U]): PathSet[T] = {
+    if(excludes == null) throw new NullPointerException()
     val excludeSet = excludes.iterator.toSet
     new IterablePathSet(CloseableIteratorOps(iter) filterNot (excludeSet.contains))
   }
 
-  def +++[U >: T](includes: PathFinder[U]): PathSet[U] = new IterablePathSet[U](CloseableIteratorOps(iter) ++ includes.iterator)
+  def +++[U >: T](includes: PathFinder[U]): PathSet[U] = {
+    if(includes == null) throw new NullPointerException()
+    new IterablePathSet[U](CloseableIteratorOps(iter) ++ includes.iterator)
+  }
 }
 
 /*

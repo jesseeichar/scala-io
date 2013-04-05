@@ -17,6 +17,7 @@ import org.junit.Assert._
 import java.nio.file.attribute.DosFileAttributeView
 import scalax.file.FileAttributeImpl
 import java.util.concurrent.TimeUnit
+import org.junit.Ignore
 
 abstract class FsMatchingTests extends scalax.test.sugar.AssertionSugar with Fixture {
   implicit val codec = Codec.UTF8
@@ -105,14 +106,13 @@ abstract class FsMatchingTests extends scalax.test.sugar.AssertionSugar with Fix
     assertTrue(path.attributes("isDirectory").nonEmpty)
     assertTrue(path.attributes("isSymbolicLink").nonEmpty)
     assertTrue(path.attributes("isOther").nonEmpty)
-    assertTrue(path.attributes("fileKey").nonEmpty)
     if (path.attributes.supportsView[DosFileAttributeView]) {
-      test(FileAttributeImpl("hidden",true))
-      test(FileAttributeImpl("hidden",false))
-      test(FileAttributeImpl("readonly",true))
-      test(FileAttributeImpl("readonly",false))
-      test(FileAttributeImpl("system",true))
-      test(FileAttributeImpl("archive",false))
+      test(FileAttributeImpl("dos:hidden",true))
+      test(FileAttributeImpl("dos:hidden",false))
+      test(FileAttributeImpl("dos:readonly",true))
+      test(FileAttributeImpl("dos:readonly",false))
+      test(FileAttributeImpl("dos:system",true))
+      test(FileAttributeImpl("dos:archive",false))
     }
   }
 
@@ -142,25 +142,26 @@ abstract class FsMatchingTests extends scalax.test.sugar.AssertionSugar with Fix
     assertMatch("a/b/[!abd-z]/d.x")
 
     assertMisMatch("aa/**")
-    assertMisMatch("A/**")
+    if(!isWindows) assertMisMatch("A/**")
     assertMisMatch("??/**")
     assertMisMatch("a/*/d.x")
     assertMisMatch("[b-z]/**")
-    assertMisMatch("[A-Z]/**")
+    if(!isWindows) assertMisMatch("[A-Z]/**")
     assertMisMatch("{b,c,d}/**")
-    assertMisMatch("{A,b,c,d}/**")
+    if(!isWindows) assertMisMatch("{A,b,c,d}/**")
 
-    path = fixture.fs("a-","b?","c","d.x")
-
-    assertMatch("a[-abc]/**")
-    assertMatch("*/b\\?/**")
-    assertMatch("**/*.*")
-    assertMatch("*/**")
-    assertMatch("??/**")
-
-    assertMisMatch("a/**")
-    assertMisMatch("?/**")
-
+    if (!isWindows) {
+	    path = fixture.fs("a-","b?","c","d.x")
+	
+	    assertMatch("a[-abc]/**")
+	    assertMatch("*/b\\?/**")
+	    assertMatch("**/*.*")
+	    assertMatch("*/**")
+	    assertMatch("??/**")
+	
+	    assertMisMatch("a/**")
+	    assertMisMatch("?/**")
+  	}
     // TODO RAMFS When we have a ram fs
 //    path = new RamFileSystem(separator="\\")("a/","b")
 //    assertMatch("""a\//b""")
@@ -171,8 +172,13 @@ abstract class FsMatchingTests extends scalax.test.sugar.AssertionSugar with Fix
   def regexPathMatcher = {
     implicit var path:Path = fixture.fs("a","b","c","d.x")
     implicit val syntax = PathMatcher.StandardSyntax.REGEX
-    assertMatch(".*/d.x")
-    assertMatch("""(\w/)*d.x""")
+    if (isWindows) {
+    	assertMatch(".*\\\\d.x")
+    	assertMatch("""(\w\\)*d.x""")
+    } else {
+    	assertMatch(".*/d.x")
+    	assertMatch("""(\w/)*d.x""")
+    }
 
     // TODO RAMFS
 //    path = new RamFileSystem(separator="\\")("a/","b")

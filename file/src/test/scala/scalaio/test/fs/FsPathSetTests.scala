@@ -16,6 +16,7 @@ import scalaio.test.Node
 import scalaio.test.AbstractPathSetTests
 import scalax.file.PathSet
 import scalax.file.PathMatcher
+import org.junit.Ignore
 
 abstract class FsPathSetTests extends scalax.test.sugar.AssertionSugar with AbstractPathSetTests with Fixture {
     protected def fixtures(depth:Int=4) : (Path, Node) = fixture.tree(depth)
@@ -46,7 +47,7 @@ abstract class FsPathSetTests extends scalax.test.sugar.AssertionSugar with Abst
     assertSameContents(List(root / "a"/"b"/"c", root / "a"/"b"), root ** "{c,b}")
   }
   @Test //@Ignore
-  def `pathset can be created with *` {
+  def pathset_can_be_created_with_* {
     val root = mkTree
 
     assertSameContents(root.children(), root * "*")
@@ -59,7 +60,7 @@ abstract class FsPathSetTests extends scalax.test.sugar.AssertionSugar with Abst
     assertSameContents(root.descendants(), root ***)
   }
   @Test //@Ignore
-  def `pathsets can be expanded on with **` {
+ def pathsets_can_be_expanded_on_with_** {
     val root = mkTree
 
     assertSameContents(root ** "*.scala" toList, root * "a" ** "*.scala")
@@ -75,7 +76,7 @@ abstract class FsPathSetTests extends scalax.test.sugar.AssertionSugar with Abst
 
   }
   @Test //@Ignore
-  def `pathsets can be expanded on with *` {
+  def pathsets_can_be_expanded_on_with_* {
     val root = mkTree
 
     assertSameContents(List(root / "a"/"b"), root * "a" * "*")
@@ -92,20 +93,20 @@ abstract class FsPathSetTests extends scalax.test.sugar.AssertionSugar with Abst
     // TODO asBase
   }
   @Test //@Ignore
-  def `pathsets can be expanded on with ***` {
+  def pathsets_can_be_expanded_on_with_*** {
     val root = mkTree
 
     assertSameContents((root / "a" ***) toList, root * "a" ***)
   }
   @Test //@Ignore
-  def `pathsets can be expanded on with /` {
+  def pathsets_can_be_expanded_on_with_/ {
     val root = mkTree
 
     assertSameContents(List(root / "a"/"b"), root * "a" / "b")
     assertSameContents(List(root / "a"/"b"), root * "*" / "b")
   }
   @Test //@Ignore
-  def `pathsets can be combined using +++` {
+  def pathsets_can_be_combined_using_+++ {
     val root = mkTree
 
     assertSameContents(List(root ** "*.scala", root * "a").flatten, (root * "a") +++ (root ** "*.scala"))
@@ -119,6 +120,7 @@ abstract class FsPathSetTests extends scalax.test.sugar.AssertionSugar with Abst
     assertSameContents(List(root / "a"/"b"/"c"), ((root * "a") +++ (root * "z")) * "b" * "c")
     assertSameContents(List(root / "a" / "b" ), ((root * "a") +++ (root * "z")) / "b")
     assertSameContents(List(root / "a"/"b" ), ((root * "a") +++ (root * "z")) \ "b")
+    assertSameContents(Nil, ((root * "a") +++ (root * "z")) \ "q")
     assertSameContents(Nil, ((root * "a") +++ (root * "z")) / "*")
     // TODO asBase
 
@@ -127,7 +129,24 @@ abstract class FsPathSetTests extends scalax.test.sugar.AssertionSugar with Abst
     assertSameContents(List(root / "a"/"b"/"c"/"d.scala", ramfs.roots.head / "g"/"h"/"i.xml"), (root ** "*.scala") +++ (ramfs.roots.head ** "*.xml"))
   }
   @Test //@Ignore
-  def `pathsets can be combined using ---` {
+  def pathsets_null_checks {
+    val root = mkTree
+    
+    intercept[NullPointerException]{root \ null.asInstanceOf[String]}
+    intercept[NullPointerException]{root --- null.asInstanceOf[Path]}
+    intercept[NullPointerException]{root +++ null.asInstanceOf[Path]}
+    intercept[NullPointerException]{root * null.asInstanceOf[PathMatcher[Path]]}
+    intercept[NullPointerException]{root ** null.asInstanceOf[PathMatcher[Path]]}
+    intercept[NullPointerException]{(root * "a") +++ (null)}
+    intercept[NullPointerException]{(root * "a") --- (null)}
+    intercept[NullPointerException]{(root * "a") * (null.asInstanceOf[String])}
+    intercept[NullPointerException]{(root * "a") ** (null.asInstanceOf[String])}
+    intercept[NullPointerException]{(root * "a") * (null.asInstanceOf[PathMatcher[Path]])}
+    intercept[NullPointerException]{(root * "a") ** (null.asInstanceOf[PathMatcher[Path]])}
+    intercept[NullPointerException]{(root * "a") / (null.asInstanceOf[String])}
+  }
+  @Test //@Ignore
+  def pathsets_can_be_combined_using_--- {
     val root = mkTree
     import scalax.file.PathMatcher.NameIs
 
@@ -151,7 +170,7 @@ abstract class FsPathSetTests extends scalax.test.sugar.AssertionSugar with Abst
 
   }
 
-  @Test
+  @Test //@Ignore
   def pathsets_are_lazily_processed_for_map {
 
     val root = mkTree

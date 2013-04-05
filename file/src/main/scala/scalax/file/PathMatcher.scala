@@ -84,6 +84,7 @@ object PathMatcher {
    *          on the path object.
    */
   final class AccessMatcher (accessModes: AccessMode*) extends PathMatcher[Path] {
+    if(accessModes == null) throw new NullPointerException
     val accessModeSet = Set(accessModes:_*)
     def apply(path:Path) = accessModeSet.intersect(path.access).size == accessModeSet.size
     override def toString = "AccessMatcher: "+(accessModeSet mkString ",")
@@ -103,6 +104,7 @@ object PathMatcher {
    *          on the path object.
    */
   final class AttributeMatcher (attributes: FileAttribute[_]*) extends PathMatcher[Path] {
+    if(attributes == null) throw new NullPointerException
     def apply(path: Path) = {
       val currentAttributes = path.attributes
       attributes.forall {att => currentAttributes(att.name) exists{_ == att.value}}
@@ -114,14 +116,17 @@ object PathMatcher {
   }
 
   class FunctionMatcher[T <: Path](f: T => Boolean, name:String = "") extends PathMatcher[T] {
+    if(f == null) throw new NullPointerException
     def apply(path: T) = f(path)
     override def toString = "FunctionMatcher: "+ (if (name == "") f.toString else name)
   }
   final case class NameIs(name:String) extends FunctionMatcher[Path](_.name == name) {
+    if(name == null) throw new NullPointerException
     override def toString = "NameIs: "+name
   }
 
   final class RegexPathMatcher(pattern:String, flags:Int = 0) extends PathMatcher[Path] {
+    if(pattern == null) throw new NullPointerException
     var patternMap = Map[String,Pattern]()
     patternMap = patternMap.updated("/", Pattern.compile(pattern,flags))
 
@@ -152,6 +157,7 @@ object PathMatcher {
   }
 
   final class RegexNameMatcher(pattern:Pattern) extends PathMatcher[Path] {
+    if(pattern == null) throw new NullPointerException
     def apply(path: Path): Boolean = pattern.matcher(path.name).matches
     override def toString = "RegexNameMatcher: "+pattern
   }
@@ -162,6 +168,7 @@ object PathMatcher {
   }
 
   final class GlobPathMatcher(query:String) extends PathMatcher[Path] {
+    if(query == null) throw new NullPointerException
     def apply(path: Path): Boolean = {
 
       val parsedQuery = new GlobParser(path.fileSystem)(query)
@@ -171,6 +178,7 @@ object PathMatcher {
   }
   object GlobPathMatcher { def apply(query : String) = new GlobPathMatcher(query) }
   final class GlobNameMatcher(query:String) extends PathMatcher {
+    if(query == null) throw new NullPointerException
     def apply(path: Path): Boolean = {
 
       val parsedQuery = new GlobParser(path.fileSystem)(query)
@@ -199,6 +207,7 @@ object PathMatcher {
   }
   
    class NativePathMatcher(underlying:java.nio.file.PathMatcher) extends PathMatcher {
+     if(underlying == null) throw new NullPointerException
      def apply(path: Path): Boolean = underlying matches path.jpath
    }
  }

@@ -46,7 +46,7 @@ object ImplicitConversions {
    * Method to implicitly convert a [[java.nio.file.Path]] to a [[scalax.file.Path]]
    * object
    */
-  implicit def jfileSystem2FileSystem(fs: JFileSystem): FileSystem = new FileSystem(fs)
+  implicit def jfileSystem2FileSystem(fs: JFileSystem): FileSystem = if(fs == FileSystem.default.jFileSystem) FileSystem.default else new FileSystem(fs)
   
   /**
    * Implicitly convert a [[scalax.file.PathMatcher]] to a [[java.nio.file.PathMatcher]]

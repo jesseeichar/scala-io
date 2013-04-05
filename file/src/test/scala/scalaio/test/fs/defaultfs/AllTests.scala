@@ -24,7 +24,7 @@ class RandomPrefixTest {
 }
 class FsMatchingTest extends scalaio.test.fs.FsMatchingTests with DefaultFixture
 class FsDirectoryStreamTest extends scalaio.test.fs.FsPathSetTests with DefaultFixture {
-    @Test // ignore because if it passes it does nearly a full scan of harddrive so only when the issue is known to fail do we want to test this
+    @Test //@Ignore
     def stackOverflowBug : Unit = {
       val testTime = 30000
       println("start overflow bug test")

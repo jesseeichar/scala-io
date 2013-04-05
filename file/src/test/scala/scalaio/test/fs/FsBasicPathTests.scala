@@ -18,6 +18,7 @@ import org.junit.Assert._
 import org.junit.Test
 import java.io.{OutputStream, IOException}
 import java.util.regex.Pattern
+import org.junit.Ignore
 
 abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with Fixture {
   implicit val codec = Codec.UTF8
@@ -27,7 +28,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
   def fspath(_name:String) = {
     val name = _name.replaceAll(Pattern.quote(fixture.fs.separator),"/")
     val mainParts = (name split "/").toList
-    val all = if(name startsWith "/") (fixture.fs.roots.head.path +: mainParts) else mainParts
+    val all = if(name startsWith "/") (fixture.fs.roots.head.path.filterNot(_ == fixture.fs.separator.charAt(0)) +: mainParts) else mainParts
     fixture.fs.fromSeq(all)
   }
   def fspath(name:Path) = fixture.fs.fromSeq(name.segments)
@@ -240,13 +241,13 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
       }
   }
 
-  @Test
+  @Test //@Ignore
   def sibling_with_parent_makes_sibling_path {
     val p = fixture.root \ "c1"
     assertEquals(fixture.root \ "c2", p sibling ("c2",'/'))
     assertEquals(fixture.root \ "c2", p sibling ("c2"))
   }
-  @Test
+  @Test //@Ignore
   def sibling_without_parent_equals_path {
     val p = fixture.fs.roots.head \ "a"
     assertEquals(p, fixture.fs.roots.head sibling p)
@@ -630,6 +631,13 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
   }
 
   @Test //@Ignore
+  def segments_can_be_used_to_create_same_path__windows_bug() {
+	  val p = fspath("/a/b/c")
+	  assertEquals(p, p.fileSystem.fromSeq(p.segments ))
+	  assertEquals(p, p.fileSystem(p.segments: _*))
+  }
+
+  @Test //@Ignore
   def parent() {
     assertEquals(Some(fspath("/a/b/c")), fspath("/a/b/c/d").parent)
   }
@@ -813,6 +821,7 @@ abstract class FsBasicPathTests extends scalax.test.sugar.FSAssertionSugar with 
     assertTrue(pathName endsWith path.name)
 
     assertTrue(path endsWith fspath(path.name))
+    assertTrue(path startsWith fspath(path.segments.take(path.segments.length - 1).mkString("/")))
     assertTrue(path startsWith fspath(path.segments.head))
     assertTrue(path isSame fspath(pathName))
     assertEquals(fspath(pathName), path)

@@ -15,6 +15,7 @@ trait PathMatcherFactory[-T] extends Function1[T,PathMatcher[Path]]
 object PathMatcherFactory {
   implicit object FunctionToMatcher extends PathMatcherFactory[Function1[Path, Boolean]] {
     def apply(f: (Path) => Boolean): PathMatcher[Path] = f match {
+      case null => throw new NullPointerException()
       case m: PathMatcher[Path] => m
       case f => new FunctionMatcher(f)
     }

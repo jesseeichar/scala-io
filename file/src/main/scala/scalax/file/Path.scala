@@ -276,6 +276,7 @@ class Path private[file] (val jpath:JPath, val fileSystem: FileSystem) extends F
    * @see #\(String)
    */
   def /(child: String): Path = {
+    if(child == null) throw new NullPointerException()
     fileSystem.checkSegmentForSeparators(child)
     fileSystem(jpath.resolve(child))
   }
@@ -439,25 +440,45 @@ class Path private[file] (val jpath:JPath, val fileSystem: FileSystem) extends F
    *
    * @return the segments in the path
    */
-  lazy val segments: Seq[String] = new Seq[String] {
-    override def length = jpath.getNameCount
-    override def apply(i: Int) = jpath.getName(i).toString
-    override def iterator = new Iterator[String]{
-      var i = {
-        if(jpath.toString startsWith separator) -1
-        else 0
-      }
-      def hasNext = i < jpath.getNameCount
-      def next = {
-        i += 1
-        if(i == 0) {
-          separator
-        } else {
-          jpath.getName(i-1).toString
+  lazy val segments: Seq[String] = 
+    if (JFiles.getFileAttributeView(jpath, classOf[DosFileAttributeView]) == null || !jpath.isAbsolute()) {
+	    new Seq[String] {
+		    override def length = {jpath.getNameCount}
+		    override def apply(i: Int) = jpath.getName(i).toString
+		    override def iterator = new Iterator[String]{
+		      var i = {
+		        if(jpath.toString startsWith separator) -1
+		        else 0
+		      }
+		      def hasNext = i < jpath.getNameCount
+		      def next = {
+		        i += 1
+		        if(i == 0) {
+		          separator
+		        } else {
+		          jpath.getName(i-1).toString
+		        }
+		      }
+		    }
+	  }
+    } else {
+      new Seq[String] {
+        override def length = { jpath.getNameCount + 1 }
+        override def apply(i: Int) = if (i == 0) jpath.getRoot().toString().dropRight(1) else jpath.getName(i).toString
+        override def iterator = new Iterator[String] {
+          var i = -1
+          def hasNext = i < jpath.getNameCount
+          def next = {
+            i += 1
+            if (i == 0) {
+              jpath.getRoot().toString().dropRight(1)
+            } else {
+              jpath.getName(i - 1).toString
+            }
+          }
         }
       }
-    }
-  }
+    }    
   /**
    * Resolves other against this path's parent in the same manner as in resolve(Path).
    *
@@ -644,12 +665,12 @@ class Path private[file] (val jpath:JPath, val fileSystem: FileSystem) extends F
    * True if this path ends with the other path
    * @return True if this path ends with the other path
    */
-  def endsWith(other: Path):Boolean = jpath.endsWith(other.jpath)
+  def endsWith(other: Path):Boolean = segments.endsWith(other.segments)
   /**
    * True if this path starts with the other path
    * @return True if this path starts with the other path
    */
-  def startsWith(other: Path):Boolean = jpath.startsWith(other.jpath)
+  def startsWith(other: Path):Boolean = segments.startsWith(other.segments)
   /**
    * True if this path and the other path reference the same file.
    * <p>
@@ -1092,6 +1113,9 @@ class Path private[file] (val jpath:JPath, val fileSystem: FileSystem) extends F
       if (followLinks) copyOptions ++= linkOptions
       
       JFiles.copy(jpath, target.jpath, copyOptions:_*)
+      if (!copyAttributes /* Fix for windows */) {
+    	  target.lastModified = FileTime.fromMillis(System.currentTimeMillis)
+      }
     }
 
     target
@@ -1284,6 +1308,7 @@ class Path private[file] (val jpath:JPath, val fileSystem: FileSystem) extends F
    */
   def descendants[U >: Path, F](filter:F = PathMatcher.All,
            depth:Int = -1, linkOptions:Seq[LinkOption]=Nil)(implicit factory:PathMatcherFactory[F]): PathSet[Path] = {
+    if(filter == null) throw new NullPointerException()
     if (!isDirectory) throw new NotDirectoryException(this + " is not a directory so descendants can not be called on it")
 
     new BasicPathSet[Path](this, factory(filter), depth, false, { (p:PathMatcher[Path], path:Path) =>
@@ -1315,7 +1340,7 @@ class Path private[file] (val jpath:JPath, val fileSystem: FileSystem) extends F
   }
   override def *** : PathSet[Path] = descendants()
 
-  override def +++[U >: Path](includes: PathFinder[U]): PathSet[U] =  new IterablePathSet[U](iterator) +++ includes
+  override def +++[U >: Path](includes: PathFinder[U]): PathSet[U] = new IterablePathSet[U](iterator) +++ includes
   override def ---[U >: Path](excludes: PathFinder[U]): PathSet[Path] = new IterablePathSet[Path](iterator) --- excludes
 
   override def iterator : CloseableIterator[Path] = CloseableIterator(Iterator(this))

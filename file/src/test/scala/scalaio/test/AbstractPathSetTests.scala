@@ -11,9 +11,9 @@ package scalaio.test
 import scalax.file._
 import AccessModes._
 import PathMatcher.GlobPathMatcher
-
 import org.junit.Assert._
 import org.junit.Test
+import org.junit.Ignore
 
 
 trait AbstractPathSetTests extends scalax.test.sugar.FSAssertionSugar {
