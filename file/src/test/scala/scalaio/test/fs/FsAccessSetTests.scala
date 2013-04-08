@@ -72,7 +72,7 @@ abstract class FsAccessSetTests extends Fixture {
 
   def assertReadOnly(isReadOnly: Boolean)(implicit file: Path) = {
     if (file.attributes.supportsView[DosFileAttributeView]) {
-      assertEqualAttribute(isReadOnly, "dos:read-only")
+      assertEqualAttribute(isReadOnly, "dos:readonly")
     }
     if (file.attributes.supportsView[PosixFileAttributeView]) {
       val perm = if (isReadOnly) "r--r--r--" else "rw-rw-rw-"
@@ -108,7 +108,7 @@ abstract class FsAccessSetTests extends Fixture {
 	if (file.attributes.supportsView[PosixFileAttributeView]) {
 	  file.attributes = Set(FileAttributeImpl("posix:permissions", PosixFilePermissions fromString "rw-rw-rw-"))
 	} else if (file.attributes.supportsView[DosFileAttributeView]) {
-	  file.attributes = Set(FileAttributeImpl("dos:read-only", false))
+	  file.attributes = Set(FileAttributeImpl("dos:readonly", false))
     }
     
     assertReadOnly(false)
@@ -116,7 +116,7 @@ abstract class FsAccessSetTests extends Fixture {
 	if (file.attributes.supportsView[PosixFileAttributeView]) {
 	  file.attributes = Set(FileAttributeImpl("posix:permissions", PosixFilePermissions fromString "r--r--r--"))
 	} else if (file.attributes.supportsView[DosFileAttributeView]) {
-	  file.attributes = Set(FileAttributeImpl("dos:read-only", true))
+	  file.attributes = Set(FileAttributeImpl("dos:readonly", true))
     }
 
     assertReadOnly(true)
@@ -124,7 +124,7 @@ abstract class FsAccessSetTests extends Fixture {
     if (file.attributes.supportsView[PosixFileAttributeView]) {
 	  file.attributes = Set(FileAttributeImpl("posix:permissions", PosixFilePermissions fromString "rw-rw-rw-"))
 	} else if (file.attributes.supportsView[DosFileAttributeView]) {
-	  file.attributes = Set(FileAttributeImpl("dos:read-only", false))
+	  file.attributes = Set(FileAttributeImpl("dos:readonly", false))
     }
 
     assertReadOnly(false)
