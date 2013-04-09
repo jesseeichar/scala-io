@@ -432,6 +432,7 @@ class Path private[file] (val jpath:JPath, val fileSystem: FileSystem) extends F
     val startsWith = absolute startsWith _
     fileSystem.cachedRoots.find(startsWith) orElse (fileSystem.roots find (startsWith))
   }
+
   /**
    * The segments in the path including the current element of the path.  If the
    * the path is relative only the segments defined are returned... NOT the absolute
@@ -440,45 +441,41 @@ class Path private[file] (val jpath:JPath, val fileSystem: FileSystem) extends F
    *
    * @return the segments in the path
    */
-  lazy val segments: Seq[String] = 
-    if (JFiles.getFileAttributeView(jpath, classOf[DosFileAttributeView]) == null || !jpath.isAbsolute()) {
-	    new Seq[String] {
-		    override def length = {jpath.getNameCount}
-		    override def apply(i: Int) = jpath.getName(i).toString
-		    override def iterator = new Iterator[String]{
-		      var i = {
-		        if(jpath.toString startsWith separator) -1
-		        else 0
-		      }
-		      def hasNext = i < jpath.getNameCount
-		      def next = {
-		        i += 1
-		        if(i == 0) {
-		          separator
-		        } else {
-		          jpath.getName(i-1).toString
-		        }
-		      }
-		    }
-	  }
-    } else {
-      new Seq[String] {
-        override def length = { jpath.getNameCount + 1 }
-        override def apply(i: Int) = if (i == 0) jpath.getRoot().toString().dropRight(1) else jpath.getName(i).toString
-        override def iterator = new Iterator[String] {
-          var i = -1
-          def hasNext = i < jpath.getNameCount
-          def next = {
-            i += 1
-            if (i == 0) {
-              jpath.getRoot().toString().dropRight(1)
-            } else {
-              jpath.getName(i - 1).toString
-            }
+  lazy val segments: Seq[String] = if (jpath.isAbsolute) {
+    new Seq[String] {
+      private[this] val rootChar = {
+        if (scalax.io.isWindows) jpath.getRoot().toString().dropRight(1)
+        else separator
+      }
+      override def length = { jpath.getNameCount + 1 }
+      override def apply(i: Int) = { if (i == 0) rootChar else jpath.getName(i - 1).toString }
+      override def iterator = new Iterator[String] {
+        var i = -1
+        def hasNext = i < jpath.getNameCount
+        def next = {
+          i += 1
+          if (i == 0) {
+            rootChar
+          } else {
+            jpath.getName(i - 1).toString
           }
         }
       }
-    }    
+    }
+  } else {
+    new Seq[String] {
+      override def length = jpath.getNameCount
+      override def apply(i: Int) = jpath.getName(i).toString
+      override def iterator = new Iterator[String] {
+        private[this] var i = 0
+        def hasNext = i < jpath.getNameCount
+        def next = {
+          i += 1
+          jpath.getName(i - 1).toString
+        }
+      }
+    }
+  }
   /**
    * Resolves other against this path's parent in the same manner as in resolve(Path).
    *

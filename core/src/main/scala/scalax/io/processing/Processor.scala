@@ -436,7 +436,7 @@ private[processing] class TimingOutProcessor[+A] (base: Processor[A], timeout: D
     }
 
     new Opened[A] {
-      def execute = Await.result(Future(opened.execute), remainingTime millis)
+      def execute = Await.result(Future(opened.execute), remainingTime.millis)
       def cleanUp() = opened.cleanUp()
     }
   }

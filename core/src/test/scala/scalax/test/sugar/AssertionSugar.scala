@@ -18,7 +18,7 @@ import scala.reflect._
 
 
 object AssertionSugar {
-  def isWindows = System.getProperty("os.name").toLowerCase.contains("win")
+  def isWindows = scalax.io.isWindows
 }
 
 trait AssertionSugar {
