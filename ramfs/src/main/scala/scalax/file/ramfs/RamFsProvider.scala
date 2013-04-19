@@ -25,7 +25,7 @@ class RamFsProvider extends file.spi.FileSystemProvider {
   
   override def createDirectory(dir: Path, attrs: FileAttribute[_]*): Unit = {
     val rPath = ramPath(dir)
-    rPath.getFileSystem.create(rPath, DirNode, false, toMap(attrs))
+    rPath.getFileSystem.actor ! RamFsMsg.CreateDir(rPath, false, toMap(attrs))
   }
   override def delete(path: Path): Unit = {
     val rPath = ramPath(path)

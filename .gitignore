@@ -16,3 +16,6 @@ derby.log
 .project
 .scala_dependencies
 .settings/
+bin/
+*.class
+eclipse/
