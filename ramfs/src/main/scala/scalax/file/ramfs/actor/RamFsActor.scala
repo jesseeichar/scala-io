@@ -1,7 +1,7 @@
 package scalax.file.ramfs
+package actor
 
 import scala.actors.Actor
-
 import java.io.IOException
 import language.reflectiveCalls
 import java.nio.file.{ FileSystem, PathMatcher, Path, FileStore, WatchService, Files, NoSuchFileException }
@@ -15,22 +15,7 @@ import scalax.file.PathMatcher.{ StandardSyntax, RegexPathMatcher, GlobPathMatch
 import collection.JavaConverters._
 import java.nio.file.AccessMode
 import java.util.regex.Pattern
-
-protected[ramfs] sealed trait RamFsMsg
-object RamFsMsg {
-	protected[ramfs] case object Stop extends RamFsMsg
-	protected[ramfs] case object IsRunning extends RamFsMsg
-	protected[ramfs] case class CreateFile(path: RamPath, createParents: Boolean, attr: Map[RamAttributes.RamAttribute,Object]) extends RamFsMsg 
-	protected[ramfs] case class CreateDir(path: RamPath, createParents: Boolean, attr: Map[RamAttributes.RamAttribute,Object]) extends RamFsMsg 
-	protected[ramfs] case class Lookup(path: RamPath) extends RamFsMsg 
-}
-
-protected[ramfs] sealed trait RamFsResponse
-object RamFsResponse {
-	protected[ramfs] case object Running extends RamFsResponse
-	protected[ramfs] case object Stopped extends RamFsResponse
-	protected[ramfs] case class Lookup(node: Node) extends RamFsResponse
-}
+import scalax.file.FileTime
 
 protected[ramfs] class RamFsActor(fileSystem: RamFileSystem) extends Actor {
   private[this] val sep = fileSystem.separator
@@ -112,7 +97,7 @@ protected[ramfs] class RamFsActor(fileSystem: RamFileSystem) extends Actor {
         case Some(fileSystem.root) | None =>
           fsTree
         case Some(parent) =>
-          create(parent, DirNode, true, Map.empty) // TODO paramaterize NodeFactory
+          create(parent, DirNodeFac, true, Map.empty) // TODO paramaterize NodeFactory
           lookup(parent).get.asInstanceOf[DirNode]
       }
 
@@ -140,5 +125,19 @@ protected[ramfs] class RamFsActor(fileSystem: RamFileSystem) extends Actor {
         newNode.data.clear
         newNode.data ++= srcNode.data
     }
+  }
+
+  private def lastModifiedTime(lookup: Node): FileTime = FileTime.fromMillis(lookup.lastModified)
+  private def lastAccessTime(lookup: Node): FileTime = FileTime.fromMillis(lookup.lastAccessTime)
+  private def creationTime(lookup: Node): FileTime = FileTime.fromMillis(lookup.creationTime)
+
+  private def isRegularFile(lookup: Node) = lookup.isInstanceOf[FileNode]
+  private def isDirectory(lookup: Node) = lookup.isInstanceOf[DirNode]
+  private def isSymbolicLink(lookup: Node) = false
+  private def isOther(lookup: Node) = false
+
+  private def size(path:String, lookup: Node): Long = lookup match {
+    case fn: FileNode => fn.data.size.toLong
+    case _ => throw new NoSuchFileException("The RamFS file: " + path + " is not a file")
   }
 }

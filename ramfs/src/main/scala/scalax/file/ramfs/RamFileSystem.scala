@@ -13,6 +13,7 @@ import scalax.file.PathMatcher.{ StandardSyntax, RegexPathMatcher, GlobPathMatch
 import collection.JavaConverters._
 import java.nio.file.AccessMode
 import java.util.regex.Pattern
+import actor._
 
 case class RamFsId(id: String = UUID.randomUUID.toString)
 

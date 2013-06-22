@@ -8,6 +8,7 @@
 
 package scalax.file
 package ramfs
+package actor
 
 import java.nio.file.attribute.PosixFilePermission
 import PosixFilePermission._
@@ -20,23 +21,7 @@ import scalax.io._
 import scalax.io.managed._
 import StandardOpenOption._
 
-private[ramfs] trait NodeFac {
-  def create(name:String):Node
-  def accepts(node:Node):Boolean
-}
-
-private[ramfs] object FileNode extends NodeFac {
-  def create(name:String) = new FileNode(name)
-  def accepts(node:Node) = node.isInstanceOf[FileNode]
-}
-
-
-private[ramfs] object DirNode extends NodeFac {
-  def create(name:String) = new DirNode(name)
-  def accepts(node:Node) = node.isInstanceOf[DirNode]
-}
-
-private[ramfs] trait Node {
+private[actor] trait Node {
   val attributes = collection.mutable.HashMap[RamAttribute,Object]()
   attributes ++= initAccess
   
@@ -63,7 +48,7 @@ private[ramfs] trait Node {
   override def toString = getClass.getSimpleName+": "+name
 }
 
-private[ramfs] class FileNode(var name:String) extends Node {
+private[actor] class FileNode(var name:String) extends Node {
     var data = ArrayBuffer[Byte]()
     def channel(openOptions:OpenOption*) = new ArrayBufferSeekableChannel(data, openOptions:_*)(_ => data.clear, _ => lastAccessTime = System.currentTimeMillis)
     def inputStream : InputStream = {
@@ -76,7 +61,7 @@ private[ramfs] class FileNode(var name:String) extends Node {
     }
   }
 
-private[ramfs] class DirNode(var name:String) extends Node {
+private[actor] class DirNode(var name:String) extends Node {
   override protected def initAccess = {
     super.initAccess ++ Map (
       RamAttributes.permissions -> Set(OWNER_READ, OWNER_WRITE, OWNER_EXECUTE, GROUP_READ, GROUP_EXECUTE, OTHERS_READ, OTHERS_EXECUTE)
