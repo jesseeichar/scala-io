@@ -8,7 +8,7 @@ object BuildConstants {
   val armVersion = "1.1"
   val armScalaVersion = "2.9.1"
   val akkaVersion = "2.0.1"
-  val scalaVersion = "2.9.1"
+  val scalaVersion = "2.9.3"
 }
 
 object ScalaIoBuild extends Build {
@@ -107,7 +107,7 @@ object ScalaIoBuild extends Build {
 
   val perfSettings: Seq[Setting[_]] = Seq(
     name := "scala-io-performance",
-    libraryDependencies += "com.github.jsuereth" %% "sperformance" % "0.1",
+    libraryDependencies += "com.github.scala-incubator" % "sperformance_2.9.2" % "0.1",
     publishArtifact := false
   )
   lazy val perfProject = Project("perf", file("perf")).
