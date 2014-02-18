@@ -11,8 +11,6 @@ package scalax.file
 import scalax.file.PathMatcher.FunctionMatcher
 import util.matching.Regex
 import java.util.regex.Pattern
-import java.util.concurrent.{ConcurrentMap => JConcurrentMap}
-import collection.mutable.ConcurrentMap
 
 /**
  * A function that returns true if the Path parameter
