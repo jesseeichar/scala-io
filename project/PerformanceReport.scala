@@ -50,7 +50,7 @@ object PerformanceReport {
     </span>
   }
   def formatName(string:String)=string.capitalize.flatMap{
-    case c if c.isUpperCase => " "+c
+    case c if c.isUpper => " "+c
     case c => Seq(c)
   }.trim
   def childReport(imgFile:File) = {
