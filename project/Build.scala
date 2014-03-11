@@ -120,7 +120,7 @@ object ScalaIoBuild extends Build {
   // ------------------------------ Docs Project ------------------------------ //
   lazy val docsSite = TaskKey[Unit]("docs-site","Generate documentation web-site")
   lazy val siteDir = TaskKey[File]("site-dir","Directory of the generated website")
-  lazy val SiteTask = docsSite in Docs <<= (siteDir,baseDirectory,scalaVersion,resourceDirectory,docDirectory in Docs) map {
+  lazy val SiteTask = docsSite in Docs <<= (siteDir,baseDirectory,scalaVersion,resourceDirectory,target in doc) map {
     (out,baseDirectory,scalaVersion,resourceDirectory,docDirectory) =>
 
     val model = new WebsiteModel(
