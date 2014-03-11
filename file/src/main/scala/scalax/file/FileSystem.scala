@@ -276,7 +276,7 @@ abstract class FileSystem {
           "\nIf you want to create a Path from a system dependent string then use fromString.  " +
           "If you want to create a child path use resolve instead of / to create the child path.  " +
           "It should be noted that the string after '/' must be a single segment but resolve accepts " +
-          "full strings. Examples: \n\tPath.fromString(\"c: \\a\\b\")\n\tpath / (\"a/b/c\", '/')\n\tpath resolve \"a\\b\\c\""
+          "full strings. Examples: \n\tPath.fromString(\"c:\\a\\b\")\n\tpath / (\"a/b/c\", '/')\n\tpath resolve \"a\\b\\c\""
         throw new IllegalArgumentException(msg.format(sep , segment))
       case CommonSeparator(sep) => {
          logger.warning(sep + " should not be used as a character in a path segment because it is a commonly used path separator on many filesystems.  Segment in question: "+segment)
