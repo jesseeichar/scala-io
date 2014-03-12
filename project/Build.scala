@@ -96,9 +96,22 @@ object ScalaIoBuild extends Build {
     }
   })
 
+  // add scala-parser-combinators dependency when needed (for Scala 2.11 and newer) in a robust way
+  // this mechanism supports cross-version publishing
+  private val addScalaParserCombinatorsModule = libraryDependencies := {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      // if scala 2.11+ is used, add dependency on scala-parser-combinators module
+      case Some((2, scalaMajor)) if scalaMajor >= 11 =>
+        libraryDependencies.value :+ "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.0"
+      case _ =>
+        libraryDependencies.value
+    }
+  }
+
   val fileSettings: Seq[Setting[_]] = Seq(
     name := "scala-io-file",
-    pomPostProcess := removeScalaIOTestDependency.apply
+    pomPostProcess := removeScalaIOTestDependency.apply,
+    addScalaParserCombinatorsModule
   )
   lazy val fileProject = Project("file", file("file")).
     configs(Samples).
