@@ -61,6 +61,7 @@ object ScalaIoBuild extends Build {
     publishMavenStyle := true,
     publishToSettings,
     pomExtraSetting,
+    credentials += Credentials(Path.userHome / ".sbt" / ".credentials"),
     resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
     resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
     resolvers += "Java.net" at "http://download.java.net/maven/2/",
