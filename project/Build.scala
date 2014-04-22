@@ -57,7 +57,7 @@ object ScalaIoBuild extends Build {
     offline := false,
 //    parallelExecution in Test := false,
     scalaVersion := BuildConstants.scalaVersion,
-
+  
     publishMavenStyle := true,
     publishToSettings,
     pomExtraSetting,
@@ -69,7 +69,8 @@ object ScalaIoBuild extends Build {
       val mapfishRepoUrl = new java.net.URL("http://dev.mapfish.org/ivy2")
       Resolver.url("Mapfish Ivy Repository", mapfishRepoUrl)(Resolver.ivyStylePatterns)
     },
-    libraryDependencies += "com.novocode" % "junit-interface" % "0.10" % "test->default",
+    libraryDependencies += "com.novocode" % "junit-interface" % "0.11-RC1" % "test->default" exclude ("org.scala-lang.modules", "scala-parser-combinators_2.11"),
+    libraryDependencies += "org.scala-lang.modules" % "scala-parser-combinators_2.11" % "1.0.1",
     libraryDependencies += "org.scala-lang" % "scala-reflect" % BuildConstants.scalaVersion % "test"
   )
 
@@ -126,10 +127,10 @@ object ScalaIoBuild extends Build {
     libraryDependencies += "com.github.jsuereth" % "sperformance_2.10" % "0.1",
     publishArtifact := false
   )
-  lazy val perfProject = Project("perf", file("perf")).
+  /*lazy val perfProject = Project("perf", file("perf")).
     settings (samplesSettings ++ sharedSettings ++ perfSettings : _*).
     dependsOn(coreProject,coreProject % "compile->test", fileProject % "compile->test")
-
+*/
 
   // ------------------------------ Docs Project ------------------------------ //
   lazy val docsSite = TaskKey[Unit]("docs-site","Generate documentation web-site")
