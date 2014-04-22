@@ -4,10 +4,10 @@ import scala.xml.transform._
 
 object BuildConstants {
   val organization = "com.github.scala-incubator.io"
-  val version = "0.4.2"
+  val version = "0.4.3"
   val armVersion = "1.3"
   val armScalaVersion = "2.10"
-  val scalaVersion = "2.10.2"
+  val scalaVersion = "2.10.4"
 }
 
 object ScalaIoBuild extends Build {
@@ -41,7 +41,7 @@ object ScalaIoBuild extends Build {
       <developer>
         <id>jesseeichar</id>
         <name>Jesse Eichar</name>
-        <url>http://jsuereth.com</url>
+        <url>http://www.pragmaticdesign.com</url>
       </developer>
     </developers>
   )
