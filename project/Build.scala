@@ -104,7 +104,7 @@ object ScalaIoBuild extends Build {
     CrossVersion.partialVersion(scalaVersion.value) match {
       // if scala 2.11+ is used, add dependency on scala-parser-combinators module
       case Some((2, scalaMajor)) if scalaMajor >= 11 =>
-        libraryDependencies.value :+ "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.0"
+        libraryDependencies.value :+ "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.1"
       case _ =>
         libraryDependencies.value
     }
