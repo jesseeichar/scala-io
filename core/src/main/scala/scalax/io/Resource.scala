@@ -536,7 +536,6 @@ object Resource {
    * @param file the file to use for constructing a Seekable Resource
    *
    * @return a SeekableByteChannelResource
-   * @throws java.io.IOException if file does not exist
    */
   def fromFile(file:File): SeekableByteChannelResource[SeekableByteChannel] = {
     def open = (opts:Seq[OpenOption]) => support.FileUtils.openChannel(file,opts)
@@ -549,7 +548,6 @@ object Resource {
    * @param file the file to use for constructing a Seekable Resource
    *
    * @return a SeekableByteChannelResource
-   * @throws java.io.IOException if file does not exist
    */
   def fromFile(file:String): SeekableByteChannelResource[SeekableByteChannel] =
     fromFile(new File(file))
