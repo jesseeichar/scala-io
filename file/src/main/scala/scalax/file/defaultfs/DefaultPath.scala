@@ -108,7 +108,7 @@ class DefaultPath private[file] (val jfile: JFile, override val fileSystem: Defa
 
       if(!canWrite) fail("File is not writeable so the file cannot be deleted")
       if(!jfile.delete) {
-        if(children().nonEmpty) fail("use deleteRecursively if you want to delete directory and descendants")
+        if(isDirectory && children().nonEmpty) fail("use deleteRecursively if you want to delete directory and descendants")
         else fail("Unable to delete file for unknown reason")
       }
     }
