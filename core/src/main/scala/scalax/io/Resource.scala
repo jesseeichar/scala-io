@@ -8,24 +8,18 @@
 
 package scalax.io
 
-import _root_.resource.{ManagedResourceOperations}
-import scala.util.control.Exception.allCatch
-import java.nio.channels.{
-  ByteChannel, ReadableByteChannel, WritableByteChannel,
-  Channels
-}
 import java.io._
-import java.nio.ByteBuffer
-import java.nio.channels.FileChannel
-import nio.SeekableFileChannel
-import java.net.{URLConnection, URL}
-import CloseAction._
-import StandardOpenOption._
-import managed._
-import collection.immutable.List._
-import util.control.Exception
-import extractor._
-import support.FileUtils
+import java.net.{URL, URLConnection}
+import java.nio.channels.{ByteChannel, ReadableByteChannel, WritableByteChannel}
+
+import _root_.resource.{ExtractedEither, ManagedResourceOperations}
+
+import scala.util.control.Exception.allCatch
+import scalax.io.CloseAction._
+import scalax.io.StandardOpenOption._
+import scalax.io.managed._
+import scalax.io.nio.SeekableFileChannel
+import scalax.io.support.FileUtils
 
 trait OpenedResource[+R] {
   def get:R
@@ -33,11 +27,11 @@ trait OpenedResource[+R] {
   def close():List[Throwable] = closeAction(get)
   def closeAction[U >: R]:CloseAction[U]
   def toSingleUseResource = new ManagedResourceOperations[R] {
-    def acquireFor[B](f: (R) => B): Either[List[Throwable], B] = {
+    def acquireFor[B](f: (R) => B): ExtractedEither[List[Throwable], B] = {
       val result = f(get)
       close() match {
-        case Nil => Right(result)
-        case errors => Left(errors)
+        case Nil => ExtractedEither(Right(result))
+        case errors => ExtractedEither(Left(errors))
       }
     }
   }
@@ -163,7 +157,7 @@ trait Resource[+R] extends ManagedResourceOperations[R] with ResourceOps[R, Reso
      *
      * Perhaps the worst method I have ever written :-(
      */
-  final def acquireFor[B](f: R => B): Either[List[Throwable], B] = {
+  final def acquireFor[B](f: R => B): ExtractedEither[List[Throwable], B] = {
 
       // perhaps the worst written method I have ever done :-(
     val resourceEither = allCatch.either {
@@ -186,7 +180,7 @@ trait Resource[+R] extends ManagedResourceOperations[R] with ResourceOps[R, Reso
 
     resourceEither match {
       case Left(t) =>
-        Left(List(context.openErrorHandler(t)))
+        ExtractedEither(Left(List(context.openErrorHandler(t))))
       case Right(resource) =>
         val result =
           try Right(f(resource.get))
@@ -197,12 +191,12 @@ trait Resource[+R] extends ManagedResourceOperations[R] with ResourceOps[R, Reso
 
         if (handleError) {
           try {
-            Right(context.errorHandler(result, closeExceptions))
+            ExtractedEither(Right(context.errorHandler(result, closeExceptions)))
           } catch {
-            case t: Throwable => Left(List(t))
+            case t: Throwable => ExtractedEither(Left(List(t)))
           }
         } else {
-          Right(result.right.get)
+          ExtractedEither(Right(result.right.get))
         }
 
     }

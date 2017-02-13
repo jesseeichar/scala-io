@@ -6,7 +6,7 @@
  * .Net IO objects.
  * </p>
  */
-import java.io.FileInputStream
+import resource.ExtractedEither
 object Resources {
 
   /**
@@ -32,9 +32,9 @@ object Resources {
 
     // If you want to handle the possible errors then acquireFor is what you want
     fileResource.acquireFor(_.readByte) match {
-      case Left(errors) =>
+      case ExtractedEither(Left(errors)) =>
         errors.foreach {_.printStackTrace}
-      case Right(b) =>
+      case ExtractedEither(Right(b)) =>
         println("I got a byte :) "+b)
     }
 
@@ -44,11 +44,12 @@ object Resources {
    * Create Resource from an Input Stream. Perform some conversions to obtain other types of Resources
    */
   def inputStreamResource {
+    import java.io._
+    import java.net.URL
+    import java.nio.channels.ReadableByteChannel
+
     import scalax.io._
     import scalax.io.managed._
-    import java.io._
-    import java.nio.channels.{FileChannel, ReadableByteChannel, WritableByteChannel, Channels}
-    import java.net.URL
 
     val inputStream: InputStream = new URL("http://someurl.com").openStream
 
@@ -79,11 +80,11 @@ object Resources {
    * Create Resource from an Output Stream. Perform some conversions to obtain other types of Resources
    */
   def outputStreamResource {
+     import java.io._
+     import java.nio.channels.WritableByteChannel
+
      import scalax.io._
      import scalax.io.managed._
-     import java.io._
-     import java.nio.channels.{FileChannel, ReadableByteChannel, WritableByteChannel, Channels}
-     import java.net.URL
     
     val outputStream: FileOutputStream = new FileOutputStream("file")
     
@@ -101,11 +102,11 @@ object Resources {
    * Seekable Trait which is a subtrait of Input and Output Traits
    */
   def seekableByteChannelResource {
+     import java.io._
+     import java.nio.channels.FileChannel
+
      import scalax.io._
      import scalax.io.managed._
-     import java.io._
-     import java.nio.channels.{FileChannel, ReadableByteChannel, WritableByteChannel, Channels}
-     import java.net.URL
 
      // One way to create a SeekableByteChannel which is a Seekable object
      val channel: SeekableByteChannelResource[SeekableByteChannel] = Resource.fromFile("file")
@@ -136,11 +137,11 @@ object Resources {
     * Several examples of creating Resources
     */
    def readableByteChannelResources {
+     import java.io._
+     import java.nio.channels.{Channels, ReadableByteChannel}
+
      import scalax.io._
      import scalax.io.managed._
-     import java.io._
-     import java.nio.channels.{FileChannel, ReadableByteChannel, WritableByteChannel, Channels}
-     import java.net.URL
 
      // see codec examples in scala io core for details on why there is an implicit codec here
      implicit val codec = scalax.io.Codec.UTF8
@@ -155,11 +156,11 @@ object Resources {
    * Several examples of creating Resources
    */
   def writableByteChannelResources {
+    import java.io._
+    import java.nio.channels.{Channels, WritableByteChannel}
+
     import scalax.io._
     import scalax.io.managed._
-    import java.io._
-    import java.nio.channels.{FileChannel, ReadableByteChannel, WritableByteChannel, Channels}
-    import java.net.URL
 
     val writableByteChannel = Channels.newChannel(new FileOutputStream("file"))
     val writeChannel : WritableByteChannelResource[WritableByteChannel] =
@@ -178,10 +179,11 @@ object Resources {
    * but the following examples are Resource only operations</p>
    */
   def usingIoResources {
-    import scalax.io._
-    import scalax.io.managed._
     import java.io._
     import java.nio.channels._
+
+    import scalax.io._
+    import scalax.io.managed._
 
     val resource = Resource.fromInputStream(new FileInputStream("file"))
 
@@ -213,9 +215,10 @@ object Resources {
    * the term Peristent.  For example fromUnmanagedStream</p>
    */
   def createResourcesThatArentClosed {
-    import scalax.io.{Resource, Input, Output, WriteChars}
+    import java.io.OutputStreamWriter
+
     import scalax.io.JavaConverters._
-    import java.io.{InputStream, OutputStream, OutputStreamWriter, Writer}
+    import scalax.io.{Input, Output, WriteChars}
 
     val stdIn:Input = System.in.asUnmanagedInput
     val stdOut:Output = System.out.asUnmanagedOutput
@@ -231,7 +234,6 @@ object Resources {
    */
   def performAdditionalActionOnClose {
     import scalax.io._
-    import scalax.io.managed.InputStreamResource
 
     // a close action can be created by passing a function to execute
     // to the Closer object's apply method
@@ -272,9 +274,9 @@ object Resources {
    * </p>
    */
   def whyAreCloseActionsContravariant {
-    import scalax.io._
-    import scalax.io.managed._
     import java.io._
+
+    import scalax.io._
 
     // Since CloseAction is Defined as CloseAction[-A], the following compiles
     val action:CloseAction[String] = CloseAction[Any]{_ => ()}
