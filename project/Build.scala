@@ -4,10 +4,10 @@ import scala.xml.transform._
 
 object BuildConstants {
   val organization = "com.github.scala-incubator.io"
-  val version = "0.4.3-1"
-  val armVersion = "1.3.3"
-  val armScalaVersion = "2.11"
-  val scalaVersion = "2.11.0"
+  val version = "0.4.4"
+  val armVersion = "2.0"
+  val armScalaVersion = "2.12"
+  val scalaVersion = "2.12.1"
 }
 
 object ScalaIoBuild extends Build {
@@ -69,8 +69,8 @@ object ScalaIoBuild extends Build {
       val mapfishRepoUrl = new java.net.URL("http://dev.mapfish.org/ivy2")
       Resolver.url("Mapfish Ivy Repository", mapfishRepoUrl)(Resolver.ivyStylePatterns)
     },
-    libraryDependencies += "com.novocode" % "junit-interface" % "0.11-RC1" % "test->default" exclude ("org.scala-lang.modules", "scala-parser-combinators_2.11"),
-    libraryDependencies += "org.scala-lang.modules" % "scala-parser-combinators_2.11" % "1.0.1",
+    libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % "test->default" exclude ("org.scala-lang.modules", "scala-parser-combinators_2.12"),
+    libraryDependencies += "org.scala-lang.modules" % "scala-parser-combinators_2.12" % "1.0.5",
     libraryDependencies += "org.scala-lang" % "scala-reflect" % BuildConstants.scalaVersion % "test"
   )
 
@@ -78,7 +78,7 @@ object ScalaIoBuild extends Build {
 
   val coreSettings = Seq[Setting[_]](
     name := "scala-io-core",
-    libraryDependencies += "com.madgag" % ("scala-arm_"+BuildConstants.armScalaVersion) % BuildConstants.armVersion,
+    libraryDependencies += "com.jsuereth" % ("scala-arm_"+BuildConstants.armScalaVersion) % BuildConstants.armVersion,
     publishArtifact in Test := true
   )
   lazy val coreProject = Project("core", file("core")).
@@ -104,7 +104,7 @@ object ScalaIoBuild extends Build {
     CrossVersion.partialVersion(scalaVersion.value) match {
       // if scala 2.11+ is used, add dependency on scala-parser-combinators module
       case Some((2, scalaMajor)) if scalaMajor >= 11 =>
-        libraryDependencies.value :+ "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.1"
+        libraryDependencies.value :+ "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.5"
       case _ =>
         libraryDependencies.value
     }
