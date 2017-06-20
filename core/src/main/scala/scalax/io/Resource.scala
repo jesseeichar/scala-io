@@ -149,20 +149,20 @@ trait Resource[+R] extends ManagedResourceOperations[R] with ResourceOps[R, Reso
     def open(): OpenedResource[R]
 
     /**
-     * Open the resource execute the function and either return all errors as a list or the result of the
+     * Open the resource, execute the function, and either return all errors as a list or the result of the
      * function execution.
      *
-     * On open and close error handlers in ResourceContext are called.  If they then raise errors
-     * the errors are captured and returned as a Right[List[Throwable]]
+     * On open and close error handlers in ResourceContext are called.  If they throw exceptions, then
+     * the errors are captured and returned as a Left[List[Throwable]].
      *
      * Perhaps the worst method I have ever written :-(
      */
   final def acquireFor[B](f: R => B): ExtractedEither[List[Throwable], B] = {
 
-      // perhaps the worst written method I have ever done :-(
     val resourceEither = allCatch.either {
       open()
     }
+
     var closeExceptions: List[Throwable] = Nil
 
     /** Close resource and assign any exceptions to closeException */
@@ -180,7 +180,8 @@ trait Resource[+R] extends ManagedResourceOperations[R] with ResourceOps[R, Reso
 
     resourceEither match {
       case Left(t) =>
-        ExtractedEither(Left(List(context.openErrorHandler(t))))
+        // Do not rethrow the error. Return it instead.
+        ExtractedEither(Left(List(t)))
       case Right(resource) =>
         val result =
           try Right(f(resource.get))
@@ -198,7 +199,6 @@ trait Resource[+R] extends ManagedResourceOperations[R] with ResourceOps[R, Reso
         } else {
           ExtractedEither(Right(result.right.get))
         }
-
     }
   }
 }
